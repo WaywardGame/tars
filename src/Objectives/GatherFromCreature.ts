@@ -1,0 +1,88 @@
+import { ICorpse } from "creature/corpse/ICorpse";
+import { ICreature } from "creature/ICreature";
+import { ItemType } from "Enums";
+import Vector2 from "utilities/math/Vector2";
+import * as Helpers from "../Helpers";
+import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
+import { IBase, ICreatureSearch, IInventoryItems, MoveResult } from "../ITars";
+import Objective from "../Objective";
+import CarveCorpse from "./CarveCorpse";
+
+export default class GatherFromCreature extends Objective {
+
+	constructor(private search: ICreatureSearch[]) {
+		super();
+	}
+
+	public getHashCode(): string {
+		return `GatherFromCreature:${this.search.map(search => `${search.type},${ItemType[search.itemType]}`).join("|")}`;
+	}
+
+	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
+		const isTargetCorpse = (corpse: ICorpse) => {
+			for (const search of this.search) {
+				if (search.type === corpse.type) {
+					return true;
+				}
+			}
+
+			return false;
+		};
+
+		const isTargetCreature = (creature: ICreature) => {
+			if (!creature.isTamed()) {
+				for (const search of this.search) {
+					if (search.type === creature.type) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		};
+
+		if (calculateDifficulty) {
+			let target = Helpers.findCorpse(this.getHashCode(), isTargetCorpse);
+			if (target === undefined) {
+				target = Helpers.findCreature(this.getHashCode(), isTargetCreature);
+			}
+
+			return target === undefined ? missionImpossible : Math.round(Vector2.squaredDistance(localPlayer, target));
+		}
+
+		let moveResult = await Helpers.findAndMoveToCorpse(this.getHashCode(), isTargetCorpse);
+		if (moveResult === MoveResult.NoTarget || moveResult === MoveResult.NoPath) {
+			this.log.info("Moving to creature");
+			moveResult = await Helpers.findAndMoveToCreature(this.getHashCode(), isTargetCreature, true);
+
+			if (moveResult === MoveResult.NoPath) {
+				this.log.info("No path to creature");
+				return ObjectiveStatus.Complete;
+			}
+
+			if (moveResult === MoveResult.NoTarget) {
+				this.log.info("No target creature");
+				return ObjectiveStatus.Complete;
+			}
+		}
+
+		if (moveResult === MoveResult.Moving) {
+			return;
+		}
+
+		const corpses = localPlayer.getFacingTile().corpses;
+		if (corpses && corpses.length > 0) {
+			this.log.info("Carving corpse");
+			return new CarveCorpse(corpses[0]);
+		}
+
+		this.log.info("No more corpses");
+
+		return ObjectiveStatus.Complete;
+	}
+
+	protected getBaseDifficulty(base: IBase, inventory: IInventoryItems): number {
+		return 50;
+	}
+
+}

@@ -1,0 +1,13 @@
+{
+	"name": "TARS",
+	"description": "Let TARS play the game for you. Good thing there are no black holes in Wayward.",
+	"version": "1.0",
+	"author": "Spacetech",
+	"compatibleMinorVersions": [
+		6
+	],
+	"multiplayerClientside": true,
+	"file": "out/Tars",
+	"unloadable": true,
+	"publishedFileId": "1218286592"
+}

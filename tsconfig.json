@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "amd",
+        "declaration": false,
+        "strict": true,
+        "noUnusedLocals": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "strictPropertyInitialization": false,
+        "experimentalDecorators": true,
+        "inlineSourceMap": true,
+        "baseUrl": "./mod-reference/definitions",
+        "types": [],
+        "outDir": "./out"
+    }
+}
