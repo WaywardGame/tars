@@ -9,6 +9,7 @@ import * as Helpers from "./Helpers";
 import { IFindPathMessage, IUpdateTileMessage, NavigationMessageType } from "./INavigation";
 import { ITileLocation } from "./ITars";
 import { log } from "./Utilities/Logger";
+import { isWalkToTileBlocked } from "creature/Pathing";
 
 export const seawaterTileLocation = -1;
 export const freshWaterTileLocation = -2;
@@ -164,8 +165,8 @@ export class Navigation {
 		return promise2;
 	}
 
-	public getValidPoint(point: IVector3): IVector3[] {
-		if (!this.isDisabledFromPoint(point)) {
+	public getValidPoint(point: IVector3, includePoint: boolean): IVector3[] {
+		if (includePoint && !this.isDisabledFromPoint(point)) {
 			return [point];
 		}
 
@@ -265,36 +266,7 @@ export class Navigation {
 	}
 
 	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType, terrainDescription: ITerrainDescription): boolean {
-		if (tileType === TerrainType.CaveEntrance) {
-			return true;
-		}
-
-		if (terrainDescription && !terrainDescription.passable && !terrainDescription.water && !terrainDescription.gather) {
-			return true;
-		}
-
-		if (tile.creature !== undefined) {
-			return true;
-		}
-
-		if (tile.doodad !== undefined &&
-			tile.doodad.type !== DoodadType.WoodenDoor &&
-			tile.doodad.type !== DoodadType.WoodenDoorOpen &&
-			tile.doodad.blocksMove() &&
-			(!tile.doodad.canGather() || tile.corpses !== undefined)) {
-			return true;
-		}
-
-		const players = game.getPlayersAtPosition(x, y, z, false, true);
-		if (players.length > 0) {
-			for (const player of players) {
-				if (player !== localPlayer) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+		return isWalkToTileBlocked(localPlayer, tile, {x, y}, false);
 	}
 
 	private getPenalty(tile: ITile, x: number, y: number, z: number, tileType: TerrainType, terrainDescription: ITerrainDescription): number {

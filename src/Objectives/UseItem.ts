@@ -16,7 +16,7 @@ export default class UseItem extends Objective {
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (this.target) {
 			if (calculateDifficulty) {
-				return Helpers.calculateDifficultyMoveToTarget(this.target);
+				return (await Helpers.getMovementPath(this.target)).difficulty;
 			}
 
 			const moveResult = await Helpers.moveToTarget(this.target);

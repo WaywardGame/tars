@@ -98,6 +98,8 @@ export default class Tars extends Mod {
 		if (player.isLocalPlayer()) {
 			this.objective = undefined;
 			this.interruptObjective = undefined;
+			
+			Helpers.resetMovementOverlays();
 		}
 
 		return undefined;
@@ -135,23 +137,9 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		if (this.isEnabled() && Helpers.shouldUseMovementIntent()) {
+		if (this.isEnabled()) {
 			this.onTick(true);
 		}
-	}
-
-	@HookMethod
-	public getPlayerMovementIntent(player: IPlayer) {
-		return (this.isEnabled() && Helpers.shouldUseMovementIntent()) ? Helpers.getMovementIntent() : undefined;
-	}
-
-	@HookMethod
-	public processInput(player: IPlayer) {
-		if (this.isEnabled() && Helpers.shouldUseMovementIntent() && !player.hasDelay()) {
-			return Helpers.shouldProcessNextInput();
-		}
-
-		return undefined;
 	}
 
 	////////////////////////////////////////////////
@@ -176,8 +164,6 @@ export default class Tars extends Mod {
 		this.objective = undefined;
 		this.interruptObjective = undefined;
 
-		Helpers.resetMovementIntent();
-
 		if (this.tickTimeoutId === undefined) {
 			await this.tick();
 
@@ -198,6 +184,9 @@ export default class Tars extends Mod {
 			clearTimeout(this.tickTimeoutId);
 			this.tickTimeoutId = undefined;
 		}
+		
+		Helpers.resetMovementOverlays();
+		localPlayer.walkAlongPath(undefined);
 	}
 
 	private isEnabled() {
@@ -226,7 +215,6 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		Helpers.resetMovementIntent();
 		Helpers.resetCachedObjects();
 		Helpers.resetCachedPaths();
 
@@ -621,43 +609,43 @@ export default class Tars extends Mod {
 
 			if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
 				if (leftHandDamageTypeMatches !== localPlayer.options.leftHand) {
-					ui.changeEquipmentOption(EquipType[EquipType.LeftHand]);
+					ui.changeEquipmentOption("leftHand");
 				}
 
 				if (rightHandDamageTypeMatches !== localPlayer.options.rightHand) {
-					ui.changeEquipmentOption(EquipType[EquipType.RightHand]);
+					ui.changeEquipmentOption("rightHand");
 				}
 
 			} else if (leftHandEquipped || rightHandEquipped) {
 				if (leftHandEquipped && !localPlayer.options.leftHand) {
-					ui.changeEquipmentOption(EquipType[EquipType.LeftHand]);
+					ui.changeEquipmentOption("leftHand");
 				}
 
 				if (rightHandEquipped && !localPlayer.options.rightHand) {
-					ui.changeEquipmentOption(EquipType[EquipType.RightHand]);
+					ui.changeEquipmentOption("rightHand");
 				}
 
 			} else {
 				if (!localPlayer.options.leftHand) {
-					ui.changeEquipmentOption(EquipType[EquipType.LeftHand]);
+					ui.changeEquipmentOption("leftHand");
 				}
 
 				if (!localPlayer.options.rightHand) {
-					ui.changeEquipmentOption(EquipType[EquipType.RightHand]);
+					ui.changeEquipmentOption("rightHand");
 				}
 			}
 
 		} else {
 			if (leftHandEquipped && !localPlayer.options.leftHand) {
-				ui.changeEquipmentOption(EquipType[EquipType.LeftHand]);
+				ui.changeEquipmentOption("leftHand");
 			}
 
 			if (rightHandEquipped && !localPlayer.options.rightHand) {
-				ui.changeEquipmentOption(EquipType[EquipType.RightHand]);
+				ui.changeEquipmentOption("rightHand");
 			}
 
 			if (!localPlayer.options.leftHand && !localPlayer.options.rightHand) {
-				ui.changeEquipmentOption(EquipType[EquipType.LeftHand]);
+				ui.changeEquipmentOption("leftHand");
 			}
 		}
 	}

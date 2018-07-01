@@ -4,7 +4,7 @@ import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
 import { IDoodad } from "doodad/IDoodad";
 import { AiType } from "entity/IEntity";
-import { ActionType, DamageType, DoodadType, DoodadTypeGroup, EquipType, IRGB, ItemType, ItemTypeGroup, TerrainType, Direction } from "Enums";
+import { ActionType, DamageType, DoodadType, DoodadTypeGroup, EquipType, ItemType, ItemTypeGroup, TerrainType } from "Enums";
 import { IContainer, IItem, IRecipe } from "item/IItem";
 import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
 import { itemDescriptions as Items } from "item/Items";
@@ -18,25 +18,19 @@ import { missionImpossible } from "./IObjective";
 import { defaultMaxTilesChecked, IBase, IInventoryItems, ITileLocation, MoveResult } from "./ITars";
 import { getNavigation } from "./Navigation";
 import { log } from "./Utilities/Logger";
-import { MovementIntent, IMovementIntent, getDirectionFromMovement } from "player/IPlayer";
+import { getDirectionFromMovement } from "player/IPlayer";
+import PathOverlayFootPrints from "newui/screen/screens/game/util/movement/PathOverlayFootPrints";
 
 const nearBaseDistance = 10;
 
 const creatureRadius = 3;
 
-const green: IRGB = {
-	r: 0,
-	g: 255,
-	b: 0
-};
-
-const lightBlue: IRGB = {
-	r: 0,
-	g: 255,
-	b: 255
-};
-
 let path: string;
+
+export interface IMovementPath {
+	difficulty: number;
+	path?: IVector2[];
+}
 
 export function getPath() {
 	return path;
@@ -230,46 +224,43 @@ export async function moveToTargetWithRetries(getTarget: (ignoredTiles: ITile[])
 	return MoveResult.NoTarget;
 }
 
-let movementIntent: IMovementIntent | undefined;
-let processNextInput: boolean;
+let cachedPaths: { [index: string]: IVector2[] | undefined };
+const movementOverlays: ITile[] = [];
 
-export function shouldProcessNextInput() {
-	if (processNextInput) {
-		processNextInput = false;
-		return true;
+export function resetMovementOverlays() {
+	for (const tile of movementOverlays) {
+		delete tile.overlay;
 	}
 
-	return false;
+	movementOverlays.length = 0;
 }
 
-export function resetMovementIntent() {
-	movementIntent = undefined;
+export function updateOverlay(path: IVector2[]) {
+	resetMovementOverlays();
+	
+	for (let i = 1; i < path.length; i++) {
+		const lastPos = path[i - 1];
+		const pos = path[i];
+		const nextPos: IVector2 | undefined = path[i + 1];
+	
+		const tile = game.getTile(pos.x, pos.y, localPlayer.z);
+	
+		tile.overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos);
+		if (tile.overlay) {
+			movementOverlays.push(tile);
+		}
+	}	
 }
-
-export function getMovementIntent() {
-	return movementIntent;
-}
-
-export function setMovementIntent(mi: IMovementIntent) {
-	processNextInput = true;
-
-	movementIntent = mi;
-	localPlayer.updateMovementIntent(movementIntent);
-}
-
-export function shouldUseMovementIntent() {
-	return false; //!multiplayer.isConnected() || multiplayer.isServer();
-}
-
-let cachedPaths: { [index: string]: IVector2[] | undefined };
 
 export function resetCachedPaths() {
 	cachedPaths = {};
 }
 
-export async function calculateDifficultyMoveToTarget(target: IVector3, moveInto: boolean = false): Promise<number> {
+export async function getMovementPath(target: IVector3, moveInto: boolean = false): Promise<IMovementPath> {
 	if (localPlayer.x === target.x && localPlayer.y === target.y && localPlayer.z === target.z) {
-		return 1;
+		return {
+			difficulty: 1
+		};
 	}
 
 	let movementPath: IVector2[] | undefined;
@@ -280,181 +271,84 @@ export async function calculateDifficultyMoveToTarget(target: IVector3, moveInto
 
 	} else {
 		const navigation = getNavigation();
-		let ends = navigation.getValidPoint(target);
+
+		const ends = navigation.getValidPoint(target, moveInto).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
 		if (ends.length === 0) {
-			return MoveResult.NoPath;
+			return {
+				difficulty: missionImpossible
+			};
 		}
 
-		ends = ends.sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
-
-		movementPath = await navigation.findPath(ends[0], localPlayer);
+		for (const end of ends) {
+			movementPath = await navigation.findPath(end, localPlayer);
+			if (movementPath) {
+				break;
+			}
+		}
 
 		cachedPaths[pathId] = movementPath;
 	}
 
 	if (movementPath) {
-		log("calculateDifficultyMoveToTarget", movementPath.length, Vector2.squaredDistance(localPlayer, target));
-		return Vector2.squaredDistance(localPlayer, target);
+		// log("getMovementPath", movementPath.length, Vector2.squaredDistance(localPlayer, target));
+
+		return {
+			difficulty: Vector2.squaredDistance(localPlayer, target),
+			path: movementPath
+		};
 	}
 
-	return missionImpossible;
+	return {
+		difficulty: missionImpossible
+	};
 }
 
 export async function moveToTarget(target: IVector3, moveInto: boolean = false): Promise<MoveResult> {
-	if (localPlayer.x === target.x && localPlayer.y === target.y && localPlayer.z === target.z) {
-		// console.log("good", moveInto);
-
-		if (moveInto) {
-			log(`Completed movement into ${target.x},${target.y},${target.z}`);
-			return MoveResult.Complete;
-		}
-
-		if (localPlayer.facingDirection !== Direction.None) {
-			const facingDirection = game.directionToMovement(localPlayer.facingDirection);
-			if (localPlayer.direction.x === facingDirection.x && localPlayer.direction.y === facingDirection.y) {
-				const facingTile = localPlayer.getFacingTile();
-				if (facingTile === game.getTileFromPoint(target)) {
-					return MoveResult.Complete;
-				}
-			}
-		}
-
-		log(`Moving to adjacent tile near ${target.x},${target.y},${target.z}`);
-		
-		// move to an adjacent tile
-		for (const direction of Enums.values(Direction)) {
-			if (direction === Direction.None) {
-				continue;
-			}
-
-			const directionMovement = game.directionToMovement(direction);
-
-			if (isOpenTile({
-				x: localPlayer.x + directionMovement.x,
-				y: localPlayer.y + directionMovement.y,
-				z: localPlayer.z
-			}, game.getTile(localPlayer.x + directionMovement.x, localPlayer.y + directionMovement.y, localPlayer.z))) {
-				if (localPlayer.facingDirection === direction) {
-					await executeAction(ActionType.Move, {
-						direction: direction
-					});
-
-				} else {
-					log(`Changing direction from ${Direction[localPlayer.facingDirection]} to ${Direction[direction]}`);
-					await executeAction(ActionType.UpdateDirection, {
-						direction: direction,
-						bypass: true
-					});
-				}
-
-				return MoveResult.Moving;
-			}
-		}
-
-		log(`Giving up movement into ${target.x},${target.y},${target.z}`);
-		
-		return MoveResult.Complete;
-	}
-
-	let movementPath: IVector2[] | undefined;
-
-	const pathId = `${target.x},${target.y},${target.z}`;
-	if (pathId in cachedPaths) {
-		movementPath = cachedPaths[pathId];
-
-	} else {
-		const navigation = getNavigation();
-		let ends = navigation.getValidPoint(target);
-		if (ends.length === 0) {
+	if (localPlayer.x !== target.x || localPlayer.y !== target.y || localPlayer.z !== target.z) {
+		const movementPath = await getMovementPath(target, moveInto);
+		if (!movementPath.path) {
 			return MoveResult.NoPath;
 		}
 
-		ends = ends.sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
+		const pathLength = movementPath.path.length;
 
-		movementPath = await navigation.findPath(ends[0], localPlayer);
-
-		cachedPaths[pathId] = movementPath;
-	}
-
-	if (!movementPath) {
-		return MoveResult.NoPath;
-	}
-
-	const pathLength = movementPath.length;
-
-	const end = movementPath[pathLength - 1];
-	if (!end) {
-		log("Broken path!", pathLength, localPlayer.x, localPlayer.y, localPlayer.z, pathId);
-		return MoveResult.NoPath;
-	}
-
-	const endIsTarget = target.x === end.x && target.y === end.y;
-	const atEnd = localPlayer.x === end.x && localPlayer.y === end.y;
-
-	let nextMove = movementPath[1];
-
-	// console.log(pathLength, end, endIsTarget, atEnd, nextMove);
-
-	let shouldMove: boolean;
-	if (endIsTarget) {
-		shouldMove = (moveInto && pathLength >= 1) || pathLength > 2;
-
-	} else {
-		shouldMove = (moveInto && pathLength >= 1) || pathLength >= 2;
-
-		if (atEnd) {
-			nextMove = target;
-		}
-	}
-
-	if (!atEnd) {
-		for (let i = 0; i < movementPath.length; i++) {
-			const point = movementPath[i];
-			const isEnd = i === movementPath.length - 1;
-			game.particle.createMultiple(point.x, point.y, localPlayer.z, isEnd ? green : lightBlue, 1, isEnd ? 5 : 1, true);
-		}
-	}
-
-	// console.log(pathLength, end, endIsTarget, atEnd, nextMove, shouldMove);
-
-	if (!shouldMove) {
-		nextMove = target;
-	}
-
-	const direction = getDirectionFromMovement(nextMove.x - localPlayer.x, nextMove.y - localPlayer.y);
-
-	if (shouldUseMovementIntent()) {
-		let intent: MovementIntent | undefined;
-
-		if (!localPlayer.faceDirection(direction, true)) {
-			intent = direction;
+		const end = movementPath.path[pathLength - 1];
+		if (!end) {
+			log("Broken path!", pathLength, target.x, target.x, target.y, localPlayer.x, localPlayer.y, localPlayer.z);
+			return MoveResult.NoPath;
 		}
 
-		setMovementIntent({ intent: intent, shouldDisableTurnDelay: true });
-
-	} else {
-		if (localPlayer.facingDirection === direction) {
-			if (shouldMove) {
-				await executeAction(ActionType.Move, {
-					direction: direction
-				});
+		const atEnd = localPlayer.x === end.x && localPlayer.y === end.y;
+		if (!atEnd) {
+			if (!localPlayer.hasWalkPath()) {
+				updateOverlay(movementPath.path);
+				
+				localPlayer.walkAlongPath(movementPath.path);
 			}
 
-		} else {
-			log(`Changing direction from ${Direction[localPlayer.facingDirection]} to ${Direction[direction]}`);
-			await executeAction(ActionType.UpdateDirection, {
-				direction: direction,
-				bypass: true
-			});
+			return MoveResult.Moving;
 		}
 	}
 
-	if (!shouldMove) {
-		log(`Completed movement to ${target.x},${target.y},${target.z}`);
+	const direction = getDirectionFromMovement(target.x - localPlayer.x, target.y - localPlayer.y);
+	if (direction !== localPlayer.facingDirection) {
+		await executeAction(ActionType.UpdateDirection, {
+			direction: direction,
+			bypass: true
+		});
+	}
+	
+	if (moveInto) {
+		log(`Completed movement into ${target.x},${target.y},${target.z}`);
+		
+		await executeAction(ActionType.Move, {
+			direction: direction
+		});
+		
 		return MoveResult.Complete;
 	}
 
-	return MoveResult.Moving;
+	return MoveResult.Complete;
 }
 
 export function isGoodBuildTile(base: IBase, point: IVector3, tile: ITile): boolean {
