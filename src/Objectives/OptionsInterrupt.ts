@@ -4,7 +4,11 @@ import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 
 export default class OptionsInterrupt extends Objective {
-
+	
+	public getHashCode(): string {
+		return "OptionsInterrupt";
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (localPlayer.options.autoPickup) {
 			this.log.info("Disabling AutoPickup");

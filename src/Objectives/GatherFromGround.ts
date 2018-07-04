@@ -2,11 +2,11 @@ import { ActionType, ItemType } from "Enums";
 import { ITile } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import * as Helpers from "../Helpers";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
-import { desertCutoff, IBase, IInventoryItems, MoveResult } from "../ITars";
+import { desertCutoff, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import ExecuteAction from "./ExecuteAction";
+import { MoveResult, moveToFaceTargetWithRetries } from "../Utilities/Movement";
 
 export default class GatherFromGround extends Objective {
 
@@ -15,7 +15,7 @@ export default class GatherFromGround extends Objective {
 	}
 
 	public getHashCode(): string {
-		return `GatherFromGround:${ItemType[this.itemType]}`;
+		return `GatherFromGround:${itemManager.getItemTypeGroupName(this.itemType, false)}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
@@ -45,7 +45,7 @@ export default class GatherFromGround extends Objective {
 			}
 		}
 
-		const moveResult = await Helpers.moveToTargetWithRetries((ignoredTiles: ITile[]) => {
+		const moveResult = await moveToFaceTargetWithRetries((ignoredTiles: ITile[]) => {
 			for (let i = 0; i < itemsOnTheGround.length; i++) {
 				const target = itemsOnTheGround[i];
 				const targetTile = target.containedWithin as ITile;

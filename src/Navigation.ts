@@ -165,7 +165,7 @@ export class Navigation {
 		return promise2;
 	}
 
-	public getValidPoint(point: IVector3, includePoint: boolean): IVector3[] {
+	public getValidPoints(point: IVector3, includePoint: boolean): IVector3[] {
 		if (includePoint && !this.isDisabledFromPoint(point)) {
 			return [point];
 		}

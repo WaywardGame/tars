@@ -1,48 +1,57 @@
-import { ActionType } from "Enums";
+import { ActionType, SentenceCaseStyle } from "Enums";
 import { IItem } from "item/IItem";
 import { ITile } from "tile/ITerrain";
-import Terrains from "tile/Terrains";
-import { IVector3 } from "utilities/math/IVector";
-import TileHelpers from "utilities/TileHelpers";
-import * as Helpers from "../Helpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
-import { defaultMaxTilesChecked } from "../ITars";
 import { anyWaterTileLocation } from "../Navigation";
 import Objective from "../Objective";
-import UseItem from "./UseItem";
+import { getNearestTileLocation } from "../Utilities/Tile";
+import { moveToFaceTargetWithRetries, MoveResult } from "../Utilities/Movement";
+import ExecuteAction from "./ExecuteAction";
 
 export default class GatherWater extends Objective {
 
 	constructor(private item: IItem) {
 		super();
 	}
-
-	public async onExecute(): Promise<IObjective | ObjectiveStatus | number | undefined> {
-		const facingTile = localPlayer.getFacingTile();
-		let tileType = TileHelpers.getType(facingTile);
-		let terrainDescription = Terrains[tileType];
-
-		let target: IVector3 | undefined;
-		if (!terrainDescription || !(terrainDescription.water || terrainDescription.shallowWater)) {
-			target = TileHelpers.findMatchingTile(localPlayer, (point: IVector3, tile: ITile) => {
-				tileType = TileHelpers.getType(tile);
-				terrainDescription = Terrains[tileType];
-				return terrainDescription && (terrainDescription.water || terrainDescription.shallowWater) ? true : false;
-			}, defaultMaxTilesChecked);
-
-			if (!target) {
-				const targets = await Helpers.getNearestTileLocation(anyWaterTileLocation, localPlayer);
-				if (targets.length === 0) {
-					this.log.info("No nearby water, go near some");
-					return;
-				}
-
-				target = targets[0].point;
-			}
-		}
-
-		this.log.info("Gather water");
-		return new UseItem(this.item, ActionType.GatherWater, target);
+	
+	public getHashCode(): string {
+		return `GatherWater:${game.getName(this.item, SentenceCaseStyle.Title, false)}`;
 	}
+	
+	public async onExecute(): Promise<IObjective | ObjectiveStatus | number | undefined> {
+		const targets = await getNearestTileLocation(anyWaterTileLocation, localPlayer);
+		
+		const moveResult = await moveToFaceTargetWithRetries((ignoredTiles: ITile[]) => {
+			for (let i = 0; i < 5; i++) {
+				const target = targets[i];
+				if (target) {
+					const targetTile = game.getTileFromPoint(target.point);
+					if (ignoredTiles.indexOf(targetTile) === -1) {
+						return target.point;
+					}
+				}
+			}
 
+			return undefined;
+		});
+		
+		if (moveResult === MoveResult.NoTarget) {
+			this.log.info("Can't find water");
+			return ObjectiveStatus.Complete;
+
+		} else if (moveResult === MoveResult.NoPath) {
+			this.log.info("Can't path to water");
+			return ObjectiveStatus.Complete;
+
+		} else if (moveResult !== MoveResult.Complete) {
+			return;
+		}
+		
+		this.log.info("Gather water");
+		
+		return new ExecuteAction(ActionType.UseItem, {
+			item: this.item,
+			useActionType: ActionType.GatherWater
+		});
+	}
 }

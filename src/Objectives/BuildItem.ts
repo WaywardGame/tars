@@ -3,11 +3,13 @@ import { IItem } from "item/IItem";
 import { ITile } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
 import TileHelpers from "utilities/TileHelpers";
-import * as Helpers from "../Helpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
-import { defaultMaxTilesChecked, IBase, IInventoryItems, MoveResult } from "../ITars";
+import { defaultMaxTilesChecked, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import UseItem from "./UseItem";
+import { moveToFaceTarget, findAndMoveToFaceTarget, MoveResult } from "../Utilities/Movement";
+import { isGoodBuildTile, getBaseDoodads, hasBase } from "../Utilities/Base";
+import { findDoodad } from "../Utilities/Object";
 
 export default class BuildItem extends Objective {
 
@@ -28,11 +30,11 @@ export default class BuildItem extends Objective {
 
 		let moveResult: MoveResult | undefined;
 
-		if (Helpers.hasBase(base)) {
-			const baseDoodads = Helpers.getBaseDoodads(base);
+		if (hasBase(base)) {
+			const baseDoodads = getBaseDoodads(base);
 
 			for (const baseDoodad of baseDoodads) {
-				moveResult = await Helpers.findAndMoveToTarget((point: IVector3, tile: ITile) => Helpers.isGoodBuildTile(base, point, tile), false, defaultMaxTilesChecked, baseDoodad);
+				moveResult = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => isGoodBuildTile(base, point, tile), defaultMaxTilesChecked, baseDoodad);
 				if (moveResult === MoveResult.Moving || moveResult === MoveResult.Complete) {
 					break;
 				}
@@ -41,7 +43,7 @@ export default class BuildItem extends Objective {
 
 		if (moveResult === undefined || moveResult === MoveResult.NoTarget || moveResult === MoveResult.NoPath) {
 			if (this.target === undefined) {
-				const targetDoodad = Helpers.findDoodad(this.getHashCode(), doodad => {
+				const targetDoodad = findDoodad(this.getHashCode(), doodad => {
 					const description = doodad.description();
 					if (!description || !description.isTree) {
 						return false;
@@ -64,7 +66,7 @@ export default class BuildItem extends Objective {
 							};
 
 							const tile = game.getTileFromPoint(point);
-							if (!tile.doodad && Helpers.isGoodBuildTile(base, point, tile)) {
+							if (!tile.doodad && isGoodBuildTile(base, point, tile)) {
 								const tileType = TileHelpers.getType(tile);
 								if (tileType === TerrainType.Dirt) {
 									dirt++;
@@ -99,7 +101,7 @@ export default class BuildItem extends Objective {
 						};
 
 						const tile = game.getTileFromPoint(point);
-						if (Helpers.isGoodBuildTile(base, point, tile)) {
+						if (isGoodBuildTile(base, point, tile)) {
 							target = point;
 							x = 7;
 							break;
@@ -115,7 +117,7 @@ export default class BuildItem extends Objective {
 				}
 			}
 
-			moveResult = await Helpers.moveToTarget(this.target);
+			moveResult = await moveToFaceTarget(this.target);
 		}
 
 		if (moveResult === MoveResult.NoTarget) {

@@ -6,7 +6,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "Enums", "tile/Terrains", "utilities/TileHelpers", "../Helpers", "../ITars", "../Navigation", "../Objective", "./UseItem"], function (require, exports, Enums_1, Terrains_1, TileHelpers_1, Helpers, ITars_1, Navigation_1, Objective_1, UseItem_1) {
+define(["require", "exports", "Enums", "../IObjective", "../Navigation", "../Objective", "../Utilities/Tile", "../Utilities/Movement", "./ExecuteAction"], function (require, exports, Enums_1, IObjective_1, Navigation_1, Objective_1, Tile_1, Movement_1, ExecuteAction_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherWater extends Objective_1.default {
@@ -14,32 +14,43 @@ define(["require", "exports", "Enums", "tile/Terrains", "utilities/TileHelpers",
             super();
             this.item = item;
         }
+        getHashCode() {
+            return `GatherWater:${game.getName(this.item, Enums_1.SentenceCaseStyle.Title, false)}`;
+        }
         onExecute() {
             return __awaiter(this, void 0, void 0, function* () {
-                const facingTile = localPlayer.getFacingTile();
-                let tileType = TileHelpers_1.default.getType(facingTile);
-                let terrainDescription = Terrains_1.default[tileType];
-                let target;
-                if (!terrainDescription || !(terrainDescription.water || terrainDescription.shallowWater)) {
-                    target = TileHelpers_1.default.findMatchingTile(localPlayer, (point, tile) => {
-                        tileType = TileHelpers_1.default.getType(tile);
-                        terrainDescription = Terrains_1.default[tileType];
-                        return terrainDescription && (terrainDescription.water || terrainDescription.shallowWater) ? true : false;
-                    }, ITars_1.defaultMaxTilesChecked);
-                    if (!target) {
-                        const targets = yield Helpers.getNearestTileLocation(Navigation_1.anyWaterTileLocation, localPlayer);
-                        if (targets.length === 0) {
-                            this.log.info("No nearby water, go near some");
-                            return;
+                const targets = yield Tile_1.getNearestTileLocation(Navigation_1.anyWaterTileLocation, localPlayer);
+                const moveResult = yield Movement_1.moveToFaceTargetWithRetries((ignoredTiles) => {
+                    for (let i = 0; i < 5; i++) {
+                        const target = targets[i];
+                        if (target) {
+                            const targetTile = game.getTileFromPoint(target.point);
+                            if (ignoredTiles.indexOf(targetTile) === -1) {
+                                return target.point;
+                            }
                         }
-                        target = targets[0].point;
                     }
+                    return undefined;
+                });
+                if (moveResult === Movement_1.MoveResult.NoTarget) {
+                    this.log.info("Can't find water");
+                    return IObjective_1.ObjectiveStatus.Complete;
+                }
+                else if (moveResult === Movement_1.MoveResult.NoPath) {
+                    this.log.info("Can't path to water");
+                    return IObjective_1.ObjectiveStatus.Complete;
+                }
+                else if (moveResult !== Movement_1.MoveResult.Complete) {
+                    return;
                 }
                 this.log.info("Gather water");
-                return new UseItem_1.default(this.item, Enums_1.ActionType.GatherWater, target);
+                return new ExecuteAction_1.default(Enums_1.ActionType.UseItem, {
+                    item: this.item,
+                    useActionType: Enums_1.ActionType.GatherWater
+                });
             });
         }
     }
     exports.default = GatherWater;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiR2F0aGVyV2F0ZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvT2JqZWN0aXZlcy9HYXRoZXJXYXRlci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OztJQWFBLGlCQUFpQyxTQUFRLG1CQUFTO1FBRWpELFlBQW9CLElBQVc7WUFDOUIsS0FBSyxFQUFFLENBQUM7WUFEVyxTQUFJLEdBQUosSUFBSSxDQUFPO1FBRS9CLENBQUM7UUFFWSxTQUFTOztnQkFDckIsTUFBTSxVQUFVLEdBQUcsV0FBVyxDQUFDLGFBQWEsRUFBRSxDQUFDO2dCQUMvQyxJQUFJLFFBQVEsR0FBRyxxQkFBVyxDQUFDLE9BQU8sQ0FBQyxVQUFVLENBQUMsQ0FBQztnQkFDL0MsSUFBSSxrQkFBa0IsR0FBRyxrQkFBUSxDQUFDLFFBQVEsQ0FBQyxDQUFDO2dCQUU1QyxJQUFJLE1BQTRCLENBQUM7Z0JBQ2pDLElBQUksQ0FBQyxrQkFBa0IsSUFBSSxDQUFDLENBQUMsa0JBQWtCLENBQUMsS0FBSyxJQUFJLGtCQUFrQixDQUFDLFlBQVksQ0FBQyxFQUFFO29CQUMxRixNQUFNLEdBQUcscUJBQVcsQ0FBQyxnQkFBZ0IsQ0FBQyxXQUFXLEVBQUUsQ0FBQyxLQUFlLEVBQUUsSUFBVyxFQUFFLEVBQUU7d0JBQ25GLFFBQVEsR0FBRyxxQkFBVyxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQzt3QkFDckMsa0JBQWtCLEdBQUcsa0JBQVEsQ0FBQyxRQUFRLENBQUMsQ0FBQzt3QkFDeEMsT0FBTyxrQkFBa0IsSUFBSSxDQUFDLGtCQUFrQixDQUFDLEtBQUssSUFBSSxrQkFBa0IsQ0FBQyxZQUFZLENBQUMsQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxLQUFLLENBQUM7b0JBQzNHLENBQUMsRUFBRSw4QkFBc0IsQ0FBQyxDQUFDO29CQUUzQixJQUFJLENBQUMsTUFBTSxFQUFFO3dCQUNaLE1BQU0sT0FBTyxHQUFHLE1BQU0sT0FBTyxDQUFDLHNCQUFzQixDQUFDLGlDQUFvQixFQUFFLFdBQVcsQ0FBQyxDQUFDO3dCQUN4RixJQUFJLE9BQU8sQ0FBQyxNQUFNLEtBQUssQ0FBQyxFQUFFOzRCQUN6QixJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQywrQkFBK0IsQ0FBQyxDQUFDOzRCQUMvQyxPQUFPO3lCQUNQO3dCQUVELE1BQU0sR0FBRyxPQUFPLENBQUMsQ0FBQyxDQUFDLENBQUMsS0FBSyxDQUFDO3FCQUMxQjtpQkFDRDtnQkFFRCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsQ0FBQztnQkFDOUIsT0FBTyxJQUFJLGlCQUFPLENBQUMsSUFBSSxDQUFDLElBQUksRUFBRSxrQkFBVSxDQUFDLFdBQVcsRUFBRSxNQUFNLENBQUMsQ0FBQztZQUMvRCxDQUFDO1NBQUE7S0FFRDtJQWxDRCw4QkFrQ0MifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiR2F0aGVyV2F0ZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvT2JqZWN0aXZlcy9HYXRoZXJXYXRlci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OztJQVVBLGlCQUFpQyxTQUFRLG1CQUFTO1FBRWpELFlBQW9CLElBQVc7WUFDOUIsS0FBSyxFQUFFLENBQUM7WUFEVyxTQUFJLEdBQUosSUFBSSxDQUFPO1FBRS9CLENBQUM7UUFFTSxXQUFXO1lBQ2pCLE9BQU8sZUFBZSxJQUFJLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxJQUFJLEVBQUUseUJBQWlCLENBQUMsS0FBSyxFQUFFLEtBQUssQ0FBQyxFQUFFLENBQUM7UUFDakYsQ0FBQztRQUVZLFNBQVM7O2dCQUNyQixNQUFNLE9BQU8sR0FBRyxNQUFNLDZCQUFzQixDQUFDLGlDQUFvQixFQUFFLFdBQVcsQ0FBQyxDQUFDO2dCQUVoRixNQUFNLFVBQVUsR0FBRyxNQUFNLHNDQUEyQixDQUFDLENBQUMsWUFBcUIsRUFBRSxFQUFFO29CQUM5RSxLQUFLLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLEdBQUcsQ0FBQyxFQUFFLENBQUMsRUFBRSxFQUFFO3dCQUMzQixNQUFNLE1BQU0sR0FBRyxPQUFPLENBQUMsQ0FBQyxDQUFDLENBQUM7d0JBQzFCLElBQUksTUFBTSxFQUFFOzRCQUNYLE1BQU0sVUFBVSxHQUFHLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxNQUFNLENBQUMsS0FBSyxDQUFDLENBQUM7NEJBQ3ZELElBQUksWUFBWSxDQUFDLE9BQU8sQ0FBQyxVQUFVLENBQUMsS0FBSyxDQUFDLENBQUMsRUFBRTtnQ0FDNUMsT0FBTyxNQUFNLENBQUMsS0FBSyxDQUFDOzZCQUNwQjt5QkFDRDtxQkFDRDtvQkFFRCxPQUFPLFNBQVMsQ0FBQztnQkFDbEIsQ0FBQyxDQUFDLENBQUM7Z0JBRUgsSUFBSSxVQUFVLEtBQUsscUJBQVUsQ0FBQyxRQUFRLEVBQUU7b0JBQ3ZDLElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLGtCQUFrQixDQUFDLENBQUM7b0JBQ2xDLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7aUJBRWhDO3FCQUFNLElBQUksVUFBVSxLQUFLLHFCQUFVLENBQUMsTUFBTSxFQUFFO29CQUM1QyxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxxQkFBcUIsQ0FBQyxDQUFDO29CQUNyQyxPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2lCQUVoQztxQkFBTSxJQUFJLFVBQVUsS0FBSyxxQkFBVSxDQUFDLFFBQVEsRUFBRTtvQkFDOUMsT0FBTztpQkFDUDtnQkFFRCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsQ0FBQztnQkFFOUIsT0FBTyxJQUFJLHVCQUFhLENBQUMsa0JBQVUsQ0FBQyxPQUFPLEVBQUU7b0JBQzVDLElBQUksRUFBRSxJQUFJLENBQUMsSUFBSTtvQkFDZixhQUFhLEVBQUUsa0JBQVUsQ0FBQyxXQUFXO2lCQUNyQyxDQUFDLENBQUM7WUFDSixDQUFDO1NBQUE7S0FDRDtJQTlDRCw4QkE4Q0MifQ==

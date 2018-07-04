@@ -2,11 +2,11 @@ import { ActionType, ItemType } from "Enums";
 import { IContainer } from "item/IItem";
 import { ITile } from "tile/ITerrain";
 import Vector2 from "utilities/math/Vector2";
-import * as Helpers from "../Helpers";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
-import { IBase, IInventoryItems, MoveResult } from "../ITars";
+import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import ExecuteAction from "./ExecuteAction";
+import { moveToTargetWithRetries, MoveResult } from "../Utilities/Movement";
 
 export default class GatherFromChest extends Objective {
 
@@ -15,7 +15,7 @@ export default class GatherFromChest extends Objective {
 	}
 
 	public getHashCode(): string {
-		return `GatherFromChest:${ItemType[this.itemType]}`;
+		return `GatherFromChest:${itemManager.getItemTypeGroupName(this.itemType, false)}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
@@ -39,7 +39,7 @@ export default class GatherFromChest extends Objective {
 			return ObjectiveStatus.Complete;
 		}
 
-		const moveResult = await Helpers.moveToTargetWithRetries((ignoredTiles: ITile[]) => {
+		const moveResult = await moveToTargetWithRetries((ignoredTiles: ITile[]) => {
 			for (let i = 0; i < chestsWithItem.length; i++) {
 				const target = chestsWithItem[i];
 				const targetTile = target.getTile();

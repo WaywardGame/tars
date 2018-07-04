@@ -1,14 +1,18 @@
 import { ActionType, WeightStatus } from "Enums";
 import { IContainer } from "item/IItem";
-import * as Helpers from "../Helpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import ExecuteAction from "./ExecuteAction";
 import OrganizeInventory from "./OrganizeInventory";
+import { getUnusedItems } from "../Utilities/Item";
 
 export default class ReduceWeight extends Objective {
-
+	
+	public getHashCode(): string {
+		return "ReduceWeight";
+	}
+	
 	public shouldSaveChildObjectives(): boolean {
 		return false;
 	}
@@ -25,7 +29,7 @@ export default class ReduceWeight extends Objective {
 				const containerWeight = itemManager.computeContainerWeight(container);
 
 				// move extra items into the chest
-				let unusedExtraItems = Helpers.getUnusedItems(inventory);
+				let unusedExtraItems = getUnusedItems(inventory);
 
 				unusedExtraItems = unusedExtraItems
 					.filter(item => (containerWeight + item.weight) <= container.weightCapacity!)

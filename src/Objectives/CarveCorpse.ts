@@ -1,19 +1,23 @@
 import { ICorpse } from "creature/corpse/ICorpse";
-import { ActionType } from "Enums";
-import * as Helpers from "../Helpers";
+import { ActionType, SentenceCaseStyle } from "Enums";
 import { IObjective, ObjectiveStatus } from "../IObjective";
-import { MoveResult } from "../ITars";
 import Objective from "../Objective";
 import ExecuteAction from "./ExecuteAction";
+import { getInventoryItemsWithUse } from "../Utilities/Item";
+import { moveToFaceTarget, MoveResult } from "../Utilities/Movement";
 
 export default class CarveCorpse extends Objective {
 
 	constructor(private corpse: ICorpse) {
 		super();
 	}
-
+	
+	public getHashCode(): string {
+		return `CarveCorpse:${game.getName(this.corpse, SentenceCaseStyle.Title, false)}`;
+	}
+	
 	public async onExecute(): Promise<IObjective | ObjectiveStatus | number | undefined> {
-		const carveTool = Helpers.getInventoryItemsWithUse(ActionType.Carve);
+		const carveTool = getInventoryItemsWithUse(ActionType.Carve);
 		if (carveTool.length === 0) {
 			return ObjectiveStatus.Complete;
 		}
@@ -23,7 +27,7 @@ export default class CarveCorpse extends Objective {
 			return ObjectiveStatus.Complete;
 		}
 
-		const moveResult = await Helpers.moveToTarget(this.corpse);
+		const moveResult = await moveToFaceTarget(this.corpse);
 		if (moveResult !== MoveResult.Complete) {
 			return;
 		}

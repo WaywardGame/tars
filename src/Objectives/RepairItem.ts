@@ -1,4 +1,4 @@
-import { ActionType, ItemType } from "Enums";
+import { ActionType, ItemType, SentenceCaseStyle } from "Enums";
 import { IItem } from "item/IItem";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
@@ -13,7 +13,11 @@ export default class RepairItem extends Objective {
 	constructor(private item: IItem) {
 		super();
 	}
-
+	
+	public getHashCode(): string {
+		return `RepairItem:${game.getName(this.item, SentenceCaseStyle.Title, false)}`;
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (inventory.hammer === undefined) {
 			return new AcquireItem(ItemType.StoneHammer);

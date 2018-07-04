@@ -12,7 +12,11 @@ export default class AcquireItemForDoodad extends Objective {
 	constructor(private doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
 		super();
 	}
-
+	
+	public getHashCode(): string {
+		return `AcquireItemForDoodad:${doodadManager.isDoodadTypeGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const doodadTypes = Helpers.getDoodadTypes(this.doodadTypeOrGroup);
 

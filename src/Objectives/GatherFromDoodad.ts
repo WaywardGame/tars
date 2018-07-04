@@ -1,10 +1,12 @@
 import { IDoodad } from "doodad/IDoodad";
-import { ActionType, DamageType, DoodadType, GrowingStage, ItemType } from "Enums";
+import { ActionType, DamageType, DoodadType, GrowingStage } from "Enums";
 import Vector2 from "utilities/math/Vector2";
-import * as Helpers from "../Helpers";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
-import { IBase, IDoodadSearch, IInventoryItems, MoveResult } from "../ITars";
+import { IBase, IDoodadSearch, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { moveToFaceTarget, MoveResult } from "../Utilities/Movement";
+import { getBestActionItem } from "../Utilities/Item";
+import { findDoodad } from "../Utilities/Object";
 
 export default class GatherFromDoodad extends Objective {
 
@@ -15,15 +17,15 @@ export default class GatherFromDoodad extends Objective {
 	}
 
 	public getHashCode(): string {
-		return `GatherFromDoodad:${this.search.map(search => `${DoodadType[search.type]},${GrowingStage[search.growingStage]},${ItemType[search.itemType]}`).join("|")}`;
+		return `GatherFromDoodad:${this.search.map(search => `${DoodadType[search.type]},${GrowingStage[search.growingStage]},${itemManager.getItemTypeGroupName(search.itemType, false)}`).join("|")}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (!this.target || !this.target.isValid()) {
-			this.target = Helpers.findDoodad(`${this.getHashCode()}|1`, (doodad: IDoodad) => doodad.canGather() && this.search.findIndex(search => search.type === doodad.type && search.growingStage === doodad.getGrowingStage()) !== -1 && doodad.getTile().corpses === undefined);
+			this.target = findDoodad(`${this.getHashCode()}|1`, (doodad: IDoodad) => doodad.canGather() && this.search.findIndex(search => search.type === doodad.type && search.growingStage === doodad.getGrowingStage()) !== -1 && doodad.getTile().corpses === undefined);
 
 			if (this.target === undefined) {
-				this.target = Helpers.findDoodad(`${this.getHashCode()}|2`, (doodad: IDoodad) => doodad.canGather() && this.search.findIndex(search => search.type === doodad.type && search.growingStage === GrowingStage.Dead) !== -1 && doodad.getTile().corpses === undefined);
+				this.target = findDoodad(`${this.getHashCode()}|2`, (doodad: IDoodad) => doodad.canGather() && this.search.findIndex(search => search.type === doodad.type && search.growingStage === GrowingStage.Dead) !== -1 && doodad.getTile().corpses === undefined);
 
 				if (this.target) {
 					this.log.info("Couldn't find target normally. found it for a dead thing!", this.search);
@@ -40,7 +42,7 @@ export default class GatherFromDoodad extends Objective {
 			return ObjectiveStatus.Complete;
 		}
 
-		const moveResult = await Helpers.moveToTarget(this.target);
+		const moveResult = await moveToFaceTarget(this.target);
 
 		if (moveResult === MoveResult.NoPath) {
 			this.log.info("No path to doodad");
@@ -53,7 +55,7 @@ export default class GatherFromDoodad extends Objective {
 
 		const targetSearch = this.search.find(search => search.type === this.target!.type && search.growingStage === this.target!.getGrowingStage());
 
-		return this.executeActionForItem(targetSearch ? targetSearch.action : ActionType.Gather, { item: Helpers.getBestActionItem(ActionType.Gather, DamageType.Slashing) }, this.search.map(search => search.itemType));
+		return this.executeActionForItem(targetSearch ? targetSearch.action : ActionType.Gather, { item: getBestActionItem(ActionType.Gather, DamageType.Slashing) }, this.search.map(search => search.itemType));
 	}
 
 	protected getBaseDifficulty(base: IBase, inventory: IInventoryItems): number {

@@ -1,5 +1,5 @@
 import { IDoodad } from "doodad/IDoodad";
-import { ItemType } from "Enums";
+import { ItemType, ItemTypeGroup } from "Enums";
 import Vector2 from "utilities/math/Vector2";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
@@ -7,9 +7,14 @@ import Objective from "../Objective";
 import AcquireItem from "./AcquireItem";
 import BuildItem from "./BuildItem";
 import StartFire from "./StartFire";
+import AcquireItemByGroup from "./AcquireItemByGroup";
 
 export default class AcquireBuildMoveToFire extends Objective {
 
+	public getHashCode(): string {
+		return "AcquireBuildMoveToFire";
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const doodads: IDoodad[] = ([base.campfire, base.kiln].filter(d => d !== undefined) as IDoodad[]).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
 		const doodad = doodads[0];
@@ -30,16 +35,21 @@ export default class AcquireBuildMoveToFire extends Objective {
 			return doodadDistance + await this.calculateObjectiveDifficulties(base, inventory, objectives);
 		}
 
-		if (doodad !== undefined) {
-			const description = doodad.description();
-			if (!description) {
-				return ObjectiveStatus.Complete;
+		if (!doodad) {
+			const inventoryItem = itemManager.getItemInInventoryByGroup(localPlayer, ItemTypeGroup.Campfire);
+			if (inventoryItem !== undefined) {
+				return new BuildItem(inventoryItem);
 			}
 
-			return new StartFire(doodad);
+			return new AcquireItemByGroup(ItemTypeGroup.Campfire);
 		}
 
-		return new AcquireItem(ItemType.StoneCampfire);
+		const description = doodad.description();
+		if (!description) {
+			return ObjectiveStatus.Complete;
+		}
+
+		return new StartFire(doodad);
 	}
 
 }

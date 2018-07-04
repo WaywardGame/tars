@@ -10,13 +10,6 @@ export const gardenMaxTilesChecked = 1024;
 
 export const desertCutoff = 512;
 
-export enum MoveResult {
-	NoTarget,
-	NoPath,
-	Moving,
-	Complete
-}
-
 export interface ITileLocation {
 	type: TerrainType;
 	tile: ITile;

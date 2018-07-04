@@ -1,18 +1,23 @@
 import { IStat, Stat } from "entity/IStats";
 import { ActionType, ItemTypeGroup, TerrainType } from "Enums";
 import { ITile } from "tile/ITerrain";
-import * as Helpers from "../Helpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
-import { IBase, IInventoryItems, MoveResult } from "../ITars";
+import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import AcquireWaterContainer from "./AcquireWaterContainer";
 import ExecuteAction from "./ExecuteAction";
 import GatherWater from "./GatherWater";
 import StartFire from "./StartFire";
 import UseItem from "./UseItem";
+import { moveToFaceTarget, moveToFaceTargetWithRetries, MoveResult } from "../Utilities/Movement";
+import { getNearestTileLocation } from "../Utilities/Tile";
 
 export default class RecoverThirst extends Objective {
-
+	
+	public getHashCode(): string {
+		return "RecoverThirst";
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const waterStill = base.waterStill;
 
@@ -40,14 +45,16 @@ export default class RecoverThirst extends Objective {
 
 		if (isEmergency) {
 			// look for nearby freshwater
-			const nearestShallowFreshWater = await Helpers.getNearestTileLocation(TerrainType.ShallowFreshWater, localPlayer);
+			const nearestShallowFreshWater = await getNearestTileLocation(TerrainType.ShallowFreshWater, localPlayer);
 			if (nearestShallowFreshWater.length > 0) {
-				const moveResult = await Helpers.moveToTargetWithRetries((ignoredTiles: ITile[]) => {
+				const moveResult = await moveToFaceTargetWithRetries((ignoredTiles: ITile[]) => {
 					for (let i = 0; i < 2; i++) {
 						const target = nearestShallowFreshWater[i];
-						const targetTile = game.getTileFromPoint(target.point);
-						if (ignoredTiles.indexOf(targetTile) === -1) {
-							return target.point;
+						if (target) {
+							const targetTile = game.getTileFromPoint(target.point);
+							if (ignoredTiles.indexOf(targetTile) === -1) {
+								return target.point;
+							}
 						}
 					}
 
@@ -111,7 +118,7 @@ export default class RecoverThirst extends Objective {
 
 			if (isEmergency) {
 				// run back to the waterstill and wait
-				const moveResult = await Helpers.moveToTarget(waterStill);
+				const moveResult = await moveToFaceTarget(waterStill);
 				if (moveResult === MoveResult.NoPath) {
 					this.log.info("No path to water still");
 					return;

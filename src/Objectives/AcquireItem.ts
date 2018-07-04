@@ -5,7 +5,6 @@ import { IItemDescription } from "item/IItem";
 import { isItemTypeGroup, itemDescriptions as Items } from "item/Items";
 import TerrainResources from "tile/TerrainResources";
 import Enums from "utilities/enum/Enums";
-import * as Helpers from "../Helpers";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { IBase, ICreatureSearch, IDoodadSearch, IInventoryItems, ITerrainSearch } from "../ITars";
 import Objective from "../Objective";
@@ -18,6 +17,7 @@ import GatherFromCreature from "./GatherFromCreature";
 import GatherFromDoodad from "./GatherFromDoodad";
 import GatherFromGround from "./GatherFromGround";
 import GatherFromTerrain from "./GatherFromTerrain";
+import { processRecipe, resetTargetRecipes, addTargetRecipe, getItemInInventory } from "../Utilities/Item";
 
 export default class AcquireItem extends Objective {
 
@@ -32,7 +32,7 @@ export default class AcquireItem extends Objective {
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		let itemDescription: IItemDescription | undefined;
 
-		this.log.info(`${ItemType[this.itemType]}`);
+		this.log.info(itemManager.getItemTypeGroupName(this.itemType, false));
 
 		itemDescription = Items[this.itemType];
 
@@ -79,7 +79,7 @@ export default class AcquireItem extends Objective {
 						continue;
 					}
 
-					const dismantleItem = Helpers.getItemInInventory(inventory, it);
+					const dismantleItem = getItemInInventory(inventory, it);
 					const hasItem = dismantleItem !== undefined;
 
 					let hasRequiredItem = true;
@@ -157,19 +157,19 @@ export default class AcquireItem extends Objective {
 				return missionImpossible;
 			}
 
-			return;
+			return ObjectiveStatus.Complete;
 		}
 
 		const recipe = itemDescription.recipe;
 
-		const checker = Helpers.processRecipe(inventory, recipe, true);
+		const checker = processRecipe(inventory, recipe, true);
 
 		const requirementsMet = checker.requirementsMet();
 		const hasAdditionalRequirements = itemManager.hasAdditionalRequirements(localPlayer, this.itemType);
 
 		if (requirementsMet && hasAdditionalRequirements.requirementsMet) {
 			if (!calculateDifficulty) {
-				Helpers.resetTargetRecipes();
+				resetTargetRecipes();
 			}
 
 			if (localPlayer.swimming) {
@@ -189,7 +189,7 @@ export default class AcquireItem extends Objective {
 			const recipeObjectives: IObjective[] = [];
 
 			if (!calculateDifficulty) {
-				Helpers.addTargetRecipe(recipe);
+				addTargetRecipe(recipe);
 			}
 
 			const itemBase = checker.itemBaseComponent;
@@ -255,6 +255,8 @@ export default class AcquireItem extends Objective {
 		if (calculateDifficulty) {
 			return missionImpossible;
 		}
+		
+		return ObjectiveStatus.Complete;
 	}
 
 	private getTerrainSearch(itemTypes: ItemType[]): ITerrainSearch[] {

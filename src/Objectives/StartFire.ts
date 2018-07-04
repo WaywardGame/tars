@@ -1,19 +1,23 @@
 import { IDoodad } from "doodad/IDoodad";
 import { ActionType, ItemTypeGroup } from "Enums";
-import * as Helpers from "../Helpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
-import { IBase, IInventoryItems, MoveResult } from "../ITars";
+import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import AcquireItemByGroup from "./AcquireItemByGroup";
 import AcquireItemForAction from "./AcquireItemForAction";
 import UseItem from "./UseItem";
+import { moveToFaceTarget, MoveResult } from "../Utilities/Movement";
 
 export default class StartFire extends Objective {
 
 	constructor(private doodad: IDoodad) {
 		super();
 	}
-
+	
+	public getHashCode(): string {
+		return "StartFire";
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (calculateDifficulty) {
 			const objectives: IObjective[] = [];
@@ -30,14 +34,14 @@ export default class StartFire extends Objective {
 				objectives.push(new AcquireItemByGroup(ItemTypeGroup.Tinder));
 			}
 
-			objectives.push(new UseItem(undefined!, ActionType.StartFire, this.doodad));
+			objectives.push(new UseItem(undefined, ActionType.StartFire, this.doodad));
 
 			return this.calculateObjectiveDifficulties(base, inventory, objectives);
 		}
 
 		const description = this.doodad.description();
 		if (!description || description.lit === undefined || description.providesFire) {
-			const moveResult = await Helpers.moveToTarget(this.doodad);
+			const moveResult = await moveToFaceTarget(this.doodad);
 			if (moveResult === MoveResult.NoPath) {
 				this.log.info("No path to doodad");
 				return ObjectiveStatus.Complete;

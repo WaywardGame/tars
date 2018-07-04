@@ -5,7 +5,11 @@ import Objective from "../Objective";
 import AcquireItem from "./AcquireItem";
 
 export default class AcquireWaterContainer extends Objective {
-
+	
+	public getHashCode(): string {
+		return "AcquireWaterContainer";
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		return this.pickEasiestObjective(base, inventory, [
 			[new AcquireItem(ItemType.Waterskin)],

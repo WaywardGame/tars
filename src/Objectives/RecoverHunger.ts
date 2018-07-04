@@ -1,20 +1,25 @@
 import { IStat, Stat } from "entity/IStats";
-import { ActionType, GrowingStage, ItemType, ItemTypeGroup } from "Enums";
+import { ActionType, GrowingStage, ItemType, ItemTypeGroup, SentenceCaseStyle } from "Enums";
 import { itemDescriptions as Items } from "item/Items";
 import { ITile } from "tile/ITerrain";
 import Enums from "utilities/enum/Enums";
 import { IVector3 } from "utilities/math/IVector";
-import * as Helpers from "../Helpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
-import { gardenMaxTilesChecked, IBase, IInventoryItems, MoveResult } from "../ITars";
+import { gardenMaxTilesChecked, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import AcquireItem from "./AcquireItem";
 import ExecuteAction from "./ExecuteAction";
 import PlantSeed from "./PlantSeed";
 import UseItem from "./UseItem";
+import { getInventoryItemsWithUse, processRecipe, getSeeds } from "../Utilities/Item";
+import { findAndMoveToFaceTarget, MoveResult } from "../Utilities/Movement";
 
 export default class RecoverHunger extends Objective {
-
+	
+	public getHashCode(): string {
+		return "RecoverHunger";
+	}
+	
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const hungerValue = localPlayer.getStat<IStat>(Stat.Hunger).value;
 		const isImportant = hungerValue <= 3;
@@ -22,11 +27,11 @@ export default class RecoverHunger extends Objective {
 
 		let food = itemManager.getItemsInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Food, true);
 		if (isEmergency && food.length === 0) {
-			food = Helpers.getInventoryItemsWithUse(ActionType.Eat);
+			food = getInventoryItemsWithUse(ActionType.Eat);
 		}
 
 		if (food.length > 0) {
-			this.log.info(`Eating ${ItemType[food[0].type]}`);
+			this.log.info(`Eating ${game.getName(food[0], SentenceCaseStyle.Title, false)}`);
 			return new UseItem(food[0], ActionType.Eat);
 		}
 
@@ -44,7 +49,7 @@ export default class RecoverHunger extends Objective {
 				continue;
 			}
 
-			const checker = Helpers.processRecipe(inventory, recipe, true);
+			const checker = processRecipe(inventory, recipe, true);
 			if (checker.requirementsMet()) {
 				objectiveSets.push([new AcquireItem(itemType)]);
 			}
@@ -56,7 +61,7 @@ export default class RecoverHunger extends Objective {
 		}
 
 		// gather plants
-		const plantToGather = await Helpers.findAndMoveToTarget((point: IVector3, tile: ITile) => {
+		const plantToGather = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => {
 			if (tile.doodad === undefined || !tile.doodad.canGather()) {
 				return false;
 			}
@@ -100,14 +105,14 @@ export default class RecoverHunger extends Objective {
 			// wait for ripening
 			return growingStage !== undefined && growingStage >= GrowingStage.Ripening;
 
-		}, false, gardenMaxTilesChecked);
+		}, gardenMaxTilesChecked);
 
 		if (plantToGather !== MoveResult.NoTarget) {
 			if (plantToGather === MoveResult.Complete) {
 				this.log.info("Gathering plant");
 
 				return new ExecuteAction(ActionType.Gather, {
-					item: Helpers.getInventoryItemsWithUse(ActionType.Gather)[0]
+					item: getInventoryItemsWithUse(ActionType.Gather)[0]
 				});
 			}
 
@@ -115,7 +120,7 @@ export default class RecoverHunger extends Objective {
 		}
 
 		// plant seeds
-		const seeds = Helpers.getSeeds();
+		const seeds = getSeeds();
 		if (seeds.length > 0) {
 			this.log.info("Plant seed");
 			return new PlantSeed(seeds[0]);

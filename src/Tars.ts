@@ -39,6 +39,10 @@ import ReduceWeight from "./Objectives/ReduceWeight";
 import RepairItem from "./Objectives/RepairItem";
 import ReturnToBase from "./Objectives/ReturnToBase";
 import { log, setLogger } from "./Utilities/Logger";
+import { resetCachedObjects, findCorpse, getNearbyCreature, findDoodads, findDoodad } from "./Utilities/Object";
+import { resetCachedPaths, resetMovementOverlays } from "./Utilities/Movement";
+import * as Action from "./Utilities/Action";
+import { getPossibleHandEquips, getInventoryItemsWithUse, getBestEquipment, getSeeds } from "./Utilities/Item";
 
 const tickSpeed = 333;
 
@@ -47,9 +51,12 @@ const baseDoodadDistance = 150;
 export default class Tars extends Mod {
 
 	private keyBind: number;
+	private messageSource: number;
 
 	private base: IBase;
 	private inventory: IInventoryItems;
+
+	private overBurdened: boolean = false;
 
 	private objective: IObjective | undefined;
 
@@ -63,6 +70,7 @@ export default class Tars extends Mod {
 
 	public onInitialize(saveDataGlobal: any): any {
 		this.keyBind = this.addBindable(this.getName(), { key: "KeyT" });
+		this.messageSource = this.addMessageSource(this.getName());
 
 		this.addCommand("tars", () => {
 			this.toggle();
@@ -98,8 +106,8 @@ export default class Tars extends Mod {
 		if (player.isLocalPlayer()) {
 			this.objective = undefined;
 			this.interruptObjective = undefined;
-			
-			Helpers.resetMovementOverlays();
+
+			resetMovementOverlays();
 		}
 
 		return undefined;
@@ -128,18 +136,40 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		Helpers.postExecuteAction(actionType);
+		Action.postExecuteAction(actionType);
 	}
 
 	@HookMethod
-	public onMoveComplete(player: IPlayer) {
-		if (player !== localPlayer) {
-			return;
+	public onUpdateWeight(player: IPlayer, newWeight: number): number | undefined {
+		const weight = player.getStat<IStatMax>(Stat.Weight);
+		if (newWeight > weight.max) {
+			if (!this.overBurdened) {
+				this.overBurdened = true;
+
+				if (this.isEnabled()) {
+					// player is carrying too much
+					// reset objectives so we'll handle this immediately
+					log("Over burdened");
+
+					this.objective = undefined;
+					this.interruptObjective = undefined;
+				}
+			}
+
+		} else if (this.overBurdened) {
+			this.overBurdened = false;
+
+			if (this.isEnabled()) {
+				log("No longer over burdened");
+			}
 		}
 
-		if (this.isEnabled()) {
-			this.onTick(true);
-		}
+		return undefined;
+	}
+
+	@HookMethod
+	public shouldStopWalkToTileMovement(): boolean | undefined {
+		return this.isEnabled() ? false : undefined;
 	}
 
 	////////////////////////////////////////////////
@@ -147,10 +177,15 @@ export default class Tars extends Mod {
 	private reset() {
 		this.base = {};
 		this.inventory = {};
+		this.overBurdened = false;
 		this.objective = undefined;
 		this.interruptObjective = undefined;
 		this.navigationInitialized = false;
 		deleteNavigation();
+	}
+
+	private isEnabled(): boolean {
+		return this.tickTimeoutId !== undefined;
 	}
 
 	private async toggle() {
@@ -165,7 +200,7 @@ export default class Tars extends Mod {
 		this.interruptObjective = undefined;
 
 		if (this.tickTimeoutId === undefined) {
-			await this.tick();
+			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
 
 		} else {
 			this.disable();
@@ -175,7 +210,9 @@ export default class Tars extends Mod {
 
 		log(str);
 
-		localPlayer.messages.type(MessageType.Good)
+		localPlayer.messages
+			.source(this.messageSource)
+			.type(MessageType.Good)
 			.send(`[TARS] ${str}`);
 	}
 
@@ -184,39 +221,29 @@ export default class Tars extends Mod {
 			clearTimeout(this.tickTimeoutId);
 			this.tickTimeoutId = undefined;
 		}
-		
-		Helpers.resetMovementOverlays();
-		localPlayer.walkAlongPath(undefined);
-	}
 
-	private isEnabled() {
-		return this.tickTimeoutId !== undefined;
+		resetMovementOverlays();
+		localPlayer.walkAlongPath(undefined);
 	}
 
 	private async tick() {
 		await this.onTick();
 
+		if (this.tickTimeoutId === undefined) {
+			// it was turned off mid tick
+			return;
+		}
+
 		this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
 	}
 
-	private async onTick(finishedMovement?: boolean) {
-		if (localPlayer.isResting() || localPlayer.isMovingClientside || localPlayer.isGhost() || game.paused) {
+	private async onTick() {
+		if (localPlayer.isResting() || localPlayer.isMovingClientside || localPlayer.hasDelay() || localPlayer.isGhost() || game.paused) {
 			return;
 		}
 
-		/*if (multiplayer.isConnected()) {
-			// assume the delay is off by 300ms
-			if (game.absoluteTime < (localPlayer as any).nextProcessInput - 300) {
-				return;
-			}
-
-		} else*/
-		if (!finishedMovement && localPlayer.hasDelay()) {
-			return;
-		}
-
-		Helpers.resetCachedObjects();
-		Helpers.resetCachedPaths();
+		resetCachedObjects();
+		resetCachedPaths();
 
 		this.analyzeInventory();
 		this.analyzeBase();
@@ -372,7 +399,6 @@ export default class Tars extends Mod {
 
 			} else {
 				objectives.push(new AcquireItemByGroup(ItemTypeGroup.Campfire));
-
 			}
 		}
 
@@ -442,7 +468,7 @@ export default class Tars extends Mod {
 			objectives.push(new AcquireItem(ItemType.StoneHammer));
 		}
 
-		const seeds = Helpers.getSeeds();
+		const seeds = getSeeds();
 		if (seeds.length > 0) {
 			objectives.push(new PlantSeed(seeds[0]));
 		}
@@ -567,7 +593,7 @@ export default class Tars extends Mod {
 
 	private equipInterrupt(equip: EquipType): IObjective | undefined {
 		const item = localPlayer.getEquippedItem(equip);
-		const bestEquipment = Helpers.getBestEquipment(equip);
+		const bestEquipment = getBestEquipment(equip);
 		if (bestEquipment.length > 0) {
 			const itemToEquip = bestEquipment[0];
 			if (itemToEquip === item) {
@@ -653,10 +679,10 @@ export default class Tars extends Mod {
 	private handEquipInterrupt(equipType: EquipType, use: ActionType, preferredDamageType?: DamageType): IObjective | undefined {
 		const equippedItem = localPlayer.getEquippedItem(equipType);
 		if (equippedItem === undefined) {
-			let possibleEquips = Helpers.getPossibleHandEquips(use, preferredDamageType, true);
+			let possibleEquips = getPossibleHandEquips(use, preferredDamageType, true);
 			if (possibleEquips.length === 0) {
 				// fall back to not caring about the damage type
-				possibleEquips = Helpers.getPossibleHandEquips(use, undefined, true);
+				possibleEquips = getPossibleHandEquips(use, undefined, true);
 			}
 
 			if (possibleEquips.length > 0) {
@@ -672,7 +698,7 @@ export default class Tars extends Mod {
 			if ((preferredDamageType !== undefined && description.damageType !== undefined && (description.damageType & preferredDamageType) === 0)) {
 				// the equipped item has the wrong damage type
 				// can we replace it with something better
-				const possibleEquips = Helpers.getPossibleHandEquips(use, preferredDamageType, true);
+				const possibleEquips = getPossibleHandEquips(use, preferredDamageType, true);
 				if (possibleEquips.length > 0) {
 					return new Equip(equippedItem);
 				}
@@ -770,9 +796,9 @@ export default class Tars extends Mod {
 	}
 
 	private gatherFromCorpsesInterrupt(): IObjective | undefined {
-		const target = Helpers.findCorpse("gatherFromCorpsesInterrupt", corpse =>
+		const target = findCorpse("gatherFromCorpsesInterrupt", corpse =>
 			Vector2.squaredDistance(localPlayer, corpse) < 16 &&
-			Helpers.getNearbyCreature(corpse) === undefined &&
+			getNearbyCreature(corpse) === undefined &&
 			corpse.type !== CreatureType.Blood &&
 			corpse.type !== CreatureType.WaterBlood);
 		if (target) {
@@ -819,9 +845,9 @@ export default class Tars extends Mod {
 		}
 
 		if (this.inventory.waterContainer === undefined) {
-			let waterContainers = Helpers.getInventoryItemsWithUse(ActionType.GatherWater);
+			let waterContainers = getInventoryItemsWithUse(ActionType.GatherWater);
 			if (waterContainers.length === 0) {
-				waterContainers = Helpers.getInventoryItemsWithUse(ActionType.DrinkItem).filter(item => item.type !== ItemType.PileOfSnow);
+				waterContainers = getInventoryItemsWithUse(ActionType.DrinkItem).filter(item => item.type !== ItemType.PileOfSnow);
 			}
 
 			if (waterContainers.length > 0) {
@@ -862,7 +888,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.inventory.fireStoker === undefined) {
-			const fireStokers = Helpers.getInventoryItemsWithUse(ActionType.StokeFire);
+			const fireStokers = getInventoryItemsWithUse(ActionType.StokeFire);
 			if (fireStokers.length > 0) {
 				this.inventory.fireStoker = fireStokers[0];
 			}
@@ -901,7 +927,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.inventory.hoe === undefined) {
-			const hoes = Helpers.getInventoryItemsWithUse(ActionType.Till);
+			const hoes = getInventoryItemsWithUse(ActionType.Till);
 			if (hoes.length > 0) {
 				this.inventory.hoe = hoes[0];
 			}
@@ -961,7 +987,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.inventory.shovel === undefined) {
-			const shovels = Helpers.getInventoryItemsWithUse(ActionType.Dig);
+			const shovels = getInventoryItemsWithUse(ActionType.Dig);
 			if (shovels.length > 0) {
 				this.inventory.shovel = shovels[0];
 			}
@@ -1044,7 +1070,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.base.campfire === undefined) {
-			const targets = Helpers.findDoodads("Campfire", doodad => {
+			const targets = findDoodads("Campfire", doodad => {
 				const description = doodad.description();
 				if (description) {
 					if (description.group === DoodadTypeGroup.LitCampfire) {
@@ -1079,7 +1105,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.base.waterStill === undefined) {
-			const targets = Helpers.findDoodads("WaterStill", doodad => {
+			const targets = findDoodads("WaterStill", doodad => {
 				const description = doodad.description();
 				if (description) {
 					if (description.group === DoodadTypeGroup.LitWaterStill) {
@@ -1114,7 +1140,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.base.kiln === undefined) {
-			const targets = Helpers.findDoodads("Kiln", doodad => {
+			const targets = findDoodads("Kiln", doodad => {
 				const description = doodad.description();
 				if (description) {
 					if (description.group === DoodadTypeGroup.LitKiln) {
@@ -1150,7 +1176,7 @@ export default class Tars extends Mod {
 
 		let i = 0;
 		while (true) {
-			const targetChest = Helpers.findDoodad(`Chest${i}`, doodad => {
+			const targetChest = findDoodad(`Chest${i}`, doodad => {
 				const container = doodad as IContainer;
 				if (container.weightCapacity && container.containedItems) {
 					return this.base.chests!.indexOf(doodad) === -1;

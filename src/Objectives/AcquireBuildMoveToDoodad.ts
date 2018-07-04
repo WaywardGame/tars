@@ -3,11 +3,14 @@ import { IDoodad } from "doodad/IDoodad";
 import { DoodadType, DoodadTypeGroup } from "Enums";
 import * as Helpers from "../Helpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
-import { IBase, IInventoryItems, MoveResult } from "../ITars";
+import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import AcquireItemForDoodad from "./AcquireItemForDoodad";
 import BuildItem from "./BuildItem";
 import StartFire from "./StartFire";
+import { moveToFaceTarget, MoveResult } from "../Utilities/Movement";
+import { findDoodad } from "../Utilities/Object";
+import { getInventoryItemForDoodad } from "../Utilities/Item";
 
 export default class AcquireBuildMoveToDoodad extends Objective {
 
@@ -22,7 +25,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const doodadTypes = Helpers.getDoodadTypes(this.doodadTypeOrGroup);
 
-		const doodad = Helpers.findDoodad(this.getHashCode(), (d: IDoodad) => doodadTypes.indexOf(d.type) !== -1);
+		const doodad = findDoodad(this.getHashCode(), (d: IDoodad) => doodadTypes.indexOf(d.type) !== -1);
 
 		let requiresFire = false;
 
@@ -56,15 +59,20 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 			return this.calculateObjectiveDifficulties(base, inventory, objectives);
 		}
 
-		if (doodad === undefined) {
+		if (!doodad) {
+			const inventoryItem = getInventoryItemForDoodad(this.doodadTypeOrGroup);
+			if (inventoryItem !== undefined) {
+				return new BuildItem(inventoryItem);
+			}
+
 			return new AcquireItemForDoodad(this.doodadTypeOrGroup);
 		}
-
+		
 		if (requiresFire) {
 			return new StartFire(doodad);
 		}
 
-		const moveResult = await Helpers.moveToTarget(doodad);
+		const moveResult = await moveToFaceTarget(doodad);
 		if (moveResult === MoveResult.NoPath) {
 			this.log.info("No path to doodad");
 			return ObjectiveStatus.Complete;

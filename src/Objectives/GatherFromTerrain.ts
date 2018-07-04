@@ -1,13 +1,15 @@
-import { ActionType, DamageType, ItemType, TerrainType } from "Enums";
+import { ActionType, DamageType, TerrainType } from "Enums";
 import { IContainer } from "item/IItem";
 import { ITerrainDescription, ITile } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import * as Helpers from "../Helpers";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
-import { IBase, IInventoryItems, ITerrainSearch, MoveResult } from "../ITars";
+import { IBase, IInventoryItems, ITerrainSearch } from "../ITars";
 import Objective from "../Objective";
+import { getBestActionItem } from "../Utilities/Item";
+import { MoveResult, moveToFaceTargetWithRetries } from "../Utilities/Movement";
+import { getNearestTileLocation } from "../Utilities/Tile";
 
 interface ITerrainSearchTarget {
 	search: ITerrainSearch;
@@ -22,11 +24,11 @@ export default class GatherFromTerrain extends Objective {
 	}
 
 	public getHashCode(): string {
-		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]},${ItemType[search.itemType]},${search.chance}`).join("|")}`;
+		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]},${itemManager.getItemTypeGroupName(search.itemType, false)},${search.chance}`).join("|")}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
-		const digTool = Helpers.getBestActionItem(ActionType.Dig);
+		const digTool = getBestActionItem(ActionType.Dig);
 
 		let terrainDescription: ITerrainDescription | undefined;
 
@@ -38,7 +40,7 @@ export default class GatherFromTerrain extends Objective {
 				continue;
 			}
 
-			const tileLocations = await Helpers.getNearestTileLocation(ts.type, localPlayer);
+			const tileLocations = await getNearestTileLocation(ts.type, localPlayer);
 			if (tileLocations.length > 0) {
 				for (let i = 0; i < 5; i++) {
 					const tileLocation = tileLocations[i];
@@ -86,7 +88,7 @@ export default class GatherFromTerrain extends Objective {
 
 		const facingTile = localPlayer.getFacingTile();
 
-		for (let i = 0; i < 4; i++) {
+		for (let i = 0; i < 8; i++) {
 			const target = targets[i];
 			if (target) {
 				const targetTile = game.getTileFromPoint(target.point);
@@ -97,13 +99,14 @@ export default class GatherFromTerrain extends Objective {
 					}
 
 					selectedTarget = target;
+					break;
 				}
 			}
 		}
 
 		if (!selectedTarget) {
 			// todo: fix logic here
-			const moveResult = await Helpers.moveToTargetWithRetries((ignoredTiles: ITile[]) => {
+			const moveResult = await moveToFaceTargetWithRetries((ignoredTiles: ITile[]) => {
 				for (let i = 0; i < targets.length; i++) {
 					const target = targets[i];
 					if (target) {
@@ -136,7 +139,7 @@ export default class GatherFromTerrain extends Objective {
 		terrainDescription = Terrains[selectedTarget!.search.type]!;
 
 		const actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
-		const item = terrainDescription.gather ? Helpers.getBestActionItem(ActionType.Gather, DamageType.Blunt) : digTool;
+		const item = terrainDescription.gather ? getBestActionItem(ActionType.Gather, DamageType.Blunt) : digTool;
 
 		return this.executeActionForItem(actionType, { item: item }, this.search.map(search => search.itemType));
 	}

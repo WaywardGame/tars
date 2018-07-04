@@ -6,7 +6,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "Enums", "utilities/TileHelpers", "../Helpers", "../IObjective", "../ITars", "../Objective", "./AcquireItem", "./UseItem"], function (require, exports, Enums_1, TileHelpers_1, Helpers, IObjective_1, ITars_1, Objective_1, AcquireItem_1, UseItem_1) {
+define(["require", "exports", "Enums", "utilities/TileHelpers", "../IObjective", "../ITars", "../Objective", "./AcquireItem", "./UseItem", "../Utilities/Movement", "../Utilities/Base"], function (require, exports, Enums_1, TileHelpers_1, IObjective_1, ITars_1, Objective_1, AcquireItem_1, UseItem_1, Movement_1, Base_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PlantSeed extends Objective_1.default {
@@ -14,13 +14,16 @@ define(["require", "exports", "Enums", "utilities/TileHelpers", "../Helpers", ".
             super();
             this.seed = seed;
         }
+        getHashCode() {
+            return `PlantSeed:${game.getName(this.seed, Enums_1.SentenceCaseStyle.Title, false)}`;
+        }
         onExecute(base, inventory) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (inventory.hoe === undefined) {
                     this.log.info("Acquire a stone hoe");
                     return new AcquireItem_1.default(Enums_1.ItemType.StoneHoe);
                 }
-                const emptyTilledTile = yield Helpers.findAndMoveToTarget((point, tile) => {
+                const emptyTilledTile = yield Movement_1.findAndMoveToFaceTarget((point, tile) => {
                     const tileContainer = tile;
                     return tile.doodad === undefined &&
                         TileHelpers_1.default.isOpenTile(point, tile) &&
@@ -28,21 +31,21 @@ define(["require", "exports", "Enums", "utilities/TileHelpers", "../Helpers", ".
                         TileHelpers_1.default.isTilled(tile) &&
                         tile.corpses === undefined &&
                         (tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
-                }, false, ITars_1.gardenMaxTilesChecked, Helpers.getBasePosition(base));
-                if (emptyTilledTile === ITars_1.MoveResult.NoTarget) {
-                    const nearbyDirtTile = yield Helpers.findAndMoveToTarget((point, tile) => TileHelpers_1.default.getType(tile) === Enums_1.TerrainType.Dirt && Helpers.isOpenArea(base, point, tile), false, ITars_1.gardenMaxTilesChecked, Helpers.getBasePosition(base));
-                    if (nearbyDirtTile === ITars_1.MoveResult.NoTarget) {
+                }, ITars_1.gardenMaxTilesChecked, Base_1.getBasePosition(base));
+                if (emptyTilledTile === Movement_1.MoveResult.NoTarget) {
+                    const nearbyDirtTile = yield Movement_1.findAndMoveToFaceTarget((point, tile) => TileHelpers_1.default.getType(tile) === Enums_1.TerrainType.Dirt && Base_1.isOpenArea(point, tile), ITars_1.gardenMaxTilesChecked, Base_1.getBasePosition(base));
+                    if (nearbyDirtTile === Movement_1.MoveResult.NoTarget) {
                         this.log.info("No nearby dirt tile");
                         return IObjective_1.ObjectiveStatus.Complete;
                     }
-                    if (nearbyDirtTile !== ITars_1.MoveResult.Complete) {
+                    if (nearbyDirtTile !== Movement_1.MoveResult.Complete) {
                         return;
                     }
                     this.log.info("Till a tile");
                     return new UseItem_1.default(inventory.hoe, Enums_1.ActionType.Till);
                 }
-                else if (emptyTilledTile === ITars_1.MoveResult.Complete) {
-                    this.log.info(`Plant ${Enums_1.ItemType[this.seed.type]}`);
+                else if (emptyTilledTile === Movement_1.MoveResult.Complete) {
+                    this.log.info(`Plant ${game.getName(this.seed, Enums_1.SentenceCaseStyle.Title, false)}`);
                     return new UseItem_1.default(this.seed, Enums_1.ActionType.Plant);
                 }
             });
@@ -50,4 +53,4 @@ define(["require", "exports", "Enums", "utilities/TileHelpers", "../Helpers", ".
     }
     exports.default = PlantSeed;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUGxhbnRTZWVkLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL09iamVjdGl2ZXMvUGxhbnRTZWVkLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O0lBWUEsZUFBK0IsU0FBUSxtQkFBUztRQUUvQyxZQUFvQixJQUFXO1lBQzlCLEtBQUssRUFBRSxDQUFDO1lBRFcsU0FBSSxHQUFKLElBQUksQ0FBTztRQUUvQixDQUFDO1FBRVksU0FBUyxDQUFDLElBQVcsRUFBRSxTQUEwQjs7Z0JBQzdELElBQUksU0FBUyxDQUFDLEdBQUcsS0FBSyxTQUFTLEVBQUU7b0JBQ2hDLElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLHFCQUFxQixDQUFDLENBQUM7b0JBQ3JDLE9BQU8sSUFBSSxxQkFBVyxDQUFDLGdCQUFRLENBQUMsUUFBUSxDQUFDLENBQUM7aUJBQzFDO2dCQUVELE1BQU0sZUFBZSxHQUFHLE1BQU0sT0FBTyxDQUFDLG1CQUFtQixDQUFDLENBQUMsS0FBZSxFQUFFLElBQVcsRUFBRSxFQUFFO29CQUMxRixNQUFNLGFBQWEsR0FBRyxJQUFzQixDQUFDO29CQUM3QyxPQUFPLElBQUksQ0FBQyxNQUFNLEtBQUssU0FBUzt3QkFDL0IscUJBQVcsQ0FBQyxVQUFVLENBQUMsS0FBSyxFQUFFLElBQUksQ0FBQzt3QkFDbkMscUJBQVcsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLEtBQUssbUJBQVcsQ0FBQyxJQUFJO3dCQUM5QyxxQkFBVyxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUM7d0JBQzFCLElBQUksQ0FBQyxPQUFPLEtBQUssU0FBUzt3QkFDMUIsQ0FBQyxhQUFhLENBQUMsY0FBYyxLQUFLLFNBQVMsSUFBSSxhQUFhLENBQUMsY0FBYyxDQUFDLE1BQU0sS0FBSyxDQUFDLENBQUMsQ0FBQztnQkFDNUYsQ0FBQyxFQUFFLEtBQUssRUFBRSw2QkFBcUIsRUFBRSxPQUFPLENBQUMsZUFBZSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUM7Z0JBQ2hFLElBQUksZUFBZSxLQUFLLGtCQUFVLENBQUMsUUFBUSxFQUFFO29CQUM1QyxNQUFNLGNBQWMsR0FBRyxNQUFNLE9BQU8sQ0FBQyxtQkFBbUIsQ0FBQyxDQUFDLEtBQWUsRUFBRSxJQUFXLEVBQUUsRUFBRSxDQUN6RixxQkFBVyxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsS0FBSyxtQkFBVyxDQUFDLElBQUksSUFBSSxPQUFPLENBQUMsVUFBVSxDQUFDLElBQUksRUFBRSxLQUFLLEVBQUUsSUFBSSxDQUFDLEVBQUUsS0FBSyxFQUFFLDZCQUFxQixFQUFFLE9BQU8sQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQztvQkFDdkosSUFBSSxjQUFjLEtBQUssa0JBQVUsQ0FBQyxRQUFRLEVBQUU7d0JBQzNDLElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLHFCQUFxQixDQUFDLENBQUM7d0JBQ3JDLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7cUJBQ2hDO29CQUVELElBQUksY0FBYyxLQUFLLGtCQUFVLENBQUMsUUFBUSxFQUFFO3dCQUMzQyxPQUFPO3FCQUNQO29CQUVELElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLGFBQWEsQ0FBQyxDQUFDO29CQUM3QixPQUFPLElBQUksaUJBQU8sQ0FBQyxTQUFTLENBQUMsR0FBRyxFQUFFLGtCQUFVLENBQUMsSUFBSSxDQUFDLENBQUM7aUJBRW5EO3FCQUFNLElBQUksZUFBZSxLQUFLLGtCQUFVLENBQUMsUUFBUSxFQUFFO29CQUNuRCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxTQUFTLGdCQUFRLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUM7b0JBQ25ELE9BQU8sSUFBSSxpQkFBTyxDQUFDLElBQUksQ0FBQyxJQUFJLEVBQUUsa0JBQVUsQ0FBQyxLQUFLLENBQUMsQ0FBQztpQkFDaEQ7WUFDRixDQUFDO1NBQUE7S0FFRDtJQTFDRCw0QkEwQ0MifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUGxhbnRTZWVkLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL09iamVjdGl2ZXMvUGxhbnRTZWVkLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O0lBYUEsZUFBK0IsU0FBUSxtQkFBUztRQUUvQyxZQUFvQixJQUFXO1lBQzlCLEtBQUssRUFBRSxDQUFDO1lBRFcsU0FBSSxHQUFKLElBQUksQ0FBTztRQUUvQixDQUFDO1FBRU0sV0FBVztZQUNqQixPQUFPLGFBQWEsSUFBSSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsSUFBSSxFQUFFLHlCQUFpQixDQUFDLEtBQUssRUFBRSxLQUFLLENBQUMsRUFBRSxDQUFDO1FBQy9FLENBQUM7UUFFWSxTQUFTLENBQUMsSUFBVyxFQUFFLFNBQTBCOztnQkFDN0QsSUFBSSxTQUFTLENBQUMsR0FBRyxLQUFLLFNBQVMsRUFBRTtvQkFDaEMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMscUJBQXFCLENBQUMsQ0FBQztvQkFDckMsT0FBTyxJQUFJLHFCQUFXLENBQUMsZ0JBQVEsQ0FBQyxRQUFRLENBQUMsQ0FBQztpQkFDMUM7Z0JBRUQsTUFBTSxlQUFlLEdBQUcsTUFBTSxrQ0FBdUIsQ0FBQyxDQUFDLEtBQWUsRUFBRSxJQUFXLEVBQUUsRUFBRTtvQkFDdEYsTUFBTSxhQUFhLEdBQUcsSUFBc0IsQ0FBQztvQkFDN0MsT0FBTyxJQUFJLENBQUMsTUFBTSxLQUFLLFNBQVM7d0JBQy9CLHFCQUFXLENBQUMsVUFBVSxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUM7d0JBQ25DLHFCQUFXLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxLQUFLLG1CQUFXLENBQUMsSUFBSTt3QkFDOUMscUJBQVcsQ0FBQyxRQUFRLENBQUMsSUFBSSxDQUFDO3dCQUMxQixJQUFJLENBQUMsT0FBTyxLQUFLLFNBQVM7d0JBQzFCLENBQUMsYUFBYSxDQUFDLGNBQWMsS0FBSyxTQUFTLElBQUksYUFBYSxDQUFDLGNBQWMsQ0FBQyxNQUFNLEtBQUssQ0FBQyxDQUFDLENBQUM7Z0JBQzVGLENBQUMsRUFBRSw2QkFBcUIsRUFBRSxzQkFBZSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUM7Z0JBQ2pELElBQUksZUFBZSxLQUFLLHFCQUFVLENBQUMsUUFBUSxFQUFFO29CQUM1QyxNQUFNLGNBQWMsR0FBRyxNQUFNLGtDQUF1QixDQUFDLENBQUMsS0FBZSxFQUFFLElBQVcsRUFBRSxFQUFFLENBQ3JGLHFCQUFXLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxLQUFLLG1CQUFXLENBQUMsSUFBSSxJQUFJLGlCQUFVLENBQUMsS0FBSyxFQUFFLElBQUksQ0FBQyxFQUFFLDZCQUFxQixFQUFFLHNCQUFlLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQztvQkFDMUgsSUFBSSxjQUFjLEtBQUsscUJBQVUsQ0FBQyxRQUFRLEVBQUU7d0JBQzNDLElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLHFCQUFxQixDQUFDLENBQUM7d0JBQ3JDLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7cUJBQ2hDO29CQUVELElBQUksY0FBYyxLQUFLLHFCQUFVLENBQUMsUUFBUSxFQUFFO3dCQUMzQyxPQUFPO3FCQUNQO29CQUVELElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLGFBQWEsQ0FBQyxDQUFDO29CQUM3QixPQUFPLElBQUksaUJBQU8sQ0FBQyxTQUFTLENBQUMsR0FBRyxFQUFFLGtCQUFVLENBQUMsSUFBSSxDQUFDLENBQUM7aUJBRW5EO3FCQUFNLElBQUksZUFBZSxLQUFLLHFCQUFVLENBQUMsUUFBUSxFQUFFO29CQUNuRCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxTQUFTLElBQUksQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLElBQUksRUFBRSx5QkFBaUIsQ0FBQyxLQUFLLEVBQUUsS0FBSyxDQUFDLEVBQUUsQ0FBQyxDQUFDO29CQUNsRixPQUFPLElBQUksaUJBQU8sQ0FBQyxJQUFJLENBQUMsSUFBSSxFQUFFLGtCQUFVLENBQUMsS0FBSyxDQUFDLENBQUM7aUJBQ2hEO1lBQ0YsQ0FBQztTQUFBO0tBRUQ7SUE5Q0QsNEJBOENDIn0=

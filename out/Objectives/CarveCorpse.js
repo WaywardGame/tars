@@ -6,7 +6,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "Enums", "../Helpers", "../IObjective", "../ITars", "../Objective", "./ExecuteAction"], function (require, exports, Enums_1, Helpers, IObjective_1, ITars_1, Objective_1, ExecuteAction_1) {
+define(["require", "exports", "Enums", "../IObjective", "../Objective", "./ExecuteAction", "../Utilities/Item", "../Utilities/Movement"], function (require, exports, Enums_1, IObjective_1, Objective_1, ExecuteAction_1, Item_1, Movement_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CarveCorpse extends Objective_1.default {
@@ -14,9 +14,12 @@ define(["require", "exports", "Enums", "../Helpers", "../IObjective", "../ITars"
             super();
             this.corpse = corpse;
         }
+        getHashCode() {
+            return `CarveCorpse:${game.getName(this.corpse, Enums_1.SentenceCaseStyle.Title, false)}`;
+        }
         onExecute() {
             return __awaiter(this, void 0, void 0, function* () {
-                const carveTool = Helpers.getInventoryItemsWithUse(Enums_1.ActionType.Carve);
+                const carveTool = Item_1.getInventoryItemsWithUse(Enums_1.ActionType.Carve);
                 if (carveTool.length === 0) {
                     return IObjective_1.ObjectiveStatus.Complete;
                 }
@@ -24,8 +27,8 @@ define(["require", "exports", "Enums", "../Helpers", "../IObjective", "../ITars"
                 if (tile.events !== undefined) {
                     return IObjective_1.ObjectiveStatus.Complete;
                 }
-                const moveResult = yield Helpers.moveToTarget(this.corpse);
-                if (moveResult !== ITars_1.MoveResult.Complete) {
+                const moveResult = yield Movement_1.moveToFaceTarget(this.corpse);
+                if (moveResult !== Movement_1.MoveResult.Complete) {
                     return;
                 }
                 this.log.info("Facing matching corpse");
@@ -40,4 +43,4 @@ define(["require", "exports", "Enums", "../Helpers", "../IObjective", "../ITars"
     }
     exports.default = CarveCorpse;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ2FydmVDb3Jwc2UuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvT2JqZWN0aXZlcy9DYXJ2ZUNvcnBzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OztJQVFBLGlCQUFpQyxTQUFRLG1CQUFTO1FBRWpELFlBQW9CLE1BQWU7WUFDbEMsS0FBSyxFQUFFLENBQUM7WUFEVyxXQUFNLEdBQU4sTUFBTSxDQUFTO1FBRW5DLENBQUM7UUFFWSxTQUFTOztnQkFDckIsTUFBTSxTQUFTLEdBQUcsT0FBTyxDQUFDLHdCQUF3QixDQUFDLGtCQUFVLENBQUMsS0FBSyxDQUFDLENBQUM7Z0JBQ3JFLElBQUksU0FBUyxDQUFDLE1BQU0sS0FBSyxDQUFDLEVBQUU7b0JBQzNCLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7aUJBQ2hDO2dCQUVELE1BQU0sSUFBSSxHQUFHLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUM7Z0JBQ2hELElBQUksSUFBSSxDQUFDLE1BQU0sS0FBSyxTQUFTLEVBQUU7b0JBQzlCLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7aUJBQ2hDO2dCQUVELE1BQU0sVUFBVSxHQUFHLE1BQU0sT0FBTyxDQUFDLFlBQVksQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUM7Z0JBQzNELElBQUksVUFBVSxLQUFLLGtCQUFVLENBQUMsUUFBUSxFQUFFO29CQUN2QyxPQUFPO2lCQUNQO2dCQUVELElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLHdCQUF3QixDQUFDLENBQUM7Z0JBRXhDLElBQUksQ0FBQyxTQUFTLElBQUksQ0FBQyxXQUFXLENBQUMsb0JBQW9CLEVBQUUsRUFBRTtvQkFDdEQsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsYUFBYSxDQUFDLENBQUM7b0JBQzdCLE9BQU87aUJBQ1A7Z0JBRUQsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsZ0JBQWdCLENBQUMsQ0FBQztnQkFFaEMsT0FBTyxJQUFJLHVCQUFhLENBQUMsa0JBQVUsQ0FBQyxLQUFLLEVBQUUsU0FBUyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7WUFDMUQsQ0FBQztTQUFBO0tBRUQ7SUFsQ0QsOEJBa0NDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ2FydmVDb3Jwc2UuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvT2JqZWN0aXZlcy9DYXJ2ZUNvcnBzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OztJQVFBLGlCQUFpQyxTQUFRLG1CQUFTO1FBRWpELFlBQW9CLE1BQWU7WUFDbEMsS0FBSyxFQUFFLENBQUM7WUFEVyxXQUFNLEdBQU4sTUFBTSxDQUFTO1FBRW5DLENBQUM7UUFFTSxXQUFXO1lBQ2pCLE9BQU8sZUFBZSxJQUFJLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxNQUFNLEVBQUUseUJBQWlCLENBQUMsS0FBSyxFQUFFLEtBQUssQ0FBQyxFQUFFLENBQUM7UUFDbkYsQ0FBQztRQUVZLFNBQVM7O2dCQUNyQixNQUFNLFNBQVMsR0FBRywrQkFBd0IsQ0FBQyxrQkFBVSxDQUFDLEtBQUssQ0FBQyxDQUFDO2dCQUM3RCxJQUFJLFNBQVMsQ0FBQyxNQUFNLEtBQUssQ0FBQyxFQUFFO29CQUMzQixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2lCQUNoQztnQkFFRCxNQUFNLElBQUksR0FBRyxJQUFJLENBQUMsZ0JBQWdCLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDO2dCQUNoRCxJQUFJLElBQUksQ0FBQyxNQUFNLEtBQUssU0FBUyxFQUFFO29CQUM5QixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2lCQUNoQztnQkFFRCxNQUFNLFVBQVUsR0FBRyxNQUFNLDJCQUFnQixDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQztnQkFDdkQsSUFBSSxVQUFVLEtBQUsscUJBQVUsQ0FBQyxRQUFRLEVBQUU7b0JBQ3ZDLE9BQU87aUJBQ1A7Z0JBRUQsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsd0JBQXdCLENBQUMsQ0FBQztnQkFFeEMsSUFBSSxDQUFDLFNBQVMsSUFBSSxDQUFDLFdBQVcsQ0FBQyxvQkFBb0IsRUFBRSxFQUFFO29CQUN0RCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxhQUFhLENBQUMsQ0FBQztvQkFDN0IsT0FBTztpQkFDUDtnQkFFRCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxDQUFDO2dCQUVoQyxPQUFPLElBQUksdUJBQWEsQ0FBQyxrQkFBVSxDQUFDLEtBQUssRUFBRSxTQUFTLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQztZQUMxRCxDQUFDO1NBQUE7S0FFRDtJQXRDRCw4QkFzQ0MifQ==

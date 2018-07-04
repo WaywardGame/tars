@@ -8,6 +8,7 @@
 	],
 	"multiplayerClientside": true,
 	"file": "out/Tars",
+	"languages": ["lang/english"],
 	"unloadable": true,
 	"publishedFileId": "1218286592"
 }

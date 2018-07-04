@@ -1,12 +1,15 @@
 import { ICorpse } from "creature/corpse/ICorpse";
 import { ICreature } from "creature/ICreature";
-import { ItemType } from "Enums";
+import { ActionType } from "Enums";
 import Vector2 from "utilities/math/Vector2";
-import * as Helpers from "../Helpers";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
-import { IBase, ICreatureSearch, IInventoryItems, MoveResult } from "../ITars";
+import { IBase, ICreatureSearch, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import CarveCorpse from "./CarveCorpse";
+import { findAndMoveToFaceCorpse, findAndMoveToCreature, MoveResult } from "../Utilities/Movement";
+import { findCreature, findCorpse } from "../Utilities/Object";
+import { getInventoryItemsWithUse } from "../Utilities/Item";
+import AcquireItemForAction from "./AcquireItemForAction";
 
 export default class GatherFromCreature extends Objective {
 
@@ -15,10 +18,12 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public getHashCode(): string {
-		return `GatherFromCreature:${this.search.map(search => `${search.type},${ItemType[search.itemType]}`).join("|")}`;
+		return `GatherFromCreature:${this.search.map(search => `${search.type},${itemManager.getItemTypeGroupName(search.itemType, false)}`).join("|")}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
+		const canCarveCorpse = getInventoryItemsWithUse(ActionType.Carve).length > 0;
+
 		const isTargetCorpse = (corpse: ICorpse) => {
 			for (const search of this.search) {
 				if (search.type === corpse.type) {
@@ -42,18 +47,32 @@ export default class GatherFromCreature extends Objective {
 		};
 
 		if (calculateDifficulty) {
-			let target = Helpers.findCorpse(this.getHashCode(), isTargetCorpse);
-			if (target === undefined) {
-				target = Helpers.findCreature(this.getHashCode(), isTargetCreature);
+			const objectives: IObjective[] = [];
+
+			if (!canCarveCorpse) {
+				objectives.push(new AcquireItemForAction(ActionType.Carve));
 			}
 
-			return target === undefined ? missionImpossible : Math.round(Vector2.squaredDistance(localPlayer, target));
+			let target = findCorpse(this.getHashCode(), isTargetCorpse);
+			if (target === undefined) {
+				target = findCreature(this.getHashCode(), isTargetCreature);
+			}
+
+			if (target === undefined) {
+				return missionImpossible;
+			}
+
+			return Math.round(Vector2.squaredDistance(localPlayer, target)) + await this.calculateObjectiveDifficulties(base, inventory, objectives);
 		}
 
-		let moveResult = await Helpers.findAndMoveToCorpse(this.getHashCode(), isTargetCorpse);
+		if (!canCarveCorpse) {
+			return new AcquireItemForAction(ActionType.Carve);
+		}
+
+		let moveResult = await findAndMoveToFaceCorpse(this.getHashCode(), isTargetCorpse);
 		if (moveResult === MoveResult.NoTarget || moveResult === MoveResult.NoPath) {
 			this.log.info("Moving to creature");
-			moveResult = await Helpers.findAndMoveToCreature(this.getHashCode(), isTargetCreature, true);
+			moveResult = await findAndMoveToCreature(this.getHashCode(), isTargetCreature);
 
 			if (moveResult === MoveResult.NoPath) {
 				this.log.info("No path to creature");
