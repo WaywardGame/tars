@@ -1,6 +1,9 @@
 {
 	"extends": "English",
 	"dictionaries": {
+		"bindable": {
+			"modTARSToggle": "Toggle TARS"
+		},
 		"source": {
 			"modTARSTARS": "TARS"
 		}

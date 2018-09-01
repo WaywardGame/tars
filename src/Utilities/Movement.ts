@@ -4,7 +4,7 @@ import { getDirectionFromMovement } from "player/IPlayer";
 import { ActionType } from "Enums";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import TileHelpers from "utilities/TileHelpers";
-import { ITile } from "tile/ITerrain";
+import { ITile, IOverlayInfo } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
 import { defaultMaxTilesChecked } from "../ITars";
 import { ICreature } from "creature/ICreature";
@@ -108,11 +108,17 @@ async function _moveToTargetWithRetries(getTarget: (ignoredTiles: ITile[]) => IV
 }
 
 let cachedPaths: { [index: string]: IVector2[] | undefined };
-const movementOverlays: ITile[] = [];
+
+interface ITrackedOverlay {
+	tile: ITile;
+	overlay: IOverlayInfo;
+}
+
+const movementOverlays: ITrackedOverlay[] = [];
 
 export function resetMovementOverlays() {
-	for (const tile of movementOverlays) {
-		delete tile.overlay;
+	for (const trackedOverlay of movementOverlays) {
+		TileHelpers.Overlay.remove(trackedOverlay.tile, trackedOverlay.overlay);
 	}
 
 	movementOverlays.length = 0;
@@ -130,9 +136,13 @@ export function updateOverlay(path: IVector2[]) {
 
 		const tile = game.getTile(pos.x, pos.y, localPlayer.z);
 
-		tile.overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos);
-		if (tile.overlay) {
-			movementOverlays.push(tile);
+		const overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos);
+		if (overlay) {
+			TileHelpers.Overlay.add(tile, overlay);
+			movementOverlays.push({
+				tile: tile,
+				overlay: overlay
+			});
 		}
 	}
 }
@@ -204,12 +214,12 @@ export async function moveAwayFromTarget(target: IVector3): Promise<MoveResult> 
 			bypass: true
 		});
 	}
-	
+
 	await executeAction(ActionType.Move, {
 		direction: direction,
 		bypass: true
 	});
-	
+
 	return MoveResult.Complete;
 }
 

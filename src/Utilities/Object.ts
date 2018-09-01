@@ -3,6 +3,7 @@ import Vector2 from "utilities/math/Vector2";
 import { IDoodad } from "doodad/IDoodad";
 import { ICreature } from "creature/ICreature";
 import { ICorpse } from "creature/corpse/ICorpse";
+import { CreatureType } from "Enums";
 
 const creatureRadius = 3;
 
@@ -42,8 +43,18 @@ export function findCreature(id: string, isTarget: (creature: ICreature) => bool
 	return findObject(`Creature:${id}`, game.creatures as ICreature[], isTarget);
 }
 
-export function findCorpse(id: string, isTarget: (corpse: ICorpse) => boolean): ICorpse | undefined {
-	return findObject(`Corpse:${id}`, game.corpses as ICorpse[], isTarget);
+export function findCarvableCorpse(id: string, isTarget: (corpse: ICorpse) => boolean): ICorpse | undefined {
+	return findObject(`Corpse:${id}`, game.corpses as ICorpse[], (corpse) => {
+		if (isTarget(corpse) && corpse.type !== CreatureType.Blood && corpse.type !== CreatureType.WaterBlood) {
+			const tile = game.getTileFromPoint(corpse);
+			return tile.creature === undefined &&
+				tile.npc === undefined &&
+				!game.isPlayerAtPosition(corpse.x, corpse.y, corpse.z) &&
+				getNearbyCreature(corpse) === undefined;
+		}
+
+		return false;
+	});
 }
 
 export function getNearbyCreature(point: IVector3): ICreature | undefined {

@@ -47,9 +47,11 @@ export default class RepairItem extends Objective {
 				}
 			}
 
+			this.log.info("Requirements not met?");
+			
 			return ObjectiveStatus.Complete;
 		}
-
+		
 		return new ExecuteAction(ActionType.Repair, {
 			item: inventory.hammer,
 			repairee: this.item

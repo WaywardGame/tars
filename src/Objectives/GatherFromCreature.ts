@@ -7,7 +7,7 @@ import { IBase, ICreatureSearch, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 import CarveCorpse from "./CarveCorpse";
 import { findAndMoveToFaceCorpse, findAndMoveToCreature, MoveResult } from "../Utilities/Movement";
-import { findCreature, findCorpse } from "../Utilities/Object";
+import { findCreature, findCarvableCorpse } from "../Utilities/Object";
 import { getInventoryItemsWithUse } from "../Utilities/Item";
 import AcquireItemForAction from "./AcquireItemForAction";
 
@@ -53,7 +53,7 @@ export default class GatherFromCreature extends Objective {
 				objectives.push(new AcquireItemForAction(ActionType.Carve));
 			}
 
-			let target = findCorpse(this.getHashCode(), isTargetCorpse);
+			let target = findCarvableCorpse(this.getHashCode(), isTargetCorpse);
 			if (target === undefined) {
 				target = findCreature(this.getHashCode(), isTargetCreature);
 			}

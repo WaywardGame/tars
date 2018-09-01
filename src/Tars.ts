@@ -2,11 +2,12 @@ import { IActionArgument, IActionResult } from "action/IAction";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
 import { IStat, IStatMax, Stat } from "entity/IStats";
-import { ActionType, Bindable, CreatureType, DamageType, DoodadType, DoodadTypeGroup, EquipType, Direction, ItemType, ItemTypeGroup } from "Enums";
+import { ActionType, Bindable, DamageType, Direction, DoodadType, DoodadTypeGroup, EquipType, ItemType, ItemTypeGroup, PlayerState } from "Enums";
 import { IContainer, IItem } from "item/IItem";
 import { MessageType } from "language/IMessages";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
+import Register from "mod/ModRegistry";
 import { BindCatcherApi } from "newui/BindingManager";
 import { IPlayer } from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
@@ -38,11 +39,11 @@ import RecoverThirst from "./Objectives/RecoverThirst";
 import ReduceWeight from "./Objectives/ReduceWeight";
 import RepairItem from "./Objectives/RepairItem";
 import ReturnToBase from "./Objectives/ReturnToBase";
-import { log, setLogger } from "./Utilities/Logger";
-import { resetCachedObjects, findCorpse, getNearbyCreature, findDoodads, findDoodad } from "./Utilities/Object";
-import { resetCachedPaths, resetMovementOverlays } from "./Utilities/Movement";
 import * as Action from "./Utilities/Action";
-import { getPossibleHandEquips, getInventoryItemsWithUse, getBestEquipment, getSeeds } from "./Utilities/Item";
+import { getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getSeeds } from "./Utilities/Item";
+import { log, setLogger } from "./Utilities/Logger";
+import { resetCachedPaths, resetMovementOverlays } from "./Utilities/Movement";
+import { findCarvableCorpse, findDoodad, findDoodads, resetCachedObjects } from "./Utilities/Object";
 
 const tickSpeed = 333;
 
@@ -50,13 +51,15 @@ const baseDoodadDistance = 150;
 
 export default class Tars extends Mod {
 
-	private keyBind: number;
-	private messageSource: number;
+	@Register.bindable("Toggle", { key: "KeyT" })
+	public readonly keyBind: number;
+	@Register.messageSource("TARS")
+	public readonly messageSource: number;
 
 	private base: IBase;
 	private inventory: IInventoryItems;
 
-	private overBurdened: boolean = false;
+	private overBurdened = false;
 
 	private objective: IObjective | undefined;
 
@@ -69,13 +72,6 @@ export default class Tars extends Mod {
 	private navigationInitialized: boolean;
 
 	public onInitialize(saveDataGlobal: any): any {
-		this.keyBind = this.addBindable(this.getName(), { key: "KeyT" });
-		this.messageSource = this.addMessageSource(this.getName());
-
-		this.addCommand("tars", () => {
-			this.toggle();
-		});
-
 		Helpers.setPath(this.getPath());
 
 		setLogger(this.getLog());
@@ -90,13 +86,13 @@ export default class Tars extends Mod {
 	////////////////////////////////////////////////
 
 	@HookMethod
-	public onGameStart(): void {
+	public onGameStart(isLoadingSave: boolean, playedCount: number): void {
 		this.reset();
 		this.navigation = getNavigation();
 	}
 
 	@HookMethod
-	public onGameEnd(): void {
+	public onGameEnd(state?: PlayerState): void {
 		this.disable();
 		this.reset();
 	}
@@ -174,6 +170,11 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
+	@Register.command("tars")
+	protected command(player: IPlayer, args: string) {
+		this.toggle();
+	}
+
 	private reset() {
 		this.base = {};
 		this.inventory = {};
@@ -222,8 +223,10 @@ export default class Tars extends Mod {
 			this.tickTimeoutId = undefined;
 		}
 
-		resetMovementOverlays();
-		localPlayer.walkAlongPath(undefined);
+		if (localPlayer) {
+			resetMovementOverlays();
+			localPlayer.walkAlongPath(undefined);
+		}
 	}
 
 	private async tick() {
@@ -796,13 +799,9 @@ export default class Tars extends Mod {
 	}
 
 	private gatherFromCorpsesInterrupt(): IObjective | undefined {
-		const target = findCorpse("gatherFromCorpsesInterrupt", corpse =>
-			Vector2.squaredDistance(localPlayer, corpse) < 16 &&
-			getNearbyCreature(corpse) === undefined &&
-			corpse.type !== CreatureType.Blood &&
-			corpse.type !== CreatureType.WaterBlood);
+		const target = findCarvableCorpse("gatherFromCorpsesInterrupt", corpse => Vector2.squaredDistance(localPlayer, corpse) < 16);
 		if (target) {
-			return new CarveCorpse(game.getTileFromPoint(target).corpses![0]);
+			return new CarveCorpse(target);
 		}
 	}
 
