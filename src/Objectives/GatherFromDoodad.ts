@@ -1,23 +1,24 @@
+import { ActionType } from "action/IAction";
 import { IDoodad } from "doodad/IDoodad";
-import { ActionType, DamageType, DoodadType, GrowingStage } from "Enums";
+import { DamageType, DoodadType, GrowingStage } from "Enums";
 import Vector2 from "utilities/math/Vector2";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { IBase, IDoodadSearch, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
-import { moveToFaceTarget, MoveResult } from "../Utilities/Movement";
 import { getBestActionItem } from "../Utilities/Item";
+import { MoveResult, moveToFaceTarget } from "../Utilities/Movement";
 import { findDoodad } from "../Utilities/Object";
 
 export default class GatherFromDoodad extends Objective {
 
 	private target: IDoodad | undefined;
 
-	constructor(private search: IDoodadSearch[]) {
+	constructor(private readonly search: IDoodadSearch[]) {
 		super();
 	}
 
 	public getHashCode(): string {
-		return `GatherFromDoodad:${this.search.map(search => `${DoodadType[search.type]},${GrowingStage[search.growingStage]},${itemManager.getItemTypeGroupName(search.itemType, false)}`).join("|")}`;
+		return `GatherFromDoodad:${this.search.map(search => `${DoodadType[search.type]},${GrowingStage[search.growingStage]},${itemManager.getItemTypeGroupName(search.itemType, false).getString()}`).join("|")}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
@@ -55,7 +56,7 @@ export default class GatherFromDoodad extends Objective {
 
 		const targetSearch = this.search.find(search => search.type === this.target!.type && search.growingStage === this.target!.getGrowingStage());
 
-		return this.executeActionForItem(targetSearch ? targetSearch.action : ActionType.Gather, { item: getBestActionItem(ActionType.Gather, DamageType.Slashing) }, this.search.map(search => search.itemType));
+		return this.executeActionForItem(targetSearch ? targetSearch.action : ActionType.Gather, ((action: any) => action.execute(localPlayer, getBestActionItem(ActionType.Gather, DamageType.Slashing))) as any, this.search.map(search => search.itemType));
 	}
 
 	protected getBaseDifficulty(base: IBase, inventory: IInventoryItems): number {

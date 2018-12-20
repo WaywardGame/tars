@@ -4,11 +4,15 @@
 	"version": "1.0",
 	"author": "Spacetech",
 	"compatibleMinorVersions": [
-		6
+		7
 	],
 	"multiplayerClientside": true,
 	"file": "out/Tars",
 	"languages": ["lang/english"],
 	"unloadable": true,
+	"tags": [
+		"Cheat",
+		"Character"
+	],
 	"publishedFileId": "1218286592"
 }

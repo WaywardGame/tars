@@ -1,18 +1,19 @@
-import { ActionType, WeightStatus } from "Enums";
+import { ActionType } from "action/IAction";
+import { WeightStatus } from "Enums";
 import { IContainer } from "item/IItem";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { getUnusedItems } from "../Utilities/Item";
 import ExecuteAction from "./ExecuteAction";
 import OrganizeInventory from "./OrganizeInventory";
-import { getUnusedItems } from "../Utilities/Item";
 
 export default class ReduceWeight extends Objective {
-	
+
 	public getHashCode(): string {
 		return "ReduceWeight";
 	}
-	
+
 	public shouldSaveChildObjectives(): boolean {
 		return false;
 	}
@@ -25,25 +26,22 @@ export default class ReduceWeight extends Objective {
 			if (chest) {
 				this.log.info("Still infront of chest");
 
-				const container = chest as IContainer;
-				const containerWeight = itemManager.computeContainerWeight(container);
+				const targetContainer = chest as IContainer;
+				const containerWeight = itemManager.computeContainerWeight(targetContainer);
 
 				// move extra items into the chest
 				let unusedExtraItems = getUnusedItems(inventory);
 
 				unusedExtraItems = unusedExtraItems
-					.filter(item => (containerWeight + item.weight) <= container.weightCapacity!)
+					.filter(item => (containerWeight + item.weight) <= targetContainer.weightCapacity!)
 					.filter(item => unusedExtraItems.filter(i => i.type === item.type).length >= 3);
 
 				if (unusedExtraItems.length > 0) {
 					const item = unusedExtraItems[0];
 
-					this.log.info(`Moving extra item ${game.getName(item)} into chest`);
+					this.log.info(`Moving extra item ${item.getName().getString()} into chest`);
 
-					return new ExecuteAction(ActionType.MoveItem, {
-						item: item,
-						targetContainer: container
-					}, false);
+					return new ExecuteAction(ActionType.MoveItem, action => action.execute(localPlayer, item, undefined, targetContainer), false);
 				}
 			}
 

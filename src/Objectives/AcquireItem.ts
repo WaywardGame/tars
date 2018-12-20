@@ -1,13 +1,14 @@
+import { ActionType } from "action/IAction";
 import Corpses from "creature/corpse/Corpses";
 import Doodads from "doodad/Doodads";
-import { ActionType, CreatureType, DoodadType, ItemType, ItemTypeGroup, TerrainType } from "Enums";
-import { IItemDescription } from "item/IItem";
-import { isItemTypeGroup, itemDescriptions as Items } from "item/Items";
+import { CreatureType, DoodadType, ItemType, ItemTypeGroup, TerrainType } from "Enums";
+import { itemDescriptions } from "item/Items";
 import TerrainResources from "tile/TerrainResources";
 import Enums from "utilities/enum/Enums";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { IBase, ICreatureSearch, IDoodadSearch, IInventoryItems, ITerrainSearch } from "../ITars";
 import Objective from "../Objective";
+import { addTargetRecipe, getItemInInventory, processRecipe, resetTargetRecipes } from "../Utilities/Item";
 import AcquireBuildMoveToDoodad from "./AcquireBuildMoveToDoodad";
 import AcquireBuildMoveToFire from "./AcquireBuildMoveToFire";
 import AcquireItemByGroup from "./AcquireItemByGroup";
@@ -17,11 +18,10 @@ import GatherFromCreature from "./GatherFromCreature";
 import GatherFromDoodad from "./GatherFromDoodad";
 import GatherFromGround from "./GatherFromGround";
 import GatherFromTerrain from "./GatherFromTerrain";
-import { processRecipe, resetTargetRecipes, addTargetRecipe, getItemInInventory } from "../Utilities/Item";
 
 export default class AcquireItem extends Objective {
 
-	constructor(private itemType: ItemType) {
+	constructor(private readonly itemType: ItemType) {
 		super();
 	}
 
@@ -30,11 +30,9 @@ export default class AcquireItem extends Objective {
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
-		let itemDescription: IItemDescription | undefined;
+		this.log.info(`Wants a ${itemManager.getItemTypeGroupName(this.itemType, false).toString()}`);
 
-		this.log.info(itemManager.getItemTypeGroupName(this.itemType, false));
-
-		itemDescription = Items[this.itemType];
+		let itemDescription = itemDescriptions[this.itemType];
 
 		const objectiveSets: IObjective[][] = [
 			[new GatherFromGround(this.itemType)],
@@ -61,7 +59,7 @@ export default class AcquireItem extends Objective {
 			const itemTypesToDismantle: ItemType[] = [];
 
 			for (const it of Enums.values(ItemType)) {
-				const description = Items[it];
+				const description = itemDescriptions[it];
 				if (description && description.dismantle) {
 					for (const di of description.dismantle.items) {
 						if (di[0] === this.itemType) {
@@ -74,7 +72,7 @@ export default class AcquireItem extends Objective {
 
 			if (itemTypesToDismantle.length > 0) {
 				for (const it of itemTypesToDismantle) {
-					const description = Items[it];
+					const description = itemDescriptions[it];
 					if (!description || !description.dismantle) {
 						continue;
 					}
@@ -89,10 +87,10 @@ export default class AcquireItem extends Objective {
 
 					if (hasItem) {
 						if (hasRequiredItem) {
-							return new ExecuteAction(ActionType.Dismantle, dismantleItem);
+							return new ExecuteAction(ActionType.Dismantle, action => action.execute(localPlayer, dismantleItem!));
 
 						} else {
-							objectiveSets.push([new AcquireItemByGroup(description.dismantle.required!), new ExecuteAction(ActionType.Dismantle, dismantleItem)]);
+							objectiveSets.push([new AcquireItemByGroup(description.dismantle.required!), new ExecuteAction(ActionType.Dismantle, action => action.execute(localPlayer, dismantleItem!))]);
 						}
 
 					} else {
@@ -104,7 +102,7 @@ export default class AcquireItem extends Objective {
 								objectiveSet.push(new AcquireItemByGroup(description.dismantle.required!));
 							}
 
-							objectiveSet.push(new ExecuteAction(ActionType.Dismantle, dismantleItem));
+							objectiveSet.push(new ExecuteAction(ActionType.Dismantle, action => action.execute(localPlayer, dismantleItem!)));
 
 							objectiveSets.push(objectiveSet);
 						}
@@ -117,7 +115,7 @@ export default class AcquireItem extends Objective {
 								objectiveSet.push(new AcquireItemByGroup(description.dismantle.required!));
 							}
 
-							objectiveSet.push(new ExecuteAction(ActionType.Dismantle, dismantleItem));
+							objectiveSet.push(new ExecuteAction(ActionType.Dismantle, action => action.execute(localPlayer, dismantleItem!)));
 
 							objectiveSets.push(objectiveSet);
 						}
@@ -130,7 +128,7 @@ export default class AcquireItem extends Objective {
 								objectiveSet.push(new AcquireItemByGroup(description.dismantle.required!));
 							}
 
-							objectiveSet.push(new ExecuteAction(ActionType.Dismantle, dismantleItem));
+							objectiveSet.push(new ExecuteAction(ActionType.Dismantle, action => action.execute(localPlayer, dismantleItem!)));
 
 							objectiveSets.push(objectiveSet);
 						}
@@ -178,12 +176,12 @@ export default class AcquireItem extends Objective {
 
 			this.log.info(`Crafting ${ItemType[this.itemType]}`);
 
-			return new ExecuteAction(ActionType.Craft, {
-				item: checker.itemBaseComponent,
-				itemType: this.itemType,
-				itemComponentsRequired: checker.itemComponentsRequired,
-				itemComponentsConsumed: checker.itemComponentsConsumed
-			});
+			return new ExecuteAction(ActionType.Craft, action => action.execute(localPlayer,
+				this.itemType,
+				checker.itemComponentsRequired,
+				checker.itemComponentsConsumed,
+				checker.itemBaseComponent
+			));
 
 		} else {
 			const recipeObjectives: IObjective[] = [];
@@ -195,9 +193,9 @@ export default class AcquireItem extends Objective {
 			const itemBase = checker.itemBaseComponent;
 
 			if (recipe.baseComponent !== undefined && !itemBase) {
-				this.log.info(`Need base component ${isItemTypeGroup(recipe.baseComponent) ? ItemTypeGroup[recipe.baseComponent] : ItemType[recipe.baseComponent]}`);
+				this.log.info(`Need base component ${itemManager.isGroup(recipe.baseComponent) ? ItemTypeGroup[recipe.baseComponent] : ItemType[recipe.baseComponent]}`);
 
-				if (isItemTypeGroup(recipe.baseComponent)) {
+				if (itemManager.isGroup(recipe.baseComponent)) {
 					recipeObjectives.push(new AcquireItemByGroup(recipe.baseComponent));
 
 				} else {
@@ -215,10 +213,10 @@ export default class AcquireItem extends Objective {
 						continue;
 					}
 
-					this.log.info(`Need component. ${isItemTypeGroup(componentType) ? ItemTypeGroup[componentType] : ItemType[componentType]}`);
+					this.log.info(`Need component. ${itemManager.isGroup(componentType) ? ItemTypeGroup[componentType] : ItemType[componentType]}`);
 
 					for (let j = 0; j < missingAmount; j++) {
-						if (isItemTypeGroup(componentType)) {
+						if (itemManager.isGroup(componentType)) {
 							recipeObjectives.push(new AcquireItemByGroup(componentType));
 
 						} else {
@@ -255,7 +253,7 @@ export default class AcquireItem extends Objective {
 		if (calculateDifficulty) {
 			return missionImpossible;
 		}
-		
+
 		return ObjectiveStatus.Complete;
 	}
 

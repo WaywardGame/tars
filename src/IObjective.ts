@@ -1,4 +1,5 @@
-import { ActionType, DamageType } from "Enums";
+import { ActionType } from "action/IAction";
+import { DamageType } from "Enums";
 import { IBase, IInventoryItems } from "./ITars";
 
 export const missionImpossible = 1000000;
@@ -32,6 +33,7 @@ export interface IObjective {
 	getName(): string;
 	getHashCode(): string;
 	shouldSaveChildObjectives(): boolean;
+	onMove(): void;
 }
 
 export interface IHandsEquipment {

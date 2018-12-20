@@ -6,7 +6,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "Enums", "../IObjective", "../Objective", "./ExecuteAction", "./Idle", "../Utilities/Object", "../Utilities/Item"], function (require, exports, Enums_1, IObjective_1, Objective_1, ExecuteAction_1, Idle_1, Object_1, Item_1) {
+define(["require", "exports", "action/IAction", "../IObjective", "../Objective", "../Utilities/Item", "../Utilities/Object", "./ExecuteAction", "./Idle"], function (require, exports, IAction_1, IObjective_1, Objective_1, Item_1, Object_1, ExecuteAction_1, Idle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Rest extends Objective_1.default {
@@ -20,19 +20,17 @@ define(["require", "exports", "Enums", "../IObjective", "../Objective", "./Execu
                 }
                 const nearbyCreature = Object_1.getNearbyCreature(localPlayer);
                 if (nearbyCreature !== undefined) {
-                    this.log.info(`Idling until the nearby ${game.getName(nearbyCreature, Enums_1.SentenceCaseStyle.None, false)} moves away.`);
+                    this.log.info(`Idling until the nearby ${nearbyCreature.getName(false).getString()} moves away.`);
                     return new Idle_1.default(false);
                 }
-                const item = Item_1.getInventoryItemsWithUse(Enums_1.ActionType.Rest)[0];
+                const item = Item_1.getInventoryItemsWithUse(IAction_1.ActionType.Rest)[0];
                 if (item) {
-                    return new ExecuteAction_1.default(Enums_1.ActionType.Sleep, {
-                        item: item
-                    });
+                    return new ExecuteAction_1.default(IAction_1.ActionType.Sleep, action => action.execute(localPlayer, item));
                 }
-                return new ExecuteAction_1.default(Enums_1.ActionType.Rest);
+                return new ExecuteAction_1.default(IAction_1.ActionType.Rest, action => action.execute(localPlayer));
             });
         }
     }
     exports.default = Rest;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9PYmplY3RpdmVzL1Jlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7SUFRQSxNQUFxQixJQUFLLFNBQVEsbUJBQVM7UUFFbkMsV0FBVztZQUNqQixPQUFPLE1BQU0sQ0FBQztRQUNmLENBQUM7UUFFWSxTQUFTOztnQkFDckIsSUFBSSxXQUFXLENBQUMsUUFBUSxFQUFFO29CQUN6QixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2lCQUNoQztnQkFFRCxNQUFNLGNBQWMsR0FBRywwQkFBaUIsQ0FBQyxXQUFXLENBQUMsQ0FBQztnQkFDdEQsSUFBSSxjQUFjLEtBQUssU0FBUyxFQUFFO29CQUNqQyxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQywyQkFBMkIsSUFBSSxDQUFDLE9BQU8sQ0FBQyxjQUFjLEVBQUUseUJBQWlCLENBQUMsSUFBSSxFQUFFLEtBQUssQ0FBQyxjQUFjLENBQUMsQ0FBQztvQkFDcEgsT0FBTyxJQUFJLGNBQUksQ0FBQyxLQUFLLENBQUMsQ0FBQztpQkFDdkI7Z0JBRUQsTUFBTSxJQUFJLEdBQUcsK0JBQXdCLENBQUMsa0JBQVUsQ0FBQyxJQUFJLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQztnQkFDMUQsSUFBSSxJQUFJLEVBQUU7b0JBQ1QsT0FBTyxJQUFJLHVCQUFhLENBQUMsa0JBQVUsQ0FBQyxLQUFLLEVBQUU7d0JBQzFDLElBQUksRUFBRSxJQUFJO3FCQUNWLENBQUMsQ0FBQztpQkFDSDtnQkFFRCxPQUFPLElBQUksdUJBQWEsQ0FBQyxrQkFBVSxDQUFDLElBQUksQ0FBQyxDQUFDO1lBQzNDLENBQUM7U0FBQTtLQUVEO0lBM0JELHVCQTJCQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9PYmplY3RpdmVzL1Jlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7SUFTQSxNQUFxQixJQUFLLFNBQVEsbUJBQVM7UUFFbkMsV0FBVztZQUNqQixPQUFPLE1BQU0sQ0FBQztRQUNmLENBQUM7UUFFWSxTQUFTOztnQkFDckIsSUFBSSxXQUFXLENBQUMsUUFBUSxFQUFFO29CQUN6QixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2lCQUNoQztnQkFFRCxNQUFNLGNBQWMsR0FBRywwQkFBaUIsQ0FBQyxXQUFXLENBQUMsQ0FBQztnQkFDdEQsSUFBSSxjQUFjLEtBQUssU0FBUyxFQUFFO29CQUNqQyxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQywyQkFBMkIsY0FBYyxDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsQ0FBQyxTQUFTLEVBQUUsY0FBYyxDQUFDLENBQUM7b0JBQ2xHLE9BQU8sSUFBSSxjQUFJLENBQUMsS0FBSyxDQUFDLENBQUM7aUJBQ3ZCO2dCQUVELE1BQU0sSUFBSSxHQUFHLCtCQUF3QixDQUFDLG9CQUFVLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7Z0JBQzFELElBQUksSUFBSSxFQUFFO29CQUNULE9BQU8sSUFBSSx1QkFBYSxDQUFDLG9CQUFVLENBQUMsS0FBSyxFQUFFLE1BQU0sQ0FBQyxFQUFFLENBQUMsTUFBTSxDQUFDLE9BQU8sQ0FBQyxXQUFXLEVBQUUsSUFBSSxDQUFDLENBQUMsQ0FBQztpQkFDeEY7Z0JBRUQsT0FBTyxJQUFJLHVCQUFhLENBQUMsb0JBQVUsQ0FBQyxJQUFJLEVBQUUsTUFBTSxDQUFDLEVBQUUsQ0FBQyxNQUFNLENBQUMsT0FBTyxDQUFDLFdBQVcsQ0FBQyxDQUFDLENBQUM7WUFDbEYsQ0FBQztTQUFBO0tBRUQ7SUF6QkQsdUJBeUJDIn0=

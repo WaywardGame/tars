@@ -32,7 +32,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 			}
 
 			const doodadDistance = doodad ? Math.round(Vector2.squaredDistance(localPlayer, doodad)) : 0;
-			return doodadDistance + await this.calculateObjectiveDifficulties(base, inventory, objectives);
+			return doodadDistance + await this.calculateObjectiveDifficulties(base, inventory, ...objectives);
 		}
 
 		if (!doodad) {

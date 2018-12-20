@@ -1,5 +1,7 @@
-import { ExecuteArgument } from "action/IAction";
-import { ActionType, ItemType } from "Enums";
+import ActionExecutor from "action/ActionExecutor";
+import actionDescriptions from "action/Actions";
+import { ActionType, IActionDescription } from "action/IAction";
+import { ItemType } from "Enums";
 import Log, { nullLog } from "utilities/Log";
 import { IObjective, missionImpossible, ObjectiveStatus } from "./IObjective";
 import { IBase, IInventoryItems } from "./ITars";
@@ -11,9 +13,9 @@ export default abstract class Objective implements IObjective {
 	private calculatingDifficulty = false;
 
 	private _log: Log | undefined;
-	
+
 	abstract getHashCode(): string;
-	
+
 	public execute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		Objective.calculatedDifficulties = {};
 		return this.onExecute(base, inventory, false);
@@ -73,6 +75,9 @@ export default abstract class Objective implements IObjective {
 	public shouldSaveChildObjectives(): boolean {
 		return true;
 	}
+	
+	public onMove(): void {
+	}
 
 	protected abstract onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined>;
 
@@ -93,11 +98,11 @@ export default abstract class Objective implements IObjective {
 	}
 
 	protected async pickEasiestObjective(base: IBase, inventory: IInventoryItems, objectiveSets: IObjective[][]): Promise<IObjective | undefined> {
-		let easiestObjective: IObjective | undefined;			
+		let easiestObjective: IObjective | undefined;
 		let easiestDifficulty: number | undefined;
 
 		for (const objectives of objectiveSets) {
-			const objectiveDifficulty = await this.calculateObjectiveDifficulties(base, inventory, objectives);
+			const objectiveDifficulty = await this.calculateObjectiveDifficulties(base, inventory, ...objectives);
 
 			this.log.info(`Objective ${objectives.map(o => o.getHashCode()).join(",")}. Difficulty: ${objectiveDifficulty}`);
 
@@ -108,7 +113,7 @@ export default abstract class Objective implements IObjective {
 		}
 
 		if (easiestObjective) {
-			this.log.info(`Easiest objective is ${easiestObjective.getHashCode()}`);
+			this.log.info(`Easiest objective is ${easiestObjective.getHashCode()} (difficulty: ${easiestDifficulty})`);
 
 		} else {
 			this.log.info(`All ${objectiveSets.length} objectives are impossible`);
@@ -117,14 +122,14 @@ export default abstract class Objective implements IObjective {
 		return easiestObjective;
 	}
 
-	protected async calculateObjectiveDifficulties(base: IBase, inventory: IInventoryItems, objectives: IObjective[]): Promise<number> {
+	protected async calculateObjectiveDifficulties(base: IBase, inventory: IInventoryItems, ...objectives: IObjective[]): Promise<number> {
 		let totalDifficulty = 0;
 
 		for (const objective of objectives) {
 			const difficulty = await objective.calculateDifficulty(base, inventory);
-			
+
 			// this.log.info(`\tObjective ${objective.getHashCode()}. Difficulty: ${difficulty}`);
-			
+
 			if (difficulty >= missionImpossible) {
 				return missionImpossible;
 			}
@@ -135,8 +140,8 @@ export default abstract class Objective implements IObjective {
 		return totalDifficulty;
 	}
 
-	protected async executeActionForItem(actionType: ActionType, executeArgument: ExecuteArgument, itemTypes: ItemType[]): Promise<ObjectiveStatus | undefined> {
-		let matchingNewItem = await this.executeActionCompareInventoryItems(actionType, executeArgument, itemTypes);
+	protected async executeActionForItem<T extends ActionType>(actionType: T, executor: (action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void, itemTypes: ItemType[]): Promise<ObjectiveStatus | undefined> {
+		let matchingNewItem = await this.executeActionCompareInventoryItems(actionType, executor, itemTypes);
 		if (matchingNewItem !== undefined) {
 			this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]}`);
 			return ObjectiveStatus.Complete;
@@ -159,10 +164,10 @@ export default abstract class Objective implements IObjective {
 		}
 	}
 
-	private async executeActionCompareInventoryItems(actionType: ActionType, executeArgument: ExecuteArgument, itemTypes: ItemType[]) {
+	private async executeActionCompareInventoryItems(actionType: ActionType, executor: any, itemTypes: ItemType[]) {
 		const itemsBefore = localPlayer.inventory.containedItems.slice(0);
 
-		await executeAction(actionType, executeArgument);
+		await executeAction(actionType, executor);
 
 		const newItems = localPlayer.inventory.containedItems.filter(item => itemsBefore.indexOf(item) === -1);
 

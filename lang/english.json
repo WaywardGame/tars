@@ -6,6 +6,9 @@
 		},
 		"source": {
 			"modTARSTARS": "TARS"
+		},
+		"message": {
+			"modTARSToggle": "[TARS] {0?Enabled:Disabled}"
 		}
 	}
 }

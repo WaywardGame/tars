@@ -6,7 +6,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "entity/IStats", "Enums", "../IObjective", "../Objective", "./AcquireItemByGroup", "./OrganizeInventory", "./UseItem", "../Utilities/Item"], function (require, exports, IStats_1, Enums_1, IObjective_1, Objective_1, AcquireItemByGroup_1, OrganizeInventory_1, UseItem_1, Item_1) {
+define(["require", "exports", "entity/IStats", "action/IAction", "Enums", "../IObjective", "../Objective", "../Utilities/Item", "./AcquireItemByGroup", "./OrganizeInventory", "./UseItem"], function (require, exports, IStats_1, IAction_1, Enums_1, IObjective_1, Objective_1, Item_1, AcquireItemByGroup_1, OrganizeInventory_1, UseItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class RecoverHealth extends Objective_1.default {
@@ -22,10 +22,10 @@ define(["require", "exports", "entity/IStats", "Enums", "../IObjective", "../Obj
         }
         onExecute(base, inventory) {
             return __awaiter(this, void 0, void 0, function* () {
-                const healItems = Item_1.getInventoryItemsWithUse(Enums_1.ActionType.Heal);
+                const healItems = Item_1.getInventoryItemsWithUse(IAction_1.ActionType.Heal);
                 if (healItems.length > 0) {
-                    this.log.info(`Healing with ${game.getName(healItems[0])}`);
-                    return new UseItem_1.default(healItems[0], Enums_1.ActionType.Heal);
+                    this.log.info(`Healing with ${healItems[0].getName().getString()}`);
+                    return new UseItem_1.default(healItems[0], IAction_1.ActionType.Heal);
                 }
                 if (localPlayer.getWeightStatus() !== Enums_1.WeightStatus.None) {
                     this.log.info("Reduce weight before finding a health item");
@@ -43,4 +43,4 @@ define(["require", "exports", "entity/IStats", "Enums", "../IObjective", "../Obj
     }
     exports.default = RecoverHealth;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVjb3ZlckhlYWx0aC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9PYmplY3RpdmVzL1JlY292ZXJIZWFsdGgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7SUFVQSxNQUFxQixhQUFjLFNBQVEsbUJBQVM7UUFBcEQ7O1lBRVMsd0JBQW1CLEdBQUcsS0FBSyxDQUFDO1FBb0NyQyxDQUFDO1FBbENPLFdBQVc7WUFDakIsT0FBTyxlQUFlLENBQUM7UUFDeEIsQ0FBQztRQUVNLHlCQUF5QjtZQUMvQixPQUFPLElBQUksQ0FBQyxtQkFBbUIsQ0FBQztRQUNqQyxDQUFDO1FBRVksU0FBUyxDQUFDLElBQVcsRUFBRSxTQUEwQjs7Z0JBQzdELE1BQU0sU0FBUyxHQUFHLCtCQUF3QixDQUFDLGtCQUFVLENBQUMsSUFBSSxDQUFDLENBQUM7Z0JBQzVELElBQUksU0FBUyxDQUFDLE1BQU0sR0FBRyxDQUFDLEVBQUU7b0JBQ3pCLElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLGdCQUFnQixJQUFJLENBQUMsT0FBTyxDQUFDLFNBQVMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxFQUFFLENBQUMsQ0FBQztvQkFDNUQsT0FBTyxJQUFJLGlCQUFPLENBQUMsU0FBUyxDQUFDLENBQUMsQ0FBQyxFQUFFLGtCQUFVLENBQUMsSUFBSSxDQUFDLENBQUM7aUJBQ2xEO2dCQUVELElBQUksV0FBVyxDQUFDLGVBQWUsRUFBRSxLQUFLLG9CQUFZLENBQUMsSUFBSSxFQUFFO29CQUd4RCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyw0Q0FBNEMsQ0FBQyxDQUFDO29CQUM1RCxJQUFJLENBQUMsbUJBQW1CLEdBQUcsS0FBSyxDQUFDO29CQUNqQyxPQUFPLElBQUksMkJBQWlCLENBQUMsSUFBSSxFQUFFLEtBQUssQ0FBQyxDQUFDO2lCQUMxQztnQkFFRCxJQUFJLENBQUMsbUJBQW1CLEdBQUcsSUFBSSxDQUFDO2dCQUVoQyxJQUFJLENBQUMsV0FBVyxDQUFDLE1BQU0sQ0FBQyxRQUFRLElBQUksV0FBVyxDQUFDLE9BQU8sQ0FBUSxhQUFJLENBQUMsTUFBTSxDQUFDLENBQUMsS0FBSyxHQUFHLENBQUMsRUFBRTtvQkFFdEYsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQztpQkFDaEM7Z0JBRUQsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsdUJBQXVCLENBQUMsQ0FBQztnQkFDdkMsT0FBTyxJQUFJLDRCQUFrQixDQUFDLHFCQUFhLENBQUMsTUFBTSxDQUFDLENBQUM7WUFDckQsQ0FBQztTQUFBO0tBRUQ7SUF0Q0QsZ0NBc0NDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVjb3ZlckhlYWx0aC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9PYmplY3RpdmVzL1JlY292ZXJIZWFsdGgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7SUFXQSxNQUFxQixhQUFjLFNBQVEsbUJBQVM7UUFBcEQ7O1lBRVMsd0JBQW1CLEdBQUcsS0FBSyxDQUFDO1FBb0NyQyxDQUFDO1FBbENPLFdBQVc7WUFDakIsT0FBTyxlQUFlLENBQUM7UUFDeEIsQ0FBQztRQUVNLHlCQUF5QjtZQUMvQixPQUFPLElBQUksQ0FBQyxtQkFBbUIsQ0FBQztRQUNqQyxDQUFDO1FBRVksU0FBUyxDQUFDLElBQVcsRUFBRSxTQUEwQjs7Z0JBQzdELE1BQU0sU0FBUyxHQUFHLCtCQUF3QixDQUFDLG9CQUFVLENBQUMsSUFBSSxDQUFDLENBQUM7Z0JBQzVELElBQUksU0FBUyxDQUFDLE1BQU0sR0FBRyxDQUFDLEVBQUU7b0JBQ3pCLElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLGdCQUFnQixTQUFTLENBQUMsQ0FBQyxDQUFDLENBQUMsT0FBTyxFQUFFLENBQUMsU0FBUyxFQUFFLEVBQUUsQ0FBQyxDQUFDO29CQUNwRSxPQUFPLElBQUksaUJBQU8sQ0FBQyxTQUFTLENBQUMsQ0FBQyxDQUFDLEVBQUUsb0JBQVUsQ0FBQyxJQUFJLENBQUMsQ0FBQztpQkFDbEQ7Z0JBRUQsSUFBSSxXQUFXLENBQUMsZUFBZSxFQUFFLEtBQUssb0JBQVksQ0FBQyxJQUFJLEVBQUU7b0JBR3hELElBQUksQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLDRDQUE0QyxDQUFDLENBQUM7b0JBQzVELElBQUksQ0FBQyxtQkFBbUIsR0FBRyxLQUFLLENBQUM7b0JBQ2pDLE9BQU8sSUFBSSwyQkFBaUIsQ0FBQyxJQUFJLEVBQUUsS0FBSyxDQUFDLENBQUM7aUJBQzFDO2dCQUVELElBQUksQ0FBQyxtQkFBbUIsR0FBRyxJQUFJLENBQUM7Z0JBRWhDLElBQUksQ0FBQyxXQUFXLENBQUMsTUFBTSxDQUFDLFFBQVEsSUFBSSxXQUFXLENBQUMsT0FBTyxDQUFRLGFBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQyxLQUFLLEdBQUcsQ0FBQyxFQUFFO29CQUV0RixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2lCQUNoQztnQkFFRCxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyx1QkFBdUIsQ0FBQyxDQUFDO2dCQUN2QyxPQUFPLElBQUksNEJBQWtCLENBQUMscUJBQWEsQ0FBQyxNQUFNLENBQUMsQ0FBQztZQUNyRCxDQUFDO1NBQUE7S0FFRDtJQXRDRCxnQ0FzQ0MifQ==

@@ -1,4 +1,5 @@
-import { ActionType, DoodadType, DoodadTypeGroup, ItemType } from "Enums";
+import { ActionType } from "action/IAction";
+import { DoodadType, DoodadTypeGroup, ItemType } from "Enums";
 import { itemDescriptions as Items } from "item/Items";
 import Enums from "utilities/enum/Enums";
 import * as Helpers from "../Helpers";
@@ -9,7 +10,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForDoodad extends Objective {
 
-	constructor(private doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
+	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
 		super();
 	}
 	

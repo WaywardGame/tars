@@ -1,5 +1,6 @@
-import { ActionType } from "Enums";
-import { ExecuteArgument } from "action/IAction";
+import ActionExecutor from "action/ActionExecutor";
+import actionDescriptions from "action/Actions";
+import { ActionType, IActionDescription } from "action/IAction";
 
 const pendingActions: {
 	[index: number]: {
@@ -31,7 +32,7 @@ export function postExecuteAction(actionType: ActionType) {
 	}
 }
 
-export async function executeAction(actionType: ActionType, executeArgument?: ExecuteArgument) {
+export async function executeAction<T extends ActionType>(actionType: T, executor: (action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void) {
 	let waiter: Promise<boolean> | undefined;
 
 	if (localPlayer.hasDelay()) {
@@ -54,7 +55,7 @@ export async function executeAction(actionType: ActionType, executeArgument?: Ex
 		waiter = waitForAction(actionType);
 	}
 
-	actionManager.execute(localPlayer, actionType, executeArgument);
+	await executor(ActionExecutor.get(actionType).skipConfirmation() as any);
 
 	if (waiter) {
 		await waiter;

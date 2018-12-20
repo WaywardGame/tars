@@ -1,6 +1,7 @@
 import { ICorpse } from "creature/corpse/ICorpse";
 import { ICreature } from "creature/ICreature";
-import { ActionType } from "Enums";
+import { ActionType } from "action/IAction";
+import {  } from "Enums";
 import Vector2 from "utilities/math/Vector2";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { IBase, ICreatureSearch, IInventoryItems } from "../ITars";
@@ -13,7 +14,7 @@ import AcquireItemForAction from "./AcquireItemForAction";
 
 export default class GatherFromCreature extends Objective {
 
-	constructor(private search: ICreatureSearch[]) {
+	constructor(private readonly search: ICreatureSearch[]) {
 		super();
 	}
 
@@ -62,7 +63,7 @@ export default class GatherFromCreature extends Objective {
 				return missionImpossible;
 			}
 
-			return Math.round(Vector2.squaredDistance(localPlayer, target)) + await this.calculateObjectiveDifficulties(base, inventory, objectives);
+			return Math.round(Vector2.squaredDistance(localPlayer, target)) + await this.calculateObjectiveDifficulties(base, inventory, ...objectives);
 		}
 
 		if (!canCarveCorpse) {

@@ -1,21 +1,22 @@
 import { IStat, Stat } from "entity/IStats";
-import { ActionType, ItemTypeGroup, WeightStatus } from "Enums";
+import { ActionType } from "action/IAction";
+import { ItemTypeGroup, WeightStatus } from "Enums";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { getInventoryItemsWithUse } from "../Utilities/Item";
 import AcquireItemByGroup from "./AcquireItemByGroup";
 import OrganizeInventory from "./OrganizeInventory";
 import UseItem from "./UseItem";
-import { getInventoryItemsWithUse } from "../Utilities/Item";
 
 export default class RecoverHealth extends Objective {
 
 	private saveChildObjectives = false;
-	
+
 	public getHashCode(): string {
 		return "RecoverHealth";
 	}
-	
+
 	public shouldSaveChildObjectives(): boolean {
 		return this.saveChildObjectives;
 	}
@@ -23,7 +24,7 @@ export default class RecoverHealth extends Objective {
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const healItems = getInventoryItemsWithUse(ActionType.Heal);
 		if (healItems.length > 0) {
-			this.log.info(`Healing with ${game.getName(healItems[0])}`);
+			this.log.info(`Healing with ${healItems[0].getName().getString()}`);
 			return new UseItem(healItems[0], ActionType.Heal);
 		}
 

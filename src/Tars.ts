@@ -1,19 +1,22 @@
-import { IActionArgument, IActionResult } from "action/IAction";
+import { ActionType, IActionApi, IActionDescription } from "action/IAction";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
 import { IStat, IStatMax, Stat } from "entity/IStats";
-import { ActionType, Bindable, DamageType, Direction, DoodadType, DoodadTypeGroup, EquipType, ItemType, ItemTypeGroup, PlayerState } from "Enums";
+import { Bindable, DamageType, Direction, DoodadType, DoodadTypeGroup, EquipType, ItemType, ItemTypeGroup, PlayerState } from "Enums";
 import { IContainer, IItem } from "item/IItem";
-import { MessageType } from "language/IMessages";
+import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
 import { BindCatcherApi } from "newui/BindingManager";
+import { Source } from "player/IMessageManager";
 import { IPlayer } from "player/IPlayer";
+import { MessageType } from "player/MessageManager";
 import { ITile } from "tile/ITerrain";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
+
 import * as Helpers from "./Helpers";
 import { IObjective, ObjectiveStatus } from "./IObjective";
 import { desertCutoff, IBase, IInventoryItems } from "./ITars";
@@ -42,8 +45,8 @@ import ReturnToBase from "./Objectives/ReturnToBase";
 import * as Action from "./Utilities/Action";
 import { getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getSeeds } from "./Utilities/Item";
 import { log, setLogger } from "./Utilities/Logger";
-import { resetCachedPaths, resetMovementOverlays } from "./Utilities/Movement";
-import { findCarvableCorpse, findDoodad, findDoodads, resetCachedObjects } from "./Utilities/Object";
+import * as movementUtilities from "./Utilities/Movement";
+import * as objectUtilities from "./Utilities/Object";
 
 const tickSpeed = 333;
 
@@ -54,7 +57,9 @@ export default class Tars extends Mod {
 	@Register.bindable("Toggle", { key: "KeyT" })
 	public readonly keyBind: number;
 	@Register.messageSource("TARS")
-	public readonly messageSource: number;
+	public readonly messageSource: Source;
+	@Register.message("Toggle")
+	public readonly messageToggle: Message;
 
 	private base: IBase;
 	private inventory: IInventoryItems;
@@ -71,7 +76,7 @@ export default class Tars extends Mod {
 	private navigation: Navigation;
 	private navigationInitialized: boolean;
 
-	public onInitialize(saveDataGlobal: any): any {
+	public onInitialize(): any {
 		Helpers.setPath(this.getPath());
 
 		setLogger(this.getLog());
@@ -103,7 +108,20 @@ export default class Tars extends Mod {
 			this.objective = undefined;
 			this.interruptObjective = undefined;
 
-			resetMovementOverlays();
+			movementUtilities.resetMovementOverlays();
+		}
+
+		return undefined;
+	}
+
+	@HookMethod
+	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
+		if (this.isEnabled()) {
+			movementUtilities.clearOverlay(tile);
+
+			if (this.objective !== undefined) {
+				this.objective.onMove();
+			}
 		}
 
 		return undefined;
@@ -127,12 +145,12 @@ export default class Tars extends Mod {
 	}
 
 	@HookMethod
-	public postExecuteAction(player: IPlayer, actionType: ActionType, actionArgument: IActionArgument, actionResult: IActionResult): void {
-		if (player !== localPlayer) {
+	public postExecuteAction(api: IActionApi, action: IActionDescription, args: any[]): void {
+		if (api.executor !== localPlayer) {
 			return;
 		}
 
-		Action.postExecuteAction(actionType);
+		Action.postExecuteAction(api.type);
 	}
 
 	@HookMethod
@@ -207,14 +225,14 @@ export default class Tars extends Mod {
 			this.disable();
 		}
 
-		const str = `${this.tickTimeoutId !== undefined ? "Enabled" : "Disabled"}`;
+		const str = this.tickTimeoutId !== undefined ? "Enabled" : "Disabled";
 
 		log(str);
 
 		localPlayer.messages
 			.source(this.messageSource)
 			.type(MessageType.Good)
-			.send(`[TARS] ${str}`);
+			.send(this.messageToggle, this.tickTimeoutId !== undefined);
 	}
 
 	private disable() {
@@ -224,7 +242,7 @@ export default class Tars extends Mod {
 		}
 
 		if (localPlayer) {
-			resetMovementOverlays();
+			movementUtilities.resetMovementOverlays();
 			localPlayer.walkAlongPath(undefined);
 		}
 	}
@@ -245,8 +263,8 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		resetCachedObjects();
-		resetCachedPaths();
+		objectUtilities.resetCachedObjects();
+		movementUtilities.resetCachedPaths();
 
 		this.analyzeInventory();
 		this.analyzeBase();
@@ -415,6 +433,10 @@ export default class Tars extends Mod {
 
 		if (this.inventory.fireTinder === undefined) {
 			objectives.push(new AcquireItemByGroup(ItemTypeGroup.Tinder));
+		}
+
+		if (this.inventory.shovel === undefined) {
+			objectives.push(new AcquireItemForAction(ActionType.Dig));
 		}
 
 		if (this.inventory.sharpened === undefined) {
@@ -773,7 +795,7 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		log(`Repair ${game.getName(item)}`);
+		log(`Repair ${item.getName().getString()}`);
 		return new RepairItem(item);
 	}
 
@@ -781,7 +803,7 @@ export default class Tars extends Mod {
 		for (const facingDirecton of Enums.values(Direction)) {
 			const creature = this.checkNearbyCreature(facingDirecton);
 			if (creature !== undefined) {
-				log(`Defend against ${game.getName(creature)}`);
+				log(`Defend against ${creature.getName().getString()}`);
 				return new DefendAgainstCreature(creature);
 			}
 		}
@@ -799,7 +821,7 @@ export default class Tars extends Mod {
 	}
 
 	private gatherFromCorpsesInterrupt(): IObjective | undefined {
-		const target = findCarvableCorpse("gatherFromCorpsesInterrupt", corpse => Vector2.squaredDistance(localPlayer, corpse) < 16);
+		const target = objectUtilities.findCarvableCorpse("gatherFromCorpsesInterrupt", corpse => Vector2.squaredDistance(localPlayer, corpse) < 16);
 		if (target) {
 			return new CarveCorpse(target);
 		}
@@ -835,7 +857,7 @@ export default class Tars extends Mod {
 			this.inventory.bed = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Bedding);
 
 			if (this.inventory.bed !== undefined) {
-				log(`Inventory bed - ${game.getName(this.inventory.bed)}`);
+				log(`Inventory bed - ${this.inventory.bed.getName().getString()}`);
 			}
 		}
 
@@ -854,7 +876,7 @@ export default class Tars extends Mod {
 			}
 
 			if (this.inventory.waterContainer !== undefined) {
-				log(`Inventory water container - ${game.getName(this.inventory.waterContainer)}`);
+				log(`Inventory water container - ${this.inventory.waterContainer.getName().getString()}`);
 			}
 		}
 
@@ -866,7 +888,7 @@ export default class Tars extends Mod {
 			this.inventory.sharpened = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Sharpened);
 
 			if (this.inventory.sharpened !== undefined) {
-				log(`Inventory sharpened - ${game.getName(this.inventory.sharpened)}`);
+				log(`Inventory sharpened - ${this.inventory.sharpened.getName().getString()}`);
 			}
 		}
 
@@ -878,7 +900,7 @@ export default class Tars extends Mod {
 			this.inventory.fireStarter = itemManager.getItemInContainer(localPlayer.inventory, ItemType.HandDrill) || itemManager.getItemInContainer(localPlayer.inventory, ItemType.BowDrill) || itemManager.getItemInContainer(localPlayer.inventory, ItemType.FirePlough);
 
 			if (this.inventory.fireStarter !== undefined) {
-				log(`Inventory fire starter - ${game.getName(this.inventory.fireStarter)}`);
+				log(`Inventory fire starter - ${this.inventory.fireStarter.getName().getString()}`);
 			}
 		}
 
@@ -893,7 +915,7 @@ export default class Tars extends Mod {
 			}
 
 			if (this.inventory.fireStoker !== undefined) {
-				log(`Inventory fire stoker - ${game.getName(this.inventory.fireStoker)}`);
+				log(`Inventory fire stoker - ${this.inventory.fireStoker.getName().getString()}`);
 			}
 		}
 
@@ -905,7 +927,7 @@ export default class Tars extends Mod {
 			this.inventory.fireKindling = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Kindling);
 
 			if (this.inventory.fireKindling !== undefined) {
-				log(`Inventory fire kindling - ${game.getName(this.inventory.fireKindling)}`);
+				log(`Inventory fire kindling - ${this.inventory.fireKindling.getName().getString()}`);
 			}
 		}
 
@@ -917,7 +939,7 @@ export default class Tars extends Mod {
 			this.inventory.fireTinder = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Tinder);
 
 			if (this.inventory.fireTinder !== undefined) {
-				log(`Inventory fire tinder - ${game.getName(this.inventory.fireTinder)}`);
+				log(`Inventory fire tinder - ${this.inventory.fireTinder.getName().getString()}`);
 			}
 		}
 
@@ -932,7 +954,7 @@ export default class Tars extends Mod {
 			}
 
 			if (this.inventory.hoe !== undefined) {
-				log(`Inventory hoe - ${game.getName(this.inventory.hoe)}`);
+				log(`Inventory hoe - ${this.inventory.hoe.getName().getString()}`);
 			}
 		}
 
@@ -944,7 +966,7 @@ export default class Tars extends Mod {
 			this.inventory.hammer = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Hammer);
 
 			if (this.inventory.hammer !== undefined) {
-				log(`Inventory hammer - ${game.getName(this.inventory.hammer)}`);
+				log(`Inventory hammer - ${this.inventory.hammer.getName().getString()}`);
 			}
 		}
 
@@ -962,7 +984,7 @@ export default class Tars extends Mod {
 				itemManager.getItemInContainer(localPlayer.inventory, ItemType.StoneAxe);
 
 			if (this.inventory.axe !== undefined) {
-				log(`Inventory axe - ${game.getName(this.inventory.axe)}`);
+				log(`Inventory axe - ${this.inventory.axe.getName().getString()}`);
 			}
 		}
 
@@ -977,7 +999,7 @@ export default class Tars extends Mod {
 				itemManager.getItemInContainer(localPlayer.inventory, ItemType.StonePickaxe);
 
 			if (this.inventory.pickAxe !== undefined) {
-				log(`Inventory pickaxe - ${game.getName(this.inventory.pickAxe)}`);
+				log(`Inventory pickaxe - ${this.inventory.pickAxe.getName().getString()}`);
 			}
 		}
 
@@ -992,7 +1014,7 @@ export default class Tars extends Mod {
 			}
 
 			if (this.inventory.shovel !== undefined) {
-				log(`Inventory shovel - ${game.getName(this.inventory.shovel)}`);
+				log(`Inventory shovel - ${this.inventory.shovel.getName().getString()}`);
 			}
 		}
 
@@ -1005,7 +1027,7 @@ export default class Tars extends Mod {
 			this.inventory.waterStill = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.WaterStill);
 
 			if (this.inventory.waterStill !== undefined) {
-				log(`Inventory waterstill - ${game.getName(this.inventory.waterStill)}`);
+				log(`Inventory waterstill - ${this.inventory.waterStill.getName().getString()}`);
 			}
 		}
 
@@ -1017,7 +1039,7 @@ export default class Tars extends Mod {
 			this.inventory.campfire = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Campfire);
 
 			if (this.inventory.campfire !== undefined) {
-				log(`Inventory campfire - ${game.getName(this.inventory.campfire)}`);
+				log(`Inventory campfire - ${this.inventory.campfire.getName().getString()}`);
 			}
 		}
 
@@ -1029,7 +1051,7 @@ export default class Tars extends Mod {
 			this.inventory.kiln = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Kiln);
 
 			if (this.inventory.kiln !== undefined) {
-				log(`Inventory kiln - ${game.getName(this.inventory.kiln)}`);
+				log(`Inventory kiln - ${this.inventory.kiln.getName().getString()}`);
 			}
 		}
 
@@ -1037,12 +1059,12 @@ export default class Tars extends Mod {
 			this.inventory.chests = this.inventory.chests.filter(c => c.isValid() && itemManager.isContainableInContainer(c, localPlayer.inventory));
 		}
 
-		const chests = itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.WoodenChest, true, false);
+		const chests = itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.WoodenChest, true);
 		if (this.inventory.chests === undefined || this.inventory.chests.length !== chests.length) {
 			this.inventory.chests = chests;
 
 			if (this.inventory.chests.length > 0) {
-				log(`Inventory chests - ${this.inventory.chests.map(c => game.getName(c)).join(", ")}`);
+				log(`Inventory chests - ${this.inventory.chests.map(c => c.getName().getString()).join(", ")}`);
 			}
 		}
 
@@ -1058,7 +1080,7 @@ export default class Tars extends Mod {
 				itemManager.getItemInContainer(localPlayer.inventory, ItemType.WoodenSword);
 
 			if (this.inventory.sword !== undefined) {
-				log(`Inventory sword - ${game.getName(this.inventory.sword)}`);
+				log(`Inventory sword - ${this.inventory.sword.getName().getString()}`);
 			}
 		}
 	}
@@ -1069,7 +1091,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.base.campfire === undefined) {
-			const targets = findDoodads("Campfire", doodad => {
+			const targets = objectUtilities.findDoodads("Campfire", doodad => {
 				const description = doodad.description();
 				if (description) {
 					if (description.group === DoodadTypeGroup.LitCampfire) {
@@ -1093,7 +1115,7 @@ export default class Tars extends Mod {
 					this.base.campfire = target;
 
 					if (this.base.campfire !== undefined) {
-						log(`Base campfire - ${game.getName(this.base.campfire)} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
+						log(`Base campfire - ${this.base.campfire.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
 					}
 				}
 			}
@@ -1104,7 +1126,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.base.waterStill === undefined) {
-			const targets = findDoodads("WaterStill", doodad => {
+			const targets = objectUtilities.findDoodads("WaterStill", doodad => {
 				const description = doodad.description();
 				if (description) {
 					if (description.group === DoodadTypeGroup.LitWaterStill) {
@@ -1128,7 +1150,7 @@ export default class Tars extends Mod {
 					this.base.waterStill = target;
 
 					if (this.base.waterStill !== undefined) {
-						log(`Base waterstill - ${game.getName(this.base.waterStill)} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
+						log(`Base waterstill - ${this.base.waterStill.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
 					}
 				}
 			}
@@ -1139,7 +1161,7 @@ export default class Tars extends Mod {
 		}
 
 		if (this.base.kiln === undefined) {
-			const targets = findDoodads("Kiln", doodad => {
+			const targets = objectUtilities.findDoodads("Kiln", doodad => {
 				const description = doodad.description();
 				if (description) {
 					if (description.group === DoodadTypeGroup.LitKiln) {
@@ -1163,7 +1185,7 @@ export default class Tars extends Mod {
 					this.base.kiln = target;
 
 					if (this.base.kiln !== undefined) {
-						log(`Base kiln - ${game.getName(this.base.kiln)} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
+						log(`Base kiln - ${this.base.kiln.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
 					}
 				}
 			}
@@ -1175,7 +1197,7 @@ export default class Tars extends Mod {
 
 		let i = 0;
 		while (true) {
-			const targetChest = findDoodad(`Chest${i}`, doodad => {
+			const targetChest = objectUtilities.findDoodad(`Chest${i}`, doodad => {
 				const container = doodad as IContainer;
 				if (container.weightCapacity && container.containedItems) {
 					return this.base.chests!.indexOf(doodad) === -1;
@@ -1193,7 +1215,7 @@ export default class Tars extends Mod {
 
 				this.base.chests.push(targetChest);
 
-				log(`Base chest - ${game.getName(targetChest)} (distance: ${Vector2.squaredDistance(localPlayer, targetChest)})`);
+				log(`Base chest - ${targetChest.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, targetChest)})`);
 
 			} else {
 				break;

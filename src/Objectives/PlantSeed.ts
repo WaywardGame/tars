@@ -1,4 +1,5 @@
-import { ActionType, ItemType, TerrainType, SentenceCaseStyle } from "Enums";
+import { ActionType } from "action/IAction";
+import { ItemType, TerrainType } from "Enums";
 import { IItem } from "item/IItem";
 import { ITile, ITileContainer } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
@@ -6,21 +7,21 @@ import TileHelpers from "utilities/TileHelpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { gardenMaxTilesChecked, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { getBasePosition, isOpenArea } from "../Utilities/Base";
+import { findAndMoveToFaceTarget, MoveResult } from "../Utilities/Movement";
 import AcquireItem from "./AcquireItem";
 import UseItem from "./UseItem";
-import { MoveResult, findAndMoveToFaceTarget } from "../Utilities/Movement";
-import { isOpenArea, getBasePosition } from "../Utilities/Base";
 
 export default class PlantSeed extends Objective {
 
-	constructor(private seed: IItem) {
+	constructor(private readonly seed: IItem) {
 		super();
 	}
-	
+
 	public getHashCode(): string {
-		return `PlantSeed:${game.getName(this.seed, SentenceCaseStyle.Title, false)}`;
+		return `PlantSeed:${this.seed.getName(false).getString()}`;
 	}
-	
+
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (inventory.hoe === undefined) {
 			this.log.info("Acquire a stone hoe");
@@ -52,7 +53,7 @@ export default class PlantSeed extends Objective {
 			return new UseItem(inventory.hoe, ActionType.Till);
 
 		} else if (emptyTilledTile === MoveResult.Complete) {
-			this.log.info(`Plant ${game.getName(this.seed, SentenceCaseStyle.Title, false)}`);
+			this.log.info(`Plant ${this.seed.getName(false).getString()}`);
 			return new UseItem(this.seed, ActionType.Plant);
 		}
 	}

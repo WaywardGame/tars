@@ -1,5 +1,6 @@
 import { IDoodad } from "doodad/IDoodad";
-import { ActionType, ItemTypeGroup } from "Enums";
+import { ActionType } from "action/IAction";
+import { ItemTypeGroup } from "Enums";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
@@ -10,7 +11,7 @@ import { moveToFaceTarget, MoveResult } from "../Utilities/Movement";
 
 export default class StartFire extends Objective {
 
-	constructor(private doodad: IDoodad) {
+	constructor(private readonly doodad: IDoodad) {
 		super();
 	}
 	
@@ -36,7 +37,7 @@ export default class StartFire extends Objective {
 
 			objectives.push(new UseItem(undefined, ActionType.StartFire, this.doodad));
 
-			return this.calculateObjectiveDifficulties(base, inventory, objectives);
+			return this.calculateObjectiveDifficulties(base, inventory, ...objectives);
 		}
 
 		const description = this.doodad.description();

@@ -4,11 +4,11 @@ import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
 
 export default class OptionsInterrupt extends Objective {
-	
+
 	public getHashCode(): string {
 		return "OptionsInterrupt";
 	}
-	
+
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (localPlayer.options.autoPickup) {
 			this.log.info("Disabling AutoPickup");
@@ -31,6 +31,12 @@ export default class OptionsInterrupt extends Objective {
 		if (localPlayer.options.protectedCraftingItems) {
 			this.log.info("Disabling ProtectedCraftingItems");
 			game.updateOption(localPlayer, "protectedCraftingItems", false);
+			return;
+		}
+
+		if (localPlayer.options.protectedCraftingItemContainers) {
+			this.log.info("Disabling protectedCraftingItemContainers");
+			game.updateOption(localPlayer, "protectedCraftingItemContainers", false);
 			return;
 		}
 

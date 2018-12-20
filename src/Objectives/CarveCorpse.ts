@@ -1,21 +1,21 @@
+import { ActionType } from "action/IAction";
 import { ICorpse } from "creature/corpse/ICorpse";
-import { ActionType, SentenceCaseStyle } from "Enums";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import Objective from "../Objective";
-import ExecuteAction from "./ExecuteAction";
 import { getInventoryItemsWithUse } from "../Utilities/Item";
-import { moveToFaceTarget, MoveResult } from "../Utilities/Movement";
+import { MoveResult, moveToFaceTarget } from "../Utilities/Movement";
+import ExecuteAction from "./ExecuteAction";
 
 export default class CarveCorpse extends Objective {
 
-	constructor(private corpse: ICorpse) {
+	constructor(private readonly corpse: ICorpse) {
 		super();
 	}
-	
+
 	public getHashCode(): string {
-		return `CarveCorpse:${game.getName(this.corpse, SentenceCaseStyle.Title, false)}`;
+		return `CarveCorpse:${corpseManager.getName(this.corpse, false).getString()}`;
 	}
-	
+
 	public async onExecute(): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const carveTool = getInventoryItemsWithUse(ActionType.Carve);
 		if (carveTool.length === 0) {
@@ -34,7 +34,7 @@ export default class CarveCorpse extends Objective {
 			this.log.info("No path to corpse");
 			return ObjectiveStatus.Complete;
 		}
-		
+
 		if (moveResult !== MoveResult.Complete) {
 			return;
 		}
@@ -48,7 +48,7 @@ export default class CarveCorpse extends Objective {
 
 		this.log.info("Carving corpse");
 
-		return new ExecuteAction(ActionType.Carve, carveTool[0]);
+		return new ExecuteAction(ActionType.Carve, action => action.execute(localPlayer, carveTool[0]));
 	}
 
 }

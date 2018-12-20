@@ -1,23 +1,24 @@
+import { ActionType } from "action/IAction";
 import { IStat, Stat } from "entity/IStats";
-import { ActionType, ItemTypeGroup, TerrainType } from "Enums";
+import { ItemTypeGroup, TerrainType } from "Enums";
 import { ITile } from "tile/ITerrain";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { MoveResult, moveToFaceTarget, moveToFaceTargetWithRetries } from "../Utilities/Movement";
+import { getNearestTileLocation } from "../Utilities/Tile";
 import AcquireWaterContainer from "./AcquireWaterContainer";
 import ExecuteAction from "./ExecuteAction";
 import GatherWater from "./GatherWater";
 import StartFire from "./StartFire";
 import UseItem from "./UseItem";
-import { moveToFaceTarget, moveToFaceTargetWithRetries, MoveResult } from "../Utilities/Movement";
-import { getNearestTileLocation } from "../Utilities/Tile";
 
 export default class RecoverThirst extends Objective {
-	
+
 	public getHashCode(): string {
 		return "RecoverThirst";
 	}
-	
+
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const waterStill = base.waterStill;
 
@@ -27,15 +28,15 @@ export default class RecoverThirst extends Objective {
 		if (inventory.waterContainer !== undefined) {
 			const waterContainerDescription = inventory.waterContainer.description()!;
 			isWaterInContainer = waterContainerDescription.use && waterContainerDescription.use.indexOf(ActionType.DrinkItem) !== -1;
-			if (isWaterInContainer && waterContainerDescription.group) {
-				if (waterContainerDescription.group.indexOf(ItemTypeGroup.ContainerOfMedicinalWater) !== -1 ||
-					waterContainerDescription.group.indexOf(ItemTypeGroup.ContainerOfDesalinatedWater) !== -1 ||
-					waterContainerDescription.group.indexOf(ItemTypeGroup.ContainerOfPurifiedFreshWater) !== -1) {
+			if (isWaterInContainer) {
+				if (itemManager.isInGroup(inventory.waterContainer.type, ItemTypeGroup.ContainerOfMedicinalWater) ||
+					itemManager.isInGroup(inventory.waterContainer.type, ItemTypeGroup.ContainerOfDesalinatedWater) ||
+					itemManager.isInGroup(inventory.waterContainer.type, ItemTypeGroup.ContainerOfPurifiedFreshWater)) {
 					this.log.info("Drink water from container");
 					return new UseItem(inventory.waterContainer, ActionType.DrinkItem);
 				}
 
-				if (isEmergency && waterContainerDescription.group.indexOf(ItemTypeGroup.ContainerOfUnpurifiedFreshWater) !== -1) {
+				if (isEmergency && itemManager.isInGroup(inventory.waterContainer.type, ItemTypeGroup.ContainerOfUnpurifiedFreshWater)) {
 					// emergency!
 					this.log.info("Drink water from container");
 					return new UseItem(inventory.waterContainer, ActionType.DrinkItem);
@@ -75,7 +76,7 @@ export default class RecoverThirst extends Objective {
 
 				this.log.info("Drink in front");
 
-				return new ExecuteAction(ActionType.DrinkInFront);
+				return new ExecuteAction(ActionType.DrinkInFront, action => action.execute(localPlayer));
 			}
 		}
 

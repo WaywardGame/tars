@@ -6,7 +6,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "Enums", "item/Items", "utilities/enum/Enums", "../IObjective", "../Objective", "./AcquireItem"], function (require, exports, Enums_1, Items_1, Enums_2, IObjective_1, Objective_1, AcquireItem_1) {
+define(["require", "exports", "utilities/iterable/Collectors", "../IObjective", "../Objective", "./AcquireItem"], function (require, exports, Collectors_1, IObjective_1, Objective_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireItemByGroup extends Objective_1.default {
@@ -19,13 +19,9 @@ define(["require", "exports", "Enums", "item/Items", "utilities/enum/Enums", "..
         }
         onExecute(base, inventory, calculateDifficulty) {
             return __awaiter(this, void 0, void 0, function* () {
-                const objectiveSets = [];
-                for (const it of Enums_2.default.values(Enums_1.ItemType)) {
-                    const itemDescription = Items_1.itemDescriptions[it];
-                    if (itemDescription && itemDescription.group !== undefined && itemDescription.group.indexOf(this.itemTypeGroup) !== -1) {
-                        objectiveSets.push([new AcquireItem_1.default(it)]);
-                    }
-                }
+                const objectiveSets = itemManager.getGroupItems(this.itemTypeGroup).values()
+                    .map(item => [new AcquireItem_1.default(item)])
+                    .collect(Collectors_1.default.toArray);
                 const objective = yield this.pickEasiestObjective(base, inventory, objectiveSets);
                 if (objective === undefined) {
                     if (calculateDifficulty) {
@@ -39,4 +35,4 @@ define(["require", "exports", "Enums", "item/Items", "utilities/enum/Enums", "..
     }
     exports.default = AcquireItemByGroup;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWNxdWlyZUl0ZW1CeUdyb3VwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL09iamVjdGl2ZXMvQWNxdWlyZUl0ZW1CeUdyb3VwLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O0lBUUEsTUFBcUIsa0JBQW1CLFNBQVEsbUJBQVM7UUFFeEQsWUFBb0IsYUFBNEI7WUFDL0MsS0FBSyxFQUFFLENBQUM7WUFEVyxrQkFBYSxHQUFiLGFBQWEsQ0FBZTtRQUVoRCxDQUFDO1FBRU0sV0FBVztZQUNqQixPQUFPLHNCQUFzQixXQUFXLENBQUMsb0JBQW9CLENBQUMsSUFBSSxDQUFDLGFBQWEsRUFBRSxLQUFLLENBQUMsRUFBRSxDQUFDO1FBQzVGLENBQUM7UUFFWSxTQUFTLENBQUMsSUFBVyxFQUFFLFNBQTBCLEVBQUUsbUJBQTRCOztnQkFDM0YsTUFBTSxhQUFhLEdBQW1CLEVBQUUsQ0FBQztnQkFFekMsS0FBSyxNQUFNLEVBQUUsSUFBSSxlQUFLLENBQUMsTUFBTSxDQUFDLGdCQUFRLENBQUMsRUFBRTtvQkFDeEMsTUFBTSxlQUFlLEdBQUcsd0JBQUssQ0FBQyxFQUFFLENBQUMsQ0FBQztvQkFDbEMsSUFBSSxlQUFlLElBQUksZUFBZSxDQUFDLEtBQUssS0FBSyxTQUFTLElBQUksZUFBZSxDQUFDLEtBQUssQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLGFBQThCLENBQUMsS0FBSyxDQUFDLENBQUMsRUFBRTt3QkFDeEksYUFBYSxDQUFDLElBQUksQ0FBQyxDQUFDLElBQUkscUJBQVcsQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDLENBQUM7cUJBQzFDO2lCQUNEO2dCQUVELE1BQU0sU0FBUyxHQUFHLE1BQU0sSUFBSSxDQUFDLG9CQUFvQixDQUFDLElBQUksRUFBRSxTQUFTLEVBQUUsYUFBYSxDQUFDLENBQUM7Z0JBRWxGLElBQUksU0FBUyxLQUFLLFNBQVMsRUFBRTtvQkFDNUIsSUFBSSxtQkFBbUIsRUFBRTt3QkFDeEIsT0FBTyw4QkFBaUIsQ0FBQztxQkFDekI7b0JBRUQsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQztpQkFDaEM7Z0JBRUQsT0FBTyxTQUFTLENBQUM7WUFDbEIsQ0FBQztTQUFBO0tBRUQ7SUFqQ0QscUNBaUNDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWNxdWlyZUl0ZW1CeUdyb3VwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL09iamVjdGl2ZXMvQWNxdWlyZUl0ZW1CeUdyb3VwLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O0lBT0EsTUFBcUIsa0JBQW1CLFNBQVEsbUJBQVM7UUFFeEQsWUFBNkIsYUFBNEI7WUFDeEQsS0FBSyxFQUFFLENBQUM7WUFEb0Isa0JBQWEsR0FBYixhQUFhLENBQWU7UUFFekQsQ0FBQztRQUVNLFdBQVc7WUFDakIsT0FBTyxzQkFBc0IsV0FBVyxDQUFDLG9CQUFvQixDQUFDLElBQUksQ0FBQyxhQUFhLEVBQUUsS0FBSyxDQUFDLEVBQUUsQ0FBQztRQUM1RixDQUFDO1FBRVksU0FBUyxDQUFDLElBQVcsRUFBRSxTQUEwQixFQUFFLG1CQUE0Qjs7Z0JBQzNGLE1BQU0sYUFBYSxHQUFtQixXQUFXLENBQUMsYUFBYSxDQUFDLElBQUksQ0FBQyxhQUFhLENBQUMsQ0FBQyxNQUFNLEVBQUU7cUJBQzFGLEdBQUcsQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUMsSUFBSSxxQkFBVyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUM7cUJBQ3BDLE9BQU8sQ0FBQyxvQkFBVSxDQUFDLE9BQU8sQ0FBQyxDQUFDO2dCQUU5QixNQUFNLFNBQVMsR0FBRyxNQUFNLElBQUksQ0FBQyxvQkFBb0IsQ0FBQyxJQUFJLEVBQUUsU0FBUyxFQUFFLGFBQWEsQ0FBQyxDQUFDO2dCQUVsRixJQUFJLFNBQVMsS0FBSyxTQUFTLEVBQUU7b0JBQzVCLElBQUksbUJBQW1CLEVBQUU7d0JBQ3hCLE9BQU8sOEJBQWlCLENBQUM7cUJBQ3pCO29CQUVELE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7aUJBQ2hDO2dCQUVELE9BQU8sU0FBUyxDQUFDO1lBQ2xCLENBQUM7U0FBQTtLQUVEO0lBNUJELHFDQTRCQyJ9

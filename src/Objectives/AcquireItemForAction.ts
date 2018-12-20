@@ -1,4 +1,5 @@
-import { ActionType, ItemType } from "Enums";
+import { ActionType } from "action/IAction";
+import { ItemType } from "Enums";
 import { itemDescriptions as Items } from "item/Items";
 import Enums from "utilities/enum/Enums";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
@@ -8,7 +9,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForAction extends Objective {
 
-	constructor(private actionType: ActionType) {
+	constructor(private readonly actionType: ActionType) {
 		super();
 	}
 

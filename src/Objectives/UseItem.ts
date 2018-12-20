@@ -1,20 +1,21 @@
-import { ActionType, SentenceCaseStyle } from "Enums";
+import { ActionType } from "action/IAction";
+import { } from "Enums";
 import { IItem } from "item/IItem";
 import { IVector3 } from "utilities/math/IVector";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { getMovementPath, MoveResult, moveToFaceTarget } from "../Utilities/Movement";
 import ExecuteAction from "./ExecuteAction";
-import { getMovementPath, moveToFaceTarget, MoveResult } from "../Utilities/Movement";
 
 export default class UseItem extends Objective {
 
-	constructor(private item: IItem | undefined, private useActionType: ActionType, private target?: IVector3) {
+	constructor(private readonly item: IItem | undefined, private readonly useActionType: ActionType, private readonly target?: IVector3) {
 		super();
 	}
 
 	public getHashCode(): string {
-		return `UseItem:${game.getName(this.item, SentenceCaseStyle.Title, false)}|${ActionType[this.useActionType]}`;
+		return `UseItem:${this.item && this.item.getName(false).getString()}|${ActionType[this.useActionType]}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
@@ -39,10 +40,7 @@ export default class UseItem extends Objective {
 			return ObjectiveStatus.Complete;
 		}
 
-		return new ExecuteAction(ActionType.UseItem, {
-			item: this.item,
-			useActionType: this.useActionType
-		});
+		return new ExecuteAction(ActionType.UseItem, action => action.execute(localPlayer, this.item!, this.useActionType));
 	}
 
 }

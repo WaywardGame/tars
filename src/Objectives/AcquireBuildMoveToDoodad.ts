@@ -14,7 +14,7 @@ import { getInventoryItemForDoodad } from "../Utilities/Item";
 
 export default class AcquireBuildMoveToDoodad extends Objective {
 
-	constructor(private doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
+	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
 		super();
 	}
 
@@ -56,7 +56,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 				objectives.push(new StartFire(doodad!));
 			}
 
-			return this.calculateObjectiveDifficulties(base, inventory, objectives);
+			return this.calculateObjectiveDifficulties(base, inventory, ...objectives);
 		}
 
 		if (!doodad) {

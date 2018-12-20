@@ -1,4 +1,5 @@
-import { ActionType, ItemType, SentenceCaseStyle } from "Enums";
+import { ActionType } from "action/IAction";
+import { ItemType } from "Enums";
 import { IItem } from "item/IItem";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
@@ -10,14 +11,14 @@ import ExecuteAction from "./ExecuteAction";
 
 export default class RepairItem extends Objective {
 
-	constructor(private item: IItem) {
+	constructor(private readonly item: IItem) {
 		super();
 	}
-	
+
 	public getHashCode(): string {
-		return `RepairItem:${game.getName(this.item, SentenceCaseStyle.Title, false)}`;
+		return `RepairItem:${this.item && this.item.getName(false).getString()}`;
 	}
-	
+
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		if (inventory.hammer === undefined) {
 			return new AcquireItem(ItemType.StoneHammer);
@@ -48,14 +49,11 @@ export default class RepairItem extends Objective {
 			}
 
 			this.log.info("Requirements not met?");
-			
+
 			return ObjectiveStatus.Complete;
 		}
-		
-		return new ExecuteAction(ActionType.Repair, {
-			item: inventory.hammer,
-			repairee: this.item
-		});
+
+		return new ExecuteAction(ActionType.Repair, action => action.execute(localPlayer, inventory.hammer!, this.item));
 	}
 
 }

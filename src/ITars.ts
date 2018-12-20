@@ -1,5 +1,6 @@
 import { IDoodad } from "doodad/IDoodad";
-import { ActionType, CreatureType, DoodadType, GrowingStage, ItemType, TerrainType } from "Enums";
+import { ActionType } from "action/IAction";
+import { CreatureType, DoodadType, GrowingStage, ItemType, TerrainType } from "Enums";
 import { IItem } from "item/IItem";
 import { ITile } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";

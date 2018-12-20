@@ -1,26 +1,27 @@
-import { ActionType, SentenceCaseStyle, TerrainType } from "Enums";
+import { ActionType } from "action/IAction";
 import { IItem } from "item/IItem";
 import { ITile } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
-import TileHelpers from "utilities/TileHelpers";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { defaultMaxTilesChecked, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { getBaseDoodads, hasBase, isGoodBuildTile, findBuildTile } from "../Utilities/Base";
+import { findAndMoveToFaceTarget, MoveResult, moveToFaceTarget } from "../Utilities/Movement";
 import UseItem from "./UseItem";
-import { moveToFaceTarget, findAndMoveToFaceTarget, MoveResult } from "../Utilities/Movement";
-import { isGoodBuildTile, getBaseDoodads, hasBase } from "../Utilities/Base";
-import { findDoodad } from "../Utilities/Object";
+
+const recalculateMovements = 40;
 
 export default class BuildItem extends Objective {
 
 	private target: IVector3 | undefined;
+	private movements: number = 0;
 
-	constructor(private item: IItem) {
+	constructor(private readonly item?: IItem) {
 		super();
 	}
 
 	public getHashCode(): string {
-		return `BuildItem:${game.getName(this.item, SentenceCaseStyle.Title, false)}`;
+		return `BuildItem:${this.item && this.item.getName(false).getString()}`;
 	}
 
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
@@ -43,73 +44,9 @@ export default class BuildItem extends Objective {
 
 		if (moveResult === undefined || moveResult === MoveResult.NoTarget || moveResult === MoveResult.NoPath) {
 			if (this.target === undefined) {
-				const targetDoodad = findDoodad(this.getHashCode(), doodad => {
-					const description = doodad.description();
-					if (!description || !description.isTree) {
-						return false;
-					}
+				this.log.info("Looking for build tile...");
 
-					// build our base near dirt and trees
-					let dirt = 0;
-					let grass = 0;
-
-					for (let x = -6; x <= 6; x++) {
-						for (let y = -6; y <= 6; y++) {
-							if (x === 0 && y === 0) {
-								continue;
-							}
-
-							const point: IVector3 = {
-								x: doodad.x + x,
-								y: doodad.y + y,
-								z: doodad.z
-							};
-
-							const tile = game.getTileFromPoint(point);
-							if (!tile.doodad && isGoodBuildTile(base, point, tile)) {
-								const tileType = TileHelpers.getType(tile);
-								if (tileType === TerrainType.Dirt) {
-									dirt++;
-
-								} else if (tileType === TerrainType.Grass) {
-									grass++;
-								}
-							}
-						}
-					}
-
-					return dirt >= 3 && grass >= 1;
-				});
-
-				if (targetDoodad === undefined) {
-					this.log.info("No target doodad to orient base around");
-					return ObjectiveStatus.Complete;
-				}
-
-				let target: IVector3 | undefined;
-
-				for (let x = -6; x <= 6; x++) {
-					for (let y = -6; y <= 6; y++) {
-						if (x === 0 && y === 0) {
-							continue;
-						}
-
-						const point: IVector3 = {
-							x: targetDoodad.x + x,
-							y: targetDoodad.y + y,
-							z: targetDoodad.z
-						};
-
-						const tile = game.getTileFromPoint(point);
-						if (isGoodBuildTile(base, point, tile)) {
-							target = point;
-							x = 7;
-							break;
-						}
-					}
-				}
-
-				this.target = target;
+				this.target = findBuildTile(this.getHashCode(), base);
 
 				if (this.target === undefined) {
 					this.log.info("No target to build first base item");
@@ -136,4 +73,16 @@ export default class BuildItem extends Objective {
 		}
 	}
 
+	public onMove() {
+		this.movements++;
+
+		if (this.movements >= recalculateMovements) {
+			// reset the objective and try to find a base spot (again)
+			// if the spot to create a base is very far away, the path to it could be huge
+			// we might just find a base while moving there!
+			this.movements = 0;
+			this.target = undefined;
+			localPlayer.walkAlongPath(undefined);
+		}
+	}
 }

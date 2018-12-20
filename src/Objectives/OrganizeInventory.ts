@@ -1,4 +1,5 @@
-import { ActionType } from "Enums";
+import { ActionType } from "action/IAction";
+import {  } from "Enums";
 import { IContainer } from "item/IItem";
 import { ITile } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
@@ -6,23 +7,23 @@ import Vector2 from "utilities/math/Vector2";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
-import ExecuteAction from "./ExecuteAction";
-import { findAndMoveToTarget, moveToFaceTarget, MoveResult } from "../Utilities/Movement";
-import { isOpenTile } from "../Utilities/Tile";
 import { getUnusedItems } from "../Utilities/Item";
+import { findAndMoveToTarget, MoveResult, moveToFaceTarget } from "../Utilities/Movement";
+import { isOpenTile } from "../Utilities/Tile";
+import ExecuteAction from "./ExecuteAction";
 
 const maxChestDistance = 128;
 
 export default class OrganizeInventory extends Objective {
 
-	constructor(private fromReduceWeightInterrupt: boolean, private allowChests: boolean = true) {
+	constructor(private readonly fromReduceWeightInterrupt: boolean, private readonly allowChests: boolean = true) {
 		super();
 	}
-	
+
 	public getHashCode(): string {
 		return "OrganizeInventory";
 	}
-	
+
 	public shouldSaveChildObjectives(): boolean {
 		return false;
 	}
@@ -53,11 +54,11 @@ export default class OrganizeInventory extends Objective {
 					continue;
 				}
 
-				const container = chest as IContainer;
-				if (itemManager.computeContainerWeight(container) + itemToDrop.weight > container.weightCapacity!) {
+				const targetContainer = chest as IContainer;
+				if (itemManager.computeContainerWeight(targetContainer) + itemToDrop.weight > targetContainer.weightCapacity!) {
 					continue;
 				}
-				
+
 				moveResult = await moveToFaceTarget(chest);
 				if (moveResult === MoveResult.NoPath) {
 					continue;
@@ -68,12 +69,9 @@ export default class OrganizeInventory extends Objective {
 					return;
 				}
 
-				this.log.info(`Moving item ${game.getName(itemToDrop)} into chest`);
+				this.log.info(`Moving item ${itemToDrop.getName()} into chest`);
 
-				return new ExecuteAction(ActionType.MoveItem, {
-					item: itemToDrop,
-					targetContainer: container
-				}, false);
+				return new ExecuteAction(ActionType.MoveItem, action => action.execute(localPlayer, itemToDrop, undefined, targetContainer), false);
 			}
 		}
 
@@ -83,9 +81,7 @@ export default class OrganizeInventory extends Objective {
 			return;
 		}
 
-		return new ExecuteAction(ActionType.Drop, {
-			item: itemToDrop
-		});
+		return new ExecuteAction(ActionType.Drop, action => action.execute(localPlayer, itemToDrop));
 	}
 
 }

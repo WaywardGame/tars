@@ -1,16 +1,17 @@
-import { ActionType, ItemType } from "Enums";
+import { ActionType } from "action/IAction";
+import { ItemType } from "Enums";
 import { ITile } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { desertCutoff, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
-import ExecuteAction from "./ExecuteAction";
 import { MoveResult, moveToFaceTargetWithRetries } from "../Utilities/Movement";
+import ExecuteAction from "./ExecuteAction";
 
 export default class GatherFromGround extends Objective {
 
-	constructor(private itemType: ItemType) {
+	constructor(private readonly itemType: ItemType) {
 		super();
 	}
 
@@ -40,7 +41,7 @@ export default class GatherFromGround extends Objective {
 			if (tile.containedItems !== undefined && tile === itemsOnTheGround[0].containedWithin as ITile) {
 				const pickupItem = tile.containedItems[tile.containedItems.length - 1];
 				if (pickupItem.type === this.itemType) {
-					return new ExecuteAction(ActionType.Idle);
+					return new ExecuteAction(ActionType.Idle, action => action.execute(localPlayer));
 				}
 			}
 		}
@@ -72,10 +73,10 @@ export default class GatherFromGround extends Objective {
 
 		const facingTile = localPlayer.getFacingTile();
 		if (facingTile.containedItems !== undefined && facingTile.containedItems[facingTile.containedItems.length - 1].type === this.itemType) {
-			return new ExecuteAction(ActionType.PickupItem);
+			return new ExecuteAction(ActionType.PickupItem, action => action.execute(localPlayer));
 		}
 
-		return new ExecuteAction(ActionType.PickupAllItems);
+		return new ExecuteAction(ActionType.PickupAllItems, action => action.execute(localPlayer));
 	}
 
 	protected getBaseDifficulty(base: IBase, inventory: IInventoryItems): number {

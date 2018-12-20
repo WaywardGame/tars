@@ -1,5 +1,6 @@
+import { ActionType } from "action/IAction";
 import { IStat, Stat } from "entity/IStats";
-import { ActionType, GrowingStage, ItemType, ItemTypeGroup, SentenceCaseStyle } from "Enums";
+import { GrowingStage, ItemType, ItemTypeGroup } from "Enums";
 import { itemDescriptions as Items } from "item/Items";
 import { ITile } from "tile/ITerrain";
 import Enums from "utilities/enum/Enums";
@@ -7,19 +8,19 @@ import { IVector3 } from "utilities/math/IVector";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { gardenMaxTilesChecked, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { getInventoryItemsWithUse, getSeeds, processRecipe } from "../Utilities/Item";
+import { findAndMoveToFaceTarget, MoveResult } from "../Utilities/Movement";
 import AcquireItem from "./AcquireItem";
 import ExecuteAction from "./ExecuteAction";
 import PlantSeed from "./PlantSeed";
 import UseItem from "./UseItem";
-import { getInventoryItemsWithUse, processRecipe, getSeeds } from "../Utilities/Item";
-import { findAndMoveToFaceTarget, MoveResult } from "../Utilities/Movement";
 
 export default class RecoverHunger extends Objective {
-	
+
 	public getHashCode(): string {
 		return "RecoverHunger";
 	}
-	
+
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const hungerValue = localPlayer.getStat<IStat>(Stat.Hunger).value;
 		const isImportant = hungerValue <= 3;
@@ -31,7 +32,7 @@ export default class RecoverHunger extends Objective {
 		}
 
 		if (food.length > 0) {
-			this.log.info(`Eating ${game.getName(food[0], SentenceCaseStyle.Title, false)}`);
+			this.log.info(`Eating ${food[0].getName(false).getString()}`);
 			return new UseItem(food[0], ActionType.Eat);
 		}
 
@@ -81,8 +82,7 @@ export default class RecoverHunger extends Objective {
 				const gatherItems = description.gather[growingStage];
 				if (gatherItems) {
 					for (const gatherItem of gatherItems) {
-						const itemDescription = Items[gatherItem.type];
-						if (itemDescription && itemDescription.group !== undefined && itemDescription.group.indexOf(ItemTypeGroup.Food) !== -1) {
+						if (itemManager.isInGroup(gatherItem.type, ItemTypeGroup.Food)) {
 							return true;
 						}
 					}
@@ -111,9 +111,7 @@ export default class RecoverHunger extends Objective {
 			if (plantToGather === MoveResult.Complete) {
 				this.log.info("Gathering plant");
 
-				return new ExecuteAction(ActionType.Gather, {
-					item: getInventoryItemsWithUse(ActionType.Gather)[0]
-				});
+				return new ExecuteAction(ActionType.Gather, action => action.execute(localPlayer, getInventoryItemsWithUse(ActionType.Gather)[0]));
 			}
 
 			return;
@@ -129,9 +127,11 @@ export default class RecoverHunger extends Objective {
 		// try to craft any food
 		objectiveSets = [];
 
-		for (const itemType of Enums.values(ItemType)) {
+		const craftableFoodItems = itemManager.getGroupItems(ItemTypeGroup.Food);
+
+		for (const itemType of craftableFoodItems) {
 			const description = Items[itemType];
-			if (!description || description.craftable === false || !description.group || description.group.indexOf(ItemTypeGroup.Food) === -1) {
+			if (!description || description.craftable === false) {
 				continue;
 			}
 

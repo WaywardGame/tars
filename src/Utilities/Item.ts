@@ -1,4 +1,5 @@
-import { ActionType, EquipType, DamageType, ItemType, ItemTypeGroup, DoodadType, DoodadTypeGroup } from "Enums";
+import { ActionType } from "action/IAction";
+import { EquipType, DamageType, ItemType, ItemTypeGroup, DoodadType, DoodadTypeGroup } from "Enums";
 import { IItem, IContainer, IRecipe } from "item/IItem";
 import Enums from "utilities/enum/Enums";
 import { IInventoryItems } from "../ITars";

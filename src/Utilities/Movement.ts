@@ -1,20 +1,20 @@
-import { log } from "./Logger";
-import { executeAction } from "./Action";
-import { getDirectionFromMovement } from "player/IPlayer";
-import { ActionType } from "Enums";
-import { IVector2, IVector3 } from "utilities/math/IVector";
-import TileHelpers from "utilities/TileHelpers";
-import { ITile, IOverlayInfo } from "tile/ITerrain";
-import Terrains from "tile/Terrains";
-import { defaultMaxTilesChecked } from "../ITars";
+import { ActionType } from "action/IAction";
+import { ICorpse } from "creature/corpse/ICorpse";
 import { ICreature } from "creature/ICreature";
 import { AiType } from "entity/IEntity";
-import { ICorpse } from "creature/corpse/ICorpse";
-import { findObjects } from "./Object";
 import PathOverlayFootPrints from "newui/screen/screens/game/util/movement/PathOverlayFootPrints";
-import { getNavigation } from "../Navigation";
-import { missionImpossible } from "../IObjective";
+import { getDirectionFromMovement } from "player/IPlayer";
+import { IOverlayInfo, ITile } from "tile/ITerrain";
+import Terrains from "tile/Terrains";
+import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import TileHelpers from "utilities/TileHelpers";
+import { missionImpossible } from "../IObjective";
+import { defaultMaxTilesChecked } from "../ITars";
+import { getNavigation } from "../Navigation";
+import { executeAction } from "./Action";
+import { log } from "./Logger";
+import { findObjects } from "./Object";
 
 export interface IMovementPath {
 	difficulty: number;
@@ -39,7 +39,6 @@ export function findTarget(start: IVector3, isTarget: (point: IVector3, tile: IT
 		return true;
 	});
 }
-
 
 export async function findAndMoveToTarget(isTarget: (point: IVector3, tile: ITile) => boolean, maxTilesChecked: number = defaultMaxTilesChecked, start: IVector3 = localPlayer): Promise<MoveResult> {
 	return moveToTargetWithRetries((ignoredTiles: ITile[]) => findTarget(start, (point, tile) => ignoredTiles.indexOf(tile) === -1 && isTarget(point, tile), maxTilesChecked));
@@ -126,6 +125,13 @@ export function resetMovementOverlays() {
 	game.updateView(false);
 }
 
+export function clearOverlay(tile: ITile) {
+	const trackedOverlay = movementOverlays.find(tracked => tracked.tile === tile);
+	if (trackedOverlay !== undefined) {
+		TileHelpers.Overlay.remove(tile, trackedOverlay.overlay);
+	}
+}
+
 export function updateOverlay(path: IVector2[]) {
 	resetMovementOverlays();
 
@@ -209,16 +215,10 @@ export async function moveToTarget(target: IVector3): Promise<MoveResult> {
 export async function moveAwayFromTarget(target: IVector3): Promise<MoveResult> {
 	const direction = getDirectionFromMovement(localPlayer.x - target.x, localPlayer.y - target.y);
 	if (direction !== localPlayer.facingDirection) {
-		await executeAction(ActionType.UpdateDirection, {
-			direction: direction,
-			bypass: true
-		});
+		await executeAction(ActionType.UpdateDirection, action => action.execute(localPlayer, direction, undefined));
 	}
 
-	await executeAction(ActionType.Move, {
-		direction: direction,
-		bypass: true
-	});
+	await executeAction(ActionType.Move, action => action.execute(localPlayer, direction));
 
 	return MoveResult.Complete;
 }
@@ -254,10 +254,7 @@ async function move(target: IVector3, moveAdjacentToTarget: boolean): Promise<Mo
 	if (moveAdjacentToTarget) {
 		const direction = getDirectionFromMovement(target.x - localPlayer.x, target.y - localPlayer.y);
 		if (direction !== localPlayer.facingDirection) {
-			await executeAction(ActionType.UpdateDirection, {
-				direction: direction,
-				bypass: true
-			});
+			await executeAction(ActionType.UpdateDirection, action => action.execute(localPlayer, direction, undefined));
 		}
 	}
 

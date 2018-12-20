@@ -1,16 +1,17 @@
-import { ActionType, ItemType } from "Enums";
+import { ActionType } from "action/IAction";
+import { ItemType } from "Enums";
 import { IContainer } from "item/IItem";
 import { ITile } from "tile/ITerrain";
 import Vector2 from "utilities/math/Vector2";
 import { IObjective, missionImpossible, ObjectiveStatus } from "../IObjective";
 import { IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
+import { MoveResult, moveToTargetWithRetries } from "../Utilities/Movement";
 import ExecuteAction from "./ExecuteAction";
-import { moveToTargetWithRetries, MoveResult } from "../Utilities/Movement";
 
 export default class GatherFromChest extends Objective {
 
-	constructor(private itemType: ItemType) {
+	constructor(private readonly itemType: ItemType) {
 		super();
 	}
 
@@ -27,7 +28,7 @@ export default class GatherFromChest extends Objective {
 			return ObjectiveStatus.Complete;
 		}
 
-		const chestsWithItem = base.chests.filter(c => itemManager.getItemsInContainerByType(c as IContainer, this.itemType, true, false).length > 0).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
+		const chestsWithItem = base.chests.filter(c => itemManager.getItemsInContainerByType(c as IContainer, this.itemType, true).length > 0).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
 
 		const chest = chestsWithItem[0];
 
@@ -58,15 +59,12 @@ export default class GatherFromChest extends Objective {
 			return;
 		}
 
-		const item = itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true, false)[0];
+		const item = itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true)[0];
 		if (!item) {
 			this.log.warn("gather from chest bug?");
 			return ObjectiveStatus.Complete;
 		}
 
-		return new ExecuteAction(ActionType.MoveItem, {
-			item: item,
-			targetContainer: localPlayer.inventory
-		});
+		return new ExecuteAction(ActionType.MoveItem, action => action.execute(localPlayer, item, undefined, localPlayer.inventory));
 	}
 }

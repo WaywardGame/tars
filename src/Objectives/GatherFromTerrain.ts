@@ -1,4 +1,5 @@
-import { ActionType, DamageType, TerrainType } from "Enums";
+import { ActionType } from "action/IAction";
+import { DamageType, TerrainType } from "Enums";
 import { IContainer } from "item/IItem";
 import { ITerrainDescription, ITile } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
@@ -19,7 +20,7 @@ interface ITerrainSearchTarget {
 
 export default class GatherFromTerrain extends Objective {
 
-	constructor(private search: ITerrainSearch[]) {
+	constructor(private readonly search: ITerrainSearch[]) {
 		super();
 	}
 
@@ -53,7 +54,7 @@ export default class GatherFromTerrain extends Objective {
 
 						let difficulty = Math.round(Vector2.squaredDistance(localPlayer, point)) + (100 - ts.chance);
 						if (!terrainDescription.gather && !digTool) {
-							difficulty += 100;
+							difficulty += 500;
 						}
 
 						targets.push({
@@ -141,7 +142,7 @@ export default class GatherFromTerrain extends Objective {
 		const actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
 		const item = terrainDescription.gather ? getBestActionItem(ActionType.Gather, DamageType.Blunt) : digTool;
 
-		return this.executeActionForItem(actionType, { item: item }, this.search.map(search => search.itemType));
+		return this.executeActionForItem(actionType, ((action: any) => action.execute(localPlayer, item)) as any, this.search.map(search => search.itemType));
 	}
 
 	protected getBaseDifficulty(base: IBase, inventory: IInventoryItems): number {

@@ -1,14 +1,15 @@
-import { ActionType } from "Enums";
+import { ActionType } from "action/IAction";
+import {  } from "Enums";
 import { ITile } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import Objective from "../Objective";
-import ExecuteAction from "./ExecuteAction";
 import { findAndMoveToTarget, MoveResult } from "../Utilities/Movement";
+import ExecuteAction from "./ExecuteAction";
 
 export default class Idle extends Objective {
 
-	constructor(private move: boolean = true) {
+	constructor(private readonly move: boolean = true) {
 		super();
 	}
 	
@@ -25,7 +26,7 @@ export default class Idle extends Objective {
 			}
 		}
 
-		return new ExecuteAction(ActionType.Idle);
+		return new ExecuteAction(ActionType.Idle, action => action.execute(localPlayer));
 	}
 
 }

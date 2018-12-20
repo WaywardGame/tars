@@ -6,25 +6,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-define(["require", "exports", "Enums", "../IObjective", "../Objective", "../Utilities/Action"], function (require, exports, Enums_1, IObjective_1, Objective_1, Action_1) {
+define(["require", "exports", "action/IAction", "../IObjective", "../Objective", "../Utilities/Action"], function (require, exports, IAction_1, IObjective_1, Objective_1, Action_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ExecuteAction extends Objective_1.default {
-        constructor(actionType, executeArgument, complete = true) {
+        constructor(actionType, executor, complete = true) {
             super();
             this.actionType = actionType;
-            this.executeArgument = executeArgument;
+            this.executor = executor;
             this.complete = complete;
         }
         getHashCode() {
-            return `ExecuteAction:${Enums_1.ActionType[this.actionType]}`;
+            return `ExecuteAction:${IAction_1.ActionType[this.actionType]}`;
         }
         onExecute(base, inventory, calculateDifficulty) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (calculateDifficulty) {
                     return 0;
                 }
-                yield Action_1.executeAction(this.actionType, this.executeArgument);
+                yield Action_1.executeAction(this.actionType, this.executor);
                 if (this.complete) {
                     return IObjective_1.ObjectiveStatus.Complete;
                 }
@@ -33,4 +33,4 @@ define(["require", "exports", "Enums", "../IObjective", "../Objective", "../Util
     }
     exports.default = ExecuteAction;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRXhlY3V0ZUFjdGlvbi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9PYmplY3RpdmVzL0V4ZWN1dGVBY3Rpb24udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7SUFPQSxNQUFxQixhQUFjLFNBQVEsbUJBQVM7UUFFbkQsWUFBb0IsVUFBc0IsRUFBVSxlQUFpQyxFQUFVLFdBQW9CLElBQUk7WUFDdEgsS0FBSyxFQUFFLENBQUM7WUFEVyxlQUFVLEdBQVYsVUFBVSxDQUFZO1lBQVUsb0JBQWUsR0FBZixlQUFlLENBQWtCO1lBQVUsYUFBUSxHQUFSLFFBQVEsQ0FBZ0I7UUFFdkgsQ0FBQztRQUVNLFdBQVc7WUFDakIsT0FBTyxpQkFBaUIsa0JBQVUsQ0FBQyxJQUFJLENBQUMsVUFBVSxDQUFDLEVBQUUsQ0FBQztRQUN2RCxDQUFDO1FBRVksU0FBUyxDQUFDLElBQVcsRUFBRSxTQUEwQixFQUFFLG1CQUE0Qjs7Z0JBQzNGLElBQUksbUJBQW1CLEVBQUU7b0JBQ3hCLE9BQU8sQ0FBQyxDQUFDO2lCQUNUO2dCQUVELE1BQU0sc0JBQWEsQ0FBQyxJQUFJLENBQUMsVUFBVSxFQUFFLElBQUksQ0FBQyxlQUFlLENBQUMsQ0FBQztnQkFFM0QsSUFBSSxJQUFJLENBQUMsUUFBUSxFQUFFO29CQUNsQixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2lCQUNoQztZQUNGLENBQUM7U0FBQTtLQUVEO0lBdEJELGdDQXNCQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRXhlY3V0ZUFjdGlvbi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9PYmplY3RpdmVzL0V4ZWN1dGVBY3Rpb24udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7SUFRQSxNQUFxQixhQUFvQyxTQUFRLG1CQUFTO1FBRXpFLFlBQTZCLFVBQWEsRUFBbUIsUUFBb0osRUFBbUIsV0FBb0IsSUFBSTtZQUMzUCxLQUFLLEVBQUUsQ0FBQztZQURvQixlQUFVLEdBQVYsVUFBVSxDQUFHO1lBQW1CLGFBQVEsR0FBUixRQUFRLENBQTRJO1lBQW1CLGFBQVEsR0FBUixRQUFRLENBQWdCO1FBRTVQLENBQUM7UUFFTSxXQUFXO1lBQ2pCLE9BQU8saUJBQWlCLG9CQUFVLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxFQUFFLENBQUM7UUFDdkQsQ0FBQztRQUVZLFNBQVMsQ0FBQyxJQUFXLEVBQUUsU0FBMEIsRUFBRSxtQkFBNEI7O2dCQUMzRixJQUFJLG1CQUFtQixFQUFFO29CQUN4QixPQUFPLENBQUMsQ0FBQztpQkFDVDtnQkFFRCxNQUFNLHNCQUFhLENBQUMsSUFBSSxDQUFDLFVBQVUsRUFBRSxJQUFJLENBQUMsUUFBZSxDQUFDLENBQUM7Z0JBRTNELElBQUksSUFBSSxDQUFDLFFBQVEsRUFBRTtvQkFDbEIsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQztpQkFDaEM7WUFDRixDQUFDO1NBQUE7S0FFRDtJQXRCRCxnQ0FzQkMifQ==

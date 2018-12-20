@@ -1,11 +1,92 @@
 import { IBase } from "../ITars";
+import { TerrainType } from "Enums";
 import { IDoodad } from "doodad/IDoodad";
 import { IVector3 } from "utilities/math/IVector";
 import { ITile } from "tile/ITerrain";
 import { isOpenTile } from "./Tile";
 import { IContainer } from "item/IItem";
+import { findDoodad } from "./Object";
+import TileHelpers from "utilities/TileHelpers";
 
 const nearBaseDistance = 10;
+
+export function findBuildTile(hashCode: string, base: IBase, targetOrigin?: IVector3): IVector3 | undefined {
+	const isValidOrigin = (origin: IVector3) => {
+		// build our base near dirt and trees
+		let dirt = 0;
+		let grass = 0;
+
+		for (let x = -6; x <= 6; x++) {
+			for (let y = -6; y <= 6; y++) {
+				if (x === 0 && y === 0) {
+					continue;
+				}
+
+				const point: IVector3 = {
+					x: origin.x + x,
+					y: origin.y + y,
+					z: origin.z
+				};
+
+				const tile = game.getTileFromPoint(point);
+				if (!tile.doodad && isGoodBuildTile(base, point, tile)) {
+					const tileType = TileHelpers.getType(tile);
+					if (tileType === TerrainType.Dirt) {
+						dirt++;
+
+					} else if (tileType === TerrainType.Grass) {
+						grass++;
+					}
+				}
+			}
+		}
+
+		return dirt >= 3 && grass >= 4;
+	};
+
+	if (targetOrigin === undefined) {
+		targetOrigin = findDoodad(hashCode, doodad => {
+			const description = doodad.description();
+			if (!description || !description.isTree) {
+				return false;
+			}
+
+			return isValidOrigin(doodad);
+		});
+		
+	} else if (!isValidOrigin(targetOrigin)) {
+		return undefined;
+	}
+
+	if (targetOrigin === undefined) {
+		return undefined;
+	}
+
+	let target: IVector3 | undefined;
+
+	for (let x = -6; x <= 6; x++) {
+		for (let y = -6; y <= 6; y++) {
+			if (x === 0 && y === 0) {
+				continue;
+			}
+
+			const point: IVector3 = {
+				x: targetOrigin.x + x,
+				y: targetOrigin.y + y,
+				z: targetOrigin.z
+			};
+
+			const tile = game.getTileFromPoint(point);
+			if (isGoodBuildTile(base, point, tile)) {
+				target = point;
+				x = 7;
+				break;
+			}
+		}
+	}
+
+	return target;
+}
 
 export function isGoodBuildTile(base: IBase, point: IVector3, tile: ITile): boolean {
 	return isOpenArea(point, tile) && isNearBase(base, point);
