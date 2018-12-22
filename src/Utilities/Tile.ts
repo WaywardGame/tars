@@ -5,6 +5,7 @@ import { ITile } from "tile/ITerrain";
 import { getNavigation } from "../Navigation";
 import { ITileLocation } from "../ITars";
 import { TerrainType } from "Enums";
+import { IContainer } from "item/IItem";
 
 export async function getNearestTileLocation(tileType: TerrainType, position: IVector3): Promise<ITileLocation[]> {
 	return getNavigation().getNearestTileLocation(tileType, position);
@@ -38,6 +39,21 @@ export function isOpenTile(point: IVector3, tile: ITile, ignoreLocalPlayer: bool
 				return false;
 			}
 		}
+	}
+
+	return true;
+}
+
+export function canGather(point: IVector3) {
+	const tile = game.getTileFromPoint(point);
+
+	const terrainDescription = Terrains[TileHelpers.getType(tile)]!;
+	if (!terrainDescription.gather && (tile.doodad || (tile as IContainer).containedItems)) {
+		return false;
+	}
+
+	if (tile.creature !== undefined || tile.npc !== undefined || game.isPlayerAtTile(tile, false, true)) {
+		return false;
 	}
 
 	return true;

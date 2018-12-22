@@ -1,6 +1,5 @@
 import { ActionType } from "action/IAction";
 import { DamageType, TerrainType } from "Enums";
-import { IContainer } from "item/IItem";
 import { ITerrainDescription, ITile } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
 import { IVector3 } from "utilities/math/IVector";
@@ -10,7 +9,7 @@ import { IBase, IInventoryItems, ITerrainSearch } from "../ITars";
 import Objective from "../Objective";
 import { getBestActionItem } from "../Utilities/Item";
 import { MoveResult, moveToFaceTargetWithRetries } from "../Utilities/Movement";
-import { getNearestTileLocation } from "../Utilities/Tile";
+import { getNearestTileLocation, canGather } from "../Utilities/Tile";
 
 interface ITerrainSearchTarget {
 	search: ITerrainSearch;
@@ -48,7 +47,7 @@ export default class GatherFromTerrain extends Objective {
 					if (tileLocation) {
 						const point = tileLocation.point;
 
-						if (!terrainDescription.gather && (tileLocation.tile.doodad || (tileLocation.tile as IContainer).containedItems)) {
+						if (!canGather(point)) {
 							continue;
 						}
 
@@ -92,13 +91,8 @@ export default class GatherFromTerrain extends Objective {
 		for (let i = 0; i < 8; i++) {
 			const target = targets[i];
 			if (target) {
-				const targetTile = game.getTileFromPoint(target.point);
-				if (targetTile === facingTile) {
-					terrainDescription = Terrains[target.search.type]!;
-					if (!terrainDescription.gather && (targetTile.doodad || (targetTile as IContainer).containedItems)) {
-						continue;
-					}
-
+				const tile = game.getTileFromPoint(target.point);
+				if (tile === facingTile && canGather(target.point)) {
 					selectedTarget = target;
 					break;
 				}
@@ -110,14 +104,8 @@ export default class GatherFromTerrain extends Objective {
 			const moveResult = await moveToFaceTargetWithRetries((ignoredTiles: ITile[]) => {
 				for (let i = 0; i < targets.length; i++) {
 					const target = targets[i];
-					if (target) {
+					if (target && canGather(target.point)) {
 						const targetTile = game.getTileFromPoint(target.point);
-
-						terrainDescription = Terrains[target.search.type]!;
-						if (!terrainDescription.gather && (targetTile.doodad || (targetTile as IContainer).containedItems)) {
-							continue;
-						}
-
 						if (ignoredTiles.indexOf(targetTile) === -1) {
 							selectedTarget = target;
 							return target.point;
