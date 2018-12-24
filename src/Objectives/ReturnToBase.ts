@@ -13,7 +13,7 @@ export default class ReturnToBase extends Objective {
 	
 	public async onExecute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const basePosition = getBasePosition(base);
-		if (basePosition === localPlayer || Vector2.squaredDistance(localPlayer, basePosition) <= 20) {
+		if (basePosition === localPlayer || Vector2.distance(localPlayer, basePosition) <= 20) {
 			return ObjectiveStatus.Complete;
 		}
 		

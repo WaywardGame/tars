@@ -48,9 +48,9 @@ export default class OrganizeInventory extends Objective {
 		let moveResult: MoveResult;
 
 		if (this.allowChests && base.chests !== undefined && base.chests.length > 0) {
-			const chests = base.chests.sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
+			const chests = base.chests.sort((a, b) => Vector2.distance(localPlayer, a) > Vector2.distance(localPlayer, b) ? 1 : -1);
 			for (const chest of chests) {
-				if (Vector2.squaredDistance(localPlayer, chest) > maxChestDistance) {
+				if (Vector2.distance(localPlayer, chest) > maxChestDistance) {
 					continue;
 				}
 

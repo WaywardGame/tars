@@ -29,11 +29,11 @@ export default class GatherFromGround extends Objective {
 
 				return false;
 			})
-			.sort((a, b) => Vector2.squaredDistance(localPlayer, a.containedWithin as any as IVector3) > Vector2.squaredDistance(localPlayer, b.containedWithin as any as IVector3) ? 1 : -1);
+			.sort((a, b) => Vector2.distance(localPlayer, a.containedWithin as any as IVector3) > Vector2.distance(localPlayer, b.containedWithin as any as IVector3) ? 1 : -1);
 
 		if (calculateDifficulty) {
 			const target = itemsOnTheGround[0];
-			return target === undefined ? missionImpossible : Math.round(Vector2.squaredDistance(localPlayer, target.containedWithin as any as IVector3));
+			return target === undefined ? missionImpossible : Math.round(Vector2.distance(localPlayer, target.containedWithin as any as IVector3));
 		}
 
 		if (itemsOnTheGround.length > 0) {

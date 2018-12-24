@@ -21,6 +21,7 @@ interface IUpdateTileMessage extends INavigationMessageBase {
 	type: NavigationMessageType.UpdateTile;
 	x: number;
 	y: number;
+	z: number;
 	disabled: boolean;
 	penalty: number;
 	tileType: number;
@@ -32,6 +33,7 @@ interface IFindPathMessage extends INavigationMessageBase {
 	startY: number;
 	endX: number;
 	endY: number;
+	z: number;
 }
 
 interface IGetTileLocationsMessage extends INavigationMessageBase {
@@ -39,6 +41,7 @@ interface IGetTileLocationsMessage extends INavigationMessageBase {
 	tileType: number;
 	x: number;
 	y: number;
+	z: number;
 }
 
 type NavigationMessage = IUpdateAllTilesMessage | IUpdateTileMessage | IFindPathMessage | IGetTileLocationsMessage;
@@ -58,16 +61,24 @@ const anyWaterTileLocation = -3;
 
 /////////////////////////////
 
+class NavigationInfo {
+	navigationInstance: INavigation;
+	tileLocations: { [index: number]: IKDTree };
+	kdTreeTileTypes: Uint8Array;
+}
+
 class Navigation {
 
-	private readonly navigationInstance: INavigation;
-	private readonly tileLocations: { [index: number]: IKDTree };
-	private readonly kdTreeTileTypes: Uint8Array;
+	private readonly navigationInfo: { [index: number]: NavigationInfo } = {};
 
 	constructor() {
-		this.navigationInstance = new Module.Navigation(true);
-		this.tileLocations = {};
-		this.kdTreeTileTypes = new Uint8Array(512 * 512);
+		for (let z = 0; z <= 1; z++) {
+			this.navigationInfo[z] = {
+				navigationInstance: new Module.Navigation(true),
+				tileLocations: {},
+				kdTreeTileTypes: new Uint8Array(512 * 512)
+			};
+		}
 	}
 
 	public processMessage(message: NavigationMessage) {
@@ -91,34 +102,45 @@ class Navigation {
 	}
 
 	private updateAllTiles(message: IUpdateAllTilesMessage) {
-		this.tileLocations[seawaterTileLocation] = new Module.KDTree();
-		this.tileLocations[freshWaterTileLocation] = new Module.KDTree();
-		this.tileLocations[anyWaterTileLocation] = new Module.KDTree();
-
 		const array = message.array;
 
-		for (let x = 0; x < 512; x++) {
-			for (let y = 0; y < 512; y++) {
-				const index = (y * 512 * 3) + x * 3;
+		for (let z = 0; z <= 1; z++) {
+			const navigationInfo = this.navigationInfo[z];
+			if(!navigationInfo) {
+				continue;
+			}
+			
+			navigationInfo.tileLocations[seawaterTileLocation] = new Module.KDTree();
+			navigationInfo.tileLocations[freshWaterTileLocation] = new Module.KDTree();
+			navigationInfo.tileLocations[anyWaterTileLocation] = new Module.KDTree();
 
-				const isDisabled = array[index];
-				const penalty = array[index + 1];
-				const tileType = array[index + 2];
+			for (let x = 0; x < 512; x++) {
+				for (let y = 0; y < 512; y++) {
+					const index = (z * 512 * 512 * 3) + (y * 512 * 3) + x * 3;
 
-				this._updateTile(x, y, isDisabled ? true : false, penalty, tileType);
+					const isDisabled = array[index];
+					const penalty = array[index + 1];
+					const tileType = array[index + 2];
+
+					this._updateTile(x, y, z, isDisabled ? true : false, penalty, tileType, navigationInfo);
+				}
 			}
 		}
+		
+		(self.postMessage as any)(undefined);
 	}
 
 	private updateTile(message: IUpdateTileMessage) {
-		this._updateTile(message.x, message.y, message.disabled, message.penalty, message.tileType);
+		this._updateTile(message.x, message.y, message.z, message.disabled, message.penalty, message.tileType);
 	}
 
 	private findPath(message: IFindPathMessage) {
-		const startNode = this.navigationInstance.getNode(message.startX, message.startY);
-		const endNode = this.navigationInstance.getNode(message.endX, message.endY);
+		const navigationInfo = this.navigationInfo[message.z];
+		
+		const startNode = navigationInfo.navigationInstance.getNode(message.startX, message.startY);
+		const endNode = navigationInfo.navigationInstance.getNode(message.endX, message.endY);
 
-		const path = this.navigationInstance.findPath(startNode, endNode);
+		const path = navigationInfo.navigationInstance.findPath(startNode, endNode);
 		if (path) {
 			(self.postMessage as any)(path.map(node => ({ x: node.x, y: node.y })));
 
@@ -128,28 +150,19 @@ class Navigation {
 	}
 
 	private getTileLocations(message: IGetTileLocationsMessage) {
-		const tileLocationTree = this.tileLocations[message.tileType];
+		const navigationInfo = this.navigationInfo[message.z];
+		
+		const tileLocationTree = navigationInfo.tileLocations[message.tileType];
 		(self.postMessage as any)(tileLocationTree ? tileLocationTree.nearestPoint(message.x, message.y) : []);
 	}
 
-	private getTileLocationWaterIndex(tileType: TerrainType): number | undefined {
-		if (tileType === TerrainType.ShallowSeawater || tileType === TerrainType.Seawater || tileType === TerrainType.DeepSeawater) {
-			return seawaterTileLocation;
-
-		} else if (tileType === TerrainType.ShallowFreshWater || tileType === TerrainType.FreshWater || tileType === TerrainType.DeepFreshWater) {
-			return freshWaterTileLocation;
-		}
-
-		return undefined;
-	}
-
-	private _updateTile(x: number, y: number, disabled: boolean, penalty: number, tileType: number) {
-		const node = this.navigationInstance.getNode(x, y);
+	private _updateTile(x: number, y: number, z: number, disabled: boolean, penalty: number, tileType: number, navigationInfo: NavigationInfo = this.navigationInfo[z]) {
+		const node = navigationInfo.navigationInstance.getNode(x, y);
 		node.disabled = disabled;
 		node.penalty = penalty;
 
 		const kdTreeIndex = (y * 512) + x;
-		let kdTreeTileType = this.kdTreeTileTypes[kdTreeIndex];
+		let kdTreeTileType = navigationInfo.kdTreeTileTypes[kdTreeIndex];
 
 		let waterIndex: number | undefined;
 
@@ -160,28 +173,39 @@ class Navigation {
 				return;
 			}
 
-			this.tileLocations[kdTreeTileType].deletePoint(x, y);
+			navigationInfo.tileLocations[kdTreeTileType].deletePoint(x, y);
 
-			waterIndex = this.getTileLocationWaterIndex(kdTreeTileType);
+			waterIndex = Navigation.getTileLocationWaterIndex(kdTreeTileType);
 			if (waterIndex !== undefined) {
-				this.tileLocations[waterIndex].deletePoint(x, y);
-				this.tileLocations[anyWaterTileLocation].deletePoint(x, y);
+				navigationInfo.tileLocations[waterIndex].deletePoint(x, y);
+				navigationInfo.tileLocations[anyWaterTileLocation].deletePoint(x, y);
 			}
 		}
 
-		this.kdTreeTileTypes[kdTreeIndex] = tileType + 1;
+		navigationInfo.kdTreeTileTypes[kdTreeIndex] = tileType + 1;
 
-		if (!this.tileLocations[tileType]) {
-			this.tileLocations[tileType] = new Module.KDTree();
+		if (!navigationInfo.tileLocations[tileType]) {
+			navigationInfo.tileLocations[tileType] = new Module.KDTree();
 		}
 
-		this.tileLocations[tileType].insertPoint(x, y);
+		navigationInfo.tileLocations[tileType].insertPoint(x, y);
 
-		waterIndex = this.getTileLocationWaterIndex(tileType);
+		waterIndex = Navigation.getTileLocationWaterIndex(tileType);
 		if (waterIndex !== undefined) {
-			this.tileLocations[waterIndex].insertPoint(x, y);
-			this.tileLocations[anyWaterTileLocation].insertPoint(x, y);
+			navigationInfo.tileLocations[waterIndex].insertPoint(x, y);
+			navigationInfo.tileLocations[anyWaterTileLocation].insertPoint(x, y);
 		}
+	}
+
+	private static getTileLocationWaterIndex(tileType: TerrainType): number | undefined {
+		if (tileType === TerrainType.ShallowSeawater || tileType === TerrainType.Seawater || tileType === TerrainType.DeepSeawater) {
+			return seawaterTileLocation;
+
+		} else if (tileType === TerrainType.ShallowFreshWater || tileType === TerrainType.FreshWater || tileType === TerrainType.DeepFreshWater) {
+			return freshWaterTileLocation;
+		}
+
+		return undefined;
 	}
 }
 

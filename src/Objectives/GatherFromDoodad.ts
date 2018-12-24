@@ -35,7 +35,7 @@ export default class GatherFromDoodad extends Objective {
 		}
 
 		if (calculateDifficulty) {
-			return this.target === undefined ? missionImpossible : Math.round(Vector2.squaredDistance(localPlayer, this.target));
+			return this.target === undefined ? missionImpossible : Math.round(Vector2.distance(localPlayer, this.target));
 		}
 
 		if (this.target === undefined) {

@@ -18,6 +18,7 @@ export interface IUpdateTileMessage extends INavigationMessageBase {
 	type: NavigationMessageType.UpdateTile;
 	x: number;
 	y: number;
+	z: number;
 	disabled: boolean;
 	penalty: number;
 	tileType: number;
@@ -29,6 +30,7 @@ export interface IFindPathMessage extends INavigationMessageBase {
 	startY: number;
 	endX: number;
 	endY: number;
+	z: number;
 }
 
 export interface IGetTileLocationsMessage extends INavigationMessageBase {
@@ -36,6 +38,7 @@ export interface IGetTileLocationsMessage extends INavigationMessageBase {
 	tileType: number;
 	x: number;
 	y: number;
+	z: number;
 }
 
 export type NavigationMessage = IUpdateAllTilesMessage | IUpdateTileMessage | IFindPathMessage | IGetTileLocationsMessage;

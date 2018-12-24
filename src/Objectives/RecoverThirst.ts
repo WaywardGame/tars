@@ -108,7 +108,7 @@ export default class RecoverThirst extends Objective {
 				return new UseItem(inventory.waterContainer, ActionType.Pour, waterStill);
 			}
 
-			this.log.info("Gather water from a water tile");
+			this.log.info("Gather water");
 			return new GatherWater(inventory.waterContainer);
 		}
 
@@ -132,7 +132,7 @@ export default class RecoverThirst extends Objective {
 
 			return ObjectiveStatus.Complete;
 		}
-
+		
 		return new StartFire(waterStill);
 	}
 

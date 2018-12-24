@@ -1,5 +1,5 @@
 import { IBase } from "../ITars";
-import { TerrainType } from "Enums";
+import { TerrainType, WorldZ } from "Enums";
 import { IDoodad } from "doodad/IDoodad";
 import { IVector3 } from "utilities/math/IVector";
 import { ITile } from "tile/ITerrain";
@@ -7,8 +7,9 @@ import { isOpenTile } from "./Tile";
 import { IContainer } from "item/IItem";
 import { findDoodad } from "./Object";
 import TileHelpers from "utilities/TileHelpers";
+import Terrains from "tile/Terrains";
 
-const nearBaseDistance = 10;
+const nearBaseDistance = 12;
 
 export function findBuildTile(hashCode: string, base: IBase, targetOrigin?: IVector3): IVector3 | undefined {
 	const isValidOrigin = (origin: IVector3) => {
@@ -53,7 +54,7 @@ export function findBuildTile(hashCode: string, base: IBase, targetOrigin?: IVec
 
 			return isValidOrigin(doodad);
 		});
-		
+
 	} else if (!isValidOrigin(targetOrigin)) {
 		return undefined;
 	}
@@ -90,6 +91,36 @@ export function findBuildTile(hashCode: string, base: IBase, targetOrigin?: IVec
 
 export function isGoodBuildTile(base: IBase, point: IVector3, tile: ITile): boolean {
 	return isOpenArea(point, tile) && isNearBase(base, point);
+}
+
+export function isGoodWellBuildTile(base: IBase, point: IVector3, tile: ITile, onlyUnlimited: boolean): boolean {
+	if (!isGoodBuildTile(base, point, tile)) {
+		return false;
+	}
+	
+	// only place wells down on fresh water tiles
+	const x = point.x;
+	const y = point.y;
+	
+	for (let x2 = x - 6; x2 <= x + 6; x2++) {
+		for (let y2 = y - 6; y2 <= y + 6; y2++) {
+			const tileDescription = Terrains[TileHelpers.getType(game.getTile(x2, y2, point.z))];
+			if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
+				// seawater well
+				return false;
+			}
+		}
+	}
+	
+	const caveTerrain = Terrains[TileHelpers.getType(game.getTile(x, y, WorldZ.Cave))];
+	if (point.z === WorldZ.Cave || (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater))) {
+		return true;
+
+	} else if (caveTerrain && !caveTerrain.passable && !onlyUnlimited) {
+		return true;
+	}
+		
+	return true;
 }
 
 export function isOpenArea(point: IVector3, tile: ITile): boolean {

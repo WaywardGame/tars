@@ -1,5 +1,5 @@
 import { ActionType } from "action/IAction";
-import { ItemType, TerrainType } from "Enums";
+import { ItemType, DoodadType } from "Enums";
 import { IItem } from "item/IItem";
 import { ITile, ITileContainer } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
@@ -11,6 +11,7 @@ import { getBasePosition, isOpenArea } from "../Utilities/Base";
 import { findAndMoveToFaceTarget, MoveResult } from "../Utilities/Movement";
 import AcquireItem from "./AcquireItem";
 import UseItem from "./UseItem";
+import doodadDescriptions from "doodad/Doodads";
 
 export default class PlantSeed extends Objective {
 
@@ -28,24 +29,39 @@ export default class PlantSeed extends Objective {
 			return new AcquireItem(ItemType.StoneHoe);
 		}
 
+		const description = this.seed.description();
+		if (!description || !description.onUse) {
+			return;
+		}
+
+		const plantType: DoodadType = description.onUse[ActionType.Plant];
+		const plantDescription = doodadDescriptions[plantType];
+		if (!plantDescription) {
+			return;
+		}
+
+		const allowedTiles = plantDescription.allowedTiles;
+		if (!allowedTiles) {
+			return;
+		}
+		
 		const emptyTilledTile = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => {
 			const tileContainer = tile as ITileContainer;
 			return tile.doodad === undefined &&
-				TileHelpers.isOpenTile(point, tile) &&
-				TileHelpers.getType(tile) === TerrainType.Dirt &&
-				TileHelpers.isTilled(tile) &&
 				tile.corpses === undefined &&
+				TileHelpers.isOpenTile(point, tile) &&
+				TileHelpers.isTilled(tile) &&
+				allowedTiles.indexOf(TileHelpers.getType(tile)) !== -1 &&
 				(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
 		}, gardenMaxTilesChecked, getBasePosition(base));
 		if (emptyTilledTile === MoveResult.NoTarget) {
-			const nearbyDirtTile = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) =>
-				TileHelpers.getType(tile) === TerrainType.Dirt && isOpenArea(point, tile), gardenMaxTilesChecked, getBasePosition(base));
-			if (nearbyDirtTile === MoveResult.NoTarget) {
+			const nearbyTillableTile = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => allowedTiles.indexOf(TileHelpers.getType(tile)) !== -1 && isOpenArea(point, tile), gardenMaxTilesChecked, getBasePosition(base));
+			if (nearbyTillableTile === MoveResult.NoTarget) {
 				this.log.info("No nearby dirt tile");
 				return ObjectiveStatus.Complete;
 			}
 
-			if (nearbyDirtTile !== MoveResult.Complete) {
+			if (nearbyTillableTile !== MoveResult.Complete) {
 				return;
 			}
 

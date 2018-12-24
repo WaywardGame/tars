@@ -5,9 +5,11 @@ import { ITile } from "tile/ITerrain";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { anyWaterTileLocation } from "../Navigation";
 import Objective from "../Objective";
-import { MoveResult, moveToFaceTargetWithRetries } from "../Utilities/Movement";
+import { MoveResult, moveToFaceTargetWithRetries, moveToFaceTarget } from "../Utilities/Movement";
 import { getNearestTileLocation } from "../Utilities/Tile";
 import ExecuteAction from "./ExecuteAction";
+import { IBase } from "../ITars";
+import { getTileId } from "utilities/TilePosition";
 
 export default class GatherWater extends Objective {
 
@@ -19,9 +21,30 @@ export default class GatherWater extends Objective {
 		return `GatherWater:${this.item && this.item.getName(false).getString()}`;
 	}
 
-	public async onExecute(): Promise<IObjective | ObjectiveStatus | number | undefined> {
-		const targets = await getNearestTileLocation(anyWaterTileLocation, localPlayer);
+	public async onExecute(base: IBase): Promise<IObjective | ObjectiveStatus | number | undefined> {
+		// look for water in wells first
+		for (const well of base.wells!) {
+			const wellData = game.wellData[getTileId(well.x, well.y, well.z)];
+			if (wellData && (wellData.quantity >= 1 || wellData.quantity === -1)) {
+				this.log.info("Gather water from a well");
 
+				const moveResult = await moveToFaceTarget(well);
+				if (moveResult !== MoveResult.NoPath) {
+					if (moveResult === MoveResult.Moving) {
+						return;
+					}
+
+					this.log.info("Gather water from the well");
+					return new ExecuteAction(ActionType.UseItem, action => action.execute(localPlayer, this.item, ActionType.GatherWater));
+
+				} else {
+					this.log.info("No path to well");
+				}
+			}
+		}
+		
+		const targets = await getNearestTileLocation(anyWaterTileLocation, localPlayer);
+		
 		const moveResult = await moveToFaceTargetWithRetries((ignoredTiles: ITile[]) => {
 			for (let i = 0; i < 5; i++) {
 				const target = targets[i];
@@ -46,9 +69,14 @@ export default class GatherWater extends Objective {
 
 		} else if (moveResult !== MoveResult.Complete) {
 			return;
-		}
+		}		
 
 		this.log.info("Gather water");
+		
+		if (game.isTileFull(localPlayer.getFacingTile())) {
+			this.log.info("Tile is full, pickup all items first");
+			return new ExecuteAction(ActionType.PickupAllItems, action => action.execute(localPlayer));
+		}
 
 		return new ExecuteAction(ActionType.UseItem, action => action.execute(localPlayer, this.item, ActionType.GatherWater));
 	}

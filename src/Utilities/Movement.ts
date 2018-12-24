@@ -83,9 +83,32 @@ async function _findAndMoveToObject<T extends IVector3>(id: string, allObjects: 
 async function _moveToTargetWithRetries(getTarget: (ignoredTiles: ITile[]) => IVector3 | undefined, moveAdjacentToTarget: boolean, maxRetries: number = 5): Promise<MoveResult> {
 	const ignoredTiles: ITile[] = [];
 
+	const facingTile = localPlayer.getFacingTile();
+	
+	let retries = maxRetries;
+	while (retries > 0) {
+		retries--;
+		
+		const target = getTarget(ignoredTiles);
+		if (!target) {
+			break;
+		}
+		
+		const tile = game.getTileFromPoint(target);
+		if (tile === facingTile) {
+			return MoveResult.Complete;
+		}
+		
+		ignoredTiles.push(tile);
+	}
+
+	ignoredTiles.length = 0;
+	
+	retries = maxRetries;
+	
 	let result = MoveResult.NoPath;
-	while (result === MoveResult.NoPath && maxRetries > 0) {
-		maxRetries--;
+	while (result === MoveResult.NoPath && retries > 0) {
+		retries--;
 
 		const target = getTarget(ignoredTiles);
 		if (target) {
@@ -173,7 +196,7 @@ export async function getMovementPath(target: IVector3, moveAdjacentToTarget: bo
 	} else {
 		const navigation = getNavigation();
 
-		const ends = navigation.getValidPoints(target, !moveAdjacentToTarget).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
+		const ends = navigation.getValidPoints(target, !moveAdjacentToTarget).sort((a, b) => Vector2.distance(localPlayer, a) > Vector2.distance(localPlayer, b) ? 1 : -1);
 		if (ends.length === 0) {
 			return {
 				difficulty: missionImpossible
@@ -191,10 +214,10 @@ export async function getMovementPath(target: IVector3, moveAdjacentToTarget: bo
 	}
 
 	if (movementPath) {
-		// log("getMovementPath", movementPath.length, Vector2.squaredDistance(localPlayer, target));
+		// log("getMovementPath", movementPath.length, Vector2.distance(localPlayer, target));
 
 		return {
-			difficulty: Vector2.squaredDistance(localPlayer, target),
+			difficulty: Vector2.distance(localPlayer, target),
 			path: movementPath
 		};
 	}

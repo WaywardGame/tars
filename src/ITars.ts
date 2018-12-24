@@ -18,10 +18,11 @@ export interface ITileLocation {
 }
 
 export interface IBaseObjects<T> {
-	waterStill?: T;
 	campfire?: T;
-	kiln?: T;
 	chests?: T[];
+	kiln?: T;
+	waterStill?: T;
+	wells?: T[];
 }
 
 export type IBase = IBaseObjects<IDoodad>;
@@ -29,19 +30,19 @@ export type IBase = IBaseObjects<IDoodad>;
 export type IInventoryBaseItems = IBaseObjects<IItem>;
 
 export interface IInventoryItems extends IInventoryBaseItems {
-	bed?: IItem;
 	axe?: IItem;
+	bed?: IItem;
 	fireKindling?: IItem;
-	fireTinder?: IItem;
 	fireStarter?: IItem;
 	fireStoker?: IItem;
+	fireTinder?: IItem;
 	hammer?: IItem;
 	hoe?: IItem;
 	pickAxe?: IItem;
 	sharpened?: IItem;
-	waterContainer?: IItem;
 	shovel?: IItem;
 	sword?: IItem;
+	waterContainer?: IItem;
 }
 
 export interface IItemSearch<T> {

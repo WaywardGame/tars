@@ -51,7 +51,7 @@ export default class GatherFromTerrain extends Objective {
 							continue;
 						}
 
-						let difficulty = Math.round(Vector2.squaredDistance(localPlayer, point)) + (100 - ts.chance);
+						let difficulty = Math.round(Vector2.distance(localPlayer, point)) + (100 - ts.chance);
 						if (!terrainDescription.gather && !digTool) {
 							difficulty += 500;
 						}

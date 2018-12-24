@@ -63,7 +63,7 @@ export default class GatherFromCreature extends Objective {
 				return missionImpossible;
 			}
 
-			return Math.round(Vector2.squaredDistance(localPlayer, target)) + await this.calculateObjectiveDifficulties(base, inventory, ...objectives);
+			return Math.round(Vector2.distance(localPlayer, target)) + await this.calculateObjectiveDifficulties(base, inventory, ...objectives);
 		}
 
 		if (!canCarveCorpse) {

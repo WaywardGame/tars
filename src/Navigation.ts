@@ -10,6 +10,7 @@ import { IFindPathMessage, IUpdateTileMessage, NavigationMessageType } from "./I
 import { ITileLocation } from "./ITars";
 import { log } from "./Utilities/Logger";
 import { isWalkToTileBlocked } from "creature/Pathing";
+import Vector2 from "utilities/math/Vector2";
 
 export const seawaterTileLocation = -1;
 export const freshWaterTileLocation = -2;
@@ -33,7 +34,7 @@ export class Navigation {
 				pathPrefix += "../";
 			}
 		}
-		
+
 		this.navigationWorker = new Worker(`${modPath}/out/NavigationWorker.js`);
 		this.navigationWorker.postMessage(pathPrefix);
 	}
@@ -45,20 +46,20 @@ export class Navigation {
 	public updateAll(): Promise<void> {
 		log("Updating navigation. Please wait...");
 
-		const array = new Uint8Array(game.mapSize * game.mapSize * 3);
+		const zs = 2;
+
+		const array = new Uint8Array(game.mapSize * game.mapSize * zs * 3);
 
 		const start = performance.now();
 
-		for (let x = 0; x < game.mapSize; x++) {
-			for (let y = 0; y < game.mapSize; y++) {
-				const tile = game.getTile(x, y, WorldZ.Overworld);
-				this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, WorldZ.Overworld, array);
+		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
+			for (let x = 0; x < game.mapSize; x++) {
+				for (let y = 0; y < game.mapSize; y++) {
+					const tile = game.getTile(x, y, z);
+					this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z, array);
+				}
 			}
 		}
-
-		const time = performance.now() - start;
-
-		log(`Updated navigation in ${time}ms`);
 
 		const updateAllTilesMessage: IUpdateAllTilesMessage = {
 			type: NavigationMessageType.UpdateAllTiles,
@@ -66,41 +67,18 @@ export class Navigation {
 		};
 		this.navigationWorker.postMessage(updateAllTilesMessage, [array.buffer]);
 
-		return Promise.resolve();
-
-		/*
 		return new Promise((resolve) => {
-			let x = 0;
-
-			const intervalId = setInterval(() => {
-				let count = 0;
-
-				for (; x < game.mapSize; x++) {
-					if (count++ >= 4) {
-						return;
-					}
-
-					for (let y = 0; y < game.mapSize; y++) {
-						const tile = game.getTile(x, y, WorldZ.Overworld);
-						delete (tile as ITileWithExtraData).kdTreeType;
-						this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, WorldZ.Overworld);
-					}
-				}
-
-				clearInterval(intervalId);
-
-				log("Updated navigation");
-
+			this.navigationWorker.onmessage = (event: MessageEvent) => {
+				const time = performance.now() - start;
+		
+				log(`Updated navigation in ${time}ms`);
+				
 				resolve();
-			}, 1);
-		});*/
+			}
+		});
 	}
 
 	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array): void {
-		if (z !== WorldZ.Overworld) {
-			return;
-		}
-
 		const terrainDescription = Terrains[tileType];
 		if (!terrainDescription) {
 			return;
@@ -110,7 +88,7 @@ export class Navigation {
 		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription);
 
 		if (array) {
-			const index = (y * game.mapSize * 3) + x * 3;
+			const index = (z * game.mapSize * game.mapSize * 3) + (y * game.mapSize * 3) + x * 3;
 			array[index] = isDisabled ? 1 : 0;
 			array[index + 1] = penalty;
 			array[index + 2] = tileType;
@@ -120,6 +98,7 @@ export class Navigation {
 				type: NavigationMessageType.UpdateTile,
 				x: x,
 				y: y,
+				z: z,
 				disabled: isDisabled,
 				penalty: penalty,
 				tileType: tileType
@@ -135,7 +114,8 @@ export class Navigation {
 			type: NavigationMessageType.GetTileLocations,
 			tileType: tileType,
 			x: point.x,
-			y: point.y
+			y: point.y,
+			z: point.z
 		};
 
 		const promise2 = new Promise2<ITileLocation[]>();
@@ -212,7 +192,8 @@ export class Navigation {
 			startX: start.x,
 			startY: start.y,
 			endX: end.x,
-			endY: end.y
+			endY: end.y,
+			z: start.z
 		};
 
 		const promise2 = new Promise2<IVector3[] | undefined>();
@@ -223,13 +204,17 @@ export class Navigation {
 
 			const path = event.data as (IVector2[] | undefined);
 			if (path) {
-				// path has the end node at index 0 and the start node at (length - 1)
-				// normally we would reverse the array, but I pathfind from end to start instead of start to end
-				promise2.resolve(path.map<IVector3>(node => ({
+				const pathPoints = path.map<IVector3>(node => ({
 					x: node.x,
 					y: node.y,
-					z: WorldZ.Overworld
-				})));
+					z: start.z
+				}));
+
+				log(`Total length: ${pathPoints.length}. Distance from current position: ${Math.round(Vector2.distance(localPlayer, pathPoints[pathPoints.length - 1]))}`);
+
+				// path has the end node at index 0 and the start node at (length - 1)
+				// normally we would reverse the array, but I pathfind from end to start instead of start to end
+				promise2.resolve(pathPoints);
 
 			} else {
 				promise2.resolve(undefined);
@@ -266,7 +251,7 @@ export class Navigation {
 	}
 
 	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType, terrainDescription: ITerrainDescription): boolean {
-		return isWalkToTileBlocked(localPlayer, tile, {x, y}, false);
+		return isWalkToTileBlocked(localPlayer, tile, { x, y }, false);
 	}
 
 	private getPenalty(tile: ITile, x: number, y: number, z: number, tileType: TerrainType, terrainDescription: ITerrainDescription): number {

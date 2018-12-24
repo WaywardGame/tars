@@ -13,11 +13,11 @@ export default class AcquireItemForDoodad extends Objective {
 	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
 		super();
 	}
-	
+
 	public getHashCode(): string {
 		return `AcquireItemForDoodad:${doodadManager.isDoodadTypeGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
 	}
-	
+
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
 		const doodadTypes = Helpers.getDoodadTypes(this.doodadTypeOrGroup);
 
@@ -27,6 +27,15 @@ export default class AcquireItemForDoodad extends Objective {
 			for (const it of Enums.values(ItemType)) {
 				const itemDescription = Items[it];
 				if (itemDescription && itemDescription.onUse && itemDescription.onUse[ActionType.Build] === dt) {
+					objectiveSets.push([new AcquireItem(it)]);
+				}
+			}
+		}
+
+		if (doodadManager.isDoodadTypeGroup(this.doodadTypeOrGroup)) {
+			for (const it of Enums.values(ItemType)) {
+				const itemDescription = Items[it];
+				if (itemDescription && itemDescription.doodad && itemDescription.doodad.group === this.doodadTypeOrGroup) {
 					objectiveSets.push([new AcquireItem(it)]);
 				}
 			}

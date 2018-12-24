@@ -1,7 +1,7 @@
 import { ActionType } from "action/IAction";
 import Corpses from "creature/corpse/Corpses";
 import Doodads from "doodad/Doodads";
-import { CreatureType, DoodadType, ItemType, ItemTypeGroup, TerrainType } from "Enums";
+import { CreatureType, DoodadType, ItemType, ItemTypeGroup, TerrainType, GrowingStage } from "Enums";
 import { itemDescriptions } from "item/Items";
 import TerrainResources from "tile/TerrainResources";
 import Enums from "utilities/enum/Enums";
@@ -307,16 +307,18 @@ export default class AcquireItem extends Objective {
 					if (doodadDescription.gather) {
 						for (const key of Object.keys(doodadDescription.gather)) {
 							const growingStage = parseInt(key, 10);
-							const resourceItems = doodadDescription.gather[growingStage];
-							if (resourceItems) {
-								for (const resourceItem of resourceItems) {
-									if (resourceItem.type === itemType) {
-										search.push({
-											type: doodadType,
-											growingStage: growingStage,
-											itemType: itemType,
-											action: ActionType.Gather
-										});
+							if ((doodadDescription.isTall && growingStage >= GrowingStage.Budding) || growingStage >= GrowingStage.Ripening) {
+								const resourceItems = doodadDescription.gather[growingStage];
+								if (resourceItems) {
+									for (const resourceItem of resourceItems) {
+										if (resourceItem.type === itemType) {
+											search.push({
+												type: doodadType,
+												growingStage: growingStage,
+												itemType: itemType,
+												action: ActionType.Gather
+											});
+										}
 									}
 								}
 							}

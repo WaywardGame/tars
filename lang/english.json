@@ -8,7 +8,9 @@
 			"modTARSTARS": "TARS"
 		},
 		"message": {
-			"modTARSToggle": "[TARS] {0?Enabled:Disabled}"
+			"modTARSToggle": "[TARS] {0?Enabled:Disabled}",
+			"modTARSNavigationUpdating": "[TARS] Updating navigation system. This may take a few seconds.",
+			"modTARSNavigationUpdated": "[TARS] Updated navigation system."
 		}
 	}
 }

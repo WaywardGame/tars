@@ -5,9 +5,10 @@ import { IVector3 } from "utilities/math/IVector";
 import { IObjective, ObjectiveStatus } from "../IObjective";
 import { defaultMaxTilesChecked, IBase, IInventoryItems } from "../ITars";
 import Objective from "../Objective";
-import { getBaseDoodads, hasBase, isGoodBuildTile, findBuildTile } from "../Utilities/Base";
+import { getBaseDoodads, hasBase, isGoodBuildTile, findBuildTile, isGoodWellBuildTile } from "../Utilities/Base";
 import { findAndMoveToFaceTarget, MoveResult, moveToFaceTarget } from "../Utilities/Movement";
 import UseItem from "./UseItem";
+import { DoodadTypeGroup } from "Enums";
 
 const recalculateMovements = 40;
 
@@ -31,11 +32,25 @@ export default class BuildItem extends Objective {
 
 		let moveResult: MoveResult | undefined;
 
+
 		if (hasBase(base)) {
+			const description = this.item!.description();
+			const isWell = description && description.doodad && description.doodad.group === DoodadTypeGroup.Well;
+
 			const baseDoodads = getBaseDoodads(base);
 
 			for (const baseDoodad of baseDoodads) {
-				moveResult = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => isGoodBuildTile(base, point, tile), defaultMaxTilesChecked, baseDoodad);
+				if (isWell) {
+					// look for unlimited wells first
+					moveResult = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => isGoodWellBuildTile(base, point, tile, true), defaultMaxTilesChecked, baseDoodad);
+					if (moveResult === MoveResult.NoPath || moveResult === MoveResult.NoTarget) {
+						moveResult = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => isGoodWellBuildTile(base, point, tile, false), defaultMaxTilesChecked, baseDoodad);
+					}
+
+				} else {
+					moveResult = await findAndMoveToFaceTarget((point: IVector3, tile: ITile) => isGoodBuildTile(base, point, tile), defaultMaxTilesChecked, baseDoodad);
+				}
+					
 				if (moveResult === MoveResult.Moving || moveResult === MoveResult.Complete) {
 					break;
 				}

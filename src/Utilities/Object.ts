@@ -19,7 +19,7 @@ export function findObjects<T extends IVector3>(id: string, allObjects: T[], isT
 		return cachedResults;
 	}
 
-	const result = allObjects.filter(o => o !== undefined && o.z === localPlayer.z && isTarget(o)).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
+	const result = allObjects.filter(o => o !== undefined && o.z === localPlayer.z && isTarget(o)).sort((a, b) => Vector2.distance(localPlayer, a) > Vector2.distance(localPlayer, b) ? 1 : -1);
 
 	cachedObjects[id] = result;
 

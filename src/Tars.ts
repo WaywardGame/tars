@@ -52,14 +52,28 @@ const tickSpeed = 333;
 
 const baseDoodadDistance = 150;
 
+enum NavigationSystemState {
+	NotInitialized,
+	Initializing,
+	Initialized
+};
+
 export default class Tars extends Mod {
 
 	@Register.bindable("Toggle", { key: "KeyT" })
 	public readonly keyBind: number;
+	
 	@Register.messageSource("TARS")
 	public readonly messageSource: Source;
+	
 	@Register.message("Toggle")
 	public readonly messageToggle: Message;
+	
+	@Register.message("NavigationUpdating")
+	public readonly messageNavigationUpdating: Message;
+	
+	@Register.message("NavigationUpdated")
+	public readonly messageNavigationUpdated: Message;
 
 	private base: IBase;
 	private inventory: IInventoryItems;
@@ -74,7 +88,7 @@ export default class Tars extends Mod {
 	private tickTimeoutId: number | undefined;
 
 	private navigation: Navigation;
-	private navigationInitialized: boolean;
+	private navigationInitialized: NavigationSystemState;
 
 	public onInitialize(): any {
 		Helpers.setPath(this.getPath());
@@ -199,7 +213,7 @@ export default class Tars extends Mod {
 		this.overBurdened = false;
 		this.objective = undefined;
 		this.interruptObjective = undefined;
-		this.navigationInitialized = false;
+		this.navigationInitialized = NavigationSystemState.NotInitialized;
 		deleteNavigation();
 	}
 
@@ -208,11 +222,35 @@ export default class Tars extends Mod {
 	}
 
 	private async toggle() {
-		log("Toggle");
+		if (this.navigationInitialized === NavigationSystemState.Initializing) {
+			return;
+		}
 
-		if (!this.navigationInitialized) {
-			this.navigationInitialized = true;
+		const str = this.tickTimeoutId !== undefined ? "Enabled" : "Disabled";
+
+		log(str);
+
+		localPlayer.messages
+			.source(this.messageSource)
+			.type(MessageType.Good)
+			.send(this.messageToggle, this.tickTimeoutId === undefined);
+
+		if (this.navigationInitialized === NavigationSystemState.NotInitialized) {
+			this.navigationInitialized = NavigationSystemState.Initializing;
+
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(MessageType.Good)
+				.send(this.messageNavigationUpdating);
+
 			await this.navigation.updateAll();
+
+			this.navigationInitialized = NavigationSystemState.Initialized;
+			
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(MessageType.Good)
+				.send(this.messageNavigationUpdated);
 		}
 
 		this.objective = undefined;
@@ -224,15 +262,6 @@ export default class Tars extends Mod {
 		} else {
 			this.disable();
 		}
-
-		const str = this.tickTimeoutId !== undefined ? "Enabled" : "Disabled";
-
-		log(str);
-
-		localPlayer.messages
-			.source(this.messageSource)
-			.type(MessageType.Good)
-			.send(this.messageToggle, this.tickTimeoutId !== undefined);
 	}
 
 	private disable() {
@@ -562,12 +591,39 @@ export default class Tars extends Mod {
 		}
 
 		/*
+			Extra objectives
+		*/
+		const wellInventoryItem =
+			itemManager.getItemInContainer(localPlayer.inventory, ItemType.StoneWell) ||
+			itemManager.getItemInContainer(localPlayer.inventory, ItemType.ClayBrickWell) ||
+			itemManager.getItemInContainer(localPlayer.inventory, ItemType.SandstoneWell);
+		if (this.base.wells!.length === 0) {
+			if (wellInventoryItem !== undefined) {
+				objectives.push(new BuildItem(wellInventoryItem));
+
+			} else {
+				objectives.push(new AcquireItemForDoodad(DoodadTypeGroup.Well));
+			}
+		}
+		
+		/*
 			Idle objectives
 		*/
 
 		if (this.inventory.waterContainer === undefined) {
 			objectives.push(new AcquireWaterContainer());
 		}
+
+		// check if any wells have water
+		// if (this.base.wells !== undefined) {
+		// 	const wellsHaveSomeWater = this.base.wells.some((well) => {
+		// 		const wellData = game.wellData[getTileId(well.x, well.y, well.z)];
+		// 		return wellData ? (wellData.quantity >= 1 || wellData.quantity === -1) : false;
+		// 	});
+		// 	if (!wellsHaveSomeWater) {
+		// 		objectives.push(new AcquireItemForDoodad(DoodadTypeGroup.Well));
+		// 	}
+		// }
 
 		if (localPlayer.getStat<IStat>(Stat.Health).value / localPlayer.getMaxHealth() < 0.9) {
 			objectives.push(new RecoverHealth());
@@ -821,7 +877,7 @@ export default class Tars extends Mod {
 	}
 
 	private gatherFromCorpsesInterrupt(): IObjective | undefined {
-		const target = objectUtilities.findCarvableCorpse("gatherFromCorpsesInterrupt", corpse => Vector2.squaredDistance(localPlayer, corpse) < 16);
+		const target = objectUtilities.findCarvableCorpse("gatherFromCorpsesInterrupt", corpse => Vector2.distance(localPlayer, corpse) < 16);
 		if (target) {
 			return new CarveCorpse(target);
 		}
@@ -1031,6 +1087,23 @@ export default class Tars extends Mod {
 			}
 		}
 
+		if (this.inventory.wells !== undefined) {
+			this.inventory.wells = this.inventory.wells.filter(c => c.isValid() && itemManager.isContainableInContainer(c, localPlayer.inventory));
+		}
+
+		const wells = [
+			...itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.StoneWell, true),
+			...itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.ClayBrickWell, true),
+			...itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.SandstoneWell, true)
+		];
+		if (this.inventory.wells === undefined || this.inventory.wells.length !== wells.length) {
+			this.inventory.wells = wells;
+
+			if (this.inventory.wells.length > 0) {
+				log(`Inventory wells - ${this.inventory.wells.map(c => c.getName().getString()).join(", ")}`);
+			}
+		}
+
 		if (this.inventory.campfire !== undefined && (!this.inventory.campfire.isValid() || !itemManager.isContainableInContainer(this.inventory.campfire, localPlayer.inventory))) {
 			this.inventory.campfire = undefined;
 		}
@@ -1111,11 +1184,11 @@ export default class Tars extends Mod {
 
 			if (targets.length > 0) {
 				const target = targets[0];
-				if (Vector2.squaredDistance(localPlayer, target) < baseDoodadDistance) {
+				if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
 					this.base.campfire = target;
 
 					if (this.base.campfire !== undefined) {
-						log(`Base campfire - ${this.base.campfire.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
+						log(`Base campfire - ${this.base.campfire.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
 					}
 				}
 			}
@@ -1146,13 +1219,38 @@ export default class Tars extends Mod {
 
 			if (targets.length > 0) {
 				const target = targets[0];
-				if (Vector2.squaredDistance(localPlayer, target) < baseDoodadDistance) {
+				if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
 					this.base.waterStill = target;
 
 					if (this.base.waterStill !== undefined) {
-						log(`Base waterstill - ${this.base.waterStill.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
+						log(`Base waterstill - ${this.base.waterStill.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
 					}
 				}
+			}
+		}
+
+		if (this.base.wells === undefined) {
+			this.base.wells = [];
+
+		} else {
+			this.base.wells = this.base.wells.filter(c => c.isValid());
+		}
+
+		const wells = objectUtilities.findDoodads("Well", doodad => {
+			const description = doodad.description();
+			if (description && description.group === DoodadTypeGroup.Well) {
+				return this.base.wells!.indexOf(doodad) === -1;
+			}
+
+			return false;
+		});
+
+		if (wells.length > 0) {
+			const target = wells[0];
+			if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
+				this.base.wells.push(target);
+
+				log(`Base well - ${target.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
 			}
 		}
 
@@ -1181,11 +1279,11 @@ export default class Tars extends Mod {
 
 			if (targets.length > 0) {
 				const target = targets[0];
-				if (Vector2.squaredDistance(localPlayer, target) < baseDoodadDistance) {
+				if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
 					this.base.kiln = target;
 
 					if (this.base.kiln !== undefined) {
-						log(`Base kiln - ${this.base.kiln.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, target)})`);
+						log(`Base kiln - ${this.base.kiln.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
 					}
 				}
 			}
@@ -1193,6 +1291,9 @@ export default class Tars extends Mod {
 
 		if (this.base.chests === undefined) {
 			this.base.chests = [];
+
+		} else {
+			this.base.chests = this.base.chests.filter(c => c.isValid());
 		}
 
 		let i = 0;
@@ -1208,14 +1309,14 @@ export default class Tars extends Mod {
 
 			i++;
 
-			if (targetChest && Vector2.squaredDistance(localPlayer, targetChest) < baseDoodadDistance) {
+			if (targetChest && Vector2.distance(localPlayer, targetChest) < baseDoodadDistance) {
 				if (!this.base.chests) {
 					this.base.chests = [];
 				}
 
 				this.base.chests.push(targetChest);
 
-				log(`Base chest - ${targetChest.getName().getString()} (distance: ${Vector2.squaredDistance(localPlayer, targetChest)})`);
+				log(`Base chest - ${targetChest.getName().getString()} (distance: ${Vector2.distance(localPlayer, targetChest)})`);
 
 			} else {
 				break;

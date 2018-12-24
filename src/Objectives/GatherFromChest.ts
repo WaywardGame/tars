@@ -28,12 +28,12 @@ export default class GatherFromChest extends Objective {
 			return ObjectiveStatus.Complete;
 		}
 
-		const chestsWithItem = base.chests.filter(c => itemManager.getItemsInContainerByType(c as IContainer, this.itemType, true).length > 0).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
+		const chestsWithItem = base.chests.filter(c => itemManager.getItemsInContainerByType(c as IContainer, this.itemType, true).length > 0).sort((a, b) => Vector2.distance(localPlayer, a) > Vector2.distance(localPlayer, b) ? 1 : -1);
 
 		const chest = chestsWithItem[0];
 
 		if (calculateDifficulty) {
-			return chest === undefined ? missionImpossible : Math.round(Vector2.squaredDistance(localPlayer, chest));
+			return chest === undefined ? missionImpossible : Math.round(Vector2.distance(localPlayer, chest));
 		}
 
 		if (chest === undefined) {

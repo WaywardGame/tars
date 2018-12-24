@@ -16,7 +16,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 	}
 	
 	public async onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined> {
-		const doodads: IDoodad[] = ([base.campfire, base.kiln].filter(d => d !== undefined) as IDoodad[]).sort((a, b) => Vector2.squaredDistance(localPlayer, a) > Vector2.squaredDistance(localPlayer, b) ? 1 : -1);
+		const doodads: IDoodad[] = ([base.campfire, base.kiln].filter(d => d !== undefined) as IDoodad[]).sort((a, b) => Vector2.distance(localPlayer, a) > Vector2.distance(localPlayer, b) ? 1 : -1);
 		const doodad = doodads[0];
 
 		if (calculateDifficulty) {
@@ -31,7 +31,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 				objectives.push(new StartFire(doodad));
 			}
 
-			const doodadDistance = doodad ? Math.round(Vector2.squaredDistance(localPlayer, doodad)) : 0;
+			const doodadDistance = doodad ? Math.round(Vector2.distance(localPlayer, doodad)) : 0;
 			return doodadDistance + await this.calculateObjectiveDifficulties(base, inventory, ...objectives);
 		}
 

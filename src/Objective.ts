@@ -149,17 +149,11 @@ export default abstract class Objective implements IObjective {
 
 		const tile = localPlayer.getTile();
 		if (tile && tile.containedItems !== undefined && tile.containedItems.find((item) => itemTypes.indexOf(item.type) !== -1)) {
-			console.log("found item!");
-			matchingNewItem = await this.executeActionCompareInventoryItems(ActionType.Idle, undefined, itemTypes);
+			matchingNewItem = await this.executeActionCompareInventoryItems(ActionType.Idle, ((action: any) => action.execute(localPlayer)), itemTypes);
 
 			if (matchingNewItem !== undefined) {
-				console.log("picked up item!");
-
 				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (via idle)`);
 				return ObjectiveStatus.Complete;
-
-			} else {
-				console.log("didn't pick up item?");
 			}
 		}
 	}
