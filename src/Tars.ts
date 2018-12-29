@@ -2,7 +2,7 @@ import { ActionType, IActionApi, IActionDescription } from "action/IAction";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
 import { IStat, IStatMax, Stat } from "entity/IStats";
-import { Bindable, DamageType, Direction, DoodadType, DoodadTypeGroup, EquipType, ItemType, ItemTypeGroup, PlayerState } from "Enums";
+import { Bindable, DamageType, Direction, DoodadType, DoodadTypeGroup, EquipType, ItemType, ItemTypeGroup, PlayerState, TurnMode } from "Enums";
 import { IContainer, IItem } from "item/IItem";
 import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
@@ -62,16 +62,16 @@ export default class Tars extends Mod {
 
 	@Register.bindable("Toggle", { key: "KeyT" })
 	public readonly keyBind: number;
-	
+
 	@Register.messageSource("TARS")
 	public readonly messageSource: Source;
-	
+
 	@Register.message("Toggle")
 	public readonly messageToggle: Message;
-	
+
 	@Register.message("NavigationUpdating")
 	public readonly messageNavigationUpdating: Message;
-	
+
 	@Register.message("NavigationUpdated")
 	public readonly messageNavigationUpdated: Message;
 
@@ -246,7 +246,7 @@ export default class Tars extends Mod {
 			await this.navigation.updateAll();
 
 			this.navigationInitialized = NavigationSystemState.Initialized;
-			
+
 			localPlayer.messages
 				.source(this.messageSource)
 				.type(MessageType.Good)
@@ -494,6 +494,14 @@ export default class Tars extends Mod {
 			}
 		}
 
+		const wellInventoryItem =
+			itemManager.getItemInContainer(localPlayer.inventory, ItemType.StoneWell) ||
+			itemManager.getItemInContainer(localPlayer.inventory, ItemType.ClayBrickWell) ||
+			itemManager.getItemInContainer(localPlayer.inventory, ItemType.SandstoneWell);
+		if (wellInventoryItem !== undefined) {
+			objectives.push(new BuildItem(wellInventoryItem));
+		}
+
 		let buildChest = true;
 		if (this.base.chests !== undefined) {
 			for (const c of this.base.chests) {
@@ -593,19 +601,10 @@ export default class Tars extends Mod {
 		/*
 			Extra objectives
 		*/
-		const wellInventoryItem =
-			itemManager.getItemInContainer(localPlayer.inventory, ItemType.StoneWell) ||
-			itemManager.getItemInContainer(localPlayer.inventory, ItemType.ClayBrickWell) ||
-			itemManager.getItemInContainer(localPlayer.inventory, ItemType.SandstoneWell);
-		if (this.base.wells!.length === 0) {
-			if (wellInventoryItem !== undefined) {
-				objectives.push(new BuildItem(wellInventoryItem));
-
-			} else {
-				objectives.push(new AcquireItemForDoodad(DoodadTypeGroup.Well));
-			}
+		if (this.base.wells!.length === 0 && wellInventoryItem === undefined) {
+			objectives.push(new AcquireItemForDoodad(DoodadTypeGroup.Well));
 		}
-		
+
 		/*
 			Idle objectives
 		*/
@@ -638,7 +637,7 @@ export default class Tars extends Mod {
 
 		objectives.push(new OrganizeInventory(false));
 
-		if (!game.isRealTimeMode()) {
+		if (game.getTurnMode() !== TurnMode.RealTime) {
 			objectives.push(new Idle());
 		}
 

@@ -120,7 +120,7 @@ export function isGoodWellBuildTile(base: IBase, point: IVector3, tile: ITile, o
 		return true;
 	}
 		
-	return true;
+	return false;
 }
 
 export function isOpenArea(point: IVector3, tile: ITile): boolean {

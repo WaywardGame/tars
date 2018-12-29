@@ -15,6 +15,7 @@ import { getNavigation } from "../Navigation";
 import { executeAction } from "./Action";
 import { log } from "./Logger";
 import { findObjects } from "./Object";
+import { RenderSource } from "game/IGame";
 
 export interface IMovementPath {
 	difficulty: number;
@@ -145,7 +146,7 @@ export function resetMovementOverlays() {
 
 	movementOverlays.length = 0;
 
-	game.updateView(false);
+	game.updateView(RenderSource.Mod, false);
 }
 
 export function clearOverlay(tile: ITile) {

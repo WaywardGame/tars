@@ -29,14 +29,16 @@ export default class BuildItem extends Objective {
 		if (calculateDifficulty) {
 			return 1;
 		}
-
+		
+		const description = this.item!.description();
+		const isWell = description && description.doodad && description.doodad.group === DoodadTypeGroup.Well;
+		if(isWell) {
+			this.log.info("Going build a well");
+		}
+		
 		let moveResult: MoveResult | undefined;
 
-
-		if (hasBase(base)) {
-			const description = this.item!.description();
-			const isWell = description && description.doodad && description.doodad.group === DoodadTypeGroup.Well;
-
+		if (hasBase(base)) {			
 			const baseDoodads = getBaseDoodads(base);
 
 			for (const baseDoodad of baseDoodads) {
@@ -58,6 +60,11 @@ export default class BuildItem extends Objective {
 		}
 
 		if (moveResult === undefined || moveResult === MoveResult.NoTarget || moveResult === MoveResult.NoPath) {
+			if(isWell) {
+				this.log.info("Unable to find location for well");
+				return ObjectiveStatus.Complete;
+			}
+			
 			if (this.target === undefined) {
 				this.log.info("Looking for build tile...");
 
