@@ -56,7 +56,7 @@ enum NavigationSystemState {
 	NotInitialized,
 	Initializing,
 	Initialized
-};
+}
 
 export default class Tars extends Mod {
 
@@ -202,7 +202,7 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
-	@Register.command("tars")
+	@Register.command("TARS")
 	protected command(player: IPlayer, args: string) {
 		this.toggle();
 	}
