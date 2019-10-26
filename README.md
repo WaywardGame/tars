@@ -5,11 +5,13 @@ TARS is a bot that will play Wayward by itself, doing tasks such as gathering re
 
 By default, use "T" to enable and disable TARS.
 
-## Cloning:
+## Cloning/Setup:
 ```
 git clone https://github.com/WaywardGame/tars.git
 cd tars
-git submodule update --init
+On Windows: path/to/wayward/install/wayward.cmd +mod update .
+On macOS: path/to/wayward/install/Wayward.app/Contents/MacOS/Electron +mod update .
+On Linux: path/to/wayward/install/wayward +mod update .
 ```
 
 ## Building:

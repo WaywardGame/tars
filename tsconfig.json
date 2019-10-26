@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "es2017",
         "module": "amd",
         "declaration": false,
         "strict": true,
@@ -10,7 +10,13 @@
         "strictPropertyInitialization": false,
         "experimentalDecorators": true,
         "inlineSourceMap": true,
-        "baseUrl": "./mod-reference/definitions",
+        "incremental": true,
+        "baseUrl": "./",
+        "paths": {
+            "*": ["node_modules/@wayward/types/definitions/*"],
+            "@wayward/goodstream": [  "node_modules/@wayward/goodstream/Stream" ],
+            "@wayward/goodstream/*": [ "node_modules/@wayward/goodstream/*" ]
+        },
         "types": [],
         "outDir": "./out"
     }

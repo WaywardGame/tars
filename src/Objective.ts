@@ -1,170 +1,142 @@
-import ActionExecutor from "action/ActionExecutor";
-import actionDescriptions from "action/Actions";
-import { ActionType, IActionDescription } from "action/IAction";
-import { ItemType } from "Enums";
-import Log, { nullLog } from "utilities/Log";
-import { IObjective, missionImpossible, ObjectiveStatus } from "./IObjective";
-import { IBase, IInventoryItems } from "./ITars";
-import { executeAction } from "./Utilities/Action";
+import Creature from "entity/creature/Creature";
+import { ILog, nullLog } from "utilities/Log";
+
+import Context from "./Context";
+import Planner from "./Core/Planner";
+import { IObjective, ObjectiveExecutionResult } from "./IObjective";
+import { createLog } from "./Utilities/Logger";
 
 export default abstract class Objective implements IObjective {
 
-	private static calculatedDifficulties: { [index: string]: number };
-	private calculatingDifficulty = false;
+	private static uuid = 0;
 
-	private _log: Log | undefined;
+	private _log: ILog | undefined;
 
-	abstract getHashCode(): string;
+	private _uniqueIdentifier: number | undefined;
 
-	public execute(base: IBase, inventory: IInventoryItems): Promise<IObjective | ObjectiveStatus | number | undefined> {
-		Objective.calculatedDifficulties = {};
-		return this.onExecute(base, inventory, false);
+	private _additionalDifficulty: number | undefined;
+
+	public abstract getIdentifier(context?: Context): string;
+
+	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
+
+	public get log(): ILog {
+		if (!Planner.isCreatingPlan) {
+			if (this._log === undefined) {
+				this._log = createLog(this.getName());
+			}
+
+			return this._log;
+		}
+
+		return this._log || nullLog;
 	}
 
-	public async calculateDifficulty(base: IBase, inventory: IInventoryItems): Promise<number> {
-		let difficulty: number | undefined;
+	public setLogger(log: ILog | undefined): void {
+		this._log = log;
+	}
 
-		const hashCode = this.getHashCode();
-		if (hashCode !== undefined) {
-			const calculatedDifficulty = Objective.calculatedDifficulties[hashCode];
-			if (calculatedDifficulty !== undefined) {
-				difficulty = calculatedDifficulty;
-			}
+	public getHashCode(context?: Context): string {
+		let hashCode = this.getIdentifier(context);
 
-			Objective.calculatedDifficulties[hashCode] = missionImpossible;
-		}
-
-		if (difficulty === undefined) {
-			difficulty = this.getBaseDifficulty(base, inventory);
-
-			this.calculatingDifficulty = true;
-			const result = await this.onExecute(base, inventory, true);
-			this.calculatingDifficulty = false;
-
-			if (result !== undefined) {
-				if (typeof (result) === "number") {
-					if (result !== ObjectiveStatus.Complete) {
-						difficulty += result;
-					}
-
-				} else if (result instanceof Objective) {
-					const calculatedDifficulty = await result.calculateDifficulty(base, inventory);
-					if (isNaN(calculatedDifficulty)) {
-						this.log.info(`Invalid difficulty - ${result.getHashCode()}`);
-					}
-
-					difficulty += calculatedDifficulty;
-
-				} else {
-					this.log.info("Unknown difficulty");
+		if (this.isDynamic()) {
+			if (this._uniqueIdentifier === undefined) {
+				this._uniqueIdentifier = Objective.uuid++;
+				if (Objective.uuid >= Number.MAX_SAFE_INTEGER) {
+					Objective.uuid = 0;
 				}
 			}
+
+			hashCode += `:${this._uniqueIdentifier}`;
 		}
 
-		if (hashCode !== undefined) {
-			Objective.calculatedDifficulties[hashCode] = difficulty;
+		if (this._additionalDifficulty !== undefined) {
+			hashCode += `:${this._additionalDifficulty}`;
 		}
 
-		return difficulty;
+		return hashCode;
+	}
+
+	public toString(): string {
+		return this.getHashCode();
 	}
 
 	public getName(): string {
 		return this.constructor.name;
 	}
 
-	public shouldSaveChildObjectives(): boolean {
+	/**
+	 * Shoud child objectives be able to be saved
+	 */
+	public canSaveChildObjectives(): boolean {
 		return true;
 	}
-	
-	public onMove(): void {
+
+	/**
+	 * Can the objective be grouped with other objectives with the same identifier?
+	 * It could cause the objective execution order to be re-ordered on the fly to make them execute one after another
+	 */
+	public canGroupTogether(): boolean {
+		return false;
 	}
 
-	protected abstract onExecute(base: IBase, inventory: IInventoryItems, calculateDifficulty: boolean): Promise<IObjective | ObjectiveStatus | number | undefined>;
-
-	protected getBaseDifficulty(base: IBase, inventory: IInventoryItems): number {
-		return 1;
+	/**
+	 * Checks if the objective changes between the planning and the actual execution
+	 */
+	public isDynamic(): boolean {
+		return false;
 	}
 
-	protected get log(): Log {
-		if (!this.calculatingDifficulty) {
-			if (this._log === undefined) {
-				this._log = new Log("MOD", "TARS", this.getName());
-			}
-
-			return this._log;
-		}
-
-		return nullLog;
+	/**
+	 * Checks if the context could effect the execution of the objective
+	 * @param context The context
+	 */
+	public canIncludeContextHashCode(context: Context): boolean {
+		return false;
 	}
 
-	protected async pickEasiestObjective(base: IBase, inventory: IInventoryItems, objectiveSets: IObjective[][]): Promise<IObjective | undefined> {
-		let easiestObjective: IObjective | undefined;
-		let easiestDifficulty: number | undefined;
-
-		for (const objectives of objectiveSets) {
-			const objectiveDifficulty = await this.calculateObjectiveDifficulties(base, inventory, ...objectives);
-
-			this.log.info(`Objective ${objectives.map(o => o.getHashCode()).join(",")}. Difficulty: ${objectiveDifficulty}`);
-
-			if (objectiveDifficulty < missionImpossible && (easiestDifficulty === undefined || easiestDifficulty > objectiveDifficulty)) {
-				easiestDifficulty = objectiveDifficulty;
-				easiestObjective = objectives[0];
-			}
-		}
-
-		if (easiestObjective) {
-			this.log.info(`Easiest objective is ${easiestObjective.getHashCode()} (difficulty: ${easiestDifficulty})`);
-
-		} else {
-			this.log.info(`All ${objectiveSets.length} objectives are impossible`);
-		}
-
-		return easiestObjective;
+	/**
+	 * Checks if the context could effect the execution of the objective
+	 * Return true if the objective checks the context for items
+	 * @param context The context
+	 */
+	public shouldIncludeContextHashCode(context: Context): boolean {
+		return false;
 	}
 
-	protected async calculateObjectiveDifficulties(base: IBase, inventory: IInventoryItems, ...objectives: IObjective[]): Promise<number> {
-		let totalDifficulty = 0;
-
-		for (const objective of objectives) {
-			const difficulty = await objective.calculateDifficulty(base, inventory);
-
-			// this.log.info(`\tObjective ${objective.getHashCode()}. Difficulty: ${difficulty}`);
-
-			if (difficulty >= missionImpossible) {
-				return missionImpossible;
-			}
-
-			totalDifficulty += difficulty;
-		}
-
-		return totalDifficulty;
+	public addDifficulty(difficulty: number) {
+		this._additionalDifficulty = (this._additionalDifficulty || 0) + difficulty;
+		return this;
 	}
 
-	protected async executeActionForItem<T extends ActionType>(actionType: T, executor: (action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void, itemTypes: ItemType[]): Promise<ObjectiveStatus | undefined> {
-		let matchingNewItem = await this.executeActionCompareInventoryItems(actionType, executor, itemTypes);
-		if (matchingNewItem !== undefined) {
-			this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]}`);
-			return ObjectiveStatus.Complete;
+	public getDifficulty(context: Context) {
+		let difficulty = this.getBaseDifficulty(context);
+
+		if (this._additionalDifficulty !== undefined) {
+			difficulty += this._additionalDifficulty;
 		}
 
-		const tile = localPlayer.getTile();
-		if (tile && tile.containedItems !== undefined && tile.containedItems.find((item) => itemTypes.indexOf(item.type) !== -1)) {
-			matchingNewItem = await this.executeActionCompareInventoryItems(ActionType.Idle, ((action: any) => action.execute(localPlayer)), itemTypes);
+		return difficulty;
+	}
 
-			if (matchingNewItem !== undefined) {
-				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (via idle)`);
-				return ObjectiveStatus.Complete;
+	public async onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean> {
+		const walkPath = context.player.walkPath;
+		if (walkPath) {
+			// interrupt if a creature moved along our walk path
+			for (const point of walkPath) {
+				const tile = game.getTile(point.x, point.y, context.player.z);
+				if (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature) {
+					this.log.info("Creature moved along walk path, recalculating");
+					return true;
+				}
 			}
 		}
+
+		return false;
 	}
 
-	private async executeActionCompareInventoryItems(actionType: ActionType, executor: any, itemTypes: ItemType[]) {
-		const itemsBefore = localPlayer.inventory.containedItems.slice(0);
-
-		await executeAction(actionType, executor);
-
-		const newItems = localPlayer.inventory.containedItems.filter(item => itemsBefore.indexOf(item) === -1);
-
-		return newItems.find(item => itemTypes.indexOf(item.type) !== -1);
+	protected getBaseDifficulty(_context: Context): number {
+		return 0;
 	}
+
 }

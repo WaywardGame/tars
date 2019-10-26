@@ -1,14 +1,15 @@
 {
 	"name": "TARS",
 	"description": "Let TARS play the game for you. Good thing there are no black holes in Wayward.",
-	"version": "1.0",
+	"version": "2.0",
 	"author": "Spacetech",
-	"compatibleMinorVersions": [
-		7
-	],
-	"multiplayerClientside": true,
+	"waywardVersion": "2.8.0-beta",
+	"multiplayer": "clientside",
 	"file": "out/Tars",
-	"languages": ["lang/english"],
+	"allowUnlockingMilestones": true,
+	"languages": [
+		"lang/english"
+	],
 	"unloadable": true,
 	"tags": [
 		"Cheat",

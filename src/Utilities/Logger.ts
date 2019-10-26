@@ -1,19 +1,59 @@
-import Log from "utilities/Log";
+import Log, { ILog, LogSource } from "utilities/Log";
 
-let lastMessage: string;
+export let log = createLog();
 
-let modLog: Log;
+let nextMessage: { log: ILog; args: any[] } | undefined;
 
-export function log(message: string, ...args: any[]) {
-	if (lastMessage !== message) {
-		lastMessage = message;
-		
-		args.unshift(message);
+export function queueNextMessage(log: ILog, ...args: any[]) {
+	nextMessage = { log, args };
+}
 
-		modLog.info.apply(modLog, args);
+export function discardNextMessage() {
+	nextMessage = undefined;
+}
+
+export function processNextMessage() {
+	if (nextMessage) {
+		const message = nextMessage;
+		nextMessage = undefined;
+
+		message.log.info(...message.args);
 	}
 }
 
-export function setLogger(logger: Log) {
-	modLog = logger;
+export function createLog(...name: string[]) {
+	const log = new Log();
+
+	const sources: Array<LogSource | string> = ["MOD", "TARS"];
+
+	if (name.length > 0) {
+		sources.push(...name);
+	}
+
+	log.info = (...args: any[]) => {
+		processNextMessage();
+		Log.info(...sources)(...args);
+	};
+
+	log.warn = (...args: any[]) => {
+		processNextMessage();
+		Log.warn(...sources)(...args);
+	};
+
+	log.error = (...args: any[]) => {
+		processNextMessage();
+		Log.error(...sources)(...args);
+	};
+
+	log.trace = (...args: any[]) => {
+		processNextMessage();
+		Log.trace(...sources)(...args);
+	};
+
+	log.debug = (...args: any[]) => {
+		processNextMessage();
+		Log.debug(...sources)(...args);
+	};
+
+	return log;
 }

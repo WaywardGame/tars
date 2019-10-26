@@ -1,139 +1,83 @@
-import { IBase } from "../ITars";
-import { TerrainType, WorldZ } from "Enums";
-import { IDoodad } from "doodad/IDoodad";
-import { IVector3 } from "utilities/math/IVector";
-import { ITile } from "tile/ITerrain";
-import { isOpenTile } from "./Tile";
+import Doodad from "doodad/Doodad";
+import { WorldZ } from "game/WorldZ";
 import { IContainer } from "item/IItem";
-import { findDoodad } from "./Object";
-import TileHelpers from "utilities/TileHelpers";
+import { ITile, TerrainType } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
+import { IVector3 } from "utilities/math/IVector";
+import TileHelpers from "utilities/TileHelpers";
+
+import Context from "../Context";
+import { baseInfo, BaseInfoKey } from "../ITars";
+
+import { hasCorpses, isOpenTile } from "./Tile";
 
 const nearBaseDistance = 12;
 
-export function findBuildTile(hashCode: string, base: IBase, targetOrigin?: IVector3): IVector3 | undefined {
-	const isValidOrigin = (origin: IVector3) => {
-		// build our base near dirt and trees
-		let dirt = 0;
-		let grass = 0;
-
-		for (let x = -6; x <= 6; x++) {
-			for (let y = -6; y <= 6; y++) {
-				if (x === 0 && y === 0) {
-					continue;
-				}
-
-				const point: IVector3 = {
-					x: origin.x + x,
-					y: origin.y + y,
-					z: origin.z
-				};
-
-				const tile = game.getTileFromPoint(point);
-				if (!tile.doodad && isGoodBuildTile(base, point, tile)) {
-					const tileType = TileHelpers.getType(tile);
-					if (tileType === TerrainType.Dirt) {
-						dirt++;
-
-					} else if (tileType === TerrainType.Grass) {
-						grass++;
-					}
-				}
-			}
-		}
-
-		return dirt >= 3 && grass >= 4;
-	};
-
-	if (targetOrigin === undefined) {
-		targetOrigin = findDoodad(hashCode, doodad => {
-			const description = doodad.description();
-			if (!description || !description.isTree) {
-				return false;
-			}
-
-			return isValidOrigin(doodad);
-		});
-
-	} else if (!isValidOrigin(targetOrigin)) {
-		return undefined;
-	}
-
-	if (targetOrigin === undefined) {
-		return undefined;
-	}
-
-	let target: IVector3 | undefined;
-
-	for (let x = -6; x <= 6; x++) {
-		for (let y = -6; y <= 6; y++) {
-			if (x === 0 && y === 0) {
-				continue;
-			}
-
-			const point: IVector3 = {
-				x: targetOrigin.x + x,
-				y: targetOrigin.y + y,
-				z: targetOrigin.z
-			};
-
-			const tile = game.getTileFromPoint(point);
-			if (isGoodBuildTile(base, point, tile)) {
-				target = point;
-				x = 7;
-				break;
-			}
-		}
-	}
-
-	return target;
-}
-
-export function isGoodBuildTile(base: IBase, point: IVector3, tile: ITile): boolean {
-	return isOpenArea(point, tile) && isNearBase(base, point);
-}
-
-export function isGoodWellBuildTile(base: IBase, point: IVector3, tile: ITile, onlyUnlimited: boolean): boolean {
-	if (!isGoodBuildTile(base, point, tile)) {
+export function isGoodBuildTile(context: Context, point: IVector3, tile: ITile): boolean {
+	if (!isOpenArea(context, point, tile)) {
 		return false;
 	}
-	
-	// only place wells down on fresh water tiles
+
+	if (!hasBase(context)) {
+		// this is the first base item. don't make it on sand or gravel
+		const tileType = TileHelpers.getType(game.getTileFromPoint(point));
+		if (tileType === TerrainType.BeachSand || tileType === TerrainType.DesertSand || tileType === TerrainType.Gravel) {
+			return false;
+		}
+
+		return true;
+	}
+
+	return isNearBase(context, point);
+}
+
+export function isGoodWellBuildTile(context: Context, point: IVector3, tile: ITile, onlyUnlimited: boolean): boolean {
+	if (!isGoodBuildTile(context, point, tile)) {
+		return false;
+	}
+
 	const x = point.x;
 	const y = point.y;
-	
+
+	const caveTerrain = Terrains[TileHelpers.getType(game.getTile(x, y, WorldZ.Cave))];
+	if (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater)) {
+		// unlimited fresh water
+		return true;
+	}
+
+	if (onlyUnlimited) {
+		return false;
+	}
+
+	if (caveTerrain && !caveTerrain.passable) {
+		// fresh water
+		return true;
+	}
+
 	for (let x2 = x - 6; x2 <= x + 6; x2++) {
 		for (let y2 = y - 6; y2 <= y + 6; y2++) {
 			const tileDescription = Terrains[TileHelpers.getType(game.getTile(x2, y2, point.z))];
 			if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
-				// seawater well
-				return false;
+				// seawater
+				return true;
 			}
 		}
 	}
-	
-	const caveTerrain = Terrains[TileHelpers.getType(game.getTile(x, y, WorldZ.Cave))];
-	if (point.z === WorldZ.Cave || (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater))) {
-		return true;
 
-	} else if (caveTerrain && !caveTerrain.passable && !onlyUnlimited) {
-		return true;
-	}
-		
 	return false;
 }
 
-export function isOpenArea(point: IVector3, tile: ITile): boolean {
-	if (!isOpenTile(point, tile, false, false) || tile.corpses !== undefined) {
+export function isOpenArea(context: Context, point: IVector3, tile: ITile, radius: number = 1): boolean {
+	if (!isOpenTile(context, point, tile, false) || hasCorpses(tile)) {
 		return false;
 	}
 
-	for (let x = -1; x <= 1; x++) {
-		for (let y = -1; y <= 1; y++) {
+	for (let x = -radius; x <= radius; x++) {
+		for (let y = -radius; y <= radius; y++) {
 			const nearbyPoint: IVector3 = {
 				x: point.x + x,
 				y: point.y + y,
-				z: point.z
+				z: point.z,
 			};
 
 			const nearbyTile = game.getTileFromPoint(nearbyPoint);
@@ -146,7 +90,7 @@ export function isOpenArea(point: IVector3, tile: ITile): boolean {
 				return false;
 			}
 
-			if (!isOpenTile(nearbyPoint, nearbyTile) || game.isTileFull(nearbyTile)) {
+			if (!isOpenTile(context, nearbyPoint, nearbyTile) || game.isTileFull(nearbyTile)) {
 				return false;
 			}
 		}
@@ -155,11 +99,12 @@ export function isOpenArea(point: IVector3, tile: ITile): boolean {
 	return true;
 }
 
-export function getBaseDoodads(base: IBase): IDoodad[] {
-	let doodads: IDoodad[] = [];
+export function getBaseDoodads(context: Context): Doodad[] {
+	let doodads: Doodad[] = [];
 
-	for (const key of Object.keys(base)) {
-		const baseDoodadOrDoodads: IDoodad | IDoodad[] = (base as any)[key];
+	const keys = Object.keys(baseInfo) as BaseInfoKey[];
+	for (const key of keys) {
+		const baseDoodadOrDoodads: Doodad | Doodad[] = context.base[key];
 		if (Array.isArray(baseDoodadOrDoodads)) {
 			doodads = doodads.concat(baseDoodadOrDoodads);
 
@@ -171,50 +116,44 @@ export function getBaseDoodads(base: IBase): IDoodad[] {
 	return doodads;
 }
 
-export function isBaseDoodad(base: IBase, doodad: IDoodad) {
-	return Object.keys(base).findIndex(key => {
-		const baseDoodadOrDoodads: IDoodad | IDoodad[] = (base as any)[key];
-		if (Array.isArray(baseDoodadOrDoodads)) {
-			return baseDoodadOrDoodads.indexOf(doodad) !== -1;
-		}
-
-		return baseDoodadOrDoodads === doodad;
-	}) !== -1;
+export function getBasePosition(context: Context): IVector3 {
+	return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.player;
 }
 
-export function getBasePosition(base: IBase): IVector3 {
-	return base.campfire || base.waterStill || base.kiln || localPlayer;
+export function hasBase(context: Context): boolean {
+	return context.base.campfire.length > 0 || context.base.waterStill.length > 0;
 }
 
-export function hasBase(base: IBase): boolean {
-	return Object.keys(base).findIndex(key => {
-		const baseDoodadOrDoodads: IDoodad | IDoodad[] = (base as any)[key];
-		if (Array.isArray(baseDoodadOrDoodads)) {
-			return baseDoodadOrDoodads.length > 0;
-		}
-
-		return baseDoodadOrDoodads !== undefined;
-	}) !== -1;
-}
-
-export function isNearBase(base: IBase, point: IVector3): boolean {
-	if (!hasBase(base)) {
-		return true;
+export function isNearBase(context: Context, point: IVector3 = context.player): boolean {
+	if (!hasBase(context)) {
+		return false;
 	}
 
-	for (let x = -nearBaseDistance; x <= nearBaseDistance; x++) {
-		for (let y = -nearBaseDistance; y <= nearBaseDistance; y++) {
+	for (let x = nearBaseDistance * -1; x <= nearBaseDistance; x++) {
+		for (let y = nearBaseDistance * -1; y <= nearBaseDistance; y++) {
 			const nearbyPoint: IVector3 = {
 				x: point.x + x,
 				y: point.y + y,
-				z: point.z
+				z: point.z,
 			};
 
 			const nearbyTile = game.getTileFromPoint(nearbyPoint);
 			const doodad = nearbyTile.doodad;
-			if (doodad && isBaseDoodad(base, doodad)) {
+			if (doodad && isBaseDoodad(context, doodad)) {
 				return true;
 			}
+		}
+	}
+
+	return false;
+}
+
+function isBaseDoodad(context: Context, doodad: Doodad) {
+	const keys = Object.keys(baseInfo) as BaseInfoKey[];
+
+	for (const key of keys) {
+		if (context.base[key].some(baseDoodad => baseDoodad === doodad)) {
+			return true;
 		}
 	}
 

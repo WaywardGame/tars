@@ -1,6 +1,8 @@
-import ActionExecutor from "action/ActionExecutor";
-import actionDescriptions from "action/Actions";
-import { ActionType, IActionDescription } from "action/IAction";
+import ActionExecutor from "entity/action/ActionExecutor";
+import actionDescriptions from "entity/action/Actions";
+import { ActionType, IActionDescription } from "entity/action/IAction";
+
+import Context from "../Context";
 
 const pendingActions: {
 	[index: number]: {
@@ -9,7 +11,7 @@ const pendingActions: {
 	};
 } = {};
 
-export function waitForAction(actionType: ActionType) {
+export async function waitForAction(actionType: ActionType) {
 	return new Promise<boolean>(resolve => {
 		const rejectorId = setTimeout(() => {
 			delete pendingActions[actionType];
@@ -18,7 +20,7 @@ export function waitForAction(actionType: ActionType) {
 
 		pendingActions[actionType] = {
 			resolve: resolve,
-			rejectorTimeoutId: rejectorId
+			rejectorTimeoutId: rejectorId,
 		};
 	});
 }
@@ -32,13 +34,16 @@ export function postExecuteAction(actionType: ActionType) {
 	}
 }
 
-export async function executeAction<T extends ActionType>(actionType: T, executor: (action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void) {
+export async function executeAction<T extends ActionType>(
+	context: Context,
+	actionType: T,
+	executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void): Promise<void> {
 	let waiter: Promise<boolean> | undefined;
 
-	if (localPlayer.hasDelay()) {
+	if (context.player.hasDelay()) {
 		await new Promise(resolve => {
 			const checker = () => {
-				if (!localPlayer.hasDelay()) {
+				if (!context.player.hasDelay()) {
 					resolve();
 					return;
 				}
@@ -55,7 +60,7 @@ export async function executeAction<T extends ActionType>(actionType: T, executo
 		waiter = waitForAction(actionType);
 	}
 
-	await executor(ActionExecutor.get(actionType).skipConfirmation() as any);
+	executor(context, ActionExecutor.get(actionType).skipConfirmation() as any);
 
 	if (waiter) {
 		await waiter;

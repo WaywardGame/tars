@@ -1,86 +1,63 @@
-import { ActionType } from "action/IAction";
-import { EquipType, DamageType, ItemType, ItemTypeGroup, DoodadType, DoodadTypeGroup } from "Enums";
-import { IItem, IContainer, IRecipe } from "item/IItem";
-import Enums from "utilities/enum/Enums";
-import { IInventoryItems } from "../ITars";
-import Items from "item/Items";
-import { log } from "./Logger";
+import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
+import { ActionType } from "entity/action/IAction";
+import Creature from "entity/creature/Creature";
+import { DamageType } from "entity/IEntity";
+import { EquipType } from "entity/IHuman";
+import { IStatMax, Stat } from "entity/IStats";
+import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "item/IItem";
+import Item from "item/Item";
 import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
-import { getDoodadTypes } from "../Helpers";
+import Items from "item/Items";
+import Enums from "utilities/enum/Enums";
 
-const recipes: IRecipe[] = [];
+import Context from "../Context";
+import { IInventoryItems, inventoryItemInfo } from "../ITars";
 
-export function resetTargetRecipes() {
-	recipes.length = 0;
-}
+import { getDoodadTypes } from "./Doodad";
 
-export function addTargetRecipe(recipe: IRecipe) {
-	if (recipes.indexOf(recipe) === -1) {
-		recipes.push(recipe);
+// allow processing with inventory items assuming they wont be consumed
+export function processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean): ItemRecipeRequirementChecker {
+	const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed) =>
+		!isConsumed || (!context.isReservedItem(item) && !isInventoryItem(context, item)));
 
-		log("addTargetRecipe", recipe);
-	}
-}
-
-export function processRecipe(inventory: IInventoryItems, recipe: IRecipe, trackItems: boolean): ItemRecipeRequirementChecker {
-	const checker = new ItemRecipeRequirementChecker(localPlayer, recipe, trackItems);
-
-	// don't process using reserved items
-	// todo: use protectedCraftingItems and quickslot important things
-	const items = localPlayer.inventory.containedItems.filter(i => !isInventoryItem(inventory, i));
+	const items = context.player.inventory.containedItems;
 	const container: IContainer = {
-		weightCapacity: localPlayer.inventory.weightCapacity,
+		weightCapacity: context.player.inventory.weightCapacity,
 		containedItems: items,
-		itemOrders: items.map(i => i.id)
+		itemOrders: items.map(i => i.id),
 	};
 	checker.processContainer(container, true);
-	// checker.processAdjacent(true);
+
+	if (useIntermediateChest && context.base.intermediateChest[0] && !checker.requirementsMet()) {
+		// process with the intermediate chest in mind
+		checker.processContainer(context.base.intermediateChest[0], true);
+	}
 
 	return checker;
 }
 
-export function isUsedByTargetRecipe(inventory: IInventoryItems, item: IItem): boolean {
-	for (const recipe of recipes) {
-		const checker = processRecipe(inventory, recipe, true);
-
-		if (checker.itemBaseComponent === item) {
-			return true;
-		}
-
-		for (const requiredItem of checker.itemComponentsRequired) {
-			if (requiredItem === item) {
-				return true;
-			}
-		}
-
-		for (const consumedItem of checker.itemComponentsConsumed) {
-			if (consumedItem === item) {
-				return true;
-			}
-		}
-	}
-
-	return false;
+export function getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
+	return getItemInContainer(context, context.player.inventory, itemTypeSearch, true);
 }
 
-export function getItemInInventory(inventory: IInventoryItems, itemTypeSearch: ItemType, excludeUsefulItems: boolean = true): IItem | undefined {
-	return getItemInContainer(inventory, localPlayer.inventory, itemTypeSearch, excludeUsefulItems);
-}
-
-export function getItemInContainer(inventory: IInventoryItems, container: IContainer, itemTypeSearch: ItemType, excludeUsefulItems: boolean = true): IItem | undefined {
+export function getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, excludeUsefulItems: boolean = true): Item | undefined {
 	const orderedItems = itemManager.getOrderedContainerItems(container);
 	for (const item of orderedItems) {
-		if (excludeUsefulItems && isInventoryItem(inventory, item)) {
+		if (excludeUsefulItems && isInventoryItem(context, item)) {
 			continue;
 		}
 
 		if (item.type === itemTypeSearch) {
+			if (context.isReservedItem(item)) {
+				continue;
+			}
+
 			return item;
 		}
 
 		const description = Items[item.type];
 		if (description && description.weightCapacity !== undefined) {
-			const item2 = getItemInContainer(inventory, item as IContainer, itemTypeSearch, excludeUsefulItems);
+			const item2 = getItemInContainer(context, item as IContainer, itemTypeSearch, excludeUsefulItems);
 			if (item2) {
 				return item2;
 			}
@@ -90,22 +67,28 @@ export function getItemInContainer(inventory: IInventoryItems, container: IConta
 	return undefined;
 }
 
-export function isInventoryItem(inventory: IInventoryItems, item: IItem) {
-	return Object.keys(inventory).findIndex(key => {
-		const itemOrItems: IItem | IItem[] = (inventory as any)[key];
-		if (Array.isArray(itemOrItems)) {
-			return itemOrItems.indexOf(item) !== -1;
-		}
+export function isInventoryItem(context: Context, item: Item) {
+	const keys = Object.keys(inventoryItemInfo) as Array<keyof IInventoryItems>;
 
-		return itemOrItems === item;
-	}) !== -1;
+	for (const key of keys) {
+		if (context.inventory[key] === item) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
-export function getBestActionItem(use: ActionType, preferredDamageType?: DamageType): IItem | undefined {
-	let possibleEquips = getPossibleHandEquips(use, preferredDamageType);
-	if (possibleEquips.length === 0) {
+export function canDrinkItem(item: Item) {
+	const waterContainerDescription = item.description()!;
+	return (waterContainerDescription.use && waterContainerDescription.use.indexOf(ActionType.DrinkItem) !== -1) ? true : false;
+}
+
+export function getBestActionItem(context: Context, use: ActionType, preferredDamageType?: DamageType): Item | undefined {
+	let possibleEquips = getPossibleHandEquips(context, use, preferredDamageType);
+	if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
 		// fall back to not caring about the damage type
-		possibleEquips = getPossibleHandEquips(use);
+		possibleEquips = getPossibleHandEquips(context, use);
 	}
 
 	if (possibleEquips.length > 0) {
@@ -115,25 +98,27 @@ export function getBestActionItem(use: ActionType, preferredDamageType?: DamageT
 	return undefined;
 }
 
-export function getBestEquipment(equip: EquipType): IItem[] {
-	return localPlayer.inventory.containedItems.filter(item => {
-		if (item.type === ItemType.AnimalPelt) {
-			// we're not savages
-			return false;
-		}
+export function getBestEquipment(context: Context, equip: EquipType): Item[] {
+	return context.player.inventory.containedItems
+		.filter(item => {
+			if (item.type === ItemType.AnimalPelt) {
+				// we're not savages
+				return false;
+			}
 
-		const description = item.description();
-		return description && description.equip === equip;
-	}).sort((a, b) => calculateEquipItemScore(a) < calculateEquipItemScore(b) ? 1 : -1);
+			const description = item.description();
+			return description && description.equip === equip;
+		})
+		.sort((a, b) => calculateEquipItemScore(a) < calculateEquipItemScore(b) ? 1 : -1);
 }
 
-export function calculateEquipItemScore(item: IItem): number {
+export function calculateEquipItemScore(item: Item): number {
 	const description = item.description();
 	if (!description || !description.defense) {
 		return 0;
 	}
 
-	let score = description.defense.base;
+	let score = 4 * description.defense.base;
 
 	const resists = description.defense.resist;
 	const vulns = description.defense.vulnerable;
@@ -153,47 +138,136 @@ export function calculateEquipItemScore(item: IItem): number {
 	return score;
 }
 
-export function getPossibleHandEquips(use: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): IItem[] {
-	return getInventoryItemsWithUse(use, filterEquipped).filter(item => {
-		const description = item.description();
-		return description && description.equip === EquipType.Held &&
-			(preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
-	}).sort((a, b) => a.minDur !== undefined && b.minDur !== undefined ? (a.minDur < b.minDur ? 1 : -1) : 0);
-}
+export function estimateDamageModifier(weapon: Item, target: Creature): number {
+	const weaponDescription = weapon.description();
+	const creatureDescription = target.description();
+	if (!weaponDescription || !creatureDescription) {
+		return -99;
+	}
 
-export function getInventoryItemsWithUse(use: ActionType, filterEquipped?: boolean): IItem[] {
-	return localPlayer.inventory.containedItems.filter(item => {
-		if (filterEquipped && item.isEquipped()) {
-			return false;
+	const weaponAttack = weaponDescription.attack;
+	const weaponDamageType = weaponDescription.damageType;
+	if (weaponAttack === undefined || weaponDamageType === undefined) {
+		return -99;
+	}
+
+	const defense = creatureDescription.defense;
+
+	const resists = defense.resist;
+	const vulnerabilities = defense.vulnerable;
+
+	let resist = 0;
+	let vulnerable = 0;
+
+	for (const damageType of Enums.values(DamageType)) {
+		if ((weaponDamageType & damageType) && resists[damageType]) {
+			resist += resists[damageType];
 		}
 
-		const description = item.description();
-		return description && description.use && description.use.indexOf(use) !== -1;
-	}).sort((a, b) => a.minDur !== undefined && b.minDur !== undefined ? (a.minDur < b.minDur ? 1 : -1) : 0);
-}
-
-export function getUnusedItems(inventory: IInventoryItems) {
-	return localPlayer.inventory.containedItems.filter(item => {
-		if (item.isEquipped() || isInventoryItem(inventory, item) || isUsedByTargetRecipe(inventory, item)) {
-			return false;
+		if ((weaponDamageType & damageType) && vulnerabilities[damageType]) {
+			vulnerable += vulnerabilities[damageType];
 		}
+	}
 
+	return weaponAttack + vulnerable - resist;
+}
+
+export function getPossibleHandEquips(context: Context, use: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[] {
+	return getInventoryItemsWithUse(context, use, filterEquipped)
+		.filter(item => {
+			const description = item.description();
+			return description && description.equip === EquipType.Held &&
+				(preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
+		});
+}
+
+export function getInventoryItemsWithEquipType(context: Context, equipType: EquipType): Item[] {
+	return context.player.inventory.containedItems.filter(item => {
 		const description = item.description();
-		if (description && description.use && (description.use.indexOf(ActionType.GatherWater) !== -1 || description.use.indexOf(ActionType.DrinkItem) !== -1)) {
-			return false;
-		}
-
-		return true;
-	}).sort((a, b) => a.weight < b.weight ? 1 : -1);
+		return description && description.equip === equipType;
+	});
 }
 
-export function getSeeds(): IItem[] {
-	return itemManager.getItemsInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Seed, true).filter(seed => seed.minDur !== undefined && seed.minDur > 0);
+export function getInventoryItemsWithUse(context: Context, use: ActionType, filterEquipped?: boolean): Item[] {
+	return context.player.inventory.containedItems
+		.filter(item => {
+			if (filterEquipped && item.isEquipped()) {
+				return false;
+			}
+
+			const description = item.description();
+			if (!description) {
+				return false;
+			}
+
+			if (use === ActionType.Attack) {
+				return description.attack !== undefined;
+			}
+
+			return description.use && description.use.indexOf(use) !== -1;
+		})
+		.sort((a, b) => {
+			if (use === ActionType.Attack) {
+				const descriptionA = a.description();
+				const descriptionB = b.description();
+				if (descriptionA !== undefined && descriptionB !== undefined &&
+					descriptionA.attack !== undefined && descriptionB.attack !== undefined &&
+					descriptionA.damageType !== undefined && descriptionB.damageType !== undefined) {
+					if (descriptionA.attack === descriptionB.attack) {
+						const damageTypesA = Enums.values(DamageType).filter(type => (descriptionA.damageType! & type) === type).length();
+						const damageTypesB = Enums.values(DamageType).filter(type => (descriptionB.damageType! & type) === type).length();
+
+						return damageTypesA < damageTypesB ? 1 : -1;
+					}
+
+					return descriptionA.attack < descriptionB.attack ? 1 : -1;
+				}
+			}
+
+			return a.minDur !== undefined && b.minDur !== undefined ? (a.minDur < b.minDur ? 1 : -1) : 0;
+		});
 }
 
-export function getInventoryItemForDoodad(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): IItem | undefined {
+export function getReservedItems(context: Context) {
+	return context.player.inventory.containedItems
+		.filter(item => context.isReservedItem(item) && !isInventoryItem(context, item));
+}
+
+/**
+ * Returns unused items sorted by oldest to newest
+ */
+export function getUnusedItems(context: Context, ignoreReserved: boolean = false) {
+	return context.player.inventory.containedItems
+		.filter(item => {
+			if (item.isEquipped() || isInventoryItem(context, item) || (!ignoreReserved && context.isReservedItem(item))) {
+				return false;
+			}
+
+			const description = item.description();
+			if (description && description.use && (description.use.indexOf(ActionType.GatherWater) !== -1 || description.use.indexOf(ActionType.DrinkItem) !== -1)) {
+				return false;
+			}
+
+			return true;
+		})
+		.sort((a, b) => context.player.inventory.containedItems.indexOf(a) > context.player.inventory.containedItems.indexOf(b) ? 1 : -1);
+}
+
+export function getAvailableInventoryWeight(context: Context) {
+	const items = context.player.inventory.containedItems
+		.filter(item => isInventoryItem(context, item));
+	const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
+	return context.player.getStat<IStatMax>(Stat.Weight).max - itemsWeight;
+}
+
+export function getSeeds(context: Context): Item[] {
+	return itemManager.getItemsInContainerByGroup(context.player.inventory, ItemTypeGroup.Seed, true)
+		.filter(seed => seed.minDur !== undefined && seed.minDur > 0 && seed.type !== ItemType.GrassSeeds && seed.type !== ItemType.MapleSeeds);
+}
+
+export function getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: DoodadType | DoodadTypeGroup): Item | undefined {
 	const itemTypes: ItemType[] = [];
-	
+
 	const doodadTypes = getDoodadTypes(doodadTypeOrGroup);
 	for (const dt of doodadTypes) {
 		for (const it of Enums.values(ItemType)) {
@@ -203,9 +277,8 @@ export function getInventoryItemForDoodad(doodadTypeOrGroup: DoodadType | Doodad
 			}
 		}
 	}
-	
-	const matchingItems = itemManager.getItemsInContainer(localPlayer.inventory, true).filter((item) => itemTypes.indexOf(item.type) !== -1);
+
+	const matchingItems = itemManager.getItemsInContainer(context.player.inventory, true).filter(item => itemTypes.indexOf(item.type) !== -1);
 
 	return matchingItems[0];
 }
-

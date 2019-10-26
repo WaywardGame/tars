@@ -1,0 +1,86 @@
+import Doodad from "doodad/Doodad";
+import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
+import Vector2 from "utilities/math/Vector2";
+
+import Context from "../../../Context";
+import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
+import { baseInfo, BaseInfoKey } from "../../../ITars";
+import Objective from "../../../Objective";
+import StartFire from "../../Other/StartFire";
+
+import AcquireBuildMoveToDoodad from "./AcquireBuildMoveToDoodad";
+
+/**
+ * Acquires, builds, and moves to a lit doodad
+ * 
+ * If no doodad that is able to provide fire exists and the build item isn't in the inventory, it will acquire a campfire and build it.
+ * 
+ * If the doodad exists, it will move to face the doodad and light it on fire if it's not already lit).
+ */
+export default class AcquireBuildMoveToFire extends Objective {
+
+	constructor(private readonly baseInfoKey?: BaseInfoKey) {
+		super();
+	}
+
+	public getIdentifier(): string {
+		return "AcquireBuildMoveToFire";
+	}
+
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const objectives: IObjective[] = [];
+
+		let doodad: Doodad | undefined;
+		let doodadTypeOrGroup: DoodadType | DoodadTypeGroup | undefined;
+
+		if (this.baseInfoKey !== undefined) {
+			doodad = context.base[this.baseInfoKey][0];
+			if (!doodad) {
+				doodadTypeOrGroup = baseInfo[this.baseInfoKey].doodadTypes![0];
+			}
+
+		} else {
+			const doodadInfos = ([context.base.campfire, context.base.kiln, context.base.furnace]
+				.map(doodads => {
+					for (const doodad of doodads) {
+						const description = doodad.description();
+						if (!description) {
+							return undefined;
+						}
+
+						return {
+							doodad: doodad,
+							providesFire: description.providesFire,
+						};
+					}
+				})
+				.filter(doodadInfo => doodadInfo !== undefined) as Array<{ doodad: Doodad; providesFire: boolean }>)
+				// todo: make this use objective pipelines and move to easiest one?
+				.sort((a, b) => Vector2.distance(context.player, a.doodad) > Vector2.distance(context.player, b.doodad) ? 1 : -1);
+
+			for (const doodadInfo of doodadInfos) {
+				if (!doodad) {
+					doodad = doodadInfo.doodad;
+				}
+
+				if (doodadInfo.providesFire) {
+					doodad = doodadInfo.doodad;
+					break;
+				}
+			}
+
+			if (!doodad) {
+				doodadTypeOrGroup = DoodadTypeGroup.LitCampfire;
+			}
+		}
+
+		if (doodadTypeOrGroup !== undefined) {
+			objectives.push(new AcquireBuildMoveToDoodad(doodadTypeOrGroup));
+		}
+
+		objectives.push(new StartFire(doodad));
+
+		return objectives;
+	}
+
+}

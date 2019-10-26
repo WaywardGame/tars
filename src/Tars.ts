@@ -1,61 +1,86 @@
-import { ActionType, IActionApi, IActionDescription } from "action/IAction";
-import { ICreature } from "creature/ICreature";
-import Doodads from "doodad/Doodads";
+import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
+import { ActionType, IActionApi, IActionDescription } from "entity/action/IAction";
+import Creature from "entity/creature/Creature";
+import { DamageType } from "entity/IEntity";
+import { EquipType } from "entity/IHuman";
 import { IStat, IStatMax, Stat } from "entity/IStats";
-import { Bindable, DamageType, Direction, DoodadType, DoodadTypeGroup, EquipType, ItemType, ItemTypeGroup, PlayerState, TurnMode } from "Enums";
-import { IContainer, IItem } from "item/IItem";
+import { Source } from "entity/player/IMessageManager";
+import { PlayerState, WeightStatus } from "entity/player/IPlayer";
+import { MessageType } from "entity/player/MessageManager";
+import { INote } from "entity/player/note/NoteManager";
+import Player from "entity/player/Player";
+import { EventBus } from "event/EventBuses";
+import { EventHandler } from "event/EventManager";
+import { TileUpdateType, TurnMode } from "game/IGame";
+import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
+import Item from "item/Item";
 import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
-import { BindCatcherApi } from "newui/BindingManager";
-import { Source } from "player/IMessageManager";
-import { IPlayer } from "player/IPlayer";
-import { MessageType } from "player/MessageManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import { ITile } from "tile/ITerrain";
-import Enums from "utilities/enum/Enums";
+import { sleep } from "utilities/Async";
+import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
-import * as Helpers from "./Helpers";
-import { IObjective, ObjectiveStatus } from "./IObjective";
+import Context from "./Context";
+import Planner from "./Core/Planner";
+import { IObjective, ObjectiveResult } from "./IObjective";
 import { desertCutoff, IBase, IInventoryItems } from "./ITars";
-import { deleteNavigation, getNavigation, Navigation } from "./Navigation";
-import AcquireItem from "./Objectives/AcquireItem";
-import AcquireItemByGroup from "./Objectives/AcquireItemByGroup";
-import AcquireItemForAction from "./Objectives/AcquireItemForAction";
-import AcquireItemForDoodad from "./Objectives/AcquireItemForDoodad";
-import AcquireWaterContainer from "./Objectives/AcquireWaterContainer";
-import BuildItem from "./Objectives/BuildItem";
-import CarveCorpse from "./Objectives/CarveCorpse";
-import DefendAgainstCreature from "./Objectives/DefendAgainstCreature";
-import Equip from "./Objectives/Equip";
-import Idle from "./Objectives/Idle";
-import LeaveDesert from "./Objectives/LeaveDesert";
-import OptionsInterrupt from "./Objectives/OptionsInterrupt";
-import OrganizeInventory from "./Objectives/OrganizeInventory";
-import PlantSeed from "./Objectives/PlantSeed";
-import RecoverHealth from "./Objectives/RecoverHealth";
-import RecoverHunger from "./Objectives/RecoverHunger";
-import RecoverStamina from "./Objectives/RecoverStamina";
-import RecoverThirst from "./Objectives/RecoverThirst";
-import ReduceWeight from "./Objectives/ReduceWeight";
-import RepairItem from "./Objectives/RepairItem";
-import ReturnToBase from "./Objectives/ReturnToBase";
+import Navigation from "./Navigation/Navigation";
+import AcquireItem from "./Objectives/Acquire/Item/AcquireItem";
+import AcquireItemByGroup from "./Objectives/Acquire/Item/AcquireItemByGroup";
+import AcquireItemForAction from "./Objectives/Acquire/Item/AcquireItemForAction";
+import AcquireItemForDoodad from "./Objectives/Acquire/Item/AcquireItemForDoodad";
+import AcquireWaterContainer from "./Objectives/Acquire/Item/Specific/AcquireWaterContainer";
+import AnalyzeBase from "./Objectives/Analyze/AnalyzeBase";
+import AnalyzeInventory from "./Objectives/Analyze/AnalyzeInventory";
+import Lambda from "./Objectives/Core/Lambda";
+import CarveCorpse from "./Objectives/Interrupt/CarveCorpse";
+import DefendAgainstCreature from "./Objectives/Interrupt/DefendAgainstCreature";
+import OptionsInterrupt from "./Objectives/Interrupt/OptionsInterrupt";
+import ReduceWeight from "./Objectives/Interrupt/ReduceWeight";
+import RepairItem from "./Objectives/Interrupt/RepairItem";
+import BuildItem from "./Objectives/Other/BuildItem";
+import Equip from "./Objectives/Other/Equip";
+import Idle from "./Objectives/Other/Idle";
+import PlantSeed from "./Objectives/Other/PlantSeed";
+import ReturnToBase from "./Objectives/Other/ReturnToBase";
+import StartWaterStillDesalination from "./Objectives/Other/StartWaterStillDesalination";
+import Unequip from "./Objectives/Other/Unequip";
+import UpgradeInventoryItem from "./Objectives/Other/UpgradeInventoryItem";
+import RecoverHealth from "./Objectives/Recover/RecoverHealth";
+import RecoverHunger from "./Objectives/Recover/RecoverHunger";
+import RecoverStamina from "./Objectives/Recover/RecoverStamina";
+import RecoverThirst from "./Objectives/Recover/RecoverThirst";
+import LeaveDesert from "./Objectives/Utility/LeaveDesert";
+import OrganizeInventory from "./Objectives/Utility/OrganizeInventory";
 import * as Action from "./Utilities/Action";
-import { getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getSeeds } from "./Utilities/Item";
-import { log, setLogger } from "./Utilities/Logger";
+import { isNearBase } from "./Utilities/Base";
+import { estimateDamageModifier, getBestActionItem, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getSeeds } from "./Utilities/Item";
+import { log } from "./Utilities/Logger";
 import * as movementUtilities from "./Utilities/Movement";
 import * as objectUtilities from "./Utilities/Object";
+import * as tileUtilities from "./Utilities/Tile";
 
 const tickSpeed = 333;
 
-const baseDoodadDistance = 150;
+const recoverThresholds: { [index: number]: number } = {
+	[Stat.Health]: 30,
+	[Stat.Stamina]: 20,
+	[Stat.Hunger]: 10,
+	[Stat.Thirst]: 10,
+};
+
+// focus on healing if our health is below 85% while poisoned
+const poisonHealthPercentThreshold = 0.85;
 
 enum NavigationSystemState {
 	NotInitialized,
 	Initializing,
-	Initialized
+	Initialized,
 }
 
 export default class Tars extends Mod {
@@ -78,25 +103,29 @@ export default class Tars extends Mod {
 	private base: IBase;
 	private inventory: IInventoryItems;
 
-	private overBurdened = false;
+	private readonly statThresholdExceeded: { [index: number]: boolean } = {};
+	private weightStatus: WeightStatus | undefined;
+	private weightChanged: boolean;
 
+	private context: Context;
 	private objective: IObjective | undefined;
-
 	private interruptObjective: IObjective | undefined;
-	private interruptsId: string;
+	private interruptContext: Context | undefined;
+	private readonly interruptContexts: Map<number, Context> = new Map();
+	private interruptsId: string | undefined;
+	private interrupted = false;
 
 	private tickTimeoutId: number | undefined;
 
-	private navigation: Navigation;
+	private navigation: Navigation | undefined;
 	private navigationInitialized: NavigationSystemState;
+	private navigationQueuedUpdates: Array<() => void>;
 
-	public onInitialize(): any {
-		Helpers.setPath(this.getPath());
-
-		setLogger(this.getLog());
+	public onInitialize(): void {
+		Navigation.setModPath(this.getPath());
 	}
 
-	public onUninitialize(): any {
+	public onUninitialize(): void {
 		this.onGameEnd();
 	}
 
@@ -106,21 +135,31 @@ export default class Tars extends Mod {
 
 	@HookMethod
 	public onGameStart(isLoadingSave: boolean, playedCount: number): void {
-		this.reset();
-		this.navigation = getNavigation();
+		this.delete();
+
+		this.navigation = Navigation.get();
 	}
 
 	@HookMethod
 	public onGameEnd(state?: PlayerState): void {
 		this.disable();
-		this.reset();
+		this.delete();
 	}
 
 	@HookMethod
-	public onPlayerDeath(player: IPlayer): boolean | undefined {
+	public onWriteNote(player: Player, note: INote): false | undefined {
+		if (this.isEnabled()) {
+			// hide notes
+			return false;
+		}
+
+		return undefined;
+	}
+
+	@HookMethod
+	public onPlayerDeath(player: Player): boolean | undefined {
 		if (player.isLocalPlayer()) {
-			this.objective = undefined;
-			this.interruptObjective = undefined;
+			this.interrupt();
 
 			movementUtilities.resetMovementOverlays();
 		}
@@ -128,17 +167,38 @@ export default class Tars extends Mod {
 		return undefined;
 	}
 
-	@HookMethod
-	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
-		if (this.isEnabled()) {
-			movementUtilities.clearOverlay(tile);
+	@EventHandler(EventBus.LocalPlayer, "processMovement")
+	public async processMovement(player: Player): Promise<void> {
+		if (this.isEnabled() && player.isLocalPlayer()) {
+			if (this.navigationInitialized === NavigationSystemState.Initialized && this.navigation) {
+				this.navigation.queueUpdateOrigin(player);
+			}
 
-			if (this.objective !== undefined) {
-				this.objective.onMove();
+			const objective = this.interruptObjective || this.objective;
+			if (objective !== undefined) {
+				const result = await objective.onMove(this.context);
+				if (result === true) {
+					this.interrupt();
+
+				} else if (result) {
+					this.interrupt(result);
+				}
 			}
 		}
+	}
 
-		return undefined;
+	@EventHandler(EventBus.LocalPlayer, "restEnd")
+	public restEnd(player: Player) {
+		if (this.isEnabled() && player.isLocalPlayer()) {
+			this.processQueuedNavigationUpdates();
+		}
+	}
+
+	@HookMethod
+	public onMoveComplete(player: Player) {
+		if (this.isEnabled() && player.isLocalPlayer()) {
+			movementUtilities.clearOverlay(player.getTile());
+		}
 	}
 
 	@HookMethod
@@ -152,9 +212,25 @@ export default class Tars extends Mod {
 	}
 
 	@HookMethod
-	public onTileUpdate(tile: ITile, x: number, y: number, z: number): void {
-		if (this.navigationInitialized) {
-			this.navigation.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z);
+	public onTileUpdate(tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
+		if (this.navigationInitialized === NavigationSystemState.Initializing || localPlayer.isResting()) {
+			this.navigationQueuedUpdates.push(() => {
+				this.onTileUpdate(tile, tileX, tileY, tileZ, tileUpdateType);
+			});
+
+		} else if (this.navigationInitialized === NavigationSystemState.Initialized && this.navigation) {
+			// update this tile and its neighbors
+			for (let x = -1; x <= 1; x++) {
+				for (let y = -1; y <= 1; y++) {
+					if (x === 0 && y === 0) {
+						this.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ);
+
+					} else {
+						const otherTile = game.getTile(tileX + x, tileY + y, tileZ);
+						this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ);
+					}
+				}
+			}
 		}
 	}
 
@@ -167,32 +243,51 @@ export default class Tars extends Mod {
 		Action.postExecuteAction(api.type);
 	}
 
-	@HookMethod
-	public onUpdateWeight(player: IPlayer, newWeight: number): number | undefined {
-		const weight = player.getStat<IStatMax>(Stat.Weight);
-		if (newWeight > weight.max) {
-			if (!this.overBurdened) {
-				this.overBurdened = true;
+	@EventHandler(EventBus.LocalPlayer, "statChanged")
+	public onStatChange(player: Player, stat: IStat) {
+		const recoverThreshold = recoverThresholds[stat.type];
+		if (recoverThreshold !== undefined) {
+			if (stat.value <= recoverThreshold) {
+				if (!this.statThresholdExceeded[stat.type]) {
+					this.statThresholdExceeded[stat.type] = true;
 
-				if (this.isEnabled()) {
-					// player is carrying too much
-					// reset objectives so we'll handle this immediately
-					log("Over burdened");
+					if (this.isEnabled()) {
+						log.info(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
 
-					this.objective = undefined;
-					this.interruptObjective = undefined;
+						this.interrupt();
+					}
 				}
-			}
 
-		} else if (this.overBurdened) {
-			this.overBurdened = false;
-
-			if (this.isEnabled()) {
-				log("No longer over burdened");
+			} else if (this.statThresholdExceeded[stat.type]) {
+				this.statThresholdExceeded[stat.type] = false;
 			}
 		}
 
-		return undefined;
+		switch (stat.type) {
+			case Stat.Weight:
+				this.weightChanged = true;
+
+				const weightStatus = player.getWeightStatus();
+				if (this.weightStatus !== weightStatus) {
+					const previousWeightStatus = this.weightStatus;
+
+					this.weightStatus = weightStatus;
+
+					if (weightStatus === WeightStatus.None) {
+						return;
+					}
+
+					if (this.isEnabled()) {
+						// players weight status changed
+						// reset objectives so we'll handle this immediately
+						log.info(`Weight status changed from ${previousWeightStatus !== undefined ? WeightStatus[previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
+
+						this.interrupt();
+					}
+				}
+
+				break;
+		}
 	}
 
 	@HookMethod
@@ -203,22 +298,55 @@ export default class Tars extends Mod {
 	////////////////////////////////////////////////
 
 	@Register.command("TARS")
-	protected command(player: IPlayer, args: string) {
+	protected command(_player: Player, _args: string) {
 		this.toggle();
 	}
 
 	private reset() {
-		this.base = {};
-		this.inventory = {};
-		this.overBurdened = false;
 		this.objective = undefined;
 		this.interruptObjective = undefined;
+		this.interruptsId = undefined;
+		this.interrupted = false;
+		this.interruptContext = undefined;
+		this.interruptContexts.clear();
+	}
+
+	private delete() {
+		this.base = {
+			anvil: [],
+			campfire: [],
+			chest: [],
+			furnace: [],
+			intermediateChest: [],
+			kiln: [],
+			waterStill: [],
+			well: [],
+			buildAnotherChest: false,
+			availableUnlimitedWellLocation: undefined,
+		};
+
+		this.inventory = {};
+
+		this.reset();
+
 		this.navigationInitialized = NavigationSystemState.NotInitialized;
-		deleteNavigation();
+		this.navigationQueuedUpdates = [];
+
+		Navigation.delete();
 	}
 
 	private isEnabled(): boolean {
 		return this.tickTimeoutId !== undefined;
+	}
+
+	private isReady(checkForInterrupts: boolean) {
+		return this.isEnabled() &&
+			!this.context.player.isResting() &&
+			!this.context.player.isMovingClientside &&
+			!this.context.player.hasDelay() &&
+			!this.context.player.isGhost() &&
+			!game.paused &&
+			(!checkForInterrupts || !this.interrupted);
 	}
 
 	private async toggle() {
@@ -226,16 +354,16 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		const str = this.tickTimeoutId !== undefined ? "Enabled" : "Disabled";
+		const str = !this.isEnabled() ? "Enabled" : "Disabled";
 
-		log(str);
+		log.info(str);
 
 		localPlayer.messages
 			.source(this.messageSource)
 			.type(MessageType.Good)
-			.send(this.messageToggle, this.tickTimeoutId === undefined);
+			.send(this.messageToggle, !this.isEnabled());
 
-		if (this.navigationInitialized === NavigationSystemState.NotInitialized) {
+		if (this.navigationInitialized === NavigationSystemState.NotInitialized && this.navigation) {
 			this.navigationInitialized = NavigationSystemState.Initializing;
 
 			localPlayer.messages
@@ -243,9 +371,16 @@ export default class Tars extends Mod {
 				.type(MessageType.Good)
 				.send(this.messageNavigationUpdating);
 
+			// give a chance for the message to show up on screen before starting nav update
+			await sleep(100);
+
 			await this.navigation.updateAll();
 
+			this.navigation.queueUpdateOrigin(localPlayer);
+
 			this.navigationInitialized = NavigationSystemState.Initialized;
+
+			this.processQueuedNavigationUpdates();
 
 			localPlayer.messages
 				.source(this.messageSource)
@@ -253,18 +388,31 @@ export default class Tars extends Mod {
 				.send(this.messageNavigationUpdated);
 		}
 
-		this.objective = undefined;
-		this.interruptObjective = undefined;
+		this.context = new Context(localPlayer, this.base, this.inventory);
 
-		if (this.tickTimeoutId === undefined) {
-			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
+		this.reset();
+
+		if (this.isEnabled()) {
+			this.disable();
 
 		} else {
-			this.disable();
+			if (this.navigation) {
+				this.navigation.showOverlay();
+
+				if (this.navigationInitialized === NavigationSystemState.Initialized) {
+					this.navigation.queueUpdateOrigin(localPlayer);
+				}
+			}
+
+			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
 		}
 	}
 
 	private disable() {
+		if (this.navigation) {
+			this.navigation.hideOverlay();
+		}
+
 		if (this.tickTimeoutId !== undefined) {
 			clearTimeout(this.tickTimeoutId);
 			this.tickTimeoutId = undefined;
@@ -276,11 +424,31 @@ export default class Tars extends Mod {
 		}
 	}
 
+	private interrupt(interruptObjective?: IObjective) {
+		log.info("Interrupt", interruptObjective);
+
+		this.interrupted = true;
+
+		this.objective = undefined;
+
+		if (interruptObjective) {
+			this.interruptObjective = interruptObjective;
+		}
+
+		movementUtilities.resetMovementOverlays();
+		localPlayer.walkAlongPath(undefined);
+	}
+
 	private async tick() {
-		await this.onTick();
+		try {
+			await this.onTick();
+
+		} catch (ex) {
+			log.error("onTick error", ex);
+		}
 
 		if (this.tickTimeoutId === undefined) {
-			// it was turned off mid tick
+			this.disable();
 			return;
 		}
 
@@ -288,271 +456,358 @@ export default class Tars extends Mod {
 	}
 
 	private async onTick() {
-		if (localPlayer.isResting() || localPlayer.isMovingClientside || localPlayer.hasDelay() || localPlayer.isGhost() || game.paused) {
+		if (!this.isReady(false)) {
 			return;
 		}
 
 		objectUtilities.resetCachedObjects();
 		movementUtilities.resetCachedPaths();
+		tileUtilities.resetNearestTileLocationCache();
 
-		this.analyzeInventory();
-		this.analyzeBase();
+		// system objectives
+		await this.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
 
-		let result: IObjective[] | boolean;
+		// interrupts
+		const interrupts = this.getInterrupts(this.context);
+		const interruptsId = interrupts
+			.map(objective => objective && (Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective.getIdentifier()))
+			.join(", ");
 
-		const interrupts = this.getInterrupts();
-		const interruptsId = interrupts.map(i => i.getHashCode()).join(",");
 		if (this.interruptsId !== interruptsId) {
+			log.info(`Interrupts changed from ${this.interruptsId} to ${interruptsId}`);
 			this.interruptsId = interruptsId;
 			this.interruptObjective = undefined;
 		}
 
-		// console.log("interruptsId", this.interruptsId);
-		// console.log("interruptObjective", this.interruptObjective ? this.interruptObjective.getHashCode() : undefined);
+		if (this.interruptObjective || interrupts.length > 0) {
+			if (!this.interruptContext) {
+				// we should use our main context when running interrupt objectives
+				// this will prevent interrupts from messing with reserved items
+				// when the context is reset, it goes back to this initial state
+				this.interruptContext = this.context.clone();
+				this.interruptContext.setInitialState();
 
-		if (this.interruptObjective) {
-			log(`Working on interrupt ${this.interruptObjective.getHashCode()}`);
+				this.interruptContexts.clear();
 
-			result = await this.executeObjectives([this.interruptObjective]);
-			if (result !== true) {
-				// still working on it
-				return;
+				log.debug(`Created interrupt context with hash code: ${this.interruptContext.getHashCode()}`);
 			}
 
-			this.interruptObjective = undefined;
-		}
+			if (this.interruptObjective) {
+				this.interruptObjective.log.info("Continuing interrupt execution...");
 
-		if (interrupts.length > 0) {
-			result = await this.executeObjectives(interrupts);
-			if (result === true) {
+				const result = await this.executeObjectives(this.interruptContext, [this.interruptObjective], false);
+				if (result !== true) {
+					// still working on it
+					return;
+				}
+
 				this.interruptObjective = undefined;
+			}
 
-			} else if (result === false) {
-				return;
+			if (interrupts.length > 0) {
+				// return interrupts.filter(objective => objective !== undefined && (!Array.isArray(objective) || objective.length > 0)) as Array<IObjective | IObjective[]>;
 
-			} else {
-				// the first one is the active one
-				// this is different from normal!
+				for (let i = 0; i < interrupts.length; i++) {
+					const interruptObjectives = interrupts[i];
+					if (interruptObjectives === undefined || (Array.isArray(interruptObjectives) && interruptObjectives.length === 0)) {
+						continue;
+					}
 
-				// save the active objective
-				this.interruptObjective = result.find(objective => !objective.shouldSaveChildObjectives()) || result[result.length - 1];
+					const savedContext = this.interruptContexts.get(i);
+					if (savedContext) {
+						this.interruptContext = savedContext;
 
-				// reset main objective
-				this.objective = undefined;
+						log.debug(`Restored saved context from ${i}. ${this.interruptContext}`);
+					}
+
+					const result = await this.executeObjectives(this.interruptContext, [interruptObjectives], true);
+
+					log.debug("Interrupt result", result);
+
+					if (!this.interruptContext) {
+						// tars was disabled mid run
+						return;
+					}
+
+					if (result === true) {
+						// finished working on it
+						// update the initial state of the interrupt context
+						// it's possible interrupt() was called, so we'll come back here with the same context
+						// this.interruptContext.setInitialState();
+						// todo: nest interrupt support / contexts?
+
+						// ensure the current objective is cleared
+						this.interruptObjective = undefined;
+
+						if (this.interruptContexts.has(i)) {
+							this.interruptContexts.delete(i);
+							log.debug(`Deleting saved context from ${i}`);
+						}
+
+					} else {
+						// in progress. run again during the next tick
+
+						// save this context so it will be restored next time
+						this.interruptContexts.set(i, this.interruptContext.clone());
+						log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext}`);
+
+						// update the initial state so we don't mess with items between interrupts
+						this.interruptContext.setInitialState();
+
+						if (result !== false) {
+							// save the active objective
+							this.interruptObjective = result.find(objective => !objective.canSaveChildObjectives()) || result[result.length - 1];
+
+							// reset main objective
+							this.objective = undefined;
+						}
+
+						return;
+					}
+				}
+			}
+
+			// console.log.info("this.objective", this.objective ? this.objective.getHashCode() : undefined);
+
+			if (this.interrupted) {
+				this.interrupted = false;
+
+				// nested interrupt. update interrupt context
+				this.interruptContext.setInitialState();
+
+				log.debug(`Nested interrupt. Updating context with hash code: ${this.interruptContext.getHashCode()}`);
 
 				return;
 			}
 		}
 
-		// console.log("this.objective", this.objective ? this.objective.getHashCode() : undefined);
+		if (this.interrupted) {
+			this.interrupted = false;
+			return;
+		}
+
+		// no longer working on interrupts
+		this.interruptContext = undefined;
 
 		if (this.objective !== undefined) {
 			// we have an objective we are working on
-			log(`Working on ${this.objective.getHashCode()}`);
+			this.objective.log.info("Continuing execution...");
 
-			result = await this.executeObjectives([this.objective]);
+			const result = await this.executeObjectives(this.context, [this.objective], false, true);
 			if (result !== true) {
 				// still working on it
 				return;
 			}
 		}
 
-		result = await this.executeObjectives(this.determineObjectives());
+		const result = await this.executeObjectives(this.context, this.determineObjectives(this.context), true, true);
 		if (result === true || result === false) {
 			this.objective = undefined;
 
 		} else {
 			// save the active objective
-			this.objective = result.find(objective => !objective.shouldSaveChildObjectives()) || result[result.length - 1];
+			this.objective = result.find(objective => !objective.canSaveChildObjectives()) || result[result.length - 1];
+
+			// console.log.info("saved objective", this.objective, this.objective.getHashCode());
 		}
 	}
 
 	/**
 	 * Execute objectives
 	 * @param objectives Array of objectives
-	 * @returns An objective (if it's still being worked on), True if all the objectives are completed, False if we cannot execute anymore objectives
+	 * @param resetContextState True to reset the context before running each objective
+	 * @param checkForInterrupts True to interrupt objective execution when an interrupt occurs
+	 * @returns An objective (if it's still being worked on), True if all the objectives are completed
+	 * False if objectives are waiting for the next tick to continue running
 	 */
-	private async executeObjectives(objectives: IObjective[]): Promise<IObjective[] | boolean> {
+	private async executeObjectives(
+		context: Context,
+		objectives: Array<IObjective | IObjective[]>,
+		resetContextState: boolean,
+		checkForInterrupts: boolean = false): Promise<IObjective[] | boolean> {
 		for (const objective of objectives) {
-			if (this.hasDelay()) {
+			if (!this.isReady(checkForInterrupts)) {
 				return false;
 			}
 
-			const result = await this.executeObjective(objective);
-			if (typeof (result) !== "boolean") {
-				return result;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Execute an objective
-	 * @param objective Objective
-	 * @returns An objective (if it's still being worked on), True if completed
-	 */
-	private async executeObjective(objective: IObjective | undefined): Promise<IObjective[] | boolean> {
-		const chain: IObjective[] = [];
-
-		while (objective !== undefined) {
-			chain.push(objective);
-
-			// log(`Execute objective: ${objective.getHashCode()}`);
-
-			const newObjective = await objective.execute(this.base, this.inventory);
-			if (newObjective === undefined) {
-				// objective is still running
-				return chain;
+			if (resetContextState) {
+				// reset before running objectives
+				context.reset();
+				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`);
 			}
 
-			if (typeof (newObjective) === "number") {
-				switch (newObjective) {
-					case ObjectiveStatus.Complete:
-						objective = undefined;
-						break;
+			let objs: IObjective[];
+			if (Array.isArray(objective)) {
+				objs = objective;
+			} else {
+				objs = [objective];
+			}
 
-					default:
-						log(`Invalid return for objective ${objective}. ${newObjective}`);
-						objective = undefined;
-						break;
+			Planner.reset();
+
+			for (const o of objs) {
+				const plan = await Planner.createPlan(context, o);
+				if (!plan) {
+					log.warn(`No valid plan for ${o.getHashCode()}`);
+					break;
 				}
 
-			} else {
-				objective = newObjective;
+				const result = await plan.execute(
+					() => {
+						this.weightChanged = false;
+						return true;
+					},
+					() => {
+						if (this.weightChanged && context.player.getWeightStatus() !== WeightStatus.None) {
+							log.info("Weight changed. Stopping execution");
+							return false;
+						}
+
+						return this.isReady(checkForInterrupts);
+					});
+
+				if (result === ObjectiveResult.Restart) {
+					return false;
+				}
+
+				if (result === false) {
+					return false;
+				}
+
+				if (typeof (result) !== "boolean") {
+					return result;
+				}
 			}
 		}
 
 		return true;
 	}
 
-	private hasDelay(): boolean {
-		return localPlayer.hasDelay() || localPlayer.isResting() || localPlayer.isMovingClientside;
-	}
+	private determineObjectives(context: Context): Array<IObjective | IObjective[]> {
+		const chest = context.player.getEquippedItem(EquipType.Chest);
+		const legs = context.player.getEquippedItem(EquipType.Legs);
+		const belt = context.player.getEquippedItem(EquipType.Belt);
+		const neck = context.player.getEquippedItem(EquipType.Neck);
+		const back = context.player.getEquippedItem(EquipType.Back);
+		const head = context.player.getEquippedItem(EquipType.Head);
+		const feet = context.player.getEquippedItem(EquipType.Feet);
+		const hands = context.player.getEquippedItem(EquipType.Hands);
 
-	private determineObjectives(): IObjective[] {
-		const chest = localPlayer.getEquippedItem(EquipType.Chest);
-		const legs = localPlayer.getEquippedItem(EquipType.Legs);
-		const belt = localPlayer.getEquippedItem(EquipType.Belt);
-		const neck = localPlayer.getEquippedItem(EquipType.Neck);
-		const back = localPlayer.getEquippedItem(EquipType.Back);
-		const head = localPlayer.getEquippedItem(EquipType.Head);
-		const feet = localPlayer.getEquippedItem(EquipType.Feet);
-		const gloves = localPlayer.getEquippedItem(EquipType.Hands);
+		const objectives: Array<IObjective | IObjective[]> = [];
 
-		const objectives: IObjective[] = [];
+		const gatherItem = getBestActionItem(context, ActionType.Gather, DamageType.Slashing);
+		if (gatherItem === undefined) {
+			objectives.push([new AcquireItemForAction(ActionType.Gather)]);
+		}
 
-		if (this.base.campfire === undefined) {
-			const inventoryItem = itemManager.getItemInInventoryByGroup(localPlayer, ItemTypeGroup.Campfire);
-			if (inventoryItem !== undefined) {
-				objectives.push(new BuildItem(inventoryItem));
-
-			} else {
-				objectives.push(new AcquireItemByGroup(ItemTypeGroup.Campfire));
-			}
+		if (this.base.campfire.length === 0 && this.inventory.campfire === undefined) {
+			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Campfire), new BuildItem(), new AnalyzeBase()]);
 		}
 
 		if (this.inventory.fireStarter === undefined) {
-			objectives.push(new AcquireItemForAction(ActionType.StartFire));
+			objectives.push([new AcquireItemForAction(ActionType.StartFire), new AnalyzeInventory()]);
 		}
 
 		if (this.inventory.fireKindling === undefined) {
-			objectives.push(new AcquireItemByGroup(ItemTypeGroup.Kindling));
+			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Kindling), new AnalyzeInventory()]);
 		}
 
 		if (this.inventory.fireTinder === undefined) {
-			objectives.push(new AcquireItemByGroup(ItemTypeGroup.Tinder));
+			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tinder), new AnalyzeInventory()]);
 		}
 
 		if (this.inventory.shovel === undefined) {
-			objectives.push(new AcquireItemForAction(ActionType.Dig));
+			objectives.push([new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory()]);
 		}
 
-		if (this.inventory.sharpened === undefined) {
-			objectives.push(new AcquireItemByGroup(ItemTypeGroup.Sharpened));
+		if (this.inventory.knife === undefined) {
+			objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
+		}
+
+		if (this.inventory.equipSword === undefined) {
+			objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new Equip(EquipType.LeftHand)]);
 		}
 
 		if (this.inventory.axe === undefined) {
-			objectives.push(new AcquireItem(ItemType.StoneAxe));
+			objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);
 		}
 
 		if (chest === undefined || chest.type === ItemType.TatteredShirt) {
-			objectives.push(new AcquireItem(ItemType.BarkTunic));
+			objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
 		}
 
 		if (legs === undefined || legs.type === ItemType.TatteredPants) {
-			objectives.push(new AcquireItem(ItemType.BarkLeggings));
+			objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
 		}
 
-		if (this.base.waterStill === undefined) {
-			const inventoryItem = itemManager.getItemInInventoryByGroup(localPlayer, ItemTypeGroup.WaterStill);
-			if (inventoryItem !== undefined) {
-				objectives.push(new BuildItem(inventoryItem));
-
-			} else {
-				objectives.push(new AcquireItemByGroup(ItemTypeGroup.WaterStill));
-			}
+		if (this.inventory.equipShield === undefined) {
+			objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new Equip(EquipType.RightHand)]);
 		}
 
-		const wellInventoryItem =
-			itemManager.getItemInContainer(localPlayer.inventory, ItemType.StoneWell) ||
-			itemManager.getItemInContainer(localPlayer.inventory, ItemType.ClayBrickWell) ||
-			itemManager.getItemInContainer(localPlayer.inventory, ItemType.SandstoneWell);
-		if (wellInventoryItem !== undefined) {
-			objectives.push(new BuildItem(wellInventoryItem));
+		if (this.base.waterStill.length === 0 && this.inventory.waterStill === undefined) {
+			objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		let buildChest = true;
-		if (this.base.chests !== undefined) {
-			for (const c of this.base.chests) {
-				if ((itemManager.computeContainerWeight(c as IContainer) / c.weightCapacity!) < 0.9) {
-					buildChest = false;
+		let acquireChest = true;
+
+		if (!this.base.buildAnotherChest && this.base.chest.length > 0) {
+			for (const c of this.base.chest) {
+				if ((itemManager.computeContainerWeight(c as IContainer) / c.weightCapacity) < 0.9) {
+					acquireChest = false;
 					break;
 				}
 			}
 		}
 
-		if (buildChest) {
-			const inventoryItem = itemManager.getItemInContainer(localPlayer.inventory, ItemType.WoodenChest);
-			if (inventoryItem !== undefined) {
-				objectives.push(new BuildItem(inventoryItem));
+		if (acquireChest && this.inventory.chest === undefined) {
+			// mark that we should build a chest (memory)
+			// we need to do this to prevent a loop
+			// if we take items out of a chest to build another chest,
+			// the weight capacity could go back under the threshold. and then it wouldn't want to build another chest
+			// this is reset to false in baseInfo.onAdd
+			this.base.buildAnotherChest = true;
 
-			} else {
-				objectives.push(new AcquireItemForDoodad(DoodadType.WoodenChest));
-			}
+			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
 		}
 
 		if (this.inventory.pickAxe === undefined) {
-			objectives.push(new AcquireItem(ItemType.StonePickaxe));
+			objectives.push([new AcquireItem(ItemType.StonePickaxe), new AnalyzeInventory()]);
 		}
 
 		if (this.inventory.hammer === undefined) {
-			objectives.push(new AcquireItem(ItemType.StoneHammer));
+			objectives.push([new AcquireItem(ItemType.StoneHammer), new AnalyzeInventory()]);
 		}
 
-		const seeds = getSeeds();
-		if (seeds.length > 0) {
-			objectives.push(new PlantSeed(seeds[0]));
+		if (this.inventory.tongs === undefined) {
+			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tongs), new AnalyzeInventory()]);
 		}
 
 		if (this.inventory.shovel === undefined) {
-			objectives.push(new AcquireItem(ItemType.StoneShovel));
+			objectives.push([new AcquireItem(ItemType.StoneShovel), new AnalyzeInventory()]);
 		}
 
-		if (this.base.kiln === undefined) {
-			if (this.inventory.kiln !== undefined) {
-				objectives.push(new BuildItem(this.inventory.kiln));
+		if (context.base.waterStill.length > 0) {
+			objectives.push(new StartWaterStillDesalination(context.base.waterStill[0]));
 
-			} else {
-				objectives.push(new AcquireItemForDoodad(DoodadTypeGroup.LitKiln));
+			// if (context.inventory.waterContainer !== undefined && !canDrinkItem(context.inventory.waterContainer)) {
+			// 	objectives.push(new GatherWaterFromStill(context.base.waterStill, context.inventory.waterContainer));
+			// }
+		}
+
+		if (isNearBase(context)) {
+			// todo: improve seed planting - grab from base chests too! and add reserved items for it
+			const seeds = getSeeds(context);
+			if (seeds.length > 0) {
+				objectives.push(new PlantSeed(seeds[0]));
 			}
 		}
 
-		if (this.inventory.sword === undefined) {
-			objectives.push(new AcquireItem(ItemType.WoodenSword));
+		if (this.base.kiln.length === 0 && this.inventory.kiln === undefined) {
+			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitKiln), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		const waitingForWater = localPlayer.getStat<IStat>(Stat.Thirst).value <= 10 && this.base.waterStill && this.base.waterStill.description()!.providesFire;
+		const waitingForWater = context.player.getStat<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst] &&
+			this.base.waterStill.length > 0 && this.base.waterStill[0].description()!.providesFire;
 
 		const shouldUpgradeToLeather = !waitingForWater;
 		if (shouldUpgradeToLeather) {
@@ -562,143 +817,207 @@ export default class Tars extends Mod {
 			*/
 
 			if (belt === undefined) {
-				objectives.push(new AcquireItem(ItemType.LeatherBelt));
+				objectives.push([new AcquireItem(ItemType.LeatherBelt), new AnalyzeInventory(), new Equip(EquipType.Belt)]);
 			}
 
 			if (neck === undefined) {
-				objectives.push(new AcquireItem(ItemType.LeatherGorget));
+				objectives.push([new AcquireItem(ItemType.LeatherGorget), new AnalyzeInventory(), new Equip(EquipType.Neck)]);
 			}
 
 			if (head === undefined) {
-				objectives.push(new AcquireItem(ItemType.LeatherCap));
+				objectives.push([new AcquireItem(ItemType.LeatherCap), new AnalyzeInventory(), new Equip(EquipType.Head)]);
 			}
 
 			if (back === undefined) {
-				objectives.push(new AcquireItem(ItemType.LeatherQuiver));
+				objectives.push([new AcquireItem(ItemType.LeatherQuiver), new AnalyzeInventory(), new Equip(EquipType.Back)]);
 			}
 
 			if (feet === undefined) {
-				objectives.push(new AcquireItem(ItemType.LeatherBoots));
+				objectives.push([new AcquireItem(ItemType.LeatherBoots), new AnalyzeInventory(), new Equip(EquipType.Feet)]);
 			}
 
-			if (gloves === undefined) {
-				objectives.push(new AcquireItem(ItemType.LeatherGloves));
+			if (hands === undefined) {
+				objectives.push([new AcquireItem(ItemType.LeatherGloves), new AnalyzeInventory(), new Equip(EquipType.Hands)]);
 			}
 
 			if (legs && legs.type === ItemType.BarkLeggings) {
-				objectives.push(new AcquireItem(ItemType.LeatherPants));
+				objectives.push([new AcquireItem(ItemType.LeatherPants), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
 			}
 
 			if (chest && chest.type === ItemType.BarkTunic) {
-				objectives.push(new AcquireItem(ItemType.LeatherTunic));
-			}
-
-			if (legs && legs.type === ItemType.BarkLeggings) {
-				objectives.push(new AcquireItem(ItemType.LeatherPants));
+				objectives.push([new AcquireItem(ItemType.LeatherTunic), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
 			}
 		}
 
 		/*
 			Extra objectives
 		*/
-		if (this.base.wells!.length === 0 && wellInventoryItem === undefined) {
-			objectives.push(new AcquireItemForDoodad(DoodadTypeGroup.Well));
+
+		if (this.base.well.length === 0 && this.inventory.well === undefined && this.base.availableUnlimitedWellLocation !== undefined) {
+			// todo: only build a well if we find a good tile?
+			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Well), new BuildItem(), new AnalyzeBase()]);
+		}
+
+		if (this.base.furnace.length === 0 && this.inventory.furnace === undefined) {
+			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitFurnace), new BuildItem(), new AnalyzeBase()]);
+		}
+
+		if (this.base.anvil.length === 0 && this.inventory.anvil === undefined) {
+			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Anvil), new BuildItem(), new AnalyzeBase()]);
+		}
+
+		// todo: add inventory bandage (it's good to have one on you!)
+		if (this.inventory.waterContainer === undefined) {
+			objectives.push([new AcquireWaterContainer(), new AnalyzeInventory()]);
 		}
 
 		/*
-			Idle objectives
+			Upgrade objectives
 		*/
 
-		if (this.inventory.waterContainer === undefined) {
-			objectives.push(new AcquireWaterContainer());
+		// objectives.push([new EnsureReservableItem(ItemType.WroughtIron, 12)]);
+
+		if (this.inventory.equipSword && this.inventory.equipSword.type === ItemType.WoodenSword) {
+			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new Equip(EquipType.LeftHand)]);
 		}
 
-		// check if any wells have water
-		// if (this.base.wells !== undefined) {
-		// 	const wellsHaveSomeWater = this.base.wells.some((well) => {
-		// 		const wellData = game.wellData[getTileId(well.x, well.y, well.z)];
-		// 		return wellData ? (wellData.quantity >= 1 || wellData.quantity === -1) : false;
-		// 	});
-		// 	if (!wellsHaveSomeWater) {
-		// 		objectives.push(new AcquireItemForDoodad(DoodadTypeGroup.Well));
-		// 	}
-		// }
+		if (this.inventory.equipShield && this.inventory.equipShield.type === ItemType.WoodenShield) {
+			objectives.push([new UpgradeInventoryItem("equipShield"), new AnalyzeInventory(), new Equip(EquipType.RightHand)]);
+		}
 
-		if (localPlayer.getStat<IStat>(Stat.Health).value / localPlayer.getMaxHealth() < 0.9) {
+		if (this.inventory.equipBelt && this.inventory.equipBelt.type === ItemType.LeatherBelt) {
+			objectives.push([new UpgradeInventoryItem("equipBelt"), new AnalyzeInventory(), new Equip(EquipType.Belt)]);
+		}
+
+		if (this.inventory.equipNeck && this.inventory.equipNeck.type === ItemType.LeatherGorget) {
+			objectives.push([new UpgradeInventoryItem("equipNeck"), new AnalyzeInventory(), new Equip(EquipType.Neck)]);
+		}
+
+		if (this.inventory.equipHead && this.inventory.equipHead.type === ItemType.LeatherCap) {
+			objectives.push([new UpgradeInventoryItem("equipHead"), new AnalyzeInventory(), new Equip(EquipType.Head)]);
+		}
+
+		if (this.inventory.equipFeet && this.inventory.equipFeet.type === ItemType.LeatherBoots) {
+			objectives.push([new UpgradeInventoryItem("equipFeet"), new AnalyzeInventory(), new Equip(EquipType.Feet)]);
+		}
+
+		if (this.inventory.equipHands && this.inventory.equipHands.type === ItemType.LeatherGloves) {
+			objectives.push([new UpgradeInventoryItem("equipHands"), new AnalyzeInventory(), new Equip(EquipType.Hands)]);
+		}
+
+		if (this.inventory.equipLegs && this.inventory.equipLegs.type === ItemType.LeatherPants) {
+			objectives.push([new UpgradeInventoryItem("equipLegs"), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
+		}
+
+		if (this.inventory.equipChest && this.inventory.equipChest.type === ItemType.LeatherTunic) {
+			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
+		}
+
+		/*
+			End game objectives
+		*/
+		const health = context.player.getStat<IStatMax>(Stat.Health);
+		if (health.value / health.max < 0.9) {
 			objectives.push(new RecoverHealth());
 		}
 
-		const hunger = localPlayer.getStat<IStatMax>(Stat.Hunger)!;
-		if (hunger.value / hunger.max < 0.75) {
-			objectives.push(new RecoverHunger());
+		const hunger = context.player.getStat<IStatMax>(Stat.Hunger);
+		if (hunger.value / hunger.max < 0.7) {
+			objectives.push(new RecoverHunger(true));
 		}
 
 		objectives.push(new ReturnToBase());
 
-		objectives.push(new OrganizeInventory(false));
+		objectives.push(new OrganizeInventory());
 
-		if (game.getTurnMode() !== TurnMode.RealTime) {
+		if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
+			objectives.push(new Lambda(async () => {
+				log.info("Done with all objectives! Disabling...");
+				this.disable();
+				return ObjectiveResult.Complete;
+			}));
+
+		} else {
 			objectives.push(new Idle());
 		}
 
 		return objectives;
 	}
 
-	private getInterrupts(): IObjective[] {
-		const interrupts: Array<IObjective | undefined> = [
+	// todo: add severity to stat interrupts to prioritize which one to run
+	private getInterrupts(context: Context): Array<IObjective | IObjective[] | undefined> {
+		return [
 			this.optionsInterrupt(),
-			this.equipsInterrupt(),
-			this.nearbyCreatureInterrupt(),
-			this.staminaInterrupt(),
-			this.healthInterrupt(),
+			this.equipmentInterrupt(context),
+			this.nearbyCreatureInterrupt(context),
+			this.staminaInterrupt(context),
+			this.buildItemObjectives(),
+			this.healthInterrupt(context),
 			this.weightInterrupt(),
-			this.leaveDesertInterrupt(),
-			this.repairInterrupt(this.inventory.waterContainer),
-			this.thirstInterrupt(),
-			this.gatherFromCorpsesInterrupt(),
-			this.hungerInterrupt(),
-			this.repairsInterrupt()
+			this.leaveDesertInterrupt(context),
+			this.thirstInterrupt(context),
+			this.gatherFromCorpsesInterrupt(context),
+			this.hungerInterrupt(context),
+			this.repairsInterrupt(context),
 		];
-
-		return interrupts.filter(interrupt => interrupt !== undefined) as IObjective[];
 	}
 
 	private optionsInterrupt(): IObjective | undefined {
 		return new OptionsInterrupt();
 	}
 
-	private equipsInterrupt(): IObjective | undefined {
-		return this.handsEquipInterrupt(ActionType.Gather) || this.equipInterrupt(EquipType.Chest) || this.equipInterrupt(EquipType.Legs) || this.equipInterrupt(EquipType.Head) || this.equipInterrupt(EquipType.Belt) || this.equipInterrupt(EquipType.Feet) || this.equipInterrupt(EquipType.Hands) || this.equipInterrupt(EquipType.Neck) || this.equipInterrupt(EquipType.Back);
+	private equipmentInterrupt(context: Context): IObjective | undefined {
+		return this.handsEquipInterrupt(context) ||
+			this.equipInterrupt(context, EquipType.Chest) ||
+			this.equipInterrupt(context, EquipType.Legs) ||
+			this.equipInterrupt(context, EquipType.Head) ||
+			this.equipInterrupt(context, EquipType.Belt) ||
+			this.equipInterrupt(context, EquipType.Feet) ||
+			this.equipInterrupt(context, EquipType.Hands) ||
+			this.equipInterrupt(context, EquipType.Neck) ||
+			this.equipInterrupt(context, EquipType.Back);
 	}
 
-	private equipInterrupt(equip: EquipType): IObjective | undefined {
-		const item = localPlayer.getEquippedItem(equip);
-		const bestEquipment = getBestEquipment(equip);
+	private equipInterrupt(context: Context, equip: EquipType): IObjective | undefined {
+		const item = context.player.getEquippedItem(equip);
+		if (item && item.type === ItemType.SlitherSucker) {
+			// brain slugs are bad
+			return new Unequip(item);
+		}
+
+		const bestEquipment = getBestEquipment(context, equip);
 		if (bestEquipment.length > 0) {
 			const itemToEquip = bestEquipment[0];
 			if (itemToEquip === item) {
-				return;
+				return undefined;
 			}
 
 			if (item !== undefined) {
-				return new Equip(item);
+				return new Unequip(item);
 			}
 
-			return new Equip(itemToEquip, equip);
+			return new Equip(equip, itemToEquip);
 		}
 	}
 
-	private handsEquipInterrupt(use: ActionType, preferredDamageType?: DamageType): IObjective | undefined {
-		const objective = this.handEquipInterrupt(EquipType.LeftHand, use, preferredDamageType) || this.handEquipInterrupt(EquipType.RightHand, use, preferredDamageType);
-		if (objective) {
-			return objective;
+	private handsEquipInterrupt(context: Context, preferredDamageType?: DamageType): IObjective | undefined {
+		const leftHandEquipInterrupt = this.handEquipInterrupt(context, EquipType.LeftHand, ActionType.Attack);
+		if (leftHandEquipInterrupt) {
+			return leftHandEquipInterrupt;
 		}
 
-		const leftHandItem = localPlayer.getEquippedItem(EquipType.LeftHand);
-		const rightHandItem = localPlayer.getEquippedItem(EquipType.RightHand);
+		if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped()) {
+			return new Equip(EquipType.RightHand, context.inventory.equipShield);
+		}
 
-		const leftHandEquipped = leftHandItem !== undefined;
-		const rightHandEquipped = rightHandItem !== undefined;
+		const leftHandItem = context.player.getEquippedItem(EquipType.LeftHand);
+		const rightHandItem = context.player.getEquippedItem(EquipType.RightHand);
+
+		const leftHandDescription = leftHandItem ? leftHandItem.description() : undefined;
+		const leftHandEquipped = leftHandDescription ? leftHandDescription.attack !== undefined : false;
+
+		const rightHandDescription = rightHandItem ? rightHandItem.description() : undefined;
+		const rightHandEquipped = rightHandDescription ? rightHandDescription.attack !== undefined : false;
 
 		if (preferredDamageType !== undefined) {
 			let leftHandDamageTypeMatches = false;
@@ -714,160 +1033,207 @@ export default class Tars extends Mod {
 			}
 
 			if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
-				if (leftHandDamageTypeMatches !== localPlayer.options.leftHand) {
+				if (leftHandDamageTypeMatches !== context.player.options.leftHand) {
 					ui.changeEquipmentOption("leftHand");
 				}
 
-				if (rightHandDamageTypeMatches !== localPlayer.options.rightHand) {
+				if (rightHandDamageTypeMatches !== context.player.options.rightHand) {
 					ui.changeEquipmentOption("rightHand");
 				}
 
 			} else if (leftHandEquipped || rightHandEquipped) {
-				if (leftHandEquipped && !localPlayer.options.leftHand) {
+				if (leftHandEquipped && !context.player.options.leftHand) {
 					ui.changeEquipmentOption("leftHand");
 				}
 
-				if (rightHandEquipped && !localPlayer.options.rightHand) {
+				if (rightHandEquipped && !context.player.options.rightHand) {
 					ui.changeEquipmentOption("rightHand");
 				}
 
 			} else {
-				if (!localPlayer.options.leftHand) {
+				if (!context.player.options.leftHand) {
 					ui.changeEquipmentOption("leftHand");
 				}
 
-				if (!localPlayer.options.rightHand) {
+				if (!context.player.options.rightHand) {
 					ui.changeEquipmentOption("rightHand");
 				}
 			}
 
 		} else {
-			if (leftHandEquipped && !localPlayer.options.leftHand) {
+			if (leftHandEquipped !== context.player.options.leftHand) {
 				ui.changeEquipmentOption("leftHand");
 			}
 
-			if (rightHandEquipped && !localPlayer.options.rightHand) {
+			if (rightHandEquipped !== context.player.options.rightHand) {
 				ui.changeEquipmentOption("rightHand");
 			}
 
-			if (!localPlayer.options.leftHand && !localPlayer.options.rightHand) {
+			if (!context.player.options.leftHand && !context.player.options.rightHand) {
 				ui.changeEquipmentOption("leftHand");
 			}
 		}
 	}
 
-	private handEquipInterrupt(equipType: EquipType, use: ActionType, preferredDamageType?: DamageType): IObjective | undefined {
-		const equippedItem = localPlayer.getEquippedItem(equipType);
-		if (equippedItem === undefined) {
-			let possibleEquips = getPossibleHandEquips(use, preferredDamageType, true);
-			if (possibleEquips.length === 0) {
-				// fall back to not caring about the damage type
-				possibleEquips = getPossibleHandEquips(use, undefined, true);
+	private handEquipInterrupt(context: Context, equipType: EquipType, use?: ActionType, itemTypes?: Array<ItemType | ItemTypeGroup>, preferredDamageType?: DamageType): IObjective | undefined {
+		const equippedItem = context.player.getEquippedItem(equipType);
+
+		let possibleEquips: Item[];
+		if (use) {
+			possibleEquips = getPossibleHandEquips(context, use, preferredDamageType, false);
+
+			if (use === ActionType.Attack) {
+				// equip based on how effective it will be against nearby creatures
+				let closestCreature: Creature | undefined;
+				let closestCreatureDistance: number | undefined;
+
+				for (let x = -2; x <= 2; x++) {
+					for (let y = -2; y <= 2; y++) {
+						const tile = game.getTile(context.player.x + x, context.player.y + y, context.player.z);
+						if (tile.creature && !tile.creature.isTamed()) {
+							const distance = Vector2.distance(context.player, tile.creature.getPoint());
+							if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
+								closestCreatureDistance = distance;
+								closestCreature = tile.creature;
+							}
+						}
+					}
+				}
+
+				if (closestCreature) {
+					// creature is close, calculate it
+					possibleEquips
+						.sort((a, b) => estimateDamageModifier(a, closestCreature!) < estimateDamageModifier(b, closestCreature!) ? 1 : -1);
+
+				} else if (context.player.getEquippedItem(equipType) !== undefined) {
+					// don't switch until we're close to a creature
+					return undefined;
+				}
 			}
 
-			if (possibleEquips.length > 0) {
-				return new Equip(possibleEquips[0], equipType);
+			if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
+				// fall back to not caring about the damage type
+				possibleEquips = getPossibleHandEquips(context, use, undefined, false);
+			}
+
+		} else if (itemTypes) {
+			possibleEquips = [];
+
+			for (const itemType of itemTypes) {
+				if (itemManager.isGroup(itemType)) {
+					possibleEquips.push(...itemManager.getItemsInContainerByGroup(context.player.inventory, itemType));
+
+				} else {
+					possibleEquips.push(...itemManager.getItemsInContainerByType(context.player.inventory, itemType));
+				}
 			}
 
 		} else {
-			const description = equippedItem.description();
-			if (!description || !description.use || description.use.indexOf(use) === -1) {
-				return new Equip(equippedItem);
-			}
+			return undefined;
+		}
 
-			if ((preferredDamageType !== undefined && description.damageType !== undefined && (description.damageType & preferredDamageType) === 0)) {
-				// the equipped item has the wrong damage type
-				// can we replace it with something better
-				const possibleEquips = getPossibleHandEquips(use, preferredDamageType, true);
-				if (possibleEquips.length > 0) {
-					return new Equip(equippedItem);
+		if (possibleEquips.length > 0) {
+			// always try to equip the two best items
+			for (let i = 0; i < 2; i++) {
+				const possibleEquipItem = possibleEquips[i];
+				if (!possibleEquipItem || possibleEquipItem === equippedItem) {
+					return undefined;
+				}
+
+				if (!possibleEquipItem.isEquipped()) {
+					return new Equip(equipType, possibleEquips[i]);
 				}
 			}
 		}
 	}
 
-	private thirstInterrupt(): IObjective | undefined {
-		if (localPlayer.getStat<IStat>(Stat.Thirst).value > 10) {
-			return;
+	private healthInterrupt(context: Context): IObjective | undefined {
+		const health = context.player.getStat<IStatMax>(Stat.Health);
+		if (health.value > recoverThresholds[Stat.Health] && !context.player.status.Bleeding &&
+			(!context.player.status.Poisoned || (context.player.status.Poisoned && (health.value / health.max) >= poisonHealthPercentThreshold))) {
+			return undefined;
 		}
 
-		return new RecoverThirst();
+		log.info("Heal");
+		return new RecoverHealth();
 	}
 
-	private staminaInterrupt(): IObjective | undefined {
-		if (localPlayer.getStat<IStat>(Stat.Stamina).value > 15) {
-			return;
+	private staminaInterrupt(context: Context): IObjective | undefined {
+		if (context.player.getStat<IStat>(Stat.Stamina).value > recoverThresholds[Stat.Stamina]) {
+			return undefined;
 		}
 
-		log("Stamina");
+		log.info("Stamina");
 		return new RecoverStamina();
 	}
 
-	private hungerInterrupt(): IObjective | undefined {
-		if (localPlayer.getStat<IStat>(Stat.Hunger).value > 10) {
-			return;
-		}
-
-		return new RecoverHunger();
+	private hungerInterrupt(context: Context): IObjective | undefined {
+		return new RecoverHunger(context.player.getStat<IStat>(Stat.Hunger).value <= recoverThresholds[Stat.Hunger]);
 	}
 
-	private repairsInterrupt(): IObjective | undefined {
+	private thirstInterrupt(context: Context): IObjective | undefined {
+		return new RecoverThirst(context.player.getStat<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst]);
+	}
+
+	private repairsInterrupt(context: Context): IObjective | undefined {
 		if (this.inventory.hammer === undefined) {
-			return;
+			return undefined;
 		}
 
-		return this.repairInterrupt(localPlayer.getEquippedItem(EquipType.LeftHand)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Chest)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Legs)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Head)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Belt)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Feet)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Neck)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Hands)) ||
-			this.repairInterrupt(localPlayer.getEquippedItem(EquipType.Back)) ||
-			this.repairInterrupt(this.inventory.sharpened) ||
-			this.repairInterrupt(this.inventory.fireStarter) ||
-			this.repairInterrupt(this.inventory.fireStoker) ||
-			this.repairInterrupt(this.inventory.fireKindling) ||
-			this.repairInterrupt(this.inventory.hoe) ||
-			this.repairInterrupt(this.inventory.axe) ||
-			this.repairInterrupt(this.inventory.pickAxe) ||
-			this.repairInterrupt(this.inventory.shovel) ||
-			this.repairInterrupt(this.inventory.sword);
+		return this.repairInterrupt(context, context.player.getEquippedItem(EquipType.LeftHand)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.RightHand)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Chest)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Legs)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Head)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Belt)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Feet)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Neck)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Hands)) ||
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Back)) ||
+			this.repairInterrupt(context, this.inventory.knife) ||
+			this.repairInterrupt(context, this.inventory.fireStarter) ||
+			this.repairInterrupt(context, this.inventory.fireKindling) ||
+			this.repairInterrupt(context, this.inventory.hoe) ||
+			this.repairInterrupt(context, this.inventory.axe) ||
+			this.repairInterrupt(context, this.inventory.pickAxe) ||
+			this.repairInterrupt(context, this.inventory.shovel) ||
+			this.repairInterrupt(context, this.inventory.equipSword) ||
+			this.repairInterrupt(context, this.inventory.equipShield) ||
+			this.repairInterrupt(context, this.inventory.bed) ||
+			this.repairInterrupt(context, this.inventory.waterContainer);
 	}
 
-	private repairInterrupt(item: IItem | undefined): IObjective | undefined {
-		if (localPlayer.swimming || item === undefined || item.minDur === undefined || item.maxDur === undefined || item.minDur > 5 || item === this.inventory.hammer) {
-			return;
+	private repairInterrupt(context: Context, item: Item | undefined): IObjective | undefined {
+		if (item === undefined || item.minDur === undefined || item.maxDur === undefined) {
+			return undefined;
 		}
 
-		if (item.minDur / item.maxDur >= 0.5) {
-			return;
+		if (item.minDur / item.maxDur >= 0.6) {
+			return undefined;
 		}
 
-		const description = item.description();
-		if (!description || description.durability === undefined || description.repairable === false) {
-			return;
+		if (item === this.inventory.waterContainer && context.player.getStat<IStat>(Stat.Thirst).value < 2) {
+			// don't worry about reparing the water container if it's an emergency
+			return undefined;
 		}
 
-		log(`Repair ${item.getName().getString()}`);
 		return new RepairItem(item);
 	}
 
-	private nearbyCreatureInterrupt(): IObjective | undefined {
-		for (const facingDirecton of Enums.values(Direction)) {
-			const creature = this.checkNearbyCreature(facingDirecton);
+	private nearbyCreatureInterrupt(context: Context): IObjective | undefined {
+		for (const facingDirecton of Direction.DIRECTIONS) {
+			const creature = this.checkNearbyCreature(context, facingDirecton);
 			if (creature !== undefined) {
-				log(`Defend against ${creature.getName().getString()}`);
+				log.info(`Defend against ${creature.getName().getString()}`);
 				return new DefendAgainstCreature(creature);
 			}
 		}
 	}
 
-	private checkNearbyCreature(direction: Direction): ICreature | undefined {
+	private checkNearbyCreature(context: Context, direction: Direction): Creature | undefined {
 		if (direction !== Direction.None) {
 			const point = game.directionToMovement(direction);
-			const tile = game.getTile(localPlayer.x + point.x, localPlayer.y + point.y, localPlayer.z);
+			const tile = game.getTile(context.player.x + point.x, context.player.y + point.y, context.player.z);
 			if (tile && tile.creature && !tile.creature.isTamed()) {
 				//  && (tile.creature.ai & AiType.Hostile) !== 0
 				return tile.creature;
@@ -875,451 +1241,91 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private gatherFromCorpsesInterrupt(): IObjective | undefined {
-		const target = objectUtilities.findCarvableCorpse("gatherFromCorpsesInterrupt", corpse => Vector2.distance(localPlayer, corpse) < 16);
-		if (target) {
-			return new CarveCorpse(target);
+	private buildItemObjectives(): IObjective[] {
+		const objectives: IObjective[] = [];
+
+		// prioritize building items that are in the inventory
+		if (this.inventory.campfire !== undefined) {
+			objectives.push(new BuildItem(this.inventory.campfire));
 		}
+
+		if (this.inventory.waterStill !== undefined) {
+			objectives.push(new BuildItem(this.inventory.waterStill));
+		}
+
+		if (this.inventory.chest !== undefined) {
+			objectives.push(new BuildItem(this.inventory.chest));
+		}
+
+		if (this.inventory.kiln !== undefined) {
+			objectives.push(new BuildItem(this.inventory.kiln));
+		}
+
+		if (this.inventory.well !== undefined) {
+			objectives.push(new BuildItem(this.inventory.well));
+		}
+
+		if (this.inventory.furnace !== undefined) {
+			objectives.push(new BuildItem(this.inventory.furnace));
+		}
+
+		if (this.inventory.anvil !== undefined) {
+			objectives.push(new BuildItem(this.inventory.anvil));
+		}
+
+		return objectives;
 	}
 
-	private healthInterrupt(): IObjective | undefined {
-		if (localPlayer.getStat<IStat>(Stat.Health).value >= 30 && !localPlayer.status.Bleeding) {
-			return;
+	private gatherFromCorpsesInterrupt(context: Context): IObjective[] | undefined {
+		if (getInventoryItemsWithUse(context, ActionType.Carve).length === 0) {
+			return undefined;
 		}
 
-		log("Heal");
-		return new RecoverHealth();
+		const targets = objectUtilities.findCarvableCorpses(context, "gatherFromCorpsesInterrupt", corpse => Vector2.distance(context.player, corpse) < 16);
+		if (targets) {
+			const objectives: IObjective[] = [];
+
+			for (const target of targets) {
+				const tile = game.getTileFromPoint(target);
+				const corpses = tile.corpses;
+				if (corpses && corpses.length > 0) {
+					for (const corpse of corpses) {
+						const resources = corpseManager.getResources(corpse, true);
+						if (!resources || resources.length === 0) {
+							continue;
+						}
+
+						const step = corpse.step || 0;
+						const carveCount = resources.length - step;
+
+						for (let i = 0; i < carveCount; i++) {
+							objectives.push(new CarveCorpse(corpse));
+						}
+					}
+				}
+			}
+
+			return objectives;
+		}
 	}
 
 	private weightInterrupt(): IObjective | undefined {
 		return new ReduceWeight();
 	}
 
-	private leaveDesertInterrupt(): IObjective | undefined {
-		if (localPlayer.y < desertCutoff) {
-			return;
+	private leaveDesertInterrupt(context: Context): IObjective | undefined {
+		if (context.player.y < desertCutoff) {
+			return undefined;
 		}
 
 		return new LeaveDesert();
 	}
 
-	private analyzeInventory() {
-		if (this.inventory.bed !== undefined && (!this.inventory.bed.isValid() || !itemManager.isContainableInContainer(this.inventory.bed, localPlayer.inventory))) {
-			this.inventory.bed = undefined;
+	private processQueuedNavigationUpdates() {
+		for (const queuedUpdate of this.navigationQueuedUpdates) {
+			queuedUpdate();
 		}
 
-		if (this.inventory.bed === undefined) {
-			this.inventory.bed = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Bedding);
-
-			if (this.inventory.bed !== undefined) {
-				log(`Inventory bed - ${this.inventory.bed.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.waterContainer !== undefined && (!this.inventory.waterContainer.isValid() || !itemManager.isContainableInContainer(this.inventory.waterContainer, localPlayer.inventory))) {
-			this.inventory.waterContainer = undefined;
-		}
-
-		if (this.inventory.waterContainer === undefined) {
-			let waterContainers = getInventoryItemsWithUse(ActionType.GatherWater);
-			if (waterContainers.length === 0) {
-				waterContainers = getInventoryItemsWithUse(ActionType.DrinkItem).filter(item => item.type !== ItemType.PileOfSnow);
-			}
-
-			if (waterContainers.length > 0) {
-				this.inventory.waterContainer = waterContainers[0];
-			}
-
-			if (this.inventory.waterContainer !== undefined) {
-				log(`Inventory water container - ${this.inventory.waterContainer.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.sharpened !== undefined && (!this.inventory.sharpened.isValid() || !itemManager.isContainableInContainer(this.inventory.sharpened, localPlayer.inventory))) {
-			this.inventory.sharpened = undefined;
-		}
-
-		if (this.inventory.sharpened === undefined) {
-			this.inventory.sharpened = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Sharpened);
-
-			if (this.inventory.sharpened !== undefined) {
-				log(`Inventory sharpened - ${this.inventory.sharpened.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.fireStarter !== undefined && (!this.inventory.fireStarter.isValid() || !itemManager.isContainableInContainer(this.inventory.fireStarter, localPlayer.inventory))) {
-			this.inventory.fireStarter = undefined;
-		}
-
-		if (this.inventory.fireStarter === undefined) {
-			this.inventory.fireStarter = itemManager.getItemInContainer(localPlayer.inventory, ItemType.HandDrill) || itemManager.getItemInContainer(localPlayer.inventory, ItemType.BowDrill) || itemManager.getItemInContainer(localPlayer.inventory, ItemType.FirePlough);
-
-			if (this.inventory.fireStarter !== undefined) {
-				log(`Inventory fire starter - ${this.inventory.fireStarter.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.fireStoker !== undefined && (!this.inventory.fireStoker.isValid() || !itemManager.isContainableInContainer(this.inventory.fireStoker, localPlayer.inventory))) {
-			this.inventory.fireStoker = undefined;
-		}
-
-		if (this.inventory.fireStoker === undefined) {
-			const fireStokers = getInventoryItemsWithUse(ActionType.StokeFire);
-			if (fireStokers.length > 0) {
-				this.inventory.fireStoker = fireStokers[0];
-			}
-
-			if (this.inventory.fireStoker !== undefined) {
-				log(`Inventory fire stoker - ${this.inventory.fireStoker.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.fireKindling !== undefined && (!this.inventory.fireKindling.isValid() || !itemManager.isContainableInContainer(this.inventory.fireKindling, localPlayer.inventory))) {
-			this.inventory.fireKindling = undefined;
-		}
-
-		if (this.inventory.fireKindling === undefined) {
-			this.inventory.fireKindling = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Kindling);
-
-			if (this.inventory.fireKindling !== undefined) {
-				log(`Inventory fire kindling - ${this.inventory.fireKindling.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.fireTinder !== undefined && (!this.inventory.fireTinder.isValid() || !itemManager.isContainableInContainer(this.inventory.fireTinder, localPlayer.inventory))) {
-			this.inventory.fireTinder = undefined;
-		}
-
-		if (this.inventory.fireTinder === undefined) {
-			this.inventory.fireTinder = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Tinder);
-
-			if (this.inventory.fireTinder !== undefined) {
-				log(`Inventory fire tinder - ${this.inventory.fireTinder.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.hoe !== undefined && (!this.inventory.hoe.isValid() || !itemManager.isContainableInContainer(this.inventory.hoe, localPlayer.inventory))) {
-			this.inventory.hoe = undefined;
-		}
-
-		if (this.inventory.hoe === undefined) {
-			const hoes = getInventoryItemsWithUse(ActionType.Till);
-			if (hoes.length > 0) {
-				this.inventory.hoe = hoes[0];
-			}
-
-			if (this.inventory.hoe !== undefined) {
-				log(`Inventory hoe - ${this.inventory.hoe.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.hammer !== undefined && (!this.inventory.hammer.isValid() || !itemManager.isContainableInContainer(this.inventory.hammer, localPlayer.inventory))) {
-			this.inventory.hammer = undefined;
-		}
-
-		if (this.inventory.hammer === undefined) {
-			this.inventory.hammer = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Hammer);
-
-			if (this.inventory.hammer !== undefined) {
-				log(`Inventory hammer - ${this.inventory.hammer.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.axe !== undefined && (!this.inventory.axe.isValid() || !itemManager.isContainableInContainer(this.inventory.axe, localPlayer.inventory))) {
-			this.inventory.axe = undefined;
-		}
-
-		if (this.inventory.axe === undefined) {
-			this.inventory.axe = itemManager.getItemInContainer(localPlayer.inventory, ItemType.WroughtIronDoubleAxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.WroughtIronAxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.IronDoubleAxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.IronAxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.CopperDoubleAxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.CopperAxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.StoneAxe);
-
-			if (this.inventory.axe !== undefined) {
-				log(`Inventory axe - ${this.inventory.axe.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.pickAxe !== undefined && (!this.inventory.pickAxe.isValid() || !itemManager.isContainableInContainer(this.inventory.pickAxe, localPlayer.inventory))) {
-			this.inventory.pickAxe = undefined;
-		}
-
-		if (this.inventory.pickAxe === undefined) {
-			this.inventory.pickAxe = itemManager.getItemInContainer(localPlayer.inventory, ItemType.WroughtIronPickaxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.IronPickaxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.CopperPickaxe) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.StonePickaxe);
-
-			if (this.inventory.pickAxe !== undefined) {
-				log(`Inventory pickaxe - ${this.inventory.pickAxe.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.shovel !== undefined && (!this.inventory.shovel.isValid() || !itemManager.isContainableInContainer(this.inventory.shovel, localPlayer.inventory))) {
-			this.inventory.shovel = undefined;
-		}
-
-		if (this.inventory.shovel === undefined) {
-			const shovels = getInventoryItemsWithUse(ActionType.Dig);
-			if (shovels.length > 0) {
-				this.inventory.shovel = shovels[0];
-			}
-
-			if (this.inventory.shovel !== undefined) {
-				log(`Inventory shovel - ${this.inventory.shovel.getName().getString()}`);
-			}
-		}
-
-		// base items
-		if (this.inventory.waterStill !== undefined && (!this.inventory.waterStill.isValid() || !itemManager.isContainableInContainer(this.inventory.waterStill, localPlayer.inventory))) {
-			this.inventory.waterStill = undefined;
-		}
-
-		if (this.inventory.waterStill === undefined) {
-			this.inventory.waterStill = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.WaterStill);
-
-			if (this.inventory.waterStill !== undefined) {
-				log(`Inventory waterstill - ${this.inventory.waterStill.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.wells !== undefined) {
-			this.inventory.wells = this.inventory.wells.filter(c => c.isValid() && itemManager.isContainableInContainer(c, localPlayer.inventory));
-		}
-
-		const wells = [
-			...itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.StoneWell, true),
-			...itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.ClayBrickWell, true),
-			...itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.SandstoneWell, true)
-		];
-		if (this.inventory.wells === undefined || this.inventory.wells.length !== wells.length) {
-			this.inventory.wells = wells;
-
-			if (this.inventory.wells.length > 0) {
-				log(`Inventory wells - ${this.inventory.wells.map(c => c.getName().getString()).join(", ")}`);
-			}
-		}
-
-		if (this.inventory.campfire !== undefined && (!this.inventory.campfire.isValid() || !itemManager.isContainableInContainer(this.inventory.campfire, localPlayer.inventory))) {
-			this.inventory.campfire = undefined;
-		}
-
-		if (this.inventory.campfire === undefined) {
-			this.inventory.campfire = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Campfire);
-
-			if (this.inventory.campfire !== undefined) {
-				log(`Inventory campfire - ${this.inventory.campfire.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.kiln !== undefined && (!this.inventory.kiln.isValid() || !itemManager.isContainableInContainer(this.inventory.kiln, localPlayer.inventory))) {
-			this.inventory.kiln = undefined;
-		}
-
-		if (this.inventory.kiln === undefined) {
-			this.inventory.kiln = itemManager.getItemInContainerByGroup(localPlayer.inventory, ItemTypeGroup.Kiln);
-
-			if (this.inventory.kiln !== undefined) {
-				log(`Inventory kiln - ${this.inventory.kiln.getName().getString()}`);
-			}
-		}
-
-		if (this.inventory.chests !== undefined) {
-			this.inventory.chests = this.inventory.chests.filter(c => c.isValid() && itemManager.isContainableInContainer(c, localPlayer.inventory));
-		}
-
-		const chests = itemManager.getItemsInContainerByType(localPlayer.inventory, ItemType.WoodenChest, true);
-		if (this.inventory.chests === undefined || this.inventory.chests.length !== chests.length) {
-			this.inventory.chests = chests;
-
-			if (this.inventory.chests.length > 0) {
-				log(`Inventory chests - ${this.inventory.chests.map(c => c.getName().getString()).join(", ")}`);
-			}
-		}
-
-		if (this.inventory.sword !== undefined && (!this.inventory.sword.isValid() || !itemManager.isContainableInContainer(this.inventory.sword, localPlayer.inventory))) {
-			this.inventory.sword = undefined;
-		}
-
-		if (this.inventory.sword === undefined) {
-			this.inventory.sword = itemManager.getItemInContainer(localPlayer.inventory, ItemType.WroughtIronSword) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.IronSword) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.GoldenSword) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.CopperSword) ||
-				itemManager.getItemInContainer(localPlayer.inventory, ItemType.WoodenSword);
-
-			if (this.inventory.sword !== undefined) {
-				log(`Inventory sword - ${this.inventory.sword.getName().getString()}`);
-			}
-		}
-	}
-
-	private analyzeBase() {
-		if (this.base.campfire !== undefined && !this.base.campfire.isValid()) {
-			this.base.campfire = undefined;
-		}
-
-		if (this.base.campfire === undefined) {
-			const targets = objectUtilities.findDoodads("Campfire", doodad => {
-				const description = doodad.description();
-				if (description) {
-					if (description.group === DoodadTypeGroup.LitCampfire) {
-						return true;
-					}
-
-					if (description.lit !== undefined) {
-						const litDescription = Doodads[description.lit];
-						if (litDescription && litDescription.group === DoodadTypeGroup.LitCampfire) {
-							return true;
-						}
-					}
-				}
-
-				return false;
-			});
-
-			if (targets.length > 0) {
-				const target = targets[0];
-				if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
-					this.base.campfire = target;
-
-					if (this.base.campfire !== undefined) {
-						log(`Base campfire - ${this.base.campfire.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
-					}
-				}
-			}
-		}
-
-		if (this.base.waterStill !== undefined && !this.base.waterStill.isValid()) {
-			this.base.waterStill = undefined;
-		}
-
-		if (this.base.waterStill === undefined) {
-			const targets = objectUtilities.findDoodads("WaterStill", doodad => {
-				const description = doodad.description();
-				if (description) {
-					if (description.group === DoodadTypeGroup.LitWaterStill) {
-						return true;
-					}
-
-					if (description.lit !== undefined) {
-						const litDescription = Doodads[description.lit];
-						if (litDescription && litDescription.group === DoodadTypeGroup.LitWaterStill) {
-							return true;
-						}
-					}
-				}
-
-				return false;
-			});
-
-			if (targets.length > 0) {
-				const target = targets[0];
-				if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
-					this.base.waterStill = target;
-
-					if (this.base.waterStill !== undefined) {
-						log(`Base waterstill - ${this.base.waterStill.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
-					}
-				}
-			}
-		}
-
-		if (this.base.wells === undefined) {
-			this.base.wells = [];
-
-		} else {
-			this.base.wells = this.base.wells.filter(c => c.isValid());
-		}
-
-		const wells = objectUtilities.findDoodads("Well", doodad => {
-			const description = doodad.description();
-			if (description && description.group === DoodadTypeGroup.Well) {
-				return this.base.wells!.indexOf(doodad) === -1;
-			}
-
-			return false;
-		});
-
-		if (wells.length > 0) {
-			const target = wells[0];
-			if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
-				this.base.wells.push(target);
-
-				log(`Base well - ${target.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
-			}
-		}
-
-		if (this.base.kiln !== undefined && !this.base.kiln.isValid()) {
-			this.base.kiln = undefined;
-		}
-
-		if (this.base.kiln === undefined) {
-			const targets = objectUtilities.findDoodads("Kiln", doodad => {
-				const description = doodad.description();
-				if (description) {
-					if (description.group === DoodadTypeGroup.LitKiln) {
-						return true;
-					}
-
-					if (description.lit !== undefined) {
-						const litDescription = Doodads[description.lit];
-						if (litDescription && litDescription.group === DoodadTypeGroup.LitKiln) {
-							return true;
-						}
-					}
-				}
-
-				return false;
-			});
-
-			if (targets.length > 0) {
-				const target = targets[0];
-				if (Vector2.distance(localPlayer, target) < baseDoodadDistance) {
-					this.base.kiln = target;
-
-					if (this.base.kiln !== undefined) {
-						log(`Base kiln - ${this.base.kiln.getName().getString()} (distance: ${Vector2.distance(localPlayer, target)})`);
-					}
-				}
-			}
-		}
-
-		if (this.base.chests === undefined) {
-			this.base.chests = [];
-
-		} else {
-			this.base.chests = this.base.chests.filter(c => c.isValid());
-		}
-
-		let i = 0;
-		while (true) {
-			const targetChest = objectUtilities.findDoodad(`Chest${i}`, doodad => {
-				const container = doodad as IContainer;
-				if (container.weightCapacity && container.containedItems) {
-					return this.base.chests!.indexOf(doodad) === -1;
-				}
-
-				return false;
-			});
-
-			i++;
-
-			if (targetChest && Vector2.distance(localPlayer, targetChest) < baseDoodadDistance) {
-				if (!this.base.chests) {
-					this.base.chests = [];
-				}
-
-				this.base.chests.push(targetChest);
-
-				log(`Base chest - ${targetChest.getName().getString()} (distance: ${Vector2.distance(localPlayer, targetChest)})`);
-
-			} else {
-				break;
-			}
-		}
+		this.navigationQueuedUpdates = [];
 	}
 }

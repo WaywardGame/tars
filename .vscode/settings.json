@@ -1,8 +1,7 @@
 {
 	"files.exclude": {
-		"*.d.ts": true,
-		"**/*.js": true,
-		"**/*.js.map": true
+		"mod-reference": true,
+		"out": true
 	},
 	"typescript.format.insertSpaceBeforeFunctionParenthesis": false,
 	"javascript.format.insertSpaceBeforeFunctionParenthesis": false

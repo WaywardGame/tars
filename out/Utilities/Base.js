@@ -1,110 +1,58 @@
-define(["require", "exports", "Enums", "./Tile", "./Object", "utilities/TileHelpers", "tile/Terrains"], function (require, exports, Enums_1, Tile_1, Object_1, TileHelpers_1, Terrains_1) {
+define(["require", "exports", "game/WorldZ", "tile/ITerrain", "tile/Terrains", "utilities/TileHelpers", "../ITars", "./Tile"], function (require, exports, WorldZ_1, ITerrain_1, Terrains_1, TileHelpers_1, ITars_1, Tile_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const nearBaseDistance = 12;
-    function findBuildTile(hashCode, base, targetOrigin) {
-        const isValidOrigin = (origin) => {
-            let dirt = 0;
-            let grass = 0;
-            for (let x = -6; x <= 6; x++) {
-                for (let y = -6; y <= 6; y++) {
-                    if (x === 0 && y === 0) {
-                        continue;
-                    }
-                    const point = {
-                        x: origin.x + x,
-                        y: origin.y + y,
-                        z: origin.z
-                    };
-                    const tile = game.getTileFromPoint(point);
-                    if (!tile.doodad && isGoodBuildTile(base, point, tile)) {
-                        const tileType = TileHelpers_1.default.getType(tile);
-                        if (tileType === Enums_1.TerrainType.Dirt) {
-                            dirt++;
-                        }
-                        else if (tileType === Enums_1.TerrainType.Grass) {
-                            grass++;
-                        }
-                    }
-                }
+    function isGoodBuildTile(context, point, tile) {
+        if (!isOpenArea(context, point, tile)) {
+            return false;
+        }
+        if (!hasBase(context)) {
+            const tileType = TileHelpers_1.default.getType(game.getTileFromPoint(point));
+            if (tileType === ITerrain_1.TerrainType.BeachSand || tileType === ITerrain_1.TerrainType.DesertSand || tileType === ITerrain_1.TerrainType.Gravel) {
+                return false;
             }
-            return dirt >= 3 && grass >= 4;
-        };
-        if (targetOrigin === undefined) {
-            targetOrigin = Object_1.findDoodad(hashCode, doodad => {
-                const description = doodad.description();
-                if (!description || !description.isTree) {
-                    return false;
-                }
-                return isValidOrigin(doodad);
-            });
+            return true;
         }
-        else if (!isValidOrigin(targetOrigin)) {
-            return undefined;
-        }
-        if (targetOrigin === undefined) {
-            return undefined;
-        }
-        let target;
-        for (let x = -6; x <= 6; x++) {
-            for (let y = -6; y <= 6; y++) {
-                if (x === 0 && y === 0) {
-                    continue;
-                }
-                const point = {
-                    x: targetOrigin.x + x,
-                    y: targetOrigin.y + y,
-                    z: targetOrigin.z
-                };
-                const tile = game.getTileFromPoint(point);
-                if (isGoodBuildTile(base, point, tile)) {
-                    target = point;
-                    x = 7;
-                    break;
-                }
-            }
-        }
-        return target;
-    }
-    exports.findBuildTile = findBuildTile;
-    function isGoodBuildTile(base, point, tile) {
-        return isOpenArea(point, tile) && isNearBase(base, point);
+        return isNearBase(context, point);
     }
     exports.isGoodBuildTile = isGoodBuildTile;
-    function isGoodWellBuildTile(base, point, tile, onlyUnlimited) {
-        if (!isGoodBuildTile(base, point, tile)) {
+    function isGoodWellBuildTile(context, point, tile, onlyUnlimited) {
+        if (!isGoodBuildTile(context, point, tile)) {
             return false;
         }
         const x = point.x;
         const y = point.y;
+        const caveTerrain = Terrains_1.default[TileHelpers_1.default.getType(game.getTile(x, y, WorldZ_1.WorldZ.Cave))];
+        if (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater)) {
+            return true;
+        }
+        if (onlyUnlimited) {
+            return false;
+        }
+        if (caveTerrain && !caveTerrain.passable) {
+            return true;
+        }
         for (let x2 = x - 6; x2 <= x + 6; x2++) {
             for (let y2 = y - 6; y2 <= y + 6; y2++) {
                 const tileDescription = Terrains_1.default[TileHelpers_1.default.getType(game.getTile(x2, y2, point.z))];
                 if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
-                    return false;
+                    return true;
                 }
             }
-        }
-        const caveTerrain = Terrains_1.default[TileHelpers_1.default.getType(game.getTile(x, y, Enums_1.WorldZ.Cave))];
-        if (point.z === Enums_1.WorldZ.Cave || (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater))) {
-            return true;
-        }
-        else if (caveTerrain && !caveTerrain.passable && !onlyUnlimited) {
-            return true;
         }
         return false;
     }
     exports.isGoodWellBuildTile = isGoodWellBuildTile;
-    function isOpenArea(point, tile) {
-        if (!Tile_1.isOpenTile(point, tile, false, false) || tile.corpses !== undefined) {
+    function isOpenArea(context, point, tile, radius = 1) {
+        if (!Tile_1.isOpenTile(context, point, tile, false) || Tile_1.hasCorpses(tile)) {
             return false;
         }
-        for (let x = -1; x <= 1; x++) {
-            for (let y = -1; y <= 1; y++) {
+        for (let x = -radius; x <= radius; x++) {
+            for (let y = -radius; y <= radius; y++) {
                 const nearbyPoint = {
                     x: point.x + x,
                     y: point.y + y,
-                    z: point.z
+                    z: point.z,
                 };
                 const nearbyTile = game.getTileFromPoint(nearbyPoint);
                 if (nearbyTile.doodad) {
@@ -114,7 +62,7 @@ define(["require", "exports", "Enums", "./Tile", "./Object", "utilities/TileHelp
                 if (container.containedItems && container.containedItems.length > 0) {
                     return false;
                 }
-                if (!Tile_1.isOpenTile(nearbyPoint, nearbyTile) || game.isTileFull(nearbyTile)) {
+                if (!Tile_1.isOpenTile(context, nearbyPoint, nearbyTile) || game.isTileFull(nearbyTile)) {
                     return false;
                 }
             }
@@ -122,10 +70,11 @@ define(["require", "exports", "Enums", "./Tile", "./Object", "utilities/TileHelp
         return true;
     }
     exports.isOpenArea = isOpenArea;
-    function getBaseDoodads(base) {
+    function getBaseDoodads(context) {
         let doodads = [];
-        for (const key of Object.keys(base)) {
-            const baseDoodadOrDoodads = base[key];
+        const keys = Object.keys(ITars_1.baseInfo);
+        for (const key of keys) {
+            const baseDoodadOrDoodads = context.base[key];
             if (Array.isArray(baseDoodadOrDoodads)) {
                 doodads = doodads.concat(baseDoodadOrDoodads);
             }
@@ -136,44 +85,28 @@ define(["require", "exports", "Enums", "./Tile", "./Object", "utilities/TileHelp
         return doodads;
     }
     exports.getBaseDoodads = getBaseDoodads;
-    function isBaseDoodad(base, doodad) {
-        return Object.keys(base).findIndex(key => {
-            const baseDoodadOrDoodads = base[key];
-            if (Array.isArray(baseDoodadOrDoodads)) {
-                return baseDoodadOrDoodads.indexOf(doodad) !== -1;
-            }
-            return baseDoodadOrDoodads === doodad;
-        }) !== -1;
-    }
-    exports.isBaseDoodad = isBaseDoodad;
-    function getBasePosition(base) {
-        return base.campfire || base.waterStill || base.kiln || localPlayer;
+    function getBasePosition(context) {
+        return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.player;
     }
     exports.getBasePosition = getBasePosition;
-    function hasBase(base) {
-        return Object.keys(base).findIndex(key => {
-            const baseDoodadOrDoodads = base[key];
-            if (Array.isArray(baseDoodadOrDoodads)) {
-                return baseDoodadOrDoodads.length > 0;
-            }
-            return baseDoodadOrDoodads !== undefined;
-        }) !== -1;
+    function hasBase(context) {
+        return context.base.campfire.length > 0 || context.base.waterStill.length > 0;
     }
     exports.hasBase = hasBase;
-    function isNearBase(base, point) {
-        if (!hasBase(base)) {
-            return true;
+    function isNearBase(context, point = context.player) {
+        if (!hasBase(context)) {
+            return false;
         }
-        for (let x = -nearBaseDistance; x <= nearBaseDistance; x++) {
-            for (let y = -nearBaseDistance; y <= nearBaseDistance; y++) {
+        for (let x = nearBaseDistance * -1; x <= nearBaseDistance; x++) {
+            for (let y = nearBaseDistance * -1; y <= nearBaseDistance; y++) {
                 const nearbyPoint = {
                     x: point.x + x,
                     y: point.y + y,
-                    z: point.z
+                    z: point.z,
                 };
                 const nearbyTile = game.getTileFromPoint(nearbyPoint);
                 const doodad = nearbyTile.doodad;
-                if (doodad && isBaseDoodad(base, doodad)) {
+                if (doodad && isBaseDoodad(context, doodad)) {
                     return true;
                 }
             }
@@ -181,5 +114,14 @@ define(["require", "exports", "Enums", "./Tile", "./Object", "utilities/TileHelp
         return false;
     }
     exports.isNearBase = isNearBase;
+    function isBaseDoodad(context, doodad) {
+        const keys = Object.keys(ITars_1.baseInfo);
+        for (const key of keys) {
+            if (context.base[key].some(baseDoodad => baseDoodad === doodad)) {
+                return true;
+            }
+        }
+        return false;
+    }
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQmFzZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9VdGlsaXRpZXMvQmFzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFXQSxNQUFNLGdCQUFnQixHQUFHLEVBQUUsQ0FBQztJQUU1QixTQUFnQixhQUFhLENBQUMsUUFBZ0IsRUFBRSxJQUFXLEVBQUUsWUFBdUI7UUFDbkYsTUFBTSxhQUFhLEdBQUcsQ0FBQyxNQUFnQixFQUFFLEVBQUU7WUFFMUMsSUFBSSxJQUFJLEdBQUcsQ0FBQyxDQUFDO1lBQ2IsSUFBSSxLQUFLLEdBQUcsQ0FBQyxDQUFDO1lBRWQsS0FBSyxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUMsRUFBRSxDQUFDLElBQUksQ0FBQyxFQUFFLENBQUMsRUFBRSxFQUFFO2dCQUM3QixLQUFLLElBQUksQ0FBQyxHQUFHLENBQUMsQ0FBQyxFQUFFLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxFQUFFLEVBQUU7b0JBQzdCLElBQUksQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQyxFQUFFO3dCQUN2QixTQUFTO3FCQUNUO29CQUVELE1BQU0sS0FBSyxHQUFhO3dCQUN2QixDQUFDLEVBQUUsTUFBTSxDQUFDLENBQUMsR0FBRyxDQUFDO3dCQUNmLENBQUMsRUFBRSxNQUFNLENBQUMsQ0FBQyxHQUFHLENBQUM7d0JBQ2YsQ0FBQyxFQUFFLE1BQU0sQ0FBQyxDQUFDO3FCQUNYLENBQUM7b0JBRUYsTUFBTSxJQUFJLEdBQUcsSUFBSSxDQUFDLGdCQUFnQixDQUFDLEtBQUssQ0FBQyxDQUFDO29CQUMxQyxJQUFJLENBQUMsSUFBSSxDQUFDLE1BQU0sSUFBSSxlQUFlLENBQUMsSUFBSSxFQUFFLEtBQUssRUFBRSxJQUFJLENBQUMsRUFBRTt3QkFDdkQsTUFBTSxRQUFRLEdBQUcscUJBQVcsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLENBQUM7d0JBQzNDLElBQUksUUFBUSxLQUFLLG1CQUFXLENBQUMsSUFB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQmFzZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9VdGlsaXRpZXMvQmFzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFhQSxNQUFNLGdCQUFnQixHQUFHLEVBQUUsQ0FBQztJQUU1QixTQUFnQixlQUFlLENBQUMsT0FBZ0IsRUFBRSxLQUFlLEVBQUUsSUFBVztRQUM3RSxJQUFJLENBQUMsVUFBVSxDQUFDLE9BQU8sRUFBRSxLQUFLLEVBQUUsSUFBSSxDQUFDLEVBQUU7WUFDdEMsT0FBTyxLQUFLLENBQUM7U0FDYjtRQUVELElBQUksQ0FBQyxPQUFPLENBQUMsT0FBTyxDQUFDLEVBQUU7WUFFdEIsTUFBTSxRQUFRLEdBQUcscUJBQVcsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLGdCQUFnQixDQUFDLEtBQUssQ0FBQyxDQUFDLENBQUM7WUFDbkUsSUFBSSxRQUFRLEtBQUssc0JBQVcsQ0FBQyxTQUFTLElBQUksUUFBUSxLQUFLLHNCQUFXLENBQUMsVUFBVSxJQUFJLFFBQVEsS0FBSyxzQkFBVyxDQUFDLE1BQU0sRUFBRTtnQkFDakgsT0FBTyxLQUFLLENBQUM7YUFDYjtZQUVELE9BQU8sSUFBSSxDQUFDO1NBQ1o7UUFFRCxPQUFPLFVBQVUsQ0FBQyxPQUFPLEVBQUUsS0FBSyxDQUFDLENBQUM7SUFDbkMsQ0FBQztJQWhCRCwwQ0FnQkM7SUFFRCxTQUFnQixtQkFBbUIsQ0FBQyxPQUFnQixFQUFFLEtBQWUsRUFBRSxJQUFXLEVBQUUsYUFBc0I7UUFDekcsSUFBSSxDQUFDLGVBQWUsQ0FBQyxPQUFPLEVBQUUsS0FBSyxFQUFFLElBQUksQ0FBQyxFQUFFO1lBQzNDLE9BQU8sS0FBSyxDQUFDO1NBQ2I7UUFFRCxNQUFNLENBQUMsR0FBRyxLQUFLLENBQUMsQ0FBQyxDQUFDO1FBQ2xCLE1BQU0sQ0FBQyxHQUFHLEtBQUssQ0FBQyxDQUFDLENBQUM7UUFFbEIsTUFBTSxXQUFXLEdBQUcsa0JBQVEsQ0FBQyxxQkFBVyxDQUFD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

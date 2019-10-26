@@ -1,71 +1,110 @@
+import Doodad from "doodad/Doodad";
+import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Creature from "entity/creature/Creature";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import { IDoodad } from "doodad/IDoodad";
-import { ICreature } from "creature/ICreature";
-import { ICorpse } from "creature/corpse/ICorpse";
-import { CreatureType } from "Enums";
+
+import Context from "../Context";
+
+import { isFreeOfOtherPlayers } from "./Tile";
 
 const creatureRadius = 3;
 
-let cachedObjects: { [index: string]: any | undefined };
+const cachedSorts: Map<string, any> = new Map();
+const cachedObjects: Map<string, any> = new Map();
 
-export function resetCachedObjects() {
-	cachedObjects = {};
+export enum FindObjectType {
+	Creature,
+	Doodad,
+	Corpse,
 }
 
-export function findObjects<T extends IVector3>(id: string, allObjects: T[], isTarget: (object: T) => boolean): T[] {
-	const cachedResults = cachedObjects[id];
-	if (cachedResults) {
+export function resetCachedObjects() {
+	cachedSorts.clear();
+	cachedObjects.clear();
+}
+
+export function getSortedObjects<T extends IVector3>(context: Context, type: FindObjectType, allObjects: T[]): T[] {
+	const sortedCacheId = FindObjectType[type];
+	let sortedObjects = cachedSorts.get(sortedCacheId);
+	if (sortedObjects === undefined) {
+		sortedObjects = allObjects
+			.slice()
+			.sort((a, b) => Vector2.distance(context.player, a) > Vector2.distance(context.player, b) ? 1 : -1);
+		cachedSorts.set(sortedCacheId, sortedObjects);
+	}
+
+	return sortedObjects;
+}
+
+export function findObjects<T extends IVector3>(context: Context, type: FindObjectType, id: string, allObjects: T[], isTarget: (object: T) => boolean, top?: number): T[] {
+	const cacheId = top === undefined ? `${type}-${id}` : `${type}-${id}-${top}`;
+
+	const cachedResults = cachedObjects.get(id) || cachedObjects.get(cacheId);
+	if (cachedResults !== undefined) {
 		return cachedResults;
 	}
 
-	const result = allObjects.filter(o => o !== undefined && o.z === localPlayer.z && isTarget(o)).sort((a, b) => Vector2.distance(localPlayer, a) > Vector2.distance(localPlayer, b) ? 1 : -1);
+	const results: T[] = [];
+	let matches = 0;
 
-	cachedObjects[id] = result;
+	const sortedObjects = getSortedObjects(context, type, allObjects);
 
-	return result;
+	for (const object of sortedObjects) {
+		if (object !== undefined && object.z === context.player.z && isTarget(object)) {
+			results.push(object);
+			matches++;
+
+			if (top !== undefined && matches >= top) {
+				break;
+			}
+		}
+	}
+
+	cachedObjects.set(cacheId, results);
+
+	return results;
 }
 
-export function findObject<T extends IVector3>(id: string, object: T[], isTarget: (object: T) => boolean): T | undefined {
-	const objects = findObjects(id, object, isTarget);
+export function findObject<T extends IVector3>(context: Context, type: FindObjectType, id: string, object: T[], isTarget: (object: T) => boolean): T | undefined {
+	const objects = findObjects(context, type, id, object, isTarget, 1);
 	return objects.length > 0 ? objects[0] : undefined;
 }
 
-export function findDoodad(id: string, isTarget: (doodad: IDoodad) => boolean): IDoodad | undefined {
-	return findObject(`Doodad:${id}`, game.doodads as IDoodad[], isTarget);
+export function findDoodad(context: Context, id: string, isTarget: (doodad: Doodad) => boolean): Doodad | undefined {
+	return findObject(context, FindObjectType.Doodad, id, game.doodads as Doodad[], isTarget);
 }
 
-export function findDoodads(id: string, isTarget: (doodad: IDoodad) => boolean): IDoodad[] {
-	return findObjects(`Doodad:${id}`, game.doodads as IDoodad[], isTarget);
+export function findDoodads(context: Context, id: string, isTarget: (doodad: Doodad) => boolean, top?: number): Doodad[] {
+	return findObjects(context, FindObjectType.Doodad, id, game.doodads as Doodad[], isTarget, top);
 }
 
-export function findCreature(id: string, isTarget: (creature: ICreature) => boolean): ICreature | undefined {
-	return findObject(`Creature:${id}`, game.creatures as ICreature[], isTarget);
+export function findCreatures(context: Context, id: string, isTarget: (creature: Creature) => boolean, top?: number): Creature[] {
+	return findObjects(context, FindObjectType.Creature, id, game.creatures as Creature[], isTarget, top);
 }
 
-export function findCarvableCorpse(id: string, isTarget: (corpse: ICorpse) => boolean): ICorpse | undefined {
-	return findObject(`Corpse:${id}`, game.corpses as ICorpse[], (corpse) => {
-		if (isTarget(corpse) && corpse.type !== CreatureType.Blood && corpse.type !== CreatureType.WaterBlood) {
+export function findCarvableCorpses(context: Context, id: string, isTarget: (corpse: ICorpse) => boolean): ICorpse[] {
+	return findObjects(context, FindObjectType.Corpse, id, game.corpses as ICorpse[], corpse => {
+		if (isTarget(corpse)) {
 			const tile = game.getTileFromPoint(corpse);
 			return tile.creature === undefined &&
 				tile.npc === undefined &&
-				!game.isPlayerAtPosition(corpse.x, corpse.y, corpse.z) &&
-				getNearbyCreature(corpse) === undefined;
+				tile.events === undefined &&
+				isFreeOfOtherPlayers(context, corpse);
 		}
 
 		return false;
 	});
 }
 
-export function getNearbyCreature(point: IVector3): ICreature | undefined {
-	for (let x = -creatureRadius; x <= creatureRadius; x++) {
-		for (let y = -creatureRadius; y <= creatureRadius; y++) {
+export function getNearbyCreature(point: IVector3): Creature | undefined {
+	for (let x = creatureRadius * -1; x <= creatureRadius; x++) {
+		for (let y = creatureRadius * -1; y <= creatureRadius; y++) {
 			const tile = game.getTile(point.x + x, point.y + y, point.z);
 			if (tile.creature && !tile.creature.isTamed()) {
 				return tile.creature;
 			}
 		}
 	}
-
 	return undefined;
 }
