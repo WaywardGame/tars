@@ -33,7 +33,8 @@ export default class Plan implements IPlan {
 
 		this.objectives = this.flattenTree(this.tree);
 
-		this.log.debug(`Execution tree for ${objective} (context: ${context.getHashCode()}).`, this.tree, this.getTreeString(this.tree));
+		// electron 6 bug - don't print complex objects - https://github.com/electron/electron/issues/20334
+		this.log.debug(`Execution tree for ${objective} (context: ${context.getHashCode()}).`); // , this.tree, this.getTreeString(this.tree)
 	}
 
 	/**
@@ -331,6 +332,7 @@ export default class Plan implements IPlan {
 		return tree;
 	}
 
+	// @ts-ignore
 	private getTreeString(root: IExecutionTree) {
 		let str = "";
 
