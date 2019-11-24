@@ -31,7 +31,7 @@ export default class RecoverHunger extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hunger = context.player.getStat<IStatMax>(Stat.Hunger);
+		const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
 
 		if (!this.exceededThreshold) {
 			// if there's more food to cook and we're not at max, we should cook

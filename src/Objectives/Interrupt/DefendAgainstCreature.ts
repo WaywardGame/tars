@@ -24,7 +24,7 @@ export default class DefendAgainstCreature extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const creature = this.creature;
-		if (creature.getStat<IStat>(Stat.Health).value <= 0 || !creature.isValid()) {
+		if (creature.stat.get<IStat>(Stat.Health).value <= 0 || !creature.isValid()) {
 			return ObjectiveResult.Complete;
 		}
 
@@ -33,8 +33,8 @@ export default class DefendAgainstCreature extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		if (context.player.getWeightStatus() !== WeightStatus.Overburdened) {
-			const health = context.player.getStat<IStatMax>(Stat.Health);
-			const stamina = context.player.getStat<IStatMax>(Stat.Stamina);
+			const health = context.player.stat.get<IStatMax>(Stat.Health);
+			const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
 			if ((health.value / health.max) <= 0.15 || creature.type === CreatureType.Shark || stamina.value <= 2) {
 				this.log.info("Running away from target");
 				objectivePipelines.push([new RunAwayFromTarget(creature)]);

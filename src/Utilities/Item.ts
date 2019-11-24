@@ -257,7 +257,7 @@ export function getAvailableInventoryWeight(context: Context) {
 	const items = context.player.inventory.containedItems
 		.filter(item => isInventoryItem(context, item));
 	const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
-	return context.player.getStat<IStatMax>(Stat.Weight).max - itemsWeight;
+	return context.player.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
 }
 
 export function getSeeds(context: Context): Item[] {

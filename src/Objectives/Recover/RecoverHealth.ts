@@ -29,8 +29,8 @@ export default class RecoverHealth extends Objective {
 			return new UseItem(ActionType.Heal, healItems[0]);
 		}
 
-		const isThirsty = context.player.getStat<IStat>(Stat.Thirst).value <= 0;
-		const isHungry = !context.player.status.Bleeding && context.player.getStat<IStat>(Stat.Hunger).value <= 0;
+		const isThirsty = context.player.stat.get<IStat>(Stat.Thirst).value <= 0;
+		const isHungry = !context.player.status.Bleeding && context.player.stat.get<IStat>(Stat.Hunger).value <= 0;
 		const hasWeightProblems = context.player.getWeightStatus() !== WeightStatus.None;
 
 		this.saveChildObjectives = !hasWeightProblems;

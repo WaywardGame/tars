@@ -65,7 +65,7 @@ export default class GatherFromGround extends Objective {
 			.map(({ item: itemOnGround, point }) => {
 				const objectives: IObjective[] = [];
 
-				const weight = context.player.getStat<IStatMax>(Stat.Weight);
+				const weight = context.player.stat.get<IStatMax>(Stat.Weight);
 				if ((weight.value + itemOnGround.getTotalWeight()) > weight.max) {
 					// this.log.info("Reduce weight before picking up item");
 					objectives.push(new ReduceWeight());

@@ -806,7 +806,7 @@ export default class Tars extends Mod {
 			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitKiln), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		const waitingForWater = context.player.getStat<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst] &&
+		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst] &&
 			this.base.waterStill.length > 0 && this.base.waterStill[0].description()!.providesFire;
 
 		const shouldUpgradeToLeather = !waitingForWater;
@@ -916,12 +916,12 @@ export default class Tars extends Mod {
 		/*
 			End game objectives
 		*/
-		const health = context.player.getStat<IStatMax>(Stat.Health);
+		const health = context.player.stat.get<IStatMax>(Stat.Health);
 		if (health.value / health.max < 0.9) {
 			objectives.push(new RecoverHealth());
 		}
 
-		const hunger = context.player.getStat<IStatMax>(Stat.Hunger);
+		const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
 		if (hunger.value / hunger.max < 0.7) {
 			objectives.push(new RecoverHunger(true));
 		}
@@ -1148,7 +1148,7 @@ export default class Tars extends Mod {
 	}
 
 	private healthInterrupt(context: Context): IObjective | undefined {
-		const health = context.player.getStat<IStatMax>(Stat.Health);
+		const health = context.player.stat.get<IStatMax>(Stat.Health);
 		if (health.value > recoverThresholds[Stat.Health] && !context.player.status.Bleeding &&
 			(!context.player.status.Poisoned || (context.player.status.Poisoned && (health.value / health.max) >= poisonHealthPercentThreshold))) {
 			return undefined;
@@ -1159,7 +1159,7 @@ export default class Tars extends Mod {
 	}
 
 	private staminaInterrupt(context: Context): IObjective | undefined {
-		if (context.player.getStat<IStat>(Stat.Stamina).value > recoverThresholds[Stat.Stamina]) {
+		if (context.player.stat.get<IStat>(Stat.Stamina).value > recoverThresholds[Stat.Stamina]) {
 			return undefined;
 		}
 
@@ -1168,11 +1168,11 @@ export default class Tars extends Mod {
 	}
 
 	private hungerInterrupt(context: Context): IObjective | undefined {
-		return new RecoverHunger(context.player.getStat<IStat>(Stat.Hunger).value <= recoverThresholds[Stat.Hunger]);
+		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= recoverThresholds[Stat.Hunger]);
 	}
 
 	private thirstInterrupt(context: Context): IObjective | undefined {
-		return new RecoverThirst(context.player.getStat<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst]);
+		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst]);
 	}
 
 	private repairsInterrupt(context: Context): IObjective | undefined {
@@ -1212,7 +1212,7 @@ export default class Tars extends Mod {
 			return undefined;
 		}
 
-		if (item === this.inventory.waterContainer && context.player.getStat<IStat>(Stat.Thirst).value < 2) {
+		if (item === this.inventory.waterContainer && context.player.stat.get<IStat>(Stat.Thirst).value < 2) {
 			// don't worry about reparing the water container if it's an emergency
 			return undefined;
 		}

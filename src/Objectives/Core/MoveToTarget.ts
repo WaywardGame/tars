@@ -44,7 +44,7 @@ export default class MoveToTarget extends Objective {
 			const path = movementPath.path;
 			if (path) {
 				// check how our stamina is
-				const stamina = context.player.getStat<IStatMax>(Stat.Stamina);
+				const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
 				if ((stamina.max - stamina.value) > 2) {
 					let swimTiles = 0;
 

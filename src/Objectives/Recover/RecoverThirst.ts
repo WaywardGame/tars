@@ -31,7 +31,7 @@ export default class RecoverThirst extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const thirst = context.player.getStat<IStatMax>(Stat.Thirst);
+		const thirst = context.player.stat.get<IStatMax>(Stat.Thirst);
 
 		const waterStill = context.base.waterStill[0];
 
@@ -74,7 +74,7 @@ export default class RecoverThirst extends Objective {
 
 		// look for nearby freshwater
 
-		const health = context.player.getStat<IStatMax>(Stat.Health);
+		const health = context.player.stat.get<IStatMax>(Stat.Health);
 		if (isEmergency || (health.value / health.max) >= 0.7) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = await getNearestTileLocation(freshWaterTileLocation, context.player);
@@ -95,7 +95,7 @@ export default class RecoverThirst extends Objective {
 		const waterStillObjectives: IObjective[] = [];
 
 		if (waterStill !== undefined) {
-			const isEmergency = context.player.getStat<IStat>(Stat.Thirst).value <= 3 && (!waterStill || !waterStill.gatherReady);
+			const isEmergency = context.player.stat.get<IStat>(Stat.Thirst).value <= 3 && (!waterStill || !waterStill.gatherReady);
 
 			if (waterStill.gatherReady) {
 				waterStillObjectives.push(new MoveToTarget(waterStill, true));
@@ -111,7 +111,7 @@ export default class RecoverThirst extends Objective {
 					// run back to the waterstill and wait
 					waterStillObjectives.push(new MoveToTarget(waterStill, true));
 
-					const stamina = context.player.getStat<IStatMax>(Stat.Stamina);
+					const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
 					if ((stamina.value / stamina.max) < 0.9) {
 						waterStillObjectives.push(new RecoverStamina());
 
