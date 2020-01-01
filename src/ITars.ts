@@ -293,7 +293,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	well: {
 		itemTypes: [
-			ItemType.ClayBrickWell,
+			ItemType.ClayWell,
 			ItemType.SandstoneWell,
 			ItemType.StoneWell,
 		],
