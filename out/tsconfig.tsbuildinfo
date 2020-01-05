@@ -974,8 +974,8 @@
         "signature": "65741c834d84d311bd4ac064348d2c67d50d1e4a90e49ab07910eacc5fa2b27b"
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
-        "version": "bae5be7cf00fb4de5f97998bbae27e3b43377b21192d221bc71f658dfc2b2531",
-        "signature": "bae5be7cf00fb4de5f97998bbae27e3b43377b21192d221bc71f658dfc2b2531"
+        "version": "c32cec40379637b57819e7d088d20b813ba47d64b4dc8be6cfbb1c330997b2eb",
+        "signature": "c32cec40379637b57819e7d088d20b813ba47d64b4dc8be6cfbb1c330997b2eb"
       },
       "../node_modules/@wayward/types/definitions/game/options/modifiers/challenge/challengemodifier.d.ts": {
         "version": "072b67d51ed5eef9d530024311dd976d01ae843f05ca21dc62e466cc0fb3a841",
@@ -998,8 +998,8 @@
         "signature": "85cdc713f3b18c8b5d178585bb2fb819dfed384b658f3cd23dd1c8ebfc06f5e4"
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "34384eef3b3324d656bd83a2e387aa75721866a146e6e8c4403a1ede80d1740c",
-        "signature": "34384eef3b3324d656bd83a2e387aa75721866a146e6e8c4403a1ede80d1740c"
+        "version": "7f1a50002c5cb44355d993632a63612ae0c487e9b5a8274604f6d0a18fb5487c",
+        "signature": "7f1a50002c5cb44355d993632a63612ae0c487e9b5a8274604f6d0a18fb5487c"
       },
       "../node_modules/@wayward/types/definitions/newui/inewui.d.ts": {
         "version": "799ba340ecbd0f1411514f40b70c2b9c0503e69b6f528f0452365a88a56f7e9c",
@@ -1266,8 +1266,8 @@
         "signature": "bf046cfb15589e3aeb588644e051e3c2d81776b48efe214480fec9f3dc206c28"
       },
       "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts": {
-        "version": "b76df5bb6032ae3f5e83d655cd433e4142de374cacb6e8204947d64a24661a17",
-        "signature": "b76df5bb6032ae3f5e83d655cd433e4142de374cacb6e8204947d64a24661a17"
+        "version": "a5f03f9be28be041fe5fe3a8c3de0f83b5011cefeacc93ae145015304c4b8164",
+        "signature": "a5f03f9be28be041fe5fe3a8c3de0f83b5011cefeacc93ae145015304c4b8164"
       },
       "../src/itars.ts": {
         "version": "e383f0f6853d2c2a38f04d96955bdd7af8bd7a55936e621c2624ebad8defcfd5",
