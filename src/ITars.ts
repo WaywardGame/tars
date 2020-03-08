@@ -122,6 +122,7 @@ export interface IInventoryItems {
 	fireKindling?: Item;
 	fireStarter?: Item;
 	fireTinder?: Item;
+	fireStoker?: Item;
 	furnace?: Item;
 	hammer?: Item;
 	hoe?: Item;
@@ -235,6 +236,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	fireTinder: {
 		itemTypes: [ItemTypeGroup.Tinder],
+		flags: InventoryItemFlag.PreferLowerWeight,
+	},
+	fireStoker: {
+		useTypes: [ActionType.StokeFire],
 		flags: InventoryItemFlag.PreferLowerWeight,
 	},
 	furnace: {

@@ -8,14 +8,18 @@ import { isNearBase } from "../../Utilities/Base";
 import { canDrinkItem } from "../../Utilities/Item";
 import AcquireWaterContainer from "../Acquire/Item/Specific/AcquireWaterContainer";
 import ExecuteAction from "../Core/ExecuteAction";
+import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import GatherWater from "../Gather/GatherWater";
 import RepairItem from "../Interrupt/RepairItem";
 
 import StartFire from "./StartFire";
+import StokeFire from "./StokeFire";
 import UseItem from "./UseItem";
 
 export default class StartWaterStillDesalination extends Objective {
+
+	private static waterStillStokeFireTargetDecay: number | undefined;
 
 	constructor(private readonly waterStill: Doodad) {
 		super();
@@ -30,12 +34,12 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		if (this.waterStill.gatherReady) {
+		if (this.waterStill.gatherReady !== undefined && this.waterStill.gatherReady <= 0) {
 			// water is ready
 			return ObjectiveResult.Ignore;
 		}
 
-		if (this.waterStill.decay === -1) {
+		if (this.waterStill.gatherReady === undefined) {
 			// no water in the still
 
 			let isWaterInContainer = false;
@@ -97,11 +101,23 @@ export default class StartWaterStillDesalination extends Objective {
 		} else if (waterStillDescription && !waterStillDescription.providesFire) {
 			// only start the fire if we are near the base
 			if (isNearBase(context)) {
-				// we need to start the fire
+				// we need to start the fire				
+				objectives.push(new Lambda(async () => {
+					StartWaterStillDesalination.waterStillStokeFireTargetDecay = 300;
+					return ObjectiveResult.Complete;
+				}));
 				objectives.push(new StartFire(this.waterStill));
 
 			} else {
 				return ObjectiveResult.Ignore;
+			}
+
+		} else if (StartWaterStillDesalination.waterStillStokeFireTargetDecay !== undefined) {
+			if (this.waterStill.decay !== undefined && this.waterStill.decay < StartWaterStillDesalination.waterStillStokeFireTargetDecay) {
+				objectives.push(new StokeFire(this.waterStill));
+
+			} else {
+				StartWaterStillDesalination.waterStillStokeFireTargetDecay = undefined;
 			}
 
 		} else {

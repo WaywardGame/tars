@@ -20,7 +20,7 @@ export default class GatherWaterFromStill extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!this.waterStill.gatherReady) {
+		if (this.waterStill.gatherReady === undefined) {
 			return new StartWaterStillDesalination(this.waterStill);
 		}
 

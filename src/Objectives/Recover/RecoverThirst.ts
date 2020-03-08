@@ -37,7 +37,7 @@ export default class RecoverThirst extends Objective {
 
 		if (!this.exceededThreshold) {
 			// if we're near our base, the water still is ready, and we're thirsty, go drink
-			if (isNearBase(context) && waterStill !== undefined && waterStill.gatherReady && (thirst.max - thirst.value) >= 10) {
+			if (isNearBase(context) && waterStill !== undefined && waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0 && (thirst.max - thirst.value) >= 10) {
 				this.log.info("Near base, going to drink from water still");
 
 				return [
@@ -51,7 +51,7 @@ export default class RecoverThirst extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		const isEmergency = thirst.value <= 3 && (!waterStill || !waterStill.gatherReady);
+		const isEmergency = thirst.value <= 3 && (!waterStill || waterStill.gatherReady === undefined || (waterStill.gatherReady !== undefined && waterStill.gatherReady > 0));
 
 		const objectivePipelines: IObjective[][] = [];
 
@@ -95,9 +95,9 @@ export default class RecoverThirst extends Objective {
 		const waterStillObjectives: IObjective[] = [];
 
 		if (waterStill !== undefined) {
-			const isEmergency = context.player.stat.get<IStat>(Stat.Thirst).value <= 3 && (!waterStill || !waterStill.gatherReady);
+			const isEmergency = context.player.stat.get<IStat>(Stat.Thirst).value <= 3 && (!waterStill || waterStill.gatherReady === undefined || (waterStill.gatherReady !== undefined && waterStill.gatherReady > 0));
 
-			if (waterStill.gatherReady) {
+			if (waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0) {
 				waterStillObjectives.push(new MoveToTarget(waterStill, true));
 
 				waterStillObjectives.push(new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
