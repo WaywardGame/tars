@@ -4,9 +4,8 @@ import Creature from "entity/creature/Creature";
 import { DamageType } from "entity/IEntity";
 import { EquipType } from "entity/IHuman";
 import { IStat, IStatMax, Stat } from "entity/IStats";
-import { Source } from "entity/player/IMessageManager";
+import { MessageType, Source } from "entity/player/IMessageManager";
 import { PlayerState, WeightStatus } from "entity/player/IPlayer";
-import { MessageType } from "entity/player/MessageManager";
 import { INote } from "entity/player/note/NoteManager";
 import Player from "entity/player/Player";
 import { EventBus } from "event/EventBuses";
@@ -17,8 +16,10 @@ import Item from "item/Item";
 import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
-import Register from "mod/ModRegistry";
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import Register, { Registry } from "mod/ModRegistry";
+import Bind from "newui/input/Bind";
+import Bindable from "newui/input/Bindable";
+import { IInput } from "newui/input/IInput";
 import { ITile } from "tile/ITerrain";
 import { sleep } from "utilities/Async";
 import { Direction } from "utilities/math/Direction";
@@ -85,8 +86,8 @@ enum NavigationSystemState {
 
 export default class Tars extends Mod {
 
-	@Register.bindable("Toggle", { key: "KeyT" })
-	public readonly keyBind: number;
+	@Register.bindable("Toggle", IInput.key("KeyT"))
+	public readonly keyBind: Bindable;
 
 	@Register.messageSource("TARS")
 	public readonly messageSource: Source;
@@ -140,9 +141,9 @@ export default class Tars extends Mod {
 		this.navigation = Navigation.get();
 	}
 
-	@HookMethod
+	@EventHandler(EventBus.Game, "end")
 	public onGameEnd(state?: PlayerState): void {
-		this.disable();
+		this.disable(true);
 		this.delete();
 	}
 
@@ -156,15 +157,10 @@ export default class Tars extends Mod {
 		return undefined;
 	}
 
-	@HookMethod
-	public onPlayerDeath(player: Player): boolean | undefined {
-		if (player.isLocalPlayer()) {
-			this.interrupt();
-
-			movementUtilities.resetMovementOverlays();
-		}
-
-		return undefined;
+	@EventHandler(EventBus.LocalPlayer, "die")
+	public onPlayerDeath() {
+		this.interrupt();
+		movementUtilities.resetMovementOverlays();
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "processMovement")
@@ -188,34 +184,30 @@ export default class Tars extends Mod {
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "restEnd")
-	public restEnd(player: Player) {
-		if (this.isEnabled() && player.isLocalPlayer()) {
+	public restEnd() {
+		if (this.isEnabled()) {
 			this.processQueuedNavigationUpdates();
 		}
 	}
 
-	@HookMethod
+	@EventHandler(EventBus.LocalPlayer, "moveComplete")
 	public onMoveComplete(player: Player) {
-		if (this.isEnabled() && player.isLocalPlayer()) {
+		if (this.isEnabled()) {
 			movementUtilities.clearOverlay(player.getTile());
 		}
 	}
 
-	@HookMethod
-	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
-		if (api.wasPressed(this.keyBind) && !bindPressed) {
-			this.toggle();
-			bindPressed = this.keyBind;
-		}
-
-		return bindPressed;
+	@Bind.onDown(Registry<Tars>().get("keyBind"))
+	public onToggleBind() {
+		this.toggle();
+		return true;
 	}
 
-	@HookMethod
-	public onTileUpdate(tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
+	@EventHandler(EventBus.Game, "tileUpdate")
+	public onTileUpdate(game: any, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
 		if (this.navigationInitialized === NavigationSystemState.Initializing || localPlayer.isResting()) {
 			this.navigationQueuedUpdates.push(() => {
-				this.onTileUpdate(tile, tileX, tileY, tileZ, tileUpdateType);
+				this.onTileUpdate(game, tile, tileX, tileY, tileZ, tileUpdateType);
 			});
 
 		} else if (this.navigationInitialized === NavigationSystemState.Initialized && this.navigation) {
@@ -226,8 +218,11 @@ export default class Tars extends Mod {
 						this.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ);
 
 					} else {
-						const otherTile = game.getTile(tileX + x, tileY + y, tileZ);
-						this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ);
+						const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+						if (point) {
+							const otherTile = game.getTileFromPoint(point);
+							this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ);
+						}
 					}
 				}
 			}
@@ -288,11 +283,6 @@ export default class Tars extends Mod {
 
 				break;
 		}
-	}
-
-	@HookMethod
-	public shouldStopWalkToTileMovement(): boolean | undefined {
-		return this.isEnabled() ? false : undefined;
 	}
 
 	////////////////////////////////////////////////
@@ -408,7 +398,7 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private disable() {
+	private disable(gameIsEnding: boolean = false) {
 		if (this.navigation) {
 			this.navigation.hideOverlay();
 		}
@@ -418,7 +408,7 @@ export default class Tars extends Mod {
 			this.tickTimeoutId = undefined;
 		}
 
-		if (localPlayer) {
+		if (localPlayer && !gameIsEnding) {
 			movementUtilities.resetMovementOverlays();
 			localPlayer.walkAlongPath(undefined);
 		}
@@ -930,15 +920,17 @@ export default class Tars extends Mod {
 
 		objectives.push(new OrganizeInventory());
 
-		if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
-			objectives.push(new Lambda(async () => {
-				log.info("Done with all objectives! Disabling...");
-				this.disable();
-				return ObjectiveResult.Complete;
-			}));
+		if (!multiplayer.isConnected()) {
+			if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
+				objectives.push(new Lambda(async () => {
+					log.info("Done with all objectives! Disabling...");
+					this.disable();
+					return ObjectiveResult.Complete;
+				}));
 
-		} else {
-			objectives.push(new Idle());
+			} else {
+				objectives.push(new Idle());
+			}
 		}
 
 		return objectives;
@@ -1089,12 +1081,15 @@ export default class Tars extends Mod {
 
 				for (let x = -2; x <= 2; x++) {
 					for (let y = -2; y <= 2; y++) {
-						const tile = game.getTile(context.player.x + x, context.player.y + y, context.player.z);
-						if (tile.creature && !tile.creature.isTamed()) {
-							const distance = Vector2.distance(context.player, tile.creature.getPoint());
-							if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
-								closestCreatureDistance = distance;
-								closestCreature = tile.creature;
+						const point = game.ensureValidPoint({ x: context.player.x + x, y: context.player.y + y, z: context.player.z });
+						if (point) {
+							const tile = game.getTileFromPoint(point);
+							if (tile.creature && !tile.creature.isTamed()) {
+								const distance = Vector2.distance(context.player, tile.creature.getPoint());
+								if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
+									closestCreatureDistance = distance;
+									closestCreature = tile.creature;
+								}
 							}
 						}
 					}
@@ -1233,10 +1228,13 @@ export default class Tars extends Mod {
 	private checkNearbyCreature(context: Context, direction: Direction): Creature | undefined {
 		if (direction !== Direction.None) {
 			const point = game.directionToMovement(direction);
-			const tile = game.getTile(context.player.x + point.x, context.player.y + point.y, context.player.z);
-			if (tile && tile.creature && !tile.creature.isTamed()) {
-				//  && (tile.creature.ai & AiType.Hostile) !== 0
-				return tile.creature;
+			const validPoint = game.ensureValidPoint({ x: context.player.x + point.x, y: context.player.y + point.y, z: context.player.z });
+			if (validPoint) {
+				const tile = game.getTileFromPoint(validPoint);
+				if (tile && tile.creature && !tile.creature.isTamed()) {
+					//  && (tile.creature.ai & AiType.Hostile) !== 0
+					return tile.creature;
+				}
 			}
 		}
 	}

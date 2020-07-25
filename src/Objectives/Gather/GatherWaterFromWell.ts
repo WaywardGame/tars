@@ -22,7 +22,7 @@ export default class GatherWaterFromWell extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const pos = this.well.getPoint();
 
-		const wellData = game.wellData[getTileId(pos.x, pos.y, pos.z)];
+		const wellData = island.wellData[getTileId(pos.x, pos.y, pos.z)];
 		if (!wellData || wellData.quantity === 0) {
 			return ObjectiveResult.Impossible;
 		}

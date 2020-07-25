@@ -221,7 +221,7 @@ export default class AcquireItem extends Objective {
 				const description = itemDescriptions[it];
 				if (description && description.dismantle) {
 					for (const di of description.dismantle.items) {
-						if (di[0] === this.itemType) {
+						if (di.type === this.itemType) {
 							search.push(it);
 							break;
 						}

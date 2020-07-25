@@ -157,44 +157,41 @@ export default class BuildItem extends Objective {
 		const facingPoint = context.player.getFacingPoint();
 		const facingTile = context.player.getFacingTile();
 
-		if (this.isGoodTargetOrigin(context, facingPoint) && Base.isGoodBuildTile(context, facingPoint, facingTile)) {
+		if (await this.isGoodTargetOrigin(context, facingPoint) && Base.isGoodBuildTile(context, facingPoint, facingTile)) {
 			return facingPoint;
 		}
 
-		const sortedObjects = getSortedObjects(context, FindObjectType.Doodad, game.doodads as Doodad[]);
+		const sortedObjects = getSortedObjects(context, FindObjectType.Doodad, island.doodads as Doodad[]);
 
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.player.z) {
 				const description = doodad.description();
-				if (description && description.isTree) {
-					if (this.isGoodTargetOrigin(context, doodad)) {
-						for (let x = -6; x <= 6; x++) {
-							for (let y = -6; y <= 6; y++) {
-								if (x === 0 && y === 0) {
-									continue;
-								}
+				if (description && description.isTree && await this.isGoodTargetOrigin(context, doodad)) {
+					for (let x = -6; x <= 6; x++) {
+						for (let y = -6; y <= 6; y++) {
+							if (x === 0 && y === 0) {
+								continue;
+							}
 
-								const point: IVector3 = {
-									x: doodad.x + x,
-									y: doodad.y + y,
-									z: doodad.z,
-								};
+							const point: IVector3 = {
+								x: doodad.x + x,
+								y: doodad.y + y,
+								z: doodad.z,
+							};
 
-								const tile = game.getTileFromPoint(point);
+							const tile = game.getTileFromPoint(point);
 
-								if (Base.isGoodBuildTile(context, point, tile)) {
-									return point;
-								}
+							if (Base.isGoodBuildTile(context, point, tile)) {
+								return point;
 							}
 						}
-
 					}
 				}
 			}
 		}
 	}
 
-	private async isGoodTargetOrigin(context: Context, origin: IVector3) {
+	private async isGoodTargetOrigin(context: Context, origin: IVector3): Promise<boolean> {
 		// build our base near trees, grass, and open tiles
 		let tree = 0;
 		let grass = 0;

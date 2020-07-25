@@ -25,7 +25,8 @@ export default class MoveIntoChest extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const itemsToMove = this.itemsToMove || [context.getData(ContextDataType.LastAcquiredItem)];
-		if (!itemsToMove[0]) {
+		const firstItem = itemsToMove[0];
+		if (!firstItem) {
 			this.log.error("Invalid item to move");
 			return ObjectiveResult.Restart;
 		}
@@ -41,7 +42,7 @@ export default class MoveIntoChest extends Objective {
 
 			const targetContainer = chest as IContainer;
 			const weight = itemManager.computeContainerWeight(targetContainer);
-			if (weight + itemsToMove[0]!.getTotalWeight() <= targetContainer.weightCapacity!) {
+			if (weight + firstItem.getTotalWeight() <= targetContainer.weightCapacity!) {
 				// at least 1 item fits in the chest
 				const objectives: IObjective[] = [];
 
@@ -49,7 +50,7 @@ export default class MoveIntoChest extends Objective {
 
 				for (const item of itemsToMove) {
 					objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, undefined, targetContainer);
+						action.execute(context.player, item, targetContainer);
 					}));
 				}
 

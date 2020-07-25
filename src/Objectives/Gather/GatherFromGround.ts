@@ -50,7 +50,7 @@ export default class GatherFromGround extends Objective {
 			}
 		}
 
-		return game.items
+		return island.items
 			.map(item => {
 				if (item && item.type === this.itemType && itemManager.isTileContainer(item.containedWithin) && !context.isReservedItem(item)) {
 					return {
@@ -91,7 +91,7 @@ export default class GatherFromGround extends Objective {
 							objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, item));
 
 							objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-								action.execute(context.player, item, undefined, context.player.inventory);
+								action.execute(context.player, item, context.player.inventory);
 							}));
 						}
 

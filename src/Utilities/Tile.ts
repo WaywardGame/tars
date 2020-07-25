@@ -30,7 +30,7 @@ export function isSwimming(context: Context) {
 	const tile = game.getTileFromPoint(context.getPosition());
 	const terrainType = TileHelpers.getType(tile);
 	const terrainInfo = Terrains[terrainType];
-	return terrainInfo && terrainInfo.water === true && context.player.raft === undefined;
+	return terrainInfo && terrainInfo.water === true && context.player.vehicleItemId === undefined;
 }
 
 export function isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {

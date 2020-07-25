@@ -119,7 +119,7 @@ export default class OrganizeInventory extends Objective {
 
 			for (const item of itemsToMove) {
 				objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-					action.execute(context.player, item, undefined, targetContainer);
+					action.execute(context.player, item, targetContainer);
 				}));
 			}
 

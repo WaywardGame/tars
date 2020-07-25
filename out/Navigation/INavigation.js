@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.anyWaterTileLocation = exports.freshWaterTileLocation = exports.NavigationMessageType = void 0;
     var NavigationMessageType;
     (function (NavigationMessageType) {
         NavigationMessageType[NavigationMessageType["UpdateAllTiles"] = 0] = "UpdateAllTiles";
@@ -10,4 +11,4 @@ define(["require", "exports"], function (require, exports) {
     exports.freshWaterTileLocation = -1;
     exports.anyWaterTileLocation = -2;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSU5hdmlnYXRpb24uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvTmF2aWdhdGlvbi9JTmF2aWdhdGlvbi50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFFQSxJQUFZLHFCQUlYO0lBSkQsV0FBWSxxQkFBcUI7UUFDaEMscUZBQWMsQ0FBQTtRQUNkLDZFQUFVLENBQUE7UUFDVix5RkFBZ0IsQ0FBQTtJQUNqQixDQUFDLEVBSlcscUJBQXFCLEdBQXJCLDZCQUFxQixLQUFyQiw2QkFBcUIsUUFJaEM7SUE4Q1ksUUFBQSxzQkFBc0IsR0FBRyxDQUFDLENBQUMsQ0FBQztJQUU1QixRQUFBLG9CQUFvQixHQUFHLENBQUMsQ0FBQyxDQUFDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSU5hdmlnYXRpb24uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvTmF2aWdhdGlvbi9JTmF2aWdhdGlvbi50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0lBRUEsSUFBWSxxQkFJWDtJQUpELFdBQVkscUJBQXFCO1FBQ2hDLHFGQUFjLENBQUE7UUFDZCw2RUFBVSxDQUFBO1FBQ1YseUZBQWdCLENBQUE7SUFDakIsQ0FBQyxFQUpXLHFCQUFxQixHQUFyQiw2QkFBcUIsS0FBckIsNkJBQXFCLFFBSWhDO0lBOENZLFFBQUEsc0JBQXNCLEdBQUcsQ0FBQyxDQUFDLENBQUM7SUFFNUIsUUFBQSxvQkFBb0IsR0FBRyxDQUFDLENBQUMsQ0FBQyJ9

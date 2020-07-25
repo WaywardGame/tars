@@ -57,7 +57,7 @@ export default class GatherFromChest extends Objective {
 					new ReserveItems(item),
 					new SetContextData(ContextDataType.LastAcquiredItem, item),
 					new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, undefined, context.player.inventory);
+						action.execute(context.player, item, context.player.inventory);
 					}),
 				];
 			});

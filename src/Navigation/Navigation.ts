@@ -28,6 +28,7 @@ export default class Navigation {
 
 	public totalTime = 0;
 	public totalCount = 0;
+	public overlayAlpha = 0;
 
 	private readonly dijkstraMaps: IDijkstraMap[] = [];
 
@@ -116,23 +117,11 @@ export default class Navigation {
 	}
 
 	public showOverlay() {
-		for (const [, zMap] of this.overlay.entries()) {
-			for (const [, yMap] of zMap.entries()) {
-				for (const [, overlay] of yMap.entries()) {
-					overlay.alpha = 255;
-				}
-			}
-		}
+		this.updateOverlayAlpha(255);
 	}
 
 	public hideOverlay() {
-		for (const [, zMap] of this.overlay.entries()) {
-			for (const [, yMap] of zMap.entries()) {
-				for (const [, overlay] of yMap.entries()) {
-					overlay.alpha = 0;
-				}
-			}
-		}
+		this.updateOverlayAlpha(0);
 	}
 
 	public deleteOverlay() {
@@ -145,6 +134,18 @@ export default class Navigation {
 		}
 
 		this.overlay.clear();
+	}
+
+	public updateOverlayAlpha(alpha: number) {
+		this.overlayAlpha = alpha;
+
+		for (const [, zMap] of this.overlay.entries()) {
+			for (const [, yMap] of zMap.entries()) {
+				for (const [, overlay] of yMap.entries()) {
+					overlay.alpha = this.overlayAlpha;
+				}
+			}
+		}
 	}
 
 	public async updateAll(): Promise<void> {
@@ -292,6 +293,10 @@ export default class Navigation {
 	}
 
 	public isDisabledFromPoint(point: IVector3): boolean {
+		if (!game.ensureValidPoint(point)) {
+			return true;
+		}
+
 		const tile = game.getTileFromPoint(point);
 		const tileType = TileHelpers.getType(tile);
 
@@ -318,22 +323,22 @@ export default class Navigation {
 		// "point" is disabled. we should nav to a neighbor tile instead
 		const points: IVector3[] = [];
 
-		let neighbor = { x: game.getWrappedCoord(point.x + 1), y: point.y, z: point.z };
+		let neighbor = { x: point.x + 1, y: point.y, z: point.z };
 		if (!this.isDisabledFromPoint(neighbor)) {
 			points.push(neighbor);
 		}
 
-		neighbor = { x: game.getWrappedCoord(point.x - 1), y: point.y, z: point.z };
+		neighbor = { x: point.x - 1, y: point.y, z: point.z };
 		if (!this.isDisabledFromPoint(neighbor)) {
 			points.push(neighbor);
 		}
 
-		neighbor = { x: point.x, y: game.getWrappedCoord(point.y + 1), z: point.z };
+		neighbor = { x: point.x, y: point.y + 1, z: point.z };
 		if (!this.isDisabledFromPoint(neighbor)) {
 			points.push(neighbor);
 		}
 
-		neighbor = { x: point.x, y: game.getWrappedCoord(point.y - 1), z: point.z };
+		neighbor = { x: point.x, y: point.y - 1, z: point.z };
 		if (!this.isDisabledFromPoint(neighbor)) {
 			points.push(neighbor);
 		}
@@ -516,9 +521,12 @@ export default class Navigation {
 		// penalty for creatures on or next to the tile
 		for (let x = -1; x <= 1; x++) {
 			for (let y = -1; y <= 1; y++) {
-				const otherTile = game.getTile(tileX + x, tileY + y, tileZ);
-				if (otherTile.creature && !otherTile.creature.isTamed()) {
-					penalty += (x === 0 && y === 0) ? 36 : 20;
+				const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+				if (point) {
+					const otherTile = game.getTileFromPoint(point);
+					if (otherTile.creature && !otherTile.creature.isTamed()) {
+						penalty += (x === 0 && y === 0) ? 36 : 20;
+					}
 				}
 			}
 		}
@@ -579,6 +587,7 @@ export default class Navigation {
 				red: isDisabled ? 0 : Math.min(penalty, 255),
 				green: isDisabled ? 0 : 255,
 				blue: 0,
+				alpha: this.overlayAlpha,
 			};
 
 			yMap.set(tileX, overlay);

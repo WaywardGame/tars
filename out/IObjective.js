@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.CalculatedDifficultyStatus = exports.ObjectiveResult = void 0;
     var ObjectiveResult;
     (function (ObjectiveResult) {
         ObjectiveResult[ObjectiveResult["Complete"] = -1] = "Complete";
@@ -17,4 +18,4 @@ define(["require", "exports"], function (require, exports) {
         CalculatedDifficultyStatus[CalculatedDifficultyStatus["Possible"] = -26] = "Possible";
     })(CalculatedDifficultyStatus = exports.CalculatedDifficultyStatus || (exports.CalculatedDifficultyStatus = {}));
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSU9iamVjdGl2ZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9JT2JqZWN0aXZlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztJQU9BLElBQVksZUFpQlg7SUFqQkQsV0FBWSxlQUFlO1FBRTFCLDhEQUFhLENBQUE7UUFHYiw0REFBWSxDQUFBO1FBSVosMERBQVcsQ0FBQTtRQUlYLDREQUFZLENBQUE7UUFHWixrRUFBZSxDQUFBO0lBQ2hCLENBQUMsRUFqQlcsZUFBZSxHQUFmLHVCQUFlLEtBQWYsdUJBQWUsUUFpQjFCO0lBWUQsSUFBWSwwQkFLWDtJQUxELFdBQVksMEJBQTBCO1FBQ3JDLHdGQUFlLENBQUE7UUFDZixvR0FBcUIsQ0FBQTtRQUNyQiw0RkFBaUIsQ0FBQTtRQUNqQixxRkFBYyxDQUFBO0lBQ2YsQ0FBQyxFQUxXLDBCQUEwQixHQUExQixrQ0FBMEIsS0FBMUIsa0NBQTBCLFFBS3JDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSU9iamVjdGl2ZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9JT2JqZWN0aXZlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7SUFPQSxJQUFZLGVBaUJYO0lBakJELFdBQVksZUFBZTtRQUUxQiw4REFBYSxDQUFBO1FBR2IsNERBQVksQ0FBQTtRQUlaLDBEQUFXLENBQUE7UUFJWCw0REFBWSxDQUFBO1FBR1osa0VBQWUsQ0FBQTtJQUNoQixDQUFDLEVBakJXLGVBQWUsR0FBZix1QkFBZSxLQUFmLHVCQUFlLFFBaUIxQjtJQVlELElBQVksMEJBS1g7SUFMRCxXQUFZLDBCQUEwQjtRQUNyQyx3RkFBZSxDQUFBO1FBQ2Ysb0dBQXFCLENBQUE7UUFDckIsNEZBQWlCLENBQUE7UUFDakIscUZBQWMsQ0FBQTtJQUNmLENBQUMsRUFMVywwQkFBMEIsR0FBMUIsa0NBQTBCLEtBQTFCLGtDQUEwQixRQUtyQyJ9

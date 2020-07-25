@@ -3,7 +3,7 @@
 	"description": "Let TARS play the game for you. Good thing there are no black holes in Wayward.",
 	"version": "2.0",
 	"author": "Spacetech",
-	"waywardVersion": "2.8.0-beta",
+	"waywardVersion": "2.9.0-beta",
 	"multiplayer": "clientside",
 	"file": "out/Tars",
 	"allowUnlockingMilestones": true,

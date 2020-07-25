@@ -101,9 +101,9 @@ export default class StartWaterStillDesalination extends Objective {
 		} else if (waterStillDescription && !waterStillDescription.providesFire) {
 			// only start the fire if we are near the base
 			if (isNearBase(context)) {
-				// we need to start the fire				
+				// we need to start the fire
 				objectives.push(new Lambda(async () => {
-					StartWaterStillDesalination.waterStillStokeFireTargetDecay = 300;
+					StartWaterStillDesalination.waterStillStokeFireTargetDecay = 250;
 					return ObjectiveResult.Complete;
 				}));
 				objectives.push(new StartFire(this.waterStill));

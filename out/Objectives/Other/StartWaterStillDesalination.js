@@ -58,7 +58,7 @@ define(["require", "exports", "entity/action/IAction", "../../IObjective", "../.
             else if (waterStillDescription && !waterStillDescription.providesFire) {
                 if (Base_1.isNearBase(context)) {
                     objectives.push(new Lambda_1.default(async () => {
-                        StartWaterStillDesalination.waterStillStokeFireTargetDecay = 300;
+                        StartWaterStillDesalination.waterStillStokeFireTargetDecay = 250;
                         return IObjective_1.ObjectiveResult.Complete;
                     }));
                     objectives.push(new StartFire_1.default(this.waterStill));

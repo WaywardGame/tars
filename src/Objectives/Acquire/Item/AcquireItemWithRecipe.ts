@@ -141,7 +141,7 @@ export default class AcquireItemWithRecipe extends Objective {
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item && item.containedWithin === context.base.intermediateChest[0]) {
 							objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-								action.execute(context.player, item, undefined, context.player.inventory);
+								action.execute(context.player, item, context.player.inventory);
 							}));
 						}
 					};

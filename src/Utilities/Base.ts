@@ -56,10 +56,13 @@ export function isGoodWellBuildTile(context: Context, point: IVector3, tile: ITi
 
 	for (let x2 = x - 6; x2 <= x + 6; x2++) {
 		for (let y2 = y - 6; y2 <= y + 6; y2++) {
-			const tileDescription = Terrains[TileHelpers.getType(game.getTile(x2, y2, point.z))];
-			if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
-				// seawater
-				return true;
+			const validPoint = game.ensureValidPoint({ x: x2, y: y2, z: point.z });
+			if (validPoint) {
+				const tileDescription = Terrains[TileHelpers.getType(game.getTileFromPoint(validPoint))];
+				if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
+					// seawater
+					return true;
+				}
 			}
 		}
 	}
@@ -79,6 +82,10 @@ export function isOpenArea(context: Context, point: IVector3, tile: ITile, radiu
 				y: point.y + y,
 				z: point.z,
 			};
+
+			if (!game.ensureValidPoint(nearbyPoint)) {
+				continue;
+			}
 
 			const nearbyTile = game.getTileFromPoint(nearbyPoint);
 			if (nearbyTile.doodad) {

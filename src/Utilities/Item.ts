@@ -214,8 +214,8 @@ export function getInventoryItemsWithUse(context: Context, use: ActionType, filt
 					descriptionA.attack !== undefined && descriptionB.attack !== undefined &&
 					descriptionA.damageType !== undefined && descriptionB.damageType !== undefined) {
 					if (descriptionA.attack === descriptionB.attack) {
-						const damageTypesA = Enums.values(DamageType).filter(type => (descriptionA.damageType! & type) === type).length();
-						const damageTypesB = Enums.values(DamageType).filter(type => (descriptionB.damageType! & type) === type).length();
+						const damageTypesA = Enums.values(DamageType).filter(type => (descriptionA.damageType! & type) === type).length;
+						const damageTypesB = Enums.values(DamageType).filter(type => (descriptionB.damageType! & type) === type).length;
 
 						return damageTypesA < damageTypesB ? 1 : -1;
 					}

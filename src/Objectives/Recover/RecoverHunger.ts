@@ -16,7 +16,7 @@ import SetContextData from "../ContextData/SetContextData";
 import UseItem from "../Other/UseItem";
 
 // items that can cause poisoning when eaten will be filtered out
-const goodFoodItems = [ItemTypeGroup.Food, ItemType.Giblets, ItemType.AnimalFat];
+const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
 
 export default class RecoverHunger extends Objective {
 

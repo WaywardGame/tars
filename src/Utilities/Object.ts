@@ -72,19 +72,19 @@ export function findObject<T extends IVector3>(context: Context, type: FindObjec
 }
 
 export function findDoodad(context: Context, id: string, isTarget: (doodad: Doodad) => boolean): Doodad | undefined {
-	return findObject(context, FindObjectType.Doodad, id, game.doodads as Doodad[], isTarget);
+	return findObject(context, FindObjectType.Doodad, id, island.doodads as Doodad[], isTarget);
 }
 
 export function findDoodads(context: Context, id: string, isTarget: (doodad: Doodad) => boolean, top?: number): Doodad[] {
-	return findObjects(context, FindObjectType.Doodad, id, game.doodads as Doodad[], isTarget, top);
+	return findObjects(context, FindObjectType.Doodad, id, island.doodads as Doodad[], isTarget, top);
 }
 
 export function findCreatures(context: Context, id: string, isTarget: (creature: Creature) => boolean, top?: number): Creature[] {
-	return findObjects(context, FindObjectType.Creature, id, game.creatures as Creature[], isTarget, top);
+	return findObjects(context, FindObjectType.Creature, id, island.creatures as Creature[], isTarget, top);
 }
 
 export function findCarvableCorpses(context: Context, id: string, isTarget: (corpse: ICorpse) => boolean): ICorpse[] {
-	return findObjects(context, FindObjectType.Corpse, id, game.corpses as ICorpse[], corpse => {
+	return findObjects(context, FindObjectType.Corpse, id, island.corpses as ICorpse[], corpse => {
 		if (isTarget(corpse)) {
 			const tile = game.getTileFromPoint(corpse);
 			return tile.creature === undefined &&
@@ -100,9 +100,12 @@ export function findCarvableCorpses(context: Context, id: string, isTarget: (cor
 export function getNearbyCreature(point: IVector3): Creature | undefined {
 	for (let x = creatureRadius * -1; x <= creatureRadius; x++) {
 		for (let y = creatureRadius * -1; y <= creatureRadius; y++) {
-			const tile = game.getTile(point.x + x, point.y + y, point.z);
-			if (tile.creature && !tile.creature.isTamed()) {
-				return tile.creature;
+			const validPoint = game.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
+			if (validPoint) {
+				const tile = game.getTileFromPoint(validPoint);
+				if (tile.creature && !tile.creature.isTamed()) {
+					return tile.creature;
+				}
 			}
 		}
 	}

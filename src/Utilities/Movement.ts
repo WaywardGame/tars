@@ -64,7 +64,7 @@ export function updateOverlay(path: IVector2[]) {
 
 		const tile = game.getTile(pos.x, pos.y, localPlayer.z);
 
-		const overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos);
+		const overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos, false);
 		if (overlay) {
 			TileHelpers.Overlay.add(tile, overlay);
 			movementOverlays.push({
