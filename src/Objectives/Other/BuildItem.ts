@@ -25,6 +25,8 @@ const recalculateMovements = 40;
 
 const nearRocksDistance = Math.pow(24, 2);
 
+const nearSeawaterDistance = Math.pow(24, 2);
+
 export default class BuildItem extends Objective {
 
 	private target: IVector3 | undefined;
@@ -66,8 +68,8 @@ export default class BuildItem extends Objective {
 		}
 
 		if (Base.hasBase(context)) {
-			if (baseInfo && baseInfo.placeNear !== undefined) {
-				const nearDoodads = context.base[baseInfo.placeNear];
+			if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
+				const nearDoodads = context.base[baseInfo.tryPlaceNear];
 				const possiblePoints = AnalyzeBase.getNearPoints(nearDoodads);
 
 				for (const point of possiblePoints) {
@@ -76,8 +78,9 @@ export default class BuildItem extends Objective {
 						break;
 					}
 				}
+			}
 
-			} else {
+			if (!this.target) {
 				const baseDoodads = Base.getBaseDoodads(context);
 
 				for (const baseDoodad of baseDoodads) {
@@ -225,18 +228,26 @@ export default class BuildItem extends Objective {
 			}
 		}
 
-		if (grass >= 20 && tree >= 6) {
-			// build close to rocks
-			const rockTileLocations = await getNearestTileLocation(TerrainType.Rocks, origin);
-			const sandstoneTileLocations = await getNearestTileLocation(TerrainType.Sandstone, origin);
-
-			if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) <= nearRocksDistance) ||
-				sandstoneTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) <= nearRocksDistance)) {
-				return true;
-			}
+		if (grass < 20 || tree < 6) {
+			return false;
 		}
 
-		return false;
+		// build close to rocks
+		const rockTileLocations = await getNearestTileLocation(TerrainType.Rocks, origin);
+		const sandstoneTileLocations = await getNearestTileLocation(TerrainType.Sandstone, origin);
+
+		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) > nearRocksDistance) &&
+			sandstoneTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) > nearRocksDistance)) {
+			return false;
+		}
+
+		// buiuld close to a water source
+		const shallowSeawaterTileLocations = await getNearestTileLocation(TerrainType.ShallowSeawater, origin);
+		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) > nearSeawaterDistance)) {
+			return false;
+		}
+
+		return true;
 	}
 
 }

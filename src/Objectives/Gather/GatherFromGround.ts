@@ -37,16 +37,18 @@ export default class GatherFromGround extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const tile = context.player.getTile();
-		if (tile.containedItems !== undefined && tile.containedItems.length > 0) {
-			const item = tile.containedItems[tile.containedItems.length - 1];
-			if (item.type === this.itemType && !context.isReservedItem(item)) {
-				return [
-					new ReserveItems(item),
-					new SetContextData(ContextDataType.LastAcquiredItem, item),
-					new ExecuteAction(ActionType.Idle, (context, action) => {
-						action.execute(context.player);
-					}),
-				];
+		const items = tile.containedItems;
+		if (items !== undefined) {
+			for (const item of items) {
+				if (item.type === this.itemType && !context.isReservedItem(item)) {
+					return [
+						new ReserveItems(item),
+						new SetContextData(ContextDataType.LastAcquiredItem, item),
+						new ExecuteAction(ActionType.MoveItem, (context, action) => {
+							action.execute(context.player, item, context.player.inventory);
+						}),
+					];
+				}
 			}
 		}
 
@@ -94,25 +96,6 @@ export default class GatherFromGround extends Objective {
 								action.execute(context.player, item, context.player.inventory);
 							}));
 						}
-
-						/*
-						const firstItem = containedItems[containedItems.length - 1];
-						if (firstItem.type === this.itemType) {
-							objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, firstItem));
-							objectives.push(new ExecuteAction(ActionType.PickupItem, (context, action) => {
-								action.execute(context.player);
-							}));
-	
-						} else {
-							const matchingItem = itemManager.getItemInContainer(tile as any, this.itemType);
-							if (matchingItem) {
-								objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, matchingItem));
-								objectives.push(new ExecuteAction(ActionType.PickupAllItems, (context, action) => {
-									action.execute(context.player);
-								}));
-							}
-						}
-						*/
 					}
 
 					return objectives;

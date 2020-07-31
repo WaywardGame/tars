@@ -4,6 +4,7 @@ import { IContainer } from "item/IItem";
 import { ITile, TerrainType } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
 import { IVector3 } from "utilities/math/IVector";
+import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
 import Context from "../Context";
@@ -11,7 +12,7 @@ import { baseInfo, BaseInfoKey } from "../ITars";
 
 import { hasCorpses, isOpenTile } from "./Tile";
 
-const nearBaseDistance = 12;
+const nearBaseDistanceSq = Math.pow(14, 2);
 
 export function isGoodBuildTile(context: Context, point: IVector3, tile: ITile): boolean {
 	if (!isOpenArea(context, point, tile)) {
@@ -136,30 +137,10 @@ export function isNearBase(context: Context, point: IVector3 = context.player): 
 		return false;
 	}
 
-	for (let x = nearBaseDistance * -1; x <= nearBaseDistance; x++) {
-		for (let y = nearBaseDistance * -1; y <= nearBaseDistance; y++) {
-			const nearbyPoint: IVector3 = {
-				x: point.x + x,
-				y: point.y + y,
-				z: point.z,
-			};
+	const baseDoodads = getBaseDoodads(context);
 
-			const nearbyTile = game.getTileFromPoint(nearbyPoint);
-			const doodad = nearbyTile.doodad;
-			if (doodad && isBaseDoodad(context, doodad)) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-function isBaseDoodad(context: Context, doodad: Doodad) {
-	const keys = Object.keys(baseInfo) as BaseInfoKey[];
-
-	for (const key of keys) {
-		if (context.base[key].some(baseDoodad => baseDoodad === doodad)) {
+	for (const doodad of baseDoodads) {
+		if (Vector2.squaredDistance(doodad, point) <= nearBaseDistanceSq) {
 			return true;
 		}
 	}

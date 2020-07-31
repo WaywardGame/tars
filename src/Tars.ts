@@ -29,7 +29,7 @@ import TileHelpers from "utilities/TileHelpers";
 import Context from "./Context";
 import Planner from "./Core/Planner";
 import { IObjective, ObjectiveResult } from "./IObjective";
-import { desertCutoff, IBase, IInventoryItems } from "./ITars";
+import { IBase, IInventoryItems } from "./ITars";
 import Navigation from "./Navigation/Navigation";
 import AcquireItem from "./Objectives/Acquire/Item/AcquireItem";
 import AcquireItemByGroup from "./Objectives/Acquire/Item/AcquireItemByGroup";
@@ -38,6 +38,7 @@ import AcquireItemForDoodad from "./Objectives/Acquire/Item/AcquireItemForDoodad
 import AcquireWaterContainer from "./Objectives/Acquire/Item/Specific/AcquireWaterContainer";
 import AnalyzeBase from "./Objectives/Analyze/AnalyzeBase";
 import AnalyzeInventory from "./Objectives/Analyze/AnalyzeInventory";
+import ExecuteAction from "./Objectives/Core/ExecuteAction";
 import Lambda from "./Objectives/Core/Lambda";
 import CarveCorpse from "./Objectives/Interrupt/CarveCorpse";
 import DefendAgainstCreature from "./Objectives/Interrupt/DefendAgainstCreature";
@@ -56,7 +57,6 @@ import RecoverHealth from "./Objectives/Recover/RecoverHealth";
 import RecoverHunger from "./Objectives/Recover/RecoverHunger";
 import RecoverStamina from "./Objectives/Recover/RecoverStamina";
 import RecoverThirst from "./Objectives/Recover/RecoverThirst";
-import LeaveDesert from "./Objectives/Utility/LeaveDesert";
 import OrganizeInventory from "./Objectives/Utility/OrganizeInventory";
 import * as Action from "./Utilities/Action";
 import { isNearBase } from "./Utilities/Base";
@@ -130,16 +130,19 @@ export default class Tars extends Mod {
 		this.onGameEnd();
 	}
 
+	public onLoad(): void {
+		this.delete();
+		this.navigation = Navigation.get();
+	}
+
+	public onUnload(): void {
+		this.disable(true);
+		this.delete();
+	}
+
 	////////////////////////////////////////////////
 	// Hooks
 	////////////////////////////////////////////////
-
-	@HookMethod
-	public onGameStart(isLoadingSave: boolean, playedCount: number): void {
-		this.delete();
-
-		this.navigation = Navigation.get();
-	}
 
 	@EventHandler(EventBus.Game, "end")
 	public onGameEnd(state?: PlayerState): void {
@@ -447,6 +450,12 @@ export default class Tars extends Mod {
 
 	private async onTick() {
 		if (!this.isReady(false)) {
+			if (game.playing && this.context.player.isGhost() && game.getGameOptions().respawn) {
+				await new ExecuteAction(ActionType.Respawn, (context, action) => {
+					action.execute(context.player);
+				}).execute(this.context);
+			}
+
 			return;
 		}
 
@@ -903,6 +912,10 @@ export default class Tars extends Mod {
 			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
 		}
 
+		// if (!this.inventory.sailBoat) {
+		// 	objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
+		// }
+
 		/*
 			End game objectives
 		*/
@@ -946,7 +959,6 @@ export default class Tars extends Mod {
 			this.buildItemObjectives(),
 			this.healthInterrupt(context),
 			this.weightInterrupt(),
-			this.leaveDesertInterrupt(context),
 			this.thirstInterrupt(context),
 			this.gatherFromCorpsesInterrupt(context),
 			this.hungerInterrupt(context),
@@ -1053,16 +1065,18 @@ export default class Tars extends Mod {
 			}
 
 		} else {
-			if (leftHandEquipped !== context.player.options.leftHand) {
+			if (!leftHandEquipped && !rightHandEquipped) {
+				// if we have nothing equipped in both hands, make sure the left hand is enabled
+				if (!context.player.options.leftHand) {
+					ui.changeEquipmentOption("leftHand");
+				}
+
+			} else if (leftHandEquipped !== context.player.options.leftHand) {
 				ui.changeEquipmentOption("leftHand");
 			}
 
 			if (rightHandEquipped !== context.player.options.rightHand) {
 				ui.changeEquipmentOption("rightHand");
-			}
-
-			if (!context.player.options.leftHand && !context.player.options.rightHand) {
-				ui.changeEquipmentOption("leftHand");
 			}
 		}
 	}
@@ -1085,7 +1099,7 @@ export default class Tars extends Mod {
 						if (point) {
 							const tile = game.getTileFromPoint(point);
 							if (tile.creature && !tile.creature.isTamed()) {
-								const distance = Vector2.distance(context.player, tile.creature.getPoint());
+								const distance = Vector2.squaredDistance(context.player, tile.creature.getPoint());
 								if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
 									closestCreatureDistance = distance;
 									closestCreature = tile.creature;
@@ -1309,14 +1323,6 @@ export default class Tars extends Mod {
 
 	private weightInterrupt(): IObjective | undefined {
 		return new ReduceWeight();
-	}
-
-	private leaveDesertInterrupt(context: Context): IObjective | undefined {
-		if (context.player.y < desertCutoff) {
-			return undefined;
-		}
-
-		return new LeaveDesert();
 	}
 
 	private processQueuedNavigationUpdates() {

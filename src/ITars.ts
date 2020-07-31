@@ -13,8 +13,6 @@ export const defaultMaxTilesChecked = 3000;
 
 export const gardenMaxTilesChecked = 1024;
 
-export const desertCutoff = Number.MAX_SAFE_INTEGER; // 360
-
 export interface ITileLocation {
 	type: TerrainType;
 	tile: ITile;
@@ -37,7 +35,7 @@ export interface IBase {
 export interface IBaseInfo {
 	doodadTypes?: Array<DoodadType | DoodadTypeGroup>;
 	litType?: DoodadType | DoodadTypeGroup;
-	placeNear?: BaseInfoKey;
+	tryPlaceNear?: BaseInfoKey;
 	allowMultiple?: boolean;
 	canAdd?(base: IBase, target: Doodad): boolean;
 	onAdd?(base: IBase, target: Doodad): void;
@@ -49,7 +47,7 @@ export type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "av
 export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	anvil: {
 		doodadTypes: [DoodadTypeGroup.Anvil],
-		placeNear: "kiln",
+		tryPlaceNear: "kiln",
 	},
 	campfire: {
 		doodadTypes: [DoodadTypeGroup.LitCampfire],
@@ -96,6 +94,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	waterStill: {
 		doodadTypes: [DoodadTypeGroup.LitWaterStill],
 		litType: DoodadTypeGroup.LitWaterStill,
+		allowMultiple: true,
 	},
 	well: {
 		doodadTypes: [DoodadTypeGroup.Well],
@@ -121,8 +120,8 @@ export interface IInventoryItems {
 	equipSword?: Item;
 	fireKindling?: Item;
 	fireStarter?: Item;
-	fireTinder?: Item;
 	fireStoker?: Item;
+	fireTinder?: Item;
 	furnace?: Item;
 	hammer?: Item;
 	hoe?: Item;
@@ -130,6 +129,7 @@ export interface IInventoryItems {
 	kiln?: Item;
 	knife?: Item;
 	pickAxe?: Item;
+	sailBoat?: Item;
 	shovel?: Item;
 	tongs?: Item;
 	waterContainer?: Item;
@@ -279,6 +279,9 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.StonePickaxe,
 			ItemType.WroughtIronPickaxe,
 		],
+	},
+	sailBoat: {
+		itemTypes: [ItemType.Sailboat],
 	},
 	shovel: {
 		useTypes: [ActionType.Dig],

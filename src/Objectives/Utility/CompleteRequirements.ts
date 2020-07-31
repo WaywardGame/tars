@@ -1,5 +1,4 @@
-import { DoodadTypeGroup } from "doodad/IDoodad";
-import { IRecipe } from "item/IItem";
+import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -9,14 +8,14 @@ import AcquireBuildMoveToFire from "../Acquire/Doodad/AcquireBuildMoveToFire";
 import MoveToTarget from "../Core/MoveToTarget";
 import StartFire from "../Other/StartFire";
 
-export default class CompleteRecipeRequirements extends Objective {
+export default class CompleteRequirements extends Objective {
 
-	constructor(private readonly recipe: IRecipe) {
+	constructor(private readonly requiredDoodad: DoodadType | DoodadTypeGroup | undefined, private readonly requiresFire: boolean) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `CompleteRecipeRequirements:${this.recipe.requiredDoodad}:${this.recipe.requiresFire}`;
+		return `CompleteRequirements:${this.requiredDoodad}:${this.requiresFire}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -31,11 +30,11 @@ export default class CompleteRecipeRequirements extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectives: IObjective[] = [];
 
-		if (this.recipe.requiredDoodad !== undefined && this.recipe.requiresFire) {
-			this.log.info("Recipe requires doodad and fire too");
+		if (this.requiredDoodad !== undefined && this.requiresFire) {
+			this.log.info("Requires doodad and fire too");
 
-			if (this.recipe.requiredDoodad !== DoodadTypeGroup.Anvil) {
-				this.log.error("Required doodad is not an anvil", this.recipe.requiredDoodad);
+			if (this.requiredDoodad !== DoodadTypeGroup.Anvil) {
+				this.log.error("Required doodad is not an anvil", this.requiredDoodad);
 				return ObjectiveResult.Impossible;
 			}
 
@@ -43,7 +42,7 @@ export default class CompleteRecipeRequirements extends Objective {
 			const kiln = context.base.kiln[0];
 
 			if (!anvil) {
-				objectives.push(new AcquireBuildMoveToDoodad(this.recipe.requiredDoodad));
+				objectives.push(new AcquireBuildMoveToDoodad(this.requiredDoodad));
 			}
 
 			if (!kiln) {
@@ -60,12 +59,12 @@ export default class CompleteRecipeRequirements extends Objective {
 				}, false));
 			}
 
-		} else if (this.recipe.requiredDoodad !== undefined) {
-			this.log.info("Recipe requires doodad");
-			objectives.push(new AcquireBuildMoveToDoodad(this.recipe.requiredDoodad));
+		} else if (this.requiredDoodad !== undefined) {
+			this.log.info("Requires doodad");
+			objectives.push(new AcquireBuildMoveToDoodad(this.requiredDoodad));
 
-		} else if (this.recipe.requiresFire) {
-			this.log.info("Recipe requires fire");
+		} else if (this.requiresFire) {
+			this.log.info("Requires fire");
 			objectives.push(new AcquireBuildMoveToFire());
 		}
 

@@ -1,5 +1,6 @@
 import Doodad from "doodad/Doodad";
 import { ActionType } from "entity/action/IAction";
+import { IStat, Stat } from "entity/IStats";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -19,7 +20,7 @@ import UseItem from "./UseItem";
 
 export default class StartWaterStillDesalination extends Objective {
 
-	private static waterStillStokeFireTargetDecay: number | undefined;
+	private static readonly waterStillStokeFireTargetDecay: Map<number, number | undefined> = new Map();
 
 	constructor(private readonly waterStill: Doodad) {
 		super();
@@ -99,11 +100,11 @@ export default class StartWaterStillDesalination extends Objective {
 			objectives.push(new UseItem(ActionType.AttachContainer, context.inventory.waterContainer));
 
 		} else if (waterStillDescription && !waterStillDescription.providesFire) {
-			// only start the fire if we are near the base
-			if (isNearBase(context)) {
+			// only start the fire if we are near the base or if we have an emergency
+			if (isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
 				// we need to start the fire
 				objectives.push(new Lambda(async () => {
-					StartWaterStillDesalination.waterStillStokeFireTargetDecay = 250;
+					StartWaterStillDesalination.waterStillStokeFireTargetDecay.set(this.waterStill.id, 250);
 					return ObjectiveResult.Complete;
 				}));
 				objectives.push(new StartFire(this.waterStill));
@@ -112,17 +113,20 @@ export default class StartWaterStillDesalination extends Objective {
 				return ObjectiveResult.Ignore;
 			}
 
-		} else if (StartWaterStillDesalination.waterStillStokeFireTargetDecay !== undefined) {
-			if (this.waterStill.decay !== undefined && this.waterStill.decay < StartWaterStillDesalination.waterStillStokeFireTargetDecay) {
-				objectives.push(new StokeFire(this.waterStill));
+		} else {
+			const waterStillStokeFireTargetDecay = StartWaterStillDesalination.waterStillStokeFireTargetDecay.get(this.waterStill.id);
+			if (waterStillStokeFireTargetDecay !== undefined) {
+				if (this.waterStill.decay !== undefined && this.waterStill.decay < waterStillStokeFireTargetDecay) {
+					objectives.push(new StokeFire(this.waterStill));
+
+				} else {
+					StartWaterStillDesalination.waterStillStokeFireTargetDecay.delete(this.waterStill.id);
+				}
 
 			} else {
-				StartWaterStillDesalination.waterStillStokeFireTargetDecay = undefined;
+				// wait still is desalinating
+				return ObjectiveResult.Ignore;
 			}
-
-		} else {
-			// wait still is desalinating
-			return ObjectiveResult.Ignore;
 		}
 
 		return objectives;

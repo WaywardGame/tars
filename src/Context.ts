@@ -26,6 +26,11 @@ export enum ContextDataType {
 	 * The next recipe can be crafted from the intermediate chest
 	 */
 	CanCraftFromIntermediateChest,
+
+	/**
+	 * Indicates we're waiting for a water still
+	 */
+	WaitingForWaterStill,
 }
 
 export interface IContextData {
@@ -37,6 +42,7 @@ export interface IContextData {
 	[ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest]: boolean;
 	[ContextDataType.NextActionAllowsIntermediateChest]: boolean;
 	[ContextDataType.CanCraftFromIntermediateChest]: boolean;
+	[ContextDataType.WaitingForWaterStill]: boolean;
 }
 
 export type ContextDataMap<T extends ContextDataType> = IContextData[T];

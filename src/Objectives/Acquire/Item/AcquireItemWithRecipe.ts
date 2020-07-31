@@ -13,7 +13,7 @@ import ExecuteAction from "../../Core/ExecuteAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../../Core/ExecuteActionForItem";
 import MoveToTarget from "../../Core/MoveToTarget";
 import ReserveItems from "../../Core/ReserveItems";
-import CompleteRecipeRequirements from "../../Utility/CompleteRecipeRequirements";
+import CompleteRequirements from "../../Utility/CompleteRequirements";
 import MoveToLand from "../../Utility/MoveToLand";
 
 import AcquireItem from "./AcquireItem";
@@ -160,7 +160,7 @@ export default class AcquireItemWithRecipe extends Objective {
 		}
 
 		if (!requirementInfo.requirementsMet) {
-			objectives.push(new CompleteRecipeRequirements(this.recipe));
+			objectives.push(new CompleteRequirements(this.recipe.requiredDoodad, this.recipe.requiresFire ? true : false));
 
 		} else {
 			objectives.push(new MoveToLand());

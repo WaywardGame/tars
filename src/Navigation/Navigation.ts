@@ -30,7 +30,7 @@ export default class Navigation {
 	public totalCount = 0;
 	public overlayAlpha = 0;
 
-	private readonly dijkstraMaps: IDijkstraMap[] = [];
+	private readonly dijkstraMaps: Map<number, IDijkstraMap> = new Map();
 
 	private readonly navigationWorkers: INavigationWorker[] = [];
 
@@ -43,6 +43,7 @@ export default class Navigation {
 	public static get(): Navigation {
 		if (!Navigation.instance) {
 			Navigation.instance = new Navigation();
+			log.info("Created navigation instance");
 		}
 
 		return Navigation.instance;
@@ -52,6 +53,7 @@ export default class Navigation {
 		if (Navigation.instance) {
 			Navigation.instance.delete();
 			Navigation.instance = undefined;
+			log.info("Deleted navigation instance");
 		}
 	}
 
@@ -61,7 +63,12 @@ export default class Navigation {
 
 	constructor() {
 		for (let z = 0; z <= 1; z++) {
-			this.dijkstraMaps[z] = new Module.DijkstraMap();
+			try {
+				this.dijkstraMaps.set(z, new Module.DijkstraMap());
+			} catch (ex) {
+				log.error("Failed to create dijkstraMap", ex);
+				this.dijkstraMaps.delete(z);
+			}
 		}
 
 		let pathPrefix: string;
@@ -101,11 +108,16 @@ export default class Navigation {
 	}
 
 	public delete() {
-		for (const dijkstraMap of this.dijkstraMaps) {
-			dijkstraMap.delete();
+		for (const dijkstraMap of this.dijkstraMaps.values()) {
+			try {
+				dijkstraMap.delete();
+
+			} catch (ex) {
+				log.error(`Failed to delete dijkstra map: ${ex}`);
+			}
 		}
 
-		this.dijkstraMaps.length = 0;
+		this.dijkstraMaps.clear();
 
 		for (const navigationWorker of this.navigationWorkers) {
 			navigationWorker.worker.terminate();
@@ -200,7 +212,7 @@ export default class Navigation {
 	}
 
 	public updateOrigin() {
-		const dijkstraMapInstance = this.dijkstraMaps[this.origin.z];
+		const dijkstraMapInstance = this.dijkstraMaps.get(this.origin.z);
 		if (!dijkstraMapInstance) {
 			return;
 		}
@@ -223,7 +235,7 @@ export default class Navigation {
 			return;
 		}
 
-		const dijkstraMapInstance = this.dijkstraMaps[z];
+		const dijkstraMapInstance = this.dijkstraMaps.get(z);
 		if (!dijkstraMapInstance) {
 			return;
 		}
@@ -359,7 +371,10 @@ export default class Navigation {
 
 		// const response = await this.submitRequest(request);
 
-		const dijkstraMap = this.dijkstraMaps[end.z];
+		const dijkstraMap = this.dijkstraMaps.get(end.z);
+		if (!dijkstraMap) {
+			return undefined;
+		}
 
 		const response: IDijkstraMapFindPathResult = {
 			success: false,

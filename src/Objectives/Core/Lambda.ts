@@ -5,7 +5,7 @@ import Objective from "../../Objective";
 
 export default class Lambda extends Objective {
 
-	constructor(private readonly lambda: (context: Context) => Promise<ObjectiveExecutionResult>, private readonly difficulty = 1) {
+	constructor(private readonly lambda: (context: Context, lambda: Lambda) => Promise<ObjectiveExecutionResult>, private readonly difficulty = 1) {
 		super();
 	}
 
@@ -22,7 +22,7 @@ export default class Lambda extends Objective {
 			return this.difficulty;
 		}
 
-		return this.lambda(context);
+		return this.lambda(context, this);
 	}
 
 }

@@ -12,7 +12,7 @@ import Objective from "../../Objective";
 import { getBaseDoodads, isGoodWellBuildTile } from "../../Utilities/Base";
 import * as objectUtilities from "../../Utilities/Object";
 
-const baseDoodadDistance = 150; // 512
+const baseDoodadDistanceSq = Math.pow(150, 2);
 
 export default class AnalyzeBase extends Objective {
 
@@ -44,7 +44,7 @@ export default class AnalyzeBase extends Objective {
 			if (doodads.length === 0 || info.allowMultiple) {
 				let targets: Doodad[];
 
-				const placeNear = info.placeNear;
+				const placeNear = info.tryPlaceNear;
 				if (placeNear !== undefined) {
 					targets = [];
 
@@ -67,8 +67,8 @@ export default class AnalyzeBase extends Objective {
 
 				for (const target of targets) {
 					if (!info.canAdd || info.canAdd(context.base, target)) {
-						const distance = Vector2.distance(context.player, target);
-						if (distance < baseDoodadDistance && context.base[key].indexOf(target) === -1) {
+						const distance = Vector2.squaredDistance(context.player, target);
+						if (distance < baseDoodadDistanceSq && context.base[key].indexOf(target) === -1) {
 							changed = true;
 
 							context.base[key].push(target);

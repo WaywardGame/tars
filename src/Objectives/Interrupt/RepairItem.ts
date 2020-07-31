@@ -10,7 +10,7 @@ import AcquireItem from "../Acquire/Item/AcquireItem";
 import CopyContextData from "../ContextData/CopyContextData";
 import SetContextData from "../ContextData/SetContextData";
 import ExecuteAction from "../Core/ExecuteAction";
-import CompleteRecipeRequirements from "../Utility/CompleteRecipeRequirements";
+import CompleteRequirements from "../Utility/CompleteRequirements";
 
 export default class RepairItem extends Objective {
 
@@ -52,10 +52,7 @@ export default class RepairItem extends Objective {
 
 		const requirements = itemManager.hasAdditionalRequirements(context.player, this.item.type);
 		if (!requirements.requirementsMet) {
-			const recipe = description.recipe;
-			if (recipe) {
-				objectives.push(new CompleteRecipeRequirements(recipe));
-			}
+			objectives.push(new CompleteRequirements(description.recipe?.requiredDoodad, (description.recipe?.requiresFire || description.repairAndDisassemblyRequiresFire) ? true : false));
 		}
 
 		objectives.push(new ExecuteAction(ActionType.Repair, (context, action) => {

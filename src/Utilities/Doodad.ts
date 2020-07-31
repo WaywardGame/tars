@@ -1,3 +1,4 @@
+import Doodad from "doodad/Doodad";
 import Doodads from "doodad/Doodads";
 import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
 import Enums from "utilities/enum/Enums";
@@ -37,4 +38,16 @@ export function getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup):
 	}
 
 	return doodadTypes;
+}
+
+export function isWaterStillDesalinating(waterStill: Doodad) {
+	return (waterStill.decay !== undefined
+		&& waterStill.decay > 0
+		&& waterStill.gatherReady !== undefined
+		&& waterStill.gatherReady > 0
+		&& waterStill.description()?.providesFire) ? true : false;
+}
+
+export function isWaterStillDrinkable(waterStill: Doodad) {
+	return waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0;
 }
