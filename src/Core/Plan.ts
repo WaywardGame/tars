@@ -5,7 +5,7 @@ import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult
 import ReserveItems from "../Objectives/Core/ReserveItems";
 import { createLog, discardNextMessage, processNextMessage, queueNextMessage } from "../Utilities/Logger";
 
-import { IExecutionTree, IPlan } from "./IPlan";
+import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
 import { IPlanner } from "./IPlanner";
 
 /**
@@ -38,10 +38,32 @@ export default class Plan implements IPlan {
 	}
 
 	/**
+	 * Print the excution tree as a string
+	 */
+	public getTreeString(root: IExecutionTree = this.tree): string {
+		let str = "";
+
+		const writeTree = (tree: IExecutionTree, depth = 0) => {
+			str += `${"  ".repeat(depth)}${tree?.hashCode}\n`;
+
+			for (const child of tree?.children) {
+				writeTree(child, depth + 1);
+			}
+		};
+
+		writeTree(root, 0);
+
+		return str;
+	}
+
+	/**
 	 * Executes the plan. It will continue executing objectives until it's done or isReady returns false
+	 * @param preExecuteObjective Called before executing each objective. Return false if the player is busy or if an interrupt is interrupting
 	 * @param postExecuteObjective Called after executing each objective. Return false if the player is busy or if an interrupt is interrupting
 	 */
-	public async execute(preExecuteObjective: () => boolean, postExecuteObjective: () => boolean): Promise<IObjective[] | ObjectiveResult.Restart | boolean> {
+	public async execute(
+		preExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined,
+		postExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined): Promise<ExecuteResult> {
 		const chain: IObjective[] = [];
 		const objectiveStack: IObjectiveInfo[] = [...this.objectives];
 
@@ -59,8 +81,9 @@ export default class Plan implements IPlan {
 
 			chain.push(objectiveInfo.objective);
 
-			if (!preExecuteObjective()) {
-				return false;
+			const preExecuteObjectiveResult = preExecuteObjective(() => this.getObjectiveResults(chain, objectiveStack, objectiveInfo));
+			if (preExecuteObjectiveResult !== undefined) {
+				return preExecuteObjectiveResult;
 			}
 
 			// queue this messsage to be logged if another message occurs
@@ -95,21 +118,22 @@ export default class Plan implements IPlan {
 			}
 
 			if (result === ObjectiveResult.Pending) {
-				// objective is still running
-
-				// if (chain.length > 0) {
-				// 	log.info(`Saving chain: ${chain.map((o) => o.getHashCode()).join(" -> ")}`);
-				// }
-
-				return chain;
+				return {
+					type: ExecuteResultType.Pending,
+					objectives: this.getObjectiveResults(chain, objectiveStack, objectiveInfo),
+				};
 			}
 
 			if (result === ObjectiveResult.Restart) {
-				return ObjectiveResult.Restart;
+				return {
+					type: ExecuteResultType.Restart,
+				};
 			}
 
-			if (!postExecuteObjective()) {
-				return false;
+			// don't include the current objective here because we completed it
+			const postExecuteObjectiveResult = postExecuteObjective(() => this.getObjectiveResults(chain, objectiveStack, objectiveInfo, false));
+			if (postExecuteObjectiveResult !== undefined) {
+				return postExecuteObjectiveResult;
 			}
 
 			// once an objective runs as dynamic, we need to continue running them in dynamic mode
@@ -162,7 +186,9 @@ export default class Plan implements IPlan {
 			}*/
 		}
 
-		return true;
+		return {
+			type: ExecuteResultType.Completed,
+		};
 	}
 
 	private flattenTree(root: IExecutionTree): IObjectiveInfo[] {
@@ -332,20 +358,28 @@ export default class Plan implements IPlan {
 		return tree;
 	}
 
-	// @ts-ignore
-	private getTreeString(root: IExecutionTree) {
-		let str = "";
+	private getObjectiveResults(chain: IObjective[] = [], objectiveStack: IObjectiveInfo[], currentObjectiveInfo: IObjectiveInfo, includeCurrent: boolean = true) {
+		const objectiveResult = chain.find(objective => !objective.canSaveChildObjectives());
+		if (objectiveResult) {
+			return [objectiveResult];
+		}
 
-		const writeTree = (tree: IExecutionTree, depth = 0) => {
-			str += `${"  ".repeat(depth)}${tree.hashCode}\n`;
+		const results: IObjective[] = includeCurrent ? [currentObjectiveInfo.objective] : [];
 
-			for (const child of tree.children) {
-				writeTree(child, depth + 1);
+		let offset = 0;
+
+		while (true) {
+			const nextObjectiveInfo = objectiveStack[offset];
+			if (!nextObjectiveInfo || nextObjectiveInfo.depth !== currentObjectiveInfo.depth) {
+				break;
 			}
-		};
 
-		writeTree(root, 0);
+			results.push(nextObjectiveInfo.objective);
 
-		return str;
+			offset++;
+		}
+
+		return results;
 	}
+
 }

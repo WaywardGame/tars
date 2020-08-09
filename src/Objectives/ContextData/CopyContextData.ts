@@ -4,18 +4,19 @@ import Objective from "../../Objective";
 
 export default class CopyContextData<T extends ContextDataType, T2 extends ContextDataType> extends Objective {
 
-	constructor(private readonly destination: T, private readonly source: T2) {
+	constructor(private readonly source: T, private readonly destination: T2) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `CopyContextData:${this.source},${this.destination}`;
+		return `CopyContextData:${ContextDataType[this.source]},${ContextDataType[this.destination]}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const data = context.getData(this.source);
 		context.setData(this.destination, data as any);
-		this.log.info(`Copied ${data} from ${this.source} to ${this.destination}`);
+		// console.log(`Copied ${data} from ${ContextDataType[this.source]} to ${ContextDataType[this.destination]}`);
+		this.log.info(`Copied ${data} from ${ContextDataType[this.source]} to ${ContextDataType[this.destination]}`);
 		return ObjectiveResult.Complete;
 	}
 

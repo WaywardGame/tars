@@ -56,7 +56,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 				})
 				.filter(doodadInfo => doodadInfo !== undefined) as Array<{ doodad: Doodad; providesFire: boolean }>)
 				// todo: make this use objective pipelines and move to easiest one?
-				.sort((a, b) => Vector2.distance(context.player, a.doodad) > Vector2.distance(context.player, b.doodad) ? 1 : -1);
+				.sort((a, b) => Vector2.squaredDistance(context.player, a.doodad) > Vector2.squaredDistance(context.player, b.doodad) ? 1 : -1);
 
 			for (const doodadInfo of doodadInfos) {
 				if (!doodad) {

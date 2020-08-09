@@ -54,7 +54,7 @@ export default class RunAwayFromTarget extends Objective {
 					return -1;
 				}
 
-				return Vector2.distance(pointA, context.player) > Vector2.distance(pointB, context.player) ? 1 : -1;
+				return Vector2.squaredDistance(pointA, context.player) > Vector2.squaredDistance(pointB, context.player) ? 1 : -1;
 			});
 
 		this.log.info("Valid points", validPoints);

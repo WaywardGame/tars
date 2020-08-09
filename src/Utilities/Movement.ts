@@ -119,6 +119,12 @@ export async function getMovementPath(context: Context, target: IVector3, moveAd
 			}
 		}
 
+		const origin = navigation.getOrigin();
+		if (origin.x !== context.player.x || origin.y !== context.player.y || origin.z !== context.player.z) {
+			log.warn("Updating origin immediately due to mismatch", origin, context.player.getPoint());
+			navigation.updateOrigin(context.player);
+		}
+
 		// pick the easiest path
 		let results = (await Promise.all(ends.map(end => navigation.findPath(end))))
 			.filter(result => result !== undefined) as NavigationPath[];

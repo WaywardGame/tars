@@ -32,8 +32,14 @@ export default class RecoverStamina extends Objective {
 		// 	this.log.info("Can't rest now");
 		// 	return ObjectiveResult.Complete;
 		// }
-		if (context.player.stat.get<IStat>(Stat.Thirst).value < 0) {
-			this.log.info("Can't rest now");
+
+		if (context.player.stat.get<IStat>(Stat.Thirst).value < 1) {
+			this.log.info("Can't rest now, too thirsty");
+			return ObjectiveResult.Complete;
+		}
+
+		if (context.player.stat.get<IStat>(Stat.Hunger).value < 1) {
+			this.log.info("Can't rest now, too hungry");
 			return ObjectiveResult.Complete;
 		}
 

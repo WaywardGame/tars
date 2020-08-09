@@ -12,6 +12,11 @@ import { log } from "../../Utilities/Logger";
 import { getMovementPath, move, MoveResult } from "../../Utilities/Movement";
 import Rest from "../Other/Rest";
 
+export interface IMoveToTargetOptions {
+	range?: number;
+	disableStaminaCheck?: boolean;
+}
+
 export default class MoveToTarget extends Objective {
 
 	private trackedCreature: Creature | undefined;
@@ -20,12 +25,12 @@ export default class MoveToTarget extends Objective {
 	constructor(
 		protected target: IVector3,
 		protected readonly moveAdjacentToTarget: boolean,
-		protected readonly checkStamina: boolean = true) {
+		protected readonly options?: IMoveToTargetOptions) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `MoveToTarget:${this.target}:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.checkStamina}`;
+		return `MoveToTarget:${this.target}:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
 	}
 
 	public isDynamic(): boolean {
@@ -40,7 +45,7 @@ export default class MoveToTarget extends Objective {
 			return movementPath.difficulty;
 		}
 
-		if (this.checkStamina) {
+		if (!this.options?.disableStaminaCheck) {
 			const path = movementPath.path;
 			if (path) {
 				// check how our stamina is
@@ -67,6 +72,12 @@ export default class MoveToTarget extends Objective {
 					}
 				}
 			}
+		}
+
+		const range = this.options?.range;
+		if (range !== undefined && Vector2.isDistanceWithin(context.player, this.target, range)) {
+			this.log.info("Within range of the target");
+			return ObjectiveResult.Complete;
 		}
 
 		const moveResult = await move(context, this.target, this.moveAdjacentToTarget);

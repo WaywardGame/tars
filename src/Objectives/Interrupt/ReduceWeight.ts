@@ -7,7 +7,7 @@ import OrganizeInventory from "../Utility/OrganizeInventory";
 
 export default class ReduceWeight extends Objective {
 
-	constructor(private readonly force: boolean = false) {
+	constructor(private readonly includeReservedItems: boolean = false) {
 		super();
 	}
 
@@ -33,7 +33,10 @@ export default class ReduceWeight extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		return new OrganizeInventory(weightStatus !== WeightStatus.Overburdened, this.force);
+		return new OrganizeInventory({
+			allowChests: weightStatus !== WeightStatus.Overburdened,
+			includeReservedItems: this.includeReservedItems,
+		});
 	}
 
 }

@@ -80,22 +80,12 @@ export default class GatherFromGround extends Objective {
 				objectives.push(new Lambda(async context => {
 					const objectives: IObjective[] = [];
 
-					const tile = context.player.getFacingTile();
-
-					const containedItems = tile.containedItems;
-					if (containedItems !== undefined && containedItems.length > 0) {
-						// 100% legal
-						const matchingItems = containedItems
-							.filter(item => item.type === this.itemType);
-						if (matchingItems.length > 0) {
-							const item = matchingItems[0];
-
-							objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, item));
-
-							objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-								action.execute(context.player, item, context.player.inventory);
-							}));
-						}
+					const item = context.player.getFacingTile().containedItems?.find(item => item.type === this.itemType);
+					if (item) {
+						objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, item));
+						objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
+							action.execute(context.player, item, context.player.inventory);
+						}));
 					}
 
 					return objectives;

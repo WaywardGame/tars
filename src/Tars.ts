@@ -27,7 +27,7 @@ import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
 import Context from "./Context";
-import Planner from "./Core/Planner";
+import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
 import { IObjective, ObjectiveResult } from "./IObjective";
 import { IBase, IInventoryItems } from "./ITars";
 import Navigation from "./Navigation/Navigation";
@@ -106,15 +106,13 @@ export default class Tars extends Mod {
 
 	private readonly statThresholdExceeded: { [index: number]: boolean } = {};
 	private weightStatus: WeightStatus | undefined;
-	private weightChanged: boolean;
 
 	private context: Context;
-	private objective: IObjective | undefined;
-	private interruptObjective: IObjective | undefined;
+	private objectivePipeline: IObjective[] | undefined;
+	private interruptObjectivePipeline: IObjective[] | undefined;
 	private interruptContext: Context | undefined;
 	private readonly interruptContexts: Map<number, Context> = new Map();
 	private interruptsId: string | undefined;
-	private interrupted = false;
 
 	private tickTimeoutId: number | undefined;
 
@@ -133,11 +131,15 @@ export default class Tars extends Mod {
 	public onLoad(): void {
 		this.delete();
 		this.navigation = Navigation.get();
+
+		(window as any).TARS = this;
 	}
 
 	public onUnload(): void {
 		this.disable(true);
 		this.delete();
+
+		(window as any).TARS = undefined;
 	}
 
 	////////////////////////////////////////////////
@@ -166,6 +168,16 @@ export default class Tars extends Mod {
 		movementUtilities.resetMovementOverlays();
 	}
 
+	@EventHandler(EventBus.LocalPlayer, "respawn")
+	public onPlayerRespawn() {
+		this.interrupt();
+		movementUtilities.resetMovementOverlays();
+
+		if (this.navigationInitialized === NavigationSystemState.Initialized && this.navigation) {
+			this.navigation.queueUpdateOrigin(localPlayer);
+		}
+	}
+
 	@EventHandler(EventBus.LocalPlayer, "processMovement")
 	public async processMovement(player: Player): Promise<void> {
 		if (this.isEnabled() && player.isLocalPlayer()) {
@@ -173,9 +185,9 @@ export default class Tars extends Mod {
 				this.navigation.queueUpdateOrigin(player);
 			}
 
-			const objective = this.interruptObjective || this.objective;
+			const objective = this.interruptObjectivePipeline || this.objectivePipeline;
 			if (objective !== undefined) {
-				const result = await objective.onMove(this.context);
+				const result = await objective[0].onMove(this.context);
 				if (result === true) {
 					this.interrupt();
 
@@ -195,9 +207,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "moveComplete")
 	public onMoveComplete(player: Player) {
-		if (this.isEnabled()) {
-			movementUtilities.clearOverlay(player.getTile());
-		}
+		movementUtilities.clearOverlay(player.getTile());
 	}
 
 	@Bind.onDown(Registry<Tars>().get("keyBind"))
@@ -263,7 +273,7 @@ export default class Tars extends Mod {
 
 		switch (stat.type) {
 			case Stat.Weight:
-				this.weightChanged = true;
+				executor.markWeightChanged();
 
 				const weightStatus = player.getWeightStatus();
 				if (this.weightStatus !== weightStatus) {
@@ -290,16 +300,22 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
+	public async moveToFaceTarget(target: IVector3) {
+		return movementUtilities.moveToFaceTarget(new Context(localPlayer, this.base, this.inventory), target);
+	}
+
+	////////////////////////////////////////////////
+
 	@Register.command("TARS")
 	protected command(_player: Player, _args: string) {
 		this.toggle();
 	}
 
 	private reset() {
-		this.objective = undefined;
-		this.interruptObjective = undefined;
+		executor.reset();
+		this.objectivePipeline = undefined;
+		this.interruptObjectivePipeline = undefined;
 		this.interruptsId = undefined;
-		this.interrupted = false;
 		this.interruptContext = undefined;
 		this.interruptContexts.clear();
 	}
@@ -330,16 +346,6 @@ export default class Tars extends Mod {
 
 	private isEnabled(): boolean {
 		return this.tickTimeoutId !== undefined;
-	}
-
-	private isReady(checkForInterrupts: boolean) {
-		return this.isEnabled() &&
-			!this.context.player.isResting() &&
-			!this.context.player.isMovingClientside &&
-			!this.context.player.hasDelay() &&
-			!this.context.player.isGhost() &&
-			!game.paused &&
-			(!checkForInterrupts || !this.interrupted);
 	}
 
 	private async toggle() {
@@ -411,21 +417,23 @@ export default class Tars extends Mod {
 			this.tickTimeoutId = undefined;
 		}
 
-		if (localPlayer && !gameIsEnding) {
-			movementUtilities.resetMovementOverlays();
+		movementUtilities.resetMovementOverlays();
+
+		if (localPlayer) {
 			localPlayer.walkAlongPath(undefined);
+			OptionsInterrupt.restore();
 		}
 	}
 
 	private interrupt(interruptObjective?: IObjective) {
 		log.info("Interrupt", interruptObjective);
 
-		this.interrupted = true;
+		executor.interrupt();
 
-		this.objective = undefined;
+		this.objectivePipeline = undefined;
 
 		if (interruptObjective) {
-			this.interruptObjective = interruptObjective;
+			this.interruptObjectivePipeline = [interruptObjective];
 		}
 
 		movementUtilities.resetMovementOverlays();
@@ -449,7 +457,7 @@ export default class Tars extends Mod {
 	}
 
 	private async onTick() {
-		if (!this.isReady(false)) {
+		if (!this.isEnabled() || !executor.isReady(this.context, false)) {
 			if (game.playing && this.context.player.isGhost() && game.getGameOptions().respawn) {
 				await new ExecuteAction(ActionType.Respawn, (context, action) => {
 					action.execute(context.player);
@@ -464,21 +472,22 @@ export default class Tars extends Mod {
 		tileUtilities.resetNearestTileLocationCache();
 
 		// system objectives
-		await this.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
+		await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
 
 		// interrupts
 		const interrupts = this.getInterrupts(this.context);
 		const interruptsId = interrupts
-			.map(objective => objective && (Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective.getIdentifier()))
+			.filter(objective => objective !== undefined)
+			.map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective!.getIdentifier())
 			.join(", ");
 
 		if (this.interruptsId !== interruptsId) {
 			log.info(`Interrupts changed from ${this.interruptsId} to ${interruptsId}`);
 			this.interruptsId = interruptsId;
-			this.interruptObjective = undefined;
+			this.interruptObjectivePipeline = undefined;
 		}
 
-		if (this.interruptObjective || interrupts.length > 0) {
+		if (this.interruptObjectivePipeline || interrupts.length > 0) {
 			if (!this.interruptContext) {
 				// we should use our main context when running interrupt objectives
 				// this will prevent interrupts from messing with reserved items
@@ -491,16 +500,27 @@ export default class Tars extends Mod {
 				log.debug(`Created interrupt context with hash code: ${this.interruptContext.getHashCode()}`);
 			}
 
-			if (this.interruptObjective) {
-				this.interruptObjective.log.info("Continuing interrupt execution...");
+			if (this.interruptObjectivePipeline) {
+				log.info("Continuing interrupt execution", this.interruptObjectivePipeline.map(objective => objective.getHashCode()).join(" -> "));
 
-				const result = await this.executeObjectives(this.interruptContext, [this.interruptObjective], false);
-				if (result !== true) {
-					// still working on it
-					return;
+				const result = await executor.executeObjectives(this.interruptContext, this.interruptObjectivePipeline, false);
+				switch (result.type) {
+					case ExecuteObjectivesResultType.Completed:
+						this.interruptObjectivePipeline = undefined;
+						break;
+
+					case ExecuteObjectivesResultType.Restart:
+						this.interruptObjectivePipeline = undefined;
+						return;
+
+					case ExecuteObjectivesResultType.Pending:
+						return;
+
+					case ExecuteObjectivesResultType.ContinuingNextTick:
+						this.interruptObjectivePipeline = undefined;
+						log.info("Clearing interrupt objective pipeline");
+						return;
 				}
-
-				this.interruptObjective = undefined;
 			}
 
 			if (interrupts.length > 0) {
@@ -519,7 +539,7 @@ export default class Tars extends Mod {
 						log.debug(`Restored saved context from ${i}. ${this.interruptContext}`);
 					}
 
-					const result = await this.executeObjectives(this.interruptContext, [interruptObjectives], true);
+					const result = await executor.executeObjectives(this.interruptContext, [interruptObjectives], true);
 
 					log.debug("Interrupt result", result);
 
@@ -528,49 +548,49 @@ export default class Tars extends Mod {
 						return;
 					}
 
-					if (result === true) {
-						// finished working on it
-						// update the initial state of the interrupt context
-						// it's possible interrupt() was called, so we'll come back here with the same context
-						// this.interruptContext.setInitialState();
-						// todo: nest interrupt support / contexts?
+					switch (result.type) {
+						case ExecuteObjectivesResultType.Completed:
+							// finished working on it
+							// update the initial state of the interrupt context
+							// it's possible interrupt() was called, so we'll come back here with the same context
+							// this.interruptContext.setInitialState();
+							// todo: nest interrupt support / contexts?
 
-						// ensure the current objective is cleared
-						this.interruptObjective = undefined;
+							// ensure the current objective is cleared
+							this.interruptObjectivePipeline = undefined;
 
-						if (this.interruptContexts.has(i)) {
-							this.interruptContexts.delete(i);
-							log.debug(`Deleting saved context from ${i}`);
-						}
+							if (this.interruptContexts.has(i)) {
+								this.interruptContexts.delete(i);
+								log.debug(`Deleting saved context from ${i}`);
+							}
+							break;
 
-					} else {
-						// in progress. run again during the next tick
+						default:
+							// in progress. run again during the next tick
 
-						// save this context so it will be restored next time
-						this.interruptContexts.set(i, this.interruptContext.clone());
-						log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext}`);
+							// save this context so it will be restored next time
+							this.interruptContexts.set(i, this.interruptContext.clone());
+							log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext}`);
 
-						// update the initial state so we don't mess with items between interrupts
-						this.interruptContext.setInitialState();
+							// update the initial state so we don't mess with items between interrupts
+							this.interruptContext.setInitialState();
 
-						if (result !== false) {
-							// save the active objective
-							this.interruptObjective = result.find(objective => !objective.canSaveChildObjectives()) || result[result.length - 1];
+							if (result.type === ExecuteObjectivesResultType.Pending || result.type === ExecuteObjectivesResultType.ContinuingNextTick) {
+								// save the active objective
+								this.interruptObjectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
 
-							// reset main objective
-							this.objective = undefined;
-						}
+								// reset main objective
+								this.objectivePipeline = undefined;
+							}
 
-						return;
+							return;
 					}
 				}
 			}
 
 			// console.log.info("this.objective", this.objective ? this.objective.getHashCode() : undefined);
 
-			if (this.interrupted) {
-				this.interrupted = false;
-
+			if (executor.tryClearInterrupt()) {
 				// nested interrupt. update interrupt context
 				this.interruptContext.setInitialState();
 
@@ -580,106 +600,49 @@ export default class Tars extends Mod {
 			}
 		}
 
-		if (this.interrupted) {
-			this.interrupted = false;
+		if (executor.tryClearInterrupt()) {
 			return;
 		}
 
 		// no longer working on interrupts
 		this.interruptContext = undefined;
 
-		if (this.objective !== undefined) {
+		if (this.objectivePipeline !== undefined) {
 			// we have an objective we are working on
-			this.objective.log.info("Continuing execution...");
+			log.info("Continuing execution of objectives", this.objectivePipeline.map(objective => objective.getHashCode()).join(" -> "));
 
-			const result = await this.executeObjectives(this.context, [this.objective], false, true);
-			if (result !== true) {
-				// still working on it
-				return;
-			}
-		}
-
-		const result = await this.executeObjectives(this.context, this.determineObjectives(this.context), true, true);
-		if (result === true || result === false) {
-			this.objective = undefined;
-
-		} else {
-			// save the active objective
-			this.objective = result.find(objective => !objective.canSaveChildObjectives()) || result[result.length - 1];
-
-			// console.log.info("saved objective", this.objective, this.objective.getHashCode());
-		}
-	}
-
-	/**
-	 * Execute objectives
-	 * @param objectives Array of objectives
-	 * @param resetContextState True to reset the context before running each objective
-	 * @param checkForInterrupts True to interrupt objective execution when an interrupt occurs
-	 * @returns An objective (if it's still being worked on), True if all the objectives are completed
-	 * False if objectives are waiting for the next tick to continue running
-	 */
-	private async executeObjectives(
-		context: Context,
-		objectives: Array<IObjective | IObjective[]>,
-		resetContextState: boolean,
-		checkForInterrupts: boolean = false): Promise<IObjective[] | boolean> {
-		for (const objective of objectives) {
-			if (!this.isReady(checkForInterrupts)) {
-				return false;
-			}
-
-			if (resetContextState) {
-				// reset before running objectives
-				context.reset();
-				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`);
-			}
-
-			let objs: IObjective[];
-			if (Array.isArray(objective)) {
-				objs = objective;
-			} else {
-				objs = [objective];
-			}
-
-			Planner.reset();
-
-			for (const o of objs) {
-				const plan = await Planner.createPlan(context, o);
-				if (!plan) {
-					log.warn(`No valid plan for ${o.getHashCode()}`);
+			const result = await executor.executeObjectives(this.context, this.objectivePipeline, false, true);
+			switch (result.type) {
+				case ExecuteObjectivesResultType.Completed:
+					this.objectivePipeline = undefined;
 					break;
-				}
 
-				const result = await plan.execute(
-					() => {
-						this.weightChanged = false;
-						return true;
-					},
-					() => {
-						if (this.weightChanged && context.player.getWeightStatus() !== WeightStatus.None) {
-							log.info("Weight changed. Stopping execution");
-							return false;
-						}
+				case ExecuteObjectivesResultType.Restart:
+					this.objectivePipeline = undefined;
+					return;
 
-						return this.isReady(checkForInterrupts);
-					});
-
-				if (result === ObjectiveResult.Restart) {
-					return false;
-				}
-
-				if (result === false) {
-					return false;
-				}
-
-				if (typeof (result) !== "boolean") {
-					return result;
-				}
+				case ExecuteObjectivesResultType.Pending:
+				case ExecuteObjectivesResultType.ContinuingNextTick:
+					// save the active objective
+					this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
+					log.info(`Updated continuing objectives - ${ExecuteObjectivesResultType[result.type]}`, this.objectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+					return;
 			}
 		}
 
-		return true;
+		const result = await executor.executeObjectives(this.context, this.determineObjectives(this.context), true, true);
+		switch (result.type) {
+			case ExecuteObjectivesResultType.Pending:
+			case ExecuteObjectivesResultType.ContinuingNextTick:
+				// save the active objective
+				this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
+				log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, this.objectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+				return;
+
+			default:
+				this.objectivePipeline = undefined;
+				return;
+		}
 	}
 
 	private determineObjectives(context: Context): Array<IObjective | IObjective[]> {

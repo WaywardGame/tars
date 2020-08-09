@@ -5,6 +5,7 @@ import Item from "item/Item";
 import Context from "../../Context";
 import { ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
+import { isWaterStillDrinkable } from "../../Utilities/Doodad";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
 import StartWaterStillDesalination from "../Other/StartWaterStillDesalination";
@@ -20,8 +21,9 @@ export default class GatherWaterFromStill extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (this.waterStill.gatherReady === undefined) {
+		if (!isWaterStillDrinkable(this.waterStill)) {
 			return new StartWaterStillDesalination(this.waterStill);
+			// return ObjectiveResult.Impossible;
 		}
 
 		return [

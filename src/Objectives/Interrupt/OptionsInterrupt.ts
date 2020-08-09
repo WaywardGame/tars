@@ -6,6 +6,21 @@ import Objective from "../../Objective";
 
 export default class OptionsInterrupt extends Objective {
 
+	public static changedDropOnGatherHarvest = false;
+	public static changedDropOnDismantle = false;
+
+	public static restore() {
+		if (OptionsInterrupt.changedDropOnGatherHarvest) {
+			OptionsInterrupt.changedDropOnGatherHarvest = false;
+			game.updateOption(localPlayer, "dropOnGatherHarvest", false);
+		}
+
+		if (OptionsInterrupt.changedDropOnDismantle) {
+			OptionsInterrupt.changedDropOnDismantle = false;
+			game.updateOption(localPlayer, "dropOnDismantle", false);
+		}
+	}
+
 	public getIdentifier(): string {
 		return "OptionsInterrupt";
 	}
@@ -29,11 +44,17 @@ export default class OptionsInterrupt extends Objective {
 			return ObjectiveResult.Pending;
 		}
 
-		// if (!context.player.options.dropOnGather) {
-		// 	this.log("Enabling DropOnGather");
-		// 	game.updateOption(context.player, "DropOnGather", true);
-		// 	return;
-		// }
+		if (!context.player.options.dropOnGatherHarvest) {
+			this.log.info("Enabling DropOnGatherHarvest");
+			game.updateOption(context.player, "dropOnGatherHarvest", true);
+			return ObjectiveResult.Pending;
+		}
+
+		if (!context.player.options.dropOnDismantle) {
+			this.log.info("Enabling DropOnDismantle");
+			game.updateOption(context.player, "dropOnDismantle", true);
+			return ObjectiveResult.Pending;
+		}
 
 		if (context.player.options.protectedCraftingItems) {
 			this.log.info("Disabling ProtectedCraftingItems");

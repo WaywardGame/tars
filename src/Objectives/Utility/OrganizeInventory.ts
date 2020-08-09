@@ -17,9 +17,15 @@ import MoveToTarget from "../Core/MoveToTarget";
 
 const maxChestDistance = 128;
 
+export interface IOriganizeInventoryOptions {
+	allowChests: boolean;
+	onlyIfNearBase?: boolean;
+	includeReservedItems?: boolean;
+}
+
 export default class OrganizeInventory extends Objective {
 
-	constructor(private allowChests: boolean = true, private readonly force: boolean = false) {
+	constructor(private readonly options: IOriganizeInventoryOptions = { allowChests: true }) {
 		super();
 	}
 
@@ -46,6 +52,10 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
+		if (this.options.onlyIfNearBase && !isNearBase(context)) {
+			return ObjectiveResult.Ignore;
+		}
+
 		const allowOrganizingReservedItemsIntoIntermediateChest = context.getData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest) !== false;
 
 		this.log.info(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow intermediate chest: ${allowOrganizingReservedItemsIntoIntermediateChest}`);
@@ -60,7 +70,7 @@ export default class OrganizeInventory extends Objective {
 			}
 		}
 
-		if (unusedItems.length === 0 && this.force) {
+		if (unusedItems.length === 0 && this.options.includeReservedItems) {
 			// ignore reserved items
 			unusedItems = getUnusedItems(context, true);
 		}
@@ -71,12 +81,12 @@ export default class OrganizeInventory extends Objective {
 
 		if (!isNearBase(context)) {
 			this.log.info(`Not near base, disabling use of chests.. ${unusedItems.join(", ")}`, context.getHashCode());
-			this.allowChests = false;
+			this.options.allowChests = false;
 		}
 
 		this.log.info(`Unused items. ${unusedItems.join(", ")}`, context.getHashCode());
 
-		if (this.allowChests && context.base.chest.length > 0) {
+		if (this.options.allowChests && context.base.chest.length > 0) {
 			// pick the chest with the most room available
 			const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
 			for (const chest of chests) {

@@ -6,6 +6,7 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { isNearBase } from "../../Utilities/Base";
+import { isWaterStillDrinkable } from "../../Utilities/Doodad";
 import { canDrinkItem } from "../../Utilities/Item";
 import AcquireWaterContainer from "../Acquire/Item/Specific/AcquireWaterContainer";
 import ExecuteAction from "../Core/ExecuteAction";
@@ -35,16 +36,17 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		if (this.waterStill.gatherReady !== undefined && this.waterStill.gatherReady <= 0) {
+		if (isWaterStillDrinkable(this.waterStill)) {
 			// water is ready
 			return ObjectiveResult.Ignore;
 		}
 
 		if (this.waterStill.gatherReady === undefined) {
-			// no water in the still
+			// still is not desalination
 
 			let isWaterInContainer = false;
 
+			// check if we need a water container
 			if (context.inventory.waterContainer !== undefined) {
 				isWaterInContainer = canDrinkItem(context.inventory.waterContainer);
 
@@ -96,6 +98,7 @@ export default class StartWaterStillDesalination extends Objective {
 				}));
 			}
 
+			this.log.info("Moving to detach container");
 			// attach the container to the water still
 			objectives.push(new UseItem(ActionType.AttachContainer, context.inventory.waterContainer));
 
@@ -108,6 +111,7 @@ export default class StartWaterStillDesalination extends Objective {
 					return ObjectiveResult.Complete;
 				}));
 				objectives.push(new StartFire(this.waterStill));
+				objectives.push(new StokeFire(this.waterStill));
 
 			} else {
 				return ObjectiveResult.Ignore;

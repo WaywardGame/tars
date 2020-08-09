@@ -38,7 +38,7 @@ export default class MoveToLand extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		return new MoveToTarget(target, false, false);
+		return new MoveToTarget(target, false, { disableStaminaCheck: true });
 	}
 
 }

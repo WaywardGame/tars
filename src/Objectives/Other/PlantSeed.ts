@@ -7,7 +7,7 @@ import { ITileContainer, TerrainType } from "tile/ITerrain";
 import TileHelpers from "utilities/TileHelpers";
 
 import Context, { ContextDataType } from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { gardenMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
 import { getBasePosition, isOpenArea } from "../../Utilities/Base";
@@ -53,7 +53,7 @@ export default class PlantSeed extends Objective {
 
 		if (context.inventory.hoe === undefined) {
 			objectives.push(new AcquireItem(ItemType.StoneHoe));
-			objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
+			objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
 
 		} else {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hoe));
@@ -75,8 +75,11 @@ export default class PlantSeed extends Objective {
 			const nearbyTillableTile = TileHelpers.findMatchingTile(getBasePosition(context), (point, tile) => this.plantTiles.indexOf(TileHelpers.getType(tile)) !== -1 && isOpenArea(context, point, tile), gardenMaxTilesChecked);
 			if (nearbyTillableTile !== undefined) {
 				objectives.push(new MoveToTarget(nearbyTillableTile, true));
-				objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
+				objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
 				objectives.push(new UseItem(ActionType.Till));
+
+			} else {
+				return ObjectiveResult.Impossible;
 			}
 		}
 

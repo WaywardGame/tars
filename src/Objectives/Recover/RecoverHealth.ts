@@ -40,7 +40,7 @@ export default class RecoverHealth extends Objective {
 		if (hasWeightProblems) {
 			// special case - reduce weight now
 			this.log.info("Reduce weight before finding a health item");
-			objectives.push(new OrganizeInventory(false));
+			objectives.push(new OrganizeInventory({ allowChests: false }));
 
 		} else if (!isThirsty && !isHungry) {
 			this.log.info("Acquire a Health item");

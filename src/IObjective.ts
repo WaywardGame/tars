@@ -9,7 +9,7 @@ export enum ObjectiveResult {
 	// Objective was completed
 	Complete = -1,
 
-	// The objective is not finish yet. It's still working
+	// The objective is not finished yet. It's still being worked on
 	Pending = -2,
 
 	// Objective didn't do anything

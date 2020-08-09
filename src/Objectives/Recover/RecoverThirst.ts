@@ -9,14 +9,15 @@ import Objective from "../../Objective";
 import { isNearBase } from "../../Utilities/Base";
 import { isWaterStillDesalinating, isWaterStillDrinkable } from "../../Utilities/Doodad";
 import { canDrinkItem } from "../../Utilities/Item";
+import { isHealthy } from "../../Utilities/Player";
 import { getNearestTileLocation } from "../../Utilities/Tile";
 import AcquireItemByGroup from "../Acquire/Item/AcquireItemByGroup";
 import AcquireWaterContainer from "../Acquire/Item/Specific/AcquireWaterContainer";
 import AnalyzeBase from "../Analyze/AnalyzeBase";
 import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import BuildItem from "../Other/BuildItem";
+import Idle from "../Other/Idle";
 import StartWaterStillDesalination from "../Other/StartWaterStillDesalination";
 import UseItem from "../Other/UseItem";
 
@@ -111,7 +112,7 @@ export default class RecoverThirst extends Objective {
 		} else {
 			const isWaitingForAll = context.base.waterStill.every(isWaterStillDesalinating);
 			if (isWaitingForAll) {
-				if (context.base.waterStill.length < 3 && thirstStat.value > 5) {
+				if (context.base.waterStill.length < 3 && isHealthy(context)) {
 					// build another water still wait waiting
 					objectivePipelines.push([
 						new AcquireWaterContainer(),
@@ -123,7 +124,10 @@ export default class RecoverThirst extends Objective {
 				} else {
 					// run back to the waterstill and wait
 					for (const waterStill of context.base.waterStill) {
-						objectivePipelines.push([new MoveToTarget(waterStill, true)]);
+						objectivePipelines.push([
+							new MoveToTarget(waterStill, true, { range: 5 }),
+							new Idle(),
+						]);
 					}
 				}
 
@@ -155,32 +159,8 @@ export default class RecoverThirst extends Objective {
 								waterStillObjectives.push(new RecoverStamina());
 
 							} else {
-								// build another water still wait waiting
-
-								// waterStillObjectives.push(new AcquireItemByGroup(ItemTypeGroup.WaterStill));
-								// waterStillObjectives.push(new BuildItem());
-								// waterStillObjectives.push(new AnalyzeBase());
-								// run back to the waterstill and wait
-								// waterStillObjectives.push(new MoveToTarget(waterStill, true));
-								// waterStillObjectives.push(new SetContextData(ContextDataType.WaitingForWaterStill, true));
-
-								waterStillObjectives.push(new Lambda(async (context, lambda) => {
-									lambda.log.info("Waiting for water still");
-									return ObjectiveResult.Restart;
-								}));
-
-								// if (
-								// 	game.getTurnMode() === TurnMode.RealTime ||
-								// 	game.nextTickTime === 0 ||
-								// 	(game.lastTickTime !== undefined && (game.lastTickTime + (game.getTickSpeed() * game.interval) + 200) > game.absoluteTime)) {
-								// 	// don't idle in realtime mode or in simulated mode if the turns are ticking still. +200ms buffer for ping
-								// 	waterStillObjectives.push(new Lambda(async (context, lambda) => {
-								// 		lambda.log.info("Waiting for water still");
-								// 		return ObjectiveResult.Restart;
-								// 	}));
-								// } else {
-								// 	waterStillObjectives.push(new Idle());
-								// }
+								// wait for water still to finish
+								waterStillObjectives.push(new Idle());
 							}
 						}
 					}

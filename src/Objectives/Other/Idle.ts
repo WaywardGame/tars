@@ -1,16 +1,18 @@
 import { ActionType } from "entity/action/IAction";
+import { TurnMode } from "game/IGame";
 import TileHelpers from "utilities/TileHelpers";
 
 import Context from "../../Context";
-import { ObjectiveExecutionResult } from "../../IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
+import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 
 export default class Idle extends Objective {
 
-	constructor(private readonly move: boolean = true) {
+	constructor(private readonly canMoveToIdle: boolean = true) {
 		super();
 	}
 
@@ -19,23 +21,33 @@ export default class Idle extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (this.move) {
-			const target = TileHelpers.findMatchingTile(context.player, (_, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !game.isTileFull(tile) && !tile.doodad, defaultMaxTilesChecked);
-			if (target) {
-				this.log.info("Moving to idle position");
+		const objectivePipelines: IObjective[] = [];
 
-				return [
-					new MoveToTarget(target, false),
-					new ExecuteAction(ActionType.Idle, (context, action) => {
-						action.execute(context.player);
-					}),
-				];
+		if (game.getTurnMode() === TurnMode.RealTime ||
+			game.nextTickTime === 0 ||
+			(game.lastTickTime !== undefined && (game.lastTickTime + (game.getTickSpeed() * game.interval) + 200) > game.absoluteTime)) {
+			// don't idle in realtime mode or in simulated mode if the turns are ticking still. +200ms buffer for ping
+			objectivePipelines.push(new Lambda(async (context, lambda) => {
+				lambda.log.info("Smart idling");
+				return ObjectiveResult.Restart;
+			}));
+
+		} else {
+			if (this.canMoveToIdle) {
+				const target = TileHelpers.findMatchingTile(context.player, (_, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !game.isTileFull(tile) && !tile.doodad, defaultMaxTilesChecked);
+				if (target) {
+					this.log.info("Moving to idle position");
+
+					objectivePipelines.push(new MoveToTarget(target, false));
+				}
 			}
+
+			objectivePipelines.push(new ExecuteAction(ActionType.Idle, (context, action) => {
+				action.execute(context.player);
+			}));
 		}
 
-		return new ExecuteAction(ActionType.Idle, (context, action) => {
-			action.execute(context.player);
-		});
+		return objectivePipelines;
 	}
 
 	protected getBaseDifficulty() {

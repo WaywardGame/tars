@@ -155,7 +155,7 @@ export default class RecoverHunger extends Objective {
 					if (onUse) {
 						const onEat = onUse[ActionType.Eat];
 						if (onEat) {
-							if (onEat[0] >= 0) {
+							if (onEat[0] > 1) {
 								result.push(itemType);
 							}
 						}

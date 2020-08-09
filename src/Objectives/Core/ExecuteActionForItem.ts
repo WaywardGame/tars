@@ -139,6 +139,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			}
 		}) as any);
 
+		// console.log("Result", ObjectiveResult[result]);
 		if (this.type === ExecuteActionType.Generic) {
 			// never return undefined for generic - that would make it retry this objective with the same arguments
 			return result === ObjectiveResult.Complete ? ObjectiveResult.Complete : ObjectiveResult.Restart;
@@ -164,14 +165,14 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			return ObjectiveResult.Complete;
 		}
 
-		const tile = context.player.getTile();
-		if (tile && tile.containedItems !== undefined && tile.containedItems.find(item => itemTypes.indexOf(item.type) !== -1)) {
-			matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, ActionType.Idle, ((context: Context, action: any) => {
-				action.execute(context.player);
+		const item = context.player.getTile().containedItems?.find(item => itemTypes.indexOf(item.type) !== -1);
+		if (item) {
+			matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, ActionType.MoveItem, ((context: Context, action: any) => {
+				action.execute(context.player, item, context.player.inventory);
 			}));
 
 			if (matchingNewItem !== undefined) {
-				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}) (via idle)`);
+				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}) (via MoveItem)`);
 				context.setData(ContextDataType.LastAcquiredItem, matchingNewItem);
 				context.addReservedItems(matchingNewItem);
 				return ObjectiveResult.Complete;

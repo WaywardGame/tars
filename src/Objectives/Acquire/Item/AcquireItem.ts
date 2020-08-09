@@ -30,7 +30,6 @@ export default class AcquireItem extends Objective {
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
 	private static readonly dismantleSearchCache: Map<ItemType, ItemType[]> = new Map();
 
-	// todo: make count count
 	constructor(private readonly itemType: ItemType) {
 		super();
 	}

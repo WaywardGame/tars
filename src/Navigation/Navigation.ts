@@ -198,6 +198,10 @@ export default class Navigation {
 		log.info(`Updated navigation in ${time}ms`);
 	}
 
+	public getOrigin() {
+		return this.origin;
+	}
+
 	public queueUpdateOrigin(origin?: IVector3) {
 		if (origin) {
 			this.origin = { x: origin.x, y: origin.y, z: origin.z };
@@ -211,7 +215,11 @@ export default class Navigation {
 		}
 	}
 
-	public updateOrigin() {
+	public updateOrigin(origin?: IVector3) {
+		if (origin) {
+			this.origin = { x: origin.x, y: origin.y, z: origin.z };
+		}
+
 		const dijkstraMapInstance = this.dijkstraMaps.get(this.origin.z);
 		if (!dijkstraMapInstance) {
 			return;

@@ -23,8 +23,12 @@ export default class RepairItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (this.item.minDur === undefined || this.item.maxDur === undefined || this.item === context.inventory.hammer) {
-			this.log.warn("can't repair item no dur", this.item);
+		if (this.item === context.inventory.hammer) {
+			return ObjectiveResult.Ignore;
+		}
+
+		if (this.item.minDur === undefined || this.item.maxDur === undefined) {
+			this.log.warn("Can't repair item, invalid durability", this.item);
 			return ObjectiveResult.Ignore;
 		}
 
@@ -44,14 +48,15 @@ export default class RepairItem extends Objective {
 			objectives.push(new AcquireItem(ItemType.StoneHammer));
 
 			// LastAcquiredItem could change between now and when we need it. copy it in Item1
-			objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
+			objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
 
 		} else {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hammer));
 		}
 
-		const requirements = itemManager.hasAdditionalRequirements(context.player, this.item.type);
+		const requirements = itemManager.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
 		if (!requirements.requirementsMet) {
+			this.log.info("Repair requirements not met");
 			objectives.push(new CompleteRequirements(description.recipe?.requiredDoodad, (description.recipe?.requiresFire || description.repairAndDisassemblyRequiresFire) ? true : false));
 		}
 

@@ -57,7 +57,7 @@ export default class AcquireItemFromDismantle extends Objective {
 
 			if (dismantleItem === undefined) {
 				objectives.push(new AcquireItem(itemType));
-				objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
+				objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
 
 			} else {
 				objectives.push(new ReserveItems(dismantleItem));
@@ -75,7 +75,7 @@ export default class AcquireItemFromDismantle extends Objective {
 			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Dismantle, (context, action) => {
 				const item = context.getData(ContextDataType.Item1);
 				if (!item) {
-					this.log.error("Missing dismantle item", item);
+					this.log.error("Missing dismantle item. Bug in TARS pipeline", item);
 					return;
 				}
 
