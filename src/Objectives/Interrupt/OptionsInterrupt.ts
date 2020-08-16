@@ -50,9 +50,15 @@ export default class OptionsInterrupt extends Objective {
 			return ObjectiveResult.Pending;
 		}
 
-		if (!context.player.options.dropOnDismantle) {
-			this.log.info("Enabling DropOnDismantle");
-			game.updateOption(context.player, "dropOnDismantle", true);
+		// if (!context.player.options.dropOnDismantle) {
+		// 	this.log.info("Enabling DropOnDismantle");
+		// 	game.updateOption(context.player, "dropOnDismantle", true);
+		// 	return ObjectiveResult.Pending;
+		// }
+
+		if (context.player.options.dropOnDismantle) {
+			this.log.info("Disabling DropOnDismantle");
+			game.updateOption(context.player, "dropOnDismantle", false);
 			return ObjectiveResult.Pending;
 		}
 

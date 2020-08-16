@@ -1,5 +1,7 @@
 import { ActionType } from "entity/action/IAction";
 import Creature from "entity/creature/Creature";
+import { EquipType } from "entity/IHuman";
+import { ItemType } from "item/IItem";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -7,11 +9,14 @@ import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
 import { getInventoryItemsWithUse } from "../../Utilities/Item";
 import { findCreatures } from "../../Utilities/Object";
+import AcquireItem from "../Acquire/Item/AcquireItem";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
+import AnalyzeInventory from "../Analyze/AnalyzeInventory";
 import AddDifficulty from "../Core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
+import Equip from "../Other/Equip";
 
 export default class GatherFromCreature extends Objective {
 
@@ -32,6 +37,15 @@ export default class GatherFromCreature extends Objective {
 
 				if (creature.aberrant) {
 					objectives.push(new AddDifficulty(1000));
+				}
+
+				// require a sword and shield before engaging with a creature
+				if (context.inventory.equipSword === undefined) {
+					objectives.push(new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new Equip(EquipType.LeftHand));
+				}
+
+				if (context.inventory.equipShield === undefined) {
+					objectives.push(new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new Equip(EquipType.RightHand));
 				}
 
 				if (!hasCarveItem) {

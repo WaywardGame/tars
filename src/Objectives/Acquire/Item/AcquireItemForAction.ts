@@ -31,7 +31,7 @@ export default class AcquireItemForAction extends Objective {
 
 	public async execute(): Promise<ObjectiveExecutionResult> {
 		return this.getItems()
-			.map(item => [new AcquireItem(item)]);
+			.map(item => [new AcquireItem(item).passContextDataKey(this)]);
 	}
 
 	private getItems(): ItemType[] {
@@ -41,7 +41,7 @@ export default class AcquireItemForAction extends Objective {
 
 			for (const it of Enums.values(ItemType)) {
 				const itemDescription = Items[it];
-				if (itemDescription && itemDescription.use !== undefined && itemDescription.use.indexOf(this.actionType) !== -1) {
+				if (itemDescription && itemDescription.use !== undefined && itemDescription.use.includes(this.actionType)) {
 					result.push(it);
 				}
 			}

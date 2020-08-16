@@ -34,13 +34,13 @@ export default class StokeFire extends Objective {
 			objectives.push(new StartFire(doodad));
 		}
 
-		if (context.inventory.fireStoker === undefined) {
+		if (context.inventory.fireKindling === undefined || context.inventory.fireKindling.length === 0) {
 			objectives.push(new AcquireItemForAction(ActionType.StokeFire));
 		}
 
 		objectives.push(new MoveToTarget(doodad, true));
 
-		objectives.push(new UseItem(ActionType.StokeFire, context.inventory.fireStoker));
+		objectives.push(new UseItem(ActionType.StokeFire, context.inventory.fireKindling?.[0]));
 
 		return objectives;
 	}

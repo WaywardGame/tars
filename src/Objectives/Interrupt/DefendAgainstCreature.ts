@@ -1,6 +1,5 @@
 import { ActionType } from "entity/action/IAction";
 import Creature from "entity/creature/Creature";
-import { CreatureType } from "entity/creature/ICreature";
 import { IStat, IStatMax, Stat } from "entity/IStats";
 import { getDirectionFromMovement, WeightStatus } from "entity/player/IPlayer";
 
@@ -11,6 +10,7 @@ import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import RunAwayFromTarget from "../Other/RunAwayFromTarget";
+import { isScaredOfCreature } from "../../Utilities/Creature";
 
 export default class DefendAgainstCreature extends Objective {
 
@@ -24,8 +24,8 @@ export default class DefendAgainstCreature extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const creature = this.creature;
-		if (creature.stat.get<IStat>(Stat.Health).value <= 0 || !creature.isValid()) {
-			return ObjectiveResult.Complete;
+		if (creature.stat.get<IStat>(Stat.Health).value <= 0 || !creature.isValid() || creature.isTamed()) {
+			return ObjectiveResult.Restart;
 		}
 
 		// use pipelines for the run away logic
@@ -35,7 +35,7 @@ export default class DefendAgainstCreature extends Objective {
 		if (context.player.getWeightStatus() !== WeightStatus.Overburdened) {
 			const health = context.player.stat.get<IStatMax>(Stat.Health);
 			const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
-			if ((health.value / health.max) <= 0.15 || creature.type === CreatureType.Shark || stamina.value <= 2) {
+			if ((health.value / health.max) <= 0.15 || isScaredOfCreature(context, creature) || stamina.value <= 2) {
 				this.log.info("Running away from target");
 				objectivePipelines.push([new RunAwayFromTarget(creature)]);
 			}

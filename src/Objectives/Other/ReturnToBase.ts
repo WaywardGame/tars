@@ -6,6 +6,9 @@ import Objective from "../../Objective";
 import { getBasePosition } from "../../Utilities/Base";
 import MoveToTarget from "../Core/MoveToTarget";
 
+const returnToBaseDistance = 20;
+const returnToBaseDistanceSq = Math.pow(returnToBaseDistance, 2);
+
 export default class ReturnToBase extends Objective {
 
 	public getIdentifier(): string {
@@ -14,9 +17,11 @@ export default class ReturnToBase extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const basePosition = getBasePosition(context);
-		if (basePosition === context.player || Vector2.distance(context.player, basePosition) <= 20) {
+		if (basePosition === context.player || Vector2.squaredDistance(context.player, basePosition) <= returnToBaseDistanceSq) {
 			return ObjectiveResult.Ignore;
 		}
+
+		this.log.info("Returning to base");
 
 		return new MoveToTarget(basePosition, true);
 	}

@@ -1,13 +1,14 @@
 import Doodad from "doodad/Doodad";
 import { ActionType } from "entity/action/IAction";
 import { IStat, Stat } from "entity/IStats";
+import { ItemTypeGroup } from "item/IItem";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { isNearBase } from "../../Utilities/Base";
 import { isWaterStillDrinkable } from "../../Utilities/Doodad";
-import { canDrinkItem } from "../../Utilities/Item";
+import { isDrinkableItem } from "../../Utilities/Item";
 import AcquireWaterContainer from "../Acquire/Item/Specific/AcquireWaterContainer";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
@@ -19,9 +20,11 @@ import StartFire from "./StartFire";
 import StokeFire from "./StokeFire";
 import UseItem from "./UseItem";
 
+/**
+ * It will ensure the water still is desalinating as long as we're near the base
+ * It will pour water into the still, attach containers, gather water, start & stoke fires.
+ */
 export default class StartWaterStillDesalination extends Objective {
-
-	private static readonly waterStillStokeFireTargetDecay: Map<number, number | undefined> = new Map();
 
 	constructor(private readonly waterStill: Doodad) {
 		super();
@@ -32,29 +35,33 @@ export default class StartWaterStillDesalination extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const waterStillDescription = this.waterStill.description();
-
-		const objectives: IObjective[] = [];
-
 		if (isWaterStillDrinkable(this.waterStill)) {
 			// water is ready
 			return ObjectiveResult.Ignore;
 		}
 
-		if (this.waterStill.gatherReady === undefined) {
-			// still is not desalination
+		const waterStillDescription = this.waterStill.description();
+		if (!waterStillDescription) {
+			return ObjectiveResult.Impossible;
+		}
 
+		const objectives: IObjective[] = [];
+
+		const availableWaterContainer = context.inventory.waterContainer?.find(waterContainer => !itemManager.isInGroup(waterContainer.type, ItemTypeGroup.ContainerOfDesalinatedWater));
+
+		if (this.waterStill.gatherReady === undefined) {
+			// water still cannot be desalinated yet
 			let isWaterInContainer = false;
 
 			// check if we need a water container
-			if (context.inventory.waterContainer !== undefined) {
-				isWaterInContainer = canDrinkItem(context.inventory.waterContainer);
+			if (availableWaterContainer) {
+				isWaterInContainer = isDrinkableItem(availableWaterContainer);
 
-				if (context.inventory.waterContainer.minDur !== undefined &&
-					context.inventory.waterContainer.maxDur !== undefined &&
-					(context.inventory.waterContainer.minDur / context.inventory.waterContainer.maxDur) < 0.6) {
+				if (availableWaterContainer.minDur !== undefined &&
+					availableWaterContainer.maxDur !== undefined &&
+					(availableWaterContainer.minDur / availableWaterContainer.maxDur) < 0.6) {
 					// repair our container
-					objectives.push(new RepairItem(context.inventory.waterContainer));
+					objectives.push(new RepairItem(availableWaterContainer));
 				}
 
 			} else if (this.waterStill.stillContainer === undefined) {
@@ -73,18 +80,21 @@ export default class StartWaterStillDesalination extends Objective {
 
 			if (!isWaterInContainer) {
 				// gather water for our container
-				objectives.push(new GatherWater(context.inventory.waterContainer));
+				objectives.push(new GatherWater(availableWaterContainer, { disallowWaterStill: true }));
 			}
 
 			objectives.push(new MoveToTarget(this.waterStill, true));
 
-			// pour our water into the water still
-			objectives.push(new UseItem(ActionType.Pour, context.inventory.waterContainer));
+			this.log.info("Going to pour water into the water still");
 
-		} else if (!this.waterStill.stillContainer) {
+			// pour our water into the water still
+			objectives.push(new UseItem(ActionType.Pour, availableWaterContainer));
+		}
+
+		if (!this.waterStill.stillContainer) {
 			this.log.info("No still container");
 
-			if (context.inventory.waterContainer === undefined) {
+			if (availableWaterContainer === undefined) {
 				objectives.push(new AcquireWaterContainer());
 			}
 
@@ -99,36 +109,34 @@ export default class StartWaterStillDesalination extends Objective {
 			}
 
 			this.log.info("Moving to detach container");
-			// attach the container to the water still
-			objectives.push(new UseItem(ActionType.AttachContainer, context.inventory.waterContainer));
 
-		} else if (waterStillDescription && !waterStillDescription.providesFire) {
+			// attach the container to the water still
+			objectives.push(new UseItem(ActionType.AttachContainer, availableWaterContainer));
+		}
+
+		if (!waterStillDescription.providesFire) {
 			// only start the fire if we are near the base or if we have an emergency
 			if (isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
 				// we need to start the fire
-				objectives.push(new Lambda(async () => {
-					StartWaterStillDesalination.waterStillStokeFireTargetDecay.set(this.waterStill.id, 250);
-					return ObjectiveResult.Complete;
-				}));
 				objectives.push(new StartFire(this.waterStill));
 				objectives.push(new StokeFire(this.waterStill));
+				objectives.push(new Lambda(async () => ObjectiveResult.Restart));
 
 			} else {
 				return ObjectiveResult.Ignore;
 			}
+		}
 
-		} else {
-			const waterStillStokeFireTargetDecay = StartWaterStillDesalination.waterStillStokeFireTargetDecay.get(this.waterStill.id);
-			if (waterStillStokeFireTargetDecay !== undefined) {
-				if (this.waterStill.decay !== undefined && this.waterStill.decay < waterStillStokeFireTargetDecay) {
-					objectives.push(new StokeFire(this.waterStill));
+		if (this.waterStill.decay !== undefined && this.waterStill.gatherReady !== undefined) {
+			// water still is lit and desalinating
+			if (this.waterStill.decay <= this.waterStill.gatherReady) {
+				this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}`);
 
-				} else {
-					StartWaterStillDesalination.waterStillStokeFireTargetDecay.delete(this.waterStill.id);
-				}
+				objectives.push(new StokeFire(this.waterStill));
+				objectives.push(new Lambda(async () => ObjectiveResult.Restart));
 
 			} else {
-				// wait still is desalinating
+				// water still is desalinating and the decay is enough for the process to finish
 				return ObjectiveResult.Ignore;
 			}
 		}

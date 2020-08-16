@@ -8,10 +8,11 @@ import { freshWaterTileLocation } from "../../Navigation/INavigation";
 import Objective from "../../Objective";
 import { isNearBase } from "../../Utilities/Base";
 import { isWaterStillDesalinating, isWaterStillDrinkable } from "../../Utilities/Doodad";
-import { canDrinkItem } from "../../Utilities/Item";
+import { isDrinkableItem, isSafeToDrinkItem } from "../../Utilities/Item";
 import { isHealthy } from "../../Utilities/Player";
 import { getNearestTileLocation } from "../../Utilities/Tile";
 import AcquireItemByGroup from "../Acquire/Item/AcquireItemByGroup";
+import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import AcquireWaterContainer from "../Acquire/Item/Specific/AcquireWaterContainer";
 import AnalyzeBase from "../Analyze/AnalyzeBase";
 import ExecuteAction from "../Core/ExecuteAction";
@@ -41,7 +42,7 @@ export default class RecoverThirst extends Objective {
 			if (isNearBase(context)) {
 				for (const waterStill of context.base.waterStill) {
 					// if we're near our base, the water still is ready, and we're thirsty, go drink
-					if (waterStill !== undefined && waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0 && (thirstStat.max - thirstStat.value) >= 10) {
+					if (isWaterStillDrinkable(waterStill) && (thirstStat.max - thirstStat.value) >= 10) {
 						this.log.info("Near base, going to drink from water still");
 
 						return [
@@ -62,31 +63,30 @@ export default class RecoverThirst extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		if (context.inventory.waterContainer !== undefined) {
-			if (canDrinkItem(context.inventory.waterContainer)) {
-				if (itemManager.isInGroup(context.inventory.waterContainer.type, ItemTypeGroup.ContainerOfMedicinalWater) ||
-					itemManager.isInGroup(context.inventory.waterContainer.type, ItemTypeGroup.ContainerOfDesalinatedWater) ||
-					itemManager.isInGroup(context.inventory.waterContainer.type, ItemTypeGroup.ContainerOfPurifiedFreshWater)) {
-					this.log.info("Drink water from container");
-					objectivePipelines.push([new UseItem(ActionType.DrinkItem, context.inventory.waterContainer)]);
-				}
+			for (const waterContainer of context.inventory.waterContainer) {
+				if (isDrinkableItem(waterContainer)) {
+					if (isSafeToDrinkItem(waterContainer)) {
+						this.log.info("Drink water from container");
+						objectivePipelines.push([new UseItem(ActionType.DrinkItem, waterContainer)]);
 
-				if (isEmergency && itemManager.isInGroup(context.inventory.waterContainer.type, ItemTypeGroup.ContainerOfUnpurifiedFreshWater)) {
-					// emergency!
-					this.log.info("Drink unpurified water from container");
-					objectivePipelines.push([new UseItem(ActionType.DrinkItem, context.inventory.waterContainer)]);
+					} else if (isEmergency && itemManager.isInGroup(waterContainer.type, ItemTypeGroup.ContainerOfUnpurifiedFreshWater)) {
+						// emergency!
+						this.log.info("Drink unpurified water from container");
+						objectivePipelines.push([new UseItem(ActionType.DrinkItem, waterContainer)]);
+					}
 				}
 			}
 		}
 
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		if (isEmergency || (health.value / health.max) >= 0.7) {
+		if (isEmergency || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = await getNearestTileLocation(freshWaterTileLocation, context.player);
 
 			for (const { point } of nearestFreshWater) {
 				const objectives: IObjective[] = [];
 
-				objectives.push(new MoveToTarget(point, true).addDifficulty(!isEmergency ? 100 : 0));
+				objectives.push(new MoveToTarget(point, true).addDifficulty(!isEmergency ? 500 : 0));
 
 				objectives.push(new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
 					action.execute(context.player);
@@ -112,7 +112,34 @@ export default class RecoverThirst extends Objective {
 		} else {
 			const isWaitingForAll = context.base.waterStill.every(isWaterStillDesalinating);
 			if (isWaitingForAll) {
-				if (context.base.waterStill.length < 3 && isHealthy(context)) {
+				if (isEmergency) {
+					if ((health.value / health.max) <= 0.3) {
+						this.log.info("Making health items");
+
+						for (const waterStill of context.base.waterStill) {
+							objectivePipelines.push([
+								new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
+								new AcquireItemForAction(ActionType.Heal),
+								new UseItem(ActionType.Heal),
+							]);
+						}
+
+					} else {
+						this.log.info("Running back to wait for water still");
+
+						// run back to the waterstill and wait
+						for (const waterStill of context.base.waterStill) {
+							objectivePipelines.push([
+								// new MoveToTarget(waterStill, true, { range: 5 }),
+								new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
+								new Idle(),
+							]);
+						}
+					}
+
+				} else if (context.base.waterStill.length < 3 && isHealthy(context)) {
+					this.log.info("Building another water still while waiting");
+
 					// build another water still wait waiting
 					objectivePipelines.push([
 						new AcquireWaterContainer(),
@@ -120,15 +147,6 @@ export default class RecoverThirst extends Objective {
 						new BuildItem(),
 						new AnalyzeBase(),
 					]);
-
-				} else {
-					// run back to the waterstill and wait
-					for (const waterStill of context.base.waterStill) {
-						objectivePipelines.push([
-							new MoveToTarget(waterStill, true, { range: 5 }),
-							new Idle(),
-						]);
-					}
 				}
 
 			} else {

@@ -1,9 +1,11 @@
-import Log, { ILogLine, LogLineType } from "utilities/Log";
+import Item from "item/Item";
+import Log, { ILogLine } from "utilities/Log";
 
 import Context from "../Context";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../IObjective";
+import Lambda from "../Objectives/Core/Lambda";
 import ReserveItems from "../Objectives/Core/ReserveItems";
-import { createLog, discardNextMessage, processNextMessage, queueNextMessage } from "../Utilities/Logger";
+import { createLog, discardQueuedMessages, processQueuedMessages, queueMessage } from "../Utilities/Logger";
 
 import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
 import { IPlanner } from "./IPlanner";
@@ -25,16 +27,18 @@ export default class Plan implements IPlan {
 	 */
 	private readonly objectives: IObjectiveInfo[];
 
-	constructor(private readonly planner: IPlanner, private readonly context: Context, objective: IObjective, objectives: IObjectiveInfo[]) {
-		this.log = createLog("Plan", objective.getHashCode());
+	constructor(private readonly planner: IPlanner, private readonly context: Context, private readonly objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]) {
+		this.log = createLog("Plan", objectiveInfo.objective.getHashCode());
 
 		// this.tree = this.createExecutionTree(objective, objectives);
-		this.tree = this.createOptimizedExecutionTree(objective, objectives);
+		this.tree = this.createOptimizedExecutionTree(objectiveInfo.objective, objectives);
 
 		this.objectives = this.flattenTree(this.tree);
 
+		// this.getTreeString(this.createExecutionTree(objective, objectives)), 
+
 		// electron 6 bug - don't print complex objects - https://github.com/electron/electron/issues/20334
-		this.log.debug(`Execution tree for ${objective} (context: ${context.getHashCode()}).`); // , this.tree, this.getTreeString(this.tree)
+		this.log.debug(`Execution tree for ${objectiveInfo.objective} (context: ${context.getHashCode()}).`, this.getTreeString(this.tree));
 	}
 
 	/**
@@ -69,13 +73,23 @@ export default class Plan implements IPlan {
 
 		if (objectiveStack.length > 1) {
 			this.log.info("Executing plan", objectiveStack.map(objectiveInfo => objectiveInfo.objective.getIdentifier()).join(" -> "));
+
+			if (this.objectiveInfo.objective !== objectiveStack[0].objective) {
+				// print logs for the planned objective if it's not in the stack
+				for (const log of this.objectiveInfo.logs) {
+					queueMessage(log.type, log.args);
+				}
+			}
 		}
+
+		// todo: print original objective logs?
 
 		let dynamic = false;
 
 		while (true) {
 			const objectiveInfo = objectiveStack.shift();
 			if (objectiveInfo === undefined) {
+				discardQueuedMessages();
 				break;
 			}
 
@@ -83,6 +97,7 @@ export default class Plan implements IPlan {
 
 			const preExecuteObjectiveResult = preExecuteObjective(() => this.getObjectiveResults(chain, objectiveStack, objectiveInfo));
 			if (preExecuteObjectiveResult !== undefined) {
+				discardQueuedMessages();
 				return preExecuteObjectiveResult;
 			}
 
@@ -94,27 +109,19 @@ export default class Plan implements IPlan {
 				message += `. Context hash code: ${contextHashCode}`;
 			}
 
-			queueNextMessage(objectiveInfo.objective.log, message);
+			queueMessage(objectiveInfo.objective.log, [message]);
 
-			if (objectiveInfo.logs.length > 0) {
-				for (const logLine of objectiveInfo.logs) {
-					const method = LogLineType[logLine.type].toLowerCase();
-					const func = (console as any)[method];
-					if (func) {
-						func(...logLine.args);
-					}
-				}
-
-				processNextMessage();
+			for (const log of objectiveInfo.logs) {
+				queueMessage(log.type, log.args);
 			}
 
 			const result = await objectiveInfo.objective.execute(this.context);
 
 			if (result === ObjectiveResult.Ignore) {
-				discardNextMessage();
+				discardQueuedMessages();
 
 			} else {
-				processNextMessage();
+				processQueuedMessages();
 			}
 
 			if (result === ObjectiveResult.Pending) {
@@ -279,15 +286,19 @@ export default class Plan implements IPlan {
 		const depthMap = new Map<number, IExecutionTree>();
 		depthMap.set(1, tree);
 
-		const reserveItemObjectives: IObjective[] = [];
+		const reserveItemObjectives: Map<string, Item[]> = new Map();
 
 		for (const { depth, objective, difficulty, logs } of objectives) {
+			const hashCode = objective.getHashCode();
+
 			if (objective instanceof ReserveItems) {
-				reserveItemObjectives.push(objective);
+				if (!reserveItemObjectives.has(hashCode)) {
+					reserveItemObjectives.set(hashCode, objective.items);
+				}
+
+				// // leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
 				continue;
 			}
-
-			const hashCode = objective.getHashCode();
 
 			let parent = depthMap.get(depth - 1);
 			if (!parent) {
@@ -325,12 +336,73 @@ export default class Plan implements IPlan {
 			depthMap.set(depth, childTree);
 		}
 
+		/*
+		let acquireItemGroup: IExecutionTree | undefined;
+		let acquireItemGroupIndex: number | undefined;
+		let checked: Set<number> = new Set();
+
+		// console.log(this.getTreeString(tree));
+
+		const walkAndReorganizeTree = (index: number, tree: IExecutionTree) => {
+			if ((tree.objective as any).calculatePriority) {
+				const objectivePriority: any = {
+					priority: 0,
+					numberOfObjectives: 0,
+					numberOfAcquire: 0,
+					numberOfGather: 0,
+					nubmerofGatherWithoutChest: 0,
+				};
+
+				(tree.objective as any).calculatePriority(objectivePriority, tree, true);
+				// console.log("check", tree, objectivePriority.numberOfObjectives, objectivePriority.numberOfGather, objectivePriority.numberOfAcquire);
+				if (objectivePriority.numberOfObjectives <= objectivePriority.numberOfAcquire + objectivePriority.numberOfGather) {
+					if (acquireItemGroup === undefined) {
+						acquireItemGroup = tree.parent;
+						acquireItemGroupIndex = index;
+						// console.log("setting parent", acquireItemGroup, acquireItemGroupIndex);
+
+					} else {
+						// console.log("moving to new parent", tree);
+						// move to the acquire item group
+						if (tree.parent) {
+							// remove from current parent
+							tree.parent.children.splice(index, 1);
+						}
+
+						// add to new parent
+						acquireItemGroup.children.splice(acquireItemGroupIndex! + 1, 0, tree);
+					}
+				}
+			}
+
+			// tree.children = tree.children.sort((treeA, treeB) => {
+			// 	if (//treeA.objective.constructor === treeB.objective.constructor &&
+			// 		// treeA.objective.getName() === treeB.objective.getName() &&
+			// 		treeA.objective.sort && treeB.objective.sort) {
+			// 		return treeA.objective.sort(this.context, treeA, treeB);
+			// 	}
+
+			// 	return 0;
+			// });
+
+			for (let i = 0; i < tree.children.length; i++) {
+				const child = tree.children[i];
+				if (!checked.has(child.id)) {
+					checked.add(child.id);
+					walkAndReorganizeTree(i, child);
+				}
+			}
+		};
+
+		// walkAndReorganizeTree(-1, tree);
+		*/
+
 		const walkAndSortTree = (tree: IExecutionTree) => {
 			tree.children = tree.children.sort((treeA, treeB) => {
-				if (treeA.objective.constructor === treeB.objective.constructor &&
-					treeA.objective.getName() === treeB.objective.getName() &&
-					treeA.objective.sort) {
-					return treeA.objective.sort(treeA, treeB);
+				if (//treeA.objective.constructor === treeB.objective.constructor &&
+					// treeA.objective.getName() === treeB.objective.getName() &&
+					treeA.objective.sort && treeB.objective.sort) {
+					return treeA.objective.sort(this.context, treeA, treeB);
 				}
 
 				return 0;
@@ -345,15 +417,27 @@ export default class Plan implements IPlan {
 
 		// move all reserve item objectives to the top of the tree so they are executed first
 		// this will prevent interrupt objectives from messing with these items
-		tree.children.unshift(...reserveItemObjectives.map(objective => ({
-			id: id++,
-			depth: 1,
-			objective: objective,
-			hashCode: objective.getHashCode(),
-			difficulty: 0,
-			logs: [],
-			children: [],
-		})));
+		if (reserveItemObjectives.size > 0) {
+			const reserveItemObjective = new ReserveItems();
+			reserveItemObjective.items = Array.from(reserveItemObjectives)
+				.sort(([a], [b]) => a.localeCompare(b, navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
+				.map(a => a[1])
+				.flat();
+
+			const reserveItemObjectiveTree: IExecutionTree = {
+				id: id++,
+				depth: 1,
+				objective: reserveItemObjective,
+				hashCode: reserveItemObjective.getHashCode(),
+				difficulty: 0,
+				logs: [],
+				children: [],
+			};
+
+			const children = [reserveItemObjectiveTree].concat(tree.children);
+
+			tree.children = children;
+		}
 
 		return tree;
 	}
@@ -370,7 +454,14 @@ export default class Plan implements IPlan {
 
 		while (true) {
 			const nextObjectiveInfo = objectiveStack[offset];
-			if (!nextObjectiveInfo || nextObjectiveInfo.depth !== currentObjectiveInfo.depth) {
+			if (!nextObjectiveInfo) {
+				break;
+			}
+
+			if (nextObjectiveInfo.depth < currentObjectiveInfo.depth) {
+				// depth is changing, force a restart
+				// todo: verify that we want this
+				results.push(new Lambda(async () => ObjectiveResult.Restart));
 				break;
 			}
 

@@ -1,5 +1,4 @@
-import { IContainer } from "item/IItem";
-import { ITile, TerrainType } from "tile/ITerrain";
+import { ITile, ITileContainer, TerrainType } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
 import { IVector3 } from "utilities/math/IVector";
 import TileHelpers from "utilities/TileHelpers";
@@ -70,19 +69,28 @@ export function isFreeOfOtherPlayers(context: Context, point: IVector3) {
 	return true;
 }
 
-export function canGather(tile: ITile) {
-	const terrainDescription = Terrains[TileHelpers.getType(tile)]!;
-	if (!terrainDescription.gather && (tile.doodad || (tile as IContainer).containedItems)) {
+export function canGather(tile: ITile, skipDoodadCheck?: boolean) {
+	if (!skipDoodadCheck && !Terrains[TileHelpers.getType(tile)]?.gather && (tile.doodad || hasItems(tile))) {
 		return false;
 	}
 
-	if (tile.creature !== undefined || tile.npc !== undefined || hasCorpses(tile) || game.isPlayerAtTile(tile, false, true)) {
-		return false;
-	}
+	return !hasCorpses(tile) && !tile.creature && !tile.npc && !game.isPlayerAtTile(tile, false, true);
+}
 
-	return true;
+export function canDig(tile: ITile) {
+	return !hasCorpses(tile) && !tile.creature && !tile.npc && !hasItems(tile) && !game.isPlayerAtTile(tile, false, true);
+}
+
+export function canCarveCorpse(tile: ITile, skipCorpseCheck?: boolean) {
+	return (skipCorpseCheck || hasCorpses(tile))
+		&& !tile.creature && !tile.npc && !hasItems(tile) && !game.isPlayerAtTile(tile, false, true) && !tileEventManager.blocksTile(tile);
 }
 
 export function hasCorpses(tile: ITile) {
 	return !!(tile.corpses && tile.corpses.length);
+}
+
+export function hasItems(tile: ITile) {
+	const tileContainer = tile as ITileContainer;
+	return tileContainer.containedItems && tileContainer.containedItems.length > 0;
 }

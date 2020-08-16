@@ -113,8 +113,12 @@ export default class MoveToTarget extends Objective {
 	public async onMove(context: Context) {
 		if (this.trackedCreature && this.trackedPosition) {
 			if (!this.trackedCreature.isValid()) {
-				// creature died
 				this.log.info("Creature died");
+				return true;
+			}
+
+			if (this.trackedCreature.isTamed()) {
+				this.log.info("Creature became tamed");
 				return true;
 			}
 

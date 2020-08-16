@@ -1,23 +1,47 @@
-import Log, { ILog, LogSource } from "utilities/Log";
+import Log, { ILog, LogLineType, LogSource } from "utilities/Log";
 
 export let log = createLog();
 
-let nextMessage: { log: ILog; args: any[] } | undefined;
+let queuedMessages: Array<{
+	logOrType: ILog | LogLineType;
+	args: any[];
+}> | undefined;
 
-export function queueNextMessage(log: ILog, ...args: any[]) {
-	nextMessage = { log, args };
+export function preConsoleCallback() {
+	processQueuedMessages();
 }
 
-export function discardNextMessage() {
-	nextMessage = undefined;
+export function queueMessage(logOrType: ILog | LogLineType, args: any[]) {
+	if (!queuedMessages) {
+		queuedMessages = [];
+	}
+
+	queuedMessages.push({ logOrType, args });
 }
 
-export function processNextMessage() {
-	if (nextMessage) {
-		const message = nextMessage;
-		nextMessage = undefined;
+export function discardQueuedMessages() {
+	queuedMessages = undefined;
+}
 
-		message.log.info(...message.args);
+export function processQueuedMessages() {
+	if (!queuedMessages) {
+		return;
+	}
+
+	const messages = queuedMessages.slice();
+	queuedMessages = undefined;
+
+	for (const message of messages) {
+		if (typeof (message.logOrType) === "object") {
+			message.logOrType.info(...message.args);
+
+		} else {
+			const method = LogLineType[message.logOrType].toLowerCase();
+			const func = (console as any)[method];
+			if (func) {
+				func(...message.args);
+			}
+		}
 	}
 }
 
@@ -31,27 +55,27 @@ export function createLog(...name: string[]) {
 	}
 
 	log.info = (...args: any[]) => {
-		processNextMessage();
+		processQueuedMessages();
 		Log.info(...sources)(...args);
 	};
 
 	log.warn = (...args: any[]) => {
-		processNextMessage();
+		processQueuedMessages();
 		Log.warn(...sources)(...args);
 	};
 
 	log.error = (...args: any[]) => {
-		processNextMessage();
+		processQueuedMessages();
 		Log.error(...sources)(...args);
 	};
 
 	log.trace = (...args: any[]) => {
-		processNextMessage();
+		processQueuedMessages();
 		Log.trace(...sources)(...args);
 	};
 
 	log.debug = (...args: any[]) => {
-		processNextMessage();
+		processQueuedMessages();
 		Log.debug(...sources)(...args);
 	};
 

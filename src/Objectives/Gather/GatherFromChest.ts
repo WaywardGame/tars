@@ -17,16 +17,17 @@ export default class GatherFromChest extends Objective {
 	}
 
 	public getIdentifier(context?: Context): string {
-		return `GatherFromChest:${ItemType[this.itemType]}:${context ? context.getData(ContextDataType.NextActionAllowsIntermediateChest) : null}`;
+		return `GatherFromChest:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseChests)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public canGroupTogether(): boolean {
-		return true;
-	}
+	// we can't group this together because gatherfromchest objectives are prioritized to be ran last
+	// public canGroupTogether(): boolean {
+	// 	return true;
+	// }
 
 	// todo: add getWeightChange(): number and take that into account when grouping together?
 
@@ -35,12 +36,14 @@ export default class GatherFromChest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const chests: Doodad[] = context.base.chest.slice();
+		const prioritizeBaseChests = context.getData(ContextDataType.PrioritizeBaseChests);
+
+		let chests: Doodad[] = context.base.chest.slice();
 
 		if (!context.getData(ContextDataType.NextActionAllowsIntermediateChest)) {
 			// the intermediate chest cannot be used for the recipe
 			// allow using gathering items from it
-			chests.push(...context.base.intermediateChest);
+			chests = chests.concat(context.base.intermediateChest);
 		}
 
 		return chests
@@ -53,9 +56,9 @@ export default class GatherFromChest extends Objective {
 			.map(({ chest, items }) => {
 				const item = items[0];
 				return [
-					new MoveToTarget(chest, true),
+					new MoveToTarget(chest, true).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
 					new ReserveItems(item),
-					new SetContextData(ContextDataType.LastAcquiredItem, item),
+					new SetContextData(this.contextDataKey, item),
 					new ExecuteAction(ActionType.MoveItem, (context, action) => {
 						action.execute(context.player, item, context.player.inventory);
 					}),

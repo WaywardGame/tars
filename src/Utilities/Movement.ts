@@ -15,8 +15,9 @@ import { NavigationPath } from "../Navigation/INavigation";
 import Navigation from "../Navigation/Navigation";
 
 import { executeAction } from "./Action";
-import { getBestActionItem } from "./Item";
+import { getBestActionItem, getInventoryItemsWithUse } from "./Item";
 import { log } from "./Logger";
+import { hasCorpses } from "./Tile";
 
 export interface IMovementPath {
 	difficulty: number;
@@ -225,6 +226,14 @@ export async function move(context: Context, target: IVector3, moveAdjacentToTar
 						log.info("Picking up doodad", Direction[direction]);
 						await executeAction(context, ActionType.Pickup, (context, action) => {
 							action.execute(context.player);
+						});
+
+					} else if (hasCorpses(nextTile)) {
+						log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);
+
+						// todo: what if you don't have a carve item?
+						await executeAction(context, ActionType.Carve, (context, action) => {
+							action.execute(context.player, getInventoryItemsWithUse(context, ActionType.Carve)[0]);
 						});
 
 					} else {

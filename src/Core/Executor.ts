@@ -22,12 +22,12 @@ export interface IExecuteObjectivesCompleted {
 
 export interface IExecuteObjectivesInProgress {
 	type: ExecuteObjectivesResultType.Pending;
-	objectives: IObjective[];
+	objectives: Array<IObjective | IObjective[]>;
 }
 
 export interface IExecuteObjectivesContinuingNextTick {
 	type: ExecuteObjectivesResultType.ContinuingNextTick;
-	objectives: IObjective[];
+	objectives: Array<IObjective | IObjective[]>;
 }
 
 export interface IExecuteObjectivesRestart {
@@ -151,13 +151,13 @@ class Executor {
 					case ExecuteResultType.Pending:
 						return {
 							type: ExecuteObjectivesResultType.Pending,
-							objectives: result.objectives,
+							objectives: result.objectives.concat(objectives.slice(i + 1)),
 						};
 
 					case ExecuteResultType.ContinuingNextTick:
 						return {
 							type: ExecuteObjectivesResultType.ContinuingNextTick,
-							objectives: result.objectives,
+							objectives: result.objectives.concat(objectives.slice(i + 1)),
 						};
 
 					case ExecuteResultType.Restart:

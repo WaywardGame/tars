@@ -1,7 +1,7 @@
 {
 	"name": "TARS",
 	"description": "Let TARS play the game for you. Good thing there are no black holes in Wayward.",
-	"version": "2.0",
+	"version": "2.1",
 	"author": "Spacetech",
 	"waywardVersion": "2.9.0-beta",
 	"multiplayer": "clientside",

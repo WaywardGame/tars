@@ -37,7 +37,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const doodadTypes = getDoodadTypes(this.doodadTypeOrGroup);
 
-		const doodad = findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.indexOf(d.type) !== -1);
+		const doodad = findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.includes(d.type));
 
 		let requiresFire = false;
 

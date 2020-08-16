@@ -1,20 +1,19 @@
-import Context, { ContextDataMap, ContextDataType } from "../../Context";
+import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 
-export default class SetContextData<T extends ContextDataType> extends Objective {
+export default class SetContextData extends Objective {
 
-	constructor(private readonly type: T, private readonly value: ContextDataMap<T> | undefined) {
+	constructor(private readonly type: string, private readonly value: any | undefined) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `SetContextData:${this.type}`;
+		return `SetContextData:${this.type}:${this.value}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		context.setData(this.type, this.value);
-		this.log.info(`Set ${this.type} to ${this.value}`);
 		return ObjectiveResult.Complete;
 	}
 

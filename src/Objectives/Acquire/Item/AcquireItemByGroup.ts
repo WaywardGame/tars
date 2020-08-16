@@ -2,11 +2,11 @@ import { ItemType, ItemTypeGroup } from "item/IItem";
 
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
 
+import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 
-export default class AcquireItemByGroup extends Objective {
+export default class AcquireItemByGroup extends AcquireBase {
 
 	private static readonly cache: Map<ItemTypeGroup, ItemType[]> = new Map();
 
@@ -28,7 +28,7 @@ export default class AcquireItemByGroup extends Objective {
 
 	public async execute(): Promise<ObjectiveExecutionResult> {
 		return this.getItems()
-			.map(item => [new AcquireItem(item)]);
+			.map(item => [new AcquireItem(item).passContextDataKey(this)]);
 	}
 
 	private getItems(): ItemType[] {

@@ -1,7 +1,7 @@
 import Creature from "entity/creature/Creature";
 import { ILog, nullLog } from "utilities/Log";
 
-import Context from "./Context";
+import Context, { ContextDataType } from "./Context";
 import Planner from "./Core/Planner";
 import { IObjective, ObjectiveExecutionResult } from "./IObjective";
 import { createLog } from "./Utilities/Logger";
@@ -10,11 +10,18 @@ export default abstract class Objective implements IObjective {
 
 	private static uuid = 0;
 
+	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
+
 	private _log: ILog | undefined;
 
 	private _uniqueIdentifier: number | undefined;
 
 	private _additionalDifficulty: number | undefined;
+	private _overrideDifficulty: number | undefined;
+
+	public static getPipelineString(objectives: Array<IObjective | IObjective[]> | undefined): string {
+		return objectives ? objectives.map(objective => Array.isArray(objective) ? Objective.getPipelineString(objective) : objective.getHashCode()).join(" -> ") : "Empty pipeline";
+	}
 
 	public abstract getIdentifier(context?: Context): string;
 
@@ -52,6 +59,10 @@ export default abstract class Objective implements IObjective {
 
 		if (this._additionalDifficulty !== undefined) {
 			hashCode += `:${this._additionalDifficulty}`;
+		}
+
+		if (this._overrideDifficulty !== undefined) {
+			hashCode += `:${this._overrideDifficulty}`;
 		}
 
 		return hashCode;
@@ -109,7 +120,20 @@ export default abstract class Objective implements IObjective {
 		return this;
 	}
 
+	public overrideDifficulty(difficulty: number | undefined) {
+		this._overrideDifficulty = difficulty;
+		return this;
+	}
+
+	public isDifficultyOverridden(): boolean {
+		return this._overrideDifficulty !== undefined;
+	}
+
 	public getDifficulty(context: Context) {
+		if (this._overrideDifficulty !== undefined) {
+			return this._overrideDifficulty;
+		}
+
 		let difficulty = this.getBaseDifficulty(context);
 
 		if (this._additionalDifficulty !== undefined) {
@@ -122,8 +146,9 @@ export default abstract class Objective implements IObjective {
 	public async onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean> {
 		const walkPath = context.player.walkPath;
 		if (walkPath) {
-			// interrupt if a creature moved along our walk path
-			for (const point of walkPath) {
+			// interrupt if a creature moved along our walk path (only close point)
+			for (let i = 0; i < Math.min(20, walkPath.length); i++) {
+				const point = walkPath[i];
 				const tile = game.getTile(point.x, point.y, context.player.z);
 				if (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature) {
 					this.log.info("Creature moved along walk path, recalculating");
@@ -133,6 +158,19 @@ export default abstract class Objective implements IObjective {
 		}
 
 		return false;
+	}
+
+	/**
+	 * For AcquireItem objectives, the key will be set to the item once it's acquired
+	 */
+	public setContextDataKey(contextDataKey: string) {
+		this.contextDataKey = contextDataKey;
+		return this;
+	}
+
+	public passContextDataKey(objective: Objective) {
+		this.contextDataKey = objective.contextDataKey;
+		return this;
 	}
 
 	protected getBaseDifficulty(_context: Context): number {

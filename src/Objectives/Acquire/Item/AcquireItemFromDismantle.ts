@@ -1,12 +1,12 @@
 import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
+import Item from "item/Item";
 import { itemDescriptions } from "item/Items";
 
 import Context, { ContextDataType } from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import { getItemInInventory } from "../../../Utilities/Item";
-import CopyContextData from "../../ContextData/CopyContextData";
 import SetContextData from "../../ContextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../Core/ExecuteActionForItem";
 import ReserveItems from "../../Core/ReserveItems";
@@ -55,13 +55,14 @@ export default class AcquireItemFromDismantle extends Objective {
 				new SetContextData(ContextDataType.NextActionAllowsIntermediateChest, false),
 			];
 
+			const hashCode = this.getHashCode();
+
 			if (dismantleItem === undefined) {
-				objectives.push(new AcquireItem(itemType));
-				objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
+				objectives.push(new AcquireItem(itemType).setContextDataKey(hashCode));
 
 			} else {
 				objectives.push(new ReserveItems(dismantleItem));
-				objectives.push(new SetContextData(ContextDataType.Item1, dismantleItem));
+				objectives.push(new SetContextData(hashCode, dismantleItem));
 			}
 
 			if (!hasRequirements) {
@@ -73,9 +74,9 @@ export default class AcquireItemFromDismantle extends Objective {
 			}
 
 			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Dismantle, (context, action) => {
-				const item = context.getData(ContextDataType.Item1);
+				const item = context.getData<Item>(hashCode);
 				if (!item) {
-					this.log.error("Missing dismantle item. Bug in TARS pipeline", item);
+					this.log.warn("Missing dismantle item. Bug in TARS pipeline, will fix itself", item, hashCode);
 					return;
 				}
 
@@ -86,5 +87,13 @@ export default class AcquireItemFromDismantle extends Objective {
 		}
 
 		return objectivePipelines;
+	}
+
+	/**
+	 * Prefer to not dismantle things. Sometimes we want to keep logs until we really need them
+	 */
+	protected getBaseDifficulty(context: Context): number {
+		// todo: increase?
+		return 10;
 	}
 }

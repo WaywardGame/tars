@@ -65,14 +65,15 @@ export default class PlantSeed extends Objective {
 				tile.corpses === undefined &&
 				TileHelpers.isOpenTile(point, tile) &&
 				TileHelpers.isTilled(tile) &&
-				this.plantTiles.indexOf(TileHelpers.getType(tile)) !== -1 &&
+				this.plantTiles.includes(TileHelpers.getType(tile)) &&
 				(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
 		}, gardenMaxTilesChecked);
 		if (emptyTilledTile !== undefined) {
 			objectives.push(new MoveToTarget(emptyTilledTile, true));
 
 		} else {
-			const nearbyTillableTile = TileHelpers.findMatchingTile(getBasePosition(context), (point, tile) => this.plantTiles.indexOf(TileHelpers.getType(tile)) !== -1 && isOpenArea(context, point, tile), gardenMaxTilesChecked);
+			const nearbyTillableTile = TileHelpers.findMatchingTile(getBasePosition(context), (point, tile) =>
+				this.plantTiles.includes(TileHelpers.getType(tile)) && isOpenArea(context, point, tile), gardenMaxTilesChecked);
 			if (nearbyTillableTile !== undefined) {
 				objectives.push(new MoveToTarget(nearbyTillableTile, true));
 				objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));

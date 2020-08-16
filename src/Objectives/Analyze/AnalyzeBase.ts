@@ -62,7 +62,7 @@ export default class AnalyzeBase extends Objective {
 				} else {
 					targets = info.findTargets ?
 						info.findTargets(context.base) :
-						objectUtilities.findDoodads(context, key, doodad => AnalyzeBase.matchesBaseInfo(info, doodad.type));
+						objectUtilities.findDoodads(context, key, doodad => doodad.ownerIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(info, doodad.type));
 				}
 
 				for (const target of targets) {
@@ -73,7 +73,7 @@ export default class AnalyzeBase extends Objective {
 
 							context.base[key].push(target);
 
-							this.log.info(`Found "${key}" - ${target.getName().getString()} (distance: ${Math.round(distance)})`);
+							this.log.info(`Found "${key}" - ${target} (distance: ${Math.round(distance)})`);
 
 							if (info.onAdd) {
 								info.onAdd(context.base, target);
@@ -150,7 +150,7 @@ export default class AnalyzeBase extends Objective {
 						return true;
 					}
 
-					if (doodadDescription.group && doodadDescription.group.indexOf(doodadTypeOrGroup) !== -1) {
+					if (doodadDescription.group && doodadDescription.group.includes(doodadTypeOrGroup)) {
 						return true;
 					}
 

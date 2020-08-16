@@ -7,7 +7,7 @@ import { IStatMax, Stat } from "entity/IStats";
 import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "item/IItem";
 import Item from "item/Item";
 import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
-import Items from "item/Items";
+import Items, { itemDescriptions } from "item/Items";
 import Enums from "utilities/enum/Enums";
 
 import Context from "../Context";
@@ -17,8 +17,18 @@ import { getDoodadTypes } from "./Doodad";
 
 // allow processing with inventory items assuming they wont be consumed
 export function processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean): ItemRecipeRequirementChecker {
-	const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed) =>
-		!isConsumed || (!context.isReservedItem(item) && !isInventoryItem(context, item)));
+	const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
+		if (isConsumed) {
+			return !context.isReservedItem(item) && !isInventoryItem(context, item);
+		}
+
+		if (forItemTypeOrGroup === ItemTypeGroup.Sharpened) {
+			// only allow the knife
+			return item === context.inventory.knife;
+		}
+
+		return true;
+	});
 
 	const items = context.player.inventory.containedItems;
 	const container: IContainer = {
@@ -71,7 +81,8 @@ export function isInventoryItem(context: Context, item: Item) {
 	const keys = Object.keys(inventoryItemInfo) as Array<keyof IInventoryItems>;
 
 	for (const key of keys) {
-		if (context.inventory[key] === item) {
+		const inventoryItem = context.inventory[key];
+		if (Array.isArray(inventoryItem) ? inventoryItem.includes(item) : inventoryItem === item) {
 			return true;
 		}
 	}
@@ -79,9 +90,22 @@ export function isInventoryItem(context: Context, item: Item) {
 	return false;
 }
 
-export function canDrinkItem(item: Item) {
-	const waterContainerDescription = item.description()!;
-	return (waterContainerDescription.use && waterContainerDescription.use.indexOf(ActionType.DrinkItem) !== -1) ? true : false;
+export function isSafeToDrinkItem(item: Item) {
+	return itemManager.isInGroup(item.type, ItemTypeGroup.ContainerOfMedicinalWater)
+		|| itemManager.isInGroup(item.type, ItemTypeGroup.ContainerOfDesalinatedWater)
+		|| itemManager.isInGroup(item.type, ItemTypeGroup.ContainerOfPurifiedFreshWater);
+}
+
+export function isDrinkableItem(item: Item) {
+	return hasUseActionType(item, ActionType.DrinkItem);
+}
+
+export function canGatherWater(item: Item) {
+	return hasUseActionType(item, ActionType.GatherWater);
+}
+
+export function hasUseActionType(item: Item, actionType: ActionType) {
+	return item.description()?.use?.includes(actionType) ? true : false;
 }
 
 export function getBestActionItem(context: Context, use: ActionType, preferredDamageType?: DamageType): Item | undefined {
@@ -204,7 +228,7 @@ export function getInventoryItemsWithUse(context: Context, use: ActionType, filt
 				return description.attack !== undefined;
 			}
 
-			return description.use && description.use.indexOf(use) !== -1;
+			return description.use && description.use.includes(use);
 		})
 		.sort((a, b) => {
 			if (use === ActionType.Attack) {
@@ -243,8 +267,9 @@ export function getUnusedItems(context: Context, ignoreReserved: boolean = false
 				return false;
 			}
 
+			// todo: remove this?
 			const description = item.description();
-			if (description && description.use && (description.use.indexOf(ActionType.GatherWater) !== -1 || description.use.indexOf(ActionType.DrinkItem) !== -1)) {
+			if (description && description.use && (description.use.includes(ActionType.GatherWater) || description.use.includes(ActionType.DrinkItem))) {
 				return false;
 			}
 
@@ -278,7 +303,36 @@ export function getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: D
 		}
 	}
 
-	const matchingItems = itemManager.getItemsInContainer(context.player.inventory, true).filter(item => itemTypes.indexOf(item.type) !== -1);
+	const matchingItems = itemManager.getItemsInContainer(context.player.inventory, true).filter(item => itemTypes.includes(item.type));
 
 	return matchingItems[0];
 }
+
+// items that can cause poisoning when eaten will be filtered out
+const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
+
+function getFoodItemTypes() {
+	const result: ItemType[] = [];
+
+	for (const itemTypeOrGroup of goodFoodItems) {
+		const itemTypes = itemManager.isGroup(itemTypeOrGroup) ? itemManager.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
+		for (const itemType of itemTypes) {
+			const description = itemDescriptions[itemType];
+			if (description) {
+				const onUse = description.onUse;
+				if (onUse) {
+					const onEat = onUse[ActionType.Eat];
+					if (onEat) {
+						if (onEat[0] > 1) {
+							result.push(itemType);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+export const foodItemTypes = getFoodItemTypes();

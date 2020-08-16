@@ -21,7 +21,7 @@ export default class UpgradeInventoryItem extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = context.inventory[this.upgrade];
-		if (!item) {
+		if (!item || Array.isArray(item)) {
 			return ObjectiveResult.Complete;
 		}
 

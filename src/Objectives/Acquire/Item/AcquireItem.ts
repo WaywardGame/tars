@@ -9,10 +9,8 @@ import TerrainResources from "tile/TerrainResources";
 import Enums from "utilities/enum/Enums";
 
 import Context from "../../../Context";
-import { IExecutionTree } from "../../../Core/IPlan";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { CreatureSearch, DoodadSearch, ITerrainSearch } from "../../../ITars";
-import Objective from "../../../Objective";
 import GatherFromChest from "../../Gather/GatherFromChest";
 import GatherFromCorpse from "../../Gather/GatherFromCorpse";
 import GatherFromCreature from "../../Gather/GatherFromCreature";
@@ -20,10 +18,11 @@ import GatherFromDoodad from "../../Gather/GatherFromDoodad";
 import GatherFromGround from "../../Gather/GatherFromGround";
 import GatherFromTerrain from "../../Gather/GatherFromTerrain";
 
+import AcquireBase from "./AcquireBase";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 
-export default class AcquireItem extends Objective {
+export default class AcquireItem extends AcquireBase {
 
 	private static readonly terrainSearchCache: Map<ItemType, ITerrainSearch[]> = new Map();
 	private static readonly doodadSearchCache: Map<ItemType, DoodadSearch[]> = new Map();
@@ -47,51 +46,39 @@ export default class AcquireItem extends Objective {
 		return true;
 	}
 
-	/**
-	 * Sort AcquireItem objectives so that objectives with multiple gather objectives will be executed first
-	 * This prevents TARS from obtaining one iron ore, then going back to base to smelt it, then going back to rocks to obtain a second (and this repeats)
-	 * TARS should objective all the ore at the same time, then go back and smelt.
-	 */
-	public sort(executionTreeA: IExecutionTree<AcquireItem>, executionTreeB: IExecutionTree<AcquireItem>): number {
-		const gatherObjectiveCountA = this.countGatherObjectives(executionTreeA);
-		const gatherObjectiveCountB = this.countGatherObjectives(executionTreeB);
-
-		return gatherObjectiveCountA === gatherObjectiveCountB ? 0 : gatherObjectiveCountA < gatherObjectiveCountB ? 1 : -1;
-	}
-
 	public async execute(): Promise<ObjectiveExecutionResult> {
 		this.log.info(`Acquiring ${ItemType[this.itemType]}...`);
 
 		const itemDescription = itemDescriptions[this.itemType];
 
 		const objectivePipelines: IObjective[][] = [
-			[new GatherFromGround(this.itemType)],
-			[new GatherFromChest(this.itemType)],
+			[new GatherFromGround(this.itemType).passContextDataKey(this)],
+			[new GatherFromChest(this.itemType).passContextDataKey(this)],
 		];
 
 		const terrainSearch = this.getTerrainSearch();
 		if (terrainSearch.length > 0) {
-			objectivePipelines.push([new GatherFromTerrain(terrainSearch)]);
+			objectivePipelines.push([new GatherFromTerrain(terrainSearch).passContextDataKey(this)]);
 		}
 
 		const doodadSearch = this.getDoodadSearch();
 		if (doodadSearch.length > 0) {
-			objectivePipelines.push([new GatherFromDoodad(doodadSearch)]);
+			objectivePipelines.push([new GatherFromDoodad(doodadSearch).passContextDataKey(this)]);
 		}
 
 		const creatureSearch: CreatureSearch = this.getCreatureSearch();
 		if (creatureSearch.map.size > 0) {
-			objectivePipelines.push([new GatherFromCorpse(creatureSearch)]);
-			objectivePipelines.push([new GatherFromCreature(creatureSearch)]);
+			objectivePipelines.push([new GatherFromCorpse(creatureSearch).passContextDataKey(this)]);
+			objectivePipelines.push([new GatherFromCreature(creatureSearch).passContextDataKey(this)]);
 		}
 
 		const dismantleSearch: ItemType[] = this.getDismantleSearch();
 		if (dismantleSearch.length > 0) {
-			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch)]);
+			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passContextDataKey(this)]);
 		}
 
 		if (itemDescription && itemDescription.recipe) {
-			objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe)]);
+			objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passContextDataKey(this)]);
 		}
 
 		return objectivePipelines;
@@ -127,21 +114,43 @@ export default class AcquireItem extends Objective {
 		if (search === undefined) {
 			search = [];
 
+			const growingStages = Enums.values(GrowingStage);
+
 			for (const doodadType of Enums.values(DoodadType)) {
 				const doodadDescription = Doodads[doodadType];
-				if (doodadDescription) {
-					if (doodadDescription.gather && doodadType !== DoodadType.AppleTree) {
-						for (const key of Object.keys(doodadDescription.gather)) {
-							const growingStage = parseInt(key, 10);
-							if ((doodadDescription.isTall && growingStage >= GrowingStage.Budding) || growingStage >= GrowingStage.Ripening) {
-								const resourceItems = doodadDescription.gather[growingStage];
-								if (resourceItems) {
-									for (const resourceItem of resourceItems) {
-										if (resourceItem.type === this.itemType) {
+				if (!doodadDescription) {
+					continue;
+				}
+
+				if (doodadDescription.gather && doodadType !== DoodadType.AppleTree) {
+					for (const growingStage of growingStages) {
+						const resourceItems = doodadDescription.gather[growingStage];
+						if (!resourceItems) {
+							continue;
+						}
+
+						if ((doodadDescription.isTall && growingStage >= GrowingStage.Budding) || growingStage >= GrowingStage.Ripening) {
+							for (const resourceItem of resourceItems) {
+								if (resourceItem.type !== this.itemType) {
+									continue;
+								}
+
+								search.push({
+									type: doodadType,
+									growingStage: growingStage,
+									itemType: this.itemType,
+								});
+
+								// add the same item to a earlier growing stages but with extra difficulty
+								for (const growingStage2 of growingStages) {
+									if (growingStage2 >= GrowingStage.Budding) {
+										const growingStageDiff = growingStage - growingStage2;
+										if (growingStageDiff > 0) {
 											search.push({
 												type: doodadType,
-												growingStage: growingStage,
+												growingStage: growingStage2,
 												itemType: this.itemType,
+												extraDifficulty: growingStageDiff * 3,
 											});
 										}
 									}
@@ -149,22 +158,26 @@ export default class AcquireItem extends Objective {
 							}
 						}
 					}
+				}
 
-					if (doodadDescription.harvest) {
-						for (const key of Object.keys(doodadDescription.harvest)) {
-							const growingStage = parseInt(key, 10);
-							const resourceItems = doodadDescription.harvest[growingStage];
-							if (resourceItems) {
-								for (const resourceItem of resourceItems) {
-									if (resourceItem.type === this.itemType) {
-										search.push({
-											type: doodadType,
-											growingStage: growingStage,
-											itemType: this.itemType,
-										});
-									}
-								}
+				if (doodadDescription.harvest) {
+					for (const key of Object.keys(doodadDescription.harvest)) {
+						const growingStage = parseInt(key, 10);
+						const resourceItems = doodadDescription.harvest[growingStage];
+						if (!resourceItems) {
+							continue;
+						}
+
+						for (const resourceItem of resourceItems) {
+							if (resourceItem.type !== this.itemType) {
+								continue;
 							}
+
+							search.push({
+								type: doodadType,
+								growingStage: growingStage,
+								itemType: this.itemType,
+							});
 						}
 					}
 				}
@@ -234,58 +247,4 @@ export default class AcquireItem extends Objective {
 		return search;
 	}
 
-	private countGatherObjectives(executionTree: IExecutionTree) {
-		const walkTree = (tree: IExecutionTree) => {
-			let count = 0;
-
-			if (tree.objective.getName().startsWith("AcquireItem")) {
-				if (tree.children.length === 0) {
-					return -1;
-				}
-
-				// prioritize harder to gather things
-				count += tree.children.reduce((count, tree) => {
-					let nextCount = count;
-
-					if (tree.objective instanceof GatherFromCreature) {
-						nextCount += 5;
-
-					} else if (tree.objective instanceof GatherFromCorpse) {
-						nextCount += 4;
-
-					} else if (tree.objective instanceof GatherFromTerrain) {
-						nextCount += 3;
-
-					} else if (tree.objective instanceof GatherFromDoodad) {
-						nextCount += 3;
-
-					} else if (tree.objective instanceof GatherFromGround) {
-						nextCount += 1;
-					}
-
-					return nextCount;
-				}, 0);
-			}
-
-			for (const child of tree.children) {
-				const childCount = walkTree(child);
-				if (childCount === -1) {
-					return -1;
-				}
-
-				count += childCount;
-			}
-
-			return count;
-		};
-
-		const count = walkTree(executionTree);
-
-		if (count === -1) {
-			// don't sort this to the top
-			return 0;
-		}
-
-		return count;
-	}
 }

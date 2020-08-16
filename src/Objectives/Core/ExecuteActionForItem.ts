@@ -7,12 +7,12 @@ import { TerrainType } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
 import TileHelpers from "utilities/TileHelpers";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { executeAction } from "../../Utilities/Action";
 import { getBestActionItem, getInventoryItemsWithUse } from "../../Utilities/Item";
-import { hasCorpses } from "../../Utilities/Tile";
+import { canCarveCorpse, canDig } from "../../Utilities/Tile";
 
 export enum ExecuteActionType {
 	Generic,
@@ -93,7 +93,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
 				actionArguments.push(terrainDescription.gather ? getBestActionItem(context, ActionType.Gather, DamageType.Blunt) : getBestActionItem(context, ActionType.Dig));
 
-				if (actionType === ActionType.Dig && hasCorpses(tile)) {
+				if (actionType === ActionType.Dig && !canDig(tile)) {
 					return ObjectiveResult.Complete;
 				}
 
@@ -102,13 +102,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			case ExecuteActionType.Corpse:
 				const carveTool = getInventoryItemsWithUse(context, ActionType.Carve);
 
-				if (carveTool.length === 0 ||
-					!tile.corpses ||
-					tile.corpses.length === 0 ||
-					tile.creature !== undefined ||
-					tile.npc !== undefined ||
-					tile.events !== undefined ||
-					game.isPlayerAtTile(tile)) {
+				if (carveTool.length === 0 || !canCarveCorpse(tile)) {
 					return ObjectiveResult.Complete;
 				}
 
@@ -160,12 +154,12 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, actionType, executor as any);
 		if (matchingNewItem !== undefined) {
 			this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id})`);
-			context.setData(ContextDataType.LastAcquiredItem, matchingNewItem);
+			context.setData(this.contextDataKey, matchingNewItem);
 			context.addReservedItems(matchingNewItem);
 			return ObjectiveResult.Complete;
 		}
 
-		const item = context.player.getTile().containedItems?.find(item => itemTypes.indexOf(item.type) !== -1);
+		const item = context.player.getTile().containedItems?.find(item => itemTypes.includes(item.type));
 		if (item) {
 			matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, ActionType.MoveItem, ((context: Context, action: any) => {
 				action.execute(context.player, item, context.player.inventory);
@@ -173,7 +167,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 			if (matchingNewItem !== undefined) {
 				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}) (via MoveItem)`);
-				context.setData(ContextDataType.LastAcquiredItem, matchingNewItem);
+				context.setData(this.contextDataKey, matchingNewItem);
 				context.addReservedItems(matchingNewItem);
 				return ObjectiveResult.Complete;
 			}
@@ -187,12 +181,12 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		itemTypes: ItemType[],
 		actionType: T,
 		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void) {
-		const itemsBefore = context.player.inventory.containedItems.slice(0);
+		const itemsBefore = context.player.inventory.containedItems.slice();
 
 		await executeAction(context, actionType, executor as any);
 
 		const newItems = context.player.inventory.containedItems.filter(item => itemsBefore.indexOf(item) === -1);
 
-		return newItems.find(item => itemTypes.indexOf(item.type) !== -1);
+		return newItems.find(item => itemTypes.includes(item.type));
 	}
 }

@@ -9,6 +9,8 @@ import { ITile, TerrainType } from "tile/ITerrain";
 import { ITerrainLoot } from "tile/TerrainResources";
 import { IVector3 } from "utilities/math/IVector";
 
+import { foodItemTypes } from "./Utilities/Item";
+
 export const defaultMaxTilesChecked = 3000;
 
 export const gardenMaxTilesChecked = 1024;
@@ -102,9 +104,13 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	},
 };
 
+/**
+ * Note: knife is our sharpened
+ */
 export interface IInventoryItems {
 	anvil?: Item;
 	axe?: Item;
+	bandage?: Item;
 	bed?: Item;
 	campfire?: Item;
 	chest?: Item;
@@ -118,12 +124,13 @@ export interface IInventoryItems {
 	equipNeck?: Item;
 	equipShield?: Item;
 	equipSword?: Item;
-	fireKindling?: Item;
+	fireKindling?: Item[];
 	fireStarter?: Item;
-	fireStoker?: Item;
 	fireTinder?: Item;
+	food?: Item;
 	furnace?: Item;
 	hammer?: Item;
+	heal?: Item;
 	hoe?: Item;
 	intermediateChest?: Item;
 	kiln?: Item;
@@ -132,7 +139,7 @@ export interface IInventoryItems {
 	sailBoat?: Item;
 	shovel?: Item;
 	tongs?: Item;
-	waterContainer?: Item;
+	waterContainer?: Item[];
 	waterStill?: Item;
 	well?: Item;
 }
@@ -142,18 +149,29 @@ export interface IInventoryItemInfo {
 	useTypes?: ActionType[];
 	equipType?: EquipType;
 	flags?: InventoryItemFlag;
+	allowMultiple?: number;
 }
 
 export enum InventoryItemFlag {
 	/**
 	 * Picks the item with a higher worth. Default
 	 */
-	PreferHigherWorth = 0,
+	PreferHigherWorth,
 
 	/**
 	 * Picks the item with lower weight.
 	 */
-	PreferLowerWeight = 1,
+	PreferLowerWeight,
+
+	/**
+	 * Picks the item with the higher durability.
+	 */
+	PreferHigherDurability,
+
+	/**
+	 * Picks the item with the higher decay.
+	 */
+	PreferHigherDecay,
 }
 
 export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo> = {
@@ -169,6 +187,14 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.StoneAxe,
 			ItemType.WroughtIronAxe,
 			ItemType.WroughtIronDoubleAxe,
+		],
+	},
+	bandage: {
+		itemTypes: [
+			ItemType.Bandage,
+			ItemType.PeatBandage,
+			ItemType.CharcoalBandage,
+			ItemType.AloeVeraBandage,
 		],
 	},
 	bed: {
@@ -225,6 +251,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	fireKindling: {
 		itemTypes: [ItemTypeGroup.Kindling],
 		flags: InventoryItemFlag.PreferLowerWeight,
+		allowMultiple: 5,
 	},
 	fireStarter: {
 		itemTypes: [
@@ -238,15 +265,18 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		itemTypes: [ItemTypeGroup.Tinder],
 		flags: InventoryItemFlag.PreferLowerWeight,
 	},
-	fireStoker: {
-		useTypes: [ActionType.StokeFire],
-		flags: InventoryItemFlag.PreferLowerWeight,
+	food: {
+		itemTypes: foodItemTypes,
+		flags: InventoryItemFlag.PreferHigherDecay,
 	},
 	furnace: {
 		itemTypes: [ItemTypeGroup.Furnace],
 	},
 	hammer: {
 		itemTypes: [ItemTypeGroup.Hammer],
+	},
+	heal: {
+		useTypes: [ActionType.Heal],
 	},
 	hoe: {
 		useTypes: [ActionType.Till],
@@ -295,6 +325,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemTypeGroup.ContainerOfSeawater,
 			ItemTypeGroup.ContainerOfUnpurifiedFreshWater,
 		],
+		allowMultiple: 3,
 	},
 	waterStill: {
 		itemTypes: [ItemTypeGroup.WaterStill],
@@ -311,6 +342,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 export interface ItemSearch<T> {
 	type: T;
 	itemType: ItemType;
+	extraDifficulty?: number;
 }
 
 export type DoodadSearch = ItemSearch<DoodadType> & { growingStage: GrowingStage };

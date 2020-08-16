@@ -33,7 +33,7 @@ export default class AcquireItemForDoodad extends Objective {
 
 	public async execute(): Promise<ObjectiveExecutionResult> {
 		return this.getItems()
-			.map(item => [new AcquireItem(item)]);
+			.map(item => [new AcquireItem(item).passContextDataKey(this)]);
 	}
 
 	private getItems(): ItemType[] {

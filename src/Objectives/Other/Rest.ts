@@ -39,7 +39,7 @@ export default class Rest extends Objective {
 
 			if (context.player.getWeightStatus() === WeightStatus.Overburdened) {
 				if (this.force) {
-					objectivePipelines.push([new ReduceWeight(true), new RunAwayFromTarget(nearbyCreature)]);
+					objectivePipelines.push([new ReduceWeight({ allowReservedItems: true }), new RunAwayFromTarget(nearbyCreature)]);
 				}
 
 			} else {

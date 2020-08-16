@@ -22,6 +22,7 @@ import Bindable from "newui/input/Bindable";
 import { IInput } from "newui/input/IInput";
 import { ITile } from "tile/ITerrain";
 import { sleep } from "utilities/Async";
+import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
@@ -29,10 +30,13 @@ import TileHelpers from "utilities/TileHelpers";
 import Context from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
 import { IObjective, ObjectiveResult } from "./IObjective";
-import { IBase, IInventoryItems } from "./ITars";
+import { IBase, IInventoryItems, inventoryItemInfo } from "./ITars";
 import Navigation from "./Navigation/Navigation";
+import Objective from "./Objective";
+import AcquireFood from "./Objectives/Acquire/Item/AcquireFood";
 import AcquireItem from "./Objectives/Acquire/Item/AcquireItem";
 import AcquireItemByGroup from "./Objectives/Acquire/Item/AcquireItemByGroup";
+import AcquireItemByTypes from "./Objectives/Acquire/Item/AcquireItemByTypes";
 import AcquireItemForAction from "./Objectives/Acquire/Item/AcquireItemForAction";
 import AcquireItemForDoodad from "./Objectives/Acquire/Item/AcquireItemForDoodad";
 import AcquireWaterContainer from "./Objectives/Acquire/Item/Specific/AcquireWaterContainer";
@@ -40,12 +44,14 @@ import AnalyzeBase from "./Objectives/Analyze/AnalyzeBase";
 import AnalyzeInventory from "./Objectives/Analyze/AnalyzeInventory";
 import ExecuteAction from "./Objectives/Core/ExecuteAction";
 import Lambda from "./Objectives/Core/Lambda";
+import GatherWater from "./Objectives/Gather/GatherWater";
 import CarveCorpse from "./Objectives/Interrupt/CarveCorpse";
 import DefendAgainstCreature from "./Objectives/Interrupt/DefendAgainstCreature";
 import OptionsInterrupt from "./Objectives/Interrupt/OptionsInterrupt";
 import ReduceWeight from "./Objectives/Interrupt/ReduceWeight";
 import RepairItem from "./Objectives/Interrupt/RepairItem";
 import BuildItem from "./Objectives/Other/BuildItem";
+import EmptyWaterContainer from "./Objectives/Other/EmptyWaterContainer";
 import Equip from "./Objectives/Other/Equip";
 import Idle from "./Objectives/Other/Idle";
 import PlantSeed from "./Objectives/Other/PlantSeed";
@@ -57,21 +63,23 @@ import RecoverHealth from "./Objectives/Recover/RecoverHealth";
 import RecoverHunger from "./Objectives/Recover/RecoverHunger";
 import RecoverStamina from "./Objectives/Recover/RecoverStamina";
 import RecoverThirst from "./Objectives/Recover/RecoverThirst";
+import OrganizeBase from "./Objectives/Utility/OrganizeBase";
 import OrganizeInventory from "./Objectives/Utility/OrganizeInventory";
 import * as Action from "./Utilities/Action";
-import { isNearBase } from "./Utilities/Base";
-import { estimateDamageModifier, getBestActionItem, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getSeeds } from "./Utilities/Item";
-import { log } from "./Utilities/Logger";
+import { getTilesWithItemsNearBase, isNearBase } from "./Utilities/Base";
+import { canGatherWater, estimateDamageModifier, getBestActionItem, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getReservedItems, getSeeds, getUnusedItems, isSafeToDrinkItem } from "./Utilities/Item";
+import { log, preConsoleCallback } from "./Utilities/Logger";
 import * as movementUtilities from "./Utilities/Movement";
 import * as objectUtilities from "./Utilities/Object";
 import * as tileUtilities from "./Utilities/Tile";
 
 const tickSpeed = 333;
 
+// can be negative. ex: -8 means [max - 8[]
 const recoverThresholds: { [index: number]: number } = {
 	[Stat.Health]: 30,
 	[Stat.Stamina]: 20,
-	[Stat.Hunger]: 10,
+	[Stat.Hunger]: 8,
 	[Stat.Thirst]: 10,
 };
 
@@ -106,10 +114,11 @@ export default class Tars extends Mod {
 
 	private readonly statThresholdExceeded: { [index: number]: boolean } = {};
 	private weightStatus: WeightStatus | undefined;
+	private previousWeightStatus: WeightStatus | undefined;
 
 	private context: Context;
-	private objectivePipeline: IObjective[] | undefined;
-	private interruptObjectivePipeline: IObjective[] | undefined;
+	private objectivePipeline: Array<IObjective | IObjective[]> | undefined;
+	private interruptObjectivePipeline: Array<IObjective | IObjective[]> | undefined;
 	private interruptContext: Context | undefined;
 	private readonly interruptContexts: Map<number, Context> = new Map();
 	private interruptsId: string | undefined;
@@ -132,12 +141,16 @@ export default class Tars extends Mod {
 		this.delete();
 		this.navigation = Navigation.get();
 
+		Log.addPreConsoleCallback(preConsoleCallback);
+
 		(window as any).TARS = this;
 	}
 
 	public onUnload(): void {
 		this.disable(true);
 		this.delete();
+
+		Log.removePreConsoleCallback(preConsoleCallback);
 
 		(window as any).TARS = undefined;
 	}
@@ -186,7 +199,7 @@ export default class Tars extends Mod {
 			}
 
 			const objective = this.interruptObjectivePipeline || this.objectivePipeline;
-			if (objective !== undefined) {
+			if (objective !== undefined && !Array.isArray(objective[0])) {
 				const result = await objective[0].onMove(this.context);
 				if (result === true) {
 					this.interrupt();
@@ -251,9 +264,38 @@ export default class Tars extends Mod {
 		Action.postExecuteAction(api.type);
 	}
 
+	@EventHandler(EventBus.LocalPlayer, "walkPathChange")
+	public onWalkPathChange(player: Player, walkPath: IVector2[] | undefined) {
+		if (!walkPath || walkPath.length === 0 || !this.isEnabled()) {
+			return;
+		}
+
+		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context);
+		if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
+			this.interrupt(...organizeInventoryInterrupts);
+		}
+	}
+
+	/*
+	@EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")
+	@EventHandler(EventBus.LocalPlayer, "inventoryItemRemove")
+	@EventHandler(EventBus.LocalPlayer, "inventoryItemUpdate")
+	public onInventoryChange(player: Player, container: IContainer) {
+		if (!this.isEnabled()) {
+			return;
+		}
+
+		// todo: analyze inventory?
+	}
+	*/
+
 	@EventHandler(EventBus.LocalPlayer, "statChanged")
 	public onStatChange(player: Player, stat: IStat) {
-		const recoverThreshold = recoverThresholds[stat.type];
+		if (!this.isEnabled()) {
+			return;
+		}
+
+		const recoverThreshold = this.getRecoverThreshold(this.context, stat.type);
 		if (recoverThreshold !== undefined) {
 			if (stat.value <= recoverThreshold) {
 				if (!this.statThresholdExceeded[stat.type]) {
@@ -277,7 +319,7 @@ export default class Tars extends Mod {
 
 				const weightStatus = player.getWeightStatus();
 				if (this.weightStatus !== weightStatus) {
-					const previousWeightStatus = this.weightStatus;
+					this.previousWeightStatus = this.weightStatus;
 
 					this.weightStatus = weightStatus;
 
@@ -288,7 +330,7 @@ export default class Tars extends Mod {
 					if (this.isEnabled()) {
 						// players weight status changed
 						// reset objectives so we'll handle this immediately
-						log.info(`Weight status changed from ${previousWeightStatus !== undefined ? WeightStatus[previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
+						log.info(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
 
 						this.interrupt();
 					}
@@ -425,15 +467,15 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private interrupt(interruptObjective?: IObjective) {
-		log.info("Interrupt", interruptObjective);
+	private interrupt(...interruptObjectives: IObjective[]) {
+		log.info("Interrupt", interruptObjectives.map(objective => objective.getHashCode()).join(" -> "));
 
 		executor.interrupt();
 
 		this.objectivePipeline = undefined;
 
-		if (interruptObjective) {
-			this.interruptObjectivePipeline = [interruptObjective];
+		if (interruptObjectives && interruptObjectives.length > 0) {
+			this.interruptObjectivePipeline = interruptObjectives;
 		}
 
 		movementUtilities.resetMovementOverlays();
@@ -487,6 +529,9 @@ export default class Tars extends Mod {
 			this.interruptObjectivePipeline = undefined;
 		}
 
+		// log.debug("objectivePipeline", this.objectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+		// log.debug("interruptObjectivePipeline", this.interruptObjectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+
 		if (this.interruptObjectivePipeline || interrupts.length > 0) {
 			if (!this.interruptContext) {
 				// we should use our main context when running interrupt objectives
@@ -501,12 +546,15 @@ export default class Tars extends Mod {
 			}
 
 			if (this.interruptObjectivePipeline) {
-				log.info("Continuing interrupt execution", this.interruptObjectivePipeline.map(objective => objective.getHashCode()).join(" -> "));
+				const interruptHashCode = Objective.getPipelineString(this.interruptObjectivePipeline);
+
+				log.info("Continuing interrupt execution", interruptHashCode);
 
 				const result = await executor.executeObjectives(this.interruptContext, this.interruptObjectivePipeline, false);
 				switch (result.type) {
 					case ExecuteObjectivesResultType.Completed:
 						this.interruptObjectivePipeline = undefined;
+						log.info("Completed interrupt objectives");
 						break;
 
 					case ExecuteObjectivesResultType.Restart:
@@ -514,18 +562,28 @@ export default class Tars extends Mod {
 						return;
 
 					case ExecuteObjectivesResultType.Pending:
+						const afterInterruptHashCode = Objective.getPipelineString(this.interruptObjectivePipeline);
+
+						if (interruptHashCode === afterInterruptHashCode) {
+							this.interruptObjectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
+							// this.objectivePipeline = undefined;
+							log.info(`Updated continuing interrupt objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.interruptObjectivePipeline));
+
+						} else {
+							log.info(`Ignoring continuing interrupt objectives due to changed interrupts - ${ExecuteObjectivesResultType[result.type]}`);
+						}
+
 						return;
 
 					case ExecuteObjectivesResultType.ContinuingNextTick:
 						this.interruptObjectivePipeline = undefined;
+						// this.objectivePipeline = undefined;
 						log.info("Clearing interrupt objective pipeline");
 						return;
 				}
 			}
 
 			if (interrupts.length > 0) {
-				// return interrupts.filter(objective => objective !== undefined && (!Array.isArray(objective) || objective.length > 0)) as Array<IObjective | IObjective[]>;
-
 				for (let i = 0; i < interrupts.length; i++) {
 					const interruptObjectives = interrupts[i];
 					if (interruptObjectives === undefined || (Array.isArray(interruptObjectives) && interruptObjectives.length === 0)) {
@@ -609,7 +667,9 @@ export default class Tars extends Mod {
 
 		if (this.objectivePipeline !== undefined) {
 			// we have an objective we are working on
-			log.info("Continuing execution of objectives", this.objectivePipeline.map(objective => objective.getHashCode()).join(" -> "));
+			const hashCode = Objective.getPipelineString(this.objectivePipeline);
+
+			log.info("Continuing execution of objectives", hashCode);
 
 			const result = await executor.executeObjectives(this.context, this.objectivePipeline, false, true);
 			switch (result.type) {
@@ -623,9 +683,19 @@ export default class Tars extends Mod {
 
 				case ExecuteObjectivesResultType.Pending:
 				case ExecuteObjectivesResultType.ContinuingNextTick:
-					// save the active objective
-					this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
-					log.info(`Updated continuing objectives - ${ExecuteObjectivesResultType[result.type]}`, this.objectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+					const afterHashCode = Objective.getPipelineString(this.objectivePipeline);
+
+					if (hashCode === afterHashCode) {
+						this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
+						log.info(`Updated continuing objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.objectivePipeline));
+
+					} else {
+						log.info(`Ignoring continuing objectives due to changed objectives - ${ExecuteObjectivesResultType[result.type]}. Resetting. Before: ${hashCode}. After: ${afterHashCode}`);
+
+						// todo: the hash code might change because a StoneWaterStill became a LitStoneWaterStill. that might be okay
+						this.objectivePipeline = undefined;
+					}
+
 					return;
 			}
 		}
@@ -636,7 +706,7 @@ export default class Tars extends Mod {
 			case ExecuteObjectivesResultType.ContinuingNextTick:
 				// save the active objective
 				this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
-				log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, this.objectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+				log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.objectivePipeline));
 				return;
 
 			default:
@@ -670,13 +740,18 @@ export default class Tars extends Mod {
 			objectives.push([new AcquireItemForAction(ActionType.StartFire), new AnalyzeInventory()]);
 		}
 
-		if (this.inventory.fireKindling === undefined) {
+		if (this.inventory.fireKindling === undefined || this.inventory.fireKindling.length === 0) {
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Kindling), new AnalyzeInventory()]);
 		}
 
 		if (this.inventory.fireTinder === undefined) {
+			log.info("Need fire tinder");
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tinder), new AnalyzeInventory()]);
 		}
+
+		// if (this.inventory.fireStoker === undefined || this.inventory.fireStoker.length < 4) {
+		// 	objectives.push([new AcquireItemForAction(ActionType.StokeFire), new AnalyzeInventory()]);
+		// }
 
 		if (this.inventory.shovel === undefined) {
 			objectives.push([new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory()]);
@@ -712,7 +787,11 @@ export default class Tars extends Mod {
 
 		let acquireChest = true;
 
-		if (!this.base.buildAnotherChest && this.base.chest.length > 0) {
+		if (this.base.buildAnotherChest) {
+			// build another chest if we're near the base
+			acquireChest = isNearBase(context);
+
+		} else if (this.base.chest.length > 0) {
 			for (const c of this.base.chest) {
 				if ((itemManager.computeContainerWeight(c as IContainer) / c.weightCapacity) < 0.9) {
 					acquireChest = false;
@@ -748,15 +827,12 @@ export default class Tars extends Mod {
 			objectives.push([new AcquireItem(ItemType.StoneShovel), new AnalyzeInventory()]);
 		}
 
-		if (context.base.waterStill.length > 0) {
-			objectives.push(new StartWaterStillDesalination(context.base.waterStill[0]));
-
-			// if (context.inventory.waterContainer !== undefined && !canDrinkItem(context.inventory.waterContainer)) {
-			// 	objectives.push(new GatherWaterFromStill(context.base.waterStill, context.inventory.waterContainer));
-			// }
-		}
-
 		if (isNearBase(context)) {
+			// ensure water stills are water stilling
+			for (const waterStill of context.base.waterStill) {
+				objectives.push(new StartWaterStillDesalination(waterStill));
+			}
+
 			// todo: improve seed planting - grab from base chests too! and add reserved items for it
 			const seeds = getSeeds(context);
 			if (seeds.length > 0) {
@@ -768,7 +844,11 @@ export default class Tars extends Mod {
 			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitKiln), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst] &&
+		if (this.inventory.heal === undefined) {
+			objectives.push([new AcquireItemForAction(ActionType.Heal), new AnalyzeInventory()]);
+		}
+
+		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= this.getRecoverThreshold(context, Stat.Thirst) &&
 			this.base.waterStill.length > 0 && this.base.waterStill[0].description()!.providesFire;
 
 		const shouldUpgradeToLeather = !waitingForWater;
@@ -828,16 +908,59 @@ export default class Tars extends Mod {
 			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Anvil), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		// todo: add inventory bandage (it's good to have one on you!)
 		if (this.inventory.waterContainer === undefined) {
 			objectives.push([new AcquireWaterContainer(), new AnalyzeInventory()]);
+		}
+
+		// run a few extra things before running upgrade objectives if we're near a base 
+		if (isNearBase(context)) {
+			// build a second water still
+			if (context.base.waterStill.length < 2) {
+				objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
+			}
+
+			// carry food with you
+			if (this.inventory.food === undefined) {
+				objectives.push([new AcquireFood(), new AnalyzeInventory()]);
+			}
+
+			// carry a bandage with you
+			if (this.inventory.bandage === undefined) {
+				objectives.push([new AcquireItemByTypes(inventoryItemInfo.bandage.itemTypes as ItemType[]), new AnalyzeInventory()]);
+			}
+
+			// carry drinkable water with you
+			let availableWaterContainer: Item | undefined;
+
+			if (context.inventory.waterContainer !== undefined) {
+				const hasDrinkableWater = context.inventory.waterContainer.some(isSafeToDrinkItem);
+				if (!hasDrinkableWater) {
+					availableWaterContainer = context.inventory.waterContainer.find(canGatherWater);
+					if (!availableWaterContainer) {
+						// use the first water container we have - pour it out first
+						availableWaterContainer = context.inventory.waterContainer[0];
+						objectives.push(new EmptyWaterContainer(availableWaterContainer));
+					}
+
+					objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, allowStartingWaterStill: true }));
+				}
+			}
+
+			// cleanup base if theres items laying around everywhere
+			const tiles = getTilesWithItemsNearBase(context);
+			if (tiles.totalCount > (availableWaterContainer ? 0 : 20)) {
+				objectives.push(new OrganizeBase(tiles.tiles));
+			}
+
+			if (availableWaterContainer) {
+				// we are trying to gather water. wait before moving on to upgrade objectives
+				objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+			}
 		}
 
 		/*
 			Upgrade objectives
 		*/
-
-		// objectives.push([new EnsureReservableItem(ItemType.WroughtIron, 12)]);
 
 		if (this.inventory.equipSword && this.inventory.equipSword.type === ItemType.WoodenSword) {
 			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new Equip(EquipType.LeftHand)]);
@@ -914,19 +1037,27 @@ export default class Tars extends Mod {
 
 	// todo: add severity to stat interrupts to prioritize which one to run
 	private getInterrupts(context: Context): Array<IObjective | IObjective[] | undefined> {
-		return [
+		let interrupts = [
 			this.optionsInterrupt(),
 			this.equipmentInterrupt(context),
 			this.nearbyCreatureInterrupt(context),
 			this.staminaInterrupt(context),
 			this.buildItemObjectives(),
 			this.healthInterrupt(context),
-			this.weightInterrupt(),
+			this.reduceWeightInterrupt(context),
 			this.thirstInterrupt(context),
 			this.gatherFromCorpsesInterrupt(context),
 			this.hungerInterrupt(context),
 			this.repairsInterrupt(context),
+			this.returnToBaseInterrupt(context),
 		];
+
+		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(context);
+		if (organizeInventoryInterrupts) {
+			interrupts = interrupts.concat(organizeInventoryInterrupts);
+		}
+
+		return interrupts;
 	}
 
 	private optionsInterrupt(): IObjective | undefined {
@@ -1038,7 +1169,13 @@ export default class Tars extends Mod {
 				ui.changeEquipmentOption("leftHand");
 			}
 
-			if (rightHandEquipped !== context.player.options.rightHand) {
+			if (leftHandEquipped) {
+				// if we have the left hand equipped, disable right hand
+				if (context.player.options.rightHand) {
+					ui.changeEquipmentOption("rightHand");
+				}
+
+			} else if (rightHandEquipped !== context.player.options.rightHand) {
 				ui.changeEquipmentOption("rightHand");
 			}
 		}
@@ -1121,7 +1258,7 @@ export default class Tars extends Mod {
 
 	private healthInterrupt(context: Context): IObjective | undefined {
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		if (health.value > recoverThresholds[Stat.Health] && !context.player.status.Bleeding &&
+		if (health.value > this.getRecoverThreshold(context, Stat.Health) && !context.player.status.Bleeding &&
 			(!context.player.status.Poisoned || (context.player.status.Poisoned && (health.value / health.max) >= poisonHealthPercentThreshold))) {
 			return undefined;
 		}
@@ -1131,7 +1268,7 @@ export default class Tars extends Mod {
 	}
 
 	private staminaInterrupt(context: Context): IObjective | undefined {
-		if (context.player.stat.get<IStat>(Stat.Stamina).value > recoverThresholds[Stat.Stamina]) {
+		if (context.player.stat.get<IStat>(Stat.Stamina).value > this.getRecoverThreshold(context, Stat.Stamina)) {
 			return undefined;
 		}
 
@@ -1140,11 +1277,11 @@ export default class Tars extends Mod {
 	}
 
 	private hungerInterrupt(context: Context): IObjective | undefined {
-		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= recoverThresholds[Stat.Hunger]);
+		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= this.getRecoverThreshold(context, Stat.Hunger));
 	}
 
 	private thirstInterrupt(context: Context): IObjective | undefined {
-		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= recoverThresholds[Stat.Thirst]);
+		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= this.getRecoverThreshold(context, Stat.Thirst));
 	}
 
 	private repairsInterrupt(context: Context): IObjective | undefined {
@@ -1152,7 +1289,7 @@ export default class Tars extends Mod {
 			return undefined;
 		}
 
-		return this.repairInterrupt(context, context.player.getEquippedItem(EquipType.LeftHand)) ||
+		let objective = this.repairInterrupt(context, context.player.getEquippedItem(EquipType.LeftHand)) ||
 			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.RightHand)) ||
 			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Chest)) ||
 			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Legs)) ||
@@ -1164,15 +1301,27 @@ export default class Tars extends Mod {
 			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Back)) ||
 			this.repairInterrupt(context, this.inventory.knife) ||
 			this.repairInterrupt(context, this.inventory.fireStarter) ||
-			this.repairInterrupt(context, this.inventory.fireKindling) ||
 			this.repairInterrupt(context, this.inventory.hoe) ||
 			this.repairInterrupt(context, this.inventory.axe) ||
 			this.repairInterrupt(context, this.inventory.pickAxe) ||
 			this.repairInterrupt(context, this.inventory.shovel) ||
 			this.repairInterrupt(context, this.inventory.equipSword) ||
 			this.repairInterrupt(context, this.inventory.equipShield) ||
-			this.repairInterrupt(context, this.inventory.bed) ||
-			this.repairInterrupt(context, this.inventory.waterContainer);
+			this.repairInterrupt(context, this.inventory.bed);
+		if (objective) {
+			return objective;
+		}
+
+		if (this.inventory.waterContainer) {
+			for (const waterContainer of this.inventory.waterContainer) {
+				objective = this.repairInterrupt(context, waterContainer);
+				if (objective) {
+					return objective;
+				}
+			}
+		}
+
+		return undefined;
 	}
 
 	private repairInterrupt(context: Context, item: Item | undefined): IObjective | undefined {
@@ -1180,12 +1329,13 @@ export default class Tars extends Mod {
 			return undefined;
 		}
 
-		if (item.minDur / item.maxDur >= 0.6) {
+		const threshold = isNearBase(context) ? 0.2 : 0.1;
+		if (item.minDur / item.maxDur >= threshold) {
 			return undefined;
 		}
 
-		if (item === this.inventory.waterContainer && context.player.stat.get<IStat>(Stat.Thirst).value < 2) {
-			// don't worry about reparing the water container if it's an emergency
+		if (this.inventory.waterContainer?.includes(item) && context.player.stat.get<IStat>(Stat.Thirst).value < 2) {
+			// don't worry about repairing a water container if it's an emergency
 			return undefined;
 		}
 
@@ -1284,8 +1434,71 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private weightInterrupt(): IObjective | undefined {
-		return new ReduceWeight();
+	private reduceWeightInterrupt(context: Context): IObjective | undefined {
+		return new ReduceWeight({
+			allowReservedItems: !isNearBase(context) && this.weightStatus === WeightStatus.Overburdened,
+			disableDrop: this.weightStatus !== WeightStatus.Overburdened && !isNearBase(context),
+		});
+	}
+
+	private returnToBaseInterrupt(context: Context): IObjective | undefined {
+		if (!isNearBase(context) && this.weightStatus !== WeightStatus.None && this.previousWeightStatus === WeightStatus.Overburdened) {
+			return new ReturnToBase();
+		}
+	}
+
+	/**
+	 * Move reserved items into intermediate chests if the player is near the base and is moving away
+	 * Explicitly not using OrganizeInventory for this - the exact objectives should be specified to prevent issues
+	 */
+	private organizeInventoryInterrupts(context: Context): IObjective[] | undefined {
+		const walkPath = context.player.walkPath;
+		if (walkPath === undefined || walkPath.length === 0) {
+			return undefined;
+		}
+
+		if (!isNearBase(context)) {
+			return undefined;
+		}
+
+		const target = walkPath[walkPath.length - 1];
+		if (isNearBase(context, { x: target.x, y: target.y, z: context.player.z })) {
+			return undefined;
+		}
+
+		const chests = context.base.chest.slice().concat(context.base.intermediateChest);
+
+		let objectives: IObjective[] = [];
+
+		const reservedItems = getReservedItems(context);
+		if (reservedItems.length > 0) {
+			for (const chest of chests) {
+				const organizeInventoryObjectives = OrganizeInventory.moveIntoChestObjectives(context, chest, reservedItems);
+				if (organizeInventoryObjectives) {
+					objectives = objectives.concat(organizeInventoryObjectives);
+					break;
+				}
+			}
+		}
+
+		const unusedItems = getUnusedItems(context);
+		if (unusedItems.length > 0) {
+			for (const chest of chests) {
+				const organizeInventoryObjectives = OrganizeInventory.moveIntoChestObjectives(context, chest, unusedItems);
+				if (organizeInventoryObjectives) {
+					objectives = objectives.concat(organizeInventoryObjectives);
+					break;
+				}
+			}
+		}
+
+		if (objectives.length > 0) {
+			log.info("Going to organize inventory space");
+		} else {
+			log.info(`Will not organize inventory space. Reserved items: ${reservedItems.length}, Unused items: ${reservedItems.length}`);
+		}
+
+		return objectives;
 	}
 
 	private processQueuedNavigationUpdates() {
@@ -1294,5 +1507,10 @@ export default class Tars extends Mod {
 		}
 
 		this.navigationQueuedUpdates = [];
+	}
+
+	private getRecoverThreshold(context: Context, stat: Stat) {
+		const recoverThreshold = recoverThresholds[stat];
+		return recoverThreshold > 0 ? recoverThreshold : context.player.stat.get<IStatMax>(stat).max + recoverThreshold;
 	}
 }

@@ -7,6 +7,7 @@ import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
 import { getInventoryItemsWithUse } from "../../Utilities/Item";
 import { findCarvableCorpses } from "../../Utilities/Object";
+import { canCarveCorpse } from "../../Utilities/Tile";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
 import MoveToTarget from "../Core/MoveToTarget";
@@ -37,8 +38,8 @@ export default class GatherFromCorpse extends Objective {
 				const possibleItems = resources.slice(step);
 
 				for (const itemType of itemTypes) {
-					if (possibleItems.indexOf(itemType) !== -1) {
-						return true;
+					if (possibleItems.includes(itemType)) {
+						return canCarveCorpse(game.getTileFromPoint(corpse), true);
 					}
 				}
 			}

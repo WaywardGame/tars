@@ -18,9 +18,18 @@ import MoveToTarget from "../Core/MoveToTarget";
 const maxChestDistance = 128;
 
 export interface IOriganizeInventoryOptions {
-	allowChests: boolean;
+	allowChests?: boolean;
+
+	disableDrop?: boolean;
+
 	onlyIfNearBase?: boolean;
-	includeReservedItems?: boolean;
+
+	allowReservedItems?: boolean;
+	onlyOrganizeReservedItems?: boolean;
+
+	onlyAllowIntermediateChest?: boolean;
+
+	items?: Item[];
 }
 
 export default class OrganizeInventory extends Objective {
@@ -48,7 +57,7 @@ export default class OrganizeInventory extends Objective {
 		let unusedItems = getUnusedItems(context);
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		if (reservedItems.length === 0 && unusedItems.length === 0) {
+		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -56,21 +65,43 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
+		if (this.options.items) {
+			const validItems = this.options.items.filter(item => itemManager.getPlayerWithItemInInventory(item) === context.player);
+			if (validItems.length === 0) {
+				return ObjectiveResult.Ignore;
+			}
+
+			this.log.info("Moving items", this.options.items);
+
+			const objectivePipelines: IObjective[][] = [];
+
+			const chests = this.options.onlyAllowIntermediateChest ? context.base.intermediateChest : context.base.chest;
+
+			for (const chest of chests) {
+				const objectives = OrganizeInventory.moveIntoChestObjectives(context, chest, validItems);
+				if (objectives) {
+					objectivePipelines.push(objectives);
+				}
+			}
+
+			return objectivePipelines;
+		}
+
 		const allowOrganizingReservedItemsIntoIntermediateChest = context.getData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest) !== false;
 
-		this.log.info(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow intermediate chest: ${allowOrganizingReservedItemsIntoIntermediateChest}`);
+		this.log.info(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow reserved items: ${this.options?.allowReservedItems}. Allow chests: ${this.options?.allowChests}. Allow intermediate chest: ${allowOrganizingReservedItemsIntoIntermediateChest}`);
 
 		if (context.base.intermediateChest[0] && allowOrganizingReservedItemsIntoIntermediateChest && reservedItems.length > 0 && reservedItemsWeight >= unusedItemsWeight) {
 			this.log.info(`Going to move reserved items into intermediate chest. ${reservedItems.join(", ")}`);
 
 			// move them into the intermediate chest
-			const objectives = this.moveIntoChestObjectives(context, context.base.intermediateChest[0], reservedItems);
+			const objectives = OrganizeInventory.moveIntoChestObjectives(context, context.base.intermediateChest[0], reservedItems);
 			if (objectives) {
 				return objectives;
 			}
 		}
 
-		if (unusedItems.length === 0 && this.options.includeReservedItems) {
+		if (unusedItems.length === 0 && this.options.allowReservedItems) {
 			// ignore reserved items
 			unusedItems = getUnusedItems(context, true);
 		}
@@ -79,10 +110,10 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (!isNearBase(context)) {
-			this.log.info(`Not near base, disabling use of chests.. ${unusedItems.join(", ")}`, context.getHashCode());
-			this.options.allowChests = false;
-		}
+		// if (!isNearBase(context)) {
+		// 	this.log.info(`Not near base, disabling use of chests.. ${unusedItems.join(", ")}`, context.getHashCode());
+		// 	this.options.allowChests = false;
+		// }
 
 		this.log.info(`Unused items. ${unusedItems.join(", ")}`, context.getHashCode());
 
@@ -90,15 +121,19 @@ export default class OrganizeInventory extends Objective {
 			// pick the chest with the most room available
 			const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
 			for (const chest of chests) {
-				if (Vector2.distance(context.player, chest) > maxChestDistance) {
+				if (!this.options.disableDrop && Vector2.distance(context.player, chest) > maxChestDistance) {
 					continue;
 				}
 
-				const objectives = this.moveIntoChestObjectives(context, chest, unusedItems);
+				const objectives = OrganizeInventory.moveIntoChestObjectives(context, chest, unusedItems);
 				if (objectives) {
 					return objectives;
 				}
 			}
+		}
+
+		if (this.options.disableDrop) {
+			return ObjectiveResult.Impossible;
 		}
 
 		const target = TileHelpers.findMatchingTile(context.player, (point, tile) => isOpenTile(context, point, tile) && !game.isTileFull(tile), defaultMaxTilesChecked);
@@ -118,7 +153,7 @@ export default class OrganizeInventory extends Objective {
 		];
 	}
 
-	private moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]) {
+	public static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]) {
 		const targetContainer = chest as IContainer;
 		const weight = itemManager.computeContainerWeight(targetContainer);
 		if (weight + itemsToMove[0].getTotalWeight() <= targetContainer.weightCapacity!) {

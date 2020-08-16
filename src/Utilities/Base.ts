@@ -12,7 +12,8 @@ import { baseInfo, BaseInfoKey } from "../ITars";
 
 import { hasCorpses, isOpenTile } from "./Tile";
 
-const nearBaseDistanceSq = Math.pow(14, 2);
+const nearBaseDistance = 14;
+const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
 
 export function isGoodBuildTile(context: Context, point: IVector3, tile: ITile): boolean {
 	if (!isOpenArea(context, point, tile)) {
@@ -146,4 +147,24 @@ export function isNearBase(context: Context, point: IVector3 = context.player): 
 	}
 
 	return false;
+}
+
+export function getTilesWithItemsNearBase(context: Context): { tiles: IVector3[]; totalCount: number } {
+	const result: { tiles: IVector3[]; totalCount: number } = {
+		tiles: [],
+		totalCount: 0,
+	};
+
+	const tiles = TileHelpers.tilesInRange(context.player, nearBaseDistance, true);
+	for (const [point, tile] of tiles) {
+		const containedItems = tile.containedItems;
+		if (!containedItems || containedItems.length === 0) {
+			continue;
+		}
+
+		result.totalCount += containedItems.length;
+		result.tiles.push(point);
+	}
+
+	return result;
 }

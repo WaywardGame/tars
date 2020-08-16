@@ -44,12 +44,12 @@ export interface IExecuteCompleted {
 
 export interface IExecutePending {
 	type: ExecuteResultType.Pending;
-	objectives: IObjective[];
+	objectives: Array<IObjective | IObjective[]>;
 }
 
 export interface IExecuteWaitingForNextTick {
 	type: ExecuteResultType.ContinuingNextTick;
-	objectives: IObjective[];
+	objectives: Array<IObjective | IObjective[]>;
 }
 
 export interface IExecuteRestart {

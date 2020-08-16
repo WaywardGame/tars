@@ -6,7 +6,7 @@ import Objective from "../../Objective";
 
 export default class ReserveItems extends Objective {
 
-	private readonly items: Item[];
+	public items: Item[];
 
 	constructor(...items: Item[]) {
 		super();

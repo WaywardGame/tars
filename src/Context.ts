@@ -1,4 +1,3 @@
-import Doodad from "doodad/Doodad";
 import Player from "entity/player/Player";
 import { ItemType } from "item/IItem";
 import Item from "item/Item";
@@ -6,46 +5,31 @@ import Item from "item/Item";
 import { IBase, IInventoryItems } from "./ITars";
 
 export enum ContextDataType {
-	LastKnownPosition,
-	LastAcquiredItem,
-	LastBuiltDoodad,
-	Item1,
-	Item2,
+	LastKnownPosition = "LastKnownPosition",
+	LastAcquiredItem = "LastAcquiredItem",
+	LastBuiltDoodad = "LastBuiltDoodad",
+	Item1 = "Item1",
 
 	/**
 	 * Allow the OrganizeInventory objective to move reserved items into the intermediate chest
 	 */
-	AllowOrganizingReservedItemsIntoIntermediateChest,
+	AllowOrganizingReservedItemsIntoIntermediateChest = "AllowOrganizingReservedItemsIntoIntermediateChest",
 
 	/**
 	 * The next recipe/dismantle in the execution tree allows the use of the intermediate chest
 	 */
-	NextActionAllowsIntermediateChest,
+	NextActionAllowsIntermediateChest = "NextActionAllowsIntermediateChest",
 
 	/**
 	 * The next recipe can be crafted from the intermediate chest
 	 */
-	CanCraftFromIntermediateChest,
+	CanCraftFromIntermediateChest = "CanCraftFromIntermediateChest",
 
 	/**
-	 * Indicates we're waiting for a water still
+	 * Prioritize using items from base chest for the objective over gather out in the field
 	 */
-	WaitingForWaterStill,
+	PrioritizeBaseChests = "PrioritizeBaseChests",
 }
-
-export interface IContextData {
-	[ContextDataType.LastKnownPosition]: IVector3;
-	[ContextDataType.LastAcquiredItem]: Item;
-	[ContextDataType.LastBuiltDoodad]: Doodad;
-	[ContextDataType.Item1]: Item;
-	[ContextDataType.Item2]: Item;
-	[ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest]: boolean;
-	[ContextDataType.NextActionAllowsIntermediateChest]: boolean;
-	[ContextDataType.CanCraftFromIntermediateChest]: boolean;
-	[ContextDataType.WaitingForWaterStill]: boolean;
-}
-
-export type ContextDataMap<T extends ContextDataType> = IContextData[T];
 
 export class ContextState {
 
@@ -59,7 +43,7 @@ export class ContextState {
 		/**
 		 * Dynamic data available during objective execution
 		 */
-		public data?: Map<ContextDataType, any> | undefined) {
+		public data?: Map<string, any> | undefined) {
 	}
 
 	public get shouldIncludeHashCode(): boolean {
@@ -99,11 +83,11 @@ export class ContextState {
 		this.data = undefined;
 	}
 
-	public get<T extends ContextDataType>(type: T): ContextDataMap<T> | undefined {
+	public get<T = any>(type: string): T | undefined {
 		return this.data ? this.data.get(type) : undefined;
 	}
 
-	public set<T extends ContextDataType>(type: T, value: ContextDataMap<T> | undefined) {
+	public set<T = any>(type: string, value: T | undefined) {
 		if (!this.data) {
 			this.data = new Map();
 		}
@@ -188,11 +172,11 @@ export default class Context {
 		return this.state.reservedItemTypes.has(itemType);
 	}
 
-	public getData<T extends ContextDataType>(type: T): ContextDataMap<T> | undefined {
+	public getData<T = any>(type: string): T | undefined {
 		return this.state.get(type);
 	}
 
-	public setData<T extends ContextDataType>(type: T, value: ContextDataMap<T> | undefined) {
+	public setData<T = any>(type: string, value: T | undefined) {
 		this.state.set(type, value);
 
 		if (this.changes) {

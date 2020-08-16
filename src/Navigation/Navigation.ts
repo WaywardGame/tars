@@ -253,9 +253,13 @@ export default class Navigation {
 
 		this.addOrUpdateOverlay(tile, x, y, z, isDisabled, penalty);
 
-		const node = dijkstraMapInstance.getNode(x, y);
-		node.penalty = penalty;
-		node.disabled = isDisabled;
+		try {
+			const node = dijkstraMapInstance.getNode(x, y);
+			node.penalty = penalty;
+			node.disabled = isDisabled;
+		} catch (ex) {
+			log.error("invalid node", x, y, penalty, isDisabled);
+		}
 
 		if (array) {
 			const index = (z * game.mapSizeSq * 3) + (y * game.mapSize * 3) + x * 3;
@@ -522,6 +526,10 @@ export default class Navigation {
 			}
 		}
 
+		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(localPlayer)) {
+			return true;
+		}
+
 		const players = game.getPlayersAtPosition(x, y, z, false, true);
 		if (players.length > 0) {
 			for (const player of players) {
@@ -559,7 +567,7 @@ export default class Navigation {
 			if (description && !description.isDoor && !description.isGate) {
 				if (tile.doodad.blocksMove()) {
 					// a gather doodad - large penalty
-					penalty += 20;
+					penalty += 15;
 
 				} else {
 					penalty += 4;

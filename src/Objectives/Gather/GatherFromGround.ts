@@ -1,9 +1,8 @@
 import { ActionType } from "entity/action/IAction";
-import { IStatMax, Stat } from "entity/IStats";
 import { ItemType } from "item/IItem";
 import { IVector3 } from "utilities/math/IVector";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
 import SetContextData from "../ContextData/SetContextData";
@@ -11,7 +10,6 @@ import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import ReserveItems from "../Core/ReserveItems";
-import ReduceWeight from "../Interrupt/ReduceWeight";
 
 export default class GatherFromGround extends Objective {
 
@@ -43,7 +41,7 @@ export default class GatherFromGround extends Objective {
 				if (item.type === this.itemType && !context.isReservedItem(item)) {
 					return [
 						new ReserveItems(item),
-						new SetContextData(ContextDataType.LastAcquiredItem, item),
+						new SetContextData(this.contextDataKey, item),
 						new ExecuteAction(ActionType.MoveItem, (context, action) => {
 							action.execute(context.player, item, context.player.inventory);
 						}),
@@ -67,11 +65,11 @@ export default class GatherFromGround extends Objective {
 			.map(({ item: itemOnGround, point }) => {
 				const objectives: IObjective[] = [];
 
-				const weight = context.player.stat.get<IStatMax>(Stat.Weight);
-				if ((weight.value + itemOnGround.getTotalWeight()) > weight.max) {
-					// this.log.info("Reduce weight before picking up item");
-					objectives.push(new ReduceWeight());
-				}
+				// const weight = context.player.stat.get<IStatMax>(Stat.Weight);
+				// if ((weight.value + itemOnGround.getTotalWeight()) > weight.max) {
+				// 	// this.log.info("Reduce weight before picking up item");
+				// 	objectives.push(new ReduceWeight());
+				// }
 
 				objectives.push(new MoveToTarget(point, true));
 
@@ -82,7 +80,7 @@ export default class GatherFromGround extends Objective {
 
 					const item = context.player.getFacingTile().containedItems?.find(item => item.type === this.itemType);
 					if (item) {
-						objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, item));
+						objectives.push(new SetContextData(this.contextDataKey, item));
 						objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
 							action.execute(context.player, item, context.player.inventory);
 						}));

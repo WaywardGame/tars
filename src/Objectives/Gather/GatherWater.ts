@@ -8,14 +8,22 @@ import GatherWaterFromStill from "./GatherWaterFromStill";
 import GatherWaterFromTerrain from "./GatherWaterFromTerrain";
 import GatherWaterFromWell from "./GatherWaterFromWell";
 
+export interface IGatherWaterOptions {
+	disallowTerrain?: boolean;
+	disallowWaterStill?: boolean;
+	disallowWell?: boolean;
+	allowStartingWaterStill?: boolean;
+	allowWaitingForWaterStill?: boolean;
+}
+
 export default class GatherWater extends Objective {
 
-	constructor(private readonly item?: Item) {
+	constructor(private readonly item?: Item, private readonly options?: IGatherWaterOptions) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `GatherWater:${this.item}`;
+		return `GatherWater:${this.item}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -25,14 +33,20 @@ export default class GatherWater extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
-		objectivePipelines.push([new GatherWaterFromTerrain(this.item)]);
-
-		for (const waterStill of context.base.waterStill) {
-			objectivePipelines.push([new GatherWaterFromStill(waterStill, this.item)]);
+		if (!this.options?.disallowTerrain) {
+			objectivePipelines.push([new GatherWaterFromTerrain(this.item)]);
 		}
 
-		for (const well of context.base.well) {
-			objectivePipelines.push([new GatherWaterFromWell(well, this.item)]);
+		if (!this.options?.disallowWaterStill) {
+			for (const waterStill of context.base.waterStill) {
+				objectivePipelines.push([new GatherWaterFromStill(waterStill, this.item, this.options?.allowStartingWaterStill, this.options?.allowWaitingForWaterStill)]);
+			}
+		}
+
+		if (!this.options?.disallowWell) {
+			for (const well of context.base.well) {
+				objectivePipelines.push([new GatherWaterFromWell(well, this.item)]);
+			}
 		}
 
 		return objectivePipelines;

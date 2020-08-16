@@ -97,7 +97,7 @@ export default class GatherFromTerrain extends Objective {
 
 				objectives.push(new MoveToTarget(point, true).addDifficulty(difficulty));
 
-				objectives.push(new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType)));
+				objectives.push(new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType)).passContextDataKey(this));
 
 				objectivePipelines.push(objectives);
 			}

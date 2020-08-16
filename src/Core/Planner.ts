@@ -80,9 +80,10 @@ class Planner implements IPlanner {
 		}
 
 		// shallow clone
+		const objectiveInfo = result.objectiveChain[0];
 		const objectives: IObjectiveInfo[] = result.objectiveChain.map(o => ({ ...o })).slice(1);
 
-		return new Plan(this, context, objective, objectives);
+		return new Plan(this, context, objectiveInfo, objectives);
 	}
 
 	/**
@@ -435,7 +436,7 @@ class Planner implements IPlanner {
 				if (executionResult === ObjectiveResult.Impossible) {
 					difficulty = CalculatedDifficultyStatus.Impossible;
 
-				} else {
+				} else if (!objective.isDifficultyOverridden()) {
 					difficulty += executionResult;
 				}
 

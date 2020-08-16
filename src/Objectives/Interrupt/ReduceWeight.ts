@@ -3,11 +3,11 @@ import { WeightStatus } from "entity/player/IPlayer";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import OrganizeInventory from "../Utility/OrganizeInventory";
+import OrganizeInventory, { IOriganizeInventoryOptions } from "../Utility/OrganizeInventory";
 
 export default class ReduceWeight extends Objective {
 
-	constructor(private readonly includeReservedItems: boolean = false) {
+	constructor(private readonly options: IOriganizeInventoryOptions = {}) {
 		super();
 	}
 
@@ -35,7 +35,7 @@ export default class ReduceWeight extends Objective {
 
 		return new OrganizeInventory({
 			allowChests: weightStatus !== WeightStatus.Overburdened,
-			includeReservedItems: this.includeReservedItems,
+			...this.options,
 		});
 	}
 

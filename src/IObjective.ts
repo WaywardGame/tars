@@ -52,7 +52,7 @@ export interface IObjective {
 	getIdentifier(): string;
 	getName(): string;
 
-	sort?(executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number;
+	sort?(context: Context, executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number;
 
 	/**
 	 * The result can change between the planning and execution phase
@@ -61,6 +61,7 @@ export interface IObjective {
 
 	addDifficulty(difficulty: number): IObjective;
 	getDifficulty(context: Context): number;
+	isDifficultyOverridden(): boolean;
 
 	onMove(context: Context): Promise<IObjective | boolean>;
 

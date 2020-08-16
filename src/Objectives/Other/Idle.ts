@@ -29,7 +29,7 @@ export default class Idle extends Objective {
 			// don't idle in realtime mode or in simulated mode if the turns are ticking still. +200ms buffer for ping
 			objectivePipelines.push(new Lambda(async (context, lambda) => {
 				lambda.log.info("Smart idling");
-				return ObjectiveResult.Restart;
+				return ObjectiveResult.Complete;
 			}));
 
 		} else {
@@ -46,6 +46,10 @@ export default class Idle extends Objective {
 				action.execute(context.player);
 			}));
 		}
+
+		// always Restart the objective after idling
+		// idling usually implies we're waiting for something. we don't want to automatically continue running the next objective in the pipeline
+		objectivePipelines.push(new Lambda(async () => ObjectiveResult.Restart));
 
 		return objectivePipelines;
 	}
