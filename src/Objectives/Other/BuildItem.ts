@@ -233,17 +233,17 @@ export default class BuildItem extends Objective {
 		}
 
 		// build close to rocks
-		const rockTileLocations = await getNearestTileLocation(TerrainType.Rocks, origin);
-		const sandstoneTileLocations = await getNearestTileLocation(TerrainType.Sandstone, origin);
+		const rockTileLocations = await getNearestTileLocation(origin, TerrainType.Rocks);
+		const sandstoneTileLocations = await getNearestTileLocation(origin, TerrainType.Sandstone);
 
-		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) > nearRocksDistance) &&
-			sandstoneTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) > nearRocksDistance)) {
+		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance) &&
+			sandstoneTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance)) {
 			return false;
 		}
 
 		// buiuld close to a water source
-		const shallowSeawaterTileLocations = await getNearestTileLocation(TerrainType.ShallowSeawater, origin);
-		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(tileLocation.point, origin) > nearSeawaterDistance)) {
+		const shallowSeawaterTileLocations = await getNearestTileLocation(origin, TerrainType.ShallowSeawater);
+		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearSeawaterDistance)) {
 			return false;
 		}
 

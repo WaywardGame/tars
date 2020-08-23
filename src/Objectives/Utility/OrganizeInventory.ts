@@ -89,7 +89,7 @@ export default class OrganizeInventory extends Objective {
 
 		const allowOrganizingReservedItemsIntoIntermediateChest = context.getData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest) !== false;
 
-		this.log.info(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow reserved items: ${this.options?.allowReservedItems}. Allow chests: ${this.options?.allowChests}. Allow intermediate chest: ${allowOrganizingReservedItemsIntoIntermediateChest}`);
+		this.log.info(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow moving reserved items: ${this.options?.allowReservedItems}. Allow moving into chests: ${this.options?.allowChests}. Allow moving into intermediate chest: ${allowOrganizingReservedItemsIntoIntermediateChest}`);
 
 		if (context.base.intermediateChest[0] && allowOrganizingReservedItemsIntoIntermediateChest && reservedItems.length > 0 && reservedItemsWeight >= unusedItemsWeight) {
 			this.log.info(`Going to move reserved items into intermediate chest. ${reservedItems.join(", ")}`);

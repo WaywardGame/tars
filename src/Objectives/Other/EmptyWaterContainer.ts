@@ -26,7 +26,7 @@ export default class EmptyWaterContainer extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const targets = await getNearestTileLocation(anyWaterTileLocation, context.player);
+		const targets = await getNearestTileLocation(context, anyWaterTileLocation);
 
 		for (const { point } of targets) {
 			const objectives: IObjective[] = [];

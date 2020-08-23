@@ -13,16 +13,26 @@ export function resetNearestTileLocationCache() {
 	cache.clear();
 }
 
-export async function getNearestTileLocation(tileType: TerrainType, position: IVector3): Promise<ITileLocation[]> {
-	const cacheId = `${tileType},${position.x},${position.y}${position.z}`;
+export async function getNearestTileLocation(contextOrPosition: Context | IVector3, tileType: TerrainType): Promise<ITileLocation[]> {
+	// const position = contextOrPosition instanceof Context ? contextOrPosition.getPosition() : contextOrPosition;
+	const position = contextOrPosition instanceof Context ? contextOrPosition.player : contextOrPosition;
+
+	const results: ITileLocation[][] = [];
+
+	// for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
+	const z = position.z;
+
+	const cacheId = `${tileType},${position.x},${position.y},${z}`;
 
 	let result = cache.get(cacheId);
 	if (!result) {
-		result = await Navigation.get().getNearestTileLocation(tileType, position);
+		result = await Navigation.get().getNearestTileLocation(tileType, { x: position.x, y: position.y, z: z });
 		cache.set(cacheId, result);
+		results.push(result);
 	}
+	// }
 
-	return result;
+	return results.flat();
 }
 
 export function isSwimming(context: Context) {
@@ -78,7 +88,7 @@ export function canGather(tile: ITile, skipDoodadCheck?: boolean) {
 }
 
 export function canDig(tile: ITile) {
-	return !hasCorpses(tile) && !tile.creature && !tile.npc && !hasItems(tile) && !game.isPlayerAtTile(tile, false, true);
+	return !hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !hasItems(tile) && !game.isPlayerAtTile(tile, false, true);
 }
 
 export function canCarveCorpse(tile: ITile, skipCorpseCheck?: boolean) {

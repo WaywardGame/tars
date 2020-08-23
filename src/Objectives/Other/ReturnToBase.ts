@@ -16,8 +16,9 @@ export default class ReturnToBase extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const position = context.getPosition();
 		const basePosition = getBasePosition(context);
-		if (basePosition === context.player || Vector2.squaredDistance(context.player, basePosition) <= returnToBaseDistanceSq) {
+		if (position.z === basePosition.z && Vector2.squaredDistance(position, basePosition) <= returnToBaseDistanceSq) {
 			return ObjectiveResult.Ignore;
 		}
 

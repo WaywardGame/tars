@@ -67,7 +67,7 @@ export default class AnalyzeBase extends Objective {
 
 				for (const target of targets) {
 					if (!info.canAdd || info.canAdd(context.base, target)) {
-						const distance = Vector2.squaredDistance(context.player, target);
+						const distance = Vector2.squaredDistance(context.getPosition(), target);
 						if (distance < baseDoodadDistanceSq && context.base[key].indexOf(target) === -1) {
 							changed = true;
 

@@ -40,6 +40,8 @@ export default class AcquireBuildMoveToFire extends Objective {
 			}
 
 		} else {
+			const position = context.getPosition();
+
 			const doodadInfos = ([context.base.campfire, context.base.kiln, context.base.furnace]
 				.map(doodads => {
 					for (const doodad of doodads) {
@@ -56,7 +58,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 				})
 				.filter(doodadInfo => doodadInfo !== undefined) as Array<{ doodad: Doodad; providesFire: boolean }>)
 				// todo: make this use objective pipelines and move to easiest one?
-				.sort((a, b) => Vector2.squaredDistance(context.player, a.doodad) > Vector2.squaredDistance(context.player, b.doodad) ? 1 : -1);
+				.sort((a, b) => Vector2.squaredDistance(position, a.doodad) > Vector2.squaredDistance(position, b.doodad) ? 1 : -1);
 
 			for (const doodadInfo of doodadInfos) {
 				if (!doodad) {

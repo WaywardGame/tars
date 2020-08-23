@@ -37,7 +37,8 @@ export default class GatherFromTerrain extends Objective {
 				continue;
 			}
 
-			const tileLocations = await getNearestTileLocation(terrainSearch.type, context.player);
+			const tileLocations = await getNearestTileLocation(context, terrainSearch.type);
+
 			for (const tileLocation of tileLocations) {
 				if (!canGather(tileLocation.tile)) {
 					continue;
@@ -73,9 +74,12 @@ export default class GatherFromTerrain extends Objective {
 						}
 
 						chanceForHit = loot.chance / 100;
-					}
 
-					difficulty += 50 * (1 - chanceForHit);
+						difficulty += 50 * (1 - chanceForHit);
+
+					} else {
+						difficulty += 5;
+					}
 				}
 
 				if (matches === 0) {

@@ -66,6 +66,13 @@ enum TerrainType {
 	ShallowFreshWater = 5,
 }
 
+enum WorldZ {
+	Min = 0,
+	Max = 1,
+	Cave = 0,
+	Overworld = 1,
+}
+
 const freshWaterTileLocation = -1;
 const anyWaterTileLocation = -2;
 
@@ -84,7 +91,7 @@ class Navigation {
 	private readonly navigationInfo: { [index: number]: INavigationInfo } = {};
 
 	constructor() {
-		for (let z = 0; z <= 1; z++) {
+		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			this.navigationInfo[z] = {
 				tileLocations: {},
 				kdTreeTileTypes: new Uint8Array(mapSizeSq),
@@ -117,7 +124,7 @@ class Navigation {
 	private updateAllTiles(message: IUpdateAllTilesRequest): IUpdateAllTilesResponse {
 		const array = message.array;
 
-		for (let z = 0; z <= 1; z++) {
+		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			const navigationInfo = this.navigationInfo[z];
 			if (!navigationInfo) {
 				continue;

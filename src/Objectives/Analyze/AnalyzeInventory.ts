@@ -1,3 +1,5 @@
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ActionType } from "entity/action/IAction";
 import Item from "item/Item";
 
 import Context from "../../Context";
@@ -56,8 +58,8 @@ export default class AnalyzeInventory extends Objective {
 				}
 			}
 
-			if (itemInfo.useTypes) {
-				for (const useType of itemInfo.useTypes) {
+			if (itemInfo.actionTypes) {
+				for (const useType of itemInfo.actionTypes) {
 					items.push(...getInventoryItemsWithUse(context, useType));
 				}
 			}
@@ -77,28 +79,22 @@ export default class AnalyzeInventory extends Objective {
 
 					switch (flags) {
 						case InventoryItemFlag.PreferHigherWorth:
-							if (descriptionA.worth === undefined) {
-								return -1;
-							}
-
-							if (descriptionB.worth === undefined) {
-								return 1;
-							}
-
-							return descriptionA.worth < descriptionB.worth ? 1 : -1;
+							const worthA = descriptionA.worth !== undefined ? descriptionA.worth : 0;
+							const worthB = descriptionB.worth !== undefined ? descriptionB.worth : 0;
+							return worthB - worthA;
 
 						case InventoryItemFlag.PreferLowerWeight:
-							return itemA.getTotalWeight() > itemB.getTotalWeight() ? 1 : -1;
+							return itemA.getTotalWeight() - itemB.getTotalWeight();
 
 						case InventoryItemFlag.PreferHigherDurability:
 							const minDurA = itemA.minDur !== undefined ? itemA.minDur : 999999;
 							const minDurB = itemB.minDur !== undefined ? itemB.minDur : 999999;
-							return minDurA < minDurB ? 1 : -1;
+							return minDurB - minDurA;
 
 						case InventoryItemFlag.PreferHigherDecay:
 							const decayA = itemA.decay !== undefined ? itemA.decay : 999999;
 							const decayB = itemB.decay !== undefined ? itemB.decay : 999999;
-							return decayA < decayB ? 1 : -1;
+							return decayB - decayA;
 					}
 				});
 
@@ -112,11 +108,36 @@ export default class AnalyzeInventory extends Objective {
 
 					context.inventory[key] = newItems as any;
 
+					if (itemInfo.protect) {
+						if (existingItems) {
+							for (const item of existingItems) {
+								if (item.isValid() && item.protected && !newItems.includes(item)) {
+									ActionExecutor.get(ActionType.ProtectItem).execute(context.player, item, false);
+								}
+							}
+						}
+
+						for (const item of newItems) {
+							if (item.isValid() && !item.protected) {
+								ActionExecutor.get(ActionType.ProtectItem).execute(context.player, item, true);
+							}
+						}
+					}
+
 				} else {
+					const currentItem = context.inventory[key] as Item | undefined;
 					const item = sortedItems[0];
-					if (context.inventory[key] !== item) {
+					if (currentItem !== item) {
+						if (itemInfo.protect && currentItem && currentItem.isValid() && currentItem.protected) {
+							ActionExecutor.get(ActionType.ProtectItem).execute(context.player, currentItem, false);
+						}
+
 						context.inventory[key] = item as any;
 						this.log.info(`Found "${key}" - ${item}`);
+
+						if (itemInfo.protect) {
+							ActionExecutor.get(ActionType.ProtectItem).execute(context.player, item, true);
+						}
 					}
 				}
 			}

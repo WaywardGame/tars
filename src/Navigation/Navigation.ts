@@ -62,7 +62,7 @@ export default class Navigation {
 	}
 
 	constructor() {
-		for (let z = 0; z <= 1; z++) {
+		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			try {
 				this.dijkstraMaps.set(z, new Module.DijkstraMap());
 			} catch (ex) {
@@ -163,13 +163,11 @@ export default class Navigation {
 	public async updateAll(): Promise<void> {
 		log.info("Updating navigation. Please wait...");
 
-		const zs = 2;
-
-		const array = new Uint8Array(game.mapSizeSq * zs * 3);
+		const array = new Uint8Array(game.mapSizeSq * this.dijkstraMaps.size * 3);
 
 		const start = performance.now();
 
-		for (let z = WorldZ.Min; z <= WorldZ.Overworld; z++) {
+		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			for (let x = 0; x < game.mapSize; x++) {
 				for (let y = 0; y < game.mapSize; y++) {
 					const tile = game.getTile(x, y, z);

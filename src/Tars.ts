@@ -13,6 +13,8 @@ import { EventHandler } from "event/EventManager";
 import { TileUpdateType, TurnMode } from "game/IGame";
 import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
 import Item from "item/Item";
+import Interrupt from "language/dictionary/Interrupt";
+import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
@@ -20,6 +22,8 @@ import Register, { Registry } from "mod/ModRegistry";
 import Bind from "newui/input/Bind";
 import Bindable from "newui/input/Bindable";
 import { IInput } from "newui/input/IInput";
+import { NewUi } from "newui/NewUi";
+import { InterruptOptions } from "newui/util/IInterrupt";
 import { ITile } from "tile/ITerrain";
 import { sleep } from "utilities/Async";
 import Log from "utilities/Log";
@@ -29,6 +33,7 @@ import TileHelpers from "utilities/TileHelpers";
 
 import Context from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
+import planner from "./Core/Planner";
 import { IObjective, ObjectiveResult } from "./IObjective";
 import { IBase, IInventoryItems, inventoryItemInfo } from "./ITars";
 import Navigation from "./Navigation/Navigation";
@@ -55,6 +60,7 @@ import EmptyWaterContainer from "./Objectives/Other/EmptyWaterContainer";
 import Equip from "./Objectives/Other/Equip";
 import Idle from "./Objectives/Other/Idle";
 import PlantSeed from "./Objectives/Other/PlantSeed";
+import ReinforceItem from "./Objectives/Other/ReinforceItem";
 import ReturnToBase from "./Objectives/Other/ReturnToBase";
 import StartWaterStillDesalination from "./Objectives/Other/StartWaterStillDesalination";
 import Unequip from "./Objectives/Other/Unequip";
@@ -144,6 +150,8 @@ export default class Tars extends Mod {
 		Log.addPreConsoleCallback(preConsoleCallback);
 
 		(window as any).TARS = this;
+		(window as any).TARS_Planner = planner;
+		(window as any).TARS_TileUtilities = tileUtilities;
 	}
 
 	public onUnload(): void {
@@ -153,6 +161,8 @@ export default class Tars extends Mod {
 		Log.removePreConsoleCallback(preConsoleCallback);
 
 		(window as any).TARS = undefined;
+		(window as any).TARS_Planner = undefined;
+		(window as any).TARS_TileUtilities = undefined;
 	}
 
 	////////////////////////////////////////////////
@@ -221,6 +231,13 @@ export default class Tars extends Mod {
 	@EventHandler(EventBus.LocalPlayer, "moveComplete")
 	public onMoveComplete(player: Player) {
 		movementUtilities.clearOverlay(player.getTile());
+	}
+
+	@EventHandler(EventBus.Ui, "interrupt")
+	public onInterrupt(host: NewUi, options: Partial<InterruptOptions>, interrupt?: Interrupt): string | boolean | void | InterruptChoice | undefined {
+		if (this.isEnabled() && interrupt === Interrupt.GameDangerousStep) {
+			return true;
+		}
 	}
 
 	@Bind.onDown(Registry<Tars>().get("keyBind"))
@@ -733,14 +750,17 @@ export default class Tars extends Mod {
 		}
 
 		if (this.base.campfire.length === 0 && this.inventory.campfire === undefined) {
+			log.info("Need campfire");
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Campfire), new BuildItem(), new AnalyzeBase()]);
 		}
 
 		if (this.inventory.fireStarter === undefined) {
+			log.info("Need fire starter");
 			objectives.push([new AcquireItemForAction(ActionType.StartFire), new AnalyzeInventory()]);
 		}
 
 		if (this.inventory.fireKindling === undefined || this.inventory.fireKindling.length === 0) {
+			log.info("Need fire kindling");
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Kindling), new AnalyzeInventory()]);
 		}
 
@@ -958,6 +978,39 @@ export default class Tars extends Mod {
 			}
 		}
 
+		// keep existing equipment in good shape
+		if (this.inventory.equipSword && this.inventory.equipSword.type !== ItemType.WoodenSword) {
+			objectives.push(new ReinforceItem(this.inventory.equipSword, 0.5));
+		}
+
+		if (this.inventory.equipShield && this.inventory.equipShield.type !== ItemType.WoodenShield) {
+			objectives.push(new ReinforceItem(this.inventory.equipShield, 0.5));
+		}
+
+		if (this.inventory.equipBelt) {
+			objectives.push(new ReinforceItem(this.inventory.equipBelt, 0.5));
+		}
+
+		if (this.inventory.equipNeck) {
+			objectives.push(new ReinforceItem(this.inventory.equipNeck, 0.5));
+		}
+
+		if (this.inventory.equipFeet) {
+			objectives.push(new ReinforceItem(this.inventory.equipFeet, 0.5));
+		}
+
+		if (this.inventory.equipHands) {
+			objectives.push(new ReinforceItem(this.inventory.equipHands, 0.5));
+		}
+
+		if (this.inventory.equipLegs && this.inventory.equipLegs.type !== ItemType.BarkLeggings) {
+			objectives.push(new ReinforceItem(this.inventory.equipLegs, 0.5));
+		}
+
+		if (this.inventory.equipChest && this.inventory.equipChest.type !== ItemType.BarkTunic) {
+			objectives.push(new ReinforceItem(this.inventory.equipChest, 0.5));
+		}
+
 		/*
 			Upgrade objectives
 		*/
@@ -1023,7 +1076,14 @@ export default class Tars extends Mod {
 			if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
 				objectives.push(new Lambda(async () => {
 					log.info("Done with all objectives! Disabling...");
+
+					localPlayer.messages
+						.source(this.messageSource)
+						.type(MessageType.Good)
+						.send(this.messageToggle, false);
+
 					this.disable();
+
 					return ObjectiveResult.Complete;
 				}));
 
@@ -1453,7 +1513,7 @@ export default class Tars extends Mod {
 	 */
 	private organizeInventoryInterrupts(context: Context): IObjective[] | undefined {
 		const walkPath = context.player.walkPath;
-		if (walkPath === undefined || walkPath.length === 0) {
+		if (walkPath === undefined || walkPath.path.length === 0) {
 			return undefined;
 		}
 
@@ -1461,7 +1521,7 @@ export default class Tars extends Mod {
 			return undefined;
 		}
 
-		const target = walkPath[walkPath.length - 1];
+		const target = walkPath.path[walkPath.path.length - 1];
 		if (isNearBase(context, { x: target.x, y: target.y, z: context.player.z })) {
 			return undefined;
 		}

@@ -113,6 +113,7 @@ export interface IInventoryItems {
 	bandage?: Item;
 	bed?: Item;
 	campfire?: Item;
+	carve?: Item;
 	chest?: Item;
 	equipBack?: Item;
 	equipBelt?: Item;
@@ -146,10 +147,11 @@ export interface IInventoryItems {
 
 export interface IInventoryItemInfo {
 	itemTypes?: Array<ItemType | ItemTypeGroup>;
-	useTypes?: ActionType[];
+	actionTypes?: ActionType[];
 	equipType?: EquipType;
 	flags?: InventoryItemFlag;
 	allowMultiple?: number;
+	protect?: boolean;
 }
 
 export enum InventoryItemFlag {
@@ -203,6 +205,9 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	campfire: {
 		itemTypes: [ItemTypeGroup.Campfire],
 	},
+	carve: {
+		actionTypes: [ActionType.Carve],
+	},
 	chest: {
 		itemTypes: [ItemType.WoodenChest],
 	},
@@ -238,6 +243,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.WoodenShield,
 			ItemType.WroughtIronShield,
 		],
+		protect: true,
 	},
 	equipSword: {
 		itemTypes: [
@@ -247,6 +253,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.WoodenSword,
 			ItemType.WroughtIronSword,
 		],
+		protect: true,
 	},
 	fireKindling: {
 		itemTypes: [ItemTypeGroup.Kindling],
@@ -276,10 +283,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		itemTypes: [ItemTypeGroup.Hammer],
 	},
 	heal: {
-		useTypes: [ActionType.Heal],
+		actionTypes: [ActionType.Heal],
 	},
 	hoe: {
-		useTypes: [ActionType.Till],
+		actionTypes: [ActionType.Till],
 	},
 	intermediateChest: {
 		itemTypes: [
@@ -314,10 +321,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		itemTypes: [ItemType.Sailboat],
 	},
 	shovel: {
-		useTypes: [ActionType.Dig],
+		actionTypes: [ActionType.Dig],
 	},
 	waterContainer: {
-		useTypes: [ActionType.GatherWater],
+		actionTypes: [ActionType.GatherWater],
 		itemTypes: [
 			ItemTypeGroup.ContainerOfDesalinatedWater,
 			ItemTypeGroup.ContainerOfMedicinalWater,

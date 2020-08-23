@@ -62,18 +62,6 @@ export default class OptionsInterrupt extends Objective {
 			return ObjectiveResult.Pending;
 		}
 
-		if (context.player.options.protectedCraftingItems) {
-			this.log.info("Disabling ProtectedCraftingItems");
-			game.updateOption(context.player, "protectedCraftingItems", false);
-			return ObjectiveResult.Pending;
-		}
-
-		if (context.player.options.protectedCraftingItemContainers) {
-			this.log.info("Disabling protectedCraftingItemContainers");
-			game.updateOption(context.player, "protectedCraftingItemContainers", false);
-			return ObjectiveResult.Pending;
-		}
-
 		if (context.player.options.dropLocation !== DropLocation.Feet) {
 			this.log.info("Setting DropLocation to Feet");
 			game.updateOption(context.player, "dropLocation", DropLocation.Feet);

@@ -81,7 +81,7 @@ export default class RecoverThirst extends Objective {
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
 		if (isEmergency || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
-			const nearestFreshWater = await getNearestTileLocation(freshWaterTileLocation, context.player);
+			const nearestFreshWater = await getNearestTileLocation(context, freshWaterTileLocation);
 
 			for (const { point } of nearestFreshWater) {
 				const objectives: IObjective[] = [];

@@ -11,10 +11,12 @@ import Objective from "../../Objective";
 import { log } from "../../Utilities/Logger";
 import { getMovementPath, move, MoveResult } from "../../Utilities/Movement";
 import Rest from "../Other/Rest";
+// import MoveToZ from "../Utility/MoveToZ";
 
 export interface IMoveToTargetOptions {
 	range?: number;
 	disableStaminaCheck?: boolean;
+	skipZCheck?: boolean;
 }
 
 export default class MoveToTarget extends Objective {
@@ -38,10 +40,24 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const position = context.getPosition();
+		if (position.z !== this.target.z) {
+			return ObjectiveResult.Impossible;
+		}
+
+		// if (!this.options?.skipZCheck && position.z !== this.target.z) {
+		// 	this.log.info("Target is on different Z");
+
+		// 	return [
+		// 		new MoveToZ(this.target.z),
+		// 		new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }), // todo: replace with this?
+		// 	];
+		// }
+
 		const movementPath = await getMovementPath(context, this.target, this.moveAdjacentToTarget);
 
 		if (context.calculatingDifficulty) {
-			context.setData(ContextDataType.LastKnownPosition, { x: this.target.x, y: this.target.y, z: this.target.z });
+			context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
 			return movementPath.difficulty;
 		}
 
@@ -98,7 +114,7 @@ export default class MoveToTarget extends Objective {
 
 			case MoveResult.Complete:
 				this.log.info("Finished moving to target");
-				context.setData(ContextDataType.LastKnownPosition, { x: this.target.x, y: this.target.y, z: this.target.z });
+				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
 				return ObjectiveResult.Complete;
 		}
 	}

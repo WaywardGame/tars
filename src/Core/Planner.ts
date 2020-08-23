@@ -119,7 +119,7 @@ class Planner implements IPlanner {
 			const objectivePipeline = await this.getObjectivePipeline(clonedContext, objectivesSet);
 
 			if (this.debug) {
-				this.writeCalculationLog(`Returned "${objectivePipeline.status}" for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}`);
+				this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}`);
 			}
 
 			switch (objectivePipeline.status) {
@@ -220,6 +220,10 @@ class Planner implements IPlanner {
 
 	private async getObjectivePipeline(context: Context, objectives: IObjective[]): Promise<ObjectivePipeline> {
 		if (objectives.length === 0) {
+			if (this.debug) {
+				this.writeCalculationLog("No objectives returned");
+			}
+
 			return {
 				status: CalculatedDifficultyStatus.Impossible,
 			};
@@ -274,7 +278,7 @@ class Planner implements IPlanner {
 					calculatedDifficulty.status === CalculatedDifficultyStatus.NotCalculatedYet ||
 					calculatedDifficulty.status === CalculatedDifficultyStatus.NotPlausible) {
 					if (this.debug) {
-						this.writeCalculationLog(`Still not plausible. ${calculatedDifficulty.status}`);
+						this.writeCalculationLog(`Still not plausible. ${CalculatedDifficultyStatus[calculatedDifficulty.status]}`);
 					}
 					return calculatedDifficulty;
 				}
@@ -455,9 +459,17 @@ class Planner implements IPlanner {
 				let pipelineResult: ObjectivePipeline | CalculatedDifficultyStatus;
 
 				if (isMultiplePipelines) {
+					if (this.debug) {
+						this.writeCalculationLog(`Found ${executionResult.length} objective pipelines.`);
+					}
+
 					pipelineResult = await this.pickEasiestObjectivePipeline(context, executionResult as IObjective[][]);
 
 				} else {
+					if (this.debug) {
+						this.writeCalculationLog(`Found objective pipeline with ${executionResult.length} objectives.`);
+					}
+
 					pipelineResult = await this.getObjectivePipeline(context, executionResult as IObjective[]);
 				}
 
@@ -469,7 +481,7 @@ class Planner implements IPlanner {
 					pipelineResult.status === CalculatedDifficultyStatus.NotCalculatedYet ||
 					pipelineResult.status === CalculatedDifficultyStatus.NotPlausible) {
 					if (this.debug) {
-						this.writeCalculationLog(`Pipeline returned ${pipelineResult.status}.`);
+						this.writeCalculationLog(`Pipeline returned ${CalculatedDifficultyStatus[pipelineResult.status]}.`);
 					}
 
 					difficulty = pipelineResult.status;
@@ -585,7 +597,7 @@ class Planner implements IPlanner {
 		this.calculateDifficultyCache.set(cacheHashCode, result);
 
 		if (this.debug) {
-			this.writeCalculationLog(`Set "${cacheHashCode}" to ${result.status}.`);
+			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}.`);
 		}
 
 		if (waitingHashCodes.length > 0) {

@@ -23,7 +23,7 @@ export default class GatherWaterFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const targets = await getNearestTileLocation(anyWaterTileLocation, context.player);
+		const targets = await getNearestTileLocation(context, anyWaterTileLocation);
 
 		for (const { tile, point } of targets) {
 			if (tile.creature || tile.npc || game.isPlayerAtTile(tile)) {

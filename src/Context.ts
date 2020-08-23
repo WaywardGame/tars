@@ -5,7 +5,7 @@ import Item from "item/Item";
 import { IBase, IInventoryItems } from "./ITars";
 
 export enum ContextDataType {
-	LastKnownPosition = "LastKnownPosition",
+	Position = "Position",
 	LastAcquiredItem = "LastAcquiredItem",
 	LastBuiltDoodad = "LastBuiltDoodad",
 	Item1 = "Item1",
@@ -210,7 +210,7 @@ export default class Context {
 			this.state.reset();
 		}
 
-		this.setData(ContextDataType.LastKnownPosition, this.player.getPoint());
+		this.setData(ContextDataType.Position, this.player.getPoint());
 	}
 
 	public getHashCode(): string {
@@ -242,14 +242,14 @@ export default class Context {
 	}
 
 	public getPosition(): IVector3 {
-		const lastKnownPosition = this.getData(ContextDataType.LastKnownPosition);
-		if (lastKnownPosition && (lastKnownPosition.x === undefined || lastKnownPosition.y === undefined || lastKnownPosition.z === undefined)) {
+		const position = this.getData(ContextDataType.Position);
+		if (position && (position.x === undefined || position.y === undefined || position.z === undefined)) {
 			// tslint:disable-next-line: no-console
-			console.error("invalid value", lastKnownPosition);
+			console.error("invalid value", position);
 			// tslint:disable-next-line: no-console
 			console.trace("lastKnownPosition get");
 		}
 
-		return lastKnownPosition || this.player;
+		return position || this.player.getPoint();
 	}
 }

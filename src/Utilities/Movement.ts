@@ -89,12 +89,6 @@ export async function getMovementPath(context: Context, target: IVector3, moveAd
 		};
 	}
 
-	if (context.player.z !== target.z) {
-		return {
-			difficulty: ObjectiveResult.Impossible,
-		};
-	}
-
 	const pathId = `${target.x},${target.y},${target.z}:${moveAdjacentToTarget ? "A" : "O"}`;
 
 	let movementPath: NavigationPath | undefined;
@@ -254,13 +248,17 @@ export async function move(context: Context, target: IVector3, moveAdjacentToTar
 					await executeAction(context, ActionType.Move, (context, action) => {
 						action.execute(context.player, direction);
 					});
+
+				} else if (nextTile.npc) {
+					log.info("No path through npc");
+					return MoveResult.NoPath;
 				}
 			}
 
 			if (force || !context.player.hasWalkPath()) {
 				updateOverlay(movementPath.path);
 
-				context.player.walkAlongPath(movementPath.path);
+				context.player.walkAlongPath(movementPath.path, true);
 			}
 
 			return MoveResult.Moving;

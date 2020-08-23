@@ -9,6 +9,7 @@
         "completed-docs": false,
         "cyclomatic-complexity": false,
         "forin": false,
+        "invalid-void": false,
         "match-default-export-name": false,
         "max-classes-per-file": false,
         "max-file-line-count": false,
