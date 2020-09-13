@@ -16,7 +16,7 @@ export default class UpgradeInventoryItem extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return "UpgradeInventoryItem";
+		return `UpgradeInventoryItem:${this.upgrade}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

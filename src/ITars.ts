@@ -15,6 +15,10 @@ export const defaultMaxTilesChecked = 3000;
 
 export const gardenMaxTilesChecked = 1024;
 
+export interface ISaveData {
+	enabled?: boolean;
+}
+
 export interface ITileLocation {
 	type: TerrainType;
 	tile: ITile;
@@ -128,7 +132,7 @@ export interface IInventoryItems {
 	fireKindling?: Item[];
 	fireStarter?: Item;
 	fireTinder?: Item;
-	food?: Item;
+	food?: Item[];
 	furnace?: Item;
 	hammer?: Item;
 	heal?: Item;
@@ -151,6 +155,7 @@ export interface IInventoryItemInfo {
 	equipType?: EquipType;
 	flags?: InventoryItemFlag;
 	allowMultiple?: number;
+	allowInChests?: boolean;
 	protect?: boolean;
 }
 
@@ -275,6 +280,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	food: {
 		itemTypes: foodItemTypes,
 		flags: InventoryItemFlag.PreferHigherDecay,
+		allowMultiple: 5,
 	},
 	furnace: {
 		itemTypes: [ItemTypeGroup.Furnace],
@@ -319,6 +325,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	sailBoat: {
 		itemTypes: [ItemType.Sailboat],
+		allowInChests: true,
 	},
 	shovel: {
 		actionTypes: [ActionType.Dig],
@@ -345,14 +352,18 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		],
 	},
 };
-
-export interface ItemSearch<T> {
-	type: T;
+export interface BaseItemSearch {
 	itemType: ItemType;
 	extraDifficulty?: number;
 }
 
-export type DoodadSearch = ItemSearch<DoodadType> & { growingStage: GrowingStage };
+export interface ItemSearch<T> extends BaseItemSearch {
+	type: T;
+}
+
+export type DoodadSearch = ItemSearch<DoodadType>;
+
+export type DoodadSearchMap = Map<DoodadType, Map<GrowingStage, number>>;
 
 export interface CreatureSearch {
 	identifier: string;

@@ -1,4 +1,5 @@
 
+import { ActionType } from "entity/action/IAction";
 import Creature from "entity/creature/Creature";
 import { IStatMax, Stat } from "entity/IStats";
 import terrainDescriptions from "tile/Terrains";
@@ -11,12 +12,14 @@ import Objective from "../../Objective";
 import { log } from "../../Utilities/Logger";
 import { getMovementPath, move, MoveResult } from "../../Utilities/Movement";
 import Rest from "../Other/Rest";
+import UseItem from "../Other/UseItem";
 // import MoveToZ from "../Utility/MoveToZ";
 
 export interface IMoveToTargetOptions {
 	range?: number;
 	disableStaminaCheck?: boolean;
 	skipZCheck?: boolean;
+	allowBoat?: boolean;
 }
 
 export default class MoveToTarget extends Objective {
@@ -61,7 +64,7 @@ export default class MoveToTarget extends Objective {
 			return movementPath.difficulty;
 		}
 
-		if (!this.options?.disableStaminaCheck) {
+		if (!this.options?.disableStaminaCheck && context.player.vehicleItemId === undefined) {
 			const path = movementPath.path;
 			if (path) {
 				// check how our stamina is
@@ -83,9 +86,46 @@ export default class MoveToTarget extends Objective {
 						// going to be swimming soon. make sure we have enough stamina for the trip
 						if (stamina.value - swimTiles <= 10) {
 							log.info(`Going to be swimming for ${swimTiles} tiles soon. Resting first`);
-							return new Rest();
+
+							return [
+								new Rest(),
+								new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, disableStaminaCheck: true }),
+							];
 						}
 					}
+				}
+			}
+		}
+
+		if (this.options?.allowBoat && context.inventory.sailBoat && context.player.vehicleItemId === undefined) {
+			const tile = context.player.getTile();
+			const tileType = TileHelpers.getType(tile);
+			const terrainDescription = terrainDescriptions[tileType];
+			if (terrainDescription && terrainDescription.water) {
+				return new UseItem(ActionType.Paddle, context.inventory.sailBoat);
+			}
+
+			const path = movementPath.path;
+			if (path) {
+				let firstWaterTile: IVector2 | undefined;
+
+				for (let i = 0; i < path.length - 1; i++) {
+					const point = path[i];
+					const tile = game.getTile(point.x, point.y, context.player.z);
+					const tileType = TileHelpers.getType(tile);
+					const terrainDescription = terrainDescriptions[tileType];
+					if (terrainDescription && terrainDescription.water) {
+						firstWaterTile = point;
+						break;
+					}
+				}
+
+				if (firstWaterTile) {
+					return [
+						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
+						new UseItem(ActionType.Paddle, context.inventory.sailBoat),
+						new MoveToTarget(this.target, this.moveAdjacentToTarget),
+					];
 				}
 			}
 		}
@@ -105,6 +145,7 @@ export default class MoveToTarget extends Objective {
 
 			case MoveResult.NoPath:
 				this.log.info(`No path to target ${this.target}`);
+				// todo: switch to Restart or Impossible?
 				return ObjectiveResult.Complete;
 
 			case MoveResult.Moving:

@@ -75,7 +75,7 @@ export default class GatherFromTerrain extends Objective {
 
 						chanceForHit = loot.chance / 100;
 
-						difficulty += 50 * (1 - chanceForHit);
+						difficulty += 60 * (1 - chanceForHit);
 
 					} else {
 						difficulty += 5;

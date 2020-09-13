@@ -89,11 +89,8 @@ export default class AcquireItemFromDismantle extends Objective {
 		return objectivePipelines;
 	}
 
-	/**
-	 * Prefer to not dismantle things. Sometimes we want to keep logs until we really need them
-	 */
 	protected getBaseDifficulty(context: Context): number {
-		// todo: increase?
-		return 10;
+		// High base difficulty because we prefer to not dismantle things. Sometimes we want to keep logs until we really need them
+		return 18;
 	}
 }

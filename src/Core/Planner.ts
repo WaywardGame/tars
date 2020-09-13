@@ -634,7 +634,7 @@ class Planner implements IPlanner {
 
 		if (this.calculatingDifficultyDepth === 0 && this.debug) {
 			const logString = this.calculationLog.join("");
-			this.log.info(logString);
+			this.log.debug(logString);
 			// this.log.info("Objectives", context.state.objectives.map(({ depth, objective }) => `Depth ${depth}: ${objective.getHashCode()}`).join("\n"));
 		}
 

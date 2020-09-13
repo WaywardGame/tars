@@ -79,7 +79,7 @@ export default class RecoverThirst extends Objective {
 		}
 
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		if (isEmergency || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
+		if ((isEmergency && health.value > 4) || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = await getNearestTileLocation(context, freshWaterTileLocation);
 
@@ -142,7 +142,6 @@ export default class RecoverThirst extends Objective {
 
 					// build another water still wait waiting
 					objectivePipelines.push([
-						new AcquireWaterContainer(),
 						new AcquireItemByGroup(ItemTypeGroup.WaterStill),
 						new BuildItem(),
 						new AnalyzeBase(),

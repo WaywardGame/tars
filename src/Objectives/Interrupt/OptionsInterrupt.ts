@@ -1,5 +1,4 @@
-import { DropLocation } from "entity/action/actions/Drop";
-
+import { DropLocation } from "save/data/ISaveDataGlobal";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";

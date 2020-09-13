@@ -146,12 +146,12 @@ export default abstract class Objective implements IObjective {
 	public async onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean> {
 		const walkPath = context.player.walkPath;
 		if (walkPath) {
-			// interrupt if a creature moved along our walk path (only close point)
+			// interrupt if an npc or creature moved along our walk path (only close point)
 			for (let i = 0; i < Math.min(20, walkPath.path.length); i++) {
 				const point = walkPath.path[i];
 				const tile = game.getTile(point.x, point.y, context.player.z);
-				if (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature) {
-					this.log.info("Creature moved along walk path, recalculating");
+				if (tile.npc !== undefined || (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature)) {
+					this.log.info("NPC or creature moved along walk path, recalculating");
 					return true;
 				}
 			}

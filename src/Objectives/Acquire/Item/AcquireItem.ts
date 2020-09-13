@@ -10,7 +10,7 @@ import Enums from "utilities/enum/Enums";
 
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import { CreatureSearch, DoodadSearch, ITerrainSearch } from "../../../ITars";
+import { CreatureSearch, DoodadSearchMap, ITerrainSearch } from "../../../ITars";
 import GatherFromChest from "../../Gather/GatherFromChest";
 import GatherFromCorpse from "../../Gather/GatherFromCorpse";
 import GatherFromCreature from "../../Gather/GatherFromCreature";
@@ -25,7 +25,7 @@ import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 export default class AcquireItem extends AcquireBase {
 
 	private static readonly terrainSearchCache: Map<ItemType, ITerrainSearch[]> = new Map();
-	private static readonly doodadSearchCache: Map<ItemType, DoodadSearch[]> = new Map();
+	private static readonly doodadSearchCache: Map<ItemType, DoodadSearchMap> = new Map();
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
 	private static readonly dismantleSearchCache: Map<ItemType, ItemType[]> = new Map();
 
@@ -62,8 +62,8 @@ export default class AcquireItem extends AcquireBase {
 		}
 
 		const doodadSearch = this.getDoodadSearch();
-		if (doodadSearch.length > 0) {
-			objectivePipelines.push([new GatherFromDoodad(doodadSearch).passContextDataKey(this)]);
+		if (doodadSearch.size > 0) {
+			objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passContextDataKey(this)]);
 		}
 
 		const creatureSearch: CreatureSearch = this.getCreatureSearch();
@@ -109,18 +109,41 @@ export default class AcquireItem extends AcquireBase {
 		return search;
 	}
 
-	private getDoodadSearch(): DoodadSearch[] {
-		let search = AcquireItem.doodadSearchCache.get(this.itemType);
-		if (search === undefined) {
-			search = [];
+	private getDoodadSearch(): DoodadSearchMap {
+		let resolvedTypes = AcquireItem.doodadSearchCache.get(this.itemType);
+		if (resolvedTypes === undefined) {
+			resolvedTypes = new Map();
 
 			const growingStages = Enums.values(GrowingStage);
 
-			for (const doodadType of Enums.values(DoodadType)) {
+			const unresolvedTypes: DoodadType[] = Array.from(Enums.values(DoodadType));
+
+			while (unresolvedTypes.length > 0) {
+				const doodadType = unresolvedTypes.shift()!;
+
 				const doodadDescription = Doodads[doodadType];
 				if (!doodadDescription) {
 					continue;
 				}
+
+				let leftOverSearch: Map<GrowingStage, number> | undefined;
+
+				const leftOver = doodadDescription.leftOver;
+				if (leftOver !== undefined) {
+					leftOverSearch = resolvedTypes.get(leftOver);
+					if (leftOverSearch === undefined) {
+						// we have not resolved the BaseItemSearch's for the left over type yet
+						// keep this as unresolved and try again later
+						unresolvedTypes.push(doodadType);
+						continue;
+					}
+
+					// todo: add
+				}
+
+				const searchMap: Map<GrowingStage, number> = new Map();
+
+				resolvedTypes.set(doodadType, searchMap);
 
 				if (doodadDescription.gather && doodadType !== DoodadType.AppleTree) {
 					for (const growingStage of growingStages) {
@@ -135,23 +158,18 @@ export default class AcquireItem extends AcquireBase {
 									continue;
 								}
 
-								search.push({
-									type: doodadType,
-									growingStage: growingStage,
-									itemType: this.itemType,
-								});
+								searchMap.set(growingStage, 0);
 
 								// add the same item to a earlier growing stages but with extra difficulty
 								for (const growingStage2 of growingStages) {
 									if (growingStage2 >= GrowingStage.Budding) {
 										const growingStageDiff = growingStage - growingStage2;
 										if (growingStageDiff > 0) {
-											search.push({
-												type: doodadType,
-												growingStage: growingStage2,
-												itemType: this.itemType,
-												extraDifficulty: growingStageDiff * 3,
-											});
+											const existingDifficulty = searchMap.get(growingStage2);
+											const difficulty = growingStageDiff * 3;
+											if (existingDifficulty === undefined || existingDifficulty > difficulty) {
+												searchMap.set(growingStage2, growingStageDiff * 3);
+											}
 										}
 									}
 								}
@@ -168,25 +186,33 @@ export default class AcquireItem extends AcquireBase {
 							continue;
 						}
 
+						if (searchMap.has(growingStage)) {
+							continue;
+						}
+
 						for (const resourceItem of resourceItems) {
 							if (resourceItem.type !== this.itemType) {
 								continue;
 							}
 
-							search.push({
-								type: doodadType,
-								growingStage: growingStage,
-								itemType: this.itemType,
-							});
+							searchMap.set(growingStage, 0);
+							break;
 						}
 					}
 				}
 			}
 
-			AcquireItem.doodadSearchCache.set(this.itemType, search);
+			// cleanup empty search maps
+			for (const [resolvedDoodadType, resolvedSearchMap] of Array.from(resolvedTypes)) {
+				if (resolvedSearchMap.size === 0) {
+					resolvedTypes.delete(resolvedDoodadType);
+				}
+			}
+
+			AcquireItem.doodadSearchCache.set(this.itemType, resolvedTypes);
 		}
 
-		return search;
+		return resolvedTypes;
 	}
 
 	private getCreatureSearch(): CreatureSearch {

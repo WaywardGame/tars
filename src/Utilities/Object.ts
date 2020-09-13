@@ -9,7 +9,7 @@ import Context from "../Context";
 
 import { isFreeOfOtherPlayers } from "./Tile";
 
-const creatureRadius = 3;
+const creatureRadius = 5;
 
 const cachedSorts: Map<string, any> = new Map();
 const cachedObjects: Map<string, any> = new Map();

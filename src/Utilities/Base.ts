@@ -21,9 +21,9 @@ export function isGoodBuildTile(context: Context, point: IVector3, tile: ITile):
 	}
 
 	if (!hasBase(context)) {
-		// this is the first base item. don't make it on sand or gravel
-		const tileType = TileHelpers.getType(game.getTileFromPoint(point));
-		if (tileType === TerrainType.BeachSand || tileType === TerrainType.DesertSand || tileType === TerrainType.Gravel) {
+		// this is the first base item. don't make it on beach sand or gravel
+		const tileType = TileHelpers.getType(tile);
+		if (tileType === TerrainType.BeachSand || tileType === TerrainType.Gravel) {
 			return false;
 		}
 

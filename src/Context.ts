@@ -1,6 +1,7 @@
 import Player from "entity/player/Player";
 import { ItemType } from "item/IItem";
 import Item from "item/Item";
+import { IVector3 } from "utilities/math/IVector";
 
 import { IBase, IInventoryItems } from "./ITars";
 
@@ -29,12 +30,17 @@ export enum ContextDataType {
 	 * Prioritize using items from base chest for the objective over gather out in the field
 	 */
 	PrioritizeBaseChests = "PrioritizeBaseChests",
+
+	/**
+	 * Set when TARS is moving to a new island
+	 */
+	MovingToNewIsland = "MovingToNewIsland",
 }
 
 export class ContextState {
 
 	constructor(
-		public depth: number,
+		public depth: number = 0,
 		public includeHashCode: boolean = false,
 		public minimumAcceptedDifficulty?: number | undefined,
 		public readonly reservedItems: Set<number> = new Set(),
@@ -118,7 +124,7 @@ export default class Context {
 		public readonly player: Player /*| NPC*/,
 		public readonly base: IBase,
 		public readonly inventory: IInventoryItems,
-		public state = new ContextState(0),
+		public state = new ContextState(),
 		public readonly calculatingDifficulty: boolean = false,
 		private initialState?: ContextState) {
 	}
@@ -196,8 +202,8 @@ export default class Context {
 		}
 	}
 
-	public setInitialState() {
-		this.initialState = this.state.clone(false);
+	public setInitialState(state: ContextState = this.state.clone(false)) {
+		this.initialState = state;
 	}
 
 	public reset() {

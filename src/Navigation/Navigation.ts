@@ -129,7 +129,7 @@ export default class Navigation {
 	}
 
 	public showOverlay() {
-		this.updateOverlayAlpha(255);
+		this.updateOverlayAlpha(150);
 	}
 
 	public hideOverlay() {
@@ -257,6 +257,7 @@ export default class Navigation {
 			node.disabled = isDisabled;
 		} catch (ex) {
 			log.error("invalid node", x, y, penalty, isDisabled);
+			console.trace();
 		}
 
 		if (array) {

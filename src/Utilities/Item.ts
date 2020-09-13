@@ -252,6 +252,7 @@ export function getInventoryItemsWithUse(context: Context, use: ActionType, filt
 		});
 }
 
+// todo: make this and related methods return a Set?
 export function getReservedItems(context: Context) {
 	return context.player.inventory.containedItems
 		.filter(item => context.isReservedItem(item) && !isInventoryItem(context, item));

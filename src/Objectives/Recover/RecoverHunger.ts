@@ -35,7 +35,7 @@ export default class RecoverHunger extends Objective {
 
 				const decayingSoonFoodItems = this.getFoodItems(context).filter(item => item.decay === undefined || item.decay < 10);
 				if (decayingSoonFoodItems.length > 0) {
-					this.log.info(`Eating ${decayingSoonFoodItems[0].getName(false).getString()}`);
+					this.log.info(`Eating ${decayingSoonFoodItems[0].getName(false).getString()} since it's decaying soon (${decayingSoonFoodItems[0].decay})`);
 					return new UseItem(ActionType.Eat, decayingSoonFoodItems[0]);
 				}
 			}

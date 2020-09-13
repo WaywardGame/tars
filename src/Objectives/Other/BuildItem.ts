@@ -1,6 +1,7 @@
 import Doodad from "doodad/Doodad";
 import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
 import { ActionType } from "entity/action/IAction";
+import { BiomeType } from "game/IBiome";
 import Item from "item/Item";
 import { TerrainType } from "tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
@@ -25,7 +26,7 @@ const recalculateMovements = 40;
 
 const nearRocksDistance = Math.pow(24, 2);
 
-const nearSeawaterDistance = Math.pow(24, 2);
+const nearWaterDistance = Math.pow(24, 2);
 
 export default class BuildItem extends Objective {
 
@@ -196,9 +197,41 @@ export default class BuildItem extends Objective {
 
 	private async isGoodTargetOrigin(context: Context, origin: IVector3): Promise<boolean> {
 		// build our base near trees, grass, and open tiles
-		let tree = 0;
-		let grass = 0;
+		let nearbyTrees = 0;
+		let nearbyCommonTiles = 0;
 		// let openTiles = 0;
+
+		let commonTerrainType: TerrainType;
+		let rockType: TerrainType;
+		let waterType: TerrainType;
+		let treeRequirementCount = 6;
+
+		switch (island.biomeType) {
+			case BiomeType.Coastal:
+				commonTerrainType = TerrainType.Grass;
+				rockType = TerrainType.Rocks;
+				waterType = TerrainType.ShallowSeawater;
+				break;
+
+			case BiomeType.IceCap:
+				commonTerrainType = TerrainType.Snow;
+				rockType = TerrainType.RocksWithSnow;
+				waterType = TerrainType.FreezingSeawater;
+				break;
+
+			case BiomeType.Arid:
+				commonTerrainType = TerrainType.DesertSand;
+				rockType = TerrainType.Sandstone;
+				waterType = TerrainType.ShallowSeawater;
+				treeRequirementCount = 3;
+				break;
+
+			default:
+				commonTerrainType = TerrainType.Dirt;
+				rockType = TerrainType.Rocks;
+				waterType = TerrainType.ShallowSeawater;
+				break;
+		}
 
 		for (let x = -6; x <= 6; x++) {
 			for (let y = -6; y <= 6; y++) {
@@ -216,34 +249,30 @@ export default class BuildItem extends Objective {
 				if (tile.doodad) {
 					const description = tile.doodad.description();
 					if (description && description.isTree) {
-						tree++;
+						nearbyTrees++;
 					}
 
 				} else if (Base.isGoodBuildTile(context, point, tile)) {
-					const tileType = TileHelpers.getType(tile);
-					if (tileType === TerrainType.Grass) {
-						grass++;
+					if (TileHelpers.getType(tile) === commonTerrainType) {
+						nearbyCommonTiles++;
 					}
 				}
 			}
 		}
 
-		if (grass < 20 || tree < 6) {
+		if (nearbyCommonTiles < 20 || nearbyTrees < treeRequirementCount) {
 			return false;
 		}
 
 		// build close to rocks
-		const rockTileLocations = await getNearestTileLocation(origin, TerrainType.Rocks);
-		const sandstoneTileLocations = await getNearestTileLocation(origin, TerrainType.Sandstone);
-
-		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance) &&
-			sandstoneTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance)) {
+		const rockTileLocations = await getNearestTileLocation(origin, rockType);
+		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance)) {
 			return false;
 		}
 
 		// buiuld close to a water source
-		const shallowSeawaterTileLocations = await getNearestTileLocation(origin, TerrainType.ShallowSeawater);
-		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearSeawaterDistance)) {
+		const shallowSeawaterTileLocations = await getNearestTileLocation(origin, waterType);
+		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearWaterDistance)) {
 			return false;
 		}
 

@@ -64,6 +64,8 @@ enum TerrainType {
 	DeepFreshWater = 3,
 	FreshWater = 4,
 	ShallowFreshWater = 5,
+	FreezingFreshWater = 41,
+	FreezingSeawater = 43,
 }
 
 enum WorldZ {
@@ -208,8 +210,8 @@ class Navigation {
 	}
 
 	private updateWaterTiles(navigationInfo: INavigationInfo, tileType: TerrainType, x: number, y: number, insert: boolean) {
-		const isFreshWater = tileType === TerrainType.ShallowFreshWater || tileType === TerrainType.FreshWater || tileType === TerrainType.DeepFreshWater;
-		const isSeawater = tileType === TerrainType.ShallowSeawater || tileType === TerrainType.Seawater || tileType === TerrainType.DeepSeawater;
+		const isFreshWater = tileType === TerrainType.ShallowFreshWater || tileType === TerrainType.FreezingFreshWater || tileType === TerrainType.FreshWater || tileType === TerrainType.DeepFreshWater;
+		const isSeawater = tileType === TerrainType.ShallowSeawater || tileType === TerrainType.FreezingSeawater || tileType === TerrainType.Seawater || tileType === TerrainType.DeepSeawater;
 
 		if (isFreshWater || isSeawater) {
 			if (insert) {

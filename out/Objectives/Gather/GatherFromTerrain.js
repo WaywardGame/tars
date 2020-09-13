@@ -47,7 +47,7 @@ define(["require", "exports", "entity/action/IAction", "item/IItem", "tile/ITerr
                                 break;
                             }
                             chanceForHit = loot.chance / 100;
-                            difficulty += 50 * (1 - chanceForHit);
+                            difficulty += 60 * (1 - chanceForHit);
                         }
                         else {
                             difficulty += 5;

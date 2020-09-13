@@ -1,6 +1,8 @@
 import { ActionType } from "entity/action/IAction";
+import { Stat } from "entity/IStats";
 import { getDirectionFromMovement } from "entity/player/IPlayer";
 import terrainDescriptions from "tile/Terrains";
+import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
@@ -35,8 +37,9 @@ export default class RunAwayFromTarget extends Objective {
 				}
 
 				const terrainType = TileHelpers.getType(tile);
-				const terrainInfo = terrainDescriptions[terrainType];
-				if (terrainInfo && (!terrainInfo.passable && !terrainInfo.water)) {
+				const terrainDescription = terrainDescriptions[terrainType];
+				if (terrainDescription &&
+					((!terrainDescription.passable && !terrainDescription.water) || (terrainDescription.water && context.player.stat.get(Stat.Stamina)!.value <= 1))) {
 					return false;
 				}
 
@@ -54,7 +57,7 @@ export default class RunAwayFromTarget extends Objective {
 					return -1;
 				}
 
-				return Vector2.squaredDistance(pointA, context.player) > Vector2.squaredDistance(pointB, context.player) ? 1 : -1;
+				return Vector2.squaredDistance(pointA, this.target) < Vector2.squaredDistance(pointB, this.target) ? 1 : -1;
 			});
 
 		this.log.info("Valid points", validPoints);
@@ -69,6 +72,8 @@ export default class RunAwayFromTarget extends Objective {
 			}
 
 			const direction = getDirectionFromMovement(bestPoint.x - context.player.x, bestPoint.y - context.player.y);
+
+			this.log.info(`Running away ${Direction[direction]}`);
 
 			if (direction !== context.player.facingDirection) {
 				objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {

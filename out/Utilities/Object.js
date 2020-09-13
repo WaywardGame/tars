@@ -2,7 +2,7 @@ define(["require", "exports", "entity/IEntity", "utilities/math/Vector2", "./Til
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getNearbyCreature = exports.findCarvableCorpses = exports.findCreatures = exports.findDoodads = exports.findDoodad = exports.findObject = exports.findObjects = exports.getSortedObjects = exports.resetCachedObjects = exports.FindObjectType = void 0;
-    const creatureRadius = 3;
+    const creatureRadius = 5;
     const cachedSorts = new Map();
     const cachedObjects = new Map();
     var FindObjectType;

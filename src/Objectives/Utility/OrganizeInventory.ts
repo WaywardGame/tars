@@ -153,7 +153,20 @@ export default class OrganizeInventory extends Objective {
 		];
 	}
 
-	public static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]) {
+	public static moveIntoChestsObjectives(context: Context, itemsToMove: Item[]) {
+		const chests = context.base.chest.slice().concat(context.base.intermediateChest);
+
+		for (const chest of chests) {
+			const organizeInventoryObjectives = OrganizeInventory.moveIntoChestObjectives(context, chest, itemsToMove);
+			if (organizeInventoryObjectives) {
+				return organizeInventoryObjectives;
+			}
+		}
+
+		return undefined;
+	}
+
+	private static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]) {
 		const targetContainer = chest as IContainer;
 		const weight = itemManager.computeContainerWeight(targetContainer);
 		if (weight + itemsToMove[0].getTotalWeight() <= targetContainer.weightCapacity!) {

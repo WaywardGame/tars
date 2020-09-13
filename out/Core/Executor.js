@@ -62,7 +62,7 @@ define(["require", "exports", "entity/player/IPlayer", "../Utilities/Logger", ".
                 for (const o of objs) {
                     const plan = await Planner_1.default.createPlan(context, o);
                     if (!plan) {
-                        Logger_1.log.warn(`No valid plan for ${o.getHashCode()}`);
+                        Logger_1.log.info(`No valid plan for ${o.getHashCode()}`);
                         break;
                     }
                     const result = await plan.execute(() => {

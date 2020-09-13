@@ -4,7 +4,7 @@ import Item from "item/Item";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
+import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
 import { getInventoryItemsWithEquipType, getInventoryItemsWithUse } from "../../Utilities/Item";
 
@@ -21,55 +21,63 @@ export default class AnalyzeInventory extends Objective {
 
 		const keys = Object.keys(inventoryItemInfo) as Array<keyof IInventoryItems>;
 		for (const key of keys) {
-			let itemOrItems = context.inventory[key];
+			const itemInfo = inventoryItemInfo[key];
+			const itemOrItems = context.inventory[key];
 
 			if (itemOrItems !== undefined) {
 				let invalidate = false;
 
 				if (Array.isArray(itemOrItems)) {
-					itemOrItems = (context.inventory[key] as any) = itemOrItems.filter(item => item.isValid() && itemManager.isContainableInContainer(item, context.player.inventory));
-					if (itemOrItems.length === 0) {
-						invalidate = true;
+					const validItems = itemOrItems.filter(item => this.isValid(context, itemInfo, item));
+
+					if (itemOrItems.length !== validItems.length) {
+						if (validItems.length > 0) {
+							this.log.info(`"${key}" changed from ${itemOrItems.map(item => item).join(", ")} to ${validItems.map(item => item).join(", ")}`);
+							context.inventory[key] = validItems as any;
+
+						} else {
+							invalidate = true;
+						}
 					}
 
-				} else if (!itemOrItems.isValid() || !itemManager.isContainableInContainer(itemOrItems, context.player.inventory)) {
+				} else if (!this.isValid(context, itemInfo, itemOrItems)) {
 					invalidate = true;
 				}
 
 				if (invalidate) {
-					itemOrItems = context.inventory[key] = undefined;
+					context.inventory[key] = undefined;
 					this.log.info(`"${key}" was removed`);
 				}
 			}
 
-			const itemInfo = inventoryItemInfo[key];
 			const flags = itemInfo.flags !== undefined ? itemInfo.flags : InventoryItemFlag.PreferHigherWorth;
 
-			const items: Item[] = [];
+			// use a set to prevent duplicates
+			const items: Set<Item> = new Set();
 
 			if (itemInfo.itemTypes) {
 				for (const itemTypeOrGroup of itemInfo.itemTypes) {
 					if (itemManager.isGroup(itemTypeOrGroup)) {
-						items.push(...itemManager.getItemsInContainerByGroup(context.player.inventory, itemTypeOrGroup));
+						items.addFrom(itemManager.getItemsInContainerByGroup(context.player.inventory, itemTypeOrGroup));
 
 					} else {
-						items.push(...itemManager.getItemsInContainerByType(context.player.inventory, itemTypeOrGroup));
+						items.addFrom(itemManager.getItemsInContainerByType(context.player.inventory, itemTypeOrGroup));
 					}
 				}
 			}
 
 			if (itemInfo.actionTypes) {
 				for (const useType of itemInfo.actionTypes) {
-					items.push(...getInventoryItemsWithUse(context, useType));
+					items.addFrom(getInventoryItemsWithUse(context, useType));
 				}
 			}
 
 			if (itemInfo.equipType) {
-				items.push(...getInventoryItemsWithEquipType(context, itemInfo.equipType));
+				items.addFrom(getInventoryItemsWithEquipType(context, itemInfo.equipType));
 			}
 
-			if (items.length > 0) {
-				const sortedItems = items.sort((itemA, itemB) => {
+			if (items.size > 0) {
+				const sortedItems = Array.from(items).sort((itemA, itemB) => {
 					const descriptionA = itemA.description();
 					const descriptionB = itemB.description();
 
@@ -103,7 +111,7 @@ export default class AnalyzeInventory extends Objective {
 					const existingItems = context.inventory[key] as Item[] | undefined;
 
 					if (existingItems === undefined || (newItems.join(",") !== existingItems.join(","))) {
-						this.log.info(`Found "${key}" - ${newItems.map(item => item).join(", ")}`);
+						this.log.info(`Found "${key}" - ${newItems.map(item => item).join(", ")} `);
 					}
 
 					context.inventory[key] = newItems as any;
@@ -133,7 +141,7 @@ export default class AnalyzeInventory extends Objective {
 						}
 
 						context.inventory[key] = item as any;
-						this.log.info(`Found "${key}" - ${item}`);
+						this.log.info(`Found "${key}" - ${item} `);
 
 						if (itemInfo.protect) {
 							ActionExecutor.get(ActionType.ProtectItem).execute(context.player, item, true);
@@ -143,7 +151,24 @@ export default class AnalyzeInventory extends Objective {
 			}
 		}
 
+		this.log.debug(context.inventory);
+
 		return ObjectiveResult.Ignore;
 	}
 
+	private isValid(context: Context, itemInfo: IInventoryItemInfo, item: Item) {
+		if (!item.isValid()) {
+			return false;
+		}
+
+		if (itemManager.isContainableInContainer(item, context.player.inventory)) {
+			return true;
+		}
+
+		if (itemInfo.allowInChests) {
+			return context.base.chest.some(chest => itemManager.isContainableInContainer(item, chest));
+		}
+
+		return false;
+	}
 }

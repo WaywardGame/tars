@@ -166,6 +166,7 @@ export async function moveToTarget(context: Context, target: IVector3): Promise<
 
 export async function move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean): Promise<MoveResult> {
 	const movementPath = await getMovementPath(context, target, moveAdjacentToTarget);
+
 	if (movementPath.difficulty !== 0) {
 		if (!movementPath.path) {
 			return MoveResult.NoPath;

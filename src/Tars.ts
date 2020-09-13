@@ -28,14 +28,15 @@ import { ITile } from "tile/ITerrain";
 import { sleep } from "utilities/Async";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
+import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
-import Context from "./Context";
+import Context, { ContextDataType, ContextState } from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
 import planner from "./Core/Planner";
 import { IObjective, ObjectiveResult } from "./IObjective";
-import { IBase, IInventoryItems, inventoryItemInfo } from "./ITars";
+import { IBase, IInventoryItems, inventoryItemInfo, ISaveData } from "./ITars";
 import Navigation from "./Navigation/Navigation";
 import Objective from "./Objective";
 import AcquireFood from "./Objectives/Acquire/Item/AcquireFood";
@@ -69,6 +70,8 @@ import RecoverHealth from "./Objectives/Recover/RecoverHealth";
 import RecoverHunger from "./Objectives/Recover/RecoverHunger";
 import RecoverStamina from "./Objectives/Recover/RecoverStamina";
 import RecoverThirst from "./Objectives/Recover/RecoverThirst";
+import MoveToLand from "./Objectives/Utility/MoveToLand";
+import MoveToNewIsland from "./Objectives/Utility/MoveToNewIsland";
 import OrganizeBase from "./Objectives/Utility/OrganizeBase";
 import OrganizeInventory from "./Objectives/Utility/OrganizeInventory";
 import * as Action from "./Utilities/Action";
@@ -115,6 +118,9 @@ export default class Tars extends Mod {
 	@Register.message("NavigationUpdated")
 	public readonly messageNavigationUpdated: Message;
 
+	@Mod.saveData<Tars>("TARS")
+	public saveData: ISaveData;
+
 	private base: IBase;
 	private inventory: IInventoryItems;
 
@@ -127,7 +133,7 @@ export default class Tars extends Mod {
 	private interruptObjectivePipeline: Array<IObjective | IObjective[]> | undefined;
 	private interruptContext: Context | undefined;
 	private readonly interruptContexts: Map<number, Context> = new Map();
-	private interruptsId: string | undefined;
+	private interruptIds: Set<string> | undefined;
 
 	private tickTimeoutId: number | undefined;
 
@@ -168,6 +174,13 @@ export default class Tars extends Mod {
 	////////////////////////////////////////////////
 	// Hooks
 	////////////////////////////////////////////////
+
+	@EventHandler(EventBus.Game, "play")
+	public onGameStart(): void {
+		if (this.saveData.enabled && !this.isEnabled()) {
+			this.toggle();
+		}
+	}
 
 	@EventHandler(EventBus.Game, "end")
 	public onGameEnd(state?: PlayerState): void {
@@ -235,8 +248,9 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.Ui, "interrupt")
 	public onInterrupt(host: NewUi, options: Partial<InterruptOptions>, interrupt?: Interrupt): string | boolean | void | InterruptChoice | undefined {
-		if (this.isEnabled() && interrupt === Interrupt.GameDangerousStep) {
-			return true;
+		if (this.isEnabled() && (interrupt === Interrupt.GameDangerousStep || interrupt === Interrupt.GameTravelConfirmation)) {
+			log.info(`Returning true for interrupt ${Interrupt[interrupt]}`);
+			return InterruptChoice.Yes;
 		}
 	}
 
@@ -287,7 +301,7 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context);
+		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext);
 		if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
 			this.interrupt(...organizeInventoryInterrupts);
 		}
@@ -374,7 +388,7 @@ export default class Tars extends Mod {
 		executor.reset();
 		this.objectivePipeline = undefined;
 		this.interruptObjectivePipeline = undefined;
-		this.interruptsId = undefined;
+		this.interruptIds = undefined;
 		this.interruptContext = undefined;
 		this.interruptContexts.clear();
 	}
@@ -450,10 +464,9 @@ export default class Tars extends Mod {
 
 		this.reset();
 
-		if (this.isEnabled()) {
-			this.disable();
+		this.saveData.enabled = !this.isEnabled();
 
-		} else {
+		if (this.saveData.enabled) {
 			if (this.navigation) {
 				this.navigation.showOverlay();
 
@@ -463,6 +476,9 @@ export default class Tars extends Mod {
 			}
 
 			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
+
+		} else {
+			this.disable();
 		}
 	}
 
@@ -535,14 +551,25 @@ export default class Tars extends Mod {
 
 		// interrupts
 		const interrupts = this.getInterrupts(this.context);
-		const interruptsId = interrupts
-			.filter(objective => objective !== undefined)
-			.map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective!.getIdentifier())
-			.join(", ");
+		const interruptIds = new Set<string>(interrupts
+			.filter(objective => Array.isArray(objective) ? objective.length > 0 : objective !== undefined)
+			.map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective!.getIdentifier()));
 
-		if (this.interruptsId !== interruptsId) {
-			log.info(`Interrupts changed from ${this.interruptsId} to ${interruptsId}`);
-			this.interruptsId = interruptsId;
+		let interruptsChanged = this.interruptIds === undefined && interruptIds.size > 0;
+		if (!interruptsChanged && this.interruptIds !== undefined) {
+			// change if a new interrupt was added - ignore removes
+			for (const interruptId of interruptIds) {
+				if (!this.interruptIds.has(interruptId)) {
+					// a new interrupt was added
+					interruptsChanged = true;
+					break;
+				}
+			}
+		}
+
+		if (interruptsChanged) {
+			log.info(`Interrupts changed from ${this.interruptIds ? Array.from(this.interruptIds).join(", ") : undefined} to ${Array.from(interruptIds).join(", ")}`);
+			this.interruptIds = interruptIds;
 			this.interruptObjectivePipeline = undefined;
 		}
 
@@ -587,7 +614,7 @@ export default class Tars extends Mod {
 							log.info(`Updated continuing interrupt objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.interruptObjectivePipeline));
 
 						} else {
-							log.info(`Ignoring continuing interrupt objectives due to changed interrupts - ${ExecuteObjectivesResultType[result.type]}`);
+							log.info(`Ignoring continuing interrupt objectives due to changed interrupts - ${ExecuteObjectivesResultType[result.type]}. Before: ${interruptHashCode}. After: ${afterInterruptHashCode}`);
 						}
 
 						return;
@@ -743,6 +770,16 @@ export default class Tars extends Mod {
 		const hands = context.player.getEquippedItem(EquipType.Hands);
 
 		const objectives: Array<IObjective | IObjective[]> = [];
+
+		if (context.getData(ContextDataType.MovingToNewIsland) !== true && this.inventory.sailBoat && itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
+			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
+			objectives.push([
+				new MoveToLand(),
+				new ExecuteAction(ActionType.Drop, (context, action) => {
+					action.execute(context.player, this.inventory.sailBoat!);
+				}),
+			]);
+		}
 
 		const gatherItem = getBestActionItem(context, ActionType.Gather, DamageType.Slashing);
 		if (gatherItem === undefined) {
@@ -1051,26 +1088,77 @@ export default class Tars extends Mod {
 			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
 		}
 
-		// if (!this.inventory.sailBoat) {
-		// 	objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
-		// }
+		if (this.inventory.axe && this.inventory.axe.type === ItemType.StoneAxe) {
+			objectives.push([new UpgradeInventoryItem("axe"), new AnalyzeInventory()]);
+		}
+
+		if (this.inventory.pickAxe && this.inventory.pickAxe.type === ItemType.StonePickaxe) {
+			objectives.push([new UpgradeInventoryItem("pickAxe"), new AnalyzeInventory()]);
+		}
+
+		if (this.inventory.shovel && this.inventory.shovel.type === ItemType.StoneShovel) {
+			objectives.push([new UpgradeInventoryItem("shovel"), new AnalyzeInventory()]);
+		}
+
+		if (this.inventory.hoe && this.inventory.hoe.type === ItemType.StoneHoe) {
+			objectives.push([new UpgradeInventoryItem("hoe"), new AnalyzeInventory()]);
+		}
 
 		/*
 			End game objectives
 		*/
-		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		if (health.value / health.max < 0.9) {
-			objectives.push(new RecoverHealth());
+
+		if (!multiplayer.isConnected()) {
+			// move to a new island
+
+			objectives.push(new Lambda(async context => {
+				const initialState = new ContextState();
+				initialState.set(ContextDataType.MovingToNewIsland, true);
+				this.context.setInitialState(initialState);
+				return ObjectiveResult.Complete;
+			}));
+
+			const needsFood = this.inventory.food === undefined || this.inventory.food.length < 2;
+
+			// make a sail boat
+			if (!this.inventory.sailBoat) {
+				objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
+
+			} else if (itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory) && needsFood) {
+				// don't carry the sail boat around
+				const organizeInventoryObjectives = OrganizeInventory.moveIntoChestsObjectives(context, [this.inventory.sailBoat]);
+				if (organizeInventoryObjectives) {
+					objectives.push(organizeInventoryObjectives);
+				}
+			}
+
+			// stock up on food
+			if (needsFood) {
+				objectives.push([new AcquireFood(), new AnalyzeInventory()]);
+			}
+
+			if (this.inventory.sailBoat && !itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
+				// it should grab it from our chest
+				objectives.push(new AcquireItem(ItemType.Sailboat));
+			}
+
+			objectives.push(new MoveToNewIsland());
+
+		} else {
+			const health = context.player.stat.get<IStatMax>(Stat.Health);
+			if (health.value / health.max < 0.9) {
+				objectives.push(new RecoverHealth());
+			}
+
+			const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
+			if (hunger.value / hunger.max < 0.7) {
+				objectives.push(new RecoverHunger(true));
+			}
+
+			objectives.push(new ReturnToBase());
+
+			objectives.push(new OrganizeInventory());
 		}
-
-		const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
-		if (hunger.value / hunger.max < 0.7) {
-			objectives.push(new RecoverHunger(true));
-		}
-
-		objectives.push(new ReturnToBase());
-
-		objectives.push(new OrganizeInventory());
 
 		if (!multiplayer.isConnected()) {
 			if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
@@ -1511,7 +1599,7 @@ export default class Tars extends Mod {
 	 * Move reserved items into intermediate chests if the player is near the base and is moving away
 	 * Explicitly not using OrganizeInventory for this - the exact objectives should be specified to prevent issues
 	 */
-	private organizeInventoryInterrupts(context: Context): IObjective[] | undefined {
+	private organizeInventoryInterrupts(context: Context, interruptContext?: Context): IObjective[] | undefined {
 		const walkPath = context.player.walkPath;
 		if (walkPath === undefined || walkPath.path.length === 0) {
 			return undefined;
@@ -1526,37 +1614,42 @@ export default class Tars extends Mod {
 			return undefined;
 		}
 
-		const chests = context.base.chest.slice().concat(context.base.intermediateChest);
-
 		let objectives: IObjective[] = [];
 
 		const reservedItems = getReservedItems(context);
+
+		const interruptReservedItems = interruptContext ? getReservedItems(interruptContext) : undefined;
+		// if (interruptReservedItems) {
+		// 	reservedItems = reservedItems.filter(item => !interruptReservedItems.includes(item));
+		// }
+
 		if (reservedItems.length > 0) {
-			for (const chest of chests) {
-				const organizeInventoryObjectives = OrganizeInventory.moveIntoChestObjectives(context, chest, reservedItems);
-				if (organizeInventoryObjectives) {
-					objectives = objectives.concat(organizeInventoryObjectives);
-					break;
-				}
+			const organizeInventoryObjectives = OrganizeInventory.moveIntoChestsObjectives(context, reservedItems);
+			if (organizeInventoryObjectives) {
+				objectives = objectives.concat(organizeInventoryObjectives);
 			}
 		}
 
-		const unusedItems = getUnusedItems(context);
+		let unusedItems = getUnusedItems(context);
+
+		// todo: this might be hiding a bug related to CompleteRequirements running after aquiring items from chests (infinite looping)
+		const interruptUnusedItems = interruptContext ? getUnusedItems(interruptContext) : undefined;
+		if (interruptUnusedItems) {
+			unusedItems = unusedItems.filter(item => !interruptReservedItems?.includes(item) && !interruptUnusedItems.includes(item));
+		}
+
 		if (unusedItems.length > 0) {
-			for (const chest of chests) {
-				const organizeInventoryObjectives = OrganizeInventory.moveIntoChestObjectives(context, chest, unusedItems);
-				if (organizeInventoryObjectives) {
-					objectives = objectives.concat(organizeInventoryObjectives);
-					break;
-				}
+			const organizeInventoryObjectives = OrganizeInventory.moveIntoChestsObjectives(context, unusedItems);
+			if (organizeInventoryObjectives) {
+				objectives = objectives.concat(organizeInventoryObjectives);
 			}
 		}
 
-		if (objectives.length > 0) {
-			log.info("Going to organize inventory space");
-		} else {
-			log.info(`Will not organize inventory space. Reserved items: ${reservedItems.length}, Unused items: ${reservedItems.length}`);
-		}
+		log.info(
+			objectives.length > 0 ? "Going to organize inventory space" : "Will not organize inventory space",
+			`Reserved items: ${reservedItems.join(",")}, Unused items: ${unusedItems.join(",")}`,
+			`Context reserved items: ${Array.from(context.state.reservedItems).join(",")}`,
+			`Interrupt context reserved items: ${Array.from(interruptContext?.state.reservedItems ?? []).join(",")}`);
 
 		return objectives;
 	}
