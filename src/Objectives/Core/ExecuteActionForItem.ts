@@ -12,7 +12,7 @@ import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { executeAction } from "../../Utilities/Action";
 import { getBestActionItem, getInventoryItemsWithUse } from "../../Utilities/Item";
-import { canCarveCorpse, canDig } from "../../Utilities/Tile";
+import { canCarveCorpse, canDig, canGather } from "../../Utilities/Tile";
 
 export enum ExecuteActionType {
 	Generic,
@@ -74,6 +74,10 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 				const description = doodad.description();
 				if (!description) {
+					return ObjectiveResult.Complete;
+				}
+
+				if (!canGather(tile, true)) {
 					return ObjectiveResult.Complete;
 				}
 

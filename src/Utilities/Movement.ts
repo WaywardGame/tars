@@ -45,7 +45,9 @@ export function resetMovementOverlays() {
 
 	movementOverlays.length = 0;
 
-	game.updateView(RenderSource.Mod, false);
+	if (game.playing) {
+		game.updateView(RenderSource.Mod, false);
+	}
 }
 
 export function clearOverlay(tile: ITile) {

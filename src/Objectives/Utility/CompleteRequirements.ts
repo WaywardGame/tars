@@ -1,10 +1,14 @@
 import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
+import { ActionType } from "entity/action/IAction";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import AcquireBuildMoveToDoodad from "../Acquire/Doodad/AcquireBuildMoveToDoodad";
 import AcquireBuildMoveToFire from "../Acquire/Doodad/AcquireBuildMoveToFire";
+import AnalyzeBase from "../Analyze/AnalyzeBase";
+import ExecuteAction from "../Core/ExecuteAction";
+import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import StartFire from "../Other/StartFire";
 
@@ -31,7 +35,7 @@ export default class CompleteRequirements extends Objective {
 		const objectives: IObjective[] = [];
 
 		if (this.requiredDoodad !== undefined && this.requiresFire) {
-			this.log.info("Requires doodad and fire too");
+			this.log.info("Requires doodad and fire too", this.requiredDoodad);
 
 			if (this.requiredDoodad !== DoodadTypeGroup.Anvil) {
 				this.log.error("Required doodad is not an anvil", this.requiredDoodad);
@@ -43,6 +47,20 @@ export default class CompleteRequirements extends Objective {
 
 			if (!anvil) {
 				objectives.push(new AcquireBuildMoveToDoodad(this.requiredDoodad));
+				objectives.push(new AnalyzeBase());
+				objectives.push(new Lambda(async context => {
+					if (!context.base.anvil[0]) {
+						// the anvil we went to is not our base anvil
+						// it was probably not placed correctly
+						// pick it up. the object will be then built in the correct spot
+						this.log.info("Picking up anvil to place it next to the kiln");
+						return new ExecuteAction(ActionType.Pickup, (context, action) => {
+							action.execute(context.player);
+						});
+					}
+
+					return ObjectiveResult.Complete;
+				}));
 			}
 
 			if (!kiln) {

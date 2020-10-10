@@ -6,7 +6,8 @@ import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { getInventoryItemsWithUse } from "../../Utilities/Item";
 import { getNearbyCreature } from "../../Utilities/Object";
-import { isSwimming } from "../../Utilities/Tile";
+import { isUsingVehicle } from "../../Utilities/Player";
+import { isOverWater } from "../../Utilities/Tile";
 import ExecuteAction from "../Core/ExecuteAction";
 import ReduceWeight from "../Interrupt/ReduceWeight";
 import MoveToLand from "../Utility/MoveToLand";
@@ -25,7 +26,7 @@ export default class Rest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (isSwimming(context)) {
+		if (isOverWater(context) && !isUsingVehicle(context)) {
 			return new MoveToLand();
 		}
 

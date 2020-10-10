@@ -5,7 +5,8 @@ import Item from "item/Item";
 import Context, { ContextDataType } from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { isSwimming } from "../../Utilities/Tile";
+import { isUsingVehicle } from "../../Utilities/Player";
+import { isOverWater } from "../../Utilities/Tile";
 import AcquireItem from "../Acquire/Item/AcquireItem";
 import CopyContextData from "../ContextData/CopyContextData";
 import SetContextData from "../ContextData/SetContextData";
@@ -38,7 +39,7 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (isSwimming(context)) {
+		if (isOverWater(context) && !isUsingVehicle(context)) {
 			return ObjectiveResult.Ignore;
 		}
 

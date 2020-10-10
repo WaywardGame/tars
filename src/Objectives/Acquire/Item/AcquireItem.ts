@@ -6,6 +6,7 @@ import { ItemType } from "item/IItem";
 import { itemDescriptions } from "item/Items";
 import { TerrainType } from "tile/ITerrain";
 import TerrainResources from "tile/TerrainResources";
+import terrainDescriptions from "tile/Terrains";
 import Enums from "utilities/enum/Enums";
 
 import Context from "../../../Context";
@@ -91,14 +92,64 @@ export default class AcquireItem extends AcquireBase {
 
 			// todo: figure out a better way to handle this
 			if (this.itemType !== ItemType.PlantRoots) {
-				for (const tt of Enums.values(TerrainType)) {
-					const resource = TerrainResources[tt];
+				const resolvedTypes: Map<TerrainType, ITerrainSearch[]> = new Map();
+
+				const unresolvedTypes: TerrainType[] = Array.from(Enums.values(TerrainType));
+
+				while (unresolvedTypes.length > 0) {
+					const terrainType = unresolvedTypes.shift()!;
+
+					const terrainDescription = terrainDescriptions[terrainType];
+					if (!terrainDescription) {
+						continue;
+					}
+
+					const leftOvers = terrainDescription.leftOvers;
+					if (leftOvers !== undefined) {
+						for (const leftOver of leftOvers) {
+							const leftOverType = leftOver.terrainType;
+							const leftOverSearch = resolvedTypes.get(leftOverType);
+							if (leftOverSearch === undefined) {
+								// we have not resolved the search for the left over type yet
+								// keep this as unresolved and try again later
+								unresolvedTypes.push(leftOverType);
+								continue;
+							}
+						}
+					}
+
+					let terrainSearches = resolvedTypes.get(terrainType);
+					if (!terrainSearches) {
+						terrainSearches = [];
+						resolvedTypes.set(terrainType, terrainSearches);
+					}
+
+					const resource = TerrainResources[terrainType];
 					if (resource && (resource.defaultItem === this.itemType || resource.items.some(ri => ri.type === this.itemType))) {
-						search.push({
-							type: tt,
+						const terrainSearch: ITerrainSearch = {
+							type: terrainType,
 							itemType: this.itemType,
 							resource: resource,
-						});
+						};
+
+						search.push(terrainSearch);
+						terrainSearches.push(terrainSearch);
+					}
+
+					if (leftOvers) {
+						for (const leftOver of leftOvers) {
+							const terrainSearches = resolvedTypes.get(leftOver.terrainType);
+							if (terrainSearches) {
+								for (const terrainSearch of terrainSearches) {
+									search.push({
+										type: terrainType,
+										itemType: this.itemType,
+										resource: terrainSearch.resource,
+										extraDifficulty: 5, // random number. todo: use this
+									});
+								}
+							}
+						}
 					}
 				}
 			}

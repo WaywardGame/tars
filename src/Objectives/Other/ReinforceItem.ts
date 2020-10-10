@@ -30,7 +30,7 @@ export default class ReinforceItem extends Objective {
 		}
 
 		if (this.threshold !== undefined) {
-			const defaultDuribility = itemManager.getDefaultDurability(context.player, this.item.weight, this.item.type);
+			const defaultDuribility = itemManager.getDefaultDurability(context.player, this.item.weight, this.item.type, true);
 			if (maxDur / defaultDuribility > this.threshold) {
 				return ObjectiveResult.Ignore;
 			}

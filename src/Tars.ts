@@ -11,6 +11,7 @@ import Player from "entity/player/Player";
 import { EventBus } from "event/EventBuses";
 import { EventHandler } from "event/EventManager";
 import { TileUpdateType, TurnMode } from "game/IGame";
+import { WorldZ } from "game/WorldZ";
 import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
 import Item from "item/Item";
 import Interrupt from "language/dictionary/Interrupt";
@@ -72,12 +73,13 @@ import RecoverStamina from "./Objectives/Recover/RecoverStamina";
 import RecoverThirst from "./Objectives/Recover/RecoverThirst";
 import MoveToLand from "./Objectives/Utility/MoveToLand";
 import MoveToNewIsland from "./Objectives/Utility/MoveToNewIsland";
+import MoveToZ from "./Objectives/Utility/MoveToZ";
 import OrganizeBase from "./Objectives/Utility/OrganizeBase";
 import OrganizeInventory from "./Objectives/Utility/OrganizeInventory";
 import * as Action from "./Utilities/Action";
 import { getTilesWithItemsNearBase, isNearBase } from "./Utilities/Base";
 import { canGatherWater, estimateDamageModifier, getBestActionItem, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getReservedItems, getSeeds, getUnusedItems, isSafeToDrinkItem } from "./Utilities/Item";
-import { log, preConsoleCallback } from "./Utilities/Logger";
+import { log, logSourceName, preConsoleCallback } from "./Utilities/Logger";
 import * as movementUtilities from "./Utilities/Movement";
 import * as objectUtilities from "./Utilities/Object";
 import * as tileUtilities from "./Utilities/Tile";
@@ -143,6 +145,8 @@ export default class Tars extends Mod {
 
 	public onInitialize(): void {
 		Navigation.setModPath(this.getPath());
+
+		Log.setSourceFilter(Log.LogType.File, false, logSourceName);
 	}
 
 	public onUninitialize(): void {
@@ -304,6 +308,18 @@ export default class Tars extends Mod {
 		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext);
 		if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
 			this.interrupt(...organizeInventoryInterrupts);
+		}
+	}
+
+	@EventHandler(EventBus.LocalPlayer, "preMove")
+	public preMove(player: Player, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
+		if (!this.isEnabled() || !player.hasWalkPath()) {
+			return;
+		}
+
+		if (nextTile.npc || (nextTile.doodad && nextTile.doodad.blocksMove())) {
+			log.info("Interrupting due to blocked movement");
+			this.interrupt();
 		}
 	}
 
@@ -999,7 +1015,9 @@ export default class Tars extends Mod {
 						objectives.push(new EmptyWaterContainer(availableWaterContainer));
 					}
 
-					objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, allowStartingWaterStill: true }));
+					// we are looking for something drinkable
+					// if there is a well, starting the water still will use it
+					objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }));
 				}
 			}
 
@@ -1197,6 +1215,7 @@ export default class Tars extends Mod {
 			this.gatherFromCorpsesInterrupt(context),
 			this.hungerInterrupt(context),
 			this.repairsInterrupt(context),
+			this.escapeCavesInterrupt(context),
 			this.returnToBaseInterrupt(context),
 		];
 
@@ -1592,6 +1611,12 @@ export default class Tars extends Mod {
 	private returnToBaseInterrupt(context: Context): IObjective | undefined {
 		if (!isNearBase(context) && this.weightStatus !== WeightStatus.None && this.previousWeightStatus === WeightStatus.Overburdened) {
 			return new ReturnToBase();
+		}
+	}
+
+	private escapeCavesInterrupt(context: Context) {
+		if (context.player.z === WorldZ.Cave) {
+			return new MoveToZ(WorldZ.Overworld);
 		}
 	}
 

@@ -1,5 +1,7 @@
 import Log, { ILog, LogLineType, LogSource } from "utilities/Log";
 
+export const logSourceName = "TARS";
+
 export let log = createLog();
 
 let queuedMessages: Array<{
@@ -48,7 +50,7 @@ export function processQueuedMessages() {
 export function createLog(...name: string[]) {
 	const log = new Log();
 
-	const sources: Array<LogSource | string> = ["MOD", "TARS"];
+	const sources: Array<LogSource | string> = ["MOD", logSourceName];
 
 	if (name.length > 0) {
 		sources.push(...name);

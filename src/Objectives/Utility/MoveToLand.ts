@@ -6,7 +6,7 @@ import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Navigation from "../../Navigation/Navigation";
 import Objective from "../../Objective";
-import { isSwimming } from "../../Utilities/Tile";
+import { isOverWater } from "../../Utilities/Tile";
 import MoveToTarget from "../Core/MoveToTarget";
 
 export default class MoveToLand extends Objective {
@@ -16,7 +16,7 @@ export default class MoveToLand extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!isSwimming(context)) {
+		if (!isOverWater(context)) {
 			return ObjectiveResult.Complete;
 		}
 

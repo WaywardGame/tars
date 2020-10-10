@@ -502,10 +502,6 @@ export default class Navigation {
 	}
 
 	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType): boolean {
-		if (tileType === TerrainType.CaveEntrance) {
-			return true;
-		}
-
 		if (tile.npc !== undefined) {
 			return true;
 		}
@@ -548,6 +544,10 @@ export default class Navigation {
 			penalty += 150;
 		}
 
+		if (tileType === TerrainType.CaveEntrance) {
+			penalty += 255;
+		}
+
 		// penalty for creatures on or next to the tile
 		for (let x = -1; x <= 1; x++) {
 			for (let y = -1; y <= 1; y++) {
@@ -564,7 +564,11 @@ export default class Navigation {
 		if (tile.doodad !== undefined) {
 			const description = tile.doodad.description();
 			if (description && !description.isDoor && !description.isGate) {
-				if (tile.doodad.blocksMove()) {
+				if (description.isWall) {
+					// walls are hard to pick up and we don't want to
+					penalty += 200;
+
+				} else if (tile.doodad.blocksMove()) {
 					// a gather doodad - large penalty
 					penalty += 15;
 
