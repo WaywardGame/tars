@@ -1,5 +1,7 @@
 import { ActionType } from "entity/action/IAction";
 import { ICorpse } from "entity/creature/corpse/ICorpse";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -16,6 +18,10 @@ export default class CarveCorpse extends Objective {
 
 	public getIdentifier(): string {
 		return `CarveCorpse:${this.corpse.id}`;
+	}
+
+	public getStatus(): string {
+		return `Carving ${Translation.nameOf(Dictionary.Creature, this.corpse.type).getString()} corpse`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -37,7 +43,7 @@ export default class CarveCorpse extends Objective {
 
 		objectives.push(new ExecuteAction(ActionType.Carve, (context, action) => {
 			action.execute(context.player, carveTool[0]);
-		}));
+		}).setStatus(this));
 
 		return objectives;
 	}

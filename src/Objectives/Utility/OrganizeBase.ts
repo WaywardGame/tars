@@ -19,6 +19,10 @@ export default class OrganizeBase extends Objective {
 		return "OrganizeBase";
 	}
 
+	public getStatus(): string {
+		return "Organizing base";
+	}
+
 	public canIncludeContextHashCode(): boolean {
 		return true;
 	}

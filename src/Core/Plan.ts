@@ -15,17 +15,17 @@ import { IPlanner } from "./IPlanner";
  */
 export default class Plan implements IPlan {
 
-	private readonly log: Log;
+	public readonly log: Log;
 
 	/**
 	 * Full execution tree
 	 */
-	private readonly tree: IExecutionTree;
+	public readonly tree: IExecutionTree;
 
 	/**
 	 * Flattened list of objectives to execute
 	 */
-	private readonly objectives: IObjectiveInfo[];
+	public readonly objectives: IObjectiveInfo[];
 
 	constructor(private readonly planner: IPlanner, private readonly context: Context, private readonly objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]) {
 		this.log = createLog("Plan", objectiveInfo.objective.getHashCode());
@@ -461,7 +461,7 @@ export default class Plan implements IPlan {
 			if (nextObjectiveInfo.depth < currentObjectiveInfo.depth) {
 				// depth is changing, force a restart
 				// todo: verify that we want this
-				results.push(new Lambda(async () => ObjectiveResult.Restart));
+				results.push(new Lambda(async () => ObjectiveResult.Restart).setStatus("Determining objective..."));
 				break;
 			}
 

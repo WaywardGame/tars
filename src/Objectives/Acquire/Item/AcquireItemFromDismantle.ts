@@ -2,6 +2,8 @@ import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
 import Item from "item/Item";
 import { itemDescriptions } from "item/Items";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { ListEnder } from "language/Translation";
 
 import Context, { ContextDataType } from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
@@ -27,7 +29,18 @@ export default class AcquireItemFromDismantle extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `AcquireItemFromDismantle:${ItemType[this.itemType]}:${this.dismantleItemTypes.map((itemType: ItemType) => ItemType[itemType])}`;
+		return `AcquireItemFromDismantle:${ItemType[this.itemType]}:${this.dismantleItemTypes.map((itemType: ItemType) => ItemType[itemType]).join(",")}`;
+	}
+
+	public getStatus(): string {
+		if (this.dismantleItemTypes.length > 1) {
+			const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+				.collect(Translation.formatList, ListEnder.Or);
+
+			return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
+		}
+
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${Translation.nameOf(Dictionary.Item, this.dismantleItemTypes[0]).getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -81,7 +94,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				}
 
 				action.execute(context.player, item);
-			}));
+			}).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

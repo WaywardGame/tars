@@ -16,6 +16,10 @@ export default class Unequip extends Objective {
 		return `Unequip:${this.item}`;
 	}
 
+	public getStatus(): string {
+		return `Unequipping ${this.item?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item || context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {

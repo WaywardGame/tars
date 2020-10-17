@@ -46,7 +46,7 @@ export default class GatherWaterFromStill extends Objective {
 			new MoveToTarget(this.waterStill, true),
 			new ExecuteAction(ActionType.UseItem, (context, action) => {
 				action.execute(context.player, this.item, ActionType.GatherWater);
-			}),
+			}).setStatus(() => `Gathering water from ${this.waterStill.getName()}`),
 		];
 	}
 

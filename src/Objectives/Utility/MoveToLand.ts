@@ -15,6 +15,10 @@ export default class MoveToLand extends Objective {
 		return "MoveToLand";
 	}
 
+	public getStatus(): string {
+		return "Moving to land";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (!isOverWater(context)) {
 			return ObjectiveResult.Complete;

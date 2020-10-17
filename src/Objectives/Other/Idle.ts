@@ -20,6 +20,10 @@ export default class Idle extends Objective {
 		return "Idle";
 	}
 
+	public getStatus(): string {
+		return "Idling";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[] = [];
 
@@ -30,7 +34,7 @@ export default class Idle extends Objective {
 			objectivePipelines.push(new Lambda(async (context, lambda) => {
 				lambda.log.info("Smart idling");
 				return ObjectiveResult.Complete;
-			}));
+			}).setStatus(this));
 
 		} else {
 			if (this.canMoveToIdle) {
@@ -44,12 +48,12 @@ export default class Idle extends Objective {
 
 			objectivePipelines.push(new ExecuteAction(ActionType.Idle, (context, action) => {
 				action.execute(context.player);
-			}));
+			}).setStatus(this));
 		}
 
 		// always Restart the objective after idling
 		// idling usually implies we're waiting for something. we don't want to automatically continue running the next objective in the pipeline
-		objectivePipelines.push(new Lambda(async () => ObjectiveResult.Restart));
+		objectivePipelines.push(new Lambda(async () => ObjectiveResult.Restart).setStatus(this));
 
 		return objectivePipelines;
 	}

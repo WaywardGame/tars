@@ -1,5 +1,7 @@
 import { ActionType } from "entity/action/IAction";
 import Item from "item/Item";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 
 import Context, { ContextDataType } from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -16,6 +18,10 @@ export default class UseItem extends Objective {
 		return `UseItem:${this.item}:${ActionType[this.actionType]}`;
 	}
 
+	public getStatus(): string {
+		return `Using ${this.item?.getName()} for ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item || context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
@@ -30,7 +36,7 @@ export default class UseItem extends Objective {
 
 		return new ExecuteAction(ActionType.UseItem, (context, action) => {
 			action.execute(context.player, item, this.actionType);
-		});
+		}).setStatus(this);
 	}
 
 }

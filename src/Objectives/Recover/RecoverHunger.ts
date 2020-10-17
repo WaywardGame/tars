@@ -20,6 +20,10 @@ export default class RecoverHunger extends Objective {
 		return "RecoverHunger";
 	}
 
+	public getStatus(): string {
+		return "Recovering hunger";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
 

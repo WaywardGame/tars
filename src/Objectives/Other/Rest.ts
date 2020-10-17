@@ -25,6 +25,10 @@ export default class Rest extends Objective {
 		return "Rest";
 	}
 
+	public getStatus(): string {
+		return "Resting";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (isOverWater(context) && !isUsingVehicle(context)) {
 			return new MoveToLand();
@@ -55,12 +59,12 @@ export default class Rest extends Objective {
 		if (item) {
 			return new ExecuteAction(ActionType.Sleep, (context, action) => {
 				action.execute(context.player, item);
-			});
+			}).setStatus(this);
 		}
 
 		return new ExecuteAction(ActionType.Rest, (context, action) => {
 			action.execute(context.player);
-		});
+		}).setStatus(this);
 	}
 
 }

@@ -3,13 +3,18 @@ import { DoodadType, DoodadTypeGroup, GrowingStage } from "doodad/IDoodad";
 import { ActionType } from "entity/action/IAction";
 import { CreatureType } from "entity/creature/ICreature";
 import { EquipType } from "entity/IHuman";
+import { Events } from "event/EventEmitter";
 import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
 import Item from "item/Item";
+import Translation from "language/Translation";
+import Mod from "mod/Mod";
 import { ITile, TerrainType } from "tile/ITerrain";
 import { ITerrainLoot } from "tile/TerrainResources";
 import { IVector3 } from "utilities/math/IVector";
 
 import { foodItemTypes } from "./Utilities/Item";
+
+export const TARS_ID = "TARS";
 
 export const defaultMaxTilesChecked = 3000;
 
@@ -17,6 +22,7 @@ export const gardenMaxTilesChecked = 1024;
 
 export interface ISaveData {
 	enabled?: boolean;
+	shouldOpenDialog?: boolean;
 }
 
 export interface ITileLocation {
@@ -371,3 +377,23 @@ export interface CreatureSearch {
 }
 
 export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot };
+
+export enum TarsTranslation {
+	DialogTitleMain,
+	DialogButtonEnable,
+	DialogLabelStatus,
+
+	DialogStatusNavigatingInitializing,
+}
+
+export interface ITarsEvents extends Events<Mod> {
+	/**
+	 * Emitted when tars is enabled or disabled
+	 */
+	enableChange(enabled: boolean): any;
+
+	/**
+	 * Emitted when tars status is changed
+	 */
+	statusChange(status: Translation | string): any;
+}

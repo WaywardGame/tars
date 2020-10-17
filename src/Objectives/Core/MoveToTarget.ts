@@ -38,6 +38,10 @@ export default class MoveToTarget extends Objective {
 		return `MoveToTarget:${this.target}:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
 	}
 
+	public getStatus(): string {
+		return `Moving to (${this.target.x},${this.target.y},${this.target.z})`;
+	}
+
 	public isDynamic(): boolean {
 		return true;
 	}

@@ -61,7 +61,7 @@ export default class GatherFromChest extends Objective {
 					new SetContextData(this.contextDataKey, item),
 					new ExecuteAction(ActionType.MoveItem, (context, action) => {
 						action.execute(context.player, item, context.player.inventory);
-					}),
+					}).setStatus(() => `Moving ${item.getName()} to inventory`),
 				];
 			});
 	}

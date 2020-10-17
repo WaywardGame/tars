@@ -1,7 +1,5 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import { ActionType } from "entity/action/IAction";
+import ProtectItem from "entity/action/actions/ProtectItem";
 import Item from "item/Item";
-
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
@@ -120,14 +118,14 @@ export default class AnalyzeInventory extends Objective {
 						if (existingItems) {
 							for (const item of existingItems) {
 								if (item.isValid() && item.protected && !newItems.includes(item)) {
-									ActionExecutor.get(ActionType.ProtectItem).execute(context.player, item, false);
+									ProtectItem.execute(context.player, item, false);
 								}
 							}
 						}
 
 						for (const item of newItems) {
 							if (item.isValid() && !item.protected) {
-								ActionExecutor.get(ActionType.ProtectItem).execute(context.player, item, true);
+								ProtectItem.execute(context.player, item, true);
 							}
 						}
 					}
@@ -137,14 +135,14 @@ export default class AnalyzeInventory extends Objective {
 					const item = sortedItems[0];
 					if (currentItem !== item) {
 						if (itemInfo.protect && currentItem && currentItem.isValid() && currentItem.protected) {
-							ActionExecutor.get(ActionType.ProtectItem).execute(context.player, currentItem, false);
+							ProtectItem.execute(context.player, currentItem, false);
 						}
 
 						context.inventory[key] = item as any;
 						this.log.info(`Found "${key}" - ${item} `);
 
 						if (itemInfo.protect) {
-							ActionExecutor.get(ActionType.ProtectItem).execute(context.player, item, true);
+							ProtectItem.execute(context.player, item, true);
 						}
 					}
 				}

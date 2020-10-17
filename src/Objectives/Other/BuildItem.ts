@@ -41,6 +41,10 @@ export default class BuildItem extends Objective {
 		return `BuildItem:${this.item}`;
 	}
 
+	public getStatus(): string {
+		return `Building ${this.item?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item || context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {

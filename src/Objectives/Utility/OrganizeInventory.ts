@@ -42,6 +42,10 @@ export default class OrganizeInventory extends Objective {
 		return "OrganizeInventory";
 	}
 
+	public getStatus(): string {
+		return "Organizing inventory";
+	}
+
 	public canIncludeContextHashCode(): boolean {
 		return true;
 	}

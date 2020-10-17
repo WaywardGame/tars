@@ -31,7 +31,7 @@ export default class GatherWaterFromWell extends Objective {
 			new MoveToTarget(this.well, true),
 			new ExecuteAction(ActionType.UseItem, (context, action) => {
 				action.execute(context.player, this.item, ActionType.GatherWater);
-			}),
+			}).setStatus(() => `Gathering water from ${this.well.getName()}`),
 		];
 	}
 }

@@ -23,6 +23,10 @@ export default class RepairItem extends Objective {
 		return `RepairItem:${this.item}`;
 	}
 
+	public getStatus(): string {
+		return `Repairing ${this.item.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (this.item === context.inventory.hammer) {
 			return ObjectiveResult.Ignore;
@@ -69,7 +73,7 @@ export default class RepairItem extends Objective {
 			}
 
 			action.execute(context.player, hammer, this.item);
-		}));
+		}).setStatus(this));
 
 		return objectives;
 	}

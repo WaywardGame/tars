@@ -1,5 +1,7 @@
 import { ActionType } from "entity/action/IAction";
 import { ICorpse } from "entity/creature/corpse/ICorpse";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
@@ -55,7 +57,8 @@ export default class GatherFromCorpse extends Objective {
 
 				objectives.push(new MoveToTarget(corpse, true));
 
-				objectives.push(new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(corpse.type)!));
+				objectives.push(new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(corpse.type)!)
+					.setStatus(() => `Carving ${Translation.nameOf(Dictionary.Creature, corpse.type).getString()} corpse`));
 
 				return objectives;
 			});

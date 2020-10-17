@@ -19,6 +19,8 @@ export default abstract class Objective implements IObjective {
 	private _additionalDifficulty: number | undefined;
 	private _overrideDifficulty: number | undefined;
 
+	private _status: IObjective | (() => string) | string | undefined;
+
 	public static getPipelineString(objectives: Array<IObjective | IObjective[]> | undefined): string {
 		return objectives ? objectives.map(objective => Array.isArray(objective) ? Objective.getPipelineString(objective) : objective.getHashCode()).join(" -> ") : "Empty pipeline";
 	}
@@ -74,6 +76,37 @@ export default abstract class Objective implements IObjective {
 
 	public getName(): string {
 		return this.constructor.name;
+	}
+
+	/**
+	 * Human readable status for what the objective is doing
+	 */
+	public getStatus(): string {
+		return this.getIdentifier();
+	}
+
+	/**
+	 * Human readable status for what the objective is doing
+	 */
+	public getStatusMessage(): string {
+		switch (typeof (this._status)) {
+			case "string":
+				return this._status;
+
+			case "function":
+				return this._status();
+
+			case "object":
+				return this._status.getStatusMessage();
+
+			default:
+				return this.getStatus();
+		}
+	}
+
+	public setStatus(status: IObjective | (() => string) | string) {
+		this._status = status;
+		return this;
 	}
 
 	/**
@@ -143,6 +176,9 @@ export default abstract class Objective implements IObjective {
 		return difficulty;
 	}
 
+	/**
+	 * Called when the player moves while this objective is running
+	 */
 	public async onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean> {
 		const walkPath = context.player.walkPath;
 		if (walkPath) {

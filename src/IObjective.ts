@@ -52,6 +52,11 @@ export interface IObjective {
 	getIdentifier(): string;
 	getName(): string;
 
+	/**
+	 * Human readable status for what the objective is doing
+	 */
+	getStatusMessage(): string;
+
 	sort?(context: Context, executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number;
 
 	/**
@@ -63,6 +68,9 @@ export interface IObjective {
 	getDifficulty(context: Context): number;
 	isDifficultyOverridden(): boolean;
 
+	/**
+	 * Called when the player moves while this objective is running
+	 */
 	onMove(context: Context): Promise<IObjective | boolean>;
 
 	/**

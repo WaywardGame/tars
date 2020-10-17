@@ -3,6 +3,8 @@ import { IRecipe, ItemType, ItemTypeGroup } from "item/IItem";
 import { RequirementInfo, WeightType } from "item/IItemManager";
 import Item from "item/Item";
 import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context, { ContextDataType } from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
@@ -143,7 +145,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 						if (item && item.containedWithin === context.base.intermediateChest[0]) {
 							objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
 								action.execute(context.player, item, context.player.inventory);
-							}));
+							}).setStatus(() => `Moving ${item.getName()} to inventory`));
 						}
 					};
 
@@ -169,7 +171,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Craft, (context, action) => {
 			action.execute(context.player, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
-		}).passContextDataKey(this));
+		}).passContextDataKey(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 		return objectives;
 	}

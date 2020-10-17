@@ -1,6 +1,8 @@
 import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
 import { itemDescriptions as Items } from "item/Items";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Enums from "utilities/enum/Enums";
 
 import Context from "../../../Context";
@@ -19,6 +21,10 @@ export default class AcquireItemForAction extends Objective {
 
 	public getIdentifier(): string {
 		return `AcquireItemForAction:${ActionType[this.actionType]}`;
+	}
+
+	public getStatus(): string {
+		return `Acquiring an item to use for ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

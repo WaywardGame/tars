@@ -40,12 +40,12 @@ export default class GatherWaterFromTerrain extends Objective {
 				if (game.isTileFull(context.player.getFacingTile())) {
 					objectives.push(new ExecuteAction(ActionType.PickupAllItems, (context, action) => {
 						action.execute(context.player);
-					}));
+					}).setStatus("Picking up all items from full tile"));
 				}
 
 				objectives.push(new ExecuteAction(ActionType.UseItem, (context, action) => {
 					action.execute(context.player, this.item, ActionType.GatherWater);
-				}));
+				}).setStatus("Gathering water from terrain"));
 
 				return objectives;
 			}));

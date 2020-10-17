@@ -2,6 +2,8 @@ import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
 import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
 import { itemDescriptions as Items } from "item/Items";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
 
 import Context from "../../../Context";
@@ -21,6 +23,10 @@ export default class AcquireItemForDoodad extends Objective {
 
 	public getIdentifier(): string {
 		return `AcquireItemForDoodad:${doodadManager.isGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
+	}
+
+	public getStatus(): string {
+		return `Acquiring an item to build ${doodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

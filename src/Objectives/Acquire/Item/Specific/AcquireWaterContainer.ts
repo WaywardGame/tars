@@ -33,7 +33,7 @@ export default class AcquireWaterContainer extends Objective {
 			}
 
 			action.execute(context.player, item);
-		}));
+		}).setStatus("Opening glass bottle"));
 
 		return [
 			[new AcquireItem(ItemType.Waterskin)],

@@ -44,7 +44,7 @@ export default class GatherFromGround extends Objective {
 						new SetContextData(this.contextDataKey, item),
 						new ExecuteAction(ActionType.MoveItem, (context, action) => {
 							action.execute(context.player, item, context.player.inventory);
-						}),
+						}).setStatus(() => `Moving ${item.getName()} to inventory`),
 					];
 				}
 			}
@@ -83,7 +83,7 @@ export default class GatherFromGround extends Objective {
 						objectives.push(new SetContextData(this.contextDataKey, item));
 						objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
 							action.execute(context.player, item, context.player.inventory);
-						}));
+						}).setStatus(() => `Moving ${item.getName()} to inventory`));
 					}
 
 					return objectives;

@@ -34,6 +34,10 @@ export default class RecoverThirst extends Objective {
 		return "RecoverThirst";
 	}
 
+	public getStatus(): string {
+		return "Recovering thirst";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const thirstStat = context.player.stat.get<IStatMax>(Stat.Thirst);
 

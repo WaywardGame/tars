@@ -15,6 +15,10 @@ export default class MoveToNewIsland extends Objective {
 		return "MoveToNewIsland";
 	}
 
+	public getStatus(): string {
+		return "Moving to a new island";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const unvisitedIslands: Array<{ islandId: string; edgePosition: IVector3; direction: Direction }> = [];
 

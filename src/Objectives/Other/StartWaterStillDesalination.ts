@@ -34,6 +34,10 @@ export default class StartWaterStillDesalination extends Objective {
 		return `StartWaterStillDesalination:${this.waterStill}`;
 	}
 
+	public getStatus(): string {
+		return `Starting desalination process for ${this.waterStill.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (isWaterStillDrinkable(this.waterStill)) {
 			// water is ready
@@ -75,7 +79,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 				objectives.push(new ExecuteAction(ActionType.DetachContainer, (context, action) => {
 					action.execute(context.player);
-				}));
+				}).setStatus(() => `Detaching container from ${this.waterStill.getName()}`));
 			}
 
 			if (!isWaterInContainer) {
@@ -105,7 +109,7 @@ export default class StartWaterStillDesalination extends Objective {
 				// cleanup water still tile
 				objectives.push(new ExecuteAction(ActionType.PickupAllItems, (context, action) => {
 					action.execute(context.player);
-				}));
+				}).setStatus(() => `Picking up all items under ${this.waterStill.getName()}`));
 			}
 
 			this.log.info("Moving to detach container");

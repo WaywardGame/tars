@@ -15,6 +15,10 @@ export default class ReduceWeight extends Objective {
 		return "ReduceWeight";
 	}
 
+	public getStatus(): string {
+		return "Reducing weight";
+	}
+
 	public canSaveChildObjectives(): boolean {
 		return false;
 	}

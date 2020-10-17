@@ -18,6 +18,10 @@ export default class RecoverHealth extends Objective {
 		return "RecoverHealth";
 	}
 
+	public getStatus(): string {
+		return "Recovering health";
+	}
+
 	public canSaveChildObjectives(): boolean {
 		return this.saveChildObjectives;
 	}

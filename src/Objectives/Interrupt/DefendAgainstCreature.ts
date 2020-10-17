@@ -6,11 +6,11 @@ import { getDirectionFromMovement, WeightStatus } from "entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
+import { isScaredOfCreature } from "../../Utilities/Creature";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import RunAwayFromTarget from "../Other/RunAwayFromTarget";
-import { isScaredOfCreature } from "../../Utilities/Creature";
 
 export default class DefendAgainstCreature extends Objective {
 
@@ -20,6 +20,10 @@ export default class DefendAgainstCreature extends Objective {
 
 	public getIdentifier(): string {
 		return `DefendAgainstCreature:${this.creature}`;
+	}
+
+	public getStatus(): string {
+		return `Defending against ${this.creature.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

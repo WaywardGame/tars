@@ -12,6 +12,10 @@ export default class RecoverStamina extends Objective {
 		return "RecoverStamina";
 	}
 
+	public getStatus(): string {
+		return "Recovering stamina";
+	}
+
 	public isDynamic(): boolean {
 		return true;
 	}

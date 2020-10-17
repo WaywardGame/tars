@@ -13,6 +13,10 @@ export default class Lambda extends Objective {
 		return "Lambda";
 	}
 
+	public getStatus(): string {
+		return "Miscellaneous processing";
+	}
+
 	public isDynamic(): boolean {
 		return true;
 	}

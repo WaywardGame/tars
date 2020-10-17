@@ -4,6 +4,8 @@ import Corpses from "entity/creature/corpse/Corpses";
 import { CreatureType } from "entity/creature/ICreature";
 import { ItemType } from "item/IItem";
 import { itemDescriptions } from "item/Items";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 import { TerrainType } from "tile/ITerrain";
 import TerrainResources from "tile/TerrainResources";
 import terrainDescriptions from "tile/Terrains";
@@ -36,6 +38,10 @@ export default class AcquireItem extends AcquireBase {
 
 	public getIdentifier(): string {
 		return `AcquireItem:${ItemType[this.itemType]}`;
+	}
+
+	public getStatus(): string {
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

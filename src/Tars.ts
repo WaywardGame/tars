@@ -9,14 +9,17 @@ import { PlayerState, WeightStatus } from "entity/player/IPlayer";
 import { INote } from "entity/player/note/NoteManager";
 import Player from "entity/player/Player";
 import { EventBus } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
 import { TileUpdateType, TurnMode } from "game/IGame";
 import { WorldZ } from "game/WorldZ";
 import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
 import Item from "item/Item";
+import { Dictionary } from "language/Dictionaries";
 import Interrupt from "language/dictionary/Interrupt";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
+import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
@@ -24,6 +27,9 @@ import Bind from "newui/input/Bind";
 import Bindable from "newui/input/Bindable";
 import { IInput } from "newui/input/IInput";
 import { NewUi } from "newui/NewUi";
+import { DialogId } from "newui/screen/screens/game/Dialogs";
+import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import { InterruptOptions } from "newui/util/IInterrupt";
 import { ITile } from "tile/ITerrain";
 import { sleep } from "utilities/Async";
@@ -32,12 +38,11 @@ import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
-
 import Context, { ContextDataType, ContextState } from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
 import planner from "./Core/Planner";
 import { IObjective, ObjectiveResult } from "./IObjective";
-import { IBase, IInventoryItems, inventoryItemInfo, ISaveData } from "./ITars";
+import { IBase, IInventoryItems, inventoryItemInfo, ISaveData, ITarsEvents, TarsTranslation, TARS_ID } from "./ITars";
 import Navigation from "./Navigation/Navigation";
 import Objective from "./Objective";
 import AcquireFood from "./Objectives/Acquire/Item/AcquireFood";
@@ -76,6 +81,7 @@ import MoveToNewIsland from "./Objectives/Utility/MoveToNewIsland";
 import MoveToZ from "./Objectives/Utility/MoveToZ";
 import OrganizeBase from "./Objectives/Utility/OrganizeBase";
 import OrganizeInventory from "./Objectives/Utility/OrganizeInventory";
+import TarsDialog from "./Ui/TarsDialog";
 import * as Action from "./Utilities/Action";
 import { getTilesWithItemsNearBase, isNearBase } from "./Utilities/Base";
 import { canGatherWater, estimateDamageModifier, getBestActionItem, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getReservedItems, getSeeds, getUnusedItems, isSafeToDrinkItem } from "./Utilities/Item";
@@ -83,6 +89,7 @@ import { log, logSourceName, preConsoleCallback } from "./Utilities/Logger";
 import * as movementUtilities from "./Utilities/Movement";
 import * as objectUtilities from "./Utilities/Object";
 import * as tileUtilities from "./Utilities/Tile";
+
 
 const tickSpeed = 333;
 
@@ -105,8 +112,27 @@ enum NavigationSystemState {
 
 export default class Tars extends Mod {
 
-	@Register.bindable("Toggle", IInput.key("KeyT"))
-	public readonly keyBind: Bindable;
+	@Mod.instance<Tars>(TARS_ID)
+	public static readonly INSTANCE: Tars;
+
+	////////////////////////////////////
+
+	public event: IEventEmitter<this, ITarsEvents>;
+
+	////////////////////////////////////
+
+	@Mod.saveData<Tars>()
+	public saveData: ISaveData;
+
+	////////////////////////////////////
+
+	@Register.bindable("ToggleDialog", IInput.key("KeyT", "Shift"))
+	public readonly bindableToggleDialog: Bindable;
+
+	@Register.bindable("ToggleTars", IInput.key("KeyT"))
+	public readonly bindableToggleTars: Bindable;
+
+	////////////////////////////////////
 
 	@Register.messageSource("TARS")
 	public readonly messageSource: Source;
@@ -120,8 +146,25 @@ export default class Tars extends Mod {
 	@Register.message("NavigationUpdated")
 	public readonly messageNavigationUpdated: Message;
 
-	@Mod.saveData<Tars>("TARS")
-	public saveData: ISaveData;
+	////////////////////////////////////
+
+	@Register.dictionary("Tars", TarsTranslation)
+	public readonly dictionary: Dictionary;
+
+	////////////////////////////////////
+
+	@Register.dialog("Main", TarsDialog.description, TarsDialog)
+	public readonly dialogMain: DialogId;
+
+	@Register.menuBarButton("Dialog", {
+		onActivate: () => gameScreen?.toggleDialog(Tars.INSTANCE.dialogMain),
+		group: MenuBarButtonGroup.Meta,
+		bindable: Registry<Tars>().get("bindableToggleDialog"),
+		tooltip: tooltip => tooltip.addText(text => text.setText(new Translation(Tars.INSTANCE.dictionary, TarsTranslation.DialogTitleMain))),
+	})
+	public readonly menuBarButton: MenuBarButtonType;
+
+	////////////////////////////////////
 
 	private base: IBase;
 	private inventory: IInventoryItems;
@@ -129,6 +172,7 @@ export default class Tars extends Mod {
 	private readonly statThresholdExceeded: { [index: number]: boolean } = {};
 	private weightStatus: WeightStatus | undefined;
 	private previousWeightStatus: WeightStatus | undefined;
+	private lastStatusMessage: string | undefined;
 
 	private context: Context;
 	private objectivePipeline: Array<IObjective | IObjective[]> | undefined;
@@ -140,7 +184,7 @@ export default class Tars extends Mod {
 	private tickTimeoutId: number | undefined;
 
 	private navigation: Navigation | undefined;
-	private navigationInitialized: NavigationSystemState;
+	private navigationSystemState: NavigationSystemState;
 	private navigationQueuedUpdates: Array<() => void>;
 
 	public onInitialize(): void {
@@ -162,6 +206,12 @@ export default class Tars extends Mod {
 		(window as any).TARS = this;
 		(window as any).TARS_Planner = planner;
 		(window as any).TARS_TileUtilities = tileUtilities;
+
+		// this is to support hot reloading while in game
+		if (this.saveData.shouldOpenDialog) {
+			this.saveData.shouldOpenDialog = undefined;
+			gameScreen?.openDialog(Tars.INSTANCE.dialogMain);
+		}
 	}
 
 	public onUnload(): void {
@@ -173,6 +223,12 @@ export default class Tars extends Mod {
 		(window as any).TARS = undefined;
 		(window as any).TARS_Planner = undefined;
 		(window as any).TARS_TileUtilities = undefined;
+
+		// this is to support hot reloading while in game
+		if (gameScreen?.isDialogVisible(Tars.INSTANCE.dialogMain)) {
+			this.saveData.shouldOpenDialog = true;
+			gameScreen?.closeDialog(Tars.INSTANCE.dialogMain);
+		}
 	}
 
 	////////////////////////////////////////////////
@@ -192,8 +248,8 @@ export default class Tars extends Mod {
 		this.delete();
 	}
 
-	@HookMethod
-	public onWriteNote(player: Player, note: INote): false | undefined {
+	@EventHandler(EventBus.LocalPlayer, "writeNote")
+	public onWriteNote(player: Player, note: INote): false | void {
 		if (this.isEnabled()) {
 			// hide notes
 			return false;
@@ -213,7 +269,7 @@ export default class Tars extends Mod {
 		this.interrupt();
 		movementUtilities.resetMovementOverlays();
 
-		if (this.navigationInitialized === NavigationSystemState.Initialized && this.navigation) {
+		if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
 			this.navigation.queueUpdateOrigin(localPlayer);
 		}
 	}
@@ -221,7 +277,7 @@ export default class Tars extends Mod {
 	@EventHandler(EventBus.LocalPlayer, "processMovement")
 	public async processMovement(player: Player): Promise<void> {
 		if (this.isEnabled() && player.isLocalPlayer()) {
-			if (this.navigationInitialized === NavigationSystemState.Initialized && this.navigation) {
+			if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
 				this.navigation.queueUpdateOrigin(player);
 			}
 
@@ -258,20 +314,25 @@ export default class Tars extends Mod {
 		}
 	}
 
-	@Bind.onDown(Registry<Tars>().get("keyBind"))
-	public onToggleBind() {
+	@Register.command("TARS")
+	public command(_player: Player, _args: string) {
+		this.toggle();
+	}
+
+	@Bind.onDown(Registry<Tars>().get("bindableToggleTars"))
+	public onToggleTars() {
 		this.toggle();
 		return true;
 	}
 
 	@EventHandler(EventBus.Game, "tileUpdate")
 	public onTileUpdate(game: any, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
-		if (this.navigationInitialized === NavigationSystemState.Initializing || localPlayer.isResting()) {
+		if (this.navigationSystemState === NavigationSystemState.Initializing || localPlayer.isResting()) {
 			this.navigationQueuedUpdates.push(() => {
 				this.onTileUpdate(game, tile, tileX, tileY, tileZ, tileUpdateType);
 			});
 
-		} else if (this.navigationInitialized === NavigationSystemState.Initialized && this.navigation) {
+		} else if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
 			// update this tile and its neighbors
 			for (let x = -1; x <= 1; x++) {
 				for (let y = -1; y <= 1; y++) {
@@ -395,13 +456,113 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
-	@Register.command("TARS")
-	protected command(_player: Player, _args: string) {
-		this.toggle();
+	public getTranslation(translation: TarsTranslation) {
+		return new Translation(this.dictionary, translation);
 	}
+
+	public isEnabled(): boolean {
+		return this.tickTimeoutId !== undefined;
+	}
+
+	public async toggle() {
+		if (this.navigationSystemState === NavigationSystemState.Initializing) {
+			return;
+		}
+
+		const str = !this.isEnabled() ? "Enabled" : "Disabled";
+
+		log.info(str);
+
+		localPlayer.messages
+			.source(this.messageSource)
+			.type(MessageType.Good)
+			.send(this.messageToggle, !this.isEnabled());
+
+		if (this.navigationSystemState === NavigationSystemState.NotInitialized && this.navigation) {
+			this.navigationSystemState = NavigationSystemState.Initializing;
+
+			this.updateStatus();
+
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(MessageType.Good)
+				.send(this.messageNavigationUpdating);
+
+			// give a chance for the message to show up on screen before starting nav update
+			await sleep(100);
+
+			await this.navigation.updateAll();
+
+			this.navigation.queueUpdateOrigin(localPlayer);
+
+			this.navigationSystemState = NavigationSystemState.Initialized;
+
+			this.processQueuedNavigationUpdates();
+
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(MessageType.Good)
+				.send(this.messageNavigationUpdated);
+		}
+
+		this.context = new Context(localPlayer, this.base, this.inventory);
+
+		this.reset();
+
+		this.saveData.enabled = !this.isEnabled();
+
+		if (this.saveData.enabled) {
+			if (this.navigation) {
+				this.navigation.showOverlay();
+
+				if (this.navigationSystemState === NavigationSystemState.Initialized) {
+					this.navigation.queueUpdateOrigin(localPlayer);
+				}
+			}
+
+			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
+
+		} else {
+			this.disable();
+		}
+
+		this.event.emit("enableChange", this.isEnabled());
+		// this.updateStatus();
+	}
+
+	@Bound
+	public getStatus(): Translation | string {
+		if (this.navigationSystemState === NavigationSystemState.Initializing) {
+			return this.getTranslation(TarsTranslation.DialogStatusNavigatingInitializing);
+		}
+
+		if (!this.isEnabled()) {
+			return "Waiting to be enabled";
+		}
+
+		const plan = executor.getPlan();
+		if (plan !== undefined) {
+			const statusMessage = plan.tree.objective.getStatusMessage();
+			if (this.lastStatusMessage !== statusMessage) {
+				this.lastStatusMessage = statusMessage;
+				log.info(`Status: ${statusMessage}`, plan.tree.objective);
+			}
+
+			return statusMessage;
+		}
+
+		return "Idle";
+	}
+
+	public updateStatus() {
+		this.event.emit("statusChange", this.getStatus());
+	}
+
+	////////////////////////////////////////////////
 
 	private reset() {
 		executor.reset();
+		this.lastStatusMessage = undefined;
 		this.objectivePipeline = undefined;
 		this.interruptObjectivePipeline = undefined;
 		this.interruptIds = undefined;
@@ -427,75 +588,10 @@ export default class Tars extends Mod {
 
 		this.reset();
 
-		this.navigationInitialized = NavigationSystemState.NotInitialized;
+		this.navigationSystemState = NavigationSystemState.NotInitialized;
 		this.navigationQueuedUpdates = [];
 
 		Navigation.delete();
-	}
-
-	private isEnabled(): boolean {
-		return this.tickTimeoutId !== undefined;
-	}
-
-	private async toggle() {
-		if (this.navigationInitialized === NavigationSystemState.Initializing) {
-			return;
-		}
-
-		const str = !this.isEnabled() ? "Enabled" : "Disabled";
-
-		log.info(str);
-
-		localPlayer.messages
-			.source(this.messageSource)
-			.type(MessageType.Good)
-			.send(this.messageToggle, !this.isEnabled());
-
-		if (this.navigationInitialized === NavigationSystemState.NotInitialized && this.navigation) {
-			this.navigationInitialized = NavigationSystemState.Initializing;
-
-			localPlayer.messages
-				.source(this.messageSource)
-				.type(MessageType.Good)
-				.send(this.messageNavigationUpdating);
-
-			// give a chance for the message to show up on screen before starting nav update
-			await sleep(100);
-
-			await this.navigation.updateAll();
-
-			this.navigation.queueUpdateOrigin(localPlayer);
-
-			this.navigationInitialized = NavigationSystemState.Initialized;
-
-			this.processQueuedNavigationUpdates();
-
-			localPlayer.messages
-				.source(this.messageSource)
-				.type(MessageType.Good)
-				.send(this.messageNavigationUpdated);
-		}
-
-		this.context = new Context(localPlayer, this.base, this.inventory);
-
-		this.reset();
-
-		this.saveData.enabled = !this.isEnabled();
-
-		if (this.saveData.enabled) {
-			if (this.navigation) {
-				this.navigation.showOverlay();
-
-				if (this.navigationInitialized === NavigationSystemState.Initialized) {
-					this.navigation.queueUpdateOrigin(localPlayer);
-				}
-			}
-
-			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
-
-		} else {
-			this.disable();
-		}
 	}
 
 	private disable(gameIsEnding: boolean = false) {
@@ -534,6 +630,7 @@ export default class Tars extends Mod {
 	private async tick() {
 		try {
 			await this.onTick();
+			this.updateStatus();
 
 		} catch (ex) {
 			log.error("onTick error", ex);
@@ -793,7 +890,7 @@ export default class Tars extends Mod {
 				new MoveToLand(),
 				new ExecuteAction(ActionType.Drop, (context, action) => {
 					action.execute(context.player, this.inventory.sailBoat!);
-				}),
+				}).setStatus("Dropping sailboat"),
 			]);
 		}
 

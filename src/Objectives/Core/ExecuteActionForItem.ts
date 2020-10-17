@@ -3,10 +3,11 @@ import actionDescriptions from "entity/action/Actions";
 import { ActionType, IActionDescription } from "entity/action/IAction";
 import { DamageType } from "entity/IEntity";
 import { ItemType } from "item/IItem";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { ListEnder } from "language/Translation";
 import { TerrainType } from "tile/ITerrain";
 import Terrains from "tile/Terrains";
 import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -29,12 +30,23 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		private readonly type: ExecuteActionType,
 		private readonly itemTypes: ItemType[],
 		private readonly actionType?: T,
-		private readonly executor?: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never)) => void) {
+		private readonly executor?: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void) {
 		super();
 	}
 
 	public getIdentifier(): string {
 		return `ExecuteActionForItem:${ExecuteActionType[this.type]}${this.actionType !== undefined ? `:${ActionType[this.actionType]}` : ""}`;
+	}
+
+	public getStatus(): string {
+		if (this.itemTypes.length > 1) {
+			const translation = Stream.values(Array.from(new Set(this.itemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+				.collect(Translation.formatList, ListEnder.Or);
+
+			return `Acquiring ${translation.getString()}`;
+		}
+
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemTypes[0]).getString()}`;
 	}
 
 	public isDynamic(): boolean {
@@ -154,7 +166,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		context: Context,
 		itemTypes: ItemType[],
 		actionType: T,
-		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void): Promise<ObjectiveResult> {
+		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void): Promise<ObjectiveResult> {
 		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, actionType, executor as any);
 		if (matchingNewItem !== undefined) {
 			this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id})`);
@@ -184,7 +196,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		context: Context,
 		itemTypes: ItemType[],
 		actionType: T,
-		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void) {
+		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) {
 		const itemsBefore = context.player.inventory.containedItems.slice();
 
 		await executeAction(context, actionType, executor as any);

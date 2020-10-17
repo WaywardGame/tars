@@ -22,6 +22,10 @@ export default class RunAwayFromTarget extends Objective {
 		return `RunAwayFromTarget:(${this.target.x},${this.target.y},${this.target.z})`;
 	}
 
+	public getStatus(): string {
+		return "Running away";
+	}
+
 	public isDynamic(): boolean {
 		return true;
 	}
@@ -78,12 +82,12 @@ export default class RunAwayFromTarget extends Objective {
 			if (direction !== context.player.facingDirection) {
 				objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
 					action.execute(context.player, direction, undefined);
-				}));
+				}).setStatus(this));
 			}
 
 			objectives.push(new ExecuteAction(ActionType.Move, (context, action) => {
 				action.execute(context.player, direction);
-			}));
+			}).setStatus(this));
 
 		} else {
 			this.log.info("Unable to run away from target");

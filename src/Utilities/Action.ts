@@ -1,7 +1,6 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import actionDescriptions from "entity/action/Actions";
 import { ActionType, IActionDescription } from "entity/action/IAction";
-
 import Context from "../Context";
 
 const pendingActions: {
@@ -37,7 +36,7 @@ export function postExecuteAction(actionType: ActionType) {
 export async function executeAction<T extends ActionType>(
 	context: Context,
 	actionType: T,
-	executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R> ? ActionExecutor<A, E, R> : never) => void): Promise<void> {
+	executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void): Promise<void> {
 	let waiter: Promise<boolean> | undefined;
 
 	if (context.player.hasDelay()) {
@@ -60,7 +59,7 @@ export async function executeAction<T extends ActionType>(
 		waiter = waitForAction(actionType);
 	}
 
-	executor(context, ActionExecutor.get(actionType).skipConfirmation() as any);
+	executor(context, ActionExecutor.get(actionDescriptions[actionType]).skipConfirmation() as any);
 
 	if (waiter) {
 		await waiter;

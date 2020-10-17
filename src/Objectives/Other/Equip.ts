@@ -17,6 +17,10 @@ export default class Equip extends Objective {
 		return `Equip:${this.item}`;
 	}
 
+	public getStatus(): string {
+		return `Equipping ${this.item?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item || context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
