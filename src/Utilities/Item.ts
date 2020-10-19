@@ -312,8 +312,8 @@ export function getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: D
 // items that can cause poisoning when eaten will be filtered out
 const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
 
-function getFoodItemTypes() {
-	const result: ItemType[] = [];
+function getFoodItemTypes(): Set<ItemType> {
+	const result: Set<ItemType> = new Set();
 
 	for (const itemTypeOrGroup of goodFoodItems) {
 		const itemTypes = itemManager.isGroup(itemTypeOrGroup) ? itemManager.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
@@ -325,7 +325,7 @@ function getFoodItemTypes() {
 					const onEat = onUse[ActionType.Eat];
 					if (onEat) {
 						if (onEat[0] > 1) {
-							result.push(itemType);
+							result.add(itemType);
 						}
 					}
 				}

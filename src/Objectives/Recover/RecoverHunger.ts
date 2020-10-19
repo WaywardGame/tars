@@ -31,13 +31,17 @@ export default class RecoverHunger extends Objective {
 			// if there's more food to cook and we're not at max, we should cook
 			if ((hunger.value / hunger.max) < 0.9) {
 				if (isNearBase(context)) {
-					const foodRecipeObjectivePipelines = AcquireFood.getFoodRecipeObjectivePipelines(context, false);
-					if (foodRecipeObjectivePipelines.length > 0) {
-						return foodRecipeObjectivePipelines;
+					// only make food if theres not enough
+					const availableFoodItems = this.getFoodItemsInBase(context).concat(this.getFoodItemsInInventory(context));
+					if (availableFoodItems.length < 10) {
+						const foodRecipeObjectivePipelines = AcquireFood.getFoodRecipeObjectivePipelines(context, false);
+						if (foodRecipeObjectivePipelines.length > 0) {
+							return foodRecipeObjectivePipelines;
+						}
 					}
 				}
 
-				const decayingSoonFoodItems = this.getFoodItems(context).filter(item => item.decay === undefined || item.decay < 10);
+				const decayingSoonFoodItems = this.getFoodItemsInInventory(context).filter(item => item.decay === undefined || item.decay < 10);
 				if (decayingSoonFoodItems.length > 0) {
 					this.log.info(`Eating ${decayingSoonFoodItems[0].getName(false).getString()} since it's decaying soon (${decayingSoonFoodItems[0].decay})`);
 					return new UseItem(ActionType.Eat, decayingSoonFoodItems[0]);
@@ -49,7 +53,7 @@ export default class RecoverHunger extends Objective {
 
 		const isEmergency = hunger.value < 0;
 
-		let foodItems = this.getFoodItems(context);
+		let foodItems = this.getFoodItemsInInventory(context);
 
 		if (isEmergency && foodItems.length === 0) {
 			foodItems = getInventoryItemsWithUse(context, ActionType.Eat);
@@ -66,7 +70,7 @@ export default class RecoverHunger extends Objective {
 		];
 	}
 
-	private getFoodItems(context: Context) {
+	private getFoodItemsInInventory(context: Context) {
 		const items: Item[] = [];
 
 		for (const itemType of foodItemTypes) {
@@ -81,4 +85,18 @@ export default class RecoverHunger extends Objective {
 			});
 	}
 
+	private getFoodItemsInBase(context: Context) {
+		const items: Item[] = [];
+
+		for (const chest of context.base.chest) {
+			items.push(...itemManager.getItemsInContainer(chest, true).filter(item => foodItemTypes.has(item.type)));
+		}
+
+		return items
+			.sort((a, b) => {
+				const decayA = a.decay !== undefined ? a.decay : 999999;
+				const decayB = b.decay !== undefined ? b.decay : 999999;
+				return decayA > decayB ? 1 : -1;
+			});
+	}
 }

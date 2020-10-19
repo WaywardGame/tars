@@ -284,7 +284,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		flags: InventoryItemFlag.PreferLowerWeight,
 	},
 	food: {
-		itemTypes: foodItemTypes,
+		itemTypes: Array.from(foodItemTypes),
 		flags: InventoryItemFlag.PreferHigherDecay,
 		allowMultiple: 5,
 	},
