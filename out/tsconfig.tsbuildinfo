@@ -1777,8 +1777,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/creature/creature.d.ts": {
-        "version": "166f45b7f96f3e0aeac653810192165e6fc3a195e48c1b5c3f89b236de4d35de",
-        "signature": "166f45b7f96f3e0aeac653810192165e6fc3a195e48c1b5c3f89b236de4d35de",
+        "version": "cae8d269fe0c31ac13739db20f17a56742e4c532faa9596b6f547de4ccd5b521",
+        "signature": "cae8d269fe0c31ac13739db20f17a56742e4c532faa9596b6f547de4ccd5b521",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/lootgroups.d.ts": {
