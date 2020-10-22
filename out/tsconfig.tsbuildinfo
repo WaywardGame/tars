@@ -267,8 +267,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
-        "version": "00f19dfe9c6e33e47ff3114c603c8a85f146a212e00fb3beda182a62e8e16ec3",
-        "signature": "00f19dfe9c6e33e47ff3114c603c8a85f146a212e00fb3beda182a62e8e16ec3",
+        "version": "cb993a4f6fa7d1c1cfc72f62f1eb15fdc707719067139367e6f91477bc171cbf",
+        "signature": "cb993a4f6fa7d1c1cfc72f62f1eb15fdc707719067139367e6f91477bc171cbf",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/recipe/reciperequirement.d.ts": {
@@ -1412,8 +1412,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "20b0a1550d88f7ffcf1bd21d531d47b59efa1f39bcb792d0b275bd26beebc832",
-        "signature": "20b0a1550d88f7ffcf1bd21d531d47b59efa1f39bcb792d0b275bd26beebc832",
+        "version": "0159ebec3f7ead69cf49318b41d4bb4fe20e204a3aa8d9b5b7df3c6bc7e215e1",
+        "signature": "0159ebec3f7ead69cf49318b41d4bb4fe20e204a3aa8d9b5b7df3c6bc7e215e1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
@@ -1467,8 +1467,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/skills.d.ts": {
-        "version": "928fa5075f7a03cba8055125d8268ed31c1a1dc3cf25f9abc209ea4dc53aa291",
-        "signature": "928fa5075f7a03cba8055125d8268ed31c1a1dc3cf25f9abc209ea4dc53aa291",
+        "version": "b392c66e8a950b6d1e27a38baf38a0b353f6db1c5ad8af80b6e40b24fa98779d",
+        "signature": "b392c66e8a950b6d1e27a38baf38a0b353f6db1c5ad8af80b6e40b24fa98779d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/statuseffectrenderer.d.ts": {
@@ -1767,8 +1767,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/human.d.ts": {
-        "version": "9ae6c0d80beccd079489fa471c4228236060cae312463d8cae0ec620318b55bf",
-        "signature": "9ae6c0d80beccd079489fa471c4228236060cae312463d8cae0ec620318b55bf",
+        "version": "37b2843ae1108f442c23f54adf2854305e6dcba81d4fb996093f738bbdf92bf0",
+        "signature": "37b2843ae1108f442c23f54adf2854305e6dcba81d4fb996093f738bbdf92bf0",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/entity.d.ts": {
@@ -2924,6 +2924,7 @@
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/entity/player/skills.d.ts": [
+        "../node_modules/@wayward/types/definitions/entity/ientity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/ihuman.d.ts",
         "../node_modules/@wayward/types/definitions/entity/istats.d.ts",
         "../node_modules/@wayward/types/definitions/mod/modregistry.d.ts"
@@ -2978,6 +2979,7 @@
         "../node_modules/@wayward/types/definitions/entity/creature/icreature.d.ts",
         "../node_modules/@wayward/types/definitions/entity/entity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
+        "../node_modules/@wayward/types/definitions/entity/ientity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/ihuman.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/iplayer.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/player.d.ts",
@@ -6111,6 +6113,7 @@
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/entity/player/skills.d.ts": [
+        "../node_modules/@wayward/types/definitions/entity/ientity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/ihuman.d.ts",
         "../node_modules/@wayward/types/definitions/entity/istats.d.ts",
         "../node_modules/@wayward/types/definitions/mod/modregistry.d.ts"
@@ -6165,6 +6168,7 @@
         "../node_modules/@wayward/types/definitions/entity/creature/icreature.d.ts",
         "../node_modules/@wayward/types/definitions/entity/entity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
+        "../node_modules/@wayward/types/definitions/entity/ientity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/ihuman.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/iplayer.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/player.d.ts",
