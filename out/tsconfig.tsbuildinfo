@@ -1767,8 +1767,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/human.d.ts": {
-        "version": "37b2843ae1108f442c23f54adf2854305e6dcba81d4fb996093f738bbdf92bf0",
-        "signature": "37b2843ae1108f442c23f54adf2854305e6dcba81d4fb996093f738bbdf92bf0",
+        "version": "1128af25995e18895b3f9b1257813a5dcb82d1061c8dfb08f71bf7530c32069d",
+        "signature": "1128af25995e18895b3f9b1257813a5dcb82d1061c8dfb08f71bf7530c32069d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/entity.d.ts": {
