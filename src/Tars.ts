@@ -38,6 +38,7 @@ import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
+
 import Context, { ContextDataType, ContextState } from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
 import planner from "./Core/Planner";
@@ -89,7 +90,6 @@ import { log, logSourceName, preConsoleCallback } from "./Utilities/Logger";
 import * as movementUtilities from "./Utilities/Movement";
 import * as objectUtilities from "./Utilities/Object";
 import * as tileUtilities from "./Utilities/Tile";
-
 
 const tickSpeed = 333;
 
@@ -991,10 +991,6 @@ export default class Tars extends Mod {
 
 		if (this.inventory.tongs === undefined) {
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tongs), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.shovel === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneShovel), new AnalyzeInventory()]);
 		}
 
 		if (isNearBase(context)) {
