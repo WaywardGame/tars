@@ -26,6 +26,10 @@ export default class GatherWater extends Objective {
 		return `GatherWater:${this.item}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
 	}
 
+	public getStatus(): string {
+		return `Gathering water into ${this.item?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (!this.item) {
 			return ObjectiveResult.Restart;

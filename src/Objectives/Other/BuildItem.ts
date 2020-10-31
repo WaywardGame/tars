@@ -98,7 +98,7 @@ export default class BuildItem extends Objective {
 						}
 
 					} else {
-						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodBuildTile(context, point, tile), defaultMaxTilesChecked);
+						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), defaultMaxTilesChecked);
 					}
 
 					if (this.target !== undefined) {

@@ -23,6 +23,10 @@ export default class EmptyWaterContainer extends Objective {
 		return `EmptyWaterContainer:${this.item}`;
 	}
 
+	public getStatus(): string {
+		return `Emptying ${this.item?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 

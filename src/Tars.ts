@@ -1122,7 +1122,7 @@ export default class Tars extends Mod {
 
 			if (availableWaterContainer) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+				objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
 			}
 		}
 

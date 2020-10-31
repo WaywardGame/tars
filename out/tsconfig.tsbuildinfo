@@ -422,8 +422,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "f008b4ad8c9caba4abe96952f235639cc8d3e88a430e9ebaadd325b33f27faaf",
-        "signature": "f008b4ad8c9caba4abe96952f235639cc8d3e88a430e9ebaadd325b33f27faaf",
+        "version": "61db7cc248503a1aca17245829448886472d59979b935dcb150e20d7e11004d9",
+        "signature": "61db7cc248503a1aca17245829448886472d59979b935dcb150e20d7e11004d9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodadmanager.d.ts": {
@@ -1112,8 +1112,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screens/ingamescreen.d.ts": {
-        "version": "5ec65de7acaa20120a076cbb4e2e6643e1eac670e52a7781d4d8abb7be6e7594",
-        "signature": "5ec65de7acaa20120a076cbb4e2e6643e1eac670e52a7781d4d8abb7be6e7594",
+        "version": "9f2336cac961f9737c8b6de79281e51e2c6697767ebbedeb8a7efe513efc92bd",
+        "signature": "9f2336cac961f9737c8b6de79281e51e2c6697767ebbedeb8a7efe513efc92bd",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/ui/ui.d.ts": {
@@ -1427,8 +1427,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
-        "version": "7830cfd27d54190c6e656163541b5c9c0fc8d720379decc899dbdf65f4e36bbc",
-        "signature": "7830cfd27d54190c6e656163541b5c9c0fc8d720379decc899dbdf65f4e36bbc",
+        "version": "e143c10000b6440797c849ba9025f90fc0fc630030ab0c10043243c95acefef7",
+        "signature": "e143c10000b6440797c849ba9025f90fc0fc630030ab0c10043243c95acefef7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/ihookhost.d.ts": {
@@ -1752,8 +1752,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts": {
-        "version": "5950cd5de7e295a63a23183ddc72818c1604d3073e189e794f31c0b855838a79",
-        "signature": "5950cd5de7e295a63a23183ddc72818c1604d3073e189e794f31c0b855838a79",
+        "version": "7cc214209efa29e52399a0ddb50fecf157dbf246a48cd946a1c731b0365e005a",
+        "signature": "7cc214209efa29e52399a0ddb50fecf157dbf246a48cd946a1c731b0365e005a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/ientity.d.ts": {
@@ -1847,8 +1847,8 @@
         "affectsGlobalScope": false
       },
       "../src/itars.ts": {
-        "version": "defda2b952f99e759bd149465a577e36a5e79f6615d0dbd4cf2af04df591146d",
-        "signature": "993749f1b4af0061bb5be9538d983eceeef888f4b2cc6f3e75f434b6d1b2ec44",
+        "version": "ec83e5ad07f1f8e9dce08d8b568c05a8c2407bbfd0828bb2949f2afbad19cdfb",
+        "signature": "3397f23f95d4005fc6788986e968fa0a4abf223fb5c3a79ad79d97bec44f330a",
         "affectsGlobalScope": false
       },
       "../src/context.ts": {
@@ -2042,8 +2042,8 @@
         "affectsGlobalScope": false
       },
       "../src/utilities/base.ts": {
-        "version": "d2e5ee5c7d90e575f72d38e0cabbf4d1965701e9ad9e3ef5dcf537bf66dbb3bc",
-        "signature": "92088860219eb2a2819461c6792d0f025850cd1a6b20f51eb29871cb94aee1ec",
+        "version": "e3e31e4c7bba6eefcbb4474516e5f499c430ad6e67a72c3abd049bfa826c2e82",
+        "signature": "0769e0c5890d05fdb8daed4f4e15e03428cddfce2a5136970e3936bc60fea276",
         "affectsGlobalScope": false
       },
       "../src/objectives/utility/organizeinventory.ts": {
@@ -2162,7 +2162,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/other/builditem.ts": {
-        "version": "4c23bdfc472edcc3572383fb2462741a07576092a65f26da71b5a6304efc8966",
+        "version": "455e8fde9366c729a26e17e4f1d96d29f4f227a455d31eddb6fbf26a0aaa51ee",
         "signature": "4ea31c8c6824e32217cdd6aae1ee8a54e74e76bbc866f978df4eaaa51a48f13a",
         "affectsGlobalScope": false
       },
@@ -2257,8 +2257,8 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/gather/gatherwater.ts": {
-        "version": "05f488341358b2ad07f49ba0bd578b13549e457280b4c6c4b5131580097b63e7",
-        "signature": "800f1ddc3d396e62c12991b10346fde66be1adf1302cd710ba8a38e18e158f53",
+        "version": "1da8ca84283cd93871213e464a5bbeb2fcf5a7370ce5683815c42f0ae60d0a0a",
+        "signature": "9783affa5fcc0d0e57a21d712710cc1ff8e1a95e16334c0733bdf04585dda621",
         "affectsGlobalScope": false
       },
       "../src/objectives/interrupt/carvecorpse.ts": {
@@ -2282,8 +2282,8 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/other/emptywatercontainer.ts": {
-        "version": "c13e7b774b677cec9e59a24f9a1ef6b18a8e442914722d8399f63b832f7bfefd",
-        "signature": "6fb891a17f7a88761112551cda29a861ec277c2c8924119c756033a97e677756",
+        "version": "607cbbe4df36382770f167c4032ccdaf29f472e3a3d7b5948f02ec8961622ed4",
+        "signature": "33470e28924e7c31627ceb580d3dcf9c5a87e44b6193fd01bd19ac7171682d03",
         "affectsGlobalScope": false
       },
       "../src/objectives/other/plantseed.ts": {
@@ -2362,7 +2362,7 @@
         "affectsGlobalScope": false
       },
       "../src/tars.ts": {
-        "version": "0288e52ad7b67e2f37b58821cde4457f134327d2f785f5a2fd2a0bc538acae49",
+        "version": "74a7d0cbb065ac4198c048de89106a168cef424535b973bc04eb59224721d43d",
         "signature": "5c3fd389edb0cd49b0ff1142a064c46b23d13d7c548488d2b30dac2868dd3ccc",
         "affectsGlobalScope": false
       },

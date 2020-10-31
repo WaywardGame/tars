@@ -49,6 +49,7 @@ export interface IBaseInfo {
 	litType?: DoodadType | DoodadTypeGroup;
 	tryPlaceNear?: BaseInfoKey;
 	allowMultiple?: boolean;
+	openAreaRadius?: number;
 	canAdd?(base: IBase, target: Doodad): boolean;
 	onAdd?(base: IBase, target: Doodad): void;
 	findTargets?(base: IBase): Doodad[];
@@ -60,6 +61,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	anvil: {
 		doodadTypes: [DoodadTypeGroup.Anvil],
 		tryPlaceNear: "kiln",
+		// openAreaRadius: 0, // todo: verify this
 	},
 	campfire: {
 		doodadTypes: [DoodadTypeGroup.LitCampfire],
