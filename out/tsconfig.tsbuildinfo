@@ -207,8 +207,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/map/prioritymap.d.ts": {
-        "version": "7759b64eb136dd16dd95b16a18b50e0d505718e8cc7593d76ce195711fcfca94",
-        "signature": "7759b64eb136dd16dd95b16a18b50e0d505718e8cc7593d76ce195711fcfca94",
+        "version": "5d6a81b734b350254366f85fa37f855e6f762557b16965cca88e4b77ca843cd2",
+        "signature": "5d6a81b734b350254366f85fa37f855e6f762557b16965cca88e4b77ca843cd2",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts": {
@@ -247,13 +247,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/imessagemanager.d.ts": {
-        "version": "71d3233506b48af165b62de1f7e825aeb77bdd34f65637eae53d6a44806bca8c",
-        "signature": "71d3233506b48af165b62de1f7e825aeb77bdd34f65637eae53d6a44806bca8c",
+        "version": "5343337d34117c979157d2d19f733e035cd6d0ee4b8e470b5f2d90a6fea9465a",
+        "signature": "5343337d34117c979157d2d19f733e035cd6d0ee4b8e470b5f2d90a6fea9465a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/command/icommand.d.ts": {
-        "version": "ee5ffff832d6d062eb3ea6cf1078505f3786e8033117dab6ff820491a941c9a0",
-        "signature": "ee5ffff832d6d062eb3ea6cf1078505f3786e8033117dab6ff820491a941c9a0",
+        "version": "30cffc31d13bd05bf91e877280022ec23e4a6dc2162289ba5cb98e710e3c6f0b",
+        "signature": "30cffc31d13bd05bf91e877280022ec23e4a6dc2162289ba5cb98e710e3c6f0b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/inpcs.d.ts": {
@@ -267,8 +267,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
-        "version": "08e683d40f5a99e368a3b73fb6e5c4952de92cb7495e26ab326b76cac52ff78f",
-        "signature": "08e683d40f5a99e368a3b73fb6e5c4952de92cb7495e26ab326b76cac52ff78f",
+        "version": "50dabf08dbd5908b7c1e2b06d67a6ab725c24bf38619ecf1797b0bbd40cd8dbe",
+        "signature": "50dabf08dbd5908b7c1e2b06d67a6ab725c24bf38619ecf1797b0bbd40cd8dbe",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/recipe/reciperequirement.d.ts": {
@@ -327,8 +327,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/registrar.d.ts": {
-        "version": "f3518de5073c076226936747b5eda9fc12f1a00c85158a6abd27e34e9d4e657e",
-        "signature": "f3518de5073c076226936747b5eda9fc12f1a00c85158a6abd27e34e9d4e657e",
+        "version": "39905a5ac84ee912e6149cde956abc14275c47f32df1e5cbfa77e8109aeb235c",
+        "signature": "39905a5ac84ee912e6149cde956abc14275c47f32df1e5cbfa77e8109aeb235c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npcs.d.ts": {
@@ -432,8 +432,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/save/isavemanager.d.ts": {
-        "version": "cdd56c383e19a4fec28d6c4852a307c7d6ecb5de3b821df5115d53d1dc6aa712",
-        "signature": "cdd56c383e19a4fec28d6c4852a307c7d6ecb5de3b821df5115d53d1dc6aa712",
+        "version": "46c10b17973af404a6d4c978e45aa6f62648ae31c65669a8d8d702c0532e8338",
+        "signature": "46c10b17973af404a6d4c978e45aa6f62648ae31c65669a8d8d702c0532e8338",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts": {
@@ -447,8 +447,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": {
-        "version": "8e8a7f4c92f280e650e6abb717929e7d9303c74bc31bbb422083ce3245608cf3",
-        "signature": "8e8a7f4c92f280e650e6abb717929e7d9303c74bc31bbb422083ce3245608cf3",
+        "version": "718f31084206bd92cb9fc7f1fb949ea3067840f14ed48708fecab0c66a4982df",
+        "signature": "718f31084206bd92cb9fc7f1fb949ea3067840f14ed48708fecab0c66a4982df",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/networking/iconnection.d.ts": {
@@ -457,8 +457,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/packets/ipacket.d.ts": {
-        "version": "05044ed22802a53a39731ede0b1aeb3b721d572368914ecdf0bd859108d9fcb6",
-        "signature": "05044ed22802a53a39731ede0b1aeb3b721d572368914ecdf0bd859108d9fcb6",
+        "version": "7933a5aa8b71f83e287a46fe862e66820605f564a5deeaaa6f877196fb6010d0",
+        "signature": "7933a5aa8b71f83e287a46fe862e66820605f564a5deeaaa6f877196fb6010d0",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/events/ifire.d.ts": {
@@ -552,8 +552,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
-        "version": "141c7a0a251181461e7e3b1284837735deb1f408345202382923b4f61698ff09",
-        "signature": "141c7a0a251181461e7e3b1284837735deb1f408345202382923b4f61698ff09",
+        "version": "6263e3d8d52b26f59057afcb3371348ac6c604c4cb62e1a8929975805d6a674c",
+        "signature": "6263e3d8d52b26f59057afcb3371348ac6c604c4cb62e1a8929975805d6a674c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/language.d.ts": {
@@ -572,18 +572,18 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/string/strings.d.ts": {
-        "version": "495a8dd021d682664de5e48151ccffa08d448f64fbfd436537c57cecf591079f",
-        "signature": "495a8dd021d682664de5e48151ccffa08d448f64fbfd436537c57cecf591079f",
+        "version": "7544b5f16ee6b146d8f4c907775c833813a2074057cddbc284189c4a4d1f57fc",
+        "signature": "7544b5f16ee6b146d8f4c907775c833813a2074057cddbc284189c4a4d1f57fc",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/languagemanager.d.ts": {
-        "version": "e74af145304841a04c29485fb1f07b34dff5139936998795aeaed7631d1502d8",
-        "signature": "e74af145304841a04c29485fb1f07b34dff5139936998795aeaed7631d1502d8",
+        "version": "5f3c1a204df98891c12b6a78f0dc23b02eec0d9ff4c76f494b097ee81b6b4689",
+        "signature": "5f3c1a204df98891c12b6a78f0dc23b02eec0d9ff4c76f494b097ee81b6b4689",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/ihookmanager.d.ts": {
-        "version": "cf355b7d7ec1e4ce0d6ad135d2dda850ade3225aaae67295d1e0a41fbc57fcb0",
-        "signature": "cf355b7d7ec1e4ce0d6ad135d2dda850ade3225aaae67295d1e0a41fbc57fcb0",
+        "version": "7addabea071037abc5f4fa0c7ab86d5888c507c9e28a3a2d88bd02379be23204",
+        "signature": "7addabea071037abc5f4fa0c7ab86d5888c507c9e28a3a2d88bd02379be23204",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/goodstream/apply/array/collect.d.ts": {
@@ -782,8 +782,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/creature/creaturemanager.d.ts": {
-        "version": "33e66f935d35e787e92c40c01761060c6e2cc5105791608819c99083975055ea",
-        "signature": "33e66f935d35e787e92c40c01761060c6e2cc5105791608819c99083975055ea",
+        "version": "a506b2d31ce8c7824ef2a00383644ce3c302597848f272ba7864ff5c9b25b705",
+        "signature": "a506b2d31ce8c7824ef2a00383644ce3c302597848f272ba7864ff5c9b25b705",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/flowfield/flowfield.d.ts": {
@@ -797,8 +797,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/flowfield/flowfieldmanager.d.ts": {
-        "version": "3fd3a299d76e2b77cdcf1da0c2c54b430387f0d7c68d864f664f05118cf7e44a",
-        "signature": "3fd3a299d76e2b77cdcf1da0c2c54b430387f0d7c68d864f664f05118cf7e44a",
+        "version": "cd015bb678e5484fc723c94878b480320b29680f3fc0e5b87652b5472728274d",
+        "signature": "cd015bb678e5484fc723c94878b480320b29680f3fc0e5b87652b5472728274d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npcmanager.d.ts": {
@@ -827,13 +827,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/shaders.d.ts": {
-        "version": "a56b3ea41fe84644f5cc48303c1dcb741d16db118a5ae0d1ef026638622c64af",
-        "signature": "a56b3ea41fe84644f5cc48303c1dcb741d16db118a5ae0d1ef026638622c64af",
+        "version": "94ae642d3736e136cd358cfa101e4881062a8df4389fc1f56342d57d58b6d72b",
+        "signature": "94ae642d3736e136cd358cfa101e4881062a8df4389fc1f56342d57d58b6d72b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/fieldofview/fieldofview.d.ts": {
-        "version": "ee84a308b0c87973efede53d3519135e51d3f5f24e2bb4da617b318479f37108",
-        "signature": "ee84a308b0c87973efede53d3519135e51d3f5f24e2bb4da617b318479f37108",
+        "version": "f51fd255f0882f84cad0f792f15b01db11c1720cd00c014bc46350669a1e7408",
+        "signature": "f51fd255f0882f84cad0f792f15b01db11c1720cd00c014bc46350669a1e7408",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/fieldofview/ibytegrid.d.ts": {
@@ -847,8 +847,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/ispriteatlas.d.ts": {
-        "version": "68d8dfaeb524935aaa5385cba6febe9b869f19d98543216413f172049d4dae4c",
-        "signature": "68d8dfaeb524935aaa5385cba6febe9b869f19d98543216413f172049d4dae4c",
+        "version": "470359060ec50d6eb1ed95dbf9ea301f80a5a42897e3e3017b67809320dd3295",
+        "signature": "470359060ec50d6eb1ed95dbf9ea301f80a5a42897e3e3017b67809320dd3295",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/spriteatlas.d.ts": {
@@ -857,8 +857,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/iexploremap.d.ts": {
-        "version": "de42e2c50b654725178f111cdfa22e8935dea65814b4bc0eb3f19e3e7ba6ba48",
-        "signature": "de42e2c50b654725178f111cdfa22e8935dea65814b4bc0eb3f19e3e7ba6ba48",
+        "version": "13501712063862add964af12f17ffee08c2d5cf015255360dcae3b4352a6e95a",
+        "signature": "13501712063862add964af12f17ffee08c2d5cf015255360dcae3b4352a6e95a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/iworld.d.ts": {
@@ -867,8 +867,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/iworldlayer.d.ts": {
-        "version": "5a8ca55dae07c04f0afe2fa460984919d864163f5166fe437e8897f6ec205524",
-        "signature": "5a8ca55dae07c04f0afe2fa460984919d864163f5166fe437e8897f6ec205524",
+        "version": "ba56fb2b29d4c60810b1e6ac115a1f0f5e4cece246a8e35a71b4d93aef7eb13d",
+        "signature": "ba56fb2b29d4c60810b1e6ac115a1f0f5e4cece246a8e35a71b4d93aef7eb13d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/terraintileinfo.d.ts": {
@@ -932,8 +932,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/worldrenderer.d.ts": {
-        "version": "f3edf83e92d1ecb55aed616c17c5758cc0282b9d5d9a51a294306b11c51dc137",
-        "signature": "f3edf83e92d1ecb55aed616c17c5758cc0282b9d5d9a51a294306b11c51dc137",
+        "version": "574ead0cdeb9c721eec8f0d6943b91f2ca915ab97fc11dfb9ec299cfc347d3c7",
+        "signature": "574ead0cdeb9c721eec8f0d6943b91f2ca915ab97fc11dfb9ec299cfc347d3c7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/imod.d.ts": {
@@ -942,8 +942,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/imodinfo.d.ts": {
-        "version": "435ffc7954cd0f64e6d441d19b2b4fc43a2668a174faa383acc35318af17f065",
-        "signature": "435ffc7954cd0f64e6d441d19b2b4fc43a2668a174faa383acc35318af17f065",
+        "version": "fb6a645ec0054ed5a110126cd21e7716f4d4a37d65ea48cb643e283d5b18aa6f",
+        "signature": "fb6a645ec0054ed5a110126cd21e7716f4d4a37d65ea48cb643e283d5b18aa6f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/resource/iresourceloader.d.ts": {
@@ -982,8 +982,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/save/data/savedata.d.ts": {
-        "version": "4272a227f2f08c5175d287984df4b574709c0143915c0627a33e18743cb4b8d6",
-        "signature": "4272a227f2f08c5175d287984df4b574709c0143915c0627a33e18743cb4b8d6",
+        "version": "face042694ddca632c4ac209ff0348eaac818a4e150e5fbb6464ea58ad88aeaa",
+        "signature": "face042694ddca632c4ac209ff0348eaac818a4e150e5fbb6464ea58ad88aeaa",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/menu/menus/character/character.d.ts": {
@@ -1022,8 +1022,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/save/data/isavedataglobal.d.ts": {
-        "version": "05db8225332af9a1dead2376e120b8f4e7d8d52368bb806c4f995a05d49243de",
-        "signature": "05db8225332af9a1dead2376e120b8f4e7d8d52368bb806c4f995a05d49243de",
+        "version": "115c7fa2510ecf08c8043b3d6d3d1b6ef8c1648b2898e4339d2f6650e2a3b06e",
+        "signature": "115c7fa2510ecf08c8043b3d6d3d1b6ef8c1648b2898e4339d2f6650e2a3b06e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/sorttype.d.ts": {
@@ -1037,8 +1037,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/save/data/savedataglobal.d.ts": {
-        "version": "475a0ddf3dc3db3b0dd109aab8d95702d50eb6b55c26e676159ca09284f1fdeb",
-        "signature": "475a0ddf3dc3db3b0dd109aab8d95702d50eb6b55c26e676159ca09284f1fdeb",
+        "version": "3d4898139f6321abe526b91c1c6314159514333cb32fc7acdec75a5ec672e6bd",
+        "signature": "3d4898139f6321abe526b91c1c6314159514333cb32fc7acdec75a5ec672e6bd",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/version.d.ts": {
@@ -1112,8 +1112,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screens/ingamescreen.d.ts": {
-        "version": "9f2336cac961f9737c8b6de79281e51e2c6697767ebbedeb8a7efe513efc92bd",
-        "signature": "9f2336cac961f9737c8b6de79281e51e2c6697767ebbedeb8a7efe513efc92bd",
+        "version": "d763f814a15433b0c4a428dcae8168a58cb63144dde1f8364b74df29ed12271d",
+        "signature": "d763f814a15433b0c4a428dcae8168a58cb63144dde1f8364b74df29ed12271d",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/ui/ui.d.ts": {
@@ -1121,44 +1121,39 @@
         "signature": "b431b53e126426d3e5b5639cb9eaa3c0ffbf1f1f7ef17e6166d2f9691cda61ab",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/utilities/prototype/array.d.ts": {
-        "version": "1758d87ca2e9381a188d09a745d282e4c7244ad6b70a7bbd9f4b927d7763340d",
-        "signature": "1758d87ca2e9381a188d09a745d282e4c7244ad6b70a7bbd9f4b927d7763340d",
-        "affectsGlobalScope": true
-      },
       "../node_modules/@wayward/types/definitions/utilities/prototype/promise.d.ts": {
         "version": "d058d520d9d9e2ece11bb02538b54fc7ed52c643c845727bf5aaa228a6b6751b",
         "signature": "d058d520d9d9e2ece11bb02538b54fc7ed52c643c845727bf5aaa228a6b6751b",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/utilities/typesglobal/class.d.ts": {
-        "version": "972b572609c4c5c86c9d620862f478a1ccc78f5be17dff240e883ce5dd88dc93",
-        "signature": "972b572609c4c5c86c9d620862f478a1ccc78f5be17dff240e883ce5dd88dc93",
+        "version": "9b6bb42093ad46a7568591e0e9f5828b1adca0109e54fc87feb00e1078dcfa74",
+        "signature": "9b6bb42093ad46a7568591e0e9f5828b1adca0109e54fc87feb00e1078dcfa74",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/utilities/typesglobal/descriptions.d.ts": {
-        "version": "0c084deda2d0876536e6d6ae9001c79cf364ac29c8998bdd45968af61f9ace7b",
-        "signature": "0c084deda2d0876536e6d6ae9001c79cf364ac29c8998bdd45968af61f9ace7b",
+        "version": "5d38659c49bef63f092d302ee2f92a2a735cd632c3823f5116e4d04dc3ea6cde",
+        "signature": "5d38659c49bef63f092d302ee2f92a2a735cd632c3823f5116e4d04dc3ea6cde",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/utilities/typesglobal/function.d.ts": {
-        "version": "0e6bc83945aaa9199113fd0c3f76d12798a25d15e7013d533a880155f4831366",
-        "signature": "0e6bc83945aaa9199113fd0c3f76d12798a25d15e7013d533a880155f4831366",
+        "version": "0b8845f0b906e07f3dd134a0e7208a811bf56b9f9c0ee0f62e400a4a12cf5961",
+        "signature": "0b8845f0b906e07f3dd134a0e7208a811bf56b9f9c0ee0f62e400a4a12cf5961",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/utilities/typesglobal/iterables.d.ts": {
-        "version": "1268dd0ae0247c8b4ff70c8c83d86c9554ab6e9c24626b50fd2002e63205e354",
-        "signature": "1268dd0ae0247c8b4ff70c8c83d86c9554ab6e9c24626b50fd2002e63205e354",
+        "version": "61ca895c93af4773bb64f7633c8e42491986bbbc7bdf612a6a7d6f411d2e9ce1",
+        "signature": "61ca895c93af4773bb64f7633c8e42491986bbbc7bdf612a6a7d6f411d2e9ce1",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/utilities/typesglobal/misc.d.ts": {
-        "version": "f7e113300252370a10696cbbe018f818200ec4b8818ac62ba4f0a0050a3d5250",
-        "signature": "f7e113300252370a10696cbbe018f818200ec4b8818ac62ba4f0a0050a3d5250",
+        "version": "9f6408346c74171b5f5babf88ec4002bf739be9df73db8fb7365aa84f4019101",
+        "signature": "9f6408346c74171b5f5babf88ec4002bf739be9df73db8fb7365aa84f4019101",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/utilities/typesglobal/objects.d.ts": {
-        "version": "2e3b31c9e4efbd9c8fe756a1644ffcbe9cd90688bcac8ffcd5504f3df42d1069",
-        "signature": "2e3b31c9e4efbd9c8fe756a1644ffcbe9cd90688bcac8ffcd5504f3df42d1069",
+        "version": "7f4c5d3b77142bfbd49de426d7091b52908a786ac2386c77ebfe5903724ef217",
+        "signature": "7f4c5d3b77142bfbd49de426d7091b52908a786ac2386c77ebfe5903724ef217",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/utilities/typesglobal/types.d.ts": {
@@ -1167,8 +1162,8 @@
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/iglobal.d.ts": {
-        "version": "18fb6f6c41969eec346e531156f009ce617d622bb485c8ad5905c61e543064fa",
-        "signature": "18fb6f6c41969eec346e531156f009ce617d622bb485c8ad5905c61e543064fa",
+        "version": "f0a6354d1aa1977c927e4c01ab39bbc05e7fe9dfaa97b5dcdad952ec6e247e8f",
+        "signature": "f0a6354d1aa1977c927e4c01ab39bbc05e7fe9dfaa97b5dcdad952ec6e247e8f",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/mod/basemod.d.ts": {
@@ -1282,8 +1277,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/tooltip/tooltipmanager.d.ts": {
-        "version": "166802465ca5abbfbb39b983669c2fe535e249cc3f2ed8a6bb38025d291acb38",
-        "signature": "166802465ca5abbfbb39b983669c2fe535e249cc3f2ed8a6bb38025d291acb38",
+        "version": "5d1d106979da4f41e53f6ddef6b1ae7aef33cd64d00c0bcbf00a41d77cf0b887",
+        "signature": "5d1d106979da4f41e53f6ddef6b1ae7aef33cd64d00c0bcbf00a41d77cf0b887",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/util/highlightmanager.d.ts": {
@@ -1342,13 +1337,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/input/bind.d.ts": {
-        "version": "340116dabdfe672fae3b83cc841528c6ecfddae08deb112c0e2d704ea4d25163",
-        "signature": "340116dabdfe672fae3b83cc841528c6ecfddae08deb112c0e2d704ea4d25163",
+        "version": "e77b6961925652b24394d0de77c97475821f4b7c50b6d6a41d567403afe1e85a",
+        "signature": "e77b6961925652b24394d0de77c97475821f4b7c50b6d6a41d567403afe1e85a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/util/componentmanipulator.d.ts": {
-        "version": "8fd5a00aafca62efcebbd7758bcdf6f28691b0b36fb8a6462185e303cc34be76",
-        "signature": "8fd5a00aafca62efcebbd7758bcdf6f28691b0b36fb8a6462185e303cc34be76",
+        "version": "002d3b1c5a217f70ee089db21abc994d6e62b62608ce6d21d8862e1a0f02735c",
+        "signature": "002d3b1c5a217f70ee089db21abc994d6e62b62608ce6d21d8862e1a0f02735c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/rectangle.d.ts": {
@@ -1422,13 +1417,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "a552c540962bd663697c6cc49d4ef14bdd0d3649dcff6c0417c56c82d7bf0e47",
-        "signature": "a552c540962bd663697c6cc49d4ef14bdd0d3649dcff6c0417c56c82d7bf0e47",
+        "version": "70857a3531eea4aaea480fd22d33e8e30f1cd4d75ffaadaa3fdc96bb2653a9ef",
+        "signature": "70857a3531eea4aaea480fd22d33e8e30f1cd4d75ffaadaa3fdc96bb2653a9ef",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
-        "version": "e143c10000b6440797c849ba9025f90fc0fc630030ab0c10043243c95acefef7",
-        "signature": "e143c10000b6440797c849ba9025f90fc0fc630030ab0c10043243c95acefef7",
+        "version": "e09fece220dfc857b6894a343ddbd6f1dcb961bde06fd014b6c6a3eda24499fc",
+        "signature": "e09fece220dfc857b6894a343ddbd6f1dcb961bde06fd014b6c6a3eda24499fc",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/ihookhost.d.ts": {
@@ -1492,8 +1487,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/corpseinspection.d.ts": {
-        "version": "c94ddf10efa375af83baaabab53a88f100cb3da41a8af49a754b34e0a0da3966",
-        "signature": "c94ddf10efa375af83baaabab53a88f100cb3da41a8af49a754b34e0a0da3966",
+        "version": "7543eb806a131da6f3c8c78609a38ccd62b008a0be2a76e1c7ed1ff42cb00e63",
+        "signature": "7543eb806a131da6f3c8c78609a38ccd62b008a0be2a76e1c7ed1ff42cb00e63",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/listinspection.d.ts": {
@@ -1502,8 +1497,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/corpsesinspection.d.ts": {
-        "version": "4c5a7fd35e1b34d87cf6b3fb0d6c421f7a0c83138a308ce60ff22624a98ed1c8",
-        "signature": "4c5a7fd35e1b34d87cf6b3fb0d6c421f7a0c83138a308ce60ff22624a98ed1c8",
+        "version": "9a7636887d32fc237595821d2abcc49474fe2e0baefcf58074b45cc7fbd3790a",
+        "signature": "9a7636887d32fc237595821d2abcc49474fe2e0baefcf58074b45cc7fbd3790a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/entityinspection.d.ts": {
@@ -1512,28 +1507,28 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/creatureinspection.d.ts": {
-        "version": "7cc50597adad6a998538e35d189314f18ddcb8659e9d5e22611755192865a6ea",
-        "signature": "7cc50597adad6a998538e35d189314f18ddcb8659e9d5e22611755192865a6ea",
+        "version": "c292658141bd3837e275935eba5bab6f64beeb82fdb75fc9d6729b44bca46c7b",
+        "signature": "c292658141bd3837e275935eba5bab6f64beeb82fdb75fc9d6729b44bca46c7b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/doodadinspection.d.ts": {
-        "version": "01618cdd846ec6e03594df6d70e901a7be2e3e513404aac2c37ee3fb211fb5db",
-        "signature": "01618cdd846ec6e03594df6d70e901a7be2e3e513404aac2c37ee3fb211fb5db",
+        "version": "dcc5e609c684103b32ca637459c40fe26c948dd5d7cc1b0dc9597bcd26b1d6f4",
+        "signature": "dcc5e609c684103b32ca637459c40fe26c948dd5d7cc1b0dc9597bcd26b1d6f4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/iteminspection.d.ts": {
-        "version": "def768523db117f2f864507c682953702be66910ac0c24a70694aba8fa9bde55",
-        "signature": "def768523db117f2f864507c682953702be66910ac0c24a70694aba8fa9bde55",
+        "version": "c51254ecdb3010373b1391e8c81f4d6ad7e1c697e443d53e02309fc29a5576c4",
+        "signature": "c51254ecdb3010373b1391e8c81f4d6ad7e1c697e443d53e02309fc29a5576c4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/itemsinspection.d.ts": {
-        "version": "732655be8705c4c62a6fca1e77b9c4bf3fbdd42761eaf5799d3bfba37ddbcbe8",
-        "signature": "732655be8705c4c62a6fca1e77b9c4bf3fbdd42761eaf5799d3bfba37ddbcbe8",
+        "version": "f17670197d62db9b0dab6e10ce64bb319052a2290240b1adfb44e583a14c5508",
+        "signature": "f17670197d62db9b0dab6e10ce64bb319052a2290240b1adfb44e583a14c5508",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/humaninspection.d.ts": {
-        "version": "d2981c40294e4733bc94cc08224fd2fb1e9619f80836b4ae77de780587ca10c5",
-        "signature": "d2981c40294e4733bc94cc08224fd2fb1e9619f80836b4ae77de780587ca10c5",
+        "version": "73363c1a48c931188d07d5e14a81a6a48a28f2aff74d211225cb0b7034b33fea",
+        "signature": "73363c1a48c931188d07d5e14a81a6a48a28f2aff74d211225cb0b7034b33fea",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/npcinspection.d.ts": {
@@ -1547,13 +1542,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/selfinspection.d.ts": {
-        "version": "aa88112118e751e7040bd30fcced55c2a5c6055c90b0b8f1e5f6de0ef4bf549a",
-        "signature": "aa88112118e751e7040bd30fcced55c2a5c6055c90b0b8f1e5f6de0ef4bf549a",
+        "version": "8450157c19f0ff80f5f7764fe7d42396275cc2ecffb24647980d20e33f2fc6d7",
+        "signature": "8450157c19f0ff80f5f7764fe7d42396275cc2ecffb24647980d20e33f2fc6d7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileeventinspection.d.ts": {
-        "version": "fdb5290a7e70eb7a1bb60cfdb4a53e9eab6ba3158b6450d8234a7969f18eb407",
-        "signature": "fdb5290a7e70eb7a1bb60cfdb4a53e9eab6ba3158b6450d8234a7969f18eb407",
+        "version": "346552e98f47f0889e19390bd85857523286af25183a8f352fd01c5fe9d60505",
+        "signature": "346552e98f47f0889e19390bd85857523286af25183a8f352fd01c5fe9d60505",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileinspection.d.ts": {
@@ -1622,8 +1617,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
-        "version": "4d6c56ff2ab7c50511866dc1f3ca8a2f05674e2312e3dc8d8d35beb585236c34",
-        "signature": "4d6c56ff2ab7c50511866dc1f3ca8a2f05674e2312e3dc8d8d35beb585236c34",
+        "version": "16de8ae3d3c9a73be0f3d6cce468151c7f31e9fe2c7eb9369cd6881aac1e00a2",
+        "signature": "16de8ae3d3c9a73be0f3d6cce468151c7f31e9fe2c7eb9369cd6881aac1e00a2",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts": {
@@ -1672,8 +1667,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/imessages.d.ts": {
-        "version": "ba490084a71f611f406fd28de7f36568b3f2fbbbea18e9023a789c8cd01b81b7",
-        "signature": "ba490084a71f611f406fd28de7f36568b3f2fbbbea18e9023a789c8cd01b81b7",
+        "version": "94fd450aed8dc9ead4c0528ab2944823c38db9ef34e4f6139a6d72433429f97d",
+        "signature": "94fd450aed8dc9ead4c0528ab2944823c38db9ef34e4f6139a6d72433429f97d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/menu/menus/highscores/ihighscoresmenu.d.ts": {
@@ -1702,8 +1697,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionaries.d.ts": {
-        "version": "07ddb36e990259ef5e883cfbff24584b13d26bb24c640191d1f745463a25b732",
-        "signature": "07ddb36e990259ef5e883cfbff24584b13d26bb24c640191d1f745463a25b732",
+        "version": "1458f2a040f6af8657a6350edc0e8eec4529759495e7ce08a3b2c33d36c4511c",
+        "signature": "1458f2a040f6af8657a6350edc0e8eec4529759495e7ce08a3b2c33d36c4511c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translation.d.ts": {
@@ -1752,8 +1747,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts": {
-        "version": "7cc214209efa29e52399a0ddb50fecf157dbf246a48cd946a1c731b0365e005a",
-        "signature": "7cc214209efa29e52399a0ddb50fecf157dbf246a48cd946a1c731b0365e005a",
+        "version": "4813d13954e3307ea9de0972897b4dbace18597fb4cc472ae8325815c2a7d554",
+        "signature": "4813d13954e3307ea9de0972897b4dbace18597fb4cc472ae8325815c2a7d554",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/ientity.d.ts": {
@@ -1767,13 +1762,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/human.d.ts": {
-        "version": "1128af25995e18895b3f9b1257813a5dcb82d1061c8dfb08f71bf7530c32069d",
-        "signature": "1128af25995e18895b3f9b1257813a5dcb82d1061c8dfb08f71bf7530c32069d",
+        "version": "78d1525b6c2ae365fe26a28fa649ad451edaffeb26e144af8c76b7ff1e96c223",
+        "signature": "78d1525b6c2ae365fe26a28fa649ad451edaffeb26e144af8c76b7ff1e96c223",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/entity.d.ts": {
-        "version": "2dfbf3640d64e7ca59114b90c7efce7ad64ee502538bfc05a818ea5122176e50",
-        "signature": "2dfbf3640d64e7ca59114b90c7efce7ad64ee502538bfc05a818ea5122176e50",
+        "version": "044d0cd15887399851f474e69adcac67596d18b1abd103d964fe098910239de2",
+        "signature": "044d0cd15887399851f474e69adcac67596d18b1abd103d964fe098910239de2",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/creature/creature.d.ts": {
@@ -1802,23 +1797,23 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts": {
-        "version": "fa989f797094a1969f9811f5f52ea1bf1728ca933bac4b4053a3508dba5cb5e8",
-        "signature": "fa989f797094a1969f9811f5f52ea1bf1728ca933bac4b4053a3508dba5cb5e8",
+        "version": "8b6fbfdc24632f6d429fb25e1bf864c96f6bdd0adca875674d2df87cbbe46ca9",
+        "signature": "8b6fbfdc24632f6d429fb25e1bf864c96f6bdd0adca875674d2df87cbbe46ca9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/idoodad.d.ts": {
-        "version": "63717beb15e7ea1c47fa0e9b270e6620d0452a722110a0d5798b33028f7e215a",
-        "signature": "63717beb15e7ea1c47fa0e9b270e6620d0452a722110a0d5798b33028f7e215a",
+        "version": "15b630a581f0d0b73764f8a590bd6269d0b20150546a61d4283b1a8962a634c7",
+        "signature": "15b630a581f0d0b73764f8a590bd6269d0b20150546a61d4283b1a8962a634c7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts": {
-        "version": "8a6de9325e9794f28759c1baf9d27ed79d536306a0d842151ecd6ede85d3d2c8",
-        "signature": "8a6de9325e9794f28759c1baf9d27ed79d536306a0d842151ecd6ede85d3d2c8",
+        "version": "54de720ca390ae0fade669b9b256d60c1b64a59513610bea08cc54fca98dc5f5",
+        "signature": "54de720ca390ae0fade669b9b256d60c1b64a59513610bea08cc54fca98dc5f5",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/player.d.ts": {
-        "version": "59644934116ef7f4fa982af36933c225342cbdc1930e23ad5a67e3338b0a799e",
-        "signature": "59644934116ef7f4fa982af36933c225342cbdc1930e23ad5a67e3338b0a799e",
+        "version": "0ab8bafb2d238c71309a1352982ff1fa834bd1711918fc94e38b7ebc6970c33d",
+        "signature": "0ab8bafb2d238c71309a1352982ff1fa834bd1711918fc94e38b7ebc6970c33d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/items.d.ts": {
@@ -1827,8 +1822,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/enum/enums.d.ts": {
-        "version": "56268102e04f18f98064c21c3082f894e0914f09bb47d6af710afb01a1e28b5e",
-        "signature": "56268102e04f18f98064c21c3082f894e0914f09bb47d6af710afb01a1e28b5e",
+        "version": "7d22c52f93235b1fe28d14d3bccd69fbcb86c06b252132fd411c4be456c6f0c8",
+        "signature": "7d22c52f93235b1fe28d14d3bccd69fbcb86c06b252132fd411c4be456c6f0c8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodads.d.ts": {
@@ -2012,8 +2007,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/creature/corpse/corpses.d.ts": {
-        "version": "185eed76f2093e89d451968c7710fb762b788587cedbc23e4509ed21d56ff593",
-        "signature": "185eed76f2093e89d451968c7710fb762b788587cedbc23e4509ed21d56ff593",
+        "version": "1889f712e8cc5246267a7a3393e7fbd263886800e8ad9314fe0823b774e368d1",
+        "signature": "1889f712e8cc5246267a7a3393e7fbd263886800e8ad9314fe0823b774e368d1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/util/movement/pathoverlayfootprints.d.ts": {
@@ -2152,7 +2147,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/acquireitemfromdismantle.ts": {
-        "version": "1e0dadc4a0fee5062527b975463a5fb1b299debf602ec0d584571ccdb9befb2a",
+        "version": "c5bb3e18f87428d41738f3d2456fae59a0a712701e12ecc51b5bf34a74c9f2ca",
         "signature": "e6a83744f8110caf03ddb0fd61faa45169a1efb663162246419d336fff7a3292",
         "affectsGlobalScope": false
       },
@@ -3302,7 +3297,6 @@
         "../node_modules/@wayward/types/definitions/ui/functional/ifunctionalsortable.d.ts",
         "../node_modules/@wayward/types/definitions/ui/functional/ifunctionaltooltip.d.ts",
         "../node_modules/@wayward/types/definitions/ui/ui.d.ts",
-        "../node_modules/@wayward/types/definitions/utilities/prototype/array.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/prototype/promise.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/typesglobal/class.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/typesglobal/descriptions.d.ts",
@@ -6495,7 +6489,6 @@
         "../node_modules/@wayward/types/definitions/ui/functional/ifunctionalsortable.d.ts",
         "../node_modules/@wayward/types/definitions/ui/functional/ifunctionaltooltip.d.ts",
         "../node_modules/@wayward/types/definitions/ui/ui.d.ts",
-        "../node_modules/@wayward/types/definitions/utilities/prototype/array.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/prototype/promise.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/typesglobal/class.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/typesglobal/descriptions.d.ts",
@@ -8587,7 +8580,6 @@
       "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts",
       "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts",
       "../node_modules/@wayward/types/definitions/utilities/performance.d.ts",
-      "../node_modules/@wayward/types/definitions/utilities/prototype/array.d.ts",
       "../node_modules/@wayward/types/definitions/utilities/prototype/promise.d.ts",
       "../node_modules/@wayward/types/definitions/utilities/random.d.ts",
       "../node_modules/@wayward/types/definitions/utilities/random/generators/randomitem.d.ts",
