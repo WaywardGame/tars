@@ -1427,8 +1427,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "6d5a2ae69ce6f190f083ebcfc087f58f5ca7687361ebfaffcd6de389dca6b893",
-        "signature": "6d5a2ae69ce6f190f083ebcfc087f58f5ca7687361ebfaffcd6de389dca6b893",
+        "version": "ffb7b8af52cd229ea31922449ea95fe8617cfa6fb01d86f91f9c90858560e23c",
+        "signature": "ffb7b8af52cd229ea31922449ea95fe8617cfa6fb01d86f91f9c90858560e23c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
