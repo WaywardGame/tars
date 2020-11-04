@@ -1406,14 +1406,9 @@
         "signature": "dbadfa4a1a25c1c6d145394ce7c0bd0cf558f40297e61759375c926d962345fd",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/replay/ireplaylogentry.d.ts": {
-        "version": "eee8300be611d40543a5906ff2723230aff40dbe610ef638bf5600bb7d8a8560",
-        "signature": "eee8300be611d40543a5906ff2723230aff40dbe610ef638bf5600bb7d8a8560",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@wayward/types/definitions/replay/replaymanager.d.ts": {
-        "version": "192417fa38fc7a28560da4580ce144cb5013afeac198c097e5b809858d1bf03d",
-        "signature": "192417fa38fc7a28560da4580ce144cb5013afeac198c097e5b809858d1bf03d",
+        "version": "b3c98e8c634321567ca44d6cb07f745b922e440bd3ae174abc479ae00a4eb5f4",
+        "signature": "b3c98e8c634321567ca44d6cb07f745b922e440bd3ae174abc479ae00a4eb5f4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/performance.d.ts": {
@@ -1447,8 +1442,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/quest/requirement/requirement.d.ts": {
-        "version": "ca2ec741a21bf2a472cbce6b2ad673a31df5d1fb3795a9d7dd3136da15f4dba3",
-        "signature": "ca2ec741a21bf2a472cbce6b2ad673a31df5d1fb3795a9d7dd3136da15f4dba3",
+        "version": "01cce9b1a4e1d5a243e4ef31d234500100f92282684b0a8bca570bb1fdc096ee",
+        "signature": "01cce9b1a4e1d5a243e4ef31d234500100f92282684b0a8bca570bb1fdc096ee",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/quest/requirement/killcreaturerequirement.d.ts": {
@@ -1477,8 +1472,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/quest/quest/quest.d.ts": {
-        "version": "7970d8d7ecbc97d654cc4c42a971212dd2b439eacce26e32a5c2ad1a3a8f347f",
-        "signature": "7970d8d7ecbc97d654cc4c42a971212dd2b439eacce26e32a5c2ad1a3a8f347f",
+        "version": "b3a1c6ec263b83dce26bad06c25f14690a5d595078de4e92868d13da1e0868b9",
+        "signature": "b3a1c6ec263b83dce26bad06c25f14690a5d595078de4e92868d13da1e0868b9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/skills.d.ts": {
@@ -1642,8 +1637,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/iplayer.d.ts": {
-        "version": "0872f0f99352dc85ebdc2337fb7061f812909675f19304df3b6dbe7ef59439af",
-        "signature": "0872f0f99352dc85ebdc2337fb7061f812909675f19304df3b6dbe7ef59439af",
+        "version": "cb149ab86e0034e7c4093c8fd1410014d3126ba76f81d991568179cb01291e0b",
+        "signature": "cb149ab86e0034e7c4093c8fd1410014d3126ba76f81d991568179cb01291e0b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/status/handler/iexhausted.d.ts": {
@@ -2815,6 +2810,8 @@
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts",
         "../node_modules/@wayward/types/definitions/item/item.d.ts",
+        "../node_modules/@wayward/types/definitions/language/dictionary/interrupt.d.ts",
+        "../node_modules/@wayward/types/definitions/language/dictionary/interruptchoice.d.ts",
         "../node_modules/@wayward/types/definitions/save/data/isavedataglobal.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/direction.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
@@ -4295,12 +4292,8 @@
         "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
       ],
-      "../node_modules/@wayward/types/definitions/replay/ireplaylogentry.d.ts": [
-        "../node_modules/@wayward/types/definitions/utilities/random.d.ts"
-      ],
       "../node_modules/@wayward/types/definitions/replay/replaymanager.d.ts": [
-        "../node_modules/@wayward/types/definitions/multiplayer/packets/shared/actionpacket.d.ts",
-        "../node_modules/@wayward/types/definitions/replay/ireplaylogentry.d.ts"
+        "../node_modules/@wayward/types/definitions/multiplayer/packets/shared/actionpacket.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/resource/iresourceloader.d.ts": [
         "../node_modules/@wayward/types/definitions/mod/imodinfo.d.ts",
@@ -6016,6 +6009,8 @@
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts",
         "../node_modules/@wayward/types/definitions/item/item.d.ts",
+        "../node_modules/@wayward/types/definitions/language/dictionary/interrupt.d.ts",
+        "../node_modules/@wayward/types/definitions/language/dictionary/interruptchoice.d.ts",
         "../node_modules/@wayward/types/definitions/save/data/isavedataglobal.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/direction.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
@@ -7496,12 +7491,8 @@
         "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
       ],
-      "../node_modules/@wayward/types/definitions/replay/ireplaylogentry.d.ts": [
-        "../node_modules/@wayward/types/definitions/utilities/random.d.ts"
-      ],
       "../node_modules/@wayward/types/definitions/replay/replaymanager.d.ts": [
-        "../node_modules/@wayward/types/definitions/multiplayer/packets/shared/actionpacket.d.ts",
-        "../node_modules/@wayward/types/definitions/replay/ireplaylogentry.d.ts"
+        "../node_modules/@wayward/types/definitions/multiplayer/packets/shared/actionpacket.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/resource/iresourceloader.d.ts": [
         "../node_modules/@wayward/types/definitions/mod/imodinfo.d.ts",
@@ -8557,7 +8548,6 @@
       "../node_modules/@wayward/types/definitions/renderer/world.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/worldlayerrenderer.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/worldrenderer.d.ts",
-      "../node_modules/@wayward/types/definitions/replay/ireplaylogentry.d.ts",
       "../node_modules/@wayward/types/definitions/replay/replaymanager.d.ts",
       "../node_modules/@wayward/types/definitions/resource/iresourceloader.d.ts",
       "../node_modules/@wayward/types/definitions/resource/resourceloader.d.ts",
