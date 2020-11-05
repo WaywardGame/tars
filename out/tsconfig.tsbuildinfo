@@ -422,8 +422,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "61db7cc248503a1aca17245829448886472d59979b935dcb150e20d7e11004d9",
-        "signature": "61db7cc248503a1aca17245829448886472d59979b935dcb150e20d7e11004d9",
+        "version": "e14c475470df952bc8ce55bc46ed26d12ec6c4dba77a87aa6d34c7b4ee6b6f66",
+        "signature": "e14c475470df952bc8ce55bc46ed26d12ec6c4dba77a87aa6d34c7b4ee6b6f66",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodadmanager.d.ts": {
@@ -582,8 +582,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/ihookmanager.d.ts": {
-        "version": "7addabea071037abc5f4fa0c7ab86d5888c507c9e28a3a2d88bd02379be23204",
-        "signature": "7addabea071037abc5f4fa0c7ab86d5888c507c9e28a3a2d88bd02379be23204",
+        "version": "243d7619ee9643e6911dc59748e2659937eb9f3541aff2b5a7debcc0baf6e521",
+        "signature": "243d7619ee9643e6911dc59748e2659937eb9f3541aff2b5a7debcc0baf6e521",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/goodstream/apply/array/collect.d.ts": {
@@ -1112,8 +1112,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screens/ingamescreen.d.ts": {
-        "version": "d763f814a15433b0c4a428dcae8168a58cb63144dde1f8364b74df29ed12271d",
-        "signature": "d763f814a15433b0c4a428dcae8168a58cb63144dde1f8364b74df29ed12271d",
+        "version": "8ec4eb68b1450a3b8b9b51b904d7d1a4e0c6ac6cbd2216a106399c7aacb25ba6",
+        "signature": "8ec4eb68b1450a3b8b9b51b904d7d1a4e0c6ac6cbd2216a106399c7aacb25ba6",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/ui/ui.d.ts": {
@@ -1177,8 +1177,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/mod.d.ts": {
-        "version": "e8b2a3f75194da0b6976564bdcdb8ef06554537c265cd134c8a76cb4005bf16c",
-        "signature": "e8b2a3f75194da0b6976564bdcdb8ef06554537c265cd134c8a76cb4005bf16c",
+        "version": "880d492025c6603671dc5f24614a6889b0d9fe2afcf094c8dd96682407eef030",
+        "signature": "880d492025c6603671dc5f24614a6889b0d9fe2afcf094c8dd96682407eef030",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/hookcallfactory.d.ts": {
@@ -1407,8 +1407,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/replay/replaymanager.d.ts": {
-        "version": "b3c98e8c634321567ca44d6cb07f745b922e440bd3ae174abc479ae00a4eb5f4",
-        "signature": "b3c98e8c634321567ca44d6cb07f745b922e440bd3ae174abc479ae00a4eb5f4",
+        "version": "d2077461ee04e4a627bb6fd3e6cba1b17f9004041988581659c4abdef258ead8",
+        "signature": "d2077461ee04e4a627bb6fd3e6cba1b17f9004041988581659c4abdef258ead8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/performance.d.ts": {
@@ -1432,8 +1432,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/ihookhost.d.ts": {
-        "version": "bc1f2593472525a02d490ad7db50c59478ba4aebe4e4bb842e62609e02100891",
-        "signature": "bc1f2593472525a02d490ad7db50c59478ba4aebe4e4bb842e62609e02100891",
+        "version": "4beacbc6af60bdd9d86b8614130b8257444e4b2a682872abe21bb4a95e0603ef",
+        "signature": "4beacbc6af60bdd9d86b8614130b8257444e4b2a682872abe21bb4a95e0603ef",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/quest/questmanager.d.ts": {
@@ -1577,8 +1577,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/dialogs.d.ts": {
-        "version": "f5e647d8b1e6176f148212244b36f1d98952012e8473fde944501d9d58a1432e",
-        "signature": "f5e647d8b1e6176f148212244b36f1d98952012e8473fde944501d9d58a1432e",
+        "version": "ad15f97b9529746730246cb6c08a0c42b749362a746f36687544cbe32ce06bff",
+        "signature": "ad15f97b9529746730246cb6c08a0c42b749362a746f36687544cbe32ce06bff",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/igamescreenapi.d.ts": {
@@ -1952,8 +1952,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/gamescreen.d.ts": {
-        "version": "6482181fa678bb5f944fb81b494fb563f7caa4e8c97f8240e8c1977998fc75c2",
-        "signature": "6482181fa678bb5f944fb81b494fb563f7caa4e8c97f8240e8c1977998fc75c2",
+        "version": "c2a5acea100700ff0912410925e44b8f8a0971b678d2f4b813e0ecf5e8bec3b6",
+        "signature": "c2a5acea100700ff0912410925e44b8f8a0971b678d2f4b813e0ecf5e8bec3b6",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/async.d.ts": {
@@ -4046,6 +4046,7 @@
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/game/igame.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts",
+        "../node_modules/@wayward/types/definitions/item/item.d.ts",
         "../node_modules/@wayward/types/definitions/mod/ihookhost.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts",
         "../node_modules/@wayward/types/definitions/newui/input/bind.d.ts",
@@ -7245,6 +7246,7 @@
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/game/igame.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts",
+        "../node_modules/@wayward/types/definitions/item/item.d.ts",
         "../node_modules/@wayward/types/definitions/mod/ihookhost.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts",
         "../node_modules/@wayward/types/definitions/newui/input/bind.d.ts",
