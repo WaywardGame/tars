@@ -517,8 +517,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/action/actionexecutor.d.ts": {
-        "version": "e12958f87e8e413901d7c9cf7c59b13863dba7a1c2ab7b5b8c07278f25f6cf3f",
-        "signature": "e12958f87e8e413901d7c9cf7c59b13863dba7a1c2ab7b5b8c07278f25f6cf3f",
+        "version": "999e10cacff2a06e56ac49c4eecca50ecc5e444522113d4532df01107088e5ca",
+        "signature": "999e10cacff2a06e56ac49c4eecca50ecc5e444522113d4532df01107088e5ca",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/worldz.d.ts": {
@@ -547,8 +547,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": {
-        "version": "241092e18559cfdd1ce8d5f6f4c9b8099db97ceb1b4a38eaf72c66e7f7b83f8b",
-        "signature": "241092e18559cfdd1ce8d5f6f4c9b8099db97ceb1b4a38eaf72c66e7f7b83f8b",
+        "version": "00aec7ffa9d52f0cf57fabdd8db504149c9f8f78ae5a658683e8101a72a4755f",
+        "signature": "00aec7ffa9d52f0cf57fabdd8db504149c9f8f78ae5a658683e8101a72a4755f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -3360,6 +3360,7 @@
       ],
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": [
         "../node_modules/@wayward/goodstream/stream.d.ts",
+        "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
         "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/player.d.ts",
@@ -6564,6 +6565,7 @@
       ],
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": [
         "../node_modules/@wayward/goodstream/stream.d.ts",
+        "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
         "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/player.d.ts",
