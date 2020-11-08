@@ -2152,7 +2152,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/acquireitembygroup.ts": {
-        "version": "b352586831b2e0f9439b84a071b29d83e246552c0f9769d8c4d474c1bf219f89",
+        "version": "d84187bd0fbf6c111a226d65ba87ab52ebd6ec9cb8711fc97690b124ffb58551",
         "signature": "2b50f192305f270e055fb92172d735ffe5085044a7af4b4e4d74116bb8c8cebf",
         "affectsGlobalScope": false
       },
