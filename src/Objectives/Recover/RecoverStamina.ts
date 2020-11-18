@@ -1,4 +1,6 @@
 import { IStat, Stat } from "entity/IStats";
+import { isUsingVehicle } from "src/Utilities/Player";
+import { isOverWater } from "src/Utilities/Tile";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -29,6 +31,11 @@ export default class RecoverStamina extends Objective {
 			}
 
 			return ObjectiveResult.Complete;
+		}
+
+		if (isOverWater(context) && isUsingVehicle(context)) {
+			this.log.info("Idling to recover stamina");
+			return new Idle(false);
 		}
 
 		// if (context.player.getWeightStatus() !== WeightStatus.Overburdened &&

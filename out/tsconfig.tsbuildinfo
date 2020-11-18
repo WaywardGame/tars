@@ -2322,7 +2322,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/recover/recoverstamina.ts": {
-        "version": "7ab7d12a9971712c9c659ccbd5bf40957c1c1e2120a0da36bca86ec5df30b4e1",
+        "version": "b2360b801e4bc9377c4139a7f2c7d38ea0e7ecc1ede67c490d5fc0cca4a2646b",
         "signature": "015e6c7c8a051201e8ef4610cd434fffadb0033bcba0633b6359be78ba35ed10",
         "affectsGlobalScope": false
       },
@@ -5286,7 +5286,9 @@
         "../src/iobjective.ts",
         "../src/objective.ts",
         "../src/objectives/other/idle.ts",
-        "../src/objectives/other/rest.ts"
+        "../src/objectives/other/rest.ts",
+        "../src/utilities/player.ts",
+        "../src/utilities/tile.ts"
       ],
       "../src/objectives/recover/recoverthirst.ts": [
         "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts",
