@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/IStats", "src/Utilities/Player", "src/Utilities/Tile", "../../IObjective", "../../Objective", "../Other/Idle", "../Other/Rest"], function (require, exports, IStats_1, Player_1, Tile_1, IObjective_1, Objective_1, Idle_1, Rest_1) {
+define(["require", "exports", "entity/IStats", "../../IObjective", "../../Objective", "../../Utilities/Player", "../../Utilities/Tile", "../Other/Idle", "../Other/Rest"], function (require, exports, IStats_1, IObjective_1, Objective_1, Player_1, Tile_1, Idle_1, Rest_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class RecoverStamina extends Objective_1.default {

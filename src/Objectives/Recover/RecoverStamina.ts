@@ -1,10 +1,10 @@
 import { IStat, Stat } from "entity/IStats";
-import { isUsingVehicle } from "src/Utilities/Player";
-import { isOverWater } from "src/Utilities/Tile";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
+import { isUsingVehicle } from "../../Utilities/Player";
+import { isOverWater } from "../../Utilities/Tile";
 import Idle from "../Other/Idle";
 import Rest from "../Other/Rest";
 
