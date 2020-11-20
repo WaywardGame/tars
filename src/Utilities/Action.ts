@@ -40,7 +40,7 @@ export async function executeAction<T extends ActionType>(
 	let waiter: Promise<boolean> | undefined;
 
 	if (context.player.hasDelay()) {
-		await new Promise(resolve => {
+		await new Promise<void>(resolve => {
 			const checker = () => {
 				if (!context.player.hasDelay()) {
 					resolve();

@@ -220,6 +220,16 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
+		if (this.options?.allowBoat && context.inventory.sailBoat && context.player.vehicleItemId === undefined) {
+			const tile = context.player.getTile();
+			const tileType = TileHelpers.getType(tile);
+			const terrainDescription = terrainDescriptions[tileType];
+			if (terrainDescription && terrainDescription.water) {
+				this.log.warn("Interrupting to use sail boat");
+				return true;
+			}
+		}
+
 		return super.onMove(context, this.trackedCreature);
 	}
 }

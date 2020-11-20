@@ -2,8 +2,8 @@
   "program": {
     "fileInfos": {
       "../../../../node_modules/typescript/lib/lib.es5.d.ts": {
-        "version": "c9a1f03d6ba0fe3c871eb0dd81622e78fbb61ade70878b34d48a341a690c59e9",
-        "signature": "c9a1f03d6ba0fe3c871eb0dd81622e78fbb61ade70878b34d48a341a690c59e9",
+        "version": "69f0c334b0ee4235f6219b22f42e4fa04b414535c782b4dda793ed1918cc835c",
+        "signature": "69f0c334b0ee4235f6219b22f42e4fa04b414535c782b4dda793ed1918cc835c",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2015.d.ts": {
@@ -32,13 +32,13 @@
         "affectsGlobalScope": false
       },
       "../../../../node_modules/typescript/lib/lib.dom.d.ts": {
-        "version": "38130cdd16bd2318b9362f9d60dd9670f7e38708bb6131cf11fc78a41b2c34a0",
-        "signature": "38130cdd16bd2318b9362f9d60dd9670f7e38708bb6131cf11fc78a41b2c34a0",
+        "version": "abadddbf660adeec27e9a56584907d52fa1d6e1e1dc49f639a921baa951b7a84",
+        "signature": "abadddbf660adeec27e9a56584907d52fa1d6e1e1dc49f639a921baa951b7a84",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.dom.iterable.d.ts": {
-        "version": "fb0c09b697dc42afa84d1587e3c994a2f554d2a45635e4f0618768d16a86b69a",
-        "signature": "fb0c09b697dc42afa84d1587e3c994a2f554d2a45635e4f0618768d16a86b69a",
+        "version": "d42f4141bd9ce82b4e2902f26acb00c183e321be19a38bbc0e76a922c1724c94",
+        "signature": "d42f4141bd9ce82b4e2902f26acb00c183e321be19a38bbc0e76a922c1724c94",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.webworker.importscripts.d.ts": {
@@ -67,18 +67,18 @@
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
-        "version": "42f5e41e5893da663dbf0394268f54f1da4b43dc0ddd2ea4bf471fe5361d6faf",
-        "signature": "42f5e41e5893da663dbf0394268f54f1da4b43dc0ddd2ea4bf471fe5361d6faf",
+        "version": "8b2a5df1ce95f78f6b74f1a555ccdb6baab0486b42d8345e0871dd82811f9b9a",
+        "signature": "8b2a5df1ce95f78f6b74f1a555ccdb6baab0486b42d8345e0871dd82811f9b9a",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2015.promise.d.ts": {
-        "version": "0b7a905675e6cb4211c128f0a3aa47d414b275180a299a9aad5d3ec298abbfc4",
-        "signature": "0b7a905675e6cb4211c128f0a3aa47d414b275180a299a9aad5d3ec298abbfc4",
+        "version": "2bb4b3927299434052b37851a47bf5c39764f2ba88a888a107b32262e9292b7c",
+        "signature": "2bb4b3927299434052b37851a47bf5c39764f2ba88a888a107b32262e9292b7c",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
-        "version": "dfff68b3c34338f6b307a25d4566de15eed7973b0dc5d69f9fde2bcac1c25315",
-        "signature": "dfff68b3c34338f6b307a25d4566de15eed7973b0dc5d69f9fde2bcac1c25315",
+        "version": "7207e317a2cb07a177e7d963ab7b8c0e85dde7f9ddb50351f830239bf597569e",
+        "signature": "7207e317a2cb07a177e7d963ab7b8c0e85dde7f9ddb50351f830239bf597569e",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
@@ -92,8 +92,8 @@
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
-        "version": "4670208dd7da9d6c774ab1b75c1527a810388c7989c4905de6aaea8561cb9dce",
-        "signature": "4670208dd7da9d6c774ab1b75c1527a810388c7989c4905de6aaea8561cb9dce",
+        "version": "9d122b7e8c1a5c72506eea50c0973cba55b92b5532d5cafa8a6ce2c547d57551",
+        "signature": "9d122b7e8c1a5c72506eea50c0973cba55b92b5532d5cafa8a6ce2c547d57551",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2016.array.include.d.ts": {
@@ -107,8 +107,8 @@
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts": {
-        "version": "b5e4c2d67aa844ed503b29cd4ca2ede1a229ac7fe874613b2c996fa9c581a25f",
-        "signature": "b5e4c2d67aa844ed503b29cd4ca2ede1a229ac7fe874613b2c996fa9c581a25f",
+        "version": "7ce9f0bde3307ca1f944119f6365f2d776d281a393b576a18a2f2893a2d75c98",
+        "signature": "7ce9f0bde3307ca1f944119f6365f2d776d281a393b576a18a2f2893a2d75c98",
         "affectsGlobalScope": true
       },
       "../../../../node_modules/typescript/lib/lib.es2017.string.d.ts": {
@@ -1992,12 +1992,12 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/action/actions.d.ts": {
-        "version": "61bcf72242b0978e92950b09f3714fb534d9a9c175fb9f7d6d5561d809c6fd21",
-        "signature": "61bcf72242b0978e92950b09f3714fb534d9a9c175fb9f7d6d5561d809c6fd21",
+        "version": "08e33cb510ed5c43085114564aa26a2b6c4e276a4a756b022f03fbc06370d341",
+        "signature": "08e33cb510ed5c43085114564aa26a2b6c4e276a4a756b022f03fbc06370d341",
         "affectsGlobalScope": false
       },
       "../src/utilities/action.ts": {
-        "version": "1403859e2d487e3a697ca99ad284005c9eda530e4886ef08366c1198e43c731e",
+        "version": "9a7688399b762fa0e4faec54f5c9d6378fc3c4fc4e1f64f9cde031d680f9a430",
         "signature": "6e568aaf16e7ff02828f7f3ca280b035b5eda5a1d6733f39469f39acc6fbaa7d",
         "affectsGlobalScope": false
       },
@@ -2077,7 +2077,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/core/movetotarget.ts": {
-        "version": "e5a38f11579bc32df99bc9811cf6756923d91eb5347fa846bb4422f8127d4c9e",
+        "version": "eb6760608c7309b7096f2b8abd2014edb1e29ccec6bcb10adda3b99ba2c33d7a",
         "signature": "dfb2c190e6e13c633efd02d2efa2b92ad703ccd9b3abc3868dd4ad697bbece45",
         "affectsGlobalScope": false
       },
@@ -2408,6 +2408,7 @@
       },
       "types": [],
       "outDir": "./",
+      "pathsBasePath": "/Users/gary/Documents/vstsagent/_work/9/s/mods/mods/tars",
       "pretty": true,
       "configFilePath": "../tsconfig.json"
     },
@@ -8746,5 +8747,5 @@
       "../../../../node_modules/typescript/lib/lib.webworker.importscripts.d.ts"
     ]
   },
-  "version": "4.0.2"
+  "version": "4.1.2"
 }
