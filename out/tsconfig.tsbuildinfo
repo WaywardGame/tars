@@ -1812,8 +1812,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts": {
-        "version": "54de720ca390ae0fade669b9b256d60c1b64a59513610bea08cc54fca98dc5f5",
-        "signature": "54de720ca390ae0fade669b9b256d60c1b64a59513610bea08cc54fca98dc5f5",
+        "version": "6d893f52cb3421acfc57324140a6ad56dc8afcb6a64c00ba97af5f93218fa74d",
+        "signature": "6d893f52cb3421acfc57324140a6ad56dc8afcb6a64c00ba97af5f93218fa74d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/player.d.ts": {
