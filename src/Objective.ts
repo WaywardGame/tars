@@ -1,8 +1,9 @@
 import Creature from "entity/creature/Creature";
 import { ILog, nullLog } from "utilities/Log";
 
-import Context, { ContextDataType } from "./Context";
+import Context from "./Context";
 import Planner from "./Core/Planner";
+import { ContextDataType } from "./IContext";
 import { IObjective, ObjectiveExecutionResult } from "./IObjective";
 import { createLog } from "./Utilities/Logger";
 

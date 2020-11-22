@@ -11,8 +11,8 @@ import { isWaterStillDrinkable } from "../../Utilities/Doodad";
 import { isDrinkableItem } from "../../Utilities/Item";
 import AcquireWaterContainer from "../Acquire/Item/Specific/AcquireWaterContainer";
 import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
+import Restart from "../Core/Restart";
 import GatherWater from "../Gather/GatherWater";
 import RepairItem from "../Interrupt/RepairItem";
 
@@ -124,7 +124,7 @@ export default class StartWaterStillDesalination extends Objective {
 				// we need to start the fire
 				objectives.push(new StartFire(this.waterStill));
 				objectives.push(new StokeFire(this.waterStill));
-				objectives.push(new Lambda(async () => ObjectiveResult.Restart));
+				objectives.push(new Restart());
 
 			} else {
 				return ObjectiveResult.Ignore;
@@ -137,7 +137,7 @@ export default class StartWaterStillDesalination extends Objective {
 				this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}`);
 
 				objectives.push(new StokeFire(this.waterStill));
-				objectives.push(new Lambda(async () => ObjectiveResult.Restart));
+				objectives.push(new Restart());
 
 			} else {
 				// water still is desalinating and the decay is enough for the process to finish

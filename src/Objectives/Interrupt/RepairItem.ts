@@ -2,7 +2,8 @@ import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
 import Item from "item/Item";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { isUsingVehicle } from "../../Utilities/Player";

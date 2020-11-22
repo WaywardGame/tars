@@ -10,6 +10,7 @@ import { isScaredOfCreature } from "../../Utilities/Creature";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
+import Restart from "../Core/Restart";
 import RunAwayFromTarget from "../Other/RunAwayFromTarget";
 
 export default class DefendAgainstCreature extends Objective {
@@ -54,7 +55,7 @@ export default class DefendAgainstCreature extends Objective {
 					action.execute(context.player, direction);
 				});
 			}),
-			new Lambda(async () => ObjectiveResult.Restart), // ensures that no other objectives are ran after this one
+			new Restart(), // ensures that no other objectives are ran after this one
 		]);
 
 		return objectivePipelines;

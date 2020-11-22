@@ -1,6 +1,7 @@
 import Log, { MemoryLog, nullLog } from "utilities/Log";
 
-import Context, { ContextState } from "../Context";
+import Context from "../Context";
+import ContextState from "../ContextState";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectivePipeline, ObjectiveResult, PossibleObjectivePipeline } from "../IObjective";
 import { createLog } from "../Utilities/Logger";
 

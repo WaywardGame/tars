@@ -19,6 +19,10 @@ export default class UpgradeInventoryItem extends Objective {
 		return `UpgradeInventoryItem:${this.upgrade}`;
 	}
 
+	public getStatus(): string {
+		return `Upgrading ${this.upgrade}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = context.inventory[this.upgrade];
 		if (!item || Array.isArray(item)) {

@@ -115,5 +115,6 @@ export function getNearbyCreature(point: IVector3): Creature | undefined {
 			}
 		}
 	}
+
 	return undefined;
 }

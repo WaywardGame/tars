@@ -5,7 +5,8 @@ import Item from "item/Item";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
-import Context, { ContextDataType } from "../../Context";
+import { ContextDataType } from "../..//IContext";
+import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";

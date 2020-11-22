@@ -6,7 +6,8 @@ import terrainDescriptions from "tile/Terrains";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { log } from "../../Utilities/Logger";

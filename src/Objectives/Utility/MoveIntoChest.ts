@@ -4,7 +4,8 @@ import { IContainer } from "item/IItem";
 import Item from "item/Item";
 import Vector2 from "utilities/math/Vector2";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import AcquireItemForDoodad from "../Acquire/Item/AcquireItemForDoodad";

@@ -39,9 +39,11 @@ import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import TileHelpers from "utilities/TileHelpers";
 
-import Context, { ContextDataType, ContextState } from "./Context";
+import Context from "./Context";
+import ContextState from "./ContextState";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
 import planner from "./Core/Planner";
+import { ContextDataType, MovingToNewIslandState } from "./IContext";
 import { IObjective, ObjectiveResult } from "./IObjective";
 import { IBase, IInventoryItems, inventoryItemInfo, ISaveData, ITarsEvents, TarsTranslation, TARS_ID } from "./ITars";
 import Navigation from "./Navigation/Navigation";
@@ -57,6 +59,7 @@ import AnalyzeBase from "./Objectives/Analyze/AnalyzeBase";
 import AnalyzeInventory from "./Objectives/Analyze/AnalyzeInventory";
 import ExecuteAction from "./Objectives/Core/ExecuteAction";
 import Lambda from "./Objectives/Core/Lambda";
+import Restart from "./Objectives/Core/Restart";
 import GatherWater from "./Objectives/Gather/GatherWater";
 import CarveCorpse from "./Objectives/Interrupt/CarveCorpse";
 import DefendAgainstCreature from "./Objectives/Interrupt/DefendAgainstCreature";
@@ -884,7 +887,20 @@ export default class Tars extends Mod {
 
 		const objectives: Array<IObjective | IObjective[]> = [];
 
-		if (context.getData(ContextDataType.MovingToNewIsland) !== true && this.inventory.sailBoat && itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
+		const moveToNewIslandState = context.getData(ContextDataType.MovingToNewIsland) ?? MovingToNewIslandState.None;
+
+		if (moveToNewIslandState === MovingToNewIslandState.Ready) {
+			if (this.inventory.sailBoat && !itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
+				// it should grab it from our chest
+				objectives.push(new AcquireItem(ItemType.Sailboat));
+			}
+
+			objectives.push(new MoveToNewIsland());
+
+			return objectives;
+		}
+
+		if (this.inventory.sailBoat && itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
 			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
 			objectives.push([
 				new MoveToLand(),
@@ -1114,10 +1130,12 @@ export default class Tars extends Mod {
 				}
 			}
 
-			// cleanup base if theres items laying around everywhere
-			const tiles = getTilesWithItemsNearBase(context);
-			if (tiles.totalCount > (availableWaterContainer ? 0 : 20)) {
-				objectives.push(new OrganizeBase(tiles.tiles));
+			if (moveToNewIslandState === MovingToNewIslandState.None) {
+				// cleanup base if theres items laying around everywhere
+				const tiles = getTilesWithItemsNearBase(context);
+				if (tiles.totalCount > (availableWaterContainer ? 0 : 20)) {
+					objectives.push(new OrganizeBase(tiles.tiles));
+				}
 			}
 
 			if (availableWaterContainer) {
@@ -1222,38 +1240,49 @@ export default class Tars extends Mod {
 		if (!multiplayer.isConnected()) {
 			// move to a new island
 
-			objectives.push(new Lambda(async context => {
-				const initialState = new ContextState();
-				initialState.set(ContextDataType.MovingToNewIsland, true);
-				this.context.setInitialState(initialState);
-				return ObjectiveResult.Complete;
-			}));
-
 			const needsFood = this.inventory.food === undefined || this.inventory.food.length < 2;
 
-			// make a sail boat
-			if (!this.inventory.sailBoat) {
-				objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
+			switch (moveToNewIslandState) {
+				case MovingToNewIslandState.None:
+					objectives.push(new Lambda(async () => {
+						const initialState = new ContextState();
+						initialState.set(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Preparing);
+						this.context.setInitialState(initialState);
+						return ObjectiveResult.Complete;
+					}));
 
-			} else if (itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory) && needsFood) {
-				// don't carry the sail boat around
-				const organizeInventoryObjectives = OrganizeInventory.moveIntoChestsObjectives(context, [this.inventory.sailBoat]);
-				if (organizeInventoryObjectives) {
-					objectives.push(organizeInventoryObjectives);
-				}
+				case MovingToNewIslandState.Preparing:
+					// make a sail boat
+					if (!this.inventory.sailBoat) {
+						objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
+
+						if (needsFood) {
+							objectives.push(new Restart());
+						}
+					}
+
+					// stock up on food
+					if (needsFood) {
+						objectives.push([new AcquireFood(), new AnalyzeInventory()]);
+					}
+
+					objectives.push(new Lambda(async () => {
+						const initialState = new ContextState();
+						initialState.set(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Ready);
+						this.context.setInitialState(initialState);
+						return ObjectiveResult.Complete;
+					}));
+
+				case MovingToNewIslandState.Ready:
+					if (this.inventory.sailBoat && !itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
+						// it should grab it from our chest
+						objectives.push(new AcquireItem(ItemType.Sailboat));
+					}
+
+					objectives.push(new MoveToNewIsland());
+
+					break;
 			}
-
-			// stock up on food
-			if (needsFood) {
-				objectives.push([new AcquireFood(), new AnalyzeInventory()]);
-			}
-
-			if (this.inventory.sailBoat && !itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
-				// it should grab it from our chest
-				objectives.push(new AcquireItem(ItemType.Sailboat));
-			}
-
-			objectives.push(new MoveToNewIsland());
 
 		} else {
 			const health = context.player.stat.get<IStatMax>(Stat.Health);
@@ -1702,7 +1731,10 @@ export default class Tars extends Mod {
 	}
 
 	private returnToBaseInterrupt(context: Context): IObjective | undefined {
-		if (!isNearBase(context) && this.weightStatus !== WeightStatus.None && this.previousWeightStatus === WeightStatus.Overburdened) {
+		if (!isNearBase(context) &&
+			this.weightStatus !== WeightStatus.None &&
+			this.previousWeightStatus === WeightStatus.Overburdened &&
+			context.getData(ContextDataType.MovingToNewIsland) !== MovingToNewIslandState.Ready) {
 			return new ReturnToBase();
 		}
 	}

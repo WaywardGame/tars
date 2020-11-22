@@ -1,7 +1,8 @@
 import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
 
-import Context, { ContextDataType } from "../../../../Context";
+import Context from "../../../../Context";
+import { ContextDataType } from "../../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../../IObjective";
 import Objective from "../../../../Objective";
 import SetContextData from "../../../ContextData/SetContextData";

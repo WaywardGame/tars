@@ -1,7 +1,8 @@
 import { WorldZ } from "game/WorldZ";
 import { TerrainType } from "tile/ITerrain";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { getNearestTileLocation } from "../../Utilities/Tile";

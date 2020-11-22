@@ -9,6 +9,7 @@ import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
+import Restart from "../Core/Restart";
 
 export default class Idle extends Objective {
 
@@ -53,7 +54,7 @@ export default class Idle extends Objective {
 
 		// always Restart the objective after idling
 		// idling usually implies we're waiting for something. we don't want to automatically continue running the next objective in the pipeline
-		objectivePipelines.push(new Lambda(async () => ObjectiveResult.Restart).setStatus(this));
+		objectivePipelines.push(new Restart().setStatus(this));
 
 		return objectivePipelines;
 	}

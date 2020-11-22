@@ -2,7 +2,8 @@ import { ActionType } from "entity/action/IAction";
 import { DamageType } from "entity/IEntity";
 import { ILog, ILogLine } from "utilities/Log";
 
-import Context, { ContextState } from "./Context";
+import Context from "./Context";
+import ContextState from "./ContextState";
 import { IExecutionTree } from "./Core/IPlan";
 
 export enum ObjectiveResult {

@@ -6,7 +6,8 @@ import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
 import { Dictionary } from "language/Dictionaries";
 import Translation from "language/Translation";
 
-import Context, { ContextDataType } from "../../../Context";
+import Context from "../../../Context";
+import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { getAvailableInventoryWeight, processRecipe } from "../../../Utilities/Item";
 import SetContextData from "../../ContextData/SetContextData";

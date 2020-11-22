@@ -6,7 +6,8 @@ import Item from "item/Item";
 import { ITileContainer, TerrainType } from "tile/ITerrain";
 import TileHelpers from "utilities/TileHelpers";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { gardenMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";

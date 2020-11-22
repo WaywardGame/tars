@@ -2,7 +2,8 @@ import Doodad from "doodad/Doodad";
 import { ActionType } from "entity/action/IAction";
 import { IContainer, ItemType } from "item/IItem";
 
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
 import SetContextData from "../ContextData/SetContextData";

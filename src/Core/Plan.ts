@@ -3,8 +3,8 @@ import Log, { ILogLine } from "utilities/Log";
 
 import Context from "../Context";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../IObjective";
-import Lambda from "../Objectives/Core/Lambda";
 import ReserveItems from "../Objectives/Core/ReserveItems";
+import Restart from "../Objectives/Core/Restart";
 import { createLog, discardQueuedMessages, processQueuedMessages, queueMessage } from "../Utilities/Logger";
 
 import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
@@ -461,7 +461,7 @@ export default class Plan implements IPlan {
 			if (nextObjectiveInfo.depth < currentObjectiveInfo.depth) {
 				// depth is changing, force a restart
 				// todo: verify that we want this
-				results.push(new Lambda(async () => ObjectiveResult.Restart).setStatus("Determining objective..."));
+				results.push(new Restart().setStatus("Determining objective..."));
 				break;
 			}
 
