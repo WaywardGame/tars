@@ -24,6 +24,10 @@ export default class AcquireFood extends Objective {
 		return "AcquireFood";
 	}
 
+	public getStatus(): string {
+		return "Acquiring food";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 

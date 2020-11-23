@@ -15,6 +15,10 @@ export default class AcquireWaterContainer extends Objective {
 		return "AcquireWaterContainer";
 	}
 
+	public getStatus(): string {
+		return "Acquiring a container for water";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const messageInABottleObjectives: IObjective[] = [];
 

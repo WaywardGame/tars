@@ -1632,8 +1632,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/messagemanager.d.ts": {
-        "version": "3cd9301f3f462a357dd8dc7d4d2334ab0342a3e06b6caf266d1d6cb4fc07e69e",
-        "signature": "3cd9301f3f462a357dd8dc7d4d2334ab0342a3e06b6caf266d1d6cb4fc07e69e",
+        "version": "20afc26cf2f57caeba6b6d6da0e1a58655e02fdd53f0463b919b3ad162c05e23",
+        "signature": "20afc26cf2f57caeba6b6d6da0e1a58655e02fdd53f0463b919b3ad162c05e23",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/iplayer.d.ts": {
@@ -2217,8 +2217,8 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/acquirefood.ts": {
-        "version": "2cc5b5fddfe0fd92af63eac10aef20349cd833e617fb8bef93b74d693b55ab1f",
-        "signature": "c2144bc046931b61d935bb2c0ddd541b1bd65638b647797dc10ab5cac2ada4f0",
+        "version": "0eaf4dc3b569d4ea83ef3eee2ff9c55238bc01296a74f7cb0123005f5e8512fb",
+        "signature": "2b077d28b02abbdae364905fa5513391854f47d23c74bc6c2ac0d09af92a9372",
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/acquireitembytypes.ts": {
@@ -2227,8 +2227,8 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/specific/acquirewatercontainer.ts": {
-        "version": "9086e866a1c1765e4eb51351b330f4e2da490a299d9b6ec6e4ff1deec73b8432",
-        "signature": "cef83f6c77a0685bf9938d1c40644886bc1b5fcfc927d49369657390186a268d",
+        "version": "e34914d03366b1729e50e36ed345bb8219a89008f9b2db5a09e2aba633454d03",
+        "signature": "e219dfcf3a644697bf1f81c8cc13a63fa8e551455504b985e21486e408a3de6a",
         "affectsGlobalScope": false
       },
       "../src/objectives/contextdata/copycontextdata.ts": {
@@ -2377,7 +2377,7 @@
         "affectsGlobalScope": false
       },
       "../src/tars.ts": {
-        "version": "bd4fd40e741c6a0383ea39fb5e1fa95a66e838f494a76c54ed1a60a0ba2db800",
+        "version": "3a8a5fb3f8f85580528ce1f94980ec7beb024079afef847a2689e805ec62cfa6",
         "signature": "5c3fd389edb0cd49b0ff1142a064c46b23d13d7c548488d2b30dac2868dd3ccc",
         "affectsGlobalScope": false
       },

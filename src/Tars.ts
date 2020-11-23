@@ -1257,6 +1257,7 @@ export default class Tars extends Mod {
 						objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
 
 						if (needsFood) {
+							// this lets TARS drop the sailboat until we're ready
 							objectives.push(new Restart());
 						}
 					}
