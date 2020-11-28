@@ -1622,8 +1622,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
-        "version": "3c0d90ee5213297a95bd068b079490ee34b84871b7516e29bb5da61478901428",
-        "signature": "3c0d90ee5213297a95bd068b079490ee34b84871b7516e29bb5da61478901428",
+        "version": "75eed9b0e2b7fd1ebd2e8e723bab17880314d3b84e3db8d919083833e2a6d494",
+        "signature": "75eed9b0e2b7fd1ebd2e8e723bab17880314d3b84e3db8d919083833e2a6d494",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts": {
@@ -1752,8 +1752,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts": {
-        "version": "4813d13954e3307ea9de0972897b4dbace18597fb4cc472ae8325815c2a7d554",
-        "signature": "4813d13954e3307ea9de0972897b4dbace18597fb4cc472ae8325815c2a7d554",
+        "version": "1ea7bd9426ccc8eccdec0e6b179bdfc0167fd8fe58c81de01c28f0834f870d72",
+        "signature": "1ea7bd9426ccc8eccdec0e6b179bdfc0167fd8fe58c81de01c28f0834f870d72",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/ientity.d.ts": {
