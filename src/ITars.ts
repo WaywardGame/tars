@@ -251,8 +251,8 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	equipShield: {
 		itemTypes: [
 			ItemType.BarkShield,
-			ItemType.CopperShield,
-			ItemType.IronShield,
+			ItemType.CopperBuckler,
+			ItemType.IronHeater,
 			ItemType.WoodenShield,
 			ItemType.WroughtIronShield,
 		],

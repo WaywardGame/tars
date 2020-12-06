@@ -232,8 +232,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts": {
-        "version": "b6c1e52e0763ff80d74f95fff91f16a474627a54e586bf3bb4fb893a514995a5",
-        "signature": "b6c1e52e0763ff80d74f95fff91f16a474627a54e586bf3bb4fb893a514995a5",
+        "version": "30f9fd7bf178fae857c337fb20b3bcce8662466e883badc1e6a99d63f7ff4aaf",
+        "signature": "30f9fd7bf178fae857c337fb20b3bcce8662466e883badc1e6a99d63f7ff4aaf",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts": {
@@ -1622,8 +1622,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
-        "version": "75eed9b0e2b7fd1ebd2e8e723bab17880314d3b84e3db8d919083833e2a6d494",
-        "signature": "75eed9b0e2b7fd1ebd2e8e723bab17880314d3b84e3db8d919083833e2a6d494",
+        "version": "fdb3df532c2ff795aae50204cbb2bf61cba0310ee195e13a62302f4addd75b5f",
+        "signature": "fdb3df532c2ff795aae50204cbb2bf61cba0310ee195e13a62302f4addd75b5f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts": {
@@ -1782,8 +1782,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/lootgroups.d.ts": {
-        "version": "6fce12e8500a57cfcafe91c1b159833ba0f319806db6c2c13633957892befe42",
-        "signature": "6fce12e8500a57cfcafe91c1b159833ba0f319806db6c2c13633957892befe42",
+        "version": "4dd753be40e99984478c813c0f0650dc393ec53ce3affd9c6a20d40f5983f27a",
+        "signature": "4dd753be40e99984478c813c0f0650dc393ec53ce3affd9c6a20d40f5983f27a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/creature/icreature.d.ts": {
@@ -1807,8 +1807,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/idoodad.d.ts": {
-        "version": "15b630a581f0d0b73764f8a590bd6269d0b20150546a61d4283b1a8962a634c7",
-        "signature": "15b630a581f0d0b73764f8a590bd6269d0b20150546a61d4283b1a8962a634c7",
+        "version": "06f74a09eb0ae907e617b008a6af1aa61d6cb3475233c3395eb6475a14d1b8ab",
+        "signature": "06f74a09eb0ae907e617b008a6af1aa61d6cb3475233c3395eb6475a14d1b8ab",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts": {
@@ -1857,7 +1857,7 @@
         "affectsGlobalScope": false
       },
       "../src/itars.ts": {
-        "version": "ec83e5ad07f1f8e9dce08d8b568c05a8c2407bbfd0828bb2949f2afbad19cdfb",
+        "version": "aaa0435d81b50e5e863b7f2d448567d0bec1d636a3800724752c5246256bd7c3",
         "signature": "3397f23f95d4005fc6788986e968fa0a4abf223fb5c3a79ad79d97bec44f330a",
         "affectsGlobalScope": false
       },
