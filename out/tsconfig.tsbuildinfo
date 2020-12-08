@@ -1162,8 +1162,8 @@
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/iglobal.d.ts": {
-        "version": "f0a6354d1aa1977c927e4c01ab39bbc05e7fe9dfaa97b5dcdad952ec6e247e8f",
-        "signature": "f0a6354d1aa1977c927e4c01ab39bbc05e7fe9dfaa97b5dcdad952ec6e247e8f",
+        "version": "6e8c69f7eceee1852b0a2c1b823fa2a9f749e4d40cfa9fe147adfb9760fc21f3",
+        "signature": "6e8c69f7eceee1852b0a2c1b823fa2a9f749e4d40cfa9fe147adfb9760fc21f3",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/mod/basemod.d.ts": {
