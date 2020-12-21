@@ -1622,8 +1622,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
-        "version": "0418f73feccf60eabbff11ee052a1ef5e4a9c1130b525cb802c0d8b67ef767ee",
-        "signature": "0418f73feccf60eabbff11ee052a1ef5e4a9c1130b525cb802c0d8b67ef767ee",
+        "version": "6c8a5c9f034749d5ff21f177ba2965eac277120e74952b0ff551d69119eb9621",
+        "signature": "6c8a5c9f034749d5ff21f177ba2965eac277120e74952b0ff551d69119eb9621",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts": {
@@ -1752,8 +1752,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts": {
-        "version": "c1804e2b89add3f105c0d10a183c077f12acb950a2f5559d3e647ea37cfbaa57",
-        "signature": "c1804e2b89add3f105c0d10a183c077f12acb950a2f5559d3e647ea37cfbaa57",
+        "version": "5a081eecf340df1f9058a4ca3967171a34fd3410c30f3b9683d9e1b0949c75c6",
+        "signature": "5a081eecf340df1f9058a4ca3967171a34fd3410c30f3b9683d9e1b0949c75c6",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/ientity.d.ts": {
@@ -1807,8 +1807,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/idoodad.d.ts": {
-        "version": "765b39dd422c3ac18f3ecce47d0afe9311f0d264aa9a4f4d20568b0c8c3e36f9",
-        "signature": "765b39dd422c3ac18f3ecce47d0afe9311f0d264aa9a4f4d20568b0c8c3e36f9",
+        "version": "5eba99425ec9e0cffe2250226d97bff391f3e92adb2f7129e948c29bffa1e8f9",
+        "signature": "5eba99425ec9e0cffe2250226d97bff391f3e92adb2f7129e948c29bffa1e8f9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts": {
