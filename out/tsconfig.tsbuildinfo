@@ -2007,8 +2007,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/action/actions.d.ts": {
-        "version": "0f2bf8a51792e7d473d13dcaa0adab0dca273f7d94f5bcc387a9ac971b0c0cbe",
-        "signature": "0f2bf8a51792e7d473d13dcaa0adab0dca273f7d94f5bcc387a9ac971b0c0cbe",
+        "version": "32764a0ea5b188c1c77371a30d3596f156753f4dd31df2fa6b847e31e4af422a",
+        "signature": "32764a0ea5b188c1c77371a30d3596f156753f4dd31df2fa6b847e31e4af422a",
         "affectsGlobalScope": false
       },
       "../src/utilities/action.ts": {
@@ -2108,7 +2108,7 @@
       },
       "../src/objectives/core/executeactionforitem.ts": {
         "version": "dadcd9746c9df9ebe06d9043d176645d67b616aca19d829fd5f9750ad3f91606",
-        "signature": "9c37dfb68073b1e7641ea44cffe32277d6467cd74ba7fa711bc6b57574fb8318",
+        "signature": "f480d6c804401987424ce1f93fbf6855bdd0c5fbfc6ff93a63e511834648031c",
         "affectsGlobalScope": false
       },
       "../src/objectives/gather/gatherfromcorpse.ts": {
