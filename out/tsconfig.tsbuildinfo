@@ -547,8 +547,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": {
-        "version": "a61c593f0621c7aa61f9c39eecc59c0b60dca0108add09c6bcb8d5758129ce9f",
-        "signature": "a61c593f0621c7aa61f9c39eecc59c0b60dca0108add09c6bcb8d5758129ce9f",
+        "version": "3c8106f57319d620730c01a0968a9dae90f34122450b831a1b2cdf182689485f",
+        "signature": "3c8106f57319d620730c01a0968a9dae90f34122450b831a1b2cdf182689485f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -3384,7 +3384,8 @@
         "../node_modules/@wayward/types/definitions/item/item.d.ts",
         "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
-        "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts"
+        "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts": [
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
@@ -6619,7 +6620,8 @@
         "../node_modules/@wayward/types/definitions/item/item.d.ts",
         "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
-        "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts"
+        "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts": [
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
