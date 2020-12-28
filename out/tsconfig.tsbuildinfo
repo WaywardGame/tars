@@ -1112,8 +1112,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screens/ingamescreen.d.ts": {
-        "version": "7a782122b249b27e6996695e425cdfbaa0d4652483de2870e0455978aed74127",
-        "signature": "7a782122b249b27e6996695e425cdfbaa0d4652483de2870e0455978aed74127",
+        "version": "8c04afbb4cf930935b055031fb5628af60f0bdf92ce648926142d936601e872f",
+        "signature": "8c04afbb4cf930935b055031fb5628af60f0bdf92ce648926142d936601e872f",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/ui/ui.d.ts": {
