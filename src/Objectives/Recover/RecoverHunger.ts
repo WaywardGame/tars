@@ -77,11 +77,12 @@ export default class RecoverHunger extends Objective {
 			items.push(...itemManager.getItemsInContainerByType(context.player.inventory, itemType, true));
 		}
 
+		// prioritize ones that will decay sooner
 		return items
 			.sort((a, b) => {
 				const decayA = a.decay !== undefined ? a.decay : 999999;
 				const decayB = b.decay !== undefined ? b.decay : 999999;
-				return decayA > decayB ? 1 : -1;
+				return decayA - decayB;
 			});
 	}
 
@@ -92,11 +93,12 @@ export default class RecoverHunger extends Objective {
 			items.push(...itemManager.getItemsInContainer(chest, true).filter(item => foodItemTypes.has(item.type)));
 		}
 
+		// prioritize ones that will decay sooner
 		return items
 			.sort((a, b) => {
 				const decayA = a.decay !== undefined ? a.decay : 999999;
 				const decayB = b.decay !== undefined ? b.decay : 999999;
-				return decayA > decayB ? 1 : -1;
+				return decayA - decayB;
 			});
 	}
 }

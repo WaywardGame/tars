@@ -50,15 +50,9 @@ export default class RunAwayFromTarget extends Objective {
 				return true;
 			})
 			.sort((pointA, pointB) => {
-				const scoreA = navigation.getPenaltyFromPoint(pointA);
-				const scoreB = navigation.getPenaltyFromPoint(pointB);
-
-				if (scoreA > scoreB) {
-					return 1;
-				}
-
-				if (scoreA < scoreB) {
-					return -1;
+				const delta = navigation.getPenaltyFromPoint(pointA) - navigation.getPenaltyFromPoint(pointB);
+				if (delta !== 0) {
+					return delta;
 				}
 
 				return Vector2.squaredDistance(pointA, this.target) < Vector2.squaredDistance(pointB, this.target) ? 1 : -1;

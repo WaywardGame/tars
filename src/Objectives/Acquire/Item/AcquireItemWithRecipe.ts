@@ -1,6 +1,6 @@
 import { ActionType } from "entity/action/IAction";
 import { IRecipe, ItemType, ItemTypeGroup } from "item/IItem";
-import { RequirementInfo, WeightType } from "item/IItemManager";
+import { IRequirementInfo, RequirementStatus, WeightType } from "item/IItemManager";
 import Item from "item/Item";
 import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
 import { Dictionary } from "language/Dictionaries";
@@ -42,7 +42,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const canCraftFromIntermediateChest = !this.recipe.requiresFire && !this.recipe.requiredDoodad;
+		const canCraftFromIntermediateChest = !this.recipe.requiresFire && !this.recipe.requiredDoodads;
 
 		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.itemType);
 
@@ -72,7 +72,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 	private getObjectives(
 		context: Context,
-		requirementInfo: RequirementInfo,
+		requirementInfo: IRequirementInfo,
 		canCraftFromIntermediateChest: boolean,
 		allowOrganizingItemsIntoIntermediateChest: boolean,
 		checker: ItemRecipeRequirementChecker,
@@ -163,8 +163,8 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			}
 		}
 
-		if (!requirementInfo.requirementsMet) {
-			objectives.push(new CompleteRequirements(this.recipe.requiredDoodad, this.recipe.requiresFire ? true : false));
+		if (requirementInfo.requirements === RequirementStatus.Missing) {
+			objectives.push(new CompleteRequirements(requirementInfo));
 
 		} else {
 			objectives.push(new MoveToLand());

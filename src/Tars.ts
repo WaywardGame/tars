@@ -1502,7 +1502,7 @@ export default class Tars extends Mod {
 				if (closestCreature) {
 					// creature is close, calculate it
 					possibleEquips
-						.sort((a, b) => estimateDamageModifier(a, closestCreature!) < estimateDamageModifier(b, closestCreature!) ? 1 : -1);
+						.sort((a, b) => estimateDamageModifier(b, closestCreature!) - estimateDamageModifier(a, closestCreature!));
 
 				} else if (context.player.getEquippedItem(equipType) !== undefined) {
 					// don't switch until we're close to a creature

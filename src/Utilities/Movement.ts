@@ -135,7 +135,7 @@ export async function getMovementPath(context: Context, target: IVector3, moveAd
 			result.score = Math.round(result.score - pathLength + Math.pow(pathLength, 1.1));
 		}
 
-		results = results.sort((a, b) => a.score === b.score ? 0 : (a.score > b.score ? 1 : -1));
+		results = results.sort((a, b) => a.score - b.score);
 
 		if (results.length > 0) {
 			movementPath = results[0];

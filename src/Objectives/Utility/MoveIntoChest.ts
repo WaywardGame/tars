@@ -36,7 +36,7 @@ export default class MoveIntoChest extends Objective {
 
 		const chests = context.base.chest
 			.slice()
-			.sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
+			.sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
 		for (const chest of chests) {
 			if (this.maxChestDistance !== undefined && Vector2.distance(context.player, chest) > this.maxChestDistance) {
 				continue;

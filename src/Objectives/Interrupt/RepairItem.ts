@@ -1,5 +1,6 @@
 import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
+import { RequirementStatus } from "item/IItemManager";
 import Item from "item/Item";
 
 import Context from "../../Context";
@@ -60,10 +61,10 @@ export default class RepairItem extends Objective {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hammer));
 		}
 
-		const requirements = itemManager.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
-		if (!requirements.requirementsMet) {
+		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
+		if (requirementInfo.requirements === RequirementStatus.Missing) {
 			this.log.info("Repair requirements not met");
-			objectives.push(new CompleteRequirements(description.recipe?.requiredDoodad, (description.recipe?.requiresFire || description.repairAndDisassemblyRequiresFire) ? true : false));
+			objectives.push(new CompleteRequirements(requirementInfo));
 		}
 
 		objectives.push(new ExecuteAction(ActionType.Repair, (context, action) => {

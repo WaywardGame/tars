@@ -37,7 +37,7 @@ export default class OrganizeBase extends Objective {
 		}
 
 		// pick the chest with the most room available
-		const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
+		const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
 		if (chests.length === 0) {
 			return ObjectiveResult.Impossible;
 		}

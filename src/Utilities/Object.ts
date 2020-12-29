@@ -31,7 +31,7 @@ export function getSortedObjects<T extends IVector3>(context: Context, type: Fin
 	if (sortedObjects === undefined) {
 		sortedObjects = allObjects
 			.slice()
-			.sort((a, b) => Vector2.squaredDistance(context.player, a) > Vector2.squaredDistance(context.player, b) ? 1 : -1);
+			.sort((a, b) => Vector2.squaredDistance(context.player, a) - Vector2.squaredDistance(context.player, b));
 		cachedSorts.set(sortedCacheId, sortedObjects);
 	}
 

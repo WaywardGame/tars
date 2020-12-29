@@ -89,11 +89,11 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 		findTargets: (base: IBase) => {
 			const sortedChests = base.chest
 				.map(chest =>
-					({
-						chest: chest,
-						weight: itemManager.computeContainerWeight(chest as IContainer),
-					}))
-				.sort((a, b) => a.weight > b.weight ? 1 : -1);
+				({
+					chest: chest,
+					weight: itemManager.computeContainerWeight(chest as IContainer),
+				}))
+				.sort((a, b) => a.weight - b.weight);
 			if (sortedChests.length > 0) {
 				return [base.chest.splice(base.chest.indexOf(sortedChests[0].chest), 1)[0]];
 			}

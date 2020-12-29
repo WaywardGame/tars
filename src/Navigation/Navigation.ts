@@ -366,15 +366,7 @@ export default class Navigation {
 			points.push(neighbor);
 		}
 
-		return points.sort((a, b) => {
-			const penaltyA = this.getPenaltyFromPoint(a);
-			const penaltyB = this.getPenaltyFromPoint(b);
-			if (penaltyA === penaltyB) {
-				return 0;
-			}
-
-			return penaltyA > penaltyB ? 1 : -1;
-		});
+		return points.sort((a, b) => this.getPenaltyFromPoint(a) - this.getPenaltyFromPoint(b));
 	}
 
 	public async findPath(end: IVector3): Promise<NavigationPath | undefined> {

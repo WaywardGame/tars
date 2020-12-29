@@ -124,7 +124,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (this.options.allowChests && context.base.chest.length > 0) {
 			// pick the chest with the most room available
-			const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
+			const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
 			for (const chest of chests) {
 				if (!this.options.disableDrop && Vector2.distance(context.player, chest) > maxChestDistance) {
 					continue;
