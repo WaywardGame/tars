@@ -462,8 +462,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/events/ifire.d.ts": {
-        "version": "36d4d568415213841501af082c1cf51a80067383cf0cc70f8b363d9147b49146",
-        "signature": "36d4d568415213841501af082c1cf51a80067383cf0cc70f8b363d9147b49146",
+        "version": "990997b83ca755200216f32d9d3e647dbf7383b5ba940245d223387959daf35d",
+        "signature": "990997b83ca755200216f32d9d3e647dbf7383b5ba940245d223387959daf35d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/iloot.d.ts": {
@@ -1622,8 +1622,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
-        "version": "334d11fce16f56f6b11b3283935ce183cb984461e54b95c84b2dadcad3e7a15c",
-        "signature": "334d11fce16f56f6b11b3283935ce183cb984461e54b95c84b2dadcad3e7a15c",
+        "version": "2dc515ab5bb62aa236caeee24299662a15c5bbb5e5a406419e051a68e7ba84b3",
+        "signature": "2dc515ab5bb62aa236caeee24299662a15c5bbb5e5a406419e051a68e7ba84b3",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts": {
