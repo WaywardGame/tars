@@ -1787,8 +1787,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/creature/icreature.d.ts": {
-        "version": "f312fa4701a0fabc893f65a27c9ab055701320c517231b433b27a0b87863483c",
-        "signature": "f312fa4701a0fabc893f65a27c9ab055701320c517231b433b27a0b87863483c",
+        "version": "cf762d30840ecd60247a2ed03bc018d5f9c9c26abfe99b393d5d813c44b801f8",
+        "signature": "cf762d30840ecd60247a2ed03bc018d5f9c9c26abfe99b393d5d813c44b801f8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/creature/corpse/icorpse.d.ts": {
