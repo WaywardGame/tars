@@ -867,8 +867,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/iworldlayer.d.ts": {
-        "version": "ba56fb2b29d4c60810b1e6ac115a1f0f5e4cece246a8e35a71b4d93aef7eb13d",
-        "signature": "ba56fb2b29d4c60810b1e6ac115a1f0f5e4cece246a8e35a71b4d93aef7eb13d",
+        "version": "1cd18d5a5b79a866f8fa4779115ed0d64b69ec6ae9788216237f2f923be43520",
+        "signature": "1cd18d5a5b79a866f8fa4779115ed0d64b69ec6ae9788216237f2f923be43520",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/terraintileinfo.d.ts": {
