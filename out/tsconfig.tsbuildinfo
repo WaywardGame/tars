@@ -232,8 +232,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts": {
-        "version": "e0c051e08ae4253d1295c3568d64d3ab1862dec06dc021b3e0ac84d99d620aac",
-        "signature": "e0c051e08ae4253d1295c3568d64d3ab1862dec06dc021b3e0ac84d99d620aac",
+        "version": "148c71cbf97581d238344a0ee8e2420cd5219c35d7ddfe055d28fba8a05eb941",
+        "signature": "148c71cbf97581d238344a0ee8e2420cd5219c35d7ddfe055d28fba8a05eb941",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts": {
@@ -1597,8 +1597,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
-        "version": "8f19715411367aabf018439bb1405d1c0497f4bdd31cc7c49b3e376f5b94df3e",
-        "signature": "8f19715411367aabf018439bb1405d1c0497f4bdd31cc7c49b3e376f5b94df3e",
+        "version": "c944ebf8a65a7d67fb8b013be9813335fde5c22586d9b1464a7c84a049a74afa",
+        "signature": "c944ebf8a65a7d67fb8b013be9813335fde5c22586d9b1464a7c84a049a74afa",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/recipe/reciperequirement.d.ts": {
