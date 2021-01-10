@@ -307,8 +307,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/milestones/imilestone.d.ts": {
-        "version": "54f946114ad0011fc0689f7e49a1b6721bdd2d5e709435ed3db98a537e011888",
-        "signature": "54f946114ad0011fc0689f7e49a1b6721bdd2d5e709435ed3db98a537e011888",
+        "version": "690b32dfff7af8a06eb746ec7f899cdbc956d43f3a6fbd2137f3777ad0c4f893",
+        "signature": "690b32dfff7af8a06eb746ec7f899cdbc956d43f3a6fbd2137f3777ad0c4f893",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/component/ithreestatebutton.d.ts": {
@@ -337,8 +337,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/random/generators/randomitem.d.ts": {
-        "version": "33fc8739c4e55e87c1a203883f986b3c62d55717584423a5b4d455f48e5afaae",
-        "signature": "33fc8739c4e55e87c1a203883f986b3c62d55717584423a5b4d455f48e5afaae",
+        "version": "ca490ad723fb59fa2b85710ff93b040f925b39c021ac2bb3b2a061e1538ba079",
+        "signature": "ca490ad723fb59fa2b85710ff93b040f925b39c021ac2bb3b2a061e1538ba079",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/random/generators/randomrange.d.ts": {
@@ -817,8 +817,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/tileadaptors.d.ts": {
-        "version": "1d27217f0bec01411d038a157e98499fd98dd9f9b045a2ee8f88c1783c87ae64",
-        "signature": "1d27217f0bec01411d038a157e98499fd98dd9f9b045a2ee8f88c1783c87ae64",
+        "version": "bd2b61dbf4a79913e84afa81b00082e22e52be77dbbe4c2d43c53531b4157493",
+        "signature": "bd2b61dbf4a79913e84afa81b00082e22e52be77dbbe4c2d43c53531b4157493",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/decorations.d.ts": {
@@ -1832,8 +1832,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/idoodad.d.ts": {
-        "version": "18e0b298a3a497136bace761181403fb030bba6f9e552dac0a745c107be94d55",
-        "signature": "18e0b298a3a497136bace761181403fb030bba6f9e552dac0a745c107be94d55",
+        "version": "d79c81982422a0776e77715dc6ab00ed25d01be5634ca25b0c6575523e4f059c",
+        "signature": "d79c81982422a0776e77715dc6ab00ed25d01be5634ca25b0c6575523e4f059c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts": {
