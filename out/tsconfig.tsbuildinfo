@@ -306,11 +306,6 @@
         "signature": "e9db5ffafbbbb10e19f48b5273fee35af7b195be87dd21fa905643ffc221da17",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/game/milestones/imilestone.d.ts": {
-        "version": "690b32dfff7af8a06eb746ec7f899cdbc956d43f3a6fbd2137f3777ad0c4f893",
-        "signature": "690b32dfff7af8a06eb746ec7f899cdbc956d43f3a6fbd2137f3777ad0c4f893",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@wayward/types/definitions/newui/component/ithreestatebutton.d.ts": {
         "version": "ed707f6d3289b586044ca6797a866215fe7a4aec13283df03f75a1d2e3d4d424",
         "signature": "ed707f6d3289b586044ca6797a866215fe7a4aec13283df03f75a1d2e3d4d424",
@@ -352,8 +347,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/options/igameoptions.d.ts": {
-        "version": "12acc59cd6a85b6e2dc91fcbb12842ebde1b83649f49ffbc0731b07ae7edc03c",
-        "signature": "12acc59cd6a85b6e2dc91fcbb12842ebde1b83649f49ffbc0731b07ae7edc03c",
+        "version": "ec5de77f3911f128f66b56b2b9a478065c4ea60650d38cb36ac1d9d957cea228",
+        "signature": "ec5de77f3911f128f66b56b2b9a478065c4ea60650d38cb36ac1d9d957cea228",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/game/milestones/imilestone.d.ts": {
+        "version": "87f994a4ba29fc8dd649d5e6275f53a4ec571bd88f1921575e3cd37e9c85b4ea",
+        "signature": "87f994a4ba29fc8dd649d5e6275f53a4ec571bd88f1921575e3cd37e9c85b4ea",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/options/modifiers/challenge/ichallenge.d.ts": {
@@ -1367,8 +1367,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "210afe2358373caa66b290fc60961cdec8e5a6b7294b277063e9bc4ed756b113",
-        "signature": "210afe2358373caa66b290fc60961cdec8e5a6b7294b277063e9bc4ed756b113",
+        "version": "d3d9600b5e8a1d8673012d1621a0737417092bbbd599d74cc8a7fd0e732904aa",
+        "signature": "d3d9600b5e8a1d8673012d1621a0737417092bbbd599d74cc8a7fd0e732904aa",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
@@ -1597,8 +1597,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
-        "version": "c944ebf8a65a7d67fb8b013be9813335fde5c22586d9b1464a7c84a049a74afa",
-        "signature": "c944ebf8a65a7d67fb8b013be9813335fde5c22586d9b1464a7c84a049a74afa",
+        "version": "529cf32313ee52f5dbe62744b3155a1bf5dbef7543695f253b65b79a2de8262a",
+        "signature": "529cf32313ee52f5dbe62744b3155a1bf5dbef7543695f253b65b79a2de8262a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/recipe/reciperequirement.d.ts": {
