@@ -1,5 +1,5 @@
 import Doodad from "doodad/Doodad";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Corpse from "entity/creature/corpse/Corpse";
 import Creature from "entity/creature/Creature";
 import { MoveType } from "entity/IEntity";
 import { IVector3 } from "utilities/math/IVector";
@@ -84,8 +84,8 @@ export function findCreatures(context: Context, id: string, isTarget: (creature:
 	return findObjects(context, FindObjectType.Creature, id, island.creatures as Creature[], isTarget, top);
 }
 
-export function findCarvableCorpses(context: Context, id: string, isTarget: (corpse: ICorpse) => boolean): ICorpse[] {
-	return findObjects(context, FindObjectType.Corpse, id, island.corpses as ICorpse[], corpse => {
+export function findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {
+	return findObjects(context, FindObjectType.Corpse, id, island.corpses as Corpse[], corpse => {
 		if (isTarget(corpse)) {
 			const tile = game.getTileFromPoint(corpse);
 			return tile.creature === undefined &&

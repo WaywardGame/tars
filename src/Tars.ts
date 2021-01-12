@@ -28,7 +28,8 @@ import Bindable from "newui/input/Bindable";
 import { IInput } from "newui/input/IInput";
 import { NewUi } from "newui/NewUi";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
-import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
+import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/IMenuBarButton";
+import { MenuBarButtonGroup } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import { InterruptOptions } from "newui/util/IInterrupt";
 import { ITile } from "tile/ITerrain";
@@ -1705,7 +1706,7 @@ export default class Tars extends Mod {
 				const corpses = tile.corpses;
 				if (corpses && corpses.length > 0) {
 					for (const corpse of corpses) {
-						const resources = corpseManager.getResources(corpse, true);
+						const resources = corpse.getResources(true);
 						if (!resources || resources.length === 0) {
 							continue;
 						}

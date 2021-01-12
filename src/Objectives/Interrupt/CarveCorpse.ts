@@ -1,5 +1,5 @@
 import { ActionType } from "entity/action/IAction";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Corpse from "entity/creature/corpse/Corpse";
 import { Dictionary } from "language/Dictionaries";
 import Translation from "language/Translation";
 
@@ -12,7 +12,7 @@ import MoveToTarget from "../Core/MoveToTarget";
 
 export default class CarveCorpse extends Objective {
 
-	constructor(private readonly corpse: ICorpse) {
+	constructor(private readonly corpse: Corpse) {
 		super();
 	}
 

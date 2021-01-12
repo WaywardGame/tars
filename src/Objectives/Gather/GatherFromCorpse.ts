@@ -1,5 +1,5 @@
 import { ActionType } from "entity/action/IAction";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Corpse from "entity/creature/corpse/Corpse";
 import { Dictionary } from "language/Dictionaries";
 import Translation from "language/Translation";
 
@@ -27,10 +27,10 @@ export default class GatherFromCorpse extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const hasCarveItem = getInventoryItemsWithUse(context, ActionType.Carve).length > 0;
 
-		return findCarvableCorpses(context, this.getIdentifier(), (corpse: ICorpse) => {
+		return findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
 			const itemTypes = this.search.map.get(corpse.type);
 			if (itemTypes) {
-				const resources = corpseManager.getResources(corpse, true);
+				const resources = corpse.getResources(true);
 				if (!resources || resources.length === 0) {
 					return false;
 				}
