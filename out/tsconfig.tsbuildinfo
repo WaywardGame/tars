@@ -1807,8 +1807,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/referencemanager.d.ts": {
-        "version": "32b57bf6d7ff9500f032b0e1584e62808f9672702d2b5ab49a9f64c05fbd57a1",
-        "signature": "32b57bf6d7ff9500f032b0e1584e62808f9672702d2b5ab49a9f64c05fbd57a1",
+        "version": "b992c5459f60c38ae9d30d53d3a1ffc414e1428b1e457f17b4622f2843fa5795",
+        "signature": "b992c5459f60c38ae9d30d53d3a1ffc414e1428b1e457f17b4622f2843fa5795",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translation.d.ts": {
