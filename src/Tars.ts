@@ -382,7 +382,7 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		if (nextTile.npc || (nextTile.doodad && nextTile.doodad.blocksMove())) {
+		if (nextTile.npc || (nextTile.doodad && nextTile.doodad.blocksMove()) || game.isPlayerAtTile(nextTile, false, true)) {
 			log.info("Interrupting due to blocked movement");
 			this.interrupt();
 		}
