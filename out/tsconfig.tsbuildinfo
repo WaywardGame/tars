@@ -837,8 +837,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": {
-        "version": "308aa65d05acd74ca4ba3347ac1782f3bc1a1b08ce9f98dc69dd2bfc0a1e782d",
-        "signature": "308aa65d05acd74ca4ba3347ac1782f3bc1a1b08ce9f98dc69dd2bfc0a1e782d",
+        "version": "ff271e76cfa4f38a17b34fa3c40f7826c52e9840464b79f3ed24bdfec1dd79b3",
+        "signature": "ff271e76cfa4f38a17b34fa3c40f7826c52e9840464b79f3ed24bdfec1dd79b3",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/language.d.ts": {
@@ -1592,8 +1592,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts": {
-        "version": "999f0a3d265e960aaf2d240590f3de0b4fc48674e9e1bd5c7a3042a20cf4fdd8",
-        "signature": "999f0a3d265e960aaf2d240590f3de0b4fc48674e9e1bd5c7a3042a20cf4fdd8",
+        "version": "b502c1e22c723cf1a271ad1026f4b39cca12506d12393ce42e185e19d2321014",
+        "signature": "b502c1e22c723cf1a271ad1026f4b39cca12506d12393ce42e185e19d2321014",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts": {
@@ -2077,8 +2077,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/inspectionslist.d.ts": {
-        "version": "0054538afdc26a30914d506cf28707d192b4067d40f29f3903886945bba4cf5a",
-        "signature": "0054538afdc26a30914d506cf28707d192b4067d40f29f3903886945bba4cf5a",
+        "version": "9dc77da36d45a2ac4958179057f6401b4cf7b06521b3b7bb01f47e697537a6bb",
+        "signature": "9dc77da36d45a2ac4958179057f6401b4cf7b06521b3b7bb01f47e697537a6bb",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/tileinspectionslist.d.ts": {
@@ -3634,7 +3634,6 @@
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": [
-        "../node_modules/@wayward/goodstream/stream.d.ts",
         "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
         "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts",
@@ -4229,6 +4228,7 @@
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/inspectionslist.d.ts": [
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspectionshandler.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/icomponent.d.ts"
@@ -7063,7 +7063,6 @@
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": [
-        "../node_modules/@wayward/goodstream/stream.d.ts",
         "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
         "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts",
@@ -7658,6 +7657,7 @@
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/inspectionslist.d.ts": [
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspectionshandler.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/icomponent.d.ts"
