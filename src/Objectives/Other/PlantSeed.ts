@@ -1,11 +1,9 @@
 import doodadDescriptions from "doodad/Doodads";
-import { DoodadType } from "doodad/IDoodad";
 import { ActionType } from "entity/action/IAction";
 import { ItemType } from "item/IItem";
 import Item from "item/Item";
 import { ITileContainer, TerrainType } from "tile/ITerrain";
 import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -16,7 +14,6 @@ import AcquireItem from "../Acquire/Item/AcquireItem";
 import CopyContextData from "../ContextData/CopyContextData";
 import SetContextData from "../ContextData/SetContextData";
 import MoveToTarget from "../Core/MoveToTarget";
-
 import UseItem from "./UseItem";
 
 export default class PlantSeed extends Objective {
@@ -31,8 +28,8 @@ export default class PlantSeed extends Objective {
 			throw new Error("Invalid onUse for seed");
 		}
 
-		const plantType: DoodadType = description.onUse[ActionType.Plant];
-		const plantDescription = doodadDescriptions[plantType];
+		const plantType = description.onUse[ActionType.Plant];
+		const plantDescription = doodadDescriptions[plantType!];
 		if (!plantDescription) {
 			throw new Error("Invalid plant description");
 		}
