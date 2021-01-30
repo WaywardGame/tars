@@ -1232,8 +1232,8 @@
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/mod/basemod.d.ts": {
-        "version": "40e7042e5c4d37d59e180b23a04f989fa071b66a3a76a841c61d07bdde9cb7e1",
-        "signature": "40e7042e5c4d37d59e180b23a04f989fa071b66a3a76a841c61d07bdde9cb7e1",
+        "version": "a397c3c6ddb51c5394d1f12da844df9ad0410869962161365e33a1a8ae676d56",
+        "signature": "a397c3c6ddb51c5394d1f12da844df9ad0410869962161365e33a1a8ae676d56",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/ispritebatch.d.ts": {
@@ -1782,8 +1782,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/modregistry.d.ts": {
-        "version": "e0a220602669041c9402d550483586bc9eef625e4cd4b71a4cd3fec9e4c62617",
-        "signature": "e0a220602669041c9402d550483586bc9eef625e4cd4b71a4cd3fec9e4c62617",
+        "version": "2e3cfbda47b8f11ef5c7842af0e68ab2080a2d4664f523da560db684704dcab4",
+        "signature": "2e3cfbda47b8f11ef5c7842af0e68ab2080a2d4664f523da560db684704dcab4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/imaptile.d.ts": {
