@@ -16,7 +16,7 @@ export default class AcquireWaterContainer extends Objective {
 	}
 
 	public getStatus(): string {
-		return "Acquiring a container for water";
+		return "Acquiring a water container";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

@@ -19,7 +19,7 @@ export default class AcquireItemByGroup extends AcquireBase {
 	}
 
 	public getStatus(): string {
-		return `Acquiring ${itemManager.getItemTypeGroupName(this.itemTypeGroup)} item`;
+		return `Acquiring ${itemManager.getItemTypeGroupName(this.itemTypeGroup)}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

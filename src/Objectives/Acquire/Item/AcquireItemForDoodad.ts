@@ -26,7 +26,7 @@ export default class AcquireItemForDoodad extends Objective {
 	}
 
 	public getStatus(): string {
-		return `Acquiring an item to build ${doodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
+		return `Acquiring ${doodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

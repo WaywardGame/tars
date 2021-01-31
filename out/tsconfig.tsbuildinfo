@@ -1787,8 +1787,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/imaptile.d.ts": {
-        "version": "395dd34a8f598582718f12fe69806dcff564d4c19cff27bb2b46e4eeeee258d2",
-        "signature": "395dd34a8f598582718f12fe69806dcff564d4c19cff27bb2b46e4eeeee258d2",
+        "version": "46a40b79c4addbc1e2d60a6269c0534ef24d2427099ef510311593c2457f7782",
+        "signature": "46a40b79c4addbc1e2d60a6269c0534ef24d2427099ef510311593c2457f7782",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/obfuscation.d.ts": {
@@ -1812,8 +1812,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/drawnmap.d.ts": {
-        "version": "586051624856761d86889ee2d7255c02ea3af51887d16271332e54a085fbc072",
-        "signature": "586051624856761d86889ee2d7255c02ea3af51887d16271332e54a085fbc072",
+        "version": "76f44cd63c3033ae8373094b348925e707c5ead614653f1a9d4f675d25efd06c",
+        "signature": "76f44cd63c3033ae8373094b348925e707c5ead614653f1a9d4f675d25efd06c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
@@ -1822,8 +1822,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
-        "version": "e1e4ea1e035666ceacc23166e5d386dc67da8aa460c8d038ea78d98c4fb62bd2",
-        "signature": "e1e4ea1e035666ceacc23166e5d386dc67da8aa460c8d038ea78d98c4fb62bd2",
+        "version": "1522c45944cde74e677ecf5079971d38b19ab454f2cbeff7106f582c7c6ffb47",
+        "signature": "1522c45944cde74e677ecf5079971d38b19ab454f2cbeff7106f582c7c6ffb47",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts": {
@@ -1837,8 +1837,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translation.d.ts": {
-        "version": "130ffc53fb753b6f6998c11970b6f913d981a381f5c54c74a02df93a374992d9",
-        "signature": "130ffc53fb753b6f6998c11970b6f913d981a381f5c54c74a02df93a374992d9",
+        "version": "83f1adaf7e0657bfd3c9f5d47121c181790f7b4b350535f77a58bf89955e3724",
+        "signature": "83f1adaf7e0657bfd3c9f5d47121c181790f7b4b350535f77a58bf89955e3724",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/timemanager.d.ts": {
@@ -2157,8 +2157,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/action/actions.d.ts": {
-        "version": "d7b05be4d33275bb5ed3a7c80360fec1a8ab8803772a5937cbd9827c6aa69984",
-        "signature": "d7b05be4d33275bb5ed3a7c80360fec1a8ab8803772a5937cbd9827c6aa69984",
+        "version": "4caca7fcf0f5e77868abad7b0794bbbf956fe3154daceb5c0c3f5a28cfa52808",
+        "signature": "4caca7fcf0f5e77868abad7b0794bbbf956fe3154daceb5c0c3f5a28cfa52808",
         "affectsGlobalScope": false
       },
       "../src/utilities/action.ts": {
@@ -2258,7 +2258,7 @@
       },
       "../src/objectives/core/executeactionforitem.ts": {
         "version": "dadcd9746c9df9ebe06d9043d176645d67b616aca19d829fd5f9750ad3f91606",
-        "signature": "9993ff33bddbd9b9e0ed1664fed218c0bc8c375a9c9cff161fe59eaee24eeee8",
+        "signature": "7a8d9458de40488f5adbaa155468287ebd509000b3c5d283839bdc56588b1780",
         "affectsGlobalScope": false
       },
       "../src/objectives/gather/gatherfromcorpse.ts": {
@@ -2312,7 +2312,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/acquireitembygroup.ts": {
-        "version": "d84187bd0fbf6c111a226d65ba87ab52ebd6ec9cb8711fc97690b124ffb58551",
+        "version": "ad497648becc2b1d869aac9d22f05060f496dad1754f315184e3b767522962ed",
         "signature": "2b50f192305f270e055fb92172d735ffe5085044a7af4b4e4d74116bb8c8cebf",
         "affectsGlobalScope": false
       },
@@ -2337,7 +2337,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/acquireitemfordoodad.ts": {
-        "version": "d4da6b16c69c780edfc390128d6f9dc53aaa1e277efc0f3a711e3e1a2bb9e974",
+        "version": "7ebd54955291798418c69ce755728bfb97ebe07be8323243ae7827514fb542d1",
         "signature": "f6c456b74f2c3ee82f2518f37ce16234a31a539f8ced4174f77d2f645c97a1e0",
         "affectsGlobalScope": false
       },
@@ -2377,7 +2377,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/acquire/item/specific/acquirewatercontainer.ts": {
-        "version": "e34914d03366b1729e50e36ed345bb8219a89008f9b2db5a09e2aba633454d03",
+        "version": "12f441f7d4e14bc6f6f07e78f7a3e8de348974d7c3ba35ef66d584def2be2772",
         "signature": "e219dfcf3a644697bf1f81c8cc13a63fa8e551455504b985e21486e408a3de6a",
         "affectsGlobalScope": false
       },
