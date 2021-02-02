@@ -1751,14 +1751,9 @@
         "signature": "61b5b2d91f5c2c7234426be78d476747edce36fd93feab854a5deaf322787240",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/newui/util/scrollablehandler.d.ts": {
-        "version": "3216c192edda00da2407535f9b9188571c22a77c31d527feb6c138bb6dad9e49",
-        "signature": "3216c192edda00da2407535f9b9188571c22a77c31d527feb6c138bb6dad9e49",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/dialog.d.ts": {
-        "version": "6b2e6c8116b85b49f048bdb2d444d7bc75ed23e321b8052e145e762e22d31b43",
-        "signature": "6b2e6c8116b85b49f048bdb2d444d7bc75ed23e321b8052e145e762e22d31b43",
+        "version": "16b74eaf6a193ec0c384a75d355ff2892dd5f94dfe1d97300525606f33486481",
+        "signature": "16b74eaf6a193ec0c384a75d355ff2892dd5f94dfe1d97300525606f33486481",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/static/menubar/imenubarbutton.d.ts": {
@@ -2052,8 +2047,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/quadrantcomponent.d.ts": {
-        "version": "23aa77be23da2699e947b5593000050ae9b455881dcafea4b00179ecef941ae7",
-        "signature": "23aa77be23da2699e947b5593000050ae9b455881dcafea4b00179ecef941ae7",
+        "version": "e2611ed8bd53eaaf624fc6955bffa3af9933c4a75616d89efdad25d2615a5c2f",
+        "signature": "e2611ed8bd53eaaf624fc6955bffa3af9933c4a75616d89efdad25d2615a5c2f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/static/menubar/menubarbutton.d.ts": {
@@ -4291,7 +4286,6 @@
         "../node_modules/@wayward/types/definitions/newui/component/text.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/dialogs.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/igamescreenapi.d.ts",
-        "../node_modules/@wayward/types/definitions/newui/util/scrollablehandler.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/log.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/string/interpolator.d.ts"
@@ -4314,8 +4308,7 @@
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/iquadrantcomponent.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/staticcomponent.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/igamescreenapi.d.ts",
-        "../node_modules/@wayward/types/definitions/newui/screen/screens/gamescreen.d.ts",
-        "../node_modules/@wayward/types/definitions/newui/util/scrollablehandler.d.ts"
+        "../node_modules/@wayward/types/definitions/newui/screen/screens/gamescreen.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/staticcomponent.d.ts": [
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts"
@@ -7760,7 +7753,6 @@
         "../node_modules/@wayward/types/definitions/newui/component/text.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/dialogs.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/igamescreenapi.d.ts",
-        "../node_modules/@wayward/types/definitions/newui/util/scrollablehandler.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/log.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/string/interpolator.d.ts"
@@ -7783,8 +7775,7 @@
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/iquadrantcomponent.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/staticcomponent.d.ts",
         "../node_modules/@wayward/types/definitions/newui/screen/screens/game/igamescreenapi.d.ts",
-        "../node_modules/@wayward/types/definitions/newui/screen/screens/gamescreen.d.ts",
-        "../node_modules/@wayward/types/definitions/newui/util/scrollablehandler.d.ts"
+        "../node_modules/@wayward/types/definitions/newui/screen/screens/gamescreen.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/newui/screen/screens/game/component/staticcomponent.d.ts": [
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts"
@@ -9234,7 +9225,6 @@
       "../node_modules/@wayward/types/definitions/newui/util/iinterrupt.d.ts",
       "../node_modules/@wayward/types/definitions/newui/util/interruptfactory.d.ts",
       "../node_modules/@wayward/types/definitions/newui/util/scalemanager.d.ts",
-      "../node_modules/@wayward/types/definitions/newui/util/scrollablehandler.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/decorations.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/fieldofview/fieldofview.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/fieldofview/ibytegrid.d.ts",
