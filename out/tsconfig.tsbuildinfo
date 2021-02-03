@@ -271,6 +271,11 @@
         "signature": "95d8473a31802b44970840e82f0aca41c3f1b31e014f5fd3027a40bcff729386",
         "affectsGlobalScope": false
       },
+      "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts": {
+        "version": "5f21b59d7a2c23351a1bc4f4d5b47faea46a9a02ffefec766bef31bf42ec021a",
+        "signature": "5f21b59d7a2c23351a1bc4f4d5b47faea46a9a02ffefec766bef31bf42ec021a",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@wayward/types/definitions/game/mapping/imaprender.d.ts": {
         "version": "58a322b773efd4cbe84cff38a1fa50e9aab5f820fca1473fbcfc4b48521c3afe",
         "signature": "58a322b773efd4cbe84cff38a1fa50e9aab5f820fca1473fbcfc4b48521c3afe",
@@ -786,11 +791,6 @@
         "signature": "256f2a225ed5659a947d0e11225c88e88d591547d1ba81021a9ed6b1e2a6c736",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts": {
-        "version": "5f21b59d7a2c23351a1bc4f4d5b47faea46a9a02ffefec766bef31bf42ec021a",
-        "signature": "5f21b59d7a2c23351a1bc4f4d5b47faea46a9a02ffefec766bef31bf42ec021a",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@wayward/types/definitions/utilities/math/direction.d.ts": {
         "version": "e14c72bf7b7a6129980ce3caf9c3dc87e33394936fb6452562cbb06b7b5a6dda",
         "signature": "e14c72bf7b7a6129980ce3caf9c3dc87e33394936fb6452562cbb06b7b5a6dda",
@@ -852,8 +852,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": {
-        "version": "ff271e76cfa4f38a17b34fa3c40f7826c52e9840464b79f3ed24bdfec1dd79b3",
-        "signature": "ff271e76cfa4f38a17b34fa3c40f7826c52e9840464b79f3ed24bdfec1dd79b3",
+        "version": "eb922f72ff84faf78aa20c7ce68b0783ec3cfe66e48485cfd7fe6b779fa7b3a4",
+        "signature": "eb922f72ff84faf78aa20c7ce68b0783ec3cfe66e48485cfd7fe6b779fa7b3a4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/language.d.ts": {
@@ -1692,8 +1692,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/itemsinspection.d.ts": {
-        "version": "7ce2164170a2be5f49f8687aac707cede16d606b185ed6476a7bc7043d289de7",
-        "signature": "7ce2164170a2be5f49f8687aac707cede16d606b185ed6476a7bc7043d289de7",
+        "version": "58c643ed04f385f9de505a3016d3deedaf172cf630885bbb30b9c48e61c7fd33",
+        "signature": "58c643ed04f385f9de505a3016d3deedaf172cf630885bbb30b9c48e61c7fd33",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/humaninspection.d.ts": {
@@ -1822,8 +1822,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
-        "version": "6bbd9c9677398896b571ee30aaa976a02c754c19a5f439d04fa7b490a65af363",
-        "signature": "6bbd9c9677398896b571ee30aaa976a02c754c19a5f439d04fa7b490a65af363",
+        "version": "91134b9e71d731029cb2ab6a304717b2ff7a2499a7d7234613ab3f327e6a60f7",
+        "signature": "91134b9e71d731029cb2ab6a304717b2ff7a2499a7d7234613ab3f327e6a60f7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
@@ -3694,9 +3694,10 @@
         "../node_modules/@wayward/types/definitions/item/iitemmanager.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/save/iserializer.d.ts",
-        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
+        "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": [
+        "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts",
         "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
         "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts",
@@ -3710,7 +3711,8 @@
         "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
-        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
+        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts": [
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
@@ -7161,9 +7163,10 @@
         "../node_modules/@wayward/types/definitions/item/iitemmanager.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/save/iserializer.d.ts",
-        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
+        "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": [
+        "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts",
         "../node_modules/@wayward/types/definitions/entity/action/iaction.d.ts",
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
         "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts",
@@ -7177,7 +7180,8 @@
         "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
-        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
+        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts": [
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
