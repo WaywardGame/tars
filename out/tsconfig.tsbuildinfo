@@ -232,8 +232,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts": {
-        "version": "bc93b8e7708f00478cfb2700c9f91bd7463f7f364b880c9ebfaa8770d2fde7f6",
-        "signature": "bc93b8e7708f00478cfb2700c9f91bd7463f7f364b880c9ebfaa8770d2fde7f6",
+        "version": "fe8f890eaaf12f9b9d4cfcd63619f0ce50443c9a9bbbccf2c77f53c5a41380ab",
+        "signature": "fe8f890eaaf12f9b9d4cfcd63619f0ce50443c9a9bbbccf2c77f53c5a41380ab",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts": {
@@ -722,8 +722,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/misc.d.ts": {
-        "version": "2e87563094fae75b3e9003424e1e4d0ceaa1772b0252f3a7d496edc27fb509a5",
-        "signature": "2e87563094fae75b3e9003424e1e4d0ceaa1772b0252f3a7d496edc27fb509a5",
+        "version": "916641d9effb36fc9aafe20614692cfcf4366c8d212b2b037f8b2011699e209d",
+        "signature": "916641d9effb36fc9aafe20614692cfcf4366c8d212b2b037f8b2011699e209d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/multiplayercompatibility.d.ts": {
@@ -732,8 +732,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "8aa1578111cfe0f79ae5a60025abd650db6b7a09d431eabd32fa104cc555a0d2",
-        "signature": "8aa1578111cfe0f79ae5a60025abd650db6b7a09d431eabd32fa104cc555a0d2",
+        "version": "a3a6b6dda3074e77c1532dc9979af48be1eda6819a2c4f75612943ad4b5fcf45",
+        "signature": "a3a6b6dda3074e77c1532dc9979af48be1eda6819a2c4f75612943ad4b5fcf45",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -1097,8 +1097,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/enum/ienum.d.ts": {
-        "version": "2059791a7358521924e7d9f8d99c175c176db8ab64bafb3f9e7906a547b6bae6",
-        "signature": "2059791a7358521924e7d9f8d99c175c176db8ab64bafb3f9e7906a547b6bae6",
+        "version": "6fd77d2d488e1cb9e0b3e06c55de329aaf7eaae52ae3af75c9bfeef31d080bc7",
+        "signature": "6fd77d2d488e1cb9e0b3e06c55de329aaf7eaae52ae3af75c9bfeef31d080bc7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/enum/enuminfo.d.ts": {
@@ -1367,8 +1367,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionaries.d.ts": {
-        "version": "b732d011840015d929b04ac69da8192ed2123ffbb16936e6ad7ba6082a1b7568",
-        "signature": "b732d011840015d929b04ac69da8192ed2123ffbb16936e6ad7ba6082a1b7568",
+        "version": "ca6775bcd275e3feef5a85a3dd131680b4c9c4f827b1ae1038c5f5c34b6d528c",
+        "signature": "ca6775bcd275e3feef5a85a3dd131680b4c9c4f827b1ae1038c5f5c34b6d528c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/segment/colorsegment.d.ts": {
@@ -1842,8 +1842,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translation.d.ts": {
-        "version": "c361cadd88b5c36b6b8c8ccca1abb155d6df91c78489206b603f5467730a5adb",
-        "signature": "c361cadd88b5c36b6b8c8ccca1abb155d6df91c78489206b603f5467730a5adb",
+        "version": "2948433834d66339e91c27c37f2b0f90d196fbffc71497b3a53d74f52f8f130d",
+        "signature": "2948433834d66339e91c27c37f2b0f90d196fbffc71497b3a53d74f52f8f130d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/timemanager.d.ts": {
@@ -1882,13 +1882,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/ientity.d.ts": {
-        "version": "375cc8635057736545067d86bc09a9a1536c8da8a356e3ecf82c7feaeb3d00b8",
-        "signature": "375cc8635057736545067d86bc09a9a1536c8da8a356e3ecf82c7feaeb3d00b8",
+        "version": "3a285e60a4953575b839e914a4794a3ae20546ca83965f7d8e5f043988ad1ef5",
+        "signature": "3a285e60a4953575b839e914a4794a3ae20546ca83965f7d8e5f043988ad1ef5",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/player/playerdefense.d.ts": {
-        "version": "9fdddd736f6faa0742d788026524bc379918918a24c65689da81445a826f7098",
-        "signature": "9fdddd736f6faa0742d788026524bc379918918a24c65689da81445a826f7098",
+        "version": "a1eb27e531ede84bbadff66719838a359a91868ae2d879c25d30c9ff0bc11baa",
+        "signature": "a1eb27e531ede84bbadff66719838a359a91868ae2d879c25d30c9ff0bc11baa",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/human.d.ts": {
@@ -1962,8 +1962,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/enum/enums.d.ts": {
-        "version": "7d22c52f93235b1fe28d14d3bccd69fbcb86c06b252132fd411c4be456c6f0c8",
-        "signature": "7d22c52f93235b1fe28d14d3bccd69fbcb86c06b252132fd411c4be456c6f0c8",
+        "version": "c9e0002cafb00471d4da6bd24e12003e6d19e9634a3ae926125de36f1a2e50c8",
+        "signature": "c9e0002cafb00471d4da6bd24e12003e6d19e9634a3ae926125de36f1a2e50c8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodads.d.ts": {
@@ -3909,6 +3909,7 @@
         "../node_modules/@wayward/types/definitions/utilities/string/interpolator.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/language/translation.d.ts": [
+        "../node_modules/@wayward/types/definitions/entity/ientity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/ihuman.d.ts",
         "../node_modules/@wayward/types/definitions/entity/istats.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/imessagemanager.d.ts",
@@ -7389,6 +7390,7 @@
         "../node_modules/@wayward/types/definitions/utilities/string/interpolator.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/language/translation.d.ts": [
+        "../node_modules/@wayward/types/definitions/entity/ientity.d.ts",
         "../node_modules/@wayward/types/definitions/entity/ihuman.d.ts",
         "../node_modules/@wayward/types/definitions/entity/istats.d.ts",
         "../node_modules/@wayward/types/definitions/entity/player/imessagemanager.d.ts",
