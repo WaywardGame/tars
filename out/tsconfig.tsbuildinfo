@@ -316,6 +316,11 @@
         "signature": "76a4b269520ac1a09412af82648f02309ceb6bf51e033b95f2077726f015fb08",
         "affectsGlobalScope": false
       },
+      "../node_modules/@wayward/types/definitions/item/iitemmanager.d.ts": {
+        "version": "3865f7ec50f8559ddd7b7c11dcf043b8244df6b7f412358ebc1171ba0d500296",
+        "signature": "3865f7ec50f8559ddd7b7c11dcf043b8244df6b7f412358ebc1171ba0d500296",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@wayward/types/definitions/game/mapping/imaprender.d.ts": {
         "version": "58a322b773efd4cbe84cff38a1fa50e9aab5f820fca1473fbcfc4b48521c3afe",
         "signature": "58a322b773efd4cbe84cff38a1fa50e9aab5f820fca1473fbcfc4b48521c3afe",
@@ -386,9 +391,9 @@
         "signature": "77b7942c0dbec1d5fd055484b18f4a86e0adf7457418aa1074ce88d9213492ac",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/item/iitemmanager.d.ts": {
-        "version": "3865f7ec50f8559ddd7b7c11dcf043b8244df6b7f412358ebc1171ba0d500296",
-        "signature": "3865f7ec50f8559ddd7b7c11dcf043b8244df6b7f412358ebc1171ba0d500296",
+      "../node_modules/@wayward/types/definitions/item/itemmapmanager.d.ts": {
+        "version": "b50c923d27e47138cc156da32da00f4bd1b5a645ce3ae592239c58bd568e694a",
+        "signature": "b50c923d27e47138cc156da32da00f4bd1b5a645ce3ae592239c58bd568e694a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/events/ifire.d.ts": {
@@ -397,8 +402,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
-        "version": "5b1b53de697acf00cea56937f5ebb3c290c4fc66eaf89a06187c1335e362c3ff",
-        "signature": "5b1b53de697acf00cea56937f5ebb3c290c4fc66eaf89a06187c1335e362c3ff",
+        "version": "f32e53fc2f6bff25f1c24ce8c582b60a4922ee0f7fae26cf1ec2424f2b4042b6",
+        "signature": "f32e53fc2f6bff25f1c24ce8c582b60a4922ee0f7fae26cf1ec2424f2b4042b6",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts": {
@@ -502,8 +507,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/doodad/doodadmanager.d.ts": {
-        "version": "783c9cb09074ec0117c288076147216910a1a084b7fd83b9b4f52483af4bf828",
-        "signature": "783c9cb09074ec0117c288076147216910a1a084b7fd83b9b4f52483af4bf828",
+        "version": "cd8302f9ea5980f77f42bd883401551b5d49dfbb00ddba511e095454707ef9f8",
+        "signature": "cd8302f9ea5980f77f42bd883401551b5d49dfbb00ddba511e095454707ef9f8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/component/ithreestatebutton.d.ts": {
@@ -752,8 +757,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "595646756bc4167b5b737f59f59ab777e7a2845090445ebd1c94c85dbd9363f1",
-        "signature": "595646756bc4167b5b737f59f59ab777e7a2845090445ebd1c94c85dbd9363f1",
+        "version": "ba262252c298331117005c87a3c4b9481111491acb5c220c1326d37327a0fc6d",
+        "signature": "ba262252c298331117005c87a3c4b9481111491acb5c220c1326d37327a0fc6d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -967,8 +972,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": {
-        "version": "69fae339ceb800a2dc28bbb41b8c809c34760eddb0267e6534497eafc6053129",
-        "signature": "69fae339ceb800a2dc28bbb41b8c809c34760eddb0267e6534497eafc6053129",
+        "version": "1402ccf11d680bb6c571dfbcd2a6143114ecce900f8dbf446b11188f7e5b835e",
+        "signature": "1402ccf11d680bb6c571dfbcd2a6143114ecce900f8dbf446b11188f7e5b835e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/island.d.ts": {
@@ -977,8 +982,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts": {
-        "version": "e0b6049612621c8a7318325524f014646fb2dc1a2366c896b39a4c9caefac4ad",
-        "signature": "e0b6049612621c8a7318325524f014646fb2dc1a2366c896b39a4c9caefac4ad",
+        "version": "c7704ef16af5ff14671d8e9fd87f83009bc6f3a4086f1e8dd0f0097811551d7f",
+        "signature": "c7704ef16af5ff14671d8e9fd87f83009bc6f3a4086f1e8dd0f0097811551d7f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/language.d.ts": {
@@ -1222,8 +1227,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/steamworks/steamworks.d.ts": {
-        "version": "14473247c434b01aae8f2706369a760d380458b239f1765bddde67895006f535",
-        "signature": "14473247c434b01aae8f2706369a760d380458b239f1765bddde67895006f535",
+        "version": "65501d0abac788a647a5a295c23a0176fa7c78f407acd46007921a600589fa2e",
+        "signature": "65501d0abac788a647a5a295c23a0176fa7c78f407acd46007921a600589fa2e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/tileeventmanager.d.ts": {
@@ -1502,8 +1507,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "78f3fb30b76a51595c80a6c9fa0e79a01efaf360a214594c5805409828b9c89c",
-        "signature": "78f3fb30b76a51595c80a6c9fa0e79a01efaf360a214594c5805409828b9c89c",
+        "version": "8115ba543d6ce9ffea8c7d9e9639603899b7abab9d2f2787c4ead47f97380d16",
+        "signature": "8115ba543d6ce9ffea8c7d9e9639603899b7abab9d2f2787c4ead47f97380d16",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/component/refreshable.d.ts": {
@@ -1707,8 +1712,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemdurability.d.ts": {
-        "version": "394b811cb6e384a57de32b390e8db78f34f33d828bf34f0d0dad7834c50b92ac",
-        "signature": "394b811cb6e384a57de32b390e8db78f34f33d828bf34f0d0dad7834c50b92ac",
+        "version": "ce8cfefeb5692d47d43494d9415bff7e6b70b7d4b5cb19c6855e38b01b9b0a4f",
+        "signature": "ce8cfefeb5692d47d43494d9415bff7e6b70b7d4b5cb19c6855e38b01b9b0a4f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemprotected.d.ts": {
@@ -1852,8 +1857,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/iitem.d.ts": {
-        "version": "b9cc0aad5109b0ca1ce751d19b4f3d3733d74426547f5d6674644c860a3f7338",
-        "signature": "b9cc0aad5109b0ca1ce751d19b4f3d3733d74426547f5d6674644c860a3f7338",
+        "version": "bf37e0a8f2d371fc8c5c86bb8723ffa99874530a3ff08a34a923858a476c6420",
+        "signature": "bf37e0a8f2d371fc8c5c86bb8723ffa99874530a3ff08a34a923858a476c6420",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/entity/npc/npc.d.ts": {
@@ -2288,7 +2293,7 @@
       },
       "../src/objectives/core/executeactionforitem.ts": {
         "version": "dadcd9746c9df9ebe06d9043d176645d67b616aca19d829fd5f9750ad3f91606",
-        "signature": "d9a509a2b5f5f57054a75f252552bd2ac40c3582702974db226d74f82b9833e9",
+        "signature": "7a8d9458de40488f5adbaa155468287ebd509000b3c5d283839bdc56588b1780",
         "affectsGlobalScope": false
       },
       "../src/objectives/gather/gatherfromcorpse.ts": {
@@ -2562,7 +2567,7 @@
         "affectsGlobalScope": false
       },
       "../src/navigation/navigationworker.ts": {
-        "version": "9a7ccc341b97554a02e97507e46298990fb734eb2b3f976c712d016eb026334b",
+        "version": "5141792c9a3394f4460ca63b359a311212eb0fde703f4f3157ac82cfd348e796",
         "signature": "7a64e2e739e800e58faf3474810b4f101d4aa7aef608411ecc8d2394cb675e45",
         "affectsGlobalScope": true
       },
@@ -3310,7 +3315,6 @@
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/labelledvalue.d.ts",
         "../node_modules/@wayward/types/definitions/item/item.d.ts",
-        "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemprotected.d.ts": [
@@ -3749,10 +3753,10 @@
         "../node_modules/@wayward/types/definitions/game/ireferencemanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/magicalpropertymanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/magicalpropertytype.d.ts",
-        "../node_modules/@wayward/types/definitions/game/mapping/drawnmap.d.ts",
         "../node_modules/@wayward/types/definitions/game/temperature/itemperature.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitemmanager.d.ts",
+        "../node_modules/@wayward/types/definitions/item/itemmapmanager.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/save/iserializer.d.ts",
         "../node_modules/@wayward/types/definitions/tile/events/ifire.d.ts",
@@ -3775,6 +3779,10 @@
         "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
+      ],
+      "../node_modules/@wayward/types/definitions/item/itemmapmanager.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/mapping/drawnmap.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts": [
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
@@ -6822,7 +6830,6 @@
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/labelledvalue.d.ts",
         "../node_modules/@wayward/types/definitions/item/item.d.ts",
-        "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/newui/component/component.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemprotected.d.ts": [
@@ -7261,10 +7268,10 @@
         "../node_modules/@wayward/types/definitions/game/ireferencemanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/magicalpropertymanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/magicalpropertytype.d.ts",
-        "../node_modules/@wayward/types/definitions/game/mapping/drawnmap.d.ts",
         "../node_modules/@wayward/types/definitions/game/temperature/itemperature.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitem.d.ts",
         "../node_modules/@wayward/types/definitions/item/iitemmanager.d.ts",
+        "../node_modules/@wayward/types/definitions/item/itemmapmanager.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/save/iserializer.d.ts",
         "../node_modules/@wayward/types/definitions/tile/events/ifire.d.ts",
@@ -7287,6 +7294,10 @@
         "../node_modules/@wayward/types/definitions/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
+      ],
+      "../node_modules/@wayward/types/definitions/item/itemmapmanager.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/mapping/drawnmap.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts": [
         "../node_modules/@wayward/types/definitions/entity/human.d.ts",
@@ -9218,6 +9229,7 @@
       "../node_modules/@wayward/types/definitions/item/iitemmanager.d.ts",
       "../node_modules/@wayward/types/definitions/item/item.d.ts",
       "../node_modules/@wayward/types/definitions/item/itemmanager.d.ts",
+      "../node_modules/@wayward/types/definitions/item/itemmapmanager.d.ts",
       "../node_modules/@wayward/types/definitions/item/itemreciperequirementchecker.d.ts",
       "../node_modules/@wayward/types/definitions/item/items.d.ts",
       "../node_modules/@wayward/types/definitions/item/lootgroups.d.ts",
