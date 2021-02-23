@@ -467,8 +467,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts": {
-        "version": "7af0f2255896b8bcfb34688e9ced36de59a23a3fabd610493fc74ae405d2f556",
-        "signature": "7af0f2255896b8bcfb34688e9ced36de59a23a3fabd610493fc74ae405d2f556",
+        "version": "d89e99f6cbbc838c6ea5a5b8a8e2460fbc586e553aa3657a7294a54b6bb2bdbb",
+        "signature": "d89e99f6cbbc838c6ea5a5b8a8e2460fbc586e553aa3657a7294a54b6bb2bdbb",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": {
@@ -1472,8 +1472,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "8115ba543d6ce9ffea8c7d9e9639603899b7abab9d2f2787c4ead47f97380d16",
-        "signature": "8115ba543d6ce9ffea8c7d9e9639603899b7abab9d2f2787c4ead47f97380d16",
+        "version": "5487227733d178ed268a175d32a5faeba25bf501c6b165c14cb5a592c121e121",
+        "signature": "5487227733d178ed268a175d32a5faeba25bf501c6b165c14cb5a592c121e121",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/newui/component/refreshable.d.ts": {
