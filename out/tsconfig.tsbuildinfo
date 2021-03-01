@@ -382,8 +382,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/item/item.d.ts": {
-        "version": "dc967727af99bbf4ceb4594883d411959abcc7c608ce6612dddb9fb9fa9219b3",
-        "signature": "dc967727af99bbf4ceb4594883d411959abcc7c608ce6612dddb9fb9fa9219b3",
+        "version": "f1cd7c589eeeaded8c3e1ff154654336dbf1563dda2d59bad445c9714cee0ec1",
+        "signature": "f1cd7c589eeeaded8c3e1ff154654336dbf1563dda2d59bad445c9714cee0ec1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/interrupt.d.ts": {
@@ -467,8 +467,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts": {
-        "version": "d89e99f6cbbc838c6ea5a5b8a8e2460fbc586e553aa3657a7294a54b6bb2bdbb",
-        "signature": "d89e99f6cbbc838c6ea5a5b8a8e2460fbc586e553aa3657a7294a54b6bb2bdbb",
+        "version": "c0a42baf36b4f1f68e8f517578026765f15ffb982bbf019a4db74808ec67e07c",
+        "signature": "c0a42baf36b4f1f68e8f517578026765f15ffb982bbf019a4db74808ec67e07c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": {
@@ -502,8 +502,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/tile/tileevent.d.ts": {
-        "version": "4cc2d623e70e8527d502db10ea0fb13a76f738f01e8007d2ed40ba7ae658b5fc",
-        "signature": "4cc2d623e70e8527d502db10ea0fb13a76f738f01e8007d2ed40ba7ae658b5fc",
+        "version": "d9e4428b8c414dc9da35c541142a90bc3889263aa7e076a334e06085eed60cd2",
+        "signature": "d9e4428b8c414dc9da35c541142a90bc3889263aa7e076a334e06085eed60cd2",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/packets/basepacket.d.ts": {
