@@ -467,8 +467,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts": {
-        "version": "c0a42baf36b4f1f68e8f517578026765f15ffb982bbf019a4db74808ec67e07c",
-        "signature": "c0a42baf36b4f1f68e8f517578026765f15ffb982bbf019a4db74808ec67e07c",
+        "version": "d1437a5517e911c5a802091363be8dbf326fb1c6fe78fc0f0a947ff8fbfb2af7",
+        "signature": "d1437a5517e911c5a802091363be8dbf326fb1c6fe78fc0f0a947ff8fbfb2af7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": {
