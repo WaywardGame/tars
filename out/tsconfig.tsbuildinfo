@@ -897,8 +897,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": {
-        "version": "550b8c25fd04a377ecfd7a03fd968cdd5eb78aae6075195141430ce7e0cabfec",
-        "signature": "550b8c25fd04a377ecfd7a03fd968cdd5eb78aae6075195141430ce7e0cabfec",
+        "version": "10840ad97146b5877078d17635f2d0aab36d3e204b484cc037a3b92e4ce26256",
+        "signature": "10840ad97146b5877078d17635f2d0aab36d3e204b484cc037a3b92e4ce26256",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/island.d.ts": {
@@ -3670,7 +3670,6 @@
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": [
         "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts",
         "../node_modules/@wayward/types/definitions/entity/entity.d.ts",
-        "../node_modules/@wayward/types/definitions/entity/player/player.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/game/island.d.ts",
         "../node_modules/@wayward/types/definitions/game/timemanager.d.ts",
@@ -7197,7 +7196,6 @@
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": [
         "../node_modules/@wayward/types/definitions/doodad/doodad.d.ts",
         "../node_modules/@wayward/types/definitions/entity/entity.d.ts",
-        "../node_modules/@wayward/types/definitions/entity/player/player.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/game/island.d.ts",
         "../node_modules/@wayward/types/definitions/game/timemanager.d.ts",
