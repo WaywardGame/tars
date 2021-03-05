@@ -1,10 +1,10 @@
-import { ItemType } from "item/IItem";
-
+import { ItemType } from "game/item/IItem";
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
-
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemByTypes extends AcquireBase {
 

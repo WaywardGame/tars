@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "entity/player/IPlayer", "../../Objective", "../../Utilities/Item", "../../Utilities/Object", "../../Utilities/Player", "../../Utilities/Tile", "../Core/ExecuteAction", "../Interrupt/ReduceWeight", "../Utility/MoveToLand", "./Idle", "./RunAwayFromTarget"], function (require, exports, IAction_1, IPlayer_1, Objective_1, Item_1, Object_1, Player_1, Tile_1, ExecuteAction_1, ReduceWeight_1, MoveToLand_1, Idle_1, RunAwayFromTarget_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/entity/player/IPlayer", "../../Objective", "../../Utilities/Item", "../../Utilities/Object", "../../Utilities/Player", "../../Utilities/Tile", "../Core/ExecuteAction", "../Interrupt/ReduceWeight", "../Utility/MoveToLand", "./Idle", "./RunAwayFromTarget"], function (require, exports, IAction_1, IPlayer_1, Objective_1, Item_1, Object_1, Player_1, Tile_1, ExecuteAction_1, ReduceWeight_1, MoveToLand_1, Idle_1, RunAwayFromTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Rest extends Objective_1.default {

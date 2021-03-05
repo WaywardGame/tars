@@ -1,7 +1,6 @@
-import { DoodadTypeGroup } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-import { IRequirementInfo, RequirementStatus } from "item/IItemManager";
-
+import { DoodadTypeGroup } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IRequirementInfo, RequirementStatus } from "game/item/IItemManager";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -12,6 +11,7 @@ import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import StartFire from "../Other/StartFire";
+
 
 export default class CompleteRequirements extends Objective {
 

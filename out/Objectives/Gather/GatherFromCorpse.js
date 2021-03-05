@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "language/Dictionaries", "language/Translation", "../../Objective", "../../Utilities/Item", "../../Utilities/Object", "../../Utilities/Tile", "../Acquire/Item/AcquireItemForAction", "../Core/ExecuteActionForItem", "../Core/MoveToTarget"], function (require, exports, IAction_1, Dictionaries_1, Translation_1, Objective_1, Item_1, Object_1, Tile_1, AcquireItemForAction_1, ExecuteActionForItem_1, MoveToTarget_1) {
+define(["require", "exports", "game/entity/action/IAction", "language/Dictionaries", "language/Translation", "../../Objective", "../../Utilities/Item", "../../Utilities/Object", "../../Utilities/Tile", "../Acquire/Item/AcquireItemForAction", "../Core/ExecuteActionForItem", "../Core/MoveToTarget"], function (require, exports, IAction_1, Dictionaries_1, Translation_1, Objective_1, Item_1, Object_1, Tile_1, AcquireItemForAction_1, ExecuteActionForItem_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherFromCorpse extends Objective_1.default {

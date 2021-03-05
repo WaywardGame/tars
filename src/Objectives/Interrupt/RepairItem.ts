@@ -1,8 +1,7 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-import { RequirementStatus } from "item/IItemManager";
-import Item from "item/Item";
-
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
+import { RequirementStatus } from "game/item/IItemManager";
+import Item from "game/item/Item";
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -14,6 +13,7 @@ import CopyContextData from "../ContextData/CopyContextData";
 import SetContextData from "../ContextData/SetContextData";
 import ExecuteAction from "../Core/ExecuteAction";
 import CompleteRequirements from "../Utility/CompleteRequirements";
+
 
 export default class RepairItem extends Objective {
 

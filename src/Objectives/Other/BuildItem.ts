@@ -1,13 +1,12 @@
-import Doodad from "doodad/Doodad";
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-import { BiomeType } from "game/IBiome";
-import Item from "item/Item";
-import { TerrainType } from "tile/ITerrain";
+import { BiomeType } from "game/biome/IBiome";
+import Doodad from "game/doodad/Doodad";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import Item from "game/item/Item";
+import { TerrainType } from "game/tile/ITerrain";
+import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -20,8 +19,9 @@ import { getNearestTileLocation } from "../../Utilities/Tile";
 import AnalyzeBase from "../Analyze/AnalyzeBase";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
-
 import UseItem from "./UseItem";
+
+
 
 const recalculateMovements = 40;
 

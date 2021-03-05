@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "entity/IStats", "entity/player/IPlayer", "../../IObjective", "../../Objective", "../../Utilities/Creature", "../Core/ExecuteAction", "../Core/Lambda", "../Core/MoveToTarget", "../Core/Restart", "../Other/RunAwayFromTarget"], function (require, exports, IAction_1, IStats_1, IPlayer_1, IObjective_1, Objective_1, Creature_1, ExecuteAction_1, Lambda_1, MoveToTarget_1, Restart_1, RunAwayFromTarget_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/entity/IStats", "game/entity/player/IPlayer", "../../IObjective", "../../Objective", "../../Utilities/Creature", "../Core/ExecuteAction", "../Core/Lambda", "../Core/MoveToTarget", "../Core/Restart", "../Other/RunAwayFromTarget"], function (require, exports, IAction_1, IStats_1, IPlayer_1, IObjective_1, Objective_1, Creature_1, ExecuteAction_1, Lambda_1, MoveToTarget_1, Restart_1, RunAwayFromTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class DefendAgainstCreature extends Objective_1.default {

@@ -1,8 +1,7 @@
-import { ActionType } from "entity/action/IAction";
-import Creature from "entity/creature/Creature";
-import { IStat, IStatMax, Stat } from "entity/IStats";
-import { getDirectionFromMovement, WeightStatus } from "entity/player/IPlayer";
-
+import { ActionType } from "game/entity/action/IAction";
+import Creature from "game/entity/creature/Creature";
+import { IStat, IStatMax, Stat } from "game/entity/IStats";
+import { getDirectionFromMovement, WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -12,6 +11,7 @@ import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import Restart from "../Core/Restart";
 import RunAwayFromTarget from "../Other/RunAwayFromTarget";
+
 
 export default class DefendAgainstCreature extends Objective {
 

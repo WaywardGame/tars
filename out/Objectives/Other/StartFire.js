@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "item/IItem", "../../IContext", "../../IObjective", "../../Objective", "../Acquire/Item/AcquireItemByGroup", "../Acquire/Item/AcquireItemForAction", "../Core/MoveToTarget", "./UseItem"], function (require, exports, IAction_1, IItem_1, IContext_1, IObjective_1, Objective_1, AcquireItemByGroup_1, AcquireItemForAction_1, MoveToTarget_1, UseItem_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/item/IItem", "../../IContext", "../../IObjective", "../../Objective", "../Acquire/Item/AcquireItemByGroup", "../Acquire/Item/AcquireItemForAction", "../Core/MoveToTarget", "./UseItem"], function (require, exports, IAction_1, IItem_1, IContext_1, IObjective_1, Objective_1, AcquireItemByGroup_1, AcquireItemForAction_1, MoveToTarget_1, UseItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class StartFire extends Objective_1.default {

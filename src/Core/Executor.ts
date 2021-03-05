@@ -1,11 +1,11 @@
-import { WeightStatus } from "entity/player/IPlayer";
-
+import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../Context";
 import { IObjective } from "../IObjective";
 import { log } from "../Utilities/Logger";
-
 import { ExecuteResultType, IPlan } from "./IPlan";
 import planner from "./Planner";
+
+
 
 export enum ExecuteObjectivesResultType {
 	Completed,

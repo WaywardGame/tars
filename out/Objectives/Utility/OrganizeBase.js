@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "../../IObjective", "../../Objective", "../Core/ExecuteAction", "../Core/MoveToTarget"], function (require, exports, IAction_1, IObjective_1, Objective_1, ExecuteAction_1, MoveToTarget_1) {
+define(["require", "exports", "game/entity/action/IAction", "../../IObjective", "../../Objective", "../Core/ExecuteAction", "../Core/MoveToTarget"], function (require, exports, IAction_1, IObjective_1, Objective_1, ExecuteAction_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class OrganizeBase extends Objective_1.default {

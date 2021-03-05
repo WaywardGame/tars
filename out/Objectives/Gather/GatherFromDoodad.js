@@ -1,4 +1,4 @@
-define(["require", "exports", "item/IItem", "language/Dictionaries", "language/Translation", "../../Objective", "../../Utilities/Object", "../../Utilities/Tile", "../Core/ExecuteActionForItem", "../Core/MoveToTarget"], function (require, exports, IItem_1, Dictionaries_1, Translation_1, Objective_1, Object_1, Tile_1, ExecuteActionForItem_1, MoveToTarget_1) {
+define(["require", "exports", "game/item/IItem", "language/Dictionaries", "language/Translation", "../../Objective", "../../Utilities/Object", "../../Utilities/Tile", "../Core/ExecuteActionForItem", "../Core/MoveToTarget"], function (require, exports, IItem_1, Dictionaries_1, Translation_1, Objective_1, Object_1, Tile_1, ExecuteActionForItem_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherFromDoodad extends Objective_1.default {

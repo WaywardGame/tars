@@ -1,6 +1,6 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import actionDescriptions from "entity/action/Actions";
-import { ActionType, IActionDescription } from "entity/action/IAction";
+import ActionExecutor from "game/entity/action/ActionExecutor";
+import actionDescriptions from "game/entity/action/Actions";
+import { ActionType, IActionDescription } from "game/entity/action/IAction";
 import Context from "../Context";
 
 const pendingActions: {

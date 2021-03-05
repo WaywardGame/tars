@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "item/Items", "../../../IContext", "../../../Objective", "../../../Objectives/ContextData/SetContextData", "../../../Objectives/Other/UseItem", "../../../Utilities/Item", "./AcquireItem", "./AcquireItemForAction", "./AcquireItemWithRecipe"], function (require, exports, IAction_1, Items_1, IContext_1, Objective_1, SetContextData_1, UseItem_1, Item_1, AcquireItem_1, AcquireItemForAction_1, AcquireItemWithRecipe_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/item/Items", "../../../IContext", "../../../Objective", "../../../Objectives/ContextData/SetContextData", "../../../Objectives/Other/UseItem", "../../../Utilities/Item", "./AcquireItem", "./AcquireItemForAction", "./AcquireItemWithRecipe"], function (require, exports, IAction_1, Items_1, IContext_1, Objective_1, SetContextData_1, UseItem_1, Item_1, AcquireItem_1, AcquireItemForAction_1, AcquireItemWithRecipe_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireFood extends Objective_1.default {

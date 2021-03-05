@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/creature/ICreature", "entity/IHuman", "item/IItem"], function (require, exports, ICreature_1, IHuman_1, IItem_1) {
+define(["require", "exports", "game/entity/creature/ICreature", "game/entity/IHuman", "game/item/IItem"], function (require, exports, ICreature_1, IHuman_1, IItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.isScaredOfCreatureType = exports.isScaredOfCreature = void 0;

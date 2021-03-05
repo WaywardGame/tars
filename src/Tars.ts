@@ -1,20 +1,21 @@
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
-import { ActionType, IActionApi, IActionDescription } from "entity/action/IAction";
-import Creature from "entity/creature/Creature";
-import { DamageType } from "entity/IEntity";
-import { EquipType } from "entity/IHuman";
-import { IStat, IStatMax, Stat } from "entity/IStats";
-import { MessageType, Source } from "entity/player/IMessageManager";
-import { PlayerState, WeightStatus } from "entity/player/IPlayer";
-import { INote } from "entity/player/note/NoteManager";
-import Player from "entity/player/Player";
 import { EventBus } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { ActionType, IActionApi, IActionDescription } from "game/entity/action/IAction";
+import Creature from "game/entity/creature/Creature";
+import { DamageType } from "game/entity/IEntity";
+import { EquipType } from "game/entity/IHuman";
+import { IStat, IStatMax, Stat } from "game/entity/IStats";
+import { MessageType, Source } from "game/entity/player/IMessageManager";
+import { PlayerState, WeightStatus } from "game/entity/player/IPlayer";
+import { INote } from "game/entity/player/note/NoteManager";
+import Player from "game/entity/player/Player";
 import { TileUpdateType, TurnMode } from "game/IGame";
+import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
+import Item from "game/item/Item";
+import { ITile } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
-import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
-import Item from "item/Item";
 import { Dictionary } from "language/Dictionaries";
 import Interrupt from "language/dictionary/Interrupt";
 import InterruptChoice from "language/dictionary/InterruptChoice";
@@ -23,23 +24,21 @@ import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import Bind from "newui/input/Bind";
-import Bindable from "newui/input/Bindable";
-import { IInput } from "newui/input/IInput";
-import { NewUi } from "newui/NewUi";
-import { DialogId } from "newui/screen/screens/game/Dialogs";
-import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/IMenuBarButton";
-import { MenuBarButtonGroup } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import { gameScreen } from "newui/screen/screens/GameScreen";
-import { InterruptOptions } from "newui/util/IInterrupt";
-import { ITile } from "tile/ITerrain";
-import { sleep } from "utilities/Async";
+import Bind from "ui/input/Bind";
+import Bindable from "ui/input/Bindable";
+import { IInput } from "ui/input/IInput";
+import { DialogId } from "ui/screen/screens/game/Dialogs";
+import { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
+import { MenuBarButtonGroup } from "ui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
+import { gameScreen } from "ui/screen/screens/GameScreen";
+import { Ui } from "ui/Ui";
+import { InterruptOptions } from "ui/util/IInterrupt";
+import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
+import { sleep } from "utilities/promise/Async";
 import Context from "./Context";
 import ContextState from "./ContextState";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
@@ -94,6 +93,7 @@ import { log, logSourceName, preConsoleCallback } from "./Utilities/Logger";
 import * as movementUtilities from "./Utilities/Movement";
 import * as objectUtilities from "./Utilities/Object";
 import * as tileUtilities from "./Utilities/Tile";
+
 
 const tickSpeed = 333;
 
@@ -311,7 +311,7 @@ export default class Tars extends Mod {
 	}
 
 	@EventHandler(EventBus.Ui, "interrupt")
-	public onInterrupt(host: NewUi, options: Partial<InterruptOptions>, interrupt?: Interrupt): string | boolean | void | InterruptChoice | undefined {
+	public onInterrupt(host: Ui, options: Partial<InterruptOptions>, interrupt?: Interrupt): string | boolean | void | InterruptChoice | undefined {
 		if (this.isEnabled() && (interrupt === Interrupt.GameDangerousStep || interrupt === Interrupt.GameTravelConfirmation)) {
 			log.info(`Returning true for interrupt ${Interrupt[interrupt]}`);
 			return InterruptChoice.Yes;
@@ -1423,29 +1423,29 @@ export default class Tars extends Mod {
 
 			if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
 				if (leftHandDamageTypeMatches !== context.player.options.leftHand) {
-					ui.changeEquipmentOption("leftHand");
+					oldui.changeEquipmentOption("leftHand");
 				}
 
 				if (rightHandDamageTypeMatches !== context.player.options.rightHand) {
-					ui.changeEquipmentOption("rightHand");
+					oldui.changeEquipmentOption("rightHand");
 				}
 
 			} else if (leftHandEquipped || rightHandEquipped) {
 				if (leftHandEquipped && !context.player.options.leftHand) {
-					ui.changeEquipmentOption("leftHand");
+					oldui.changeEquipmentOption("leftHand");
 				}
 
 				if (rightHandEquipped && !context.player.options.rightHand) {
-					ui.changeEquipmentOption("rightHand");
+					oldui.changeEquipmentOption("rightHand");
 				}
 
 			} else {
 				if (!context.player.options.leftHand) {
-					ui.changeEquipmentOption("leftHand");
+					oldui.changeEquipmentOption("leftHand");
 				}
 
 				if (!context.player.options.rightHand) {
-					ui.changeEquipmentOption("rightHand");
+					oldui.changeEquipmentOption("rightHand");
 				}
 			}
 
@@ -1453,21 +1453,21 @@ export default class Tars extends Mod {
 			if (!leftHandEquipped && !rightHandEquipped) {
 				// if we have nothing equipped in both hands, make sure the left hand is enabled
 				if (!context.player.options.leftHand) {
-					ui.changeEquipmentOption("leftHand");
+					oldui.changeEquipmentOption("leftHand");
 				}
 
 			} else if (leftHandEquipped !== context.player.options.leftHand) {
-				ui.changeEquipmentOption("leftHand");
+				oldui.changeEquipmentOption("leftHand");
 			}
 
 			if (leftHandEquipped) {
 				// if we have the left hand equipped, disable right hand
 				if (context.player.options.rightHand) {
-					ui.changeEquipmentOption("rightHand");
+					oldui.changeEquipmentOption("rightHand");
 				}
 
 			} else if (rightHandEquipped !== context.player.options.rightHand) {
-				ui.changeEquipmentOption("rightHand");
+				oldui.changeEquipmentOption("rightHand");
 			}
 		}
 	}

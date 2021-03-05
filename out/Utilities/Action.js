@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/ActionExecutor", "entity/action/Actions"], function (require, exports, ActionExecutor_1, Actions_1) {
+define(["require", "exports", "game/entity/action/ActionExecutor", "game/entity/action/Actions"], function (require, exports, ActionExecutor_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.executeAction = exports.postExecuteAction = exports.waitForAction = void 0;

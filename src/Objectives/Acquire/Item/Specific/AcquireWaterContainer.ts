@@ -1,6 +1,5 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
 import Context from "../../../../Context";
 import { ContextDataType } from "../../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../../IObjective";
@@ -8,6 +7,7 @@ import Objective from "../../../../Objective";
 import SetContextData from "../../../ContextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../../Core/ExecuteActionForItem";
 import AcquireItem from "../AcquireItem";
+
 
 export default class AcquireWaterContainer extends Objective {
 

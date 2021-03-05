@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "entity/IStats", "tile/Terrains", "utilities/math/Vector2", "utilities/TileHelpers", "../../IContext", "../../IObjective", "../../Objective", "../../Utilities/Logger", "../../Utilities/Movement", "../Other/Rest", "../Other/UseItem"], function (require, exports, IAction_1, IStats_1, Terrains_1, Vector2_1, TileHelpers_1, IContext_1, IObjective_1, Objective_1, Logger_1, Movement_1, Rest_1, UseItem_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/entity/IStats", "game/tile/Terrains", "utilities/game/TileHelpers", "utilities/math/Vector2", "../../IContext", "../../IObjective", "../../Objective", "../../Utilities/Logger", "../../Utilities/Movement", "../Other/Rest", "../Other/UseItem"], function (require, exports, IAction_1, IStats_1, Terrains_1, TileHelpers_1, Vector2_1, IContext_1, IObjective_1, Objective_1, Logger_1, Movement_1, Rest_1, UseItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class MoveToTarget extends Objective_1.default {

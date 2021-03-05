@@ -1,7 +1,6 @@
-import Doodad from "doodad/Doodad";
-import { ActionType } from "entity/action/IAction";
-import { ItemTypeGroup } from "item/IItem";
-
+import Doodad from "game/doodad/Doodad";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemTypeGroup } from "game/item/IItem";
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -9,8 +8,9 @@ import Objective from "../../Objective";
 import AcquireItemByGroup from "../Acquire/Item/AcquireItemByGroup";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import MoveToTarget from "../Core/MoveToTarget";
-
 import UseItem from "./UseItem";
+
+
 
 export default class StartFire extends Objective {
 

@@ -1,7 +1,6 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
 import { IVector3 } from "utilities/math/IVector";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -10,6 +9,7 @@ import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import ReserveItems from "../Core/ReserveItems";
+
 
 export default class GatherFromGround extends Objective {
 

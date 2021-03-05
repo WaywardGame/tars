@@ -1,14 +1,14 @@
-import { ActionType } from "entity/action/IAction";
-import Corpse from "entity/creature/corpse/Corpse";
+import { ActionType } from "game/entity/action/IAction";
+import Corpse from "game/entity/creature/corpse/Corpse";
 import { Dictionary } from "language/Dictionaries";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { getInventoryItemsWithUse } from "../../Utilities/Item";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
+
 
 export default class CarveCorpse extends Objective {
 

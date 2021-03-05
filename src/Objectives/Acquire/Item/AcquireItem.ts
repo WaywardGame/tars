@@ -1,16 +1,15 @@
-import Doodads from "doodad/Doodads";
-import { DoodadType, GrowingStage } from "doodad/IDoodad";
-import Corpses from "entity/creature/corpse/Corpses";
-import { CreatureType } from "entity/creature/ICreature";
-import { ItemType } from "item/IItem";
-import { itemDescriptions } from "item/Items";
+import Doodads from "game/doodad/Doodads";
+import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
+import Corpses from "game/entity/creature/corpse/Corpses";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { ItemType } from "game/item/IItem";
+import { itemDescriptions } from "game/item/Items";
+import { TerrainType } from "game/tile/ITerrain";
+import TerrainResources from "game/tile/TerrainResources";
+import terrainDescriptions from "game/tile/Terrains";
 import { Dictionary } from "language/Dictionaries";
 import Translation from "language/Translation";
-import { TerrainType } from "tile/ITerrain";
-import TerrainResources from "tile/TerrainResources";
-import terrainDescriptions from "tile/Terrains";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { CreatureSearch, DoodadSearchMap, ITerrainSearch } from "../../../ITars";
@@ -20,10 +19,11 @@ import GatherFromCreature from "../../Gather/GatherFromCreature";
 import GatherFromDoodad from "../../Gather/GatherFromDoodad";
 import GatherFromGround from "../../Gather/GatherFromGround";
 import GatherFromTerrain from "../../Gather/GatherFromTerrain";
-
 import AcquireBase from "./AcquireBase";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+
+
 
 export default class AcquireItem extends AcquireBase {
 

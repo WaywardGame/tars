@@ -1,19 +1,19 @@
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-import Creature from "entity/creature/Creature";
-import { DamageType } from "entity/IEntity";
-import { EquipType } from "entity/IHuman";
-import { IStatMax, Stat } from "entity/IStats";
-import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "item/IItem";
-import Item from "item/Item";
-import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
-import Items, { itemDescriptions } from "item/Items";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import Creature from "game/entity/creature/Creature";
+import { DamageType } from "game/entity/IEntity";
+import { EquipType } from "game/entity/IHuman";
+import { IStatMax, Stat } from "game/entity/IStats";
+import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
+import Item from "game/item/Item";
+import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
+import Items, { itemDescriptions } from "game/item/Items";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../Context";
 import { IInventoryItems, inventoryItemInfo } from "../ITars";
-
 import { getDoodadTypes } from "./Doodad";
+
+
 
 // allow processing with inventory items assuming they wont be consumed
 export function processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean): ItemRecipeRequirementChecker {

@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/actions/ProtectItem", "../../IObjective", "../../ITars", "../../Objective", "../../Utilities/Item"], function (require, exports, ProtectItem_1, IObjective_1, ITars_1, Objective_1, Item_1) {
+define(["require", "exports", "game/entity/action/actions/ProtectItem", "../../IObjective", "../../ITars", "../../Objective", "../../Utilities/Item"], function (require, exports, ProtectItem_1, IObjective_1, ITars_1, Objective_1, Item_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AnalyzeInventory extends Objective_1.default {

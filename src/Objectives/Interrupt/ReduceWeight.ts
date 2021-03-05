@@ -1,9 +1,9 @@
-import { WeightStatus } from "entity/player/IPlayer";
-
+import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import OrganizeInventory, { IOriganizeInventoryOptions } from "../Utility/OrganizeInventory";
+
 
 export default class ReduceWeight extends Objective {
 

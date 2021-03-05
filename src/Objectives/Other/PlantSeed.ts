@@ -1,9 +1,9 @@
-import doodadDescriptions from "doodad/Doodads";
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-import Item from "item/Item";
-import { ITileContainer, TerrainType } from "tile/ITerrain";
-import TileHelpers from "utilities/TileHelpers";
+import doodadDescriptions from "game/doodad/Doodads";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
+import Item from "game/item/Item";
+import { ITileContainer, TerrainType } from "game/tile/ITerrain";
+import TileHelpers from "utilities/game/TileHelpers";
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";

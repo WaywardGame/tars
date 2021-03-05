@@ -1,13 +1,13 @@
-import Doodad from "doodad/Doodad";
-import Corpse from "entity/creature/corpse/Corpse";
-import Creature from "entity/creature/Creature";
-import { MoveType } from "entity/IEntity";
+import Doodad from "game/doodad/Doodad";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import Creature from "game/entity/creature/Creature";
+import { MoveType } from "game/entity/IEntity";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-
 import Context from "../Context";
-
 import { isFreeOfOtherPlayers } from "./Tile";
+
+
 
 const creatureRadius = 5;
 

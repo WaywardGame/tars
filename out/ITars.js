@@ -1,4 +1,4 @@
-define(["require", "exports", "doodad/IDoodad", "entity/action/IAction", "entity/IHuman", "item/IItem", "./Utilities/Item"], function (require, exports, IDoodad_1, IAction_1, IHuman_1, IItem_1, Item_1) {
+define(["require", "exports", "game/doodad/IDoodad", "game/entity/action/IAction", "game/entity/IHuman", "game/item/IItem", "./Utilities/Item"], function (require, exports, IDoodad_1, IAction_1, IHuman_1, IItem_1, Item_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.TarsTranslation = exports.inventoryItemInfo = exports.InventoryItemFlag = exports.baseInfo = exports.gardenMaxTilesChecked = exports.defaultMaxTilesChecked = exports.TARS_ID = void 0;

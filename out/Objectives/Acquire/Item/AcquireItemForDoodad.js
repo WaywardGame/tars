@@ -1,4 +1,4 @@
-define(["require", "exports", "doodad/IDoodad", "entity/action/IAction", "item/IItem", "item/Items", "language/Dictionaries", "language/Translation", "utilities/enum/Enums", "../../../Objective", "../../../Utilities/Doodad", "./AcquireItem"], function (require, exports, IDoodad_1, IAction_1, IItem_1, Items_1, Dictionaries_1, Translation_1, Enums_1, Objective_1, Doodad_1, AcquireItem_1) {
+define(["require", "exports", "game/doodad/IDoodad", "game/entity/action/IAction", "game/item/IItem", "game/item/Items", "language/Dictionaries", "language/Translation", "utilities/enum/Enums", "../../../Objective", "../../../Utilities/Doodad", "./AcquireItem"], function (require, exports, IDoodad_1, IAction_1, IItem_1, Items_1, Dictionaries_1, Translation_1, Enums_1, Objective_1, Doodad_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireItemForDoodad extends Objective_1.default {

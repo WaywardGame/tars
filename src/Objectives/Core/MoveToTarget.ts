@@ -1,11 +1,10 @@
 
-import { ActionType } from "entity/action/IAction";
-import Creature from "entity/creature/Creature";
-import { IStatMax, Stat } from "entity/IStats";
-import terrainDescriptions from "tile/Terrains";
+import { ActionType } from "game/entity/action/IAction";
+import Creature from "game/entity/creature/Creature";
+import { IStatMax, Stat } from "game/entity/IStats";
+import terrainDescriptions from "game/tile/Terrains";
+import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -14,6 +13,7 @@ import { log } from "../../Utilities/Logger";
 import { getMovementPath, move, MoveResult } from "../../Utilities/Movement";
 import Rest from "../Other/Rest";
 import UseItem from "../Other/UseItem";
+
 // import MoveToZ from "../Utility/MoveToZ";
 
 export interface IMoveToTargetOptions {

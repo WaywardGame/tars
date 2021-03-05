@@ -1,18 +1,18 @@
-import Doodad from "doodad/Doodad";
-import { DoodadType, DoodadTypeGroup, GrowingStage } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-import { CreatureType } from "entity/creature/ICreature";
-import { EquipType } from "entity/IHuman";
 import { Events } from "event/EventEmitter";
-import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
-import Item from "item/Item";
+import Doodad from "game/doodad/Doodad";
+import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { EquipType } from "game/entity/IHuman";
+import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
+import Item from "game/item/Item";
+import { ITile, TerrainType } from "game/tile/ITerrain";
+import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import { ITile, TerrainType } from "tile/ITerrain";
-import { ITerrainLoot } from "tile/TerrainResources";
 import { IVector3 } from "utilities/math/IVector";
-
 import { foodItemTypes } from "./Utilities/Item";
+
 
 export const TARS_ID = "TARS";
 

@@ -1,15 +1,15 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-import { itemDescriptions as Items } from "item/Items";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
+import { itemDescriptions as Items } from "game/item/Items";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemForAction extends Objective {
 

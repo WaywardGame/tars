@@ -1,12 +1,12 @@
-import Item from "item/Item";
-
+import Item from "game/item/Item";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-
 import GatherWaterFromStill from "./GatherWaterFromStill";
 import GatherWaterFromTerrain from "./GatherWaterFromTerrain";
 import GatherWaterFromWell from "./GatherWaterFromWell";
+
+
 
 export interface IGatherWaterOptions {
 	disallowTerrain?: boolean;

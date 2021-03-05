@@ -1,10 +1,10 @@
-import { ActionType } from "entity/action/IAction";
-import { DamageType } from "entity/IEntity";
+import { ActionType } from "game/entity/action/IAction";
+import { DamageType } from "game/entity/IEntity";
 import { ILog, ILogLine } from "utilities/Log";
-
 import Context from "./Context";
 import ContextState from "./ContextState";
 import { IExecutionTree } from "./Core/IPlan";
+
 
 export enum ObjectiveResult {
 	// Objective was completed

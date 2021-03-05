@@ -1,4 +1,4 @@
-define(["require", "exports", "item/IItem", "item/Items", "utilities/enum/Enums", "../../IObjective", "../../ITars", "../../Objective", "../Acquire/Item/AcquireItem"], function (require, exports, IItem_1, Items_1, Enums_1, IObjective_1, ITars_1, Objective_1, AcquireItem_1) {
+define(["require", "exports", "game/item/IItem", "game/item/Items", "utilities/enum/Enums", "../../IObjective", "../../ITars", "../../Objective", "../Acquire/Item/AcquireItem"], function (require, exports, IItem_1, Items_1, Enums_1, IObjective_1, ITars_1, Objective_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class UpgradeInventoryItem extends Objective_1.default {

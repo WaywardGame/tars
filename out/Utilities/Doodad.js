@@ -1,4 +1,4 @@
-define(["require", "exports", "doodad/Doodads", "doodad/IDoodad", "utilities/enum/Enums"], function (require, exports, Doodads_1, IDoodad_1, Enums_1) {
+define(["require", "exports", "game/doodad/Doodads", "game/doodad/IDoodad", "utilities/enum/Enums"], function (require, exports, Doodads_1, IDoodad_1, Enums_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.isWaterStillDrinkable = exports.isWaterStillDesalinating = exports.getDoodadTypes = void 0;

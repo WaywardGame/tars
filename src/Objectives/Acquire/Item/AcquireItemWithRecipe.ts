@@ -1,11 +1,10 @@
-import { ActionType } from "entity/action/IAction";
-import { IRecipe, ItemType, ItemTypeGroup } from "item/IItem";
-import { IRequirementInfo, RequirementStatus, WeightType } from "item/IItemManager";
-import Item from "item/Item";
-import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
+import { ActionType } from "game/entity/action/IAction";
+import { IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
+import { IRequirementInfo, RequirementStatus, WeightType } from "game/item/IItemManager";
+import Item from "game/item/Item";
+import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import { Dictionary } from "language/Dictionaries";
 import Translation from "language/Translation";
-
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
@@ -17,10 +16,11 @@ import MoveToTarget from "../../Core/MoveToTarget";
 import ReserveItems from "../../Core/ReserveItems";
 import CompleteRequirements from "../../Utility/CompleteRequirements";
 import MoveToLand from "../../Utility/MoveToLand";
-
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+
+
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 

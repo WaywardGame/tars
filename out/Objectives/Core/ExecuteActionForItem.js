@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "entity/IEntity", "item/IItem", "language/Dictionaries", "language/Translation", "tile/Terrains", "utilities/TileHelpers", "../../IObjective", "../../Objective", "../../Utilities/Action", "../../Utilities/Item", "../../Utilities/Tile"], function (require, exports, IAction_1, IEntity_1, IItem_1, Dictionaries_1, Translation_1, Terrains_1, TileHelpers_1, IObjective_1, Objective_1, Action_1, Item_1, Tile_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/entity/IEntity", "game/item/IItem", "game/tile/Terrains", "language/Dictionaries", "language/Translation", "utilities/game/TileHelpers", "../../IObjective", "../../Objective", "../../Utilities/Action", "../../Utilities/Item", "../../Utilities/Tile"], function (require, exports, IAction_1, IEntity_1, IItem_1, Terrains_1, Dictionaries_1, Translation_1, TileHelpers_1, IObjective_1, Objective_1, Action_1, Item_1, Tile_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ExecuteActionType = void 0;

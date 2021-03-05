@@ -1,4 +1,4 @@
-define(["require", "exports", "doodad/IDoodad", "utilities/math/Vector2", "../../../ITars", "../../../Objective", "../../Other/StartFire", "./AcquireBuildMoveToDoodad"], function (require, exports, IDoodad_1, Vector2_1, ITars_1, Objective_1, StartFire_1, AcquireBuildMoveToDoodad_1) {
+define(["require", "exports", "game/doodad/IDoodad", "utilities/math/Vector2", "../../../ITars", "../../../Objective", "../../Other/StartFire", "./AcquireBuildMoveToDoodad"], function (require, exports, IDoodad_1, Vector2_1, ITars_1, Objective_1, StartFire_1, AcquireBuildMoveToDoodad_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireBuildMoveToFire extends Objective_1.default {

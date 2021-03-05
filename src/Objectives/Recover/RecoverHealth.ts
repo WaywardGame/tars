@@ -1,7 +1,6 @@
-import { ActionType } from "entity/action/IAction";
-import { IStat, Stat } from "entity/IStats";
-import { WeightStatus } from "entity/player/IPlayer";
-
+import { ActionType } from "game/entity/action/IAction";
+import { IStat, Stat } from "game/entity/IStats";
+import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -9,6 +8,7 @@ import { getInventoryItemsWithUse } from "../../Utilities/Item";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import UseItem from "../Other/UseItem";
 import OrganizeInventory from "../Utility/OrganizeInventory";
+
 
 export default class RecoverHealth extends Objective {
 

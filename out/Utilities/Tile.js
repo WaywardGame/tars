@@ -1,4 +1,4 @@
-define(["require", "exports", "tile/Terrains", "utilities/TileHelpers", "../Context", "../Navigation/Navigation"], function (require, exports, Terrains_1, TileHelpers_1, Context_1, Navigation_1) {
+define(["require", "exports", "game/tile/Terrains", "utilities/game/TileHelpers", "../Context", "../Navigation/Navigation"], function (require, exports, Terrains_1, TileHelpers_1, Context_1, Navigation_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hasItems = exports.hasCorpses = exports.canCarveCorpse = exports.canDig = exports.canGather = exports.isFreeOfOtherPlayers = exports.isOpenTile = exports.isOverWater = exports.getNearestTileLocation = exports.resetNearestTileLocationCache = void 0;

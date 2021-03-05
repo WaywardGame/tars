@@ -1,12 +1,12 @@
-import { ActionType } from "entity/action/IAction";
-import { EquipType } from "entity/IHuman";
-import Item from "item/Item";
-
+import { ActionType } from "game/entity/action/IAction";
+import { EquipType } from "game/entity/IHuman";
+import Item from "game/item/Item";
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
+
 
 export default class Equip extends Objective {
 

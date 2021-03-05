@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "utilities/math/Vector2", "utilities/TileHelpers", "../..//IContext", "../../IObjective", "../../ITars", "../../Objective", "../../Utilities/Base", "../../Utilities/Item", "../../Utilities/Tile", "../Core/ExecuteAction", "../Core/MoveToTarget"], function (require, exports, IAction_1, Vector2_1, TileHelpers_1, IContext_1, IObjective_1, ITars_1, Objective_1, Base_1, Item_1, Tile_1, ExecuteAction_1, MoveToTarget_1) {
+define(["require", "exports", "game/entity/action/IAction", "utilities/game/TileHelpers", "utilities/math/Vector2", "../..//IContext", "../../IObjective", "../../ITars", "../../Objective", "../../Utilities/Base", "../../Utilities/Item", "../../Utilities/Tile", "../Core/ExecuteAction", "../Core/MoveToTarget"], function (require, exports, IAction_1, TileHelpers_1, Vector2_1, IContext_1, IObjective_1, ITars_1, Objective_1, Base_1, Item_1, Tile_1, ExecuteAction_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const maxChestDistance = 128;

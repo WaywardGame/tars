@@ -1,8 +1,7 @@
-import Doodad from "doodad/Doodad";
-import { ActionType } from "entity/action/IAction";
-import { IStat, Stat } from "entity/IStats";
-import { ItemTypeGroup } from "item/IItem";
-
+import Doodad from "game/doodad/Doodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IStat, Stat } from "game/entity/IStats";
+import { ItemTypeGroup } from "game/item/IItem";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -15,10 +14,11 @@ import MoveToTarget from "../Core/MoveToTarget";
 import Restart from "../Core/Restart";
 import GatherWater from "../Gather/GatherWater";
 import RepairItem from "../Interrupt/RepairItem";
-
 import StartFire from "./StartFire";
 import StokeFire from "./StokeFire";
 import UseItem from "./UseItem";
+
+
 
 /**
  * It will ensure the water still is desalinating as long as we're near the base

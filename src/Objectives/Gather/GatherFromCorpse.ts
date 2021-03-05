@@ -1,8 +1,7 @@
-import { ActionType } from "entity/action/IAction";
-import Corpse from "entity/creature/corpse/Corpse";
+import { ActionType } from "game/entity/action/IAction";
+import Corpse from "game/entity/creature/corpse/Corpse";
 import { Dictionary } from "language/Dictionaries";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
@@ -13,6 +12,7 @@ import { canCarveCorpse } from "../../Utilities/Tile";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
 import MoveToTarget from "../Core/MoveToTarget";
+
 
 export default class GatherFromCorpse extends Objective {
 

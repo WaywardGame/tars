@@ -1,4 +1,4 @@
-define(["require", "exports", "tile/Terrains", "utilities/TileHelpers", "../../IObjective", "../../ITars", "../../Navigation/Navigation", "../../Objective", "../../Utilities/Tile", "../Core/MoveToTarget"], function (require, exports, Terrains_1, TileHelpers_1, IObjective_1, ITars_1, Navigation_1, Objective_1, Tile_1, MoveToTarget_1) {
+define(["require", "exports", "game/tile/Terrains", "utilities/game/TileHelpers", "../../IObjective", "../../ITars", "../../Navigation/Navigation", "../../Objective", "../../Utilities/Tile", "../Core/MoveToTarget"], function (require, exports, Terrains_1, TileHelpers_1, IObjective_1, ITars_1, Navigation_1, Objective_1, Tile_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class MoveToLand extends Objective_1.default {

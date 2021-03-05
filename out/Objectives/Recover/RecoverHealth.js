@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "entity/IStats", "entity/player/IPlayer", "../../Objective", "../../Utilities/Item", "../Acquire/Item/AcquireItemForAction", "../Other/UseItem", "../Utility/OrganizeInventory"], function (require, exports, IAction_1, IStats_1, IPlayer_1, Objective_1, Item_1, AcquireItemForAction_1, UseItem_1, OrganizeInventory_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/entity/IStats", "game/entity/player/IPlayer", "../../Objective", "../../Utilities/Item", "../Acquire/Item/AcquireItemForAction", "../Other/UseItem", "../Utility/OrganizeInventory"], function (require, exports, IAction_1, IStats_1, IPlayer_1, Objective_1, Item_1, AcquireItemForAction_1, UseItem_1, OrganizeInventory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class RecoverHealth extends Objective_1.default {

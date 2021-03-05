@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "item/IItem", "../../IContext", "../../Objective", "../ContextData/SetContextData", "../Core/ExecuteAction", "../Core/MoveToTarget", "../Core/ReserveItems"], function (require, exports, IAction_1, IItem_1, IContext_1, Objective_1, SetContextData_1, ExecuteAction_1, MoveToTarget_1, ReserveItems_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/item/IItem", "../../IContext", "../../Objective", "../ContextData/SetContextData", "../Core/ExecuteAction", "../Core/MoveToTarget", "../Core/ReserveItems"], function (require, exports, IAction_1, IItem_1, IContext_1, Objective_1, SetContextData_1, ExecuteAction_1, MoveToTarget_1, ReserveItems_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherFromChest extends Objective_1.default {

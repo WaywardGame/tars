@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/IEntity", "utilities/math/Vector2", "./Tile"], function (require, exports, IEntity_1, Vector2_1, Tile_1) {
+define(["require", "exports", "game/entity/IEntity", "utilities/math/Vector2", "./Tile"], function (require, exports, IEntity_1, Vector2_1, Tile_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getNearbyCreature = exports.findCarvableCorpses = exports.findCreatures = exports.findDoodads = exports.findDoodad = exports.findObject = exports.findObjects = exports.getSortedObjects = exports.resetCachedObjects = exports.FindObjectType = void 0;

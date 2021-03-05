@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "language/Dictionaries", "language/Translation", "../../IObjective", "../../Objective", "../../Utilities/Action"], function (require, exports, IAction_1, Dictionaries_1, Translation_1, IObjective_1, Objective_1, Action_1) {
+define(["require", "exports", "game/entity/action/IAction", "language/Dictionaries", "language/Translation", "../../IObjective", "../../Objective", "../../Utilities/Action"], function (require, exports, IAction_1, Dictionaries_1, Translation_1, IObjective_1, Objective_1, Action_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ExecuteAction extends Objective_1.default {

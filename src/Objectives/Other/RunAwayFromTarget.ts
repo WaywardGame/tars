@@ -1,16 +1,16 @@
-import { ActionType } from "entity/action/IAction";
-import { Stat } from "entity/IStats";
-import { getDirectionFromMovement } from "entity/player/IPlayer";
-import terrainDescriptions from "tile/Terrains";
+import { ActionType } from "game/entity/action/IAction";
+import { Stat } from "game/entity/IStats";
+import { getDirectionFromMovement } from "game/entity/player/IPlayer";
+import terrainDescriptions from "game/tile/Terrains";
+import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Navigation from "../../Navigation/Navigation";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
+
 
 export default class RunAwayFromTarget extends Objective {
 

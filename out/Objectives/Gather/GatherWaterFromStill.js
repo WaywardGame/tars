@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "../../IObjective", "../../Objective", "../../Utilities/Doodad", "../Core/ExecuteAction", "../Core/MoveToTarget", "../Other/Idle", "../Other/StartWaterStillDesalination"], function (require, exports, IAction_1, IObjective_1, Objective_1, Doodad_1, ExecuteAction_1, MoveToTarget_1, Idle_1, StartWaterStillDesalination_1) {
+define(["require", "exports", "game/entity/action/IAction", "../../IObjective", "../../Objective", "../../Utilities/Doodad", "../Core/ExecuteAction", "../Core/MoveToTarget", "../Other/Idle", "../Other/StartWaterStillDesalination"], function (require, exports, IAction_1, IObjective_1, Objective_1, Doodad_1, ExecuteAction_1, MoveToTarget_1, Idle_1, StartWaterStillDesalination_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherWaterFromStill extends Objective_1.default {

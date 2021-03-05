@@ -1,13 +1,13 @@
-import { ActionType } from "entity/action/IAction";
-import Item from "item/Item";
+import { ActionType } from "game/entity/action/IAction";
+import Item from "game/item/Item";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
-
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
+
 
 export default class UseItem extends Objective {
 

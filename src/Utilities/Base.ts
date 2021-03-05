@@ -1,16 +1,16 @@
-import Doodad from "doodad/Doodad";
+import Doodad from "game/doodad/Doodad";
+import { IContainer } from "game/item/IItem";
+import { ITile, TerrainType } from "game/tile/ITerrain";
+import Terrains from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
-import { IContainer } from "item/IItem";
-import { ITile, TerrainType } from "tile/ITerrain";
-import Terrains from "tile/Terrains";
+import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../Context";
 import { baseInfo, BaseInfoKey } from "../ITars";
-
 import { hasCorpses, isOpenTile } from "./Tile";
+
+
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);

@@ -1,4 +1,4 @@
-define(["require", "exports", "game/WorldZ", "tile/ITerrain", "../../IContext", "../../IObjective", "../../Objective", "../../Utilities/Tile", "../ContextData/SetContextData", "../Core/MoveToTarget"], function (require, exports, WorldZ_1, ITerrain_1, IContext_1, IObjective_1, Objective_1, Tile_1, SetContextData_1, MoveToTarget_1) {
+define(["require", "exports", "game/tile/ITerrain", "game/WorldZ", "../../IContext", "../../IObjective", "../../Objective", "../../Utilities/Tile", "../ContextData/SetContextData", "../Core/MoveToTarget"], function (require, exports, ITerrain_1, WorldZ_1, IContext_1, IObjective_1, Objective_1, Tile_1, SetContextData_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class MoveToZ extends Objective_1.default {

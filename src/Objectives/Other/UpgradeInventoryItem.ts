@@ -1,13 +1,13 @@
 
-import { ItemType } from "item/IItem";
-import itemDescriptions from "item/Items";
+import { ItemType } from "game/item/IItem";
+import itemDescriptions from "game/item/Items";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { IInventoryItems, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
 import AcquireItem from "../Acquire/Item/AcquireItem";
+
 
 export default class UpgradeInventoryItem extends Objective {
 

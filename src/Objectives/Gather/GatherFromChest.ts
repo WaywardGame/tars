@@ -1,7 +1,6 @@
-import Doodad from "doodad/Doodad";
-import { ActionType } from "entity/action/IAction";
-import { IContainer, ItemType } from "item/IItem";
-
+import Doodad from "game/doodad/Doodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IContainer, ItemType } from "game/item/IItem";
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult } from "../../IObjective";
@@ -10,6 +9,7 @@ import SetContextData from "../ContextData/SetContextData";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
 import ReserveItems from "../Core/ReserveItems";
+
 
 export default class GatherFromChest extends Objective {
 

@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/IAction", "entity/IStats", "entity/player/IPlayer", "tile/Terrains", "utilities/math/Direction", "utilities/math/Vector2", "utilities/TileHelpers", "../../Navigation/Navigation", "../../Objective", "../Core/ExecuteAction"], function (require, exports, IAction_1, IStats_1, IPlayer_1, Terrains_1, Direction_1, Vector2_1, TileHelpers_1, Navigation_1, Objective_1, ExecuteAction_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/entity/IStats", "game/entity/player/IPlayer", "game/tile/Terrains", "utilities/game/TileHelpers", "utilities/math/Direction", "utilities/math/Vector2", "../../Navigation/Navigation", "../../Objective", "../Core/ExecuteAction"], function (require, exports, IAction_1, IStats_1, IPlayer_1, Terrains_1, TileHelpers_1, Direction_1, Vector2_1, Navigation_1, Objective_1, ExecuteAction_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class RunAwayFromTarget extends Objective_1.default {
