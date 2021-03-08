@@ -387,8 +387,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/item.d.ts": {
-        "version": "7f5cdaf8dab60870de00a7aa0fb046fd25268c8525e6a2ed6e5bf34bcba4bf63",
-        "signature": "7f5cdaf8dab60870de00a7aa0fb046fd25268c8525e6a2ed6e5bf34bcba4bf63",
+        "version": "2bb5774c8290ad88c56f0a44af4f38bf7670e1ebacb3fedfe2fc946d08584187",
+        "signature": "2bb5774c8290ad88c56f0a44af4f38bf7670e1ebacb3fedfe2fc946d08584187",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/interrupt.d.ts": {
@@ -502,8 +502,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/itileevent.d.ts": {
-        "version": "3beabac1732e3ae405cd8fbe1735c1e9b455215e6fb46b004e92cf1ca550137d",
-        "signature": "3beabac1732e3ae405cd8fbe1735c1e9b455215e6fb46b004e92cf1ca550137d",
+        "version": "e3b0187a370c6ad449467a9fe908e220c522c971d78029e9458c7a1d952d21f9",
+        "signature": "e3b0187a370c6ad449467a9fe908e220c522c971d78029e9458c7a1d952d21f9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts": {
@@ -1302,8 +1302,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/segment/textdecorationsegments.d.ts": {
-        "version": "c4fb0452ef622af0d2265d5ed565d6f6411e3fac32f78e57bb1c747d7baedd78",
-        "signature": "c4fb0452ef622af0d2265d5ed565d6f6411e3fac32f78e57bb1c747d7baedd78",
+        "version": "b8a511f9a4b0d2ce98855dda94cdfab608e118ae026a65068d835170e943d500",
+        "signature": "b8a511f9a4b0d2ce98855dda94cdfab608e118ae026a65068d835170e943d500",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/segment/linksegment.d.ts": {
@@ -1612,8 +1612,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts": {
-        "version": "b2556797aa7af49d7eb04753eea7c3dde9e2fe6fc74ad8bf69ffe53ff6a2c0b3",
-        "signature": "b2556797aa7af49d7eb04753eea7c3dde9e2fe6fc74ad8bf69ffe53ff6a2c0b3",
+        "version": "c2f1dbd28f9b61b13f2c9367c11b7aad1198d949147c9ffd1625c5277a0f4fd3",
+        "signature": "c2f1dbd28f9b61b13f2c9367c11b7aad1198d949147c9ffd1625c5277a0f4fd3",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/npc/npc.d.ts": {
@@ -1992,8 +1992,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/items.d.ts": {
-        "version": "ed6b6f6e75b9c55fbf2ada8cae207bbcabb166ffb22e66e8572a7ed18c241e00",
-        "signature": "ed6b6f6e75b9c55fbf2ada8cae207bbcabb166ffb22e66e8572a7ed18c241e00",
+        "version": "9a213f4b155f5eeb2bde2910d01458baa465fc9c9e6683cea20a60ee3ca09572",
+        "signature": "9a213f4b155f5eeb2bde2910d01458baa465fc9c9e6683cea20a60ee3ca09572",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/enum/enums.d.ts": {
@@ -3867,6 +3867,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/tile/itileevent.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/ientity.d.ts",
+        "../node_modules/@wayward/types/definitions/game/igame.d.ts",
         "../node_modules/@wayward/types/definitions/game/iloot.d.ts",
         "../node_modules/@wayward/types/definitions/game/iobject.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts",
@@ -7390,6 +7391,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/tile/itileevent.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/ientity.d.ts",
+        "../node_modules/@wayward/types/definitions/game/igame.d.ts",
         "../node_modules/@wayward/types/definitions/game/iloot.d.ts",
         "../node_modules/@wayward/types/definitions/game/iobject.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts",
