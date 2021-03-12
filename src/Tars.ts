@@ -1634,7 +1634,7 @@ export default class Tars extends Mod {
 	}
 
 	private nearbyCreatureInterrupt(context: Context): IObjective | undefined {
-		for (const facingDirecton of Direction.DIRECTIONS) {
+		for (const facingDirecton of Direction.CARDINALS_AND_NONE) {
 			const creature = this.checkNearbyCreature(context, facingDirecton);
 			if (creature !== undefined) {
 				log.info(`Defend against ${creature.getName().getString()}`);
@@ -1643,7 +1643,7 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private checkNearbyCreature(context: Context, direction: Direction): Creature | undefined {
+	private checkNearbyCreature(context: Context, direction: Direction.Cardinal | Direction.None): Creature | undefined {
 		if (direction !== Direction.None) {
 			const point = game.directionToMovement(direction);
 			const validPoint = game.ensureValidPoint({ x: context.player.x + point.x, y: context.player.y + point.y, z: context.player.z });

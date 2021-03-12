@@ -8,7 +8,6 @@ import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
 
-
 export default class MoveToNewIsland extends Objective {
 
 	public getIdentifier(): string {
@@ -20,7 +19,7 @@ export default class MoveToNewIsland extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const unvisitedIslands: Array<{ islandId: string; edgePosition: IVector3; direction: Direction }> = [];
+		const unvisitedIslands: Array<{ islandId: string; edgePosition: IVector3; direction: Direction.Cardinal }> = [];
 
 		for (const direction of Direction.CARDINALS) {
 			const movement = game.directionToMovement(direction);
