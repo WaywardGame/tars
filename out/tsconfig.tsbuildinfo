@@ -682,8 +682,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "04a7683678b85a90bbb944932d9604aa3d4739b427e3e6f202d9c634394479db",
-        "signature": "04a7683678b85a90bbb944932d9604aa3d4739b427e3e6f202d9c634394479db",
+        "version": "a3ead1e283c0ac19ac122a1c31bcbfeb5dc23bc285486ef7b75a921e0179dce1",
+        "signature": "a3ead1e283c0ac19ac122a1c31bcbfeb5dc23bc285486ef7b75a921e0179dce1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -1167,8 +1167,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/save/data/savedataglobal.d.ts": {
-        "version": "be4e0acccc3586ff9bc4f2a93bb77c7ec40426a70936b0a2c7c3c89b9a3c0853",
-        "signature": "be4e0acccc3586ff9bc4f2a93bb77c7ec40426a70936b0a2c7c3c89b9a3c0853",
+        "version": "1dc280077a70557caf7e12478e08e8a7e35d5d91a0276d0d3fabe3e69c441aea",
+        "signature": "1dc280077a70557caf7e12478e08e8a7e35d5d91a0276d0d3fabe3e69c441aea",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/version.d.ts": {
@@ -1267,8 +1267,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/menu/component/imenu.d.ts": {
-        "version": "7abb21d462b23d0f5ce905a6fd09607740daca4029bfa4851578a2bf9aaef261",
-        "signature": "7abb21d462b23d0f5ce905a6fd09607740daca4029bfa4851578a2bf9aaef261",
+        "version": "1821af0d9e5a694521a04c17b7a0e536302b96b6eb99414b10974702402b46c4",
+        "signature": "1821af0d9e5a694521a04c17b7a0e536302b96b6eb99414b10974702402b46c4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/iui.d.ts": {
@@ -1362,8 +1362,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/menu/component/menu.d.ts": {
-        "version": "2caa21178d47513c0ea9cb487c636ffe3a4bf8d25bcad13fdfa56be16479796b",
-        "signature": "2caa21178d47513c0ea9cb487c636ffe3a4bf8d25bcad13fdfa56be16479796b",
+        "version": "98bc7041d63eeb061161410bd584ce4aeafc590b9d0f840e3550983df84ba695",
+        "signature": "98bc7041d63eeb061161410bd584ce4aeafc590b9d0f840e3550983df84ba695",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/menu/menus/interruptmenu.d.ts": {
