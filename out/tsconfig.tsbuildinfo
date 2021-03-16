@@ -907,8 +907,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": {
-        "version": "acdab20f7f6e7bd1ef3b80cf63f58963df6dec9426db497bb0ed4cde67781b5a",
-        "signature": "acdab20f7f6e7bd1ef3b80cf63f58963df6dec9426db497bb0ed4cde67781b5a",
+        "version": "6673a0f57011eb63d4935f32b7ecdf64a58ff80dc9cad4e52a12a65f7274ef9e",
+        "signature": "6673a0f57011eb63d4935f32b7ecdf64a58ff80dc9cad4e52a12a65f7274ef9e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/island.d.ts": {
@@ -917,8 +917,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts": {
-        "version": "bb1b5a6275ee8c7cdd8398be01b6baa36d92c12c427e3d48c42d017952b7f4e4",
-        "signature": "bb1b5a6275ee8c7cdd8398be01b6baa36d92c12c427e3d48c42d017952b7f4e4",
+        "version": "9794b68715eeefcef41daa9df16e65b35202bbb57fbf060b7d9e169c2117459e",
+        "signature": "9794b68715eeefcef41daa9df16e65b35202bbb57fbf060b7d9e169c2117459e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/tileeventmanager.d.ts": {
@@ -1567,8 +1567,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "32880b6c5d3835a9bbb09cbf1ae0a583784368fc6e3ae0b59a96b4fe3ab6278d",
-        "signature": "32880b6c5d3835a9bbb09cbf1ae0a583784368fc6e3ae0b59a96b4fe3ab6278d",
+        "version": "2ed853f8440835fbc29ed1eb962c14affff15ad990e85af02711fda2791f836b",
+        "signature": "2ed853f8440835fbc29ed1eb962c14affff15ad990e85af02711fda2791f836b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/event/eventbuses.d.ts": {
@@ -1607,8 +1607,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/iplayer.d.ts": {
-        "version": "eab63ed7b85c0490232f5cdf92848e5462b209ece3741daa11053db39c4826e3",
-        "signature": "eab63ed7b85c0490232f5cdf92848e5462b209ece3741daa11053db39c4826e3",
+        "version": "fc07a60e6bd01f51268cc47914f6c5d5dd2a1d5b7a0924d3ed09a5faccd3285c",
+        "signature": "fc07a60e6bd01f51268cc47914f6c5d5dd2a1d5b7a0924d3ed09a5faccd3285c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
@@ -1927,8 +1927,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts": {
-        "version": "727b2a1ef27ec98d8826c6b668b0a0d3a704acfa69bac05b73496ece43b181ee",
-        "signature": "727b2a1ef27ec98d8826c6b668b0a0d3a704acfa69bac05b73496ece43b181ee",
+        "version": "0ad0b90238aa6488461577dfb59dd8d0daf8fd45aa7acc2420444c6b5b4a31e8",
+        "signature": "0ad0b90238aa6488461577dfb59dd8d0daf8fd45aa7acc2420444c6b5b4a31e8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapgen/mapgenhelpers.d.ts": {
@@ -1952,8 +1952,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/creature/icreature.d.ts": {
-        "version": "826dc8551dc965a6d5da3a0203d8b6a65464443033b7ab7cf9ae1e0836806e80",
-        "signature": "826dc8551dc965a6d5da3a0203d8b6a65464443033b7ab7cf9ae1e0836806e80",
+        "version": "fcc5adc381510f19658c75bee5e7547d4d0c1eeafb77fbec84b8ad670c8074c1",
+        "signature": "fcc5adc381510f19658c75bee5e7547d4d0c1eeafb77fbec84b8ad670c8074c1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/creature/corpse/corpse.d.ts": {
