@@ -682,8 +682,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "a3ead1e283c0ac19ac122a1c31bcbfeb5dc23bc285486ef7b75a921e0179dce1",
-        "signature": "a3ead1e283c0ac19ac122a1c31bcbfeb5dc23bc285486ef7b75a921e0179dce1",
+        "version": "72fdd085eff58715c2288e2618143a8d66a200c933045397b68bcc1b3e85e6f8",
+        "signature": "72fdd085eff58715c2288e2618143a8d66a200c933045397b68bcc1b3e85e6f8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -1216,6 +1216,51 @@
         "signature": "de7f67dc7a261b7e033f44f264bc9cbf0310909af40ee4ff6e1afb13f5701f04",
         "affectsGlobalScope": false
       },
+      "../node_modules/@wayward/types/definitions/language/segment/colorsegment.d.ts": {
+        "version": "fc511e22f2abad62437425985415142a8be97a972223486ef43db52129e3d6f6",
+        "signature": "fc511e22f2abad62437425985415142a8be97a972223486ef43db52129e3d6f6",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/language/segment/headingsegment.d.ts": {
+        "version": "028975add85b937bf96774397777184d700c8aa0c514a1156cbcbf3e3d65367a",
+        "signature": "028975add85b937bf96774397777184d700c8aa0c514a1156cbcbf3e3d65367a",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/language/segment/textdecorationsegments.d.ts": {
+        "version": "b8a511f9a4b0d2ce98855dda94cdfab608e118ae026a65068d835170e943d500",
+        "signature": "b8a511f9a4b0d2ce98855dda94cdfab608e118ae026a65068d835170e943d500",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/language/segment/linksegment.d.ts": {
+        "version": "088056c9cd43e15e3dd511d86dc347fadd96dc2a0053736544eff91db4dce787",
+        "signature": "088056c9cd43e15e3dd511d86dc347fadd96dc2a0053736544eff91db4dce787",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/language/segment/listsegment.d.ts": {
+        "version": "d800b2459bdd9c25de93c45fd519edfee2824be203032bcbc236cb77cec3b044",
+        "signature": "d800b2459bdd9c25de93c45fd519edfee2824be203032bcbc236cb77cec3b044",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/language/segment/tooltipsegment.d.ts": {
+        "version": "7209490faf63ec5aac7e7975492e100e89b06adf26f1aedeae3c5d93180ffbba",
+        "signature": "7209490faf63ec5aac7e7975492e100e89b06adf26f1aedeae3c5d93180ffbba",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/ui/component/text.d.ts": {
+        "version": "2a4116713d4d28227d315e6663adf3326c8e867cc09b930a8f21b1e435acb0d4",
+        "signature": "2a4116713d4d28227d315e6663adf3326c8e867cc09b930a8f21b1e435acb0d4",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/ui/component/button.d.ts": {
+        "version": "e4c402265d76b16ccfe9585f7a21f737d0e34719ff451f8e35bfa713d70b4be4",
+        "signature": "e4c402265d76b16ccfe9585f7a21f737d0e34719ff451f8e35bfa713d70b4be4",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts": {
+        "version": "042b773d5b3a87cb71fea1c8e90d2f823b17e8e80de54cd1a9a3dd3803688efb",
+        "signature": "042b773d5b3a87cb71fea1c8e90d2f823b17e8e80de54cd1a9a3dd3803688efb",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@wayward/types/definitions/ui/util/componentmanipulator.d.ts": {
         "version": "002d3b1c5a217f70ee089db21abc994d6e62b62608ce6d21d8862e1a0f02735c",
         "signature": "002d3b1c5a217f70ee089db21abc994d6e62b62608ce6d21d8862e1a0f02735c",
@@ -1227,8 +1272,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/component/component.d.ts": {
-        "version": "c9ca039e3aa96c9f020a003913b6f18d348d6a95c2dff6980e000ad9f6ab65a7",
-        "signature": "c9ca039e3aa96c9f020a003913b6f18d348d6a95c2dff6980e000ad9f6ab65a7",
+        "version": "c9fbf838424285b388a7cc193e4f5fd2ddc458608913d4ed7f631b430c74c268",
+        "signature": "c9fbf838424285b388a7cc193e4f5fd2ddc458608913d4ed7f631b430c74c268",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/collection/map/hashmap.d.ts": {
@@ -1282,8 +1327,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screen.d.ts": {
-        "version": "cf6454a26c9d6226b298b1ffa9f5ac382f2e6ef3286f7a2ff18d8a1307e4a5b5",
-        "signature": "cf6454a26c9d6226b298b1ffa9f5ac382f2e6ef3286f7a2ff18d8a1307e4a5b5",
+        "version": "d8947ca24c32eb016b067e69992f1f7093294a3a5487d5f8ed70a06fb89ec44e",
+        "signature": "d8947ca24c32eb016b067e69992f1f7093294a3a5487d5f8ed70a06fb89ec44e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screenmanager.d.ts": {
@@ -1294,41 +1339,6 @@
       "../node_modules/@wayward/types/definitions/ui/screen/screens/menu/component/selectionhandler.d.ts": {
         "version": "efbe7f0dc82e79572e78714fa83290422f8a3928cfed67cccf7a8ad5bbb4523f",
         "signature": "efbe7f0dc82e79572e78714fa83290422f8a3928cfed67cccf7a8ad5bbb4523f",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/language/segment/colorsegment.d.ts": {
-        "version": "fc511e22f2abad62437425985415142a8be97a972223486ef43db52129e3d6f6",
-        "signature": "fc511e22f2abad62437425985415142a8be97a972223486ef43db52129e3d6f6",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/language/segment/headingsegment.d.ts": {
-        "version": "028975add85b937bf96774397777184d700c8aa0c514a1156cbcbf3e3d65367a",
-        "signature": "028975add85b937bf96774397777184d700c8aa0c514a1156cbcbf3e3d65367a",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/language/segment/textdecorationsegments.d.ts": {
-        "version": "b8a511f9a4b0d2ce98855dda94cdfab608e118ae026a65068d835170e943d500",
-        "signature": "b8a511f9a4b0d2ce98855dda94cdfab608e118ae026a65068d835170e943d500",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/language/segment/linksegment.d.ts": {
-        "version": "088056c9cd43e15e3dd511d86dc347fadd96dc2a0053736544eff91db4dce787",
-        "signature": "088056c9cd43e15e3dd511d86dc347fadd96dc2a0053736544eff91db4dce787",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/language/segment/listsegment.d.ts": {
-        "version": "d800b2459bdd9c25de93c45fd519edfee2824be203032bcbc236cb77cec3b044",
-        "signature": "d800b2459bdd9c25de93c45fd519edfee2824be203032bcbc236cb77cec3b044",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/language/segment/tooltipsegment.d.ts": {
-        "version": "7209490faf63ec5aac7e7975492e100e89b06adf26f1aedeae3c5d93180ffbba",
-        "signature": "7209490faf63ec5aac7e7975492e100e89b06adf26f1aedeae3c5d93180ffbba",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/ui/component/text.d.ts": {
-        "version": "2a4116713d4d28227d315e6663adf3326c8e867cc09b930a8f21b1e435acb0d4",
-        "signature": "2a4116713d4d28227d315e6663adf3326c8e867cc09b930a8f21b1e435acb0d4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/tooltip/tooltip.d.ts": {
@@ -1354,11 +1364,6 @@
       "../node_modules/@wayward/types/definitions/ui/component/blockrow.d.ts": {
         "version": "2752ee357676a9c9caf0ac8cb451de956ee54f2f48d03745363d1d84ab8d04fb",
         "signature": "2752ee357676a9c9caf0ac8cb451de956ee54f2f48d03745363d1d84ab8d04fb",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@wayward/types/definitions/ui/component/button.d.ts": {
-        "version": "e4c402265d76b16ccfe9585f7a21f737d0e34719ff451f8e35bfa713d70b4be4",
-        "signature": "e4c402265d76b16ccfe9585f7a21f737d0e34719ff451f8e35bfa713d70b4be4",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/menu/component/menu.d.ts": {
@@ -1496,14 +1501,9 @@
         "signature": "b89717009fae4c0ea7cd57e78e34100badd5d770e8f5612c55917b4719ebfc96",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts": {
-        "version": "79e84177a1bed9b34ae23000aa6ef2d756d933c636e0617b45b5c02d6b249cd7",
-        "signature": "79e84177a1bed9b34ae23000aa6ef2d756d933c636e0617b45b5c02d6b249cd7",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@wayward/types/definitions/ui/component/icomponent.d.ts": {
-        "version": "79c60c75eecfccdd93599d3f4b48c8360ec8c405298578dc4f060708665580cf",
-        "signature": "79c60c75eecfccdd93599d3f4b48c8360ec8c405298578dc4f060708665580cf",
+        "version": "13bdc17f13b666d6df345a4e44335f732eed33e9011437638d693fee68bab357",
+        "signature": "13bdc17f13b666d6df345a4e44335f732eed33e9011437638d693fee68bab357",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/options/modifiers/challenge/challengemodifier.d.ts": {
@@ -1567,8 +1567,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "2ed853f8440835fbc29ed1eb962c14affff15ad990e85af02711fda2791f836b",
-        "signature": "2ed853f8440835fbc29ed1eb962c14affff15ad990e85af02711fda2791f836b",
+        "version": "f50d55a01c598d1b17eb58388b56f07ed690103cfd6da61a9550aaae6be40804",
+        "signature": "f50d55a01c598d1b17eb58388b56f07ed690103cfd6da61a9550aaae6be40804",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/event/eventbuses.d.ts": {
@@ -4551,6 +4551,7 @@
       "../node_modules/@wayward/types/definitions/ui/component/component.d.ts": [
         "../node_modules/@wayward/goodstream/stream.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts",
         "../node_modules/@wayward/types/definitions/ui/component/icomponent.d.ts",
         "../node_modules/@wayward/types/definitions/ui/input/bind.d.ts",
         "../node_modules/@wayward/types/definitions/ui/util/componentmanipulator.d.ts",
@@ -4568,7 +4569,6 @@
         "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/ui/component/component.d.ts",
-        "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts",
         "../node_modules/@wayward/types/definitions/ui/util/componentmanipulator.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts",
@@ -4664,7 +4664,7 @@
       ],
       "../node_modules/@wayward/types/definitions/ui/screen/screen.d.ts": [
         "../node_modules/@wayward/types/definitions/ui/component/component.d.ts",
-        "../node_modules/@wayward/types/definitions/ui/component/icomponent.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts",
         "../node_modules/@wayward/types/definitions/ui/input/bind.d.ts",
         "../node_modules/@wayward/types/definitions/ui/screen/iscreen.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/log.d.ts"
@@ -8080,6 +8080,7 @@
       "../node_modules/@wayward/types/definitions/ui/component/component.d.ts": [
         "../node_modules/@wayward/goodstream/stream.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts",
         "../node_modules/@wayward/types/definitions/ui/component/icomponent.d.ts",
         "../node_modules/@wayward/types/definitions/ui/input/bind.d.ts",
         "../node_modules/@wayward/types/definitions/ui/util/componentmanipulator.d.ts",
@@ -8097,7 +8098,6 @@
         "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/ui/component/component.d.ts",
-        "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts",
         "../node_modules/@wayward/types/definitions/ui/util/componentmanipulator.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts",
@@ -8193,7 +8193,7 @@
       ],
       "../node_modules/@wayward/types/definitions/ui/screen/screen.d.ts": [
         "../node_modules/@wayward/types/definitions/ui/component/component.d.ts",
-        "../node_modules/@wayward/types/definitions/ui/component/icomponent.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/contextmenu.d.ts",
         "../node_modules/@wayward/types/definitions/ui/input/bind.d.ts",
         "../node_modules/@wayward/types/definitions/ui/screen/iscreen.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/log.d.ts"
