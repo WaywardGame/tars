@@ -912,8 +912,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/island.d.ts": {
-        "version": "ce19787d02d6a4426cf9355cb4e860a115b9c2d5994ebcfe25c8bb2fbf36e0d6",
-        "signature": "ce19787d02d6a4426cf9355cb4e860a115b9c2d5994ebcfe25c8bb2fbf36e0d6",
+        "version": "bf6e3950f1cc20b4ff4086f78a8feb160e9b39546258a5535f6f570b16c1c990",
+        "signature": "bf6e3950f1cc20b4ff4086f78a8feb160e9b39546258a5535f6f570b16c1c990",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts": {
@@ -1567,8 +1567,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "f50d55a01c598d1b17eb58388b56f07ed690103cfd6da61a9550aaae6be40804",
-        "signature": "f50d55a01c598d1b17eb58388b56f07ed690103cfd6da61a9550aaae6be40804",
+        "version": "e22329673255bb075d4de6a1cdff1fbb41646626211d692aa38e2e7d109c69c2",
+        "signature": "e22329673255bb075d4de6a1cdff1fbb41646626211d692aa38e2e7d109c69c2",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/event/eventbuses.d.ts": {
@@ -1612,8 +1612,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/igame.d.ts": {
-        "version": "ec881e2e0306a32dd3246e5519627042bb78192210deb190bae80c9ed8077ceb",
-        "signature": "ec881e2e0306a32dd3246e5519627042bb78192210deb190bae80c9ed8077ceb",
+        "version": "fb0f0bc286f2c76723b60f0a91729fc24fd7c277bb07a7c220e0c5bfd4c74fec",
+        "signature": "fb0f0bc286f2c76723b60f0a91729fc24fd7c277bb07a7c220e0c5bfd4c74fec",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts": {
@@ -1927,8 +1927,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts": {
-        "version": "0ad0b90238aa6488461577dfb59dd8d0daf8fd45aa7acc2420444c6b5b4a31e8",
-        "signature": "0ad0b90238aa6488461577dfb59dd8d0daf8fd45aa7acc2420444c6b5b4a31e8",
+        "version": "8b90a8fcfeeaaed67997faa0d535e775baf6b3c79a7e5e7557cbdff0c6620c9c",
+        "signature": "8b90a8fcfeeaaed67997faa0d535e775baf6b3c79a7e5e7557cbdff0c6620c9c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapgen/mapgenhelpers.d.ts": {
