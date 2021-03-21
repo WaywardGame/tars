@@ -267,8 +267,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/string/interpolator.d.ts": {
-        "version": "e95c05a5e5a4df5acd78ccc3fbbb89482bc80de7761bd55103ae4c408ac6754b",
-        "signature": "e95c05a5e5a4df5acd78ccc3fbbb89482bc80de7761bd55103ae4c408ac6754b",
+        "version": "fbf237b56bf5d84b56054f78cc58c7d6e973d74a833f5152d45811714f8d2c5e",
+        "signature": "fbf237b56bf5d84b56054f78cc58c7d6e973d74a833f5152d45811714f8d2c5e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/imessagemanager.d.ts": {
@@ -357,8 +357,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/magic/magicalpropertymanager.d.ts": {
-        "version": "6eae8d239ccfee600ab0817ee853759e39ec83f86843d887436aa6bbbce19dfc",
-        "signature": "6eae8d239ccfee600ab0817ee853759e39ec83f86843d887436aa6bbbce19dfc",
+        "version": "629fc4ddc63b21aba1be2b81a10f58bfabfbab33af1d000c56b431c8835642f8",
+        "signature": "629fc4ddc63b21aba1be2b81a10f58bfabfbab33af1d000c56b431c8835642f8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/timemanager.d.ts": {
@@ -882,8 +882,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": {
-        "version": "6673a0f57011eb63d4935f32b7ecdf64a58ff80dc9cad4e52a12a65f7274ef9e",
-        "signature": "6673a0f57011eb63d4935f32b7ecdf64a58ff80dc9cad4e52a12a65f7274ef9e",
+        "version": "ba85bc35d3672e2d4a641f47c450b954607ce045f4289da1a16755a5984aeaea",
+        "signature": "ba85bc35d3672e2d4a641f47c450b954607ce045f4289da1a16755a5984aeaea",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/island.d.ts": {
