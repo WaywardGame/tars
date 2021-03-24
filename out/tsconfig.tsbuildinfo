@@ -242,8 +242,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts": {
-        "version": "123021f1761e1b935930061203fc920f5d5b13b28332ca972a754f7bf52e5011",
-        "signature": "123021f1761e1b935930061203fc920f5d5b13b28332ca972a754f7bf52e5011",
+        "version": "e0573a907aef4c6934b37b9bdbf821587238421d065057cd206c3229a0113831",
+        "signature": "e0573a907aef4c6934b37b9bdbf821587238421d065057cd206c3229a0113831",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts": {
@@ -307,8 +307,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/background.d.ts": {
-        "version": "1761b365cfd1a218e1b2599394d4f57544ea722cf41a471903bab9ae5f3d10c1",
-        "signature": "1761b365cfd1a218e1b2599394d4f57544ea722cf41a471903bab9ae5f3d10c1",
+        "version": "b0b0a1e48c1fcd52dcee092f12d9a93a33122e09c6e1ccb8c0ebaf51eaf3145e",
+        "signature": "b0b0a1e48c1fcd52dcee092f12d9a93a33122e09c6e1ccb8c0ebaf51eaf3145e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts": {
@@ -327,13 +327,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/imaptile.d.ts": {
-        "version": "b84d4822ca392e8f6f9fbc50e3f0c38b8f03f14f5e425c0d3173a1e40da9df4f",
-        "signature": "b84d4822ca392e8f6f9fbc50e3f0c38b8f03f14f5e425c0d3173a1e40da9df4f",
+        "version": "8333594afca0f336eec35500e1be1aba8298f4c92c053c730cafbaf03cdfac2f",
+        "signature": "8333594afca0f336eec35500e1be1aba8298f4c92c053c730cafbaf03cdfac2f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/obfuscation.d.ts": {
-        "version": "762289c822a54f4348c479bcb9bffdf870200783ba7dac1536c79154bf9f4961",
-        "signature": "762289c822a54f4348c479bcb9bffdf870200783ba7dac1536c79154bf9f4961",
+        "version": "6ef8076a40a432fd7974ec3cc82a21209a514be2b9c20029bb5b911eeccd4d95",
+        "signature": "6ef8076a40a432fd7974ec3cc82a21209a514be2b9c20029bb5b911eeccd4d95",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/sampler.d.ts": {
@@ -342,8 +342,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/drawnmap.d.ts": {
-        "version": "44b55e9718d46493eecbfff7252c8dd8592989d66a29e88b4f8ae2df7fe94a0b",
-        "signature": "44b55e9718d46493eecbfff7252c8dd8592989d66a29e88b4f8ae2df7fe94a0b",
+        "version": "90261aa0361300d745d97540f50bdc056d3d9b8faa7225cc7eb2939ad0d04ccf",
+        "signature": "90261aa0361300d745d97540f50bdc056d3d9b8faa7225cc7eb2939ad0d04ccf",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/itemmapmanager.d.ts": {
@@ -3802,6 +3802,7 @@
         "../node_modules/@wayward/types/definitions/game/mapping/imaptile.d.ts",
         "../node_modules/@wayward/types/definitions/game/mapping/obfuscation.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
+        "../node_modules/@wayward/types/definitions/save/iserializer.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/range.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/sampler.d.ts",
@@ -7362,6 +7363,7 @@
         "../node_modules/@wayward/types/definitions/game/mapping/imaptile.d.ts",
         "../node_modules/@wayward/types/definitions/game/mapping/obfuscation.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
+        "../node_modules/@wayward/types/definitions/save/iserializer.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/range.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/sampler.d.ts",
