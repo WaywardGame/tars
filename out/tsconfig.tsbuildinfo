@@ -897,8 +897,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/tileeventmanager.d.ts": {
-        "version": "b0f9d7add1b8c02d73499653b9e822b9247aa4e0d88f43844374cb03d9dae033",
-        "signature": "b0f9d7add1b8c02d73499653b9e822b9247aa4e0d88f43844374cb03d9dae033",
+        "version": "4eae3e06c6abfc14826c475b179a60ebbe3374c426ae1691f388fcba82fade69",
+        "signature": "4eae3e06c6abfc14826c475b179a60ebbe3374c426ae1691f388fcba82fade69",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/language.d.ts": {
@@ -1312,8 +1312,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/menu/component/selectionhandler.d.ts": {
-        "version": "efbe7f0dc82e79572e78714fa83290422f8a3928cfed67cccf7a8ad5bbb4523f",
-        "signature": "efbe7f0dc82e79572e78714fa83290422f8a3928cfed67cccf7a8ad5bbb4523f",
+        "version": "f4b5c8175c8fcc0af15d874051a4f3054d4c64b700d6ed0c5ec0bc8ea9e17812",
+        "signature": "f4b5c8175c8fcc0af15d874051a4f3054d4c64b700d6ed0c5ec0bc8ea9e17812",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/tooltip/tooltip.d.ts": {
@@ -1837,8 +1837,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileeventinspection.d.ts": {
-        "version": "c3debca9d233efd731f9dca3a159974eacd2f2f76dbf7833084ea30c16e89923",
-        "signature": "c3debca9d233efd731f9dca3a159974eacd2f2f76dbf7833084ea30c16e89923",
+        "version": "b3126349513a8977f3f5bcf427456b944a68e2a758ee2fe308df78f7857202ed",
+        "signature": "b3126349513a8977f3f5bcf427456b944a68e2a758ee2fe308df78f7857202ed",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileinspection.d.ts": {
@@ -1847,8 +1847,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspectiontypemap.d.ts": {
-        "version": "aeaaeee5210b7d637b3fc235a8bf168e00a75c8fb14d241e9ce7bbbf7d685698",
-        "signature": "aeaaeee5210b7d637b3fc235a8bf168e00a75c8fb14d241e9ce7bbbf7d685698",
+        "version": "d9cafbc0790dfde87e8c4b571f009cdad249633988a335bf7c45c1a43ed209b8",
+        "signature": "d9cafbc0790dfde87e8c4b571f009cdad249633988a335bf7c45c1a43ed209b8",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/terrainresources.d.ts": {
@@ -3536,12 +3536,16 @@
         "../node_modules/@wayward/types/definitions/language/translation.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileeventinspection.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/inspection/iinfoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/inspections/listinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/icomponent.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/text.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileinspection.d.ts": [
@@ -3951,12 +3955,15 @@
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/tile/tileeventmanager.d.ts": [
+        "../node_modules/@wayward/goodstream/stream.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/creature/icreature.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/npc/npc.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/itileevent.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts",
+        "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/timemanager.d.ts": [
@@ -7098,12 +7105,16 @@
         "../node_modules/@wayward/types/definitions/language/translation.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileeventinspection.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/inspection/iinfoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/inspections/listinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts",
         "../node_modules/@wayward/types/definitions/language/translation.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/icomponent.d.ts",
+        "../node_modules/@wayward/types/definitions/ui/component/text.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileinspection.d.ts": [
@@ -7513,12 +7524,15 @@
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/tile/tileeventmanager.d.ts": [
+        "../node_modules/@wayward/goodstream/stream.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/creature/icreature.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/npc/npc.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/itileevent.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts",
+        "../node_modules/@wayward/types/definitions/language/translation.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/timemanager.d.ts": [
