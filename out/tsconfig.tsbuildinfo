@@ -1071,14 +1071,9 @@
         "signature": "e0d363f5367555ab06b5394a204174575b747ffa8230815fe9fbe1a0a477b4dc",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/renderer/itileatlas.d.ts": {
-        "version": "b295dc739d7c8c30ac0baf4714d08c0e133702a8ac8d2c5529ddb14b90e0ed86",
-        "signature": "b295dc739d7c8c30ac0baf4714d08c0e133702a8ac8d2c5529ddb14b90e0ed86",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@wayward/types/definitions/renderer/tileatlas.d.ts": {
-        "version": "d65e24ff5e83f73f4e9745f65da23d730aa27e3355aeeb87ac113e7d70bce7c7",
-        "signature": "d65e24ff5e83f73f4e9745f65da23d730aa27e3355aeeb87ac113e7d70bce7c7",
+        "version": "f8528d6b3e31a3a00c8dd3f0e4400121a37277a213e2b82dc19cee05c10663ec",
+        "signature": "f8528d6b3e31a3a00c8dd3f0e4400121a37277a213e2b82dc19cee05c10663ec",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/world.d.ts": {
@@ -1097,8 +1092,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/resource/resourceloader.d.ts": {
-        "version": "492577df67ac307df500b4f1c5d7fae88d3070d9cbc44f5274db28d438d5e26b",
-        "signature": "492577df67ac307df500b4f1c5d7fae88d3070d9cbc44f5274db28d438d5e26b",
+        "version": "4c9630b94cf3f2afbd8aed1b0cfbbae3840966b1dcf709883a1dd69a56ee53b3",
+        "signature": "4c9630b94cf3f2afbd8aed1b0cfbbae3840966b1dcf709883a1dd69a56ee53b3",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/save/clientstore/clientdata/exploredmap.d.ts": {
@@ -1957,8 +1952,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/biome/ibiome.d.ts": {
-        "version": "289339d670a2d156ac07019a9673dfdd6ba210503cbcadc46331c59bf8f0a12e",
-        "signature": "289339d670a2d156ac07019a9673dfdd6ba210503cbcadc46331c59bf8f0a12e",
+        "version": "4ca349045b7f22407742da90a9c96f3b88406fd3165b677b07e5c41098b11d9b",
+        "signature": "4ca349045b7f22407742da90a9c96f3b88406fd3165b677b07e5c41098b11d9b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/lootgroups.d.ts": {
@@ -4405,14 +4400,6 @@
       "../node_modules/@wayward/types/definitions/renderer/ispriteinfo.d.ts": [
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
       ],
-      "../node_modules/@wayward/types/definitions/renderer/itileatlas.d.ts": [
-        "../node_modules/@wayward/types/definitions/game/doodad/doodadinfo.d.ts",
-        "../node_modules/@wayward/types/definitions/game/doodad/idoodad.d.ts",
-        "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts",
-        "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
-        "../node_modules/@wayward/types/definitions/renderer/decorations.d.ts",
-        "../node_modules/@wayward/types/definitions/renderer/terraintileinfo.d.ts"
-      ],
       "../node_modules/@wayward/types/definitions/renderer/iworld.d.ts": [
         "../node_modules/@wayward/types/definitions/game/igame.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
@@ -4475,12 +4462,12 @@
         "../node_modules/@wayward/types/definitions/renderer/tileadaptors.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/renderer/tileatlas.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/biome/ibiome.d.ts",
         "../node_modules/@wayward/types/definitions/game/doodad/doodadinfo.d.ts",
         "../node_modules/@wayward/types/definitions/game/doodad/idoodad.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/renderer/decorations.d.ts",
-        "../node_modules/@wayward/types/definitions/renderer/itileatlas.d.ts",
         "../node_modules/@wayward/types/definitions/renderer/terraintileinfo.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
       ],
@@ -7976,14 +7963,6 @@
       "../node_modules/@wayward/types/definitions/renderer/ispriteinfo.d.ts": [
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
       ],
-      "../node_modules/@wayward/types/definitions/renderer/itileatlas.d.ts": [
-        "../node_modules/@wayward/types/definitions/game/doodad/doodadinfo.d.ts",
-        "../node_modules/@wayward/types/definitions/game/doodad/idoodad.d.ts",
-        "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts",
-        "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
-        "../node_modules/@wayward/types/definitions/renderer/decorations.d.ts",
-        "../node_modules/@wayward/types/definitions/renderer/terraintileinfo.d.ts"
-      ],
       "../node_modules/@wayward/types/definitions/renderer/iworld.d.ts": [
         "../node_modules/@wayward/types/definitions/game/igame.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
@@ -8046,12 +8025,12 @@
         "../node_modules/@wayward/types/definitions/renderer/tileadaptors.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/renderer/tileatlas.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/biome/ibiome.d.ts",
         "../node_modules/@wayward/types/definitions/game/doodad/doodadinfo.d.ts",
         "../node_modules/@wayward/types/definitions/game/doodad/idoodad.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/renderer/decorations.d.ts",
-        "../node_modules/@wayward/types/definitions/renderer/itileatlas.d.ts",
         "../node_modules/@wayward/types/definitions/renderer/terraintileinfo.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
       ],
@@ -9452,7 +9431,6 @@
       "../node_modules/@wayward/types/definitions/renderer/ispritebatch.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/ispriteinfo.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/itexturedebugrenderer.d.ts",
-      "../node_modules/@wayward/types/definitions/renderer/itileatlas.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/iworld.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/iworldlayer.d.ts",
       "../node_modules/@wayward/types/definitions/renderer/iworldrenderer.d.ts",
