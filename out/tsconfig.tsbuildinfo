@@ -447,8 +447,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts": {
-        "version": "cccd97f4490d232db12c9786cf593dd6eeabf613e7567eb42609acaac1756d7c",
-        "signature": "cccd97f4490d232db12c9786cf593dd6eeabf613e7567eb42609acaac1756d7c",
+        "version": "f72da7291ee0c903a88f2059b14f2f983d1f506d2ffbf3809e7d1adbea825a9d",
+        "signature": "f72da7291ee0c903a88f2059b14f2f983d1f506d2ffbf3809e7d1adbea825a9d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": {
@@ -1927,8 +1927,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/creature/creature.d.ts": {
-        "version": "a083bf18431ed197d6262e993d52007fdfa134c89e620b59108e2a18ff68d33a",
-        "signature": "a083bf18431ed197d6262e993d52007fdfa134c89e620b59108e2a18ff68d33a",
+        "version": "6c3daca9e0655889ef6adddcd4b98c2263e6e61501757fe36dfe65c5d0fa30f3",
+        "signature": "6c3daca9e0655889ef6adddcd4b98c2263e6e61501757fe36dfe65c5d0fa30f3",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/terrains.d.ts": {
@@ -2197,7 +2197,7 @@
         "affectsGlobalScope": false
       },
       "../src/navigation/navigation.ts": {
-        "version": "ce8a9d3207594df8444ef33b018a47a5e604fd7016f2c2942e1c2324e972856e",
+        "version": "06d61e76b2758f8571f1089d9a7cec815961b1fe5c655a8782de7f640306c503",
         "signature": "41eb0bd34abd1e88dcf740866b1f6e29996f738bdf98e4976fc2e0bf010f231f",
         "affectsGlobalScope": false
       },

@@ -511,7 +511,7 @@ export default class Navigation {
 			}
 		}
 
-		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(localPlayer)) {
+		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(localPlayer, undefined)) {
 			return true;
 		}
 
