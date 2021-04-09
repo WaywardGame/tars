@@ -377,8 +377,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/itemperature.d.ts": {
-        "version": "b916593e1025c9a02a2c561c0c574122dda4cd34a1d77710a709797823656660",
-        "signature": "b916593e1025c9a02a2c561c0c574122dda4cd34a1d77710a709797823656660",
+        "version": "16836909f7ec6db866950d022a0b3c4e0b3a68a564d33b8ce19ba82c48324f7a",
+        "signature": "16836909f7ec6db866950d022a0b3c4e0b3a68a564d33b8ce19ba82c48324f7a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/events/ifire.d.ts": {
@@ -607,8 +607,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "d64fa2e2819f55fe57d807c6e471ee877b7989231547a0b027506bb9162aec01",
-        "signature": "d64fa2e2819f55fe57d807c6e471ee877b7989231547a0b027506bb9162aec01",
+        "version": "c568d7cf1256af01400f1d422fa9f52319565dbaa9e30a4fbcdf4fbd41e838d9",
+        "signature": "c568d7cf1256af01400f1d422fa9f52319565dbaa9e30a4fbcdf4fbd41e838d9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -1592,8 +1592,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts": {
-        "version": "eedf485e7d1a8fe8c4646a5860a3af9b42be1aa9dbee4fe2f0811f7b74250eb3",
-        "signature": "eedf485e7d1a8fe8c4646a5860a3af9b42be1aa9dbee4fe2f0811f7b74250eb3",
+        "version": "2a8d1fc8ff3798543d9cde6bbfed24a03d427ba2f82e1f51ac07d65155179768",
+        "signature": "2a8d1fc8ff3798543d9cde6bbfed24a03d427ba2f82e1f51ac07d65155179768",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts": {
@@ -1627,8 +1627,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/item.d.ts": {
-        "version": "07fe0356195c8d2108ca527d11d43bcf87337b331d764fb866e6a5af47e8ffa4",
-        "signature": "07fe0356195c8d2108ca527d11d43bcf87337b331d764fb866e6a5af47e8ffa4",
+        "version": "e880d600c0887fd94d701d92e0efbbcddf9ae856481c9e7c201e9eb108793588",
+        "signature": "e880d600c0887fd94d701d92e0efbbcddf9ae856481c9e7c201e9eb108793588",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts": {
@@ -1757,8 +1757,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemworth.d.ts": {
-        "version": "027b91278cfb6362547382a4ecdb8eb5b96177952ecd46ebae1923fa6a1bbd00",
-        "signature": "027b91278cfb6362547382a4ecdb8eb5b96177952ecd46ebae1923fa6a1bbd00",
+        "version": "d547695aef6a204803c3456b3a6cacbc3b459cb74c96df0202a6f5e87f0ee409",
+        "signature": "d547695aef6a204803c3456b3a6cacbc3b459cb74c96df0202a6f5e87f0ee409",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemdetails.d.ts": {
@@ -1777,8 +1777,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/magicalpropertyvalue.d.ts": {
-        "version": "1a848709979f822327004e843fa3db01bafd59bc57ade9bc3f8a1384ae6e0a19",
-        "signature": "1a848709979f822327004e843fa3db01bafd59bc57ade9bc3f8a1384ae6e0a19",
+        "version": "8173686744b4d86df0ad236231d93b9070d12b9c0eb9b1c46199b19df545b4cf",
+        "signature": "8173686744b4d86df0ad236231d93b9070d12b9c0eb9b1c46199b19df545b4cf",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemuses.d.ts": {
@@ -1787,8 +1787,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/item/itemweight.d.ts": {
-        "version": "1945430bd5e49bd1b9628d0f4ad470149a8e72cdfcd574b635e00f55ae110268",
-        "signature": "1945430bd5e49bd1b9628d0f4ad470149a8e72cdfcd574b635e00f55ae110268",
+        "version": "f1f80c42e17df5bf52bb6f9e9030987363c03de7529847cbef5ea34f0c4754f6",
+        "signature": "f1f80c42e17df5bf52bb6f9e9030987363c03de7529847cbef5ea34f0c4754f6",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/magicalproperties.d.ts": {
