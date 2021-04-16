@@ -241,7 +241,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.Game, "play")
 	public onGameStart(): void {
-		if (this.saveData.enabled && !this.isEnabled()) {
+		if (!this.isEnabled() && (this.saveData.enabled || new URLSearchParams(window.location.search).has("autotars"))) {
 			this.toggle();
 		}
 	}

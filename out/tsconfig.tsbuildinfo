@@ -912,8 +912,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts": {
-        "version": "ab2f7b2f46297a7bfb8721fb6cfe449bf8fd14ec1791f521bd692d2a7e412e8c",
-        "signature": "ab2f7b2f46297a7bfb8721fb6cfe449bf8fd14ec1791f521bd692d2a7e412e8c",
+        "version": "b68eaf1d9f89d5ef463a6900e70dcf25dcaa817b89d2638ec57172e91d848d26",
+        "signature": "b68eaf1d9f89d5ef463a6900e70dcf25dcaa817b89d2638ec57172e91d848d26",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": {
@@ -922,8 +922,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/networking/iconnection.d.ts": {
-        "version": "3e067ec813eae7de47c60108fea961f7e453fbbdfe7fa415c95c6385dd4efe1e",
-        "signature": "3e067ec813eae7de47c60108fea961f7e453fbbdfe7fa415c95c6385dd4efe1e",
+        "version": "2dd58dea41430fe0915c550d093b0081d2eec8595d3ed9df192d16102530b348",
+        "signature": "2dd58dea41430fe0915c550d093b0081d2eec8595d3ed9df192d16102530b348",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/packets/ipacket.d.ts": {
@@ -1122,8 +1122,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/multiplayer.d.ts": {
-        "version": "b79346468e182d9af0f5b1e3052638fd5e90e3b7a372784b689d2e70dba5d55a",
-        "signature": "b79346468e182d9af0f5b1e3052638fd5e90e3b7a372784b689d2e70dba5d55a",
+        "version": "f45705613623b80d7b3665b37a93812993b7457546c06e6b1b0e4a41f04f14f6",
+        "signature": "f45705613623b80d7b3665b37a93812993b7457546c06e6b1b0e4a41f04f14f6",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/renderer/shaders.d.ts": {
@@ -1222,8 +1222,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/steamworks/steamworks.d.ts": {
-        "version": "65501d0abac788a647a5a295c23a0176fa7c78f407acd46007921a600589fa2e",
-        "signature": "65501d0abac788a647a5a295c23a0176fa7c78f407acd46007921a600589fa2e",
+        "version": "b1bcde617d84762328bead6a3a8aea6998737c38bdf870aa61a433c483f04035",
+        "signature": "b1bcde617d84762328bead6a3a8aea6998737c38bdf870aa61a433c483f04035",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/typings/jquery.d.ts": {
@@ -2622,7 +2622,7 @@
         "affectsGlobalScope": false
       },
       "../src/tars.ts": {
-        "version": "b8890b8998b80a51f6e4523978c08b472847e8dfb9df838aeb7ad5cf38f70c4c",
+        "version": "d20eed05ce594fb4a4827fcdf2d520b84569f8b694ebafaface0d21b4a8584b0",
         "signature": "50bab638576a0c9cea20790d97b037fee153a75db0b26631abcd0fe19e186b5b",
         "affectsGlobalScope": false
       },
@@ -4706,6 +4706,7 @@
       "../node_modules/@wayward/types/definitions/steamworks/steamworks.d.ts": [
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/mod/imodinfo.d.ts",
+        "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts",
         "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts",
         "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts"
       ],
@@ -8371,6 +8372,7 @@
       "../node_modules/@wayward/types/definitions/steamworks/steamworks.d.ts": [
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/mod/imodinfo.d.ts",
+        "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts",
         "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts",
         "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts"
       ],
