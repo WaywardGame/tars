@@ -1,4 +1,4 @@
-define(["require", "exports", "item/IItem", "./AcquireBase", "./AcquireItem"], function (require, exports, IItem_1, AcquireBase_1, AcquireItem_1) {
+define(["require", "exports", "game/item/IItem", "./AcquireBase", "./AcquireItem"], function (require, exports, IItem_1, AcquireBase_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireItemByTypes extends AcquireBase_1.default {

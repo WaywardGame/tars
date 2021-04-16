@@ -1,10 +1,11 @@
-import { ActionType } from "entity/action/IAction";
-import Item from "item/Item";
-
-import Context, { ContextDataType } from "../../Context";
+import { ActionType } from "game/entity/action/IAction";
+import Item from "game/item/Item";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
+
 
 export default class Unequip extends Objective {
 
@@ -14,6 +15,10 @@ export default class Unequip extends Objective {
 
 	public getIdentifier(): string {
 		return `Unequip:${this.item}`;
+	}
+
+	public getStatus(): string {
+		return `Unequipping ${this.item?.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

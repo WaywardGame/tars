@@ -1,9 +1,11 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-import Item from "item/Item";
-import { itemDescriptions } from "item/Items";
-
-import Context, { ContextDataType } from "../../../Context";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
+import Item from "game/item/Item";
+import { itemDescriptions } from "game/item/Items";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { ListEnder } from "language/Translation";
+import Context from "../../../Context";
+import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import { getItemInInventory } from "../../../Utilities/Item";
@@ -11,9 +13,10 @@ import SetContextData from "../../ContextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../Core/ExecuteActionForItem";
 import ReserveItems from "../../Core/ReserveItems";
 import MoveToLand from "../../Utility/MoveToLand";
-
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+
+
 
 /**
  * Dismantles one of the item types.
@@ -27,7 +30,18 @@ export default class AcquireItemFromDismantle extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `AcquireItemFromDismantle:${ItemType[this.itemType]}:${this.dismantleItemTypes.map((itemType: ItemType) => ItemType[itemType])}`;
+		return `AcquireItemFromDismantle:${ItemType[this.itemType]}:${this.dismantleItemTypes.map((itemType: ItemType) => ItemType[itemType]).join(",")}`;
+	}
+
+	public getStatus(): string {
+		if (this.dismantleItemTypes.length > 1) {
+			const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+				.collect(Translation.formatList, ListEnder.Or);
+
+			return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
+		}
+
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${Translation.nameOf(Dictionary.Item, this.dismantleItemTypes[0]).getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -48,7 +62,7 @@ export default class AcquireItemFromDismantle extends Objective {
 			}
 
 			const dismantleItem = getItemInInventory(context, itemType);
-			const hasRequirements = description.dismantle.required === undefined || itemManager.countItemsInContainerByGroup(context.player.inventory, description.dismantle.required) > 0;
+			const hasRequirements = description.dismantle.required === undefined || itemManager.getItemForHuman(context.player, description.dismantle.required, false) !== undefined;
 
 			const objectives: IObjective[] = [
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
@@ -81,7 +95,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				}
 
 				action.execute(context.player, item);
-			}));
+			}).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

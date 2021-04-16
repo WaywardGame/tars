@@ -1,6 +1,6 @@
-import Doodad from "doodad/Doodad";
-import Doodads from "doodad/Doodads";
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
+import Doodad from "game/doodad/Doodad";
+import Doodads from "game/doodad/Doodads";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Enums from "utilities/enum/Enums";
 
 export function getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): DoodadType[] {

@@ -1,14 +1,14 @@
-import Doodad from "doodad/Doodad";
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
+import Doodad from "game/doodad/Doodad";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Vector2 from "utilities/math/Vector2";
-
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { baseInfo, BaseInfoKey } from "../../../ITars";
 import Objective from "../../../Objective";
 import StartFire from "../../Other/StartFire";
-
 import AcquireBuildMoveToDoodad from "./AcquireBuildMoveToDoodad";
+
+
 
 /**
  * Acquires, builds, and moves to a lit doodad
@@ -58,7 +58,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 				})
 				.filter(doodadInfo => doodadInfo !== undefined) as Array<{ doodad: Doodad; providesFire: boolean }>)
 				// todo: make this use objective pipelines and move to easiest one?
-				.sort((a, b) => Vector2.squaredDistance(position, a.doodad) > Vector2.squaredDistance(position, b.doodad) ? 1 : -1);
+				.sort((a, b) => Vector2.squaredDistance(position, a.doodad) - Vector2.squaredDistance(position, b.doodad));
 
 			for (const doodadInfo of doodadInfos) {
 				if (!doodad) {

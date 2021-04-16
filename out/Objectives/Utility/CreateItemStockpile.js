@@ -1,4 +1,4 @@
-define(["require", "exports", "item/IItem", "../../IObjective", "../../Objective", "../Acquire/Item/AcquireItem", "../Core/ReserveItems", "./MoveIntoChest"], function (require, exports, IItem_1, IObjective_1, Objective_1, AcquireItem_1, ReserveItems_1, MoveIntoChest_1) {
+define(["require", "exports", "game/item/IItem", "../../IObjective", "../../Objective", "../Acquire/Item/AcquireItem", "../Core/ReserveItems", "./MoveIntoChest"], function (require, exports, IItem_1, IObjective_1, Objective_1, AcquireItem_1, ReserveItems_1, MoveIntoChest_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CreateItemStockpile extends Objective_1.default {

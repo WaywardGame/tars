@@ -1,16 +1,16 @@
-import { ActionType } from "entity/action/IAction";
-import { Stat } from "entity/IStats";
-import { getDirectionFromMovement } from "entity/player/IPlayer";
-import terrainDescriptions from "tile/Terrains";
+import { ActionType } from "game/entity/action/IAction";
+import { Stat } from "game/entity/IStats";
+import { getDirectionFromMovement } from "game/entity/player/IPlayer";
+import terrainDescriptions from "game/tile/Terrains";
+import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Navigation from "../../Navigation/Navigation";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
+
 
 export default class RunAwayFromTarget extends Objective {
 
@@ -20,6 +20,10 @@ export default class RunAwayFromTarget extends Objective {
 
 	public getIdentifier(): string {
 		return `RunAwayFromTarget:(${this.target.x},${this.target.y},${this.target.z})`;
+	}
+
+	public getStatus(): string {
+		return "Running away";
 	}
 
 	public isDynamic(): boolean {
@@ -46,15 +50,9 @@ export default class RunAwayFromTarget extends Objective {
 				return true;
 			})
 			.sort((pointA, pointB) => {
-				const scoreA = navigation.getPenaltyFromPoint(pointA);
-				const scoreB = navigation.getPenaltyFromPoint(pointB);
-
-				if (scoreA > scoreB) {
-					return 1;
-				}
-
-				if (scoreA < scoreB) {
-					return -1;
+				const delta = navigation.getPenaltyFromPoint(pointA) - navigation.getPenaltyFromPoint(pointB);
+				if (delta !== 0) {
+					return delta;
 				}
 
 				return Vector2.squaredDistance(pointA, this.target) < Vector2.squaredDistance(pointB, this.target) ? 1 : -1;
@@ -78,12 +76,12 @@ export default class RunAwayFromTarget extends Objective {
 			if (direction !== context.player.facingDirection) {
 				objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
 					action.execute(context.player, direction, undefined);
-				}));
+				}).setStatus(this));
 			}
 
 			objectives.push(new ExecuteAction(ActionType.Move, (context, action) => {
 				action.execute(context.player, direction);
-			}));
+			}).setStatus(this));
 
 		} else {
 			this.log.info("Unable to run away from target");

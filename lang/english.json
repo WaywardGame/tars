@@ -2,7 +2,8 @@
 	"extends": "English",
 	"dictionaries": {
 		"bindable": {
-			"modTARSToggle": "Toggle TARS"
+			"modTARSToggleDialog": "Toggle TARS Dialog",
+			"modTARSToggleTars": "Toggle TARS"
 		},
 		"source": {
 			"modTARSTARS": "TARS"
@@ -14,6 +15,12 @@
 		},
 		"command": {
 			"modTARSTARS": "tars"
+		},
+		"ModTARSTars": {
+			"dialogTitleMain": "TARS",
+			"dialogButtonEnable": "Enable TARS {#--text-secondary:({Bindings:ModTARSToggleTars})}",
+			"dialogLabelStatus": "Status: {0}",
+			"dialogStatusNavigatingInitializing": "Initializing navigation system"
 		}
 	}
 }

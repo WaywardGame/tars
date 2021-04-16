@@ -1,8 +1,9 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-import Item from "item/Item";
-
-import Context, { ContextDataType } from "../../Context";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
+import { RequirementStatus } from "game/item/IItemManager";
+import Item from "game/item/Item";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { isUsingVehicle } from "../../Utilities/Player";
@@ -13,6 +14,7 @@ import SetContextData from "../ContextData/SetContextData";
 import ExecuteAction from "../Core/ExecuteAction";
 import CompleteRequirements from "../Utility/CompleteRequirements";
 
+
 export default class RepairItem extends Objective {
 
 	constructor(private readonly item: Item) {
@@ -21,6 +23,10 @@ export default class RepairItem extends Objective {
 
 	public getIdentifier(): string {
 		return `RepairItem:${this.item}`;
+	}
+
+	public getStatus(): string {
+		return `Repairing ${this.item.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -55,10 +61,10 @@ export default class RepairItem extends Objective {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hammer));
 		}
 
-		const requirements = itemManager.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
-		if (!requirements.requirementsMet) {
+		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
+		if (requirementInfo.requirements === RequirementStatus.Missing) {
 			this.log.info("Repair requirements not met");
-			objectives.push(new CompleteRequirements(description.recipe?.requiredDoodad, (description.recipe?.requiresFire || description.repairAndDisassemblyRequiresFire) ? true : false));
+			objectives.push(new CompleteRequirements(requirementInfo));
 		}
 
 		objectives.push(new ExecuteAction(ActionType.Repair, (context, action) => {
@@ -69,7 +75,7 @@ export default class RepairItem extends Objective {
 			}
 
 			action.execute(context.player, hammer, this.item);
-		}));
+		}).setStatus(this));
 
 		return objectives;
 	}

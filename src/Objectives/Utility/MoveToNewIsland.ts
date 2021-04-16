@@ -1,8 +1,7 @@
-import { ActionType } from "entity/action/IAction";
+import { ActionType } from "game/entity/action/IAction";
 import Island from "game/Island";
 import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
-
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -15,8 +14,12 @@ export default class MoveToNewIsland extends Objective {
 		return "MoveToNewIsland";
 	}
 
+	public getStatus(): string {
+		return "Moving to a new island";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const unvisitedIslands: Array<{ islandId: string; edgePosition: IVector3; direction: Direction }> = [];
+		const unvisitedIslands: Array<{ islandId: string; edgePosition: IVector3; direction: Direction.Cardinal }> = [];
 
 		for (const direction of Direction.CARDINALS) {
 			const movement = game.directionToMovement(direction);

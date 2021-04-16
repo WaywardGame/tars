@@ -1,8 +1,19 @@
 import { ILogLine } from "utilities/Log";
 
-import { IObjective } from "../IObjective";
+import { IObjective, IObjectiveInfo } from "../IObjective";
 
 export interface IPlan {
+
+	/**
+	 * Full execution tree
+	 */
+	readonly tree: IExecutionTree;
+
+	/**
+	 * Flattened list of objectives to execute
+	 */
+	readonly objectives: IObjectiveInfo[];
+
 	/**
 	 * Print the excution tree as a string
 	 */

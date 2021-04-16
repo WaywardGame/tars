@@ -1,15 +1,20 @@
-import Doodad from "doodad/Doodad";
-import { DoodadType, DoodadTypeGroup, GrowingStage } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-import { CreatureType } from "entity/creature/ICreature";
-import { EquipType } from "entity/IHuman";
-import { IContainer, ItemType, ItemTypeGroup } from "item/IItem";
-import Item from "item/Item";
-import { ITile, TerrainType } from "tile/ITerrain";
-import { ITerrainLoot } from "tile/TerrainResources";
+import { Events } from "event/EventEmitter";
+import Doodad from "game/doodad/Doodad";
+import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { EquipType } from "game/entity/IHuman";
+import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
+import Item from "game/item/Item";
+import { ITile, TerrainType } from "game/tile/ITerrain";
+import { ITerrainLoot } from "game/tile/TerrainResources";
+import Translation from "language/Translation";
+import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
-
 import { foodItemTypes } from "./Utilities/Item";
+
+
+export const TARS_ID = "TARS";
 
 export const defaultMaxTilesChecked = 3000;
 
@@ -17,6 +22,7 @@ export const gardenMaxTilesChecked = 1024;
 
 export interface ISaveData {
 	enabled?: boolean;
+	shouldOpenDialog?: boolean;
 }
 
 export interface ITileLocation {
@@ -43,6 +49,7 @@ export interface IBaseInfo {
 	litType?: DoodadType | DoodadTypeGroup;
 	tryPlaceNear?: BaseInfoKey;
 	allowMultiple?: boolean;
+	openAreaRadius?: number;
 	canAdd?(base: IBase, target: Doodad): boolean;
 	onAdd?(base: IBase, target: Doodad): void;
 	findTargets?(base: IBase): Doodad[];
@@ -54,6 +61,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	anvil: {
 		doodadTypes: [DoodadTypeGroup.Anvil],
 		tryPlaceNear: "kiln",
+		// openAreaRadius: 0, // todo: verify this
 	},
 	campfire: {
 		doodadTypes: [DoodadTypeGroup.LitCampfire],
@@ -81,11 +89,11 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 		findTargets: (base: IBase) => {
 			const sortedChests = base.chest
 				.map(chest =>
-					({
-						chest: chest,
-						weight: itemManager.computeContainerWeight(chest as IContainer),
-					}))
-				.sort((a, b) => a.weight > b.weight ? 1 : -1);
+				({
+					chest: chest,
+					weight: itemManager.computeContainerWeight(chest as IContainer),
+				}))
+				.sort((a, b) => a.weight - b.weight);
 			if (sortedChests.length > 0) {
 				return [base.chest.splice(base.chest.indexOf(sortedChests[0].chest), 1)[0]];
 			}
@@ -243,8 +251,8 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	equipShield: {
 		itemTypes: [
 			ItemType.BarkShield,
-			ItemType.CopperShield,
-			ItemType.IronShield,
+			ItemType.CopperBuckler,
+			ItemType.IronHeater,
 			ItemType.WoodenShield,
 			ItemType.WroughtIronShield,
 		],
@@ -278,7 +286,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		flags: InventoryItemFlag.PreferLowerWeight,
 	},
 	food: {
-		itemTypes: foodItemTypes,
+		itemTypes: Array.from(foodItemTypes),
 		flags: InventoryItemFlag.PreferHigherDecay,
 		allowMultiple: 5,
 	},
@@ -371,3 +379,23 @@ export interface CreatureSearch {
 }
 
 export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot };
+
+export enum TarsTranslation {
+	DialogTitleMain,
+	DialogButtonEnable,
+	DialogLabelStatus,
+
+	DialogStatusNavigatingInitializing,
+}
+
+export interface ITarsEvents extends Events<Mod> {
+	/**
+	 * Emitted when tars is enabled or disabled
+	 */
+	enableChange(enabled: boolean): any;
+
+	/**
+	 * Emitted when tars status is changed
+	 */
+	statusChange(status: Translation | string): any;
+}

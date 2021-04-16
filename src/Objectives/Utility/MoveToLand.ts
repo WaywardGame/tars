@@ -1,6 +1,5 @@
-import Terrains from "tile/Terrains";
-import TileHelpers from "utilities/TileHelpers";
-
+import Terrains from "game/tile/Terrains";
+import TileHelpers from "utilities/game/TileHelpers";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
@@ -9,10 +8,15 @@ import Objective from "../../Objective";
 import { isOverWater } from "../../Utilities/Tile";
 import MoveToTarget from "../Core/MoveToTarget";
 
+
 export default class MoveToLand extends Objective {
 
 	public getIdentifier(): string {
 		return "MoveToLand";
+	}
+
+	public getStatus(): string {
+		return "Moving to land";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

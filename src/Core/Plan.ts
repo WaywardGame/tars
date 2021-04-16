@@ -1,31 +1,31 @@
-import Item from "item/Item";
+import Item from "game/item/Item";
 import Log, { ILogLine } from "utilities/Log";
-
 import Context from "../Context";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../IObjective";
-import Lambda from "../Objectives/Core/Lambda";
 import ReserveItems from "../Objectives/Core/ReserveItems";
+import Restart from "../Objectives/Core/Restart";
 import { createLog, discardQueuedMessages, processQueuedMessages, queueMessage } from "../Utilities/Logger";
-
 import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
 import { IPlanner } from "./IPlanner";
+
+
 
 /**
  * Represents a chain of objectives that can be executed in order to complete the plan.
  */
 export default class Plan implements IPlan {
 
-	private readonly log: Log;
+	public readonly log: Log;
 
 	/**
 	 * Full execution tree
 	 */
-	private readonly tree: IExecutionTree;
+	public readonly tree: IExecutionTree;
 
 	/**
 	 * Flattened list of objectives to execute
 	 */
-	private readonly objectives: IObjectiveInfo[];
+	public readonly objectives: IObjectiveInfo[];
 
 	constructor(private readonly planner: IPlanner, private readonly context: Context, private readonly objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]) {
 		this.log = createLog("Plan", objectiveInfo.objective.getHashCode());
@@ -461,7 +461,7 @@ export default class Plan implements IPlan {
 			if (nextObjectiveInfo.depth < currentObjectiveInfo.depth) {
 				// depth is changing, force a restart
 				// todo: verify that we want this
-				results.push(new Lambda(async () => ObjectiveResult.Restart));
+				results.push(new Restart().setStatus("Determining objective..."));
 				break;
 			}
 

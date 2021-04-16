@@ -1,10 +1,13 @@
-import { ActionType } from "entity/action/IAction";
-import Item from "item/Item";
-
-import Context, { ContextDataType } from "../../Context";
+import { ActionType } from "game/entity/action/IAction";
+import Item from "game/item/Item";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
+
 
 export default class UseItem extends Objective {
 
@@ -14,6 +17,10 @@ export default class UseItem extends Objective {
 
 	public getIdentifier(): string {
 		return `UseItem:${this.item}:${ActionType[this.actionType]}`;
+	}
+
+	public getStatus(): string {
+		return `Using ${this.item?.getName()} for ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -30,7 +37,7 @@ export default class UseItem extends Objective {
 
 		return new ExecuteAction(ActionType.UseItem, (context, action) => {
 			action.execute(context.player, item, this.actionType);
-		});
+		}).setStatus(this);
 	}
 
 }

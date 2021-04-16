@@ -1,16 +1,17 @@
-import { ActionType } from "entity/action/IAction";
-import Creature from "entity/creature/Creature";
-import { IStat, IStatMax, Stat } from "entity/IStats";
-import { getDirectionFromMovement, WeightStatus } from "entity/player/IPlayer";
-
+import { ActionType } from "game/entity/action/IAction";
+import Creature from "game/entity/creature/Creature";
+import { IStat, IStatMax, Stat } from "game/entity/IStats";
+import { getDirectionFromMovement, WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
+import { isScaredOfCreature } from "../../Utilities/Creature";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
+import Restart from "../Core/Restart";
 import RunAwayFromTarget from "../Other/RunAwayFromTarget";
-import { isScaredOfCreature } from "../../Utilities/Creature";
+
 
 export default class DefendAgainstCreature extends Objective {
 
@@ -20,6 +21,10 @@ export default class DefendAgainstCreature extends Objective {
 
 	public getIdentifier(): string {
 		return `DefendAgainstCreature:${this.creature}`;
+	}
+
+	public getStatus(): string {
+		return `Defending against ${this.creature.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -50,7 +55,7 @@ export default class DefendAgainstCreature extends Objective {
 					action.execute(context.player, direction);
 				});
 			}),
-			new Lambda(async () => ObjectiveResult.Restart), // ensures that no other objectives are ran after this one
+			new Restart(), // ensures that no other objectives are ran after this one
 		]);
 
 		return objectivePipelines;

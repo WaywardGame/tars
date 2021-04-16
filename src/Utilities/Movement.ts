@@ -1,23 +1,23 @@
-import { ActionType } from "entity/action/IAction";
-import { DamageType } from "entity/IEntity";
-import { getDirectionFromMovement } from "entity/player/IPlayer";
+import { ActionType } from "game/entity/action/IAction";
+import { DamageType } from "game/entity/IEntity";
+import { getDirectionFromMovement } from "game/entity/player/IPlayer";
 import { RenderSource } from "game/IGame";
-import PathOverlayFootPrints from "newui/screen/screens/game/util/movement/PathOverlayFootPrints";
-import { IOverlayInfo, ITile, TerrainType } from "tile/ITerrain";
-import Terrains from "tile/Terrains";
+import { IOverlayInfo, ITile, TerrainType } from "game/tile/ITerrain";
+import Terrains from "game/tile/Terrains";
+import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOverlayFootPrints";
+import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import { IVector2, IVector3 } from "utilities/math/IVector";
-import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../Context";
 import { ObjectiveResult } from "../IObjective";
 import { NavigationPath } from "../Navigation/INavigation";
 import Navigation from "../Navigation/Navigation";
-
 import { executeAction } from "./Action";
 import { getBestActionItem, getInventoryItemsWithUse } from "./Item";
 import { log } from "./Logger";
 import { hasCorpses } from "./Tile";
+
+
 
 export interface IMovementPath {
 	difficulty: number;
@@ -135,7 +135,7 @@ export async function getMovementPath(context: Context, target: IVector3, moveAd
 			result.score = Math.round(result.score - pathLength + Math.pow(pathLength, 1.1));
 		}
 
-		results = results.sort((a, b) => a.score === b.score ? 0 : (a.score > b.score ? 1 : -1));
+		results = results.sort((a, b) => a.score - b.score);
 
 		if (results.length > 0) {
 			movementPath = results[0];

@@ -1,13 +1,13 @@
-import Doodad from "doodad/Doodad";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
-import Creature from "entity/creature/Creature";
-import { MoveType } from "entity/IEntity";
+import Doodad from "game/doodad/Doodad";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import Creature from "game/entity/creature/Creature";
+import { MoveType } from "game/entity/IEntity";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-
 import Context from "../Context";
-
 import { isFreeOfOtherPlayers } from "./Tile";
+
+
 
 const creatureRadius = 5;
 
@@ -31,7 +31,7 @@ export function getSortedObjects<T extends IVector3>(context: Context, type: Fin
 	if (sortedObjects === undefined) {
 		sortedObjects = allObjects
 			.slice()
-			.sort((a, b) => Vector2.squaredDistance(context.player, a) > Vector2.squaredDistance(context.player, b) ? 1 : -1);
+			.sort((a, b) => Vector2.squaredDistance(context.player, a) - Vector2.squaredDistance(context.player, b));
 		cachedSorts.set(sortedCacheId, sortedObjects);
 	}
 
@@ -84,8 +84,8 @@ export function findCreatures(context: Context, id: string, isTarget: (creature:
 	return findObjects(context, FindObjectType.Creature, id, island.creatures as Creature[], isTarget, top);
 }
 
-export function findCarvableCorpses(context: Context, id: string, isTarget: (corpse: ICorpse) => boolean): ICorpse[] {
-	return findObjects(context, FindObjectType.Corpse, id, island.corpses as ICorpse[], corpse => {
+export function findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {
+	return findObjects(context, FindObjectType.Corpse, id, island.corpses as Corpse[], corpse => {
 		if (isTarget(corpse)) {
 			const tile = game.getTileFromPoint(corpse);
 			return tile.creature === undefined &&
@@ -115,5 +115,6 @@ export function getNearbyCreature(point: IVector3): Creature | undefined {
 			}
 		}
 	}
+
 	return undefined;
 }

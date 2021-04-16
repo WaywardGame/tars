@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/IStats"], function (require, exports, IStats_1) {
+define(["require", "exports", "game/entity/IStats"], function (require, exports, IStats_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.isUsingVehicle = exports.isHealthy = void 0;

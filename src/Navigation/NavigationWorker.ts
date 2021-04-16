@@ -264,7 +264,10 @@ webWorkerSelf.onmessage = (event: MessageEvent) => {
 
 	queuedMessages = [];
 
-	const pathPrefix = event.data.pathPrefix;
+	let pathPrefix: string = event.data.pathPrefix;
+	if (pathPrefix.endsWith("\\")) {
+		pathPrefix = pathPrefix.substring(0, pathPrefix.length - 1);
+	}
 
 	mapSize = event.data.mapSize;
 	mapSizeSq = event.data.mapSizeSq;

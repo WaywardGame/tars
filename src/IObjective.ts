@@ -1,9 +1,10 @@
-import { ActionType } from "entity/action/IAction";
-import { DamageType } from "entity/IEntity";
+import { ActionType } from "game/entity/action/IAction";
+import { DamageType } from "game/entity/IEntity";
 import { ILog, ILogLine } from "utilities/Log";
-
-import Context, { ContextState } from "./Context";
+import Context from "./Context";
+import ContextState from "./ContextState";
 import { IExecutionTree } from "./Core/IPlan";
+
 
 export enum ObjectiveResult {
 	// Objective was completed
@@ -52,6 +53,11 @@ export interface IObjective {
 	getIdentifier(): string;
 	getName(): string;
 
+	/**
+	 * Human readable status for what the objective is doing
+	 */
+	getStatusMessage(): string;
+
 	sort?(context: Context, executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number;
 
 	/**
@@ -63,6 +69,9 @@ export interface IObjective {
 	getDifficulty(context: Context): number;
 	isDifficultyOverridden(): boolean;
 
+	/**
+	 * Called when the player moves while this objective is running
+	 */
 	onMove(context: Context): Promise<IObjective | boolean>;
 
 	/**

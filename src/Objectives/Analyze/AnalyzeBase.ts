@@ -1,10 +1,8 @@
-
-import Doodad from "doodad/Doodad";
-import doodadDescriptions from "doodad/Doodads";
-import { DoodadType } from "doodad/IDoodad";
+import Doodad from "game/doodad/Doodad";
+import doodadDescriptions from "game/doodad/Doodads";
+import { DoodadType } from "game/doodad/IDoodad";
+import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { baseInfo, BaseInfoKey, IBaseInfo } from "../../ITars";

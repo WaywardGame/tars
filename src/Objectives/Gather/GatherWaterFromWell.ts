@@ -1,8 +1,7 @@
-import Doodad from "doodad/Doodad";
-import { ActionType } from "entity/action/IAction";
-import Item from "item/Item";
-import { getTileId } from "utilities/TilePosition";
-
+import Doodad from "game/doodad/Doodad";
+import { ActionType } from "game/entity/action/IAction";
+import Item from "game/item/Item";
+import { getTileId } from "utilities/game/TilePosition";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -31,7 +30,7 @@ export default class GatherWaterFromWell extends Objective {
 			new MoveToTarget(this.well, true),
 			new ExecuteAction(ActionType.UseItem, (context, action) => {
 				action.execute(context.player, this.item, ActionType.GatherWater);
-			}),
+			}).setStatus(() => `Gathering water from ${this.well.getName()}`),
 		];
 	}
 }

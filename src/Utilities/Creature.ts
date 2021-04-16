@@ -1,9 +1,9 @@
-import Creature from "entity/creature/Creature";
-import { CreatureType } from "entity/creature/ICreature";
-import { EquipType } from "entity/IHuman";
-import { ItemType } from "item/IItem";
-
+import Creature from "game/entity/creature/Creature";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { EquipType } from "game/entity/IHuman";
+import { ItemType } from "game/item/IItem";
 import Context from "../Context";
+
 
 export function isScaredOfCreature(context: Context, creature: Creature) {
 	return isScaredOfCreatureType(context, creature.type);

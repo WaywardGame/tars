@@ -1,14 +1,12 @@
+import { IOverlayInfo, ITerrainDescription, ITile, OverlayType, TerrainType } from "game/tile/ITerrain";
+import { TileEventType } from "game/tile/ITileEvent";
+import Terrains from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
-import { IOverlayInfo, ITerrainDescription, ITile, OverlayType, TerrainType } from "tile/ITerrain";
-import { TileEventType } from "tile/ITileEvent";
-import Terrains from "tile/Terrains";
-import { sleep } from "utilities/Async";
+import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
-import TileHelpers from "utilities/TileHelpers";
-
+import { sleep } from "utilities/promise/Async";
 import { ITileLocation } from "../ITars";
 import { log } from "../Utilities/Logger";
-
 import { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationMessageType, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
 
 interface INavigationWorker {
@@ -366,15 +364,7 @@ export default class Navigation {
 			points.push(neighbor);
 		}
 
-		return points.sort((a, b) => {
-			const penaltyA = this.getPenaltyFromPoint(a);
-			const penaltyB = this.getPenaltyFromPoint(b);
-			if (penaltyA === penaltyB) {
-				return 0;
-			}
-
-			return penaltyA > penaltyB ? 1 : -1;
-		});
+		return points.sort((a, b) => this.getPenaltyFromPoint(a) - this.getPenaltyFromPoint(b));
 	}
 
 	public async findPath(end: IVector3): Promise<NavigationPath | undefined> {
@@ -521,7 +511,7 @@ export default class Navigation {
 			}
 		}
 
-		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(localPlayer)) {
+		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(localPlayer, undefined)) {
 			return true;
 		}
 

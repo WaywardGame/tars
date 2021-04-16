@@ -1,10 +1,10 @@
-import { ItemType, ItemTypeGroup } from "item/IItem";
-
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
-
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemByGroup extends AcquireBase {
 
@@ -16,6 +16,10 @@ export default class AcquireItemByGroup extends AcquireBase {
 
 	public getIdentifier(): string {
 		return `AcquireItemByGroup:${ItemTypeGroup[this.itemTypeGroup]}`;
+	}
+
+	public getStatus(): string {
+		return `Acquiring ${itemManager.getItemTypeGroupName(this.itemTypeGroup)}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

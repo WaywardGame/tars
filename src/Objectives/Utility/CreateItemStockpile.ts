@@ -1,12 +1,12 @@
-import { IContainer, ItemType } from "item/IItem";
-
+import { IContainer, ItemType } from "game/item/IItem";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import AcquireItem from "../Acquire/Item/AcquireItem";
 import ReserveItems from "../Core/ReserveItems";
-
 import MoveIntoChest from "./MoveIntoChest";
+
+
 
 /**
  * Acquires items and moves them into chests in the base

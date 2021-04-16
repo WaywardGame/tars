@@ -1,13 +1,13 @@
-import Doodad from "doodad/Doodad";
-import { ActionType } from "entity/action/IAction";
-import { IContainer } from "item/IItem";
-import Item from "item/Item";
-
+import Doodad from "game/doodad/Doodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IContainer } from "game/item/IItem";
+import Item from "game/item/Item";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
+
 
 export default class OrganizeBase extends Objective {
 
@@ -17,6 +17,10 @@ export default class OrganizeBase extends Objective {
 
 	public getIdentifier(): string {
 		return "OrganizeBase";
+	}
+
+	public getStatus(): string {
+		return "Organizing base";
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -33,7 +37,7 @@ export default class OrganizeBase extends Objective {
 		}
 
 		// pick the chest with the most room available
-		const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
+		const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
 		if (chests.length === 0) {
 			return ObjectiveResult.Impossible;
 		}

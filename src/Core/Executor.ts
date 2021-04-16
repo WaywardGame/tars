@@ -1,11 +1,11 @@
-import { WeightStatus } from "entity/player/IPlayer";
-
+import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../Context";
 import { IObjective } from "../IObjective";
 import { log } from "../Utilities/Logger";
-
-import { ExecuteResultType } from "./IPlan";
+import { ExecuteResultType, IPlan } from "./IPlan";
 import planner from "./Planner";
+
+
 
 export enum ExecuteObjectivesResultType {
 	Completed,
@@ -34,21 +34,27 @@ export interface IExecuteObjectivesRestart {
 	type: ExecuteObjectivesResultType.Restart;
 }
 
-// * @returns An objective (if it's still being worked on), True if all the objectives are completed
-// * False if objectives are waiting for the next tick to continue running
-
+/**
+ * Execute objectives
+ */
 class Executor {
 
 	private interrupted: boolean;
 	private weightChanged: boolean;
+	private lastPlan: IPlan | undefined;
 
 	constructor() {
 		this.reset();
 	}
 
+	public getPlan(): IPlan | undefined {
+		return this.lastPlan;
+	}
+
 	public reset() {
 		this.interrupted = false;
 		this.weightChanged = false;
+		this.lastPlan = undefined;
 	}
 
 	public interrupt() {
@@ -114,7 +120,7 @@ class Executor {
 			planner.reset();
 
 			for (const o of objs) {
-				const plan = await planner.createPlan(context, o);
+				const plan = this.lastPlan = await planner.createPlan(context, o);
 				if (!plan) {
 					log.info(`No valid plan for ${o.getHashCode()}`);
 					break;
@@ -165,6 +171,9 @@ class Executor {
 							type: ExecuteObjectivesResultType.Restart,
 						};
 				}
+
+				// the plan finished
+				this.lastPlan = undefined;
 			}
 		}
 

@@ -1,12 +1,12 @@
-import Item from "item/Item";
-
+import Item from "game/item/Item";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-
 import GatherWaterFromStill from "./GatherWaterFromStill";
 import GatherWaterFromTerrain from "./GatherWaterFromTerrain";
 import GatherWaterFromWell from "./GatherWaterFromWell";
+
+
 
 export interface IGatherWaterOptions {
 	disallowTerrain?: boolean;
@@ -24,6 +24,10 @@ export default class GatherWater extends Objective {
 
 	public getIdentifier(): string {
 		return `GatherWater:${this.item}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
+	}
+
+	public getStatus(): string {
+		return `Gathering water into ${this.item?.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

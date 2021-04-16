@@ -1,4 +1,4 @@
-define(["require", "exports", "doodad/Doodads", "doodad/IDoodad", "../../../Objective", "../../../Utilities/Doodad", "../../../Utilities/Item", "../../../Utilities/Object", "../../Core/MoveToTarget", "../../Other/BuildItem", "../../Other/StartFire", "../Item/AcquireItemForDoodad"], function (require, exports, Doodads_1, IDoodad_1, Objective_1, Doodad_1, Item_1, Object_1, MoveToTarget_1, BuildItem_1, StartFire_1, AcquireItemForDoodad_1) {
+define(["require", "exports", "game/doodad/Doodads", "game/doodad/IDoodad", "../../../Objective", "../../../Utilities/Doodad", "../../../Utilities/Item", "../../../Utilities/Object", "../../Core/MoveToTarget", "../../Other/BuildItem", "../../Other/StartFire", "../Item/AcquireItemForDoodad"], function (require, exports, Doodads_1, IDoodad_1, Objective_1, Doodad_1, Item_1, Object_1, MoveToTarget_1, BuildItem_1, StartFire_1, AcquireItemForDoodad_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireBuildMoveToDoodad extends Objective_1.default {

@@ -1,18 +1,19 @@
 
-import { ActionType } from "entity/action/IAction";
-import Creature from "entity/creature/Creature";
-import { IStatMax, Stat } from "entity/IStats";
-import terrainDescriptions from "tile/Terrains";
+import { ActionType } from "game/entity/action/IAction";
+import Creature from "game/entity/creature/Creature";
+import { IStatMax, Stat } from "game/entity/IStats";
+import terrainDescriptions from "game/tile/Terrains";
+import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { log } from "../../Utilities/Logger";
 import { getMovementPath, move, MoveResult } from "../../Utilities/Movement";
 import Rest from "../Other/Rest";
 import UseItem from "../Other/UseItem";
+
 // import MoveToZ from "../Utility/MoveToZ";
 
 export interface IMoveToTargetOptions {
@@ -36,6 +37,10 @@ export default class MoveToTarget extends Objective {
 
 	public getIdentifier(): string {
 		return `MoveToTarget:${this.target}:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
+	}
+
+	public getStatus(): string {
+		return `Moving to (${this.target.x},${this.target.y},${this.target.z})`;
 	}
 
 	public isDynamic(): boolean {
@@ -213,6 +218,16 @@ export default class MoveToTarget extends Objective {
 						this.log.info("Finished moving to target");
 						return false;
 				}
+			}
+		}
+
+		if (this.options?.allowBoat && context.inventory.sailBoat && context.player.vehicleItemId === undefined) {
+			const tile = context.player.getTile();
+			const tileType = TileHelpers.getType(tile);
+			const terrainDescription = terrainDescriptions[tileType];
+			if (terrainDescription && terrainDescription.water) {
+				this.log.warn("Interrupting to use sail boat");
+				return true;
 			}
 		}
 

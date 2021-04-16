@@ -1,6 +1,7 @@
-import { ActionType } from "entity/action/IAction";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
-
+import { ActionType } from "game/entity/action/IAction";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
@@ -11,6 +12,7 @@ import { canCarveCorpse } from "../../Utilities/Tile";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
 import MoveToTarget from "../Core/MoveToTarget";
+
 
 export default class GatherFromCorpse extends Objective {
 
@@ -25,10 +27,10 @@ export default class GatherFromCorpse extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const hasCarveItem = getInventoryItemsWithUse(context, ActionType.Carve).length > 0;
 
-		return findCarvableCorpses(context, this.getIdentifier(), (corpse: ICorpse) => {
+		return findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
 			const itemTypes = this.search.map.get(corpse.type);
 			if (itemTypes) {
-				const resources = corpseManager.getResources(corpse, true);
+				const resources = corpse.getResources(true);
 				if (!resources || resources.length === 0) {
 					return false;
 				}
@@ -55,7 +57,8 @@ export default class GatherFromCorpse extends Objective {
 
 				objectives.push(new MoveToTarget(corpse, true));
 
-				objectives.push(new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(corpse.type)!));
+				objectives.push(new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(corpse.type)!)
+					.setStatus(() => `Carving ${Translation.nameOf(Dictionary.Creature, corpse.type).getString()} corpse`));
 
 				return objectives;
 			});

@@ -1,8 +1,7 @@
-import Doodad from "doodad/Doodad";
-import { ActionType } from "entity/action/IAction";
-import { IStat, Stat } from "entity/IStats";
-import { ItemTypeGroup } from "item/IItem";
-
+import Doodad from "game/doodad/Doodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IStat, Stat } from "game/entity/IStats";
+import { ItemTypeGroup } from "game/item/IItem";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -11,14 +10,15 @@ import { isWaterStillDrinkable } from "../../Utilities/Doodad";
 import { isDrinkableItem } from "../../Utilities/Item";
 import AcquireWaterContainer from "../Acquire/Item/Specific/AcquireWaterContainer";
 import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
+import Restart from "../Core/Restart";
 import GatherWater from "../Gather/GatherWater";
 import RepairItem from "../Interrupt/RepairItem";
-
 import StartFire from "./StartFire";
 import StokeFire from "./StokeFire";
 import UseItem from "./UseItem";
+
+
 
 /**
  * It will ensure the water still is desalinating as long as we're near the base
@@ -32,6 +32,10 @@ export default class StartWaterStillDesalination extends Objective {
 
 	public getIdentifier(): string {
 		return `StartWaterStillDesalination:${this.waterStill}`;
+	}
+
+	public getStatus(): string {
+		return `Starting desalination process for ${this.waterStill.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -75,7 +79,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 				objectives.push(new ExecuteAction(ActionType.DetachContainer, (context, action) => {
 					action.execute(context.player);
-				}));
+				}).setStatus(() => `Detaching container from ${this.waterStill.getName()}`));
 			}
 
 			if (!isWaterInContainer) {
@@ -105,7 +109,7 @@ export default class StartWaterStillDesalination extends Objective {
 				// cleanup water still tile
 				objectives.push(new ExecuteAction(ActionType.PickupAllItems, (context, action) => {
 					action.execute(context.player);
-				}));
+				}).setStatus(() => `Picking up all items under ${this.waterStill.getName()}`));
 			}
 
 			this.log.info("Moving to detach container");
@@ -120,7 +124,7 @@ export default class StartWaterStillDesalination extends Objective {
 				// we need to start the fire
 				objectives.push(new StartFire(this.waterStill));
 				objectives.push(new StokeFire(this.waterStill));
-				objectives.push(new Lambda(async () => ObjectiveResult.Restart));
+				objectives.push(new Restart());
 
 			} else {
 				return ObjectiveResult.Ignore;
@@ -133,7 +137,7 @@ export default class StartWaterStillDesalination extends Objective {
 				this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}`);
 
 				objectives.push(new StokeFire(this.waterStill));
-				objectives.push(new Lambda(async () => ObjectiveResult.Restart));
+				objectives.push(new Restart());
 
 			} else {
 				// water still is desalinating and the decay is enough for the process to finish

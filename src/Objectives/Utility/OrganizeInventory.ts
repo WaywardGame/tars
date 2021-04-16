@@ -1,11 +1,11 @@
-import Doodad from "doodad/Doodad";
-import { ActionType } from "entity/action/IAction";
-import { IContainer } from "item/IItem";
-import Item from "item/Item";
+import Doodad from "game/doodad/Doodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IContainer } from "game/item/IItem";
+import Item from "game/item/Item";
+import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
-import TileHelpers from "utilities/TileHelpers";
-
-import Context, { ContextDataType } from "../../Context";
+import { ContextDataType } from "../..//IContext";
+import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
@@ -14,6 +14,7 @@ import { getReservedItems, getUnusedItems } from "../../Utilities/Item";
 import { isOpenTile } from "../../Utilities/Tile";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
+
 
 const maxChestDistance = 128;
 
@@ -40,6 +41,10 @@ export default class OrganizeInventory extends Objective {
 
 	public getIdentifier(): string {
 		return "OrganizeInventory";
+	}
+
+	public getStatus(): string {
+		return "Organizing inventory";
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -119,7 +124,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (this.options.allowChests && context.base.chest.length > 0) {
 			// pick the chest with the most room available
-			const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
+			const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
 			for (const chest of chests) {
 				if (!this.options.disableDrop && Vector2.distance(context.player, chest) > maxChestDistance) {
 					continue;

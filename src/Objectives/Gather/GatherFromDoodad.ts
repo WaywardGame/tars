@@ -1,6 +1,7 @@
-import Doodad from "doodad/Doodad";
-import { ItemType } from "item/IItem";
-
+import Doodad from "game/doodad/Doodad";
+import { ItemType } from "game/item/IItem";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { DoodadSearchMap } from "../../ITars";
@@ -9,6 +10,7 @@ import { findDoodads } from "../../Utilities/Object";
 import { canGather } from "../../Utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
 import MoveToTarget from "../Core/MoveToTarget";
+
 
 export default class GatherFromDoodad extends Objective {
 
@@ -56,7 +58,9 @@ export default class GatherFromDoodad extends Objective {
 
 			objectives.push(new MoveToTarget(target, true));
 
-			objectives.push(new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType]).passContextDataKey(this));
+			objectives.push(new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType])
+				.passContextDataKey(this)
+				.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from ${target.getName()}`));
 
 			return objectives;
 		});

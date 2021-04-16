@@ -1,17 +1,22 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-
-import Context, { ContextDataType } from "../../../../Context";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
+import Context from "../../../../Context";
+import { ContextDataType } from "../../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../../IObjective";
 import Objective from "../../../../Objective";
 import SetContextData from "../../../ContextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../../Core/ExecuteActionForItem";
 import AcquireItem from "../AcquireItem";
 
+
 export default class AcquireWaterContainer extends Objective {
 
 	public getIdentifier(): string {
 		return "AcquireWaterContainer";
+	}
+
+	public getStatus(): string {
+		return "Acquiring a water container";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -33,7 +38,7 @@ export default class AcquireWaterContainer extends Objective {
 			}
 
 			action.execute(context.player, item);
-		}));
+		}).setStatus("Opening glass bottle"));
 
 		return [
 			[new AcquireItem(ItemType.Waterskin)],

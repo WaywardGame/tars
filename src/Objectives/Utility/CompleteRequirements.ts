@@ -1,6 +1,6 @@
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-
+import { DoodadTypeGroup } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IRequirementInfo, RequirementStatus } from "game/item/IItemManager";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -12,14 +12,15 @@ import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import StartFire from "../Other/StartFire";
 
+
 export default class CompleteRequirements extends Objective {
 
-	constructor(private readonly requiredDoodad: DoodadType | DoodadTypeGroup | undefined, private readonly requiresFire: boolean) {
+	constructor(private readonly requirementInfo: IRequirementInfo) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `CompleteRequirements:${this.requiredDoodad}:${this.requiresFire}`;
+		return `CompleteRequirements:${this.requirementInfo.fireRequirement}:${this.requirementInfo.doodadsRequired.join(",")}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -32,13 +33,23 @@ export default class CompleteRequirements extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		if (this.requirementInfo.doodadsRequired.length > 1) {
+			this.log.warn("Requires more than a single doodad", this.requirementInfo.doodadsRequired);
+			return ObjectiveResult.Impossible;
+		}
+
+		const requiresDoodads = this.requirementInfo.doodadsRequired.length > 0;
+		const requiresFire = this.requirementInfo.fireRequirement !== RequirementStatus.NotRequired;
+
 		const objectives: IObjective[] = [];
 
-		if (this.requiredDoodad !== undefined && this.requiresFire) {
-			this.log.info("Requires doodad and fire too", this.requiredDoodad);
+		if (requiresDoodads && requiresFire) {
+			this.log.info("Requires doodad and fire", this.requirementInfo.doodadsRequired);
 
-			if (this.requiredDoodad !== DoodadTypeGroup.Anvil) {
-				this.log.error("Required doodad is not an anvil", this.requiredDoodad);
+			const primaryDoodad = this.requirementInfo.doodadsRequired[0];
+
+			if (primaryDoodad !== DoodadTypeGroup.Anvil) {
+				this.log.warn("Required doodad is not an anvil", this.requirementInfo.doodadsRequired);
 				return ObjectiveResult.Impossible;
 			}
 
@@ -46,7 +57,7 @@ export default class CompleteRequirements extends Objective {
 			const kiln = context.base.kiln[0];
 
 			if (!anvil) {
-				objectives.push(new AcquireBuildMoveToDoodad(this.requiredDoodad));
+				objectives.push(new AcquireBuildMoveToDoodad(primaryDoodad));
 				objectives.push(new AnalyzeBase());
 				objectives.push(new Lambda(async context => {
 					if (!context.base.anvil[0]) {
@@ -77,11 +88,11 @@ export default class CompleteRequirements extends Objective {
 				}, false));
 			}
 
-		} else if (this.requiredDoodad !== undefined) {
+		} else if (requiresDoodads) {
 			this.log.info("Requires doodad");
-			objectives.push(new AcquireBuildMoveToDoodad(this.requiredDoodad));
+			objectives.push(new AcquireBuildMoveToDoodad(this.requirementInfo.doodadsRequired[0]));
 
-		} else if (this.requiresFire) {
+		} else if (requiresFire) {
 			this.log.info("Requires fire");
 			objectives.push(new AcquireBuildMoveToFire());
 		}

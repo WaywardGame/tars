@@ -1,12 +1,13 @@
-import { ActionType } from "entity/action/IAction";
-import Item from "item/Item";
-
-import Context, { ContextDataType } from "../../Context";
+import { ActionType } from "game/entity/action/IAction";
+import Item from "game/item/Item";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
+
 
 export default class ReinforceItem extends Objective {
 
@@ -16,6 +17,10 @@ export default class ReinforceItem extends Objective {
 
 	public getIdentifier(): string {
 		return `ReinforceItem:${this.item}:${this.threshold}`;
+	}
+
+	public getStatus(): string {
+		return `Reinforcing ${this.item.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -48,7 +53,7 @@ export default class ReinforceItem extends Objective {
 
 				return (new ExecuteAction(ActionType.Reinforce, (context, action) => {
 					action.execute(context.player, reinforcer, this.item);
-				}));
+				}).setStatus(this));
 			}),
 		];
 	}

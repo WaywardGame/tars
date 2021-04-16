@@ -1,10 +1,10 @@
-import { DoodadType } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-import { IContainer } from "item/IItem";
-import Item from "item/Item";
+import { DoodadType } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import { IContainer } from "game/item/IItem";
+import Item from "game/item/Item";
 import Vector2 from "utilities/math/Vector2";
-
-import Context, { ContextDataType } from "../../Context";
+import Context from "../../Context";
+import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import AcquireItemForDoodad from "../Acquire/Item/AcquireItemForDoodad";
@@ -12,6 +12,7 @@ import AnalyzeBase from "../Analyze/AnalyzeBase";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
 import BuildItem from "../Other/BuildItem";
+
 
 export default class MoveIntoChest extends Objective {
 
@@ -35,7 +36,7 @@ export default class MoveIntoChest extends Objective {
 
 		const chests = context.base.chest
 			.slice()
-			.sort((a, b) => itemManager.computeContainerWeight(a as IContainer) > itemManager.computeContainerWeight(b as IContainer) ? 1 : -1);
+			.sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
 		for (const chest of chests) {
 			if (this.maxChestDistance !== undefined && Vector2.distance(context.player, chest) > this.maxChestDistance) {
 				continue;

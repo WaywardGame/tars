@@ -1,15 +1,17 @@
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-import { itemDescriptions as Items } from "item/Items";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
+import { itemDescriptions as Items } from "game/item/Items";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import { getDoodadTypes } from "../../../Utilities/Doodad";
-
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemForDoodad extends Objective {
 
@@ -21,6 +23,10 @@ export default class AcquireItemForDoodad extends Objective {
 
 	public getIdentifier(): string {
 		return `AcquireItemForDoodad:${doodadManager.isGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
+	}
+
+	public getStatus(): string {
+		return `Acquiring ${doodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

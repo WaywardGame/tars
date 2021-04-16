@@ -1,0 +1,38 @@
+
+export enum ContextDataType {
+	Position = "Position",
+	LastAcquiredItem = "LastAcquiredItem",
+	LastBuiltDoodad = "LastBuiltDoodad",
+	Item1 = "Item1",
+
+	/**
+	 * Allow the OrganizeInventory objective to move reserved items into the intermediate chest
+	 */
+	AllowOrganizingReservedItemsIntoIntermediateChest = "AllowOrganizingReservedItemsIntoIntermediateChest",
+
+	/**
+	 * The next recipe/dismantle in the execution tree allows the use of the intermediate chest
+	 */
+	NextActionAllowsIntermediateChest = "NextActionAllowsIntermediateChest",
+
+	/**
+	 * The next recipe can be crafted from the intermediate chest
+	 */
+	CanCraftFromIntermediateChest = "CanCraftFromIntermediateChest",
+
+	/**
+	 * Prioritize using items from base chest for the objective over gather out in the field
+	 */
+	PrioritizeBaseChests = "PrioritizeBaseChests",
+
+	/**
+	 * Set when TARS is moving to a new island
+	 */
+	MovingToNewIsland = "MovingToNewIsland",
+}
+
+export enum MovingToNewIslandState {
+	None,
+	Preparing,
+	Ready,
+}

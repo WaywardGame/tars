@@ -1,10 +1,12 @@
-import { ActionType } from "entity/action/IAction";
-import { IRecipe, ItemType, ItemTypeGroup } from "item/IItem";
-import { RequirementInfo, WeightType } from "item/IItemManager";
-import Item from "item/Item";
-import ItemRecipeRequirementChecker from "item/ItemRecipeRequirementChecker";
-
-import Context, { ContextDataType } from "../../../Context";
+import { ActionType } from "game/entity/action/IAction";
+import { IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
+import { IRequirementInfo, RequirementStatus, WeightType } from "game/item/IItemManager";
+import Item from "game/item/Item";
+import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
+import Context from "../../../Context";
+import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { getAvailableInventoryWeight, processRecipe } from "../../../Utilities/Item";
 import SetContextData from "../../ContextData/SetContextData";
@@ -14,10 +16,11 @@ import MoveToTarget from "../../Core/MoveToTarget";
 import ReserveItems from "../../Core/ReserveItems";
 import CompleteRequirements from "../../Utility/CompleteRequirements";
 import MoveToLand from "../../Utility/MoveToLand";
-
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+
+
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
@@ -39,7 +42,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const canCraftFromIntermediateChest = !this.recipe.requiresFire && !this.recipe.requiredDoodad;
+		const canCraftFromIntermediateChest = !this.recipe.requiresFire && !this.recipe.requiredDoodads;
 
 		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.itemType);
 
@@ -69,7 +72,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 	private getObjectives(
 		context: Context,
-		requirementInfo: RequirementInfo,
+		requirementInfo: IRequirementInfo,
 		canCraftFromIntermediateChest: boolean,
 		allowOrganizingItemsIntoIntermediateChest: boolean,
 		checker: ItemRecipeRequirementChecker,
@@ -143,7 +146,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 						if (item && item.containedWithin === context.base.intermediateChest[0]) {
 							objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
 								action.execute(context.player, item, context.player.inventory);
-							}));
+							}).setStatus(() => `Moving ${item.getName()} to inventory`));
 						}
 					};
 
@@ -160,8 +163,8 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			}
 		}
 
-		if (!requirementInfo.requirementsMet) {
-			objectives.push(new CompleteRequirements(this.recipe.requiredDoodad, this.recipe.requiresFire ? true : false));
+		if (requirementInfo.requirements === RequirementStatus.Missing) {
+			objectives.push(new CompleteRequirements(requirementInfo));
 
 		} else {
 			objectives.push(new MoveToLand());
@@ -169,7 +172,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Craft, (context, action) => {
 			action.execute(context.player, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
-		}).passContextDataKey(this));
+		}).passContextDataKey(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 		return objectives;
 	}

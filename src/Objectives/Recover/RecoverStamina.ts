@@ -1,15 +1,21 @@
-import { IStat, Stat } from "entity/IStats";
-
+import { IStat, Stat } from "game/entity/IStats";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
+import { isUsingVehicle } from "../../Utilities/Player";
+import { isOverWater } from "../../Utilities/Tile";
 import Idle from "../Other/Idle";
 import Rest from "../Other/Rest";
+
 
 export default class RecoverStamina extends Objective {
 
 	public getIdentifier(): string {
 		return "RecoverStamina";
+	}
+
+	public getStatus(): string {
+		return "Recovering stamina";
 	}
 
 	public isDynamic(): boolean {
@@ -25,6 +31,11 @@ export default class RecoverStamina extends Objective {
 			}
 
 			return ObjectiveResult.Complete;
+		}
+
+		if (isOverWater(context) && isUsingVehicle(context)) {
+			this.log.info("Idling to recover stamina");
+			return new Idle(false);
 		}
 
 		// if (context.player.getWeightStatus() !== WeightStatus.Overburdened &&

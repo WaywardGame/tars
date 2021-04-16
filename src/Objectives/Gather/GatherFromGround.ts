@@ -1,7 +1,6 @@
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
+import { ActionType } from "game/entity/action/IAction";
+import { ItemType } from "game/item/IItem";
 import { IVector3 } from "utilities/math/IVector";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -10,6 +9,7 @@ import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
 import ReserveItems from "../Core/ReserveItems";
+
 
 export default class GatherFromGround extends Objective {
 
@@ -44,7 +44,7 @@ export default class GatherFromGround extends Objective {
 						new SetContextData(this.contextDataKey, item),
 						new ExecuteAction(ActionType.MoveItem, (context, action) => {
 							action.execute(context.player, item, context.player.inventory);
-						}),
+						}).setStatus(() => `Moving ${item.getName()} to inventory`),
 					];
 				}
 			}
@@ -83,7 +83,7 @@ export default class GatherFromGround extends Objective {
 						objectives.push(new SetContextData(this.contextDataKey, item));
 						objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
 							action.execute(context.player, item, context.player.inventory);
-						}));
+						}).setStatus(() => `Moving ${item.getName()} to inventory`));
 					}
 
 					return objectives;
