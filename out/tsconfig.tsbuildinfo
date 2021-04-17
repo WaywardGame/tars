@@ -227,8 +227,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/ientity.d.ts": {
-        "version": "cc13d327e5d6bcbfad1b5693588e1f73f327a9b8699e15e6ed5a131900dd659a",
-        "signature": "cc13d327e5d6bcbfad1b5693588e1f73f327a9b8699e15e6ed5a131900dd659a",
+        "version": "c71d830dfa96ff952b31244d4aeea1df9ad38cd4fccf96472d9e368304fe7e9c",
+        "signature": "c71d830dfa96ff952b31244d4aeea1df9ad38cd4fccf96472d9e368304fe7e9c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/command/icommand.d.ts": {
@@ -487,8 +487,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/requirement/irequirement.d.ts": {
-        "version": "ebf7a23c6c761cd524af3cae0146135306ef3d6543eafdba8239d2b3addb6169",
-        "signature": "ebf7a23c6c761cd524af3cae0146135306ef3d6543eafdba8239d2b3addb6169",
+        "version": "dd673c69f4a1c00f51995406840cee399eb11d2e5e7abb1a567c54c49f6f73b2",
+        "signature": "dd673c69f4a1c00f51995406840cee399eb11d2e5e7abb1a567c54c49f6f73b2",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/quest/iquest.d.ts": {
@@ -622,8 +622,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/uitranslation.d.ts": {
-        "version": "374a0567a8cc1c6f92f30296d730df58750bed53f8f2e01db7d9510b642c4be5",
-        "signature": "374a0567a8cc1c6f92f30296d730df58750bed53f8f2e01db7d9510b642c4be5",
+        "version": "82630eb7dfa7c6addd22ed1a420fefa3e0777ad1398726efa4be718b1400ed61",
+        "signature": "82630eb7dfa7c6addd22ed1a420fefa3e0777ad1398726efa4be718b1400ed61",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translationsprovider.d.ts": {
@@ -1702,8 +1702,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/requirements.d.ts": {
-        "version": "f5bc293b741dbb8a0f20391c58bb7ba875f733d4306f6067d88965dda024595b",
-        "signature": "f5bc293b741dbb8a0f20391c58bb7ba875f733d4306f6067d88965dda024595b",
+        "version": "b029e9ddb7020a3cce60568ef395cbf3b652968773d90e77561137f8b56e2276",
+        "signature": "b029e9ddb7020a3cce60568ef395cbf3b652968773d90e77561137f8b56e2276",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/quest/quest.d.ts": {
@@ -1952,8 +1952,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/playerdefense.d.ts": {
-        "version": "669519162b627cb8ad04499c2f76afd5618bac127ce421eb6b354304e8e6f925",
-        "signature": "669519162b627cb8ad04499c2f76afd5618bac127ce421eb6b354304e8e6f925",
+        "version": "ad2712bfed226fd2c29f730b204f660b45dd1c3e929e7dc761511c8b0cc461fc",
+        "signature": "ad2712bfed226fd2c29f730b204f660b45dd1c3e929e7dc761511c8b0cc461fc",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/human.d.ts": {
@@ -2607,8 +2607,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/component/checkbutton.d.ts": {
-        "version": "33128d77cb62ed323ca7cc01f347751e2d03e00a997f15f2f5d721ccb2571478",
-        "signature": "33128d77cb62ed323ca7cc01f347751e2d03e00a997f15f2f5d721ccb2571478",
+        "version": "910c9f9daf5af3af7fefb24044aae03ee817c861168b4d2d6313241aad771a0f",
+        "signature": "910c9f9daf5af3af7fefb24044aae03ee817c861168b4d2d6313241aad771a0f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/component/labelledrow.d.ts": {
