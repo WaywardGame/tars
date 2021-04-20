@@ -5,12 +5,12 @@ import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
+
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Navigation from "../../Navigation/Navigation";
 import Objective from "../../Objective";
 import ExecuteAction from "../Core/ExecuteAction";
-
 
 export default class RunAwayFromTarget extends Objective {
 
@@ -72,12 +72,6 @@ export default class RunAwayFromTarget extends Objective {
 			const direction = getDirectionFromMovement(bestPoint.x - context.player.x, bestPoint.y - context.player.y);
 
 			this.log.info(`Running away ${Direction[direction]}`);
-
-			if (direction !== context.player.facingDirection) {
-				objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
-					action.execute(context.player, direction, undefined);
-				}).setStatus(this));
-			}
 
 			objectives.push(new ExecuteAction(ActionType.Move, (context, action) => {
 				action.execute(context.player, direction);
