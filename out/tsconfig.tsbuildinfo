@@ -1602,8 +1602,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts": {
-        "version": "5f20acb95b9531d212d4fcc1dfeb106ec0149a41d4192e37868eb732778c873e",
-        "signature": "5f20acb95b9531d212d4fcc1dfeb106ec0149a41d4192e37868eb732778c873e",
+        "version": "3421016d0c8d9871aca625c6d56762f061d3e09ff366cc912720683ea91268d5",
+        "signature": "3421016d0c8d9871aca625c6d56762f061d3e09ff366cc912720683ea91268d5",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/reference/referencemanager.d.ts": {
@@ -1712,8 +1712,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/corpseinspection.d.ts": {
-        "version": "728385879ad009967b3fce964998a9f5c0f730f5cce3eedfff3d5980308f4f25",
-        "signature": "728385879ad009967b3fce964998a9f5c0f730f5cce3eedfff3d5980308f4f25",
+        "version": "996e8bca82393503fee7deabb03183628336481c3dec5c07d8b0c270d054cbcb",
+        "signature": "996e8bca82393503fee7deabb03183628336481c3dec5c07d8b0c270d054cbcb",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/listinspection.d.ts": {
@@ -1732,13 +1732,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/creatureinspection.d.ts": {
-        "version": "11436f9969568f53d22b3e2c29730deb89ff8319ccd4a1c6556ec038a6575a59",
-        "signature": "11436f9969568f53d22b3e2c29730deb89ff8319ccd4a1c6556ec038a6575a59",
+        "version": "0c3f5170e50a5667f3b35b6f10c93099bf7622b9bf485b424160321dfc2bba9b",
+        "signature": "0c3f5170e50a5667f3b35b6f10c93099bf7622b9bf485b424160321dfc2bba9b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/doodadinspection.d.ts": {
-        "version": "d62edada6f310020f0de552925455beee2213ed7723a35eee942b5c1e7520439",
-        "signature": "d62edada6f310020f0de552925455beee2213ed7723a35eee942b5c1e7520439",
+        "version": "9e2f1dd0df5a3319519630d2527d22f13f8cdc8c7e1b394da346baa0b9c98ef1",
+        "signature": "9e2f1dd0df5a3319519630d2527d22f13f8cdc8c7e1b394da346baa0b9c98ef1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/labelledvalue.d.ts": {
@@ -1807,8 +1807,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/iteminspection.d.ts": {
-        "version": "9742867ba67e1ba3621442881c1f8ca23c940b4a1dcc530a37956bf98d2dc4f8",
-        "signature": "9742867ba67e1ba3621442881c1f8ca23c940b4a1dcc530a37956bf98d2dc4f8",
+        "version": "a87613588d8a3fec4e7679e0d95e510742fb4007f904cc705bd28963f6f5019c",
+        "signature": "a87613588d8a3fec4e7679e0d95e510742fb4007f904cc705bd28963f6f5019c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/itemsinspection.d.ts": {
@@ -1827,8 +1827,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/milestoneinspection.d.ts": {
-        "version": "ef69720fe65e5ce99a23d2143c80f47c97296f83b64e18c986b3e44425935da0",
-        "signature": "ef69720fe65e5ce99a23d2143c80f47c97296f83b64e18c986b3e44425935da0",
+        "version": "7da3e8ecc66c5f31a27ece7eae956f6918b8a43ef43f6142f223a9f8e7ae0ae1",
+        "signature": "7da3e8ecc66c5f31a27ece7eae956f6918b8a43ef43f6142f223a9f8e7ae0ae1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/humaninspection.d.ts": {
@@ -1842,18 +1842,18 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/playerinspection.d.ts": {
-        "version": "401b64e4a8a6f79f538830615fe72beae6c9f01d796199865ffbb9213d658a91",
-        "signature": "401b64e4a8a6f79f538830615fe72beae6c9f01d796199865ffbb9213d658a91",
+        "version": "c4c7b04f91e8bd1fd70b38ef336a53d7ba58958030d767f63840fbf03097e2f7",
+        "signature": "c4c7b04f91e8bd1fd70b38ef336a53d7ba58958030d767f63840fbf03097e2f7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/recipeinspection.d.ts": {
-        "version": "245f90dbebe8d7993e7cba23b1e5a2283f64ff7e53c254e00086e62f55ed2fe9",
-        "signature": "245f90dbebe8d7993e7cba23b1e5a2283f64ff7e53c254e00086e62f55ed2fe9",
+        "version": "dbc645f9c41538a8e88632c7dbe069456bfa1d89f88c591633028446bd3ba629",
+        "signature": "dbc645f9c41538a8e88632c7dbe069456bfa1d89f88c591633028446bd3ba629",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/selfinspection.d.ts": {
-        "version": "6ab41f630c137a6f2f474e400a89f149f19bf50162154f875795b8ecad2648d1",
-        "signature": "6ab41f630c137a6f2f474e400a89f149f19bf50162154f875795b8ecad2648d1",
+        "version": "f4c9e7c15e8b6ebf32987bf636a807e804c6786dd07b57b844f413a7ffa78174",
+        "signature": "f4c9e7c15e8b6ebf32987bf636a807e804c6786dd07b57b844f413a7ffa78174",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/skill/magicalitembonuses.d.ts": {
@@ -1862,18 +1862,18 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/skillinspection.d.ts": {
-        "version": "42acc8ba6e089f7a6f10383c70b52439252f8fda276b2e31b8252a6dd895f42d",
-        "signature": "42acc8ba6e089f7a6f10383c70b52439252f8fda276b2e31b8252a6dd895f42d",
+        "version": "81ce91d236a0a667ea3c11374cb45fc252bb277a842afd67fd9d0113c3e214ca",
+        "signature": "81ce91d236a0a667ea3c11374cb45fc252bb277a842afd67fd9d0113c3e214ca",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/statinspection.d.ts": {
-        "version": "ad3f8b576b53a21ea77de34573249192b998f98b5b1b2a4fe55310dbe88335af",
-        "signature": "ad3f8b576b53a21ea77de34573249192b998f98b5b1b2a4fe55310dbe88335af",
+        "version": "c5e5181f8366cf8f45f1ec6e9024893f3372188e26159e0d76e5aba7d2ba0b14",
+        "signature": "c5e5181f8366cf8f45f1ec6e9024893f3372188e26159e0d76e5aba7d2ba0b14",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileeventinspection.d.ts": {
-        "version": "b3126349513a8977f3f5bcf427456b944a68e2a758ee2fe308df78f7857202ed",
-        "signature": "b3126349513a8977f3f5bcf427456b944a68e2a758ee2fe308df78f7857202ed",
+        "version": "0873a49e8445e92a0f09029aa2e3f5bc0ef4d774ae83cb6dbfefc4f398d74a32",
+        "signature": "0873a49e8445e92a0f09029aa2e3f5bc0ef4d774ae83cb6dbfefc4f398d74a32",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/tileinspection.d.ts": {
@@ -1882,8 +1882,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/inspection/inspectiontypemap.d.ts": {
-        "version": "b43b932ca4088c6b5ec2351ee4298bc9909182f9312a90e10923b7fe01292a27",
-        "signature": "b43b932ca4088c6b5ec2351ee4298bc9909182f9312a90e10923b7fe01292a27",
+        "version": "91907d652a73373284e1ca5bb608cb2dbe3d977cecc51e14ed5f1aa3ddc9398c",
+        "signature": "91907d652a73373284e1ca5bb608cb2dbe3d977cecc51e14ed5f1aa3ddc9398c",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/terrainresources.d.ts": {
@@ -3515,6 +3515,7 @@
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/corpseinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/creature/corpse/corpse.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/iinfoprovider.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
@@ -3531,6 +3532,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/creatureinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/creature/creature.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspections/entityinspection.d.ts",
@@ -3539,6 +3541,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/doodadinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/doodad/doodad.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
@@ -3596,6 +3599,7 @@
         "../node_modules/@wayward/types/definitions/language/translation.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/milestoneinspection.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/collapsableinfoprovider.d.ts",
@@ -3619,6 +3623,7 @@
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/recipeinspection.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/doodad/doodaduses.d.ts",
@@ -3630,6 +3635,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/selfinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
@@ -3639,6 +3645,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/skillinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/ihuman.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/skill/magicalitembonuses.d.ts",
@@ -3649,6 +3656,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/statinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/istats.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
@@ -7182,6 +7190,7 @@
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/corpseinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/creature/corpse/corpse.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/iinfoprovider.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
@@ -7198,6 +7207,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/creatureinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/creature/creature.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspections/entityinspection.d.ts",
@@ -7206,6 +7216,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/doodadinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/doodad/doodad.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
@@ -7263,6 +7274,7 @@
         "../node_modules/@wayward/types/definitions/language/translation.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/milestoneinspection.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/collapsableinfoprovider.d.ts",
@@ -7286,6 +7298,7 @@
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/recipeinspection.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/doodad/doodaduses.d.ts",
@@ -7297,6 +7310,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/selfinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
@@ -7306,6 +7320,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/skillinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/ihuman.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoproviders/skill/magicalitembonuses.d.ts",
@@ -7316,6 +7331,7 @@
       ],
       "../node_modules/@wayward/types/definitions/game/inspection/inspections/statinspection.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/istats.d.ts",
+        "../node_modules/@wayward/types/definitions/game/inspection/iinspection.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovider.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/infoprovidercontext.d.ts",
         "../node_modules/@wayward/types/definitions/game/inspection/inspection.d.ts",
