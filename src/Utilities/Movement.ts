@@ -242,12 +242,6 @@ export async function move(context: Context, target: IVector3, moveAdjacentToTar
 
 				} else if (nextTile.creature) {
 					// walking into a creature
-					if (direction !== context.player.facingDirection) {
-						await executeAction(context, ActionType.UpdateDirection, (context, action) => {
-							action.execute(context.player, direction, undefined);
-						});
-					}
-
 					await executeAction(context, ActionType.Move, (context, action) => {
 						action.execute(context.player, direction);
 					});

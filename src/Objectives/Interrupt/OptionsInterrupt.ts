@@ -1,30 +1,45 @@
-import { DropLocation } from "save/data/ISaveDataGlobal";
+import Player from "game/entity/player/Player";
+import { DropLocation, IOptions } from "save/data/ISaveDataGlobal";
+import Objects from "utilities/object/Objects";
+
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 
 export default class OptionsInterrupt extends Objective {
 
-	public static changedDropOnGatherHarvest = false;
-	public static changedDropOnDismantle = false;
+	public static previousOptions: IOptions | undefined;
 
-	public static restore() {
-		if (OptionsInterrupt.changedDropOnGatherHarvest) {
-			OptionsInterrupt.changedDropOnGatherHarvest = false;
-			game.updateOption(localPlayer, "dropOnGatherHarvest", false);
+	/**
+	 * Restores options to the original state before starting TARS
+	 */
+	public static restore(player: Player) {
+		if (!OptionsInterrupt.previousOptions) {
+			return;
 		}
 
-		if (OptionsInterrupt.changedDropOnDismantle) {
-			OptionsInterrupt.changedDropOnDismantle = false;
-			game.updateOption(localPlayer, "dropOnDismantle", false);
+		for (const key of Objects.keys(OptionsInterrupt.previousOptions)) {
+			const optionValue = OptionsInterrupt.previousOptions[key];
+			if ((typeof (optionValue) === "boolean" || typeof (optionValue) === "number") && optionValue !== player.options[key]) {
+				game.updateOption(player, key, optionValue);
+			}
 		}
+
+		OptionsInterrupt.previousOptions = undefined;
 	}
 
 	public getIdentifier(): string {
 		return "OptionsInterrupt";
 	}
 
+	/**
+	 * Updates options that helps TARS
+	 */
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		if (!OptionsInterrupt.previousOptions) {
+			OptionsInterrupt.previousOptions = Objects.deepClone(context.player.options);
+		}
+
 		if (context.player.options.autoPickup) {
 			this.log.info("Disabling AutoPickup");
 			game.updateOption(context.player, "autoPickup", false);

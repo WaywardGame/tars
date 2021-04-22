@@ -39,6 +39,7 @@ import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
+
 import Context from "./Context";
 import ContextState from "./ContextState";
 import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
@@ -93,7 +94,6 @@ import { log, logSourceName, preConsoleCallback } from "./Utilities/Logger";
 import * as movementUtilities from "./Utilities/Movement";
 import * as objectUtilities from "./Utilities/Object";
 import * as tileUtilities from "./Utilities/Tile";
-
 
 const tickSpeed = 333;
 
@@ -612,7 +612,7 @@ export default class Tars extends Mod {
 
 		if (localPlayer) {
 			localPlayer.walkAlongPath(undefined);
-			OptionsInterrupt.restore();
+			OptionsInterrupt.restore(localPlayer);
 		}
 	}
 
