@@ -992,8 +992,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts": {
-        "version": "9a21b010d44ed70561225b4d19c33658bba45a0df481d2a6a0313b08131fe679",
-        "signature": "9a21b010d44ed70561225b4d19c33658bba45a0df481d2a6a0313b08131fe679",
+        "version": "18aabd5adc70bd7f0254398a8c5ca7b221b4c1f36476423939b4f6d211e4fbb6",
+        "signature": "18aabd5adc70bd7f0254398a8c5ca7b221b4c1f36476423939b4f6d211e4fbb6",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/tileeventmanager.d.ts": {
@@ -1107,8 +1107,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/log.d.ts": {
-        "version": "b2ecf8d89ae5e085812d48ca3bb51ead6d3ee52f6146c0d0e62b63f0cc48b022",
-        "signature": "b2ecf8d89ae5e085812d48ca3bb51ead6d3ee52f6146c0d0e62b63f0cc48b022",
+        "version": "05a5e60509cf26d84c1d42f19e1bac4d74034b1a53bd9f3afa52ab1df81c7b57",
+        "signature": "05a5e60509cf26d84c1d42f19e1bac4d74034b1a53bd9f3afa52ab1df81c7b57",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/modmanager.d.ts": {
@@ -1632,13 +1632,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/item.d.ts": {
-        "version": "a4fcb619ee667292dff934af67040fae9254bc418192d06cc9432c7511066dc4",
-        "signature": "a4fcb619ee667292dff934af67040fae9254bc418192d06cc9432c7511066dc4",
+        "version": "30cb055b6344eb8e3fad771cbac62ebbeb92072af6f1ae0b076d9b278ac61f56",
+        "signature": "30cb055b6344eb8e3fad771cbac62ebbeb92072af6f1ae0b076d9b278ac61f56",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts": {
-        "version": "a16fde1e4ab1533559b15167fd45572a4a98fd16ee27022f870af46b71176555",
-        "signature": "a16fde1e4ab1533559b15167fd45572a4a98fd16ee27022f870af46b71176555",
+        "version": "f7263d3cfb3bcc4e2af2413a92fe8523c8aa8eea20cfafbec664f638b4a56151",
+        "signature": "f7263d3cfb3bcc4e2af2413a92fe8523c8aa8eea20cfafbec664f638b4a56151",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/npc/npc.d.ts": {
