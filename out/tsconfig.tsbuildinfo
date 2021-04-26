@@ -422,8 +422,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": {
-        "version": "c2ae2f006a8eeb70f3a57bcead51d174608e7b9a0e4bafe267458ceee2eacb5c",
-        "signature": "c2ae2f006a8eeb70f3a57bcead51d174608e7b9a0e4bafe267458ceee2eacb5c",
+        "version": "391e3d30cddac3f127ace88441aba016e314e251a2b0e6e3e2f29b62ecf4517f",
+        "signature": "391e3d30cddac3f127ace88441aba016e314e251a2b0e6e3e2f29b62ecf4517f",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/island.d.ts": {
@@ -901,24 +901,29 @@
         "signature": "6ba7df54c89e3a412db3406dd628828b2dde45a8f73fe586300e4a5f444b5c42",
         "affectsGlobalScope": false
       },
+      "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts": {
+        "version": "104c812bc85fb0aae0a070bee148534f602090daa41dbcb225fbfe253856bb52",
+        "signature": "104c812bc85fb0aae0a070bee148534f602090daa41dbcb225fbfe253856bb52",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts": {
+        "version": "c416aa308e790a05f2755195f5f91601befd253463eb0ad6a9683dc8f9f596aa",
+        "signature": "c416aa308e790a05f2755195f5f91601befd253463eb0ad6a9683dc8f9f596aa",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@wayward/types/definitions/save/isavemanager.d.ts": {
         "version": "cea3033865c2c8dec47b52bb8bd00bcde223c85326efa9a3c792baa8a3f3b46f",
         "signature": "cea3033865c2c8dec47b52bb8bd00bcde223c85326efa9a3c792baa8a3f3b46f",
         "affectsGlobalScope": false
       },
-      "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts": {
-        "version": "5bf90fb3021ad75d38724ab6b09f8936df1911783715f65a0126d2650171df21",
-        "signature": "5bf90fb3021ad75d38724ab6b09f8936df1911783715f65a0126d2650171df21",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts": {
-        "version": "2c86ac8d63de048a4419de03c17d48e2af242812a5b05a8b18c89e66cee95677",
-        "signature": "2c86ac8d63de048a4419de03c17d48e2af242812a5b05a8b18c89e66cee95677",
+        "version": "e0dd4b1ff756d5db3ed950e79122c61c5b644242d63b7230e082d70107efd306",
+        "signature": "e0dd4b1ff756d5db3ed950e79122c61c5b644242d63b7230e082d70107efd306",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": {
-        "version": "0760b5afcb2af5f496754d98a5b6bff2b2759f084ccb391396a81f2c56dd7179",
-        "signature": "0760b5afcb2af5f496754d98a5b6bff2b2759f084ccb391396a81f2c56dd7179",
+        "version": "29c1dc66c7aa3b41278aa3cb4c9f2d218b9f662b8aa02fb8eb6a9742e15c4fb5",
+        "signature": "29c1dc66c7aa3b41278aa3cb4c9f2d218b9f662b8aa02fb8eb6a9742e15c4fb5",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/multiplayer/networking/iconnection.d.ts": {
@@ -992,8 +997,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts": {
-        "version": "18aabd5adc70bd7f0254398a8c5ca7b221b4c1f36476423939b4f6d211e4fbb6",
-        "signature": "18aabd5adc70bd7f0254398a8c5ca7b221b4c1f36476423939b4f6d211e4fbb6",
+        "version": "649deae8e8a486da1fdd4626aaccd16a139a2985e00529de957a8706e06268a3",
+        "signature": "649deae8e8a486da1fdd4626aaccd16a139a2985e00529de957a8706e06268a3",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/tileeventmanager.d.ts": {
@@ -1107,8 +1112,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/log.d.ts": {
-        "version": "05a5e60509cf26d84c1d42f19e1bac4d74034b1a53bd9f3afa52ab1df81c7b57",
-        "signature": "05a5e60509cf26d84c1d42f19e1bac4d74034b1a53bd9f3afa52ab1df81c7b57",
+        "version": "2e3d2455033d3c8641a1b06b669aae43d0b4f8064173f807d3b9cd786ce468a6",
+        "signature": "2e3d2455033d3c8641a1b06b669aae43d0b4f8064173f807d3b9cd786ce468a6",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/modmanager.d.ts": {
@@ -1222,8 +1227,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/steamworks/steamworks.d.ts": {
-        "version": "3611d27f1b8d5939917fb8eeee720775110b078d367869222c8d619f3231f571",
-        "signature": "3611d27f1b8d5939917fb8eeee720775110b078d367869222c8d619f3231f571",
+        "version": "8e8cad8c004e9fe91daa57fe0ff1502f62a9a0639047a607e7bb47d52287776d",
+        "signature": "8e8cad8c004e9fe91daa57fe0ff1502f62a9a0639047a607e7bb47d52287776d",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/typings/jquery.d.ts": {
@@ -1437,8 +1442,8 @@
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/iglobal.d.ts": {
-        "version": "698d1db4e267f60faf0e4c30a5b5c356680086906bb1e17ac762fcdd901bdd83",
-        "signature": "698d1db4e267f60faf0e4c30a5b5c356680086906bb1e17ac762fcdd901bdd83",
+        "version": "891b7719be65dff62eb18ffd97db2d65a8815e2c992e1dd3a08d0fa2f84f461f",
+        "signature": "891b7719be65dff62eb18ffd97db2d65a8815e2c992e1dd3a08d0fa2f84f461f",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/mod/basemod.d.ts": {
@@ -1581,9 +1586,14 @@
         "signature": "368fb68d251551fc573f34df59b5035d51cdf0225ce71f29189e517214e2315d",
         "affectsGlobalScope": false
       },
+      "../node_modules/@wayward/types/definitions/game/entity/player/playermanager.d.ts": {
+        "version": "ab3a499bec69f72f431888d3302fd3ac0c3a129cb5000814c803a547791e2cd4",
+        "signature": "ab3a499bec69f72f431888d3302fd3ac0c3a129cb5000814c803a547791e2cd4",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@wayward/types/definitions/event/eventbuses.d.ts": {
-        "version": "2ecf07dbe5f97645e97cea128eee9f88020b1ba2842ff4091494f523cfa96ff7",
-        "signature": "2ecf07dbe5f97645e97cea128eee9f88020b1ba2842ff4091494f523cfa96ff7",
+        "version": "de02a7dea6cba2d90df487ccf384ee4e433875768d4e646d6dd98c3367841c21",
+        "signature": "de02a7dea6cba2d90df487ccf384ee4e433875768d4e646d6dd98c3367841c21",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/event/eventmanager.d.ts": {
@@ -1607,8 +1617,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/reference/referencemanager.d.ts": {
-        "version": "3f9e8353a50f13e7010f7b511ee17d4fd79ab2f1f93a172d5bf5763652524365",
-        "signature": "3f9e8353a50f13e7010f7b511ee17d4fd79ab2f1f93a172d5bf5763652524365",
+        "version": "d0d46e1546ad5ef831490d45d17996a655c0956094e651440ace7619b2c4d73a",
+        "signature": "d0d46e1546ad5ef831490d45d17996a655c0956094e651440ace7619b2c4d73a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/translation.d.ts": {
@@ -2760,7 +2770,10 @@
         "../node_modules/@wayward/types/definitions/game/doodad/doodad.d.ts",
         "../node_modules/@wayward/types/definitions/game/doodad/doodadmanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/action/actionexecutor.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/creature/creaturemanager.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/npc/npcmanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/player/playermanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/game.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/item.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts",
@@ -3176,6 +3189,11 @@
       ],
       "../node_modules/@wayward/types/definitions/game/entity/player/playerdefense.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/ientity.d.ts"
+      ],
+      "../node_modules/@wayward/types/definitions/game/entity/player/playermanager.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/entity/entitymanager.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
+        "../node_modules/@wayward/types/definitions/game/igame.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/quest/iquest.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/player/quest/requirement/irequirement.d.ts"
@@ -4426,7 +4444,7 @@
         "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": [
-        "../node_modules/@wayward/types/definitions/game/biome/ibiome.d.ts",
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts",
         "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/multiplayer/multiplayer.d.ts": [
@@ -4709,13 +4727,14 @@
         "../node_modules/@wayward/types/definitions/utilities/version.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts": [
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts",
         "../node_modules/@wayward/types/definitions/game/igame.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/steamworks/steamworks.d.ts": [
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/mod/imodinfo.d.ts",
         "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts",
-        "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts",
         "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/ui/component/blockrow.d.ts": [
@@ -5156,6 +5175,9 @@
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
+      ],
+      "../node_modules/@wayward/types/definitions/utilities/log.d.ts": [
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/utilities/math/bound3.d.ts": [
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
@@ -6435,7 +6457,10 @@
         "../node_modules/@wayward/types/definitions/game/doodad/doodad.d.ts",
         "../node_modules/@wayward/types/definitions/game/doodad/doodadmanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/action/actionexecutor.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/creature/creaturemanager.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/npc/npcmanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/player/playermanager.d.ts",
         "../node_modules/@wayward/types/definitions/game/game.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/item.d.ts",
         "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts",
@@ -6851,6 +6876,11 @@
       ],
       "../node_modules/@wayward/types/definitions/game/entity/player/playerdefense.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/ientity.d.ts"
+      ],
+      "../node_modules/@wayward/types/definitions/game/entity/player/playermanager.d.ts": [
+        "../node_modules/@wayward/types/definitions/game/entity/entitymanager.d.ts",
+        "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
+        "../node_modules/@wayward/types/definitions/game/igame.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/quest/iquest.d.ts": [
         "../node_modules/@wayward/types/definitions/game/entity/player/quest/requirement/irequirement.d.ts"
@@ -8101,7 +8131,7 @@
         "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts": [
-        "../node_modules/@wayward/types/definitions/game/biome/ibiome.d.ts",
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts",
         "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/multiplayer/multiplayer.d.ts": [
@@ -8384,13 +8414,14 @@
         "../node_modules/@wayward/types/definitions/utilities/version.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts": [
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts",
         "../node_modules/@wayward/types/definitions/game/igame.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/steamworks/steamworks.d.ts": [
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts",
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
         "../node_modules/@wayward/types/definitions/mod/imodinfo.d.ts",
         "../node_modules/@wayward/types/definitions/multiplayer/imultiplayer.d.ts",
-        "../node_modules/@wayward/types/definitions/multiplayer/matchmaking/imatchmaking.d.ts",
         "../node_modules/@wayward/types/definitions/steamworks/isteamworks.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/ui/component/blockrow.d.ts": [
@@ -8831,6 +8862,9 @@
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts",
         "../node_modules/@wayward/types/definitions/utilities/math/vector3.d.ts"
+      ],
+      "../node_modules/@wayward/types/definitions/utilities/log.d.ts": [
+        "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/utilities/math/bound3.d.ts": [
         "../node_modules/@wayward/types/definitions/utilities/math/vector2.d.ts"
@@ -9485,6 +9519,7 @@
       "../node_modules/@wayward/types/definitions/audio/audio.d.ts",
       "../node_modules/@wayward/types/definitions/audio/iaudio.d.ts",
       "../node_modules/@wayward/types/definitions/command/icommand.d.ts",
+      "../node_modules/@wayward/types/definitions/electron/interfaces.d.ts",
       "../node_modules/@wayward/types/definitions/event/eventbuses.d.ts",
       "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
       "../node_modules/@wayward/types/definitions/event/eventmanager.d.ts",
@@ -9528,6 +9563,7 @@
       "../node_modules/@wayward/types/definitions/game/entity/player/note/notemanager.d.ts",
       "../node_modules/@wayward/types/definitions/game/entity/player/player.d.ts",
       "../node_modules/@wayward/types/definitions/game/entity/player/playerdefense.d.ts",
+      "../node_modules/@wayward/types/definitions/game/entity/player/playermanager.d.ts",
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/quest/iquest.d.ts",
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/quest/quest.d.ts",
       "../node_modules/@wayward/types/definitions/game/entity/player/quest/questmanager.d.ts",
