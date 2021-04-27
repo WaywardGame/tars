@@ -992,8 +992,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "a3e560a107cc9b123cb966d56356c7d7f7ae36eed4471ad2cfb79a4e6e86a558",
-        "signature": "a3e560a107cc9b123cb966d56356c7d7f7ae36eed4471ad2cfb79a4e6e86a558",
+        "version": "8564b23909a39f8dccd0e8fd522312db13fb00b3d54c0fc7e10a8cb68d8f5d24",
+        "signature": "8564b23909a39f8dccd0e8fd522312db13fb00b3d54c0fc7e10a8cb68d8f5d24",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts": {
