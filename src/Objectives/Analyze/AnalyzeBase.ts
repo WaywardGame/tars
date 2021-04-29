@@ -3,6 +3,7 @@ import doodadDescriptions from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
+
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { baseInfo, BaseInfoKey, IBaseInfo } from "../../ITars";

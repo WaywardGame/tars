@@ -15,7 +15,7 @@ export default class CopyContextData<T extends ContextDataType, T2 extends Conte
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const data = context.getData(this.source);
-		context.setData(this.destination, data as any);
+		context.setData(this.destination, data);
 		// console.log(`Copied ${data} from ${ContextDataType[this.source]} to ${ContextDataType[this.destination]}`);
 		this.log.info(`Copied ${data} from ${ContextDataType[this.source]} to ${ContextDataType[this.destination]}`);
 		return ObjectiveResult.Complete;

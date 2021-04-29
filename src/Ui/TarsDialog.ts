@@ -5,6 +5,7 @@ import { LabelledRow } from "ui/component/LabelledRow";
 import Dialog from "ui/screen/screens/game/component/Dialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import Vector2 from "utilities/math/Vector2";
+
 import { TarsTranslation, TARS_ID } from "../ITars";
 import Tars from "../Tars";
 

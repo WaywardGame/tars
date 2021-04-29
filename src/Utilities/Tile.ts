@@ -2,10 +2,10 @@ import { ITile, ITileContainer, TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
+
 import Context from "../Context";
 import { ITileLocation } from "../ITars";
 import Navigation from "../Navigation/Navigation";
-
 
 const cache: Map<string, ITileLocation[]> = new Map();
 

@@ -1,4 +1,5 @@
 import { IStat, Stat } from "game/entity/IStats";
+
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -6,7 +7,6 @@ import { isUsingVehicle } from "../../Utilities/Player";
 import { isOverWater } from "../../Utilities/Tile";
 import Idle from "../Other/Idle";
 import Rest from "../Other/Rest";
-
 
 export default class RecoverStamina extends Objective {
 

@@ -1,14 +1,14 @@
 import Doodad from "game/doodad/Doodad";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Vector2 from "utilities/math/Vector2";
+
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { baseInfo, BaseInfoKey } from "../../../ITars";
 import Objective from "../../../Objective";
 import StartFire from "../../Other/StartFire";
+
 import AcquireBuildMoveToDoodad from "./AcquireBuildMoveToDoodad";
-
-
 
 /**
  * Acquires, builds, and moves to a lit doodad

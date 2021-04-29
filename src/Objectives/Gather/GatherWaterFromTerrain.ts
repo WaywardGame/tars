@@ -1,5 +1,6 @@
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
+
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { anyWaterTileLocation } from "../../Navigation/INavigation";
@@ -8,7 +9,6 @@ import { getNearestTileLocation } from "../../Utilities/Tile";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
-
 
 export default class GatherWaterFromTerrain extends Objective {
 

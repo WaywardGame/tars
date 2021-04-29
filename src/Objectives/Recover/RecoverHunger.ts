@@ -1,6 +1,7 @@
 import { ActionType } from "game/entity/action/IAction";
 import { IStatMax, Stat } from "game/entity/IStats";
 import Item from "game/item/Item";
+
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -8,7 +9,6 @@ import { isNearBase } from "../../Utilities/Base";
 import { foodItemTypes, getInventoryItemsWithUse } from "../../Utilities/Item";
 import AcquireFood from "../Acquire/Item/AcquireFood";
 import UseItem from "../Other/UseItem";
-
 
 export default class RecoverHunger extends Objective {
 

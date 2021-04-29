@@ -3,6 +3,7 @@ import { ActionType } from "game/entity/action/IAction";
 import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
 import Vector2 from "utilities/math/Vector2";
+
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -12,7 +13,6 @@ import AnalyzeBase from "../Analyze/AnalyzeBase";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
 import BuildItem from "../Other/BuildItem";
-
 
 export default class MoveIntoChest extends Objective {
 

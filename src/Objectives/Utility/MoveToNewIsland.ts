@@ -2,6 +2,7 @@ import { ActionType } from "game/entity/action/IAction";
 import Island from "game/Island";
 import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
+
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
