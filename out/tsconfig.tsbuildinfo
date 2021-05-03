@@ -1357,8 +1357,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/tooltip/tooltipmanager.d.ts": {
-        "version": "e1e7eb7c3b25fea867e0da20445046052a6efa21cc2d3b370c3230bb8d378d86",
-        "signature": "e1e7eb7c3b25fea867e0da20445046052a6efa21cc2d3b370c3230bb8d378d86",
+        "version": "9b3dd1e9ef7e6cb564f89300f6c6e7e8b4ef07410e531d5db2faabb1bc4b34b1",
+        "signature": "9b3dd1e9ef7e6cb564f89300f6c6e7e8b4ef07410e531d5db2faabb1bc4b34b1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/util/highlightmanager.d.ts": {
