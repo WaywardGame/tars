@@ -8,16 +8,16 @@ import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOver
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import { IVector2, IVector3 } from "utilities/math/IVector";
+
 import Context from "../Context";
 import { ObjectiveResult } from "../IObjective";
 import { NavigationPath } from "../Navigation/INavigation";
 import Navigation from "../Navigation/Navigation";
+
 import { executeAction } from "./Action";
 import { getBestActionItem, getInventoryItemsWithUse } from "./Item";
 import { log } from "./Logger";
 import { hasCorpses } from "./Tile";
-
-
 
 export interface IMovementPath {
 	difficulty: number;

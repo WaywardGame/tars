@@ -7,6 +7,7 @@ import { TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -19,9 +20,8 @@ import { getNearestTileLocation } from "../../Utilities/Tile";
 import AnalyzeBase from "../Analyze/AnalyzeBase";
 import Lambda from "../Core/Lambda";
 import MoveToTarget from "../Core/MoveToTarget";
+
 import UseItem from "./UseItem";
-
-
 
 const recalculateMovements = 40;
 

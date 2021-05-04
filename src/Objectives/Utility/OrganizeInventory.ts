@@ -4,6 +4,7 @@ import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
+
 import { ContextDataType } from "../..//IContext";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -14,7 +15,6 @@ import { getReservedItems, getUnusedItems } from "../../Utilities/Item";
 import { isOpenTile } from "../../Utilities/Tile";
 import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
-
 
 const maxChestDistance = 128;
 

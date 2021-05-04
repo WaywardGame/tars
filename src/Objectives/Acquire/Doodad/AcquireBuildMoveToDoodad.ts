@@ -1,6 +1,7 @@
 import Doodad from "game/doodad/Doodad";
 import Doodads from "game/doodad/Doodads";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
@@ -11,7 +12,6 @@ import MoveToTarget from "../../Core/MoveToTarget";
 import BuildItem from "../../Other/BuildItem";
 import StartFire from "../../Other/StartFire";
 import AcquireItemForDoodad from "../Item/AcquireItemForDoodad";
-
 
 /**
  * Acquires, builds, and moves to the doodad

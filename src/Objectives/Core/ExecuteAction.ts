@@ -3,11 +3,11 @@ import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
+
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { executeAction } from "../../Utilities/Action";
-
 
 export default class ExecuteAction<T extends ActionType> extends Objective {
 

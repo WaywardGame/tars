@@ -11,8 +11,8 @@ import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
-import { foodItemTypes } from "./Utilities/Item";
 
+import { foodItemTypes } from "./Utilities/Item";
 
 export const TARS_ID = "TARS";
 

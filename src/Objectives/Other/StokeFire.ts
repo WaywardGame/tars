@@ -1,15 +1,15 @@
 import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
+
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import MoveToTarget from "../Core/MoveToTarget";
+
 import StartFire from "./StartFire";
 import UseItem from "./UseItem";
-
-
 
 export default class StokeFire extends Objective {
 

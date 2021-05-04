@@ -1,6 +1,7 @@
 import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
+
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -9,7 +10,6 @@ import ExecuteAction from "../Core/ExecuteAction";
 import MoveToTarget from "../Core/MoveToTarget";
 import Idle from "../Other/Idle";
 import StartWaterStillDesalination from "../Other/StartWaterStillDesalination";
-
 
 export default class GatherWaterFromStill extends Objective {
 

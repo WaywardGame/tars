@@ -1,5 +1,6 @@
 import { ActionType } from "game/entity/action/IAction";
 import { WeightStatus } from "game/entity/player/IPlayer";
+
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -10,10 +11,9 @@ import { isOverWater } from "../../Utilities/Tile";
 import ExecuteAction from "../Core/ExecuteAction";
 import ReduceWeight from "../Interrupt/ReduceWeight";
 import MoveToLand from "../Utility/MoveToLand";
+
 import Idle from "./Idle";
 import RunAwayFromTarget from "./RunAwayFromTarget";
-
-
 
 export default class Rest extends Objective {
 

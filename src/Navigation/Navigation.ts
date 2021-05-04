@@ -5,8 +5,10 @@ import { WorldZ } from "game/WorldZ";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import { sleep } from "utilities/promise/Async";
+
 import { ITileLocation } from "../ITars";
 import { log } from "../Utilities/Logger";
+
 import { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationMessageType, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
 
 interface INavigationWorker {
@@ -32,7 +34,7 @@ export default class Navigation {
 
 	private readonly navigationWorkers: INavigationWorker[] = [];
 
-	private readonly overlay: Map<number, Map<number, Map<number, IOverlayInfo>>> = new Map();
+	private readonly overlay: Map<string, IOverlayInfo> = new Map();
 
 	private origin: IVector3;
 
@@ -135,12 +137,9 @@ export default class Navigation {
 	}
 
 	public deleteOverlay() {
-		for (const [z, zMap] of this.overlay.entries()) {
-			for (const [y, yMap] of zMap.entries()) {
-				for (const [x, overlay] of yMap.entries()) {
-					TileHelpers.Overlay.remove(game.getTile(x, y, z), overlay);
-				}
-			}
+		for (const [key, overlay] of this.overlay.entries()) {
+			const [x, y, z] = key.split(",");
+			TileHelpers.Overlay.remove(game.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)), overlay);
 		}
 
 		this.overlay.clear();
@@ -149,12 +148,8 @@ export default class Navigation {
 	public updateOverlayAlpha(alpha: number) {
 		this.overlayAlpha = alpha;
 
-		for (const [, zMap] of this.overlay.entries()) {
-			for (const [, yMap] of zMap.entries()) {
-				for (const [, overlay] of yMap.entries()) {
-					overlay.alpha = this.overlayAlpha;
-				}
-			}
+		for (const [, overlay] of this.overlay.entries()) {
+			overlay.alpha = this.overlayAlpha;
 		}
 	}
 
@@ -255,6 +250,7 @@ export default class Navigation {
 			node.disabled = isDisabled;
 		} catch (ex) {
 			log.error("invalid node", x, y, penalty, isDisabled);
+			// tslint:disable-next-line: no-console
 			console.trace();
 		}
 
@@ -585,19 +581,9 @@ export default class Navigation {
 	}
 
 	private addOrUpdateOverlay(tile: ITile, tileX: number, tileY: number, tileZ: number, isDisabled: boolean, penalty: number) {
-		let zMap = this.overlay.get(tileZ);
-		if (!zMap) {
-			zMap = new Map();
-			this.overlay.set(tileZ, zMap);
-		}
+		const key = `${tileX},${tileY},${tileZ}`;
 
-		let yMap = zMap.get(tileY);
-		if (!yMap) {
-			yMap = new Map();
-			zMap.set(tileY, yMap);
-		}
-
-		let overlay = yMap.get(tileX);
+		let overlay = this.overlay.get(key);
 		if (overlay) {
 			TileHelpers.Overlay.remove(tile, overlay);
 		}
@@ -614,9 +600,12 @@ export default class Navigation {
 				alpha: this.overlayAlpha,
 			};
 
-			yMap.set(tileX, overlay);
+			this.overlay.set(key, overlay);
 
 			TileHelpers.Overlay.add(tile, overlay);
+
+		} else if (overlay) {
+			this.overlay.delete(key);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 import { IStatMax, Stat } from "game/entity/IStats";
-import Context from "../Context";
 
+import Context from "../Context";
 
 export function isHealthy(context: Context) {
 	return context.player.stat.get<IStatMax>(Stat.Health).value > 8

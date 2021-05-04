@@ -9,11 +9,11 @@ import Item from "game/item/Item";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import Items, { itemDescriptions } from "game/item/Items";
 import Enums from "utilities/enum/Enums";
+
 import Context from "../Context";
 import { IInventoryItems, inventoryItemInfo } from "../ITars";
+
 import { getDoodadTypes } from "./Doodad";
-
-
 
 // allow processing with inventory items assuming they wont be consumed
 export function processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean): ItemRecipeRequirementChecker {

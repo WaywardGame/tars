@@ -2,6 +2,7 @@ import { ActionType } from "game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
+
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { ITerrainSearch } from "../../ITars";
@@ -10,7 +11,6 @@ import { getBestActionItem } from "../../Utilities/Item";
 import { canGather, getNearestTileLocation } from "../../Utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
 import MoveToTarget from "../Core/MoveToTarget";
-
 
 export default class GatherFromTerrain extends Objective {
 

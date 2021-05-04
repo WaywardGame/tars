@@ -4,12 +4,12 @@ import { itemDescriptions as Items } from "game/item/Items";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Enums from "utilities/enum/Enums";
+
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
+
 import AcquireItem from "./AcquireItem";
-
-
 
 export default class AcquireItemForAction extends Objective {
 

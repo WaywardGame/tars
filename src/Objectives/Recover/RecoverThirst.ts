@@ -1,6 +1,7 @@
 import { ActionType } from "game/entity/action/IAction";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { ItemTypeGroup } from "game/item/IItem";
+
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { freshWaterTileLocation } from "../../Navigation/INavigation";
@@ -20,9 +21,8 @@ import BuildItem from "../Other/BuildItem";
 import Idle from "../Other/Idle";
 import StartWaterStillDesalination from "../Other/StartWaterStillDesalination";
 import UseItem from "../Other/UseItem";
+
 import RecoverStamina from "./RecoverStamina";
-
-
 
 export default class RecoverThirst extends Objective {
 

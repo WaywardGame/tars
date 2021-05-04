@@ -1,5 +1,6 @@
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
+
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -7,7 +8,6 @@ import Objective from "../../Objective";
 import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
 import ExecuteAction from "../Core/ExecuteAction";
 import Lambda from "../Core/Lambda";
-
 
 export default class ReinforceItem extends Objective {
 
