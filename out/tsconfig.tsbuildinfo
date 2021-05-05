@@ -582,8 +582,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/itileevent.d.ts": {
-        "version": "5a2eec33db174df8b31d204cda04f48e05fef3b32293acbba358811be698966b",
-        "signature": "5a2eec33db174df8b31d204cda04f48e05fef3b32293acbba358811be698966b",
+        "version": "34aad13a796ac9c3843cb974a235424e5e05bff8b7452c46f14a5ef1443e5a9b",
+        "signature": "34aad13a796ac9c3843cb974a235424e5e05bff8b7452c46f14a5ef1443e5a9b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/gameendmessage.d.ts": {
@@ -1097,8 +1097,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/log.d.ts": {
-        "version": "2e3d2455033d3c8641a1b06b669aae43d0b4f8064173f807d3b9cd786ce468a6",
-        "signature": "2e3d2455033d3c8641a1b06b669aae43d0b4f8064173f807d3b9cd786ce468a6",
+        "version": "9738544fb5cf4185f2fe11034c07e831fb4177683fabee9e8d3fcea2db66acd7",
+        "signature": "9738544fb5cf4185f2fe11034c07e831fb4177683fabee9e8d3fcea2db66acd7",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/mod/modmanager.d.ts": {
@@ -1992,8 +1992,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapgen/mapgenhelpers.d.ts": {
-        "version": "f20dfe1e6d76350b7329ee839855347c3ff1cddec2988ea4d74c19421dbad77d",
-        "signature": "f20dfe1e6d76350b7329ee839855347c3ff1cddec2988ea4d74c19421dbad77d",
+        "version": "b3053ba742e6ccf0409cf96c9491681d22e3579d4e8c4af6ddf6a74bd3007f71",
+        "signature": "b3053ba742e6ccf0409cf96c9491681d22e3579d4e8c4af6ddf6a74bd3007f71",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapgen/imapgen.d.ts": {
@@ -2177,8 +2177,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/util/movement/walktotilehandler.d.ts": {
-        "version": "3fec39d6fd8e6f7416b30437b4339022d76d545357b90bd1dd535483743e0bcf",
-        "signature": "3fec39d6fd8e6f7416b30437b4339022d76d545357b90bd1dd535483743e0bcf",
+        "version": "a8359f59b55739c64f0ce4e7fdf3139538fa339e813f3a5f41bf0159d9f02f8e",
+        "signature": "a8359f59b55739c64f0ce4e7fdf3139538fa339e813f3a5f41bf0159d9f02f8e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/util/movement/movementhandler.d.ts": {
