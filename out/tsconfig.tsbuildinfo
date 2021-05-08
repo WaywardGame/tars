@@ -377,8 +377,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/mapping/drawnmap.d.ts": {
-        "version": "994f22f2b9919e7ba28dbc576321a783d75d461d2b30355a77b187974405af61",
-        "signature": "994f22f2b9919e7ba28dbc576321a783d75d461d2b30355a77b187974405af61",
+        "version": "eece0109252b0464c791a7d5de3a98f31e3710998293906c3d4de15cab96be84",
+        "signature": "eece0109252b0464c791a7d5de3a98f31e3710998293906c3d4de15cab96be84",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/worldz.d.ts": {
@@ -1647,8 +1647,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts": {
-        "version": "2904dcfd472602d50aabcc0253032d17e0129db6f436ea9b6c406e4790e34673",
-        "signature": "2904dcfd472602d50aabcc0253032d17e0129db6f436ea9b6c406e4790e34673",
+        "version": "f0990958619a2af24595fe18a94e4dede6252ae87de3eb2957f4be5a387851d5",
+        "signature": "f0990958619a2af24595fe18a94e4dede6252ae87de3eb2957f4be5a387851d5",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/npc/npc.d.ts": {
