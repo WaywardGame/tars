@@ -1617,8 +1617,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/itemperature.d.ts": {
-        "version": "db17b032c3edcb827b5af1662a0b24e5e31efc0956c2665c79297b23a35f32c7",
-        "signature": "db17b032c3edcb827b5af1662a0b24e5e31efc0956c2665c79297b23a35f32c7",
+        "version": "f8fc1ae8f42d30b8a3633231f5895221a2482356a112071cf50c8335920a1e40",
+        "signature": "f8fc1ae8f42d30b8a3633231f5895221a2482356a112071cf50c8335920a1e40",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts": {
