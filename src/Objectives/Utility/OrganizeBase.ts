@@ -77,7 +77,7 @@ export default class OrganizeBase extends Objective {
 	public static moveIntoChestObjectives(chest: Doodad, itemsToMove: Item[]) {
 		const targetContainer = chest as IContainer;
 		const weight = itemManager.computeContainerWeight(targetContainer);
-		if (weight + itemsToMove[0].getTotalWeight() <= targetContainer.weightCapacity!) {
+		if (weight + itemsToMove[0].getTotalWeight() <= itemManager.getWeightCapacity(targetContainer)!) {
 			// at least 1 item fits in the chest
 			const objectives: IObjective[] = [];
 

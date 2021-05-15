@@ -32,7 +32,6 @@ export function processRecipe(context: Context, recipe: IRecipe, useIntermediate
 
 	const items = context.player.inventory.containedItems;
 	const container: IContainer = {
-		weightCapacity: context.player.inventory.weightCapacity,
 		containedItems: items,
 		itemOrders: items.map(i => i.id),
 	};

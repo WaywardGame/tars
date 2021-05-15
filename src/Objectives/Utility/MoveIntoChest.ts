@@ -44,7 +44,7 @@ export default class MoveIntoChest extends Objective {
 
 			const targetContainer = chest as IContainer;
 			const weight = itemManager.computeContainerWeight(targetContainer);
-			if (weight + firstItem.getTotalWeight() <= targetContainer.weightCapacity!) {
+			if (weight + firstItem.getTotalWeight() <= itemManager.getWeightCapacity(targetContainer)!) {
 				// at least 1 item fits in the chest
 				const objectives: IObjective[] = [];
 

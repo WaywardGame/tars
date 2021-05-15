@@ -980,7 +980,7 @@ export default class Tars extends Mod {
 
 		} else if (this.base.chest.length > 0) {
 			for (const c of this.base.chest) {
-				if ((itemManager.computeContainerWeight(c as IContainer) / c.weightCapacity) < 0.9) {
+				if ((itemManager.computeContainerWeight(c as IContainer) / itemManager.getWeightCapacity(c)!) < 0.9) {
 					acquireChest = false;
 					break;
 				}
