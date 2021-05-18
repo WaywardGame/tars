@@ -257,8 +257,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/range.d.ts": {
-        "version": "f19f152e9d28f875d87e7475bd67916d004febde019204d503d7bb168d8adea3",
-        "signature": "f19f152e9d28f875d87e7475bd67916d004febde019204d503d7bb168d8adea3",
+        "version": "928005e04cec1829793cfcce172cef84a6f5080a9fa972f95c571180b1ed331b",
+        "signature": "928005e04cec1829793cfcce172cef84a6f5080a9fa972f95c571180b1ed331b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/random/random.d.ts": {
@@ -387,8 +387,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": {
-        "version": "5ad8486b138ef2dd88b7b844c1c320ae0e64aa5a41a23c86cb17fed1b1832cc2",
-        "signature": "5ad8486b138ef2dd88b7b844c1c320ae0e64aa5a41a23c86cb17fed1b1832cc2",
+        "version": "a52a5fee96c6ebfd8a81eb9e04d3f084e05bb001b9bd0de527b4ce3b71d421f1",
+        "signature": "a52a5fee96c6ebfd8a81eb9e04d3f084e05bb001b9bd0de527b4ce3b71d421f1",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/island.d.ts": {
@@ -542,8 +542,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/magic/magicalpropertytype.d.ts": {
-        "version": "a968ceb24af5c0bac80aeddb13ec8f7fe9e0f7611c7179c524f1639ba76cae8a",
-        "signature": "a968ceb24af5c0bac80aeddb13ec8f7fe9e0f7611c7179c524f1639ba76cae8a",
+        "version": "8fbac3ef2ebdcd56b13aaaae477d6fb8a8b08c85b8217008ac4bf3085e83a303",
+        "signature": "8fbac3ef2ebdcd56b13aaaae477d6fb8a8b08c85b8217008ac4bf3085e83a303",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/options/modifiers/challenge/ichallenge.d.ts": {
@@ -977,8 +977,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/game.d.ts": {
-        "version": "4b21de2c852bfaa061937bcc7f19f307655f715e37b9d322ee4e538c9dbdcb26",
-        "signature": "4b21de2c852bfaa061937bcc7f19f307655f715e37b9d322ee4e538c9dbdcb26",
+        "version": "f722cb54ad91a31a883f8b55f579bbc29f6d788e5dead53e24b0ac73d05c7ccf",
+        "signature": "f722cb54ad91a31a883f8b55f579bbc29f6d788e5dead53e24b0ac73d05c7ccf",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/itemmanager.d.ts": {
@@ -1617,8 +1617,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/temperature/itemperature.d.ts": {
-        "version": "f8fc1ae8f42d30b8a3633231f5895221a2482356a112071cf50c8335920a1e40",
-        "signature": "f8fc1ae8f42d30b8a3633231f5895221a2482356a112071cf50c8335920a1e40",
+        "version": "3a8fe78764a55722b4ec79a986576e2ab939eb29dd9fdfb4816bb3b532450fa9",
+        "signature": "3a8fe78764a55722b4ec79a986576e2ab939eb29dd9fdfb4816bb3b532450fa9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts": {
@@ -4044,7 +4044,8 @@
       ],
       "../node_modules/@wayward/types/definitions/game/temperature/itemperature.d.ts": [
         "../node_modules/@wayward/types/definitions/game/timemanager.d.ts",
-        "../node_modules/@wayward/types/definitions/game/worldz.d.ts"
+        "../node_modules/@wayward/types/definitions/game/worldz.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/range.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": [
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
@@ -4058,7 +4059,8 @@
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts",
         "../node_modules/@wayward/types/definitions/game/timemanager.d.ts",
-        "../node_modules/@wayward/types/definitions/game/worldz.d.ts"
+        "../node_modules/@wayward/types/definitions/game/worldz.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/range.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts": [
         "../node_modules/@wayward/types/definitions/audio/iaudio.d.ts",
@@ -7732,7 +7734,8 @@
       ],
       "../node_modules/@wayward/types/definitions/game/temperature/itemperature.d.ts": [
         "../node_modules/@wayward/types/definitions/game/timemanager.d.ts",
-        "../node_modules/@wayward/types/definitions/game/worldz.d.ts"
+        "../node_modules/@wayward/types/definitions/game/worldz.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/range.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/temperature/temperaturemanager.d.ts": [
         "../node_modules/@wayward/types/definitions/event/eventemitter.d.ts",
@@ -7746,7 +7749,8 @@
         "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts",
         "../node_modules/@wayward/types/definitions/game/tile/tileevent.d.ts",
         "../node_modules/@wayward/types/definitions/game/timemanager.d.ts",
-        "../node_modules/@wayward/types/definitions/game/worldz.d.ts"
+        "../node_modules/@wayward/types/definitions/game/worldz.d.ts",
+        "../node_modules/@wayward/types/definitions/utilities/math/range.d.ts"
       ],
       "../node_modules/@wayward/types/definitions/game/tile/iterrain.d.ts": [
         "../node_modules/@wayward/types/definitions/audio/iaudio.d.ts",
