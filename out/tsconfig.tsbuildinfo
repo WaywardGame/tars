@@ -1252,13 +1252,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/old/screens/ingamescreen.d.ts": {
-        "version": "1fb2b96eb0f6c0c449cdeb7c5d8a62b4f66922935e49333d68346e14f4b8ebf7",
-        "signature": "1fb2b96eb0f6c0c449cdeb7c5d8a62b4f66922935e49333d68346e14f4b8ebf7",
+        "version": "16697de17f395e18e21761733967a1c9c10c71d6c4333ec5aea63f7d2f5113ea",
+        "signature": "16697de17f395e18e21761733967a1c9c10c71d6c4333ec5aea63f7d2f5113ea",
         "affectsGlobalScope": true
       },
       "../node_modules/@wayward/types/definitions/ui/old/oldui.d.ts": {
-        "version": "3bab737c34de0d41bc3c8e2636680b4b0f3205dcfaf420cef413f93d5f682bd6",
-        "signature": "3bab737c34de0d41bc3c8e2636680b4b0f3205dcfaf420cef413f93d5f682bd6",
+        "version": "bdc7ead8766cfd3030c8d28dbda8c261767baae42c8394d47d677a4422d91027",
+        "signature": "bdc7ead8766cfd3030c8d28dbda8c261767baae42c8394d47d677a4422d91027",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/component/refreshable.d.ts": {
