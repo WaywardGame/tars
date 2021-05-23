@@ -247,8 +247,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/language/dictionary/message.d.ts": {
-        "version": "823c5db837a79172cb565d552d58ab037119107659e13acf3643da68e35ad5f2",
-        "signature": "823c5db837a79172cb565d552d58ab037119107659e13acf3643da68e35ad5f2",
+        "version": "73adbc51f2f77f0d9c596be8462a0be1f06beb27c1dafe445905f1e9e1dbcf3e",
+        "signature": "73adbc51f2f77f0d9c596be8462a0be1f06beb27c1dafe445905f1e9e1dbcf3e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/math/ivector.d.ts": {
@@ -1637,8 +1637,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/magic/magicalpropertymanager.d.ts": {
-        "version": "8253ee2f64f7a488086e0894a912d4d43048e3298c5476bf28602daefb25d724",
-        "signature": "8253ee2f64f7a488086e0894a912d4d43048e3298c5476bf28602daefb25d724",
+        "version": "52ea1875af1921cf476cb0724b1c228e6b0dc982ff6c57b17a9ded31813da1ed",
+        "signature": "52ea1875af1921cf476cb0724b1c228e6b0dc982ff6c57b17a9ded31813da1ed",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/item.d.ts": {
@@ -1647,8 +1647,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/item/iitem.d.ts": {
-        "version": "58acdb5333269bada1d2bbbe5e808bc9995b0723dd102513812bc8b7145641cb",
-        "signature": "58acdb5333269bada1d2bbbe5e808bc9995b0723dd102513812bc8b7145641cb",
+        "version": "a0898bd3291daa3f4741d4a87459ec469c8ef66d8de86e7e8311dc6a94584ca9",
+        "signature": "a0898bd3291daa3f4741d4a87459ec469c8ef66d8de86e7e8311dc6a94584ca9",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/npc/npc.d.ts": {
@@ -2027,8 +2027,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/action/iaction.d.ts": {
-        "version": "ae25b20b378b291ae8f8d17a7fa8fa09aa95a88719b991b306ef626e5d012ca2",
-        "signature": "ae25b20b378b291ae8f8d17a7fa8fa09aa95a88719b991b306ef626e5d012ca2",
+        "version": "c4b2d31110654bdf24f2bd5a47cf267d3f8f88d360408739020e0b6ada29cf07",
+        "signature": "c4b2d31110654bdf24f2bd5a47cf267d3f8f88d360408739020e0b6ada29cf07",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/doodad/idoodad.d.ts": {
@@ -2262,8 +2262,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/action/actions.d.ts": {
-        "version": "c7933dcb48284c07da7d445c71913a9e7f4ccb8656ab3fd35b6af37086cb94a2",
-        "signature": "c7933dcb48284c07da7d445c71913a9e7f4ccb8656ab3fd35b6af37086cb94a2",
+        "version": "0037126171edd25180b4fe767b0ddfb29feccc96dd1fd45e8fc2e533a4660070",
+        "signature": "0037126171edd25180b4fe767b0ddfb29feccc96dd1fd45e8fc2e533a4660070",
         "affectsGlobalScope": false
       },
       "../src/utilities/action.ts": {
@@ -2363,7 +2363,7 @@
       },
       "../src/objectives/core/executeactionforitem.ts": {
         "version": "e72df0463117815643d8b98bc5c05d5593c515c6abe99b611c6f42f697a75483",
-        "signature": "0e549f28ff93c9b93cedd0ddb327fe06d4b18d4606b64dea567adc59a088fe64",
+        "signature": "bc689acfe6a5c34f9c274f738a2467c88f4becb43907db0a29f0a5b778a8f185",
         "affectsGlobalScope": false
       },
       "../src/objectives/gather/gatherfromcorpse.ts": {
