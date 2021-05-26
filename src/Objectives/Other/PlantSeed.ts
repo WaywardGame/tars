@@ -61,8 +61,7 @@ export default class PlantSeed extends Objective {
 
 		const emptyTilledTile = TileHelpers.findMatchingTile(getBasePosition(context), (point, tile) => {
 			const tileContainer = tile as ITileContainer;
-			return tile.doodad === undefined &&
-				tile.corpses === undefined &&
+			return game.isTileEmpty(tile) &&
 				TileHelpers.isOpenTile(point, tile) &&
 				TileHelpers.isTilled(tile) &&
 				this.plantTiles.includes(TileHelpers.getType(tile)) &&

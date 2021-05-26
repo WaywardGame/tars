@@ -43,11 +43,7 @@ export function isOverWater(context: Context) {
 }
 
 export function isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {
-	if (tile.creature !== undefined) {
-		return false;
-	}
-
-	if (tile.doodad !== undefined) {
+	if (!game.isTileEmpty(tile)) {
 		return false;
 	}
 

@@ -1567,8 +1567,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/action/actionexecutor.d.ts": {
-        "version": "368fb68d251551fc573f34df59b5035d51cdf0225ce71f29189e517214e2315d",
-        "signature": "368fb68d251551fc573f34df59b5035d51cdf0225ce71f29189e517214e2315d",
+        "version": "62278cc92c92ed4e40ecdf44426e592e9814a223b44bcde77eb00d51b1aaf4ac",
+        "signature": "62278cc92c92ed4e40ecdf44426e592e9814a223b44bcde77eb00d51b1aaf4ac",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/game/entity/player/playermanager.d.ts": {
@@ -2162,8 +2162,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/static/messages.d.ts": {
-        "version": "12ef5171950b90599bb06138a99b8f23322814818f1951b6776597a584be904e",
-        "signature": "12ef5171950b90599bb06138a99b8f23322814818f1951b6776597a584be904e",
+        "version": "56d844a1f7db1449fab2817728e7e668023928ba8ce74b88a7bce1f22e8a35ac",
+        "signature": "56d844a1f7db1449fab2817728e7e668023928ba8ce74b88a7bce1f22e8a35ac",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/static/quickslots.d.ts": {
@@ -2292,7 +2292,7 @@
         "affectsGlobalScope": false
       },
       "../src/utilities/tile.ts": {
-        "version": "6df01d875fda3d6879412177392b1b66f082f6959135d2c77376dd0b5b221460",
+        "version": "3d9f4871442d9bd78dcf51e0057a80eff842db645ba660ac38c7bb13cfae8236",
         "signature": "d6015ad0c7447189bcf5538e00c056ac0a455627f00975dbe8fab3abd6077552",
         "affectsGlobalScope": false
       },
@@ -2557,7 +2557,7 @@
         "affectsGlobalScope": false
       },
       "../src/objectives/other/plantseed.ts": {
-        "version": "96bc173872e4ff02a2c38853a37cdc2bf9b9ab8708f20810926707889040f2c0",
+        "version": "2d0b43873f92c684e0287f5fa038801d8dc3387ba591ede5054b7e32f68518d9",
         "signature": "f612aa7dbda51fac503d50beaff5963b202dad8de2887117b4e49a933998964f",
         "affectsGlobalScope": false
       },
