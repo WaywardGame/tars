@@ -1522,8 +1522,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/component/component.d.ts": {
-        "version": "52c42eb835b41719e72dac275c2d6fafc2fad5953c9389a371532edd55accd4b",
-        "signature": "52c42eb835b41719e72dac275c2d6fafc2fad5953c9389a371532edd55accd4b",
+        "version": "d032081884ce8a676288f5be3777541295c9e690318cb4bce4a97791345befa2",
+        "signature": "d032081884ce8a676288f5be3777541295c9e690318cb4bce4a97791345befa2",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/collection/map/hashmap.d.ts": {
@@ -2177,8 +2177,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/util/movement/walktotilehandler.d.ts": {
-        "version": "5c4c9129ab95cd5b3333bf5638d7d2e3ed10a60fd97ea274bfa33aac07db510f",
-        "signature": "5c4c9129ab95cd5b3333bf5638d7d2e3ed10a60fd97ea274bfa33aac07db510f",
+        "version": "a8359f59b55739c64f0ce4e7fdf3139538fa339e813f3a5f41bf0159d9f02f8e",
+        "signature": "a8359f59b55739c64f0ce4e7fdf3139538fa339e813f3a5f41bf0159d9f02f8e",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/util/movement/movementhandler.d.ts": {
@@ -2212,8 +2212,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/inspectionstooltiphandler.d.ts": {
-        "version": "4b77b32cddb2dfdc096c830a46562612eb9a380e30cf05bfa8361d173848989e",
-        "signature": "4b77b32cddb2dfdc096c830a46562612eb9a380e30cf05bfa8361d173848989e",
+        "version": "51b42dc6f4e5ad05781a265bb2f829726afed229adc4c3f54dba97959d3ebf2a",
+        "signature": "51b42dc6f4e5ad05781a265bb2f829726afed229adc4c3f54dba97959d3ebf2a",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/ui/screen/screens/game/worldtooltiphandler.d.ts": {
@@ -2227,8 +2227,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/game/tilehelpers.d.ts": {
-        "version": "0fb908cc09f9114f66b3c37bf8998aee3610afd187d8189fcc6c7e0a67faf419",
-        "signature": "0fb908cc09f9114f66b3c37bf8998aee3610afd187d8189fcc6c7e0a67faf419",
+        "version": "0d80b8f28efcd42ee22558035fbe3243686f431553db6efe2ed444d87999464b",
+        "signature": "0d80b8f28efcd42ee22558035fbe3243686f431553db6efe2ed444d87999464b",
         "affectsGlobalScope": false
       },
       "../node_modules/@wayward/types/definitions/utilities/promise/async.d.ts": {
