@@ -30,7 +30,7 @@ export default class UseItem extends Objective {
 		}
 
 		const description = item.description();
-		if (!description || !description.use || description.use[this.actionType] === -1) {
+		if (!description || !description.use || !description.use.includes(this.actionType)) {
 			this.log.error("Invalid use item", item, this.actionType);
 			return ObjectiveResult.Restart;
 		}

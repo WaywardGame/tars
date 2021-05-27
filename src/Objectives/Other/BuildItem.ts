@@ -54,7 +54,7 @@ export default class BuildItem extends Objective {
 		}
 
 		const description = item.description();
-		if (!description || !description.use || description.use.indexOf(ActionType.Build) === -1) {
+		if (!description || !description.use || !description.use.includes(ActionType.Build)) {
 			this.log.error("Invalid build item", item);
 			return ObjectiveResult.Impossible;
 		}

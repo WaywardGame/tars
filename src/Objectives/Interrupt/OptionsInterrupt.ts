@@ -40,45 +40,45 @@ export default class OptionsInterrupt extends Objective {
 			OptionsInterrupt.previousOptions = Objects.deepClone(context.player.options);
 		}
 
+		const updated: string[] = [];
+
 		if (context.player.options.autoPickup) {
-			this.log.info("Disabling AutoPickup");
+			updated.push("Disabling AutoPickup");
 			game.updateOption(context.player, "autoPickup", false);
-			return ObjectiveResult.Pending;
 		}
 
 		if (!context.player.options.autoGatherHarvest) {
-			this.log.info("Enabling AutoGatherHarvest");
+			updated.push("Enabling AutoGatherHarvest");
 			game.updateOption(context.player, "autoGatherHarvest", true);
-			return ObjectiveResult.Pending;
 		}
 
 		if (!context.player.options.autoAttack) {
-			this.log.info("Enabling AutoAttack");
+			updated.push("Enabling AutoAttack");
 			game.updateOption(context.player, "autoAttack", true);
-			return ObjectiveResult.Pending;
 		}
 
 		if (!context.player.options.dropOnGatherHarvest) {
-			this.log.info("Enabling DropOnGatherHarvest");
+			updated.push("Enabling DropOnGatherHarvest");
 			game.updateOption(context.player, "dropOnGatherHarvest", true);
-			return ObjectiveResult.Pending;
 		}
 
 		// if (!context.player.options.dropOnDismantle) {
-		// 	this.log.info("Enabling DropOnDismantle");
+		//	updated.push("Enabling DropOnDismantle");
 		// 	game.updateOption(context.player, "dropOnDismantle", true);
-		// 	return ObjectiveResult.Pending;
 		// }
 
 		if (context.player.options.dropOnDismantle) {
-			this.log.info("Disabling DropOnDismantle");
+			updated.push("Disabling DropOnDismantle");
 			game.updateOption(context.player, "dropOnDismantle", false);
-			return ObjectiveResult.Pending;
 		}
 
 		if (context.player.options.dropLocation !== DropLocation.Feet) {
-			this.log.info("Setting DropLocation to Feet");
+			updated.push("Setting DropLocation to Feet");
 			game.updateOption(context.player, "dropLocation", DropLocation.Feet);
+		}
+
+		if (updated.length > 0) {
+			this.log.info(`Updating options. ${updated.join(", ")}`);
 			return ObjectiveResult.Pending;
 		}
 
