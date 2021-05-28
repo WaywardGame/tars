@@ -6,9 +6,9 @@ import Translation from "language/Translation";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../Utilities/Item";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import { getInventoryItemsWithUse } from "../../utilities/Item";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class CarveCorpse extends Objective {
 

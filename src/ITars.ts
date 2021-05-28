@@ -12,7 +12,7 @@ import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
 
-import { foodItemTypes } from "./Utilities/Item";
+import { foodItemTypes } from "./utilities/Item";
 
 export const TARS_ID = "TARS";
 
@@ -22,6 +22,7 @@ export const gardenMaxTilesChecked = 1024;
 
 export interface ISaveData {
 	enabled?: boolean;
+	mode?: TarsMode;
 	shouldOpenDialog?: boolean;
 }
 
@@ -384,8 +385,9 @@ export enum TarsTranslation {
 	DialogTitleMain,
 	DialogButtonEnable,
 	DialogLabelStatus,
-
 	DialogStatusNavigatingInitializing,
+
+	DialogModeSurvival,
 }
 
 export interface ITarsEvents extends Events<Mod> {
@@ -398,4 +400,9 @@ export interface ITarsEvents extends Events<Mod> {
 	 * Emitted when tars status is changed
 	 */
 	statusChange(status: Translation | string): any;
+}
+
+export enum TarsMode {
+	Survival,
+	// WorldDestroyer,
 }

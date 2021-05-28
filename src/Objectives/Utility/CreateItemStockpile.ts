@@ -3,8 +3,8 @@ import { IContainer, ItemType } from "game/item/IItem";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import AcquireItem from "../Acquire/Item/AcquireItem";
-import ReserveItems from "../Core/ReserveItems";
+import AcquireItem from "../acquire/item/AcquireItem";
+import ReserveItems from "../core/ReserveItems";
 
 import MoveIntoChest from "./MoveIntoChest";
 

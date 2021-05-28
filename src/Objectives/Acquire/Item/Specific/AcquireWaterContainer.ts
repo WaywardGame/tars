@@ -5,8 +5,8 @@ import Context from "../../../../Context";
 import { ContextDataType } from "../../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../../IObjective";
 import Objective from "../../../../Objective";
-import SetContextData from "../../../ContextData/SetContextData";
-import ExecuteActionForItem, { ExecuteActionType } from "../../../Core/ExecuteActionForItem";
+import SetContextData from "../../../contextData/SetContextData";
+import ExecuteActionForItem, { ExecuteActionType } from "../../../core/ExecuteActionForItem";
 import AcquireItem from "../AcquireItem";
 
 export default class AcquireWaterContainer extends Objective {

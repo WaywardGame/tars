@@ -6,10 +6,10 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
-import SetContextData from "../ContextData/SetContextData";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
-import ReserveItems from "../Core/ReserveItems";
+import SetContextData from "../contextData/SetContextData";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
+import ReserveItems from "../core/ReserveItems";
 
 export default class GatherFromChest extends Objective {
 

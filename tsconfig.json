@@ -1,8 +1,7 @@
 {
     "compilerOptions": {
-        "target": "es2019",
-        "module": "amd",
-        "declaration": false,
+        "target": "ES2019",
+        "module": "AMD",
         "strict": true,
         "noUnusedLocals": true,
         "removeComments": true,
@@ -13,11 +12,26 @@
         "incremental": true,
         "baseUrl": "./",
         "paths": {
-            "*": ["node_modules/@wayward/types/definitions/*"],
-            "@wayward/goodstream": [  "node_modules/@wayward/goodstream/Stream" ],
-            "@wayward/goodstream/*": [ "node_modules/@wayward/goodstream/*" ]
+            "*": [
+                "node_modules/@wayward/types/definitions/*"
+            ],
+            "@wayward/goodstream": [
+                "node_modules/@wayward/goodstream/Stream"
+            ],
+            "@wayward/goodstream/*": [
+                "node_modules/@wayward/goodstream/*"
+            ]
         },
         "types": [],
+        "lib": [
+            "WebWorker.ImportScripts",
+            // "WebWorker",
+            "DOM",
+            "DOM.Iterable",
+            "ScriptHost",
+            "ES2019",
+            "ES2020.String"
+        ],
         "outDir": "./out"
     }
 }

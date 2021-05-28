@@ -4,10 +4,10 @@ import TileHelpers from "utilities/game/TileHelpers";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
-import Navigation from "../../Navigation/Navigation";
+import Navigation from "../../navigation/Navigation";
 import Objective from "../../Objective";
-import { isOverWater } from "../../Utilities/Tile";
-import MoveToTarget from "../Core/MoveToTarget";
+import { isOverWater } from "../../utilities/Tile";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class MoveToLand extends Objective {
 

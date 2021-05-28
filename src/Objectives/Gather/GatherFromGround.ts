@@ -5,11 +5,11 @@ import { IVector3 } from "utilities/math/IVector";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
-import SetContextData from "../ContextData/SetContextData";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import ReserveItems from "../Core/ReserveItems";
+import SetContextData from "../contextData/SetContextData";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import ReserveItems from "../core/ReserveItems";
 
 export default class GatherFromGround extends Objective {
 

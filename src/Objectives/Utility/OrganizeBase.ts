@@ -2,12 +2,13 @@ import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
+import { IVector3 } from "utilities/math/IVector";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class OrganizeBase extends Objective {
 

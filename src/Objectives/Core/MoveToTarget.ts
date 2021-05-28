@@ -4,18 +4,19 @@ import Creature from "game/entity/creature/Creature";
 import { IStatMax, Stat } from "game/entity/IStats";
 import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
+import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { log } from "../../Utilities/Logger";
-import { getMovementPath, move, MoveResult } from "../../Utilities/Movement";
-import Rest from "../Other/Rest";
-import UseItem from "../Other/UseItem";
+import { log } from "../../utilities/Logger";
+import { getMovementPath, move, MoveResult } from "../../utilities/Movement";
+import Rest from "../other/Rest";
+import UseItem from "../other/UseItem";
 
-// import MoveToZ from "../Utility/MoveToZ";
+// import MoveToZ from "../utility/MoveToZ";
 
 export interface IMoveToTargetOptions {
 	range?: number;

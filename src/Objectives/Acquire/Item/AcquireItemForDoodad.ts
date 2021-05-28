@@ -9,7 +9,7 @@ import Enums from "utilities/enum/Enums";
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getDoodadTypes } from "../../../Utilities/Doodad";
+import { getDoodadTypes } from "../../../utilities/Doodad";
 
 import AcquireItem from "./AcquireItem";
 

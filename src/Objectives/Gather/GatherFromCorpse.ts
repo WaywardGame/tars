@@ -7,12 +7,12 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../Utilities/Item";
-import { findCarvableCorpses } from "../../Utilities/Object";
-import { canCarveCorpse } from "../../Utilities/Tile";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
-import MoveToTarget from "../Core/MoveToTarget";
+import { getInventoryItemsWithUse } from "../../utilities/Item";
+import { findCarvableCorpses } from "../../utilities/Object";
+import { canCarveCorpse } from "../../utilities/Tile";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromCorpse extends Objective {
 

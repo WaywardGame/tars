@@ -3,9 +3,9 @@ import Log, { ILogLine } from "utilities/Log";
 
 import Context from "../Context";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../IObjective";
-import ReserveItems from "../Objectives/Core/ReserveItems";
-import Restart from "../Objectives/Core/Restart";
-import { createLog, discardQueuedMessages, processQueuedMessages, queueMessage } from "../Utilities/Logger";
+import ReserveItems from "../objectives/core/ReserveItems";
+import Restart from "../objectives/core/Restart";
+import { createLog, discardQueuedMessages, processQueuedMessages, queueMessage } from "../utilities/Logger";
 
 import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
 import { IPlanner } from "./IPlanner";

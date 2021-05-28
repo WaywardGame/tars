@@ -3,12 +3,12 @@ import Item from "game/item/Item";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { anyWaterTileLocation } from "../../Navigation/INavigation";
+import { anyWaterTileLocation } from "../../navigation//INavigation";
 import Objective from "../../Objective";
-import { getNearestTileLocation } from "../../Utilities/Tile";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
+import { getNearestTileLocation } from "../../utilities/Tile";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherWaterFromTerrain extends Objective {
 

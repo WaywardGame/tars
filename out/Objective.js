@@ -1,4 +1,4 @@
-define(["require", "exports", "utilities/Log", "./Core/Planner", "./IContext", "./Utilities/Logger"], function (require, exports, Log_1, Planner_1, IContext_1, Logger_1) {
+define(["require", "exports", "utilities/Log", "./core/Planner", "./IContext", "./utilities/Logger"], function (require, exports, Log_1, Planner_1, IContext_1, Logger_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Objective {

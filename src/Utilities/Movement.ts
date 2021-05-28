@@ -11,8 +11,8 @@ import { IVector2, IVector3 } from "utilities/math/IVector";
 
 import Context from "../Context";
 import { ObjectiveResult } from "../IObjective";
-import { NavigationPath } from "../Navigation/INavigation";
-import Navigation from "../Navigation/Navigation";
+import { NavigationPath } from "../navigation//INavigation";
+import Navigation from "../navigation/Navigation";
 
 import { executeAction } from "./Action";
 import { getBestActionItem, getInventoryItemsWithUse } from "./Item";

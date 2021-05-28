@@ -5,10 +5,10 @@ import Item from "game/item/Item";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { isNearBase } from "../../Utilities/Base";
-import { foodItemTypes, getInventoryItemsWithUse } from "../../Utilities/Item";
-import AcquireFood from "../Acquire/Item/AcquireFood";
-import UseItem from "../Other/UseItem";
+import { isNearBase } from "../../utilities/Base";
+import { foodItemTypes, getInventoryItemsWithUse } from "../../utilities/Item";
+import AcquireFood from "../acquire/item/AcquireFood";
+import UseItem from "../other/UseItem";
 
 export default class RecoverHunger extends Objective {
 

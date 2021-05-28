@@ -1,20 +1,23 @@
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { CheckButton } from "ui/component/CheckButton";
+import ChoiceList, { Choice } from "ui/component/ChoiceList";
 import { LabelledRow } from "ui/component/LabelledRow";
 import Dialog from "ui/screen/screens/game/component/Dialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
+import Spacer from "ui/screen/screens/menu/component/Spacer";
+import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 
-import { TarsTranslation, TARS_ID } from "../ITars";
+import { TarsMode, TarsTranslation, TARS_ID } from "../ITars";
 import Tars from "../Tars";
 
 export default class TarsDialog extends Dialog {
 
 	public static description: IDialogDescription = {
-		minSize: new Vector2(15, 20),
-		size: new Vector2(15, 25),
-		maxSize: new Vector2(20, 25),
+		minSize: new Vector2(15, 21),
+		size: new Vector2(15, 21),
+		maxSize: new Vector2(20, 35),
 		edges: [
 			[Edge.Left, 25],
 			[Edge.Bottom, 33],
@@ -26,6 +29,7 @@ export default class TarsDialog extends Dialog {
 
 	private readonly statusLabel: LabelledRow;
 	private readonly enableButton: CheckButton;
+	private readonly modeChoiceList: ChoiceList<Choice<TarsMode>>;
 
 	public constructor(id: DialogId) {
 		super(id);
@@ -48,8 +52,21 @@ export default class TarsDialog extends Dialog {
 			})
 			.appendTo(this.body);
 
+		new Spacer().appendTo(this.body);
+
+		const modes = Enums.values(TarsMode);
+
+		this.modeChoiceList = new ChoiceList<Choice<TarsMode>>()
+			.setChoices(...modes.map(mode => new Choice(mode)
+				.setText(this.TARS.getTranslation(`DialogMode${TarsMode[mode]}`))))
+			.setRefreshMethod(list => list.choices(choice => choice.id === this.TARS.getMode()).first()!)
+			.event.subscribe("choose", (_, choice) => {
+				this.TARS.setMode(choice.id);
+			})
+			.appendTo(this.body);
+
 		const events = this.TARS.event.until(this, "close");
-		events.subscribe("enableChange", () => this.enableButton.refresh());
+		events.subscribe("enableChange", this.refresh);
 		events.subscribe("statusChange", (_, status) => {
 			// don't call refresh because we already calculated status when passing it to this method
 			// this.statusLabel.refresh();
@@ -59,5 +76,11 @@ export default class TarsDialog extends Dialog {
 
 	@Override public getName(): Translation {
 		return this.TARS.getTranslation(TarsTranslation.DialogTitleMain);
+	}
+
+	@Bound
+	private refresh() {
+		this.enableButton.refresh();
+		this.modeChoiceList.refresh();
 	}
 }

@@ -13,13 +13,13 @@ import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { baseInfo, BaseInfoKey, defaultMaxTilesChecked, IBaseInfo } from "../../ITars";
 import Objective from "../../Objective";
-import * as Base from "../../Utilities/Base";
-import * as movementUtilities from "../../Utilities/Movement";
-import { FindObjectType, getSortedObjects } from "../../Utilities/Object";
-import { getNearestTileLocation } from "../../Utilities/Tile";
-import AnalyzeBase from "../Analyze/AnalyzeBase";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
+import * as Base from "../../utilities/Base";
+import * as movementUtilities from "../../utilities/Movement";
+import { FindObjectType, getSortedObjects } from "../../utilities/Object";
+import { getNearestTileLocation } from "../../utilities/Tile";
+import AnalyzeBase from "../analyze/AnalyzeBase";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
 
 import UseItem from "./UseItem";
 

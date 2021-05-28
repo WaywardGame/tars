@@ -5,8 +5,8 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import MoveToTarget from "../core/MoveToTarget";
 
 import StartFire from "./StartFire";
 import UseItem from "./UseItem";

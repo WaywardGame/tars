@@ -5,18 +5,22 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getNearestTileLocation } from "../../Utilities/Tile";
-import SetContextData from "../ContextData/SetContextData";
-import MoveToTarget from "../Core/MoveToTarget";
+import { getNearestTileLocation } from "../../utilities/Tile";
+import SetContextData from "../contextData/SetContextData";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class MoveToZ extends Objective {
 
-	constructor(private readonly z: number) {
+	constructor(private readonly z: WorldZ) {
 		super();
 	}
 
 	public getIdentifier(): string {
 		return `MoveToZ:${this.z}`;
+	}
+
+	public getStatus(): string {
+		return `Moving to ${WorldZ[this.z]}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

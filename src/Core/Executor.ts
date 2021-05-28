@@ -2,7 +2,7 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 
 import Context from "../Context";
 import { IObjective } from "../IObjective";
-import { log } from "../Utilities/Logger";
+import { log } from "../utilities/Logger";
 
 import { ExecuteResultType, IPlan } from "./IPlan";
 import planner from "./Planner";

@@ -1,13 +1,16 @@
 import { IOverlayInfo, ITerrainDescription, ITile, OverlayType, TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
+import terrainDescriptions from "game/tile/Terrains";
 import Terrains from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
+import { TileType } from "renderer/TileAtlas";
+import Enums from "utilities/enum/Enums";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import { sleep } from "utilities/promise/Async";
 
 import { ITileLocation } from "../ITars";
-import { log } from "../Utilities/Logger";
+import { log } from "../utilities/Logger";
 
 import { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationMessageType, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
 
@@ -71,6 +74,25 @@ export default class Navigation {
 			}
 		}
 
+		const freshWaterTypes: TileType[] = [];
+		const seaWaterTypes: TileType[] = [];
+		const gatherableTypes: TileType[] = [];
+
+		for (const tileType of Enums.values(TileType)) {
+			const tileTypeName = TileType[tileType];
+			if (tileTypeName.includes("FreshWater")) {
+				freshWaterTypes.push(tileType);
+
+			} else if (tileTypeName.includes("Seawater")) {
+				seaWaterTypes.push(tileType);
+			}
+
+			const terrainDescription = terrainDescriptions[tileType];
+			if (terrainDescription?.gather) {
+				gatherableTypes.push(tileType);
+			}
+		}
+
 		let pathPrefix: string;
 		try {
 			pathPrefix = steamworks.getAppPath();
@@ -103,6 +125,9 @@ export default class Navigation {
 				pathPrefix: pathPrefix,
 				mapSize: game.mapSize,
 				mapSizeSq: game.mapSizeSq,
+				freshWaterTypes,
+				seaWaterTypes,
+				gatherableTypes,
 			});
 		}
 	}

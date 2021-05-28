@@ -3,10 +3,10 @@ import Item from "game/item/Item";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { anyWaterTileLocation } from "../../Navigation/INavigation";
+import { anyWaterTileLocation } from "../../navigation//INavigation";
 import Objective from "../../Objective";
-import { getNearestTileLocation } from "../../Utilities/Tile";
-import MoveToTarget from "../Core/MoveToTarget";
+import { getNearestTileLocation } from "../../utilities/Tile";
+import MoveToTarget from "../core/MoveToTarget";
 
 import UseItem from "./UseItem";
 

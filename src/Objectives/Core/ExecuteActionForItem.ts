@@ -12,9 +12,9 @@ import TileHelpers from "utilities/game/TileHelpers";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { executeAction } from "../../Utilities/Action";
-import { getBestActionItem, getInventoryItemsWithUse } from "../../Utilities/Item";
-import { canCarveCorpse, canDig, canGather } from "../../Utilities/Tile";
+import { executeAction } from "../../utilities/Action";
+import { getBestActionItem, getInventoryItemsWithUse } from "../../utilities/Item";
+import { canCarveCorpse, canDig, canGather } from "../../utilities/Tile";
 
 export enum ExecuteActionType {
 	Generic,

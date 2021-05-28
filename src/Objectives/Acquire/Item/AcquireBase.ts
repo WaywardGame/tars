@@ -1,13 +1,13 @@
 import Context from "../../../Context";
-import { IExecutionTree } from "../../../Core/IPlan";
+import { IExecutionTree } from "../../../core/IPlan";
 import Objective from "../../../Objective";
-import { isNearBase } from "../../../Utilities/Base";
-import GatherFromChest from "../../Gather/GatherFromChest";
-import GatherFromCorpse from "../../Gather/GatherFromCorpse";
-import GatherFromCreature from "../../Gather/GatherFromCreature";
-import GatherFromDoodad from "../../Gather/GatherFromDoodad";
-import GatherFromGround from "../../Gather/GatherFromGround";
-import GatherFromTerrain from "../../Gather/GatherFromTerrain";
+import { isNearBase } from "../../../utilities/Base";
+import GatherFromChest from "../../gather/GatherFromChest";
+import GatherFromCorpse from "../../gather/GatherFromCorpse";
+import GatherFromCreature from "../../gather/GatherFromCreature";
+import GatherFromDoodad from "../../gather/GatherFromDoodad";
+import GatherFromGround from "../../gather/GatherFromGround";
+import GatherFromTerrain from "../../gather/GatherFromTerrain";
 
 export interface IObjectivePriority {
 	priority: number;

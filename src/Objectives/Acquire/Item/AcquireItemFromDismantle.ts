@@ -9,11 +9,11 @@ import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getItemInInventory } from "../../../Utilities/Item";
-import SetContextData from "../../ContextData/SetContextData";
-import ExecuteActionForItem, { ExecuteActionType } from "../../Core/ExecuteActionForItem";
-import ReserveItems from "../../Core/ReserveItems";
-import MoveToLand from "../../Utility/MoveToLand";
+import { getItemInInventory } from "../../../utilities/Item";
+import SetContextData from "../../contextData/SetContextData";
+import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
+import ReserveItems from "../../core/ReserveItems";
+import MoveToLand from "../../utility/MoveToLand";
 
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";

@@ -6,9 +6,9 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import AcquireItemByGroup from "../Acquire/Item/AcquireItemByGroup";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import MoveToTarget from "../core/MoveToTarget";
 
 import UseItem from "./UseItem";
 

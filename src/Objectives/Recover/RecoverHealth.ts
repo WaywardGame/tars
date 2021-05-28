@@ -5,10 +5,10 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../Utilities/Item";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import UseItem from "../Other/UseItem";
-import OrganizeInventory from "../Utility/OrganizeInventory";
+import { getInventoryItemsWithUse } from "../../utilities/Item";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import UseItem from "../other/UseItem";
+import OrganizeInventory from "../utility/OrganizeInventory";
 
 export default class RecoverHealth extends Objective {
 

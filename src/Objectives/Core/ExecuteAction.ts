@@ -7,7 +7,7 @@ import Translation, { TextContext } from "language/Translation";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { executeAction } from "../../Utilities/Action";
+import { executeAction } from "../../utilities/Action";
 
 export default class ExecuteAction<T extends ActionType> extends Objective {
 

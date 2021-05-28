@@ -3,7 +3,7 @@ import Log, { MemoryLog, nullLog } from "utilities/Log";
 import Context from "../Context";
 import ContextState from "../ContextState";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectivePipeline, ObjectiveResult, PossibleObjectivePipeline } from "../IObjective";
-import { createLog } from "../Utilities/Logger";
+import { createLog } from "../utilities/Logger";
 
 import { IPlanner } from "./IPlanner";
 import Plan from "./Plan";

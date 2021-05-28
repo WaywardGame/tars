@@ -2,10 +2,10 @@ import Creature from "game/entity/creature/Creature";
 import { ILog, nullLog } from "utilities/Log";
 
 import Context from "./Context";
-import Planner from "./Core/Planner";
+import Planner from "./core/Planner";
 import { ContextDataType } from "./IContext";
 import { IObjective, ObjectiveExecutionResult } from "./IObjective";
-import { createLog } from "./Utilities/Logger";
+import { createLog } from "./utilities/Logger";
 
 export default abstract class Objective implements IObjective {
 

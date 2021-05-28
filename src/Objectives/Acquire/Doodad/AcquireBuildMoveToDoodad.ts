@@ -5,12 +5,12 @@ import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getDoodadTypes } from "../../../Utilities/Doodad";
-import { getInventoryItemForDoodad } from "../../../Utilities/Item";
-import { findDoodad } from "../../../Utilities/Object";
-import MoveToTarget from "../../Core/MoveToTarget";
-import BuildItem from "../../Other/BuildItem";
-import StartFire from "../../Other/StartFire";
+import { getDoodadTypes } from "../../../utilities/Doodad";
+import { getInventoryItemForDoodad } from "../../../utilities/Item";
+import { findDoodad } from "../../../utilities/Object";
+import MoveToTarget from "../../core/MoveToTarget";
+import BuildItem from "../../other/BuildItem";
+import StartFire from "../../other/StartFire";
 import AcquireItemForDoodad from "../Item/AcquireItemForDoodad";
 
 /**

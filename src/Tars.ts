@@ -1,7 +1,6 @@
 import { EventBus } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType, IActionApi, IActionDescription } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
@@ -11,8 +10,8 @@ import { MessageType, Source } from "game/entity/player/IMessageManager";
 import { PlayerState, WeightStatus } from "game/entity/player/IPlayer";
 import { INote } from "game/entity/player/note/NoteManager";
 import Player from "game/entity/player/Player";
-import { TileUpdateType, TurnMode } from "game/IGame";
-import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
+import { TileUpdateType } from "game/IGame";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import Item from "game/item/Item";
 import { ITile } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
@@ -36,74 +35,49 @@ import { InterruptOptions } from "ui/util/IInterrupt";
 import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
-import { IVector3 } from "utilities/math/IVector";
+import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
 
 import Context from "./Context";
-import ContextState from "./ContextState";
-import executor, { ExecuteObjectivesResultType } from "./Core/Executor";
-import planner from "./Core/Planner";
+import executor, { ExecuteObjectivesResultType } from "./core/Executor";
+import planner from "./core/Planner";
 import { ContextDataType, MovingToNewIslandState } from "./IContext";
-import { IObjective, ObjectiveResult } from "./IObjective";
-import { IBase, IInventoryItems, inventoryItemInfo, ISaveData, ITarsEvents, TarsTranslation, TARS_ID } from "./ITars";
-import Navigation from "./Navigation/Navigation";
+import { IObjective } from "./IObjective";
+import { IBase, IInventoryItems, ISaveData, ITarsEvents, TarsMode, TarsTranslation, TARS_ID } from "./ITars";
+import { ITarsMode } from "./modes/IMode";
+import { modes } from "./modes/Modes";
+import Navigation from "./navigation/Navigation";
 import Objective from "./Objective";
-import AcquireFood from "./Objectives/Acquire/Item/AcquireFood";
-import AcquireItem from "./Objectives/Acquire/Item/AcquireItem";
-import AcquireItemByGroup from "./Objectives/Acquire/Item/AcquireItemByGroup";
-import AcquireItemByTypes from "./Objectives/Acquire/Item/AcquireItemByTypes";
-import AcquireItemForAction from "./Objectives/Acquire/Item/AcquireItemForAction";
-import AcquireItemForDoodad from "./Objectives/Acquire/Item/AcquireItemForDoodad";
-import AcquireWaterContainer from "./Objectives/Acquire/Item/Specific/AcquireWaterContainer";
-import AnalyzeBase from "./Objectives/Analyze/AnalyzeBase";
-import AnalyzeInventory from "./Objectives/Analyze/AnalyzeInventory";
-import ExecuteAction from "./Objectives/Core/ExecuteAction";
-import Lambda from "./Objectives/Core/Lambda";
-import Restart from "./Objectives/Core/Restart";
-import GatherWater from "./Objectives/Gather/GatherWater";
-import CarveCorpse from "./Objectives/Interrupt/CarveCorpse";
-import DefendAgainstCreature from "./Objectives/Interrupt/DefendAgainstCreature";
-import OptionsInterrupt from "./Objectives/Interrupt/OptionsInterrupt";
-import ReduceWeight from "./Objectives/Interrupt/ReduceWeight";
-import RepairItem from "./Objectives/Interrupt/RepairItem";
-import BuildItem from "./Objectives/Other/BuildItem";
-import EmptyWaterContainer from "./Objectives/Other/EmptyWaterContainer";
-import Equip from "./Objectives/Other/Equip";
-import Idle from "./Objectives/Other/Idle";
-import PlantSeed from "./Objectives/Other/PlantSeed";
-import ReinforceItem from "./Objectives/Other/ReinforceItem";
-import ReturnToBase from "./Objectives/Other/ReturnToBase";
-import StartWaterStillDesalination from "./Objectives/Other/StartWaterStillDesalination";
-import Unequip from "./Objectives/Other/Unequip";
-import UpgradeInventoryItem from "./Objectives/Other/UpgradeInventoryItem";
-import RecoverHealth from "./Objectives/Recover/RecoverHealth";
-import RecoverHunger from "./Objectives/Recover/RecoverHunger";
-import RecoverStamina from "./Objectives/Recover/RecoverStamina";
-import RecoverThirst from "./Objectives/Recover/RecoverThirst";
-import MoveToLand from "./Objectives/Utility/MoveToLand";
-import MoveToNewIsland from "./Objectives/Utility/MoveToNewIsland";
-import MoveToZ from "./Objectives/Utility/MoveToZ";
-import OrganizeBase from "./Objectives/Utility/OrganizeBase";
-import OrganizeInventory from "./Objectives/Utility/OrganizeInventory";
-import TarsDialog from "./Ui/TarsDialog";
-import * as Action from "./Utilities/Action";
-import { getTilesWithItemsNearBase, isNearBase } from "./Utilities/Base";
-import { canGatherWater, estimateDamageModifier, getBestActionItem, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getReservedItems, getSeeds, getUnusedItems, isSafeToDrinkItem } from "./Utilities/Item";
-import { log, logSourceName, preConsoleCallback } from "./Utilities/Logger";
-import * as movementUtilities from "./Utilities/Movement";
-import * as objectUtilities from "./Utilities/Object";
-import * as tileUtilities from "./Utilities/Tile";
+import AnalyzeBase from "./objectives/analyze/AnalyzeBase";
+import AnalyzeInventory from "./objectives/analyze/AnalyzeInventory";
+import ExecuteAction from "./objectives/core/ExecuteAction";
+import CarveCorpse from "./objectives/interrupt/CarveCorpse";
+import DefendAgainstCreature from "./objectives/interrupt/DefendAgainstCreature";
+import OptionsInterrupt from "./objectives/interrupt/OptionsInterrupt";
+import ReduceWeight from "./objectives/interrupt/ReduceWeight";
+import RepairItem from "./objectives/interrupt/RepairItem";
+import BuildItem from "./objectives/other/BuildItem";
+import Equip from "./objectives/other/Equip";
+import ReturnToBase from "./objectives/other/ReturnToBase";
+import Unequip from "./objectives/other/Unequip";
+import RecoverHealth from "./objectives/recover/RecoverHealth";
+import RecoverHunger from "./objectives/recover/RecoverHunger";
+import RecoverStamina from "./objectives/recover/RecoverStamina";
+import RecoverThirst from "./objectives/recover/RecoverThirst";
+import MoveToZ from "./objectives/utility/MoveToZ";
+import OrganizeInventory from "./objectives/utility/OrganizeInventory";
+import TarsDialog from "./ui/TarsDialog";
+import * as Action from "./utilities/Action";
+import { isNearBase } from "./utilities/Base";
+import { estimateDamageModifier, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getReservedItems, getUnusedItems } from "./utilities/Item";
+import { log, logSourceName, preConsoleCallback } from "./utilities/Logger";
+import * as movementUtilities from "./utilities/Movement";
+import * as objectUtilities from "./utilities/Object";
+import { getRecoverThreshold } from "./utilities/Player";
+import * as tileUtilities from "./utilities/Tile";
 
 const tickSpeed = 333;
-
-// can be negative. ex: -8 means [max - 8[]
-const recoverThresholds: { [index: number]: number } = {
-	[Stat.Health]: 30,
-	[Stat.Stamina]: 20,
-	[Stat.Hunger]: 8,
-	[Stat.Thirst]: 10,
-};
 
 // focus on healing if our health is below 85% while poisoned
 const poisonHealthPercentThreshold = 0.85;
@@ -190,6 +164,16 @@ export default class Tars extends Mod {
 	private navigation: Navigation | undefined;
 	private navigationSystemState: NavigationSystemState;
 	private navigationQueuedUpdates: Array<() => void>;
+
+	private get modeInstance(): ITarsMode {
+		const modeInstance = modes.get(this.getMode());
+		if (!modeInstance) {
+			this.disable();
+			throw new Error(`Misisng mode instance for ${this.getMode()}`);
+		}
+
+		return modeInstance;
+	}
 
 	public onInitialize(): void {
 		Navigation.setModPath(this.getPath());
@@ -407,7 +391,7 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		const recoverThreshold = this.getRecoverThreshold(this.context, stat.type);
+		const recoverThreshold = getRecoverThreshold(this.context, stat.type);
 		if (recoverThreshold !== undefined) {
 			if (stat.value <= recoverThreshold) {
 				if (!this.statThresholdExceeded[stat.type]) {
@@ -460,7 +444,7 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
-	public getTranslation(translation: TarsTranslation) {
+	public getTranslation(translation: TarsTranslation | string) {
 		return new Translation(this.dictionary, translation);
 	}
 
@@ -531,7 +515,17 @@ export default class Tars extends Mod {
 		}
 
 		this.event.emit("enableChange", this.isEnabled());
-		// this.updateStatus();
+	}
+
+	public getMode(): TarsMode {
+		return this.saveData.mode ?? TarsMode.Survival;
+	}
+
+	public setMode(mode: TarsMode) {
+		if (this.saveData.mode !== mode) {
+			this.saveData.mode = mode;
+			this.interrupt();
+		}
 	}
 
 	@Bound
@@ -877,456 +871,25 @@ export default class Tars extends Mod {
 	}
 
 	private determineObjectives(context: Context): Array<IObjective | IObjective[]> {
-		const chest = context.player.getEquippedItem(EquipType.Chest);
-		const legs = context.player.getEquippedItem(EquipType.Legs);
-		const belt = context.player.getEquippedItem(EquipType.Belt);
-		const neck = context.player.getEquippedItem(EquipType.Neck);
-		const back = context.player.getEquippedItem(EquipType.Back);
-		const head = context.player.getEquippedItem(EquipType.Head);
-		const feet = context.player.getEquippedItem(EquipType.Feet);
-		const hands = context.player.getEquippedItem(EquipType.Hands);
-
-		const objectives: Array<IObjective | IObjective[]> = [];
-
-		const moveToNewIslandState = context.getData(ContextDataType.MovingToNewIsland) ?? MovingToNewIslandState.None;
-
-		if (moveToNewIslandState === MovingToNewIslandState.Ready) {
-			if (this.inventory.sailBoat && !itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
-				// it should grab it from our chest
-				objectives.push(new AcquireItem(ItemType.Sailboat));
-			}
-
-			objectives.push(new MoveToNewIsland());
-
-			return objectives;
-		}
-
-		if (this.inventory.sailBoat && itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
-			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
-			objectives.push([
-				new MoveToLand(),
-				new ExecuteAction(ActionType.Drop, (context, action) => {
-					action.execute(context.player, this.inventory.sailBoat!);
-				}).setStatus("Dropping sailboat"),
-			]);
-		}
-
-		const gatherItem = getBestActionItem(context, ActionType.Gather, DamageType.Slashing);
-		if (gatherItem === undefined) {
-			objectives.push([new AcquireItemForAction(ActionType.Gather)]);
-		}
-
-		if (this.base.campfire.length === 0 && this.inventory.campfire === undefined) {
-			log.info("Need campfire");
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Campfire), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (this.inventory.fireStarter === undefined) {
-			log.info("Need fire starter");
-			objectives.push([new AcquireItemForAction(ActionType.StartFire), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.fireKindling === undefined || this.inventory.fireKindling.length === 0) {
-			log.info("Need fire kindling");
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Kindling), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.fireTinder === undefined) {
-			log.info("Need fire tinder");
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tinder), new AnalyzeInventory()]);
-		}
-
-		// if (this.inventory.fireStoker === undefined || this.inventory.fireStoker.length < 4) {
-		// 	objectives.push([new AcquireItemForAction(ActionType.StokeFire), new AnalyzeInventory()]);
-		// }
-
-		if (this.inventory.shovel === undefined) {
-			objectives.push([new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.knife === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.equipSword === undefined) {
-			objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new Equip(EquipType.LeftHand)]);
-		}
-
-		if (this.inventory.axe === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);
-		}
-
-		if (chest === undefined || chest.type === ItemType.TatteredShirt) {
-			objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
-		}
-
-		if (legs === undefined || legs.type === ItemType.TatteredPants) {
-			objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
-		}
-
-		if (this.inventory.equipShield === undefined) {
-			objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new Equip(EquipType.RightHand)]);
-		}
-
-		if (this.base.waterStill.length === 0 && this.inventory.waterStill === undefined) {
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		let acquireChest = true;
-
-		if (this.base.buildAnotherChest) {
-			// build another chest if we're near the base
-			acquireChest = isNearBase(context);
-
-		} else if (this.base.chest.length > 0) {
-			for (const c of this.base.chest) {
-				if ((itemManager.computeContainerWeight(c as IContainer) / itemManager.getWeightCapacity(c)!) < 0.9) {
-					acquireChest = false;
-					break;
-				}
-			}
-		}
-
-		if (acquireChest && this.inventory.chest === undefined) {
-			// mark that we should build a chest (memory)
-			// we need to do this to prevent a loop
-			// if we take items out of a chest to build another chest,
-			// the weight capacity could go back under the threshold. and then it wouldn't want to build another chest
-			// this is reset to false in baseInfo.onAdd
-			this.base.buildAnotherChest = true;
-
-			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (this.inventory.pickAxe === undefined) {
-			objectives.push([new AcquireItem(ItemType.StonePickaxe), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.hammer === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneHammer), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.tongs === undefined) {
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tongs), new AnalyzeInventory()]);
-		}
-
-		if (isNearBase(context)) {
-			// ensure water stills are water stilling
-			for (const waterStill of context.base.waterStill) {
-				objectives.push(new StartWaterStillDesalination(waterStill));
-			}
-
-			// todo: improve seed planting - grab from base chests too! and add reserved items for it
-			const seeds = getSeeds(context);
-			if (seeds.length > 0) {
-				objectives.push(new PlantSeed(seeds[0]));
-			}
-		}
-
-		if (this.base.kiln.length === 0 && this.inventory.kiln === undefined) {
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitKiln), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (this.inventory.heal === undefined) {
-			objectives.push([new AcquireItemForAction(ActionType.Heal), new AnalyzeInventory()]);
-		}
-
-		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= this.getRecoverThreshold(context, Stat.Thirst) &&
-			this.base.waterStill.length > 0 && this.base.waterStill[0].description()!.providesFire;
-
-		const shouldUpgradeToLeather = !waitingForWater;
-		if (shouldUpgradeToLeather) {
-			/*
-				Upgrade to leather
-				Order is based on recipe level
-			*/
-
-			if (belt === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherBelt), new AnalyzeInventory(), new Equip(EquipType.Belt)]);
-			}
-
-			if (neck === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherGorget), new AnalyzeInventory(), new Equip(EquipType.Neck)]);
-			}
-
-			if (head === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherCap), new AnalyzeInventory(), new Equip(EquipType.Head)]);
-			}
-
-			if (back === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherQuiver), new AnalyzeInventory(), new Equip(EquipType.Back)]);
-			}
-
-			if (feet === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherBoots), new AnalyzeInventory(), new Equip(EquipType.Feet)]);
-			}
-
-			if (hands === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherGloves), new AnalyzeInventory(), new Equip(EquipType.Hands)]);
-			}
-
-			if (legs && legs.type === ItemType.BarkLeggings) {
-				objectives.push([new AcquireItem(ItemType.LeatherPants), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
-			}
-
-			if (chest && chest.type === ItemType.BarkTunic) {
-				objectives.push([new AcquireItem(ItemType.LeatherTunic), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
-			}
-		}
-
-		/*
-			Extra objectives
-		*/
-
-		if (this.base.well.length === 0 && this.inventory.well === undefined && this.base.availableUnlimitedWellLocation !== undefined) {
-			// todo: only build a well if we find a good tile?
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Well), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (this.base.furnace.length === 0 && this.inventory.furnace === undefined) {
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitFurnace), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (this.base.anvil.length === 0 && this.inventory.anvil === undefined) {
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Anvil), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (this.inventory.waterContainer === undefined) {
-			objectives.push([new AcquireWaterContainer(), new AnalyzeInventory()]);
-		}
-
-		// run a few extra things before running upgrade objectives if we're near a base 
-		if (isNearBase(context)) {
-			// build a second water still
-			if (context.base.waterStill.length < 2) {
-				objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
-			}
-
-			// carry food with you
-			if (this.inventory.food === undefined) {
-				objectives.push([new AcquireFood(), new AnalyzeInventory()]);
-			}
-
-			// carry a bandage with you
-			if (this.inventory.bandage === undefined) {
-				objectives.push([new AcquireItemByTypes(inventoryItemInfo.bandage.itemTypes as ItemType[]), new AnalyzeInventory()]);
-			}
-
-			// carry drinkable water with you
-			let availableWaterContainer: Item | undefined;
-
-			if (context.inventory.waterContainer !== undefined) {
-				const hasDrinkableWater = context.inventory.waterContainer.some(isSafeToDrinkItem);
-				if (!hasDrinkableWater) {
-					availableWaterContainer = context.inventory.waterContainer.find(canGatherWater);
-					if (!availableWaterContainer) {
-						// use the first water container we have - pour it out first
-						availableWaterContainer = context.inventory.waterContainer[0];
-						objectives.push(new EmptyWaterContainer(availableWaterContainer));
-					}
-
-					// we are looking for something drinkable
-					// if there is a well, starting the water still will use it
-					objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }));
-				}
-			}
-
-			if (moveToNewIslandState === MovingToNewIslandState.None) {
-				// cleanup base if theres items laying around everywhere
-				const tiles = getTilesWithItemsNearBase(context);
-				if (tiles.totalCount > (availableWaterContainer ? 0 : 20)) {
-					objectives.push(new OrganizeBase(tiles.tiles));
-				}
-			}
-
-			if (availableWaterContainer) {
-				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
-			}
-		}
-
-		// keep existing equipment in good shape
-		if (this.inventory.equipSword && this.inventory.equipSword.type !== ItemType.WoodenSword) {
-			objectives.push(new ReinforceItem(this.inventory.equipSword, 0.5));
-		}
-
-		if (this.inventory.equipShield && this.inventory.equipShield.type !== ItemType.WoodenShield) {
-			objectives.push(new ReinforceItem(this.inventory.equipShield, 0.5));
-		}
-
-		if (this.inventory.equipBelt) {
-			objectives.push(new ReinforceItem(this.inventory.equipBelt, 0.5));
-		}
-
-		if (this.inventory.equipNeck) {
-			objectives.push(new ReinforceItem(this.inventory.equipNeck, 0.5));
-		}
-
-		if (this.inventory.equipFeet) {
-			objectives.push(new ReinforceItem(this.inventory.equipFeet, 0.5));
-		}
-
-		if (this.inventory.equipHands) {
-			objectives.push(new ReinforceItem(this.inventory.equipHands, 0.5));
-		}
-
-		if (this.inventory.equipLegs && this.inventory.equipLegs.type !== ItemType.BarkLeggings) {
-			objectives.push(new ReinforceItem(this.inventory.equipLegs, 0.5));
-		}
-
-		if (this.inventory.equipChest && this.inventory.equipChest.type !== ItemType.BarkTunic) {
-			objectives.push(new ReinforceItem(this.inventory.equipChest, 0.5));
-		}
-
-		/*
-			Upgrade objectives
-		*/
-
-		if (this.inventory.equipSword && this.inventory.equipSword.type === ItemType.WoodenSword) {
-			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new Equip(EquipType.LeftHand)]);
-		}
-
-		if (this.inventory.equipShield && this.inventory.equipShield.type === ItemType.WoodenShield) {
-			objectives.push([new UpgradeInventoryItem("equipShield"), new AnalyzeInventory(), new Equip(EquipType.RightHand)]);
-		}
-
-		if (this.inventory.equipBelt && this.inventory.equipBelt.type === ItemType.LeatherBelt) {
-			objectives.push([new UpgradeInventoryItem("equipBelt"), new AnalyzeInventory(), new Equip(EquipType.Belt)]);
-		}
-
-		if (this.inventory.equipNeck && this.inventory.equipNeck.type === ItemType.LeatherGorget) {
-			objectives.push([new UpgradeInventoryItem("equipNeck"), new AnalyzeInventory(), new Equip(EquipType.Neck)]);
-		}
-
-		if (this.inventory.equipHead && this.inventory.equipHead.type === ItemType.LeatherCap) {
-			objectives.push([new UpgradeInventoryItem("equipHead"), new AnalyzeInventory(), new Equip(EquipType.Head)]);
-		}
-
-		if (this.inventory.equipFeet && this.inventory.equipFeet.type === ItemType.LeatherBoots) {
-			objectives.push([new UpgradeInventoryItem("equipFeet"), new AnalyzeInventory(), new Equip(EquipType.Feet)]);
-		}
-
-		if (this.inventory.equipHands && this.inventory.equipHands.type === ItemType.LeatherGloves) {
-			objectives.push([new UpgradeInventoryItem("equipHands"), new AnalyzeInventory(), new Equip(EquipType.Hands)]);
-		}
-
-		if (this.inventory.equipLegs && this.inventory.equipLegs.type === ItemType.LeatherPants) {
-			objectives.push([new UpgradeInventoryItem("equipLegs"), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
-		}
-
-		if (this.inventory.equipChest && this.inventory.equipChest.type === ItemType.LeatherTunic) {
-			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
-		}
-
-		if (this.inventory.axe && this.inventory.axe.type === ItemType.StoneAxe) {
-			objectives.push([new UpgradeInventoryItem("axe"), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.pickAxe && this.inventory.pickAxe.type === ItemType.StonePickaxe) {
-			objectives.push([new UpgradeInventoryItem("pickAxe"), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.shovel && this.inventory.shovel.type === ItemType.StoneShovel) {
-			objectives.push([new UpgradeInventoryItem("shovel"), new AnalyzeInventory()]);
-		}
-
-		if (this.inventory.hoe && this.inventory.hoe.type === ItemType.StoneHoe) {
-			objectives.push([new UpgradeInventoryItem("hoe"), new AnalyzeInventory()]);
-		}
-
-		/*
-			End game objectives
-		*/
-
-		if (!multiplayer.isConnected()) {
-			// move to a new island
-
-			const needsFood = this.inventory.food === undefined || this.inventory.food.length < 2;
-
-			switch (moveToNewIslandState) {
-				case MovingToNewIslandState.None:
-					objectives.push(new Lambda(async () => {
-						const initialState = new ContextState();
-						initialState.set(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Preparing);
-						this.context.setInitialState(initialState);
-						return ObjectiveResult.Complete;
-					}));
-
-				case MovingToNewIslandState.Preparing:
-					// make a sail boat
-					if (!this.inventory.sailBoat) {
-						objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
-
-						if (needsFood) {
-							// this lets TARS drop the sailboat until we're ready
-							objectives.push(new Restart());
-						}
-					}
-
-					// stock up on food
-					if (needsFood) {
-						objectives.push([new AcquireFood(), new AnalyzeInventory()]);
-					}
-
-					objectives.push(new Lambda(async () => {
-						const initialState = new ContextState();
-						initialState.set(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Ready);
-						this.context.setInitialState(initialState);
-						return ObjectiveResult.Complete;
-					}));
-
-				case MovingToNewIslandState.Ready:
-					if (this.inventory.sailBoat && !itemManager.isContainableInContainer(this.inventory.sailBoat, context.player.inventory)) {
-						// it should grab it from our chest
-						objectives.push(new AcquireItem(ItemType.Sailboat));
-					}
-
-					objectives.push(new MoveToNewIsland());
-
-					break;
-			}
-
-		} else {
-			const health = context.player.stat.get<IStatMax>(Stat.Health);
-			if (health.value / health.max < 0.9) {
-				objectives.push(new RecoverHealth());
-			}
-
-			const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
-			if (hunger.value / hunger.max < 0.7) {
-				objectives.push(new RecoverHunger(true));
-			}
-
-			objectives.push(new ReturnToBase());
-
-			objectives.push(new OrganizeInventory());
-		}
-
-		if (!multiplayer.isConnected()) {
-			if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
-				objectives.push(new Lambda(async () => {
-					log.info("Done with all objectives! Disabling...");
-
-					localPlayer.messages
-						.source(this.messageSource)
-						.type(MessageType.Good)
-						.send(this.messageToggle, false);
-
-					this.disable();
-
-					return ObjectiveResult.Complete;
-				}));
-
-			} else {
-				objectives.push(new Idle());
-			}
-		}
-
-		return objectives;
+		return this.modeInstance.determineObjectives(context, this.stop);
+	}
+
+	@Bound
+	private stop() {
+		localPlayer.messages
+			.source(this.messageSource)
+			.type(MessageType.Good)
+			.send(this.messageToggle, false);
+
+		this.disable();
 	}
 
 	// todo: add severity to stat interrupts to prioritize which one to run
 	private getInterrupts(context: Context): Array<IObjective | IObjective[] | undefined> {
+		if (this.modeInstance.getInterrupts) {
+			return this.modeInstance.getInterrupts(context);
+		}
+
 		let interrupts = [
 			this.optionsInterrupt(),
 			this.equipmentInterrupt(context),
@@ -1549,7 +1112,7 @@ export default class Tars extends Mod {
 
 	private healthInterrupt(context: Context): IObjective | undefined {
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		if (health.value > this.getRecoverThreshold(context, Stat.Health) && !context.player.status.Bleeding &&
+		if (health.value > getRecoverThreshold(context, Stat.Health) && !context.player.status.Bleeding &&
 			(!context.player.status.Poisoned || (context.player.status.Poisoned && (health.value / health.max) >= poisonHealthPercentThreshold))) {
 			return undefined;
 		}
@@ -1559,7 +1122,7 @@ export default class Tars extends Mod {
 	}
 
 	private staminaInterrupt(context: Context): IObjective | undefined {
-		if (context.player.stat.get<IStat>(Stat.Stamina).value > this.getRecoverThreshold(context, Stat.Stamina)) {
+		if (context.player.stat.get<IStat>(Stat.Stamina).value > getRecoverThreshold(context, Stat.Stamina)) {
 			return undefined;
 		}
 
@@ -1568,11 +1131,11 @@ export default class Tars extends Mod {
 	}
 
 	private hungerInterrupt(context: Context): IObjective | undefined {
-		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= this.getRecoverThreshold(context, Stat.Hunger));
+		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= getRecoverThreshold(context, Stat.Hunger));
 	}
 
 	private thirstInterrupt(context: Context): IObjective | undefined {
-		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= this.getRecoverThreshold(context, Stat.Thirst));
+		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= getRecoverThreshold(context, Stat.Thirst));
 	}
 
 	private repairsInterrupt(context: Context): IObjective | undefined {
@@ -1814,8 +1377,4 @@ export default class Tars extends Mod {
 		this.navigationQueuedUpdates = [];
 	}
 
-	private getRecoverThreshold(context: Context, stat: Stat) {
-		const recoverThreshold = recoverThresholds[stat];
-		return recoverThreshold > 0 ? recoverThreshold : context.player.stat.get<IStatMax>(stat).max + recoverThreshold;
-	}
 }

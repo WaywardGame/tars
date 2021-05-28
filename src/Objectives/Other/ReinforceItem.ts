@@ -5,9 +5,9 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
 
 export default class ReinforceItem extends Objective {
 

@@ -4,13 +4,14 @@ import { getDirectionFromMovement } from "game/entity/player/IPlayer";
 import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
+import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import Navigation from "../../Navigation/Navigation";
+import Navigation from "../../navigation/Navigation";
 import Objective from "../../Objective";
-import ExecuteAction from "../Core/ExecuteAction";
+import ExecuteAction from "../core/ExecuteAction";
 
 export default class RunAwayFromTarget extends Objective {
 

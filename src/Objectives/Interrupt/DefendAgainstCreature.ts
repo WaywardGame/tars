@@ -6,12 +6,12 @@ import { getDirectionFromMovement, WeightStatus } from "game/entity/player/IPlay
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { isScaredOfCreature } from "../../Utilities/Creature";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import Restart from "../Core/Restart";
-import RunAwayFromTarget from "../Other/RunAwayFromTarget";
+import { isScaredOfCreature } from "../../utilities/Creature";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import Restart from "../core/Restart";
+import RunAwayFromTarget from "../other/RunAwayFromTarget";
 
 export default class DefendAgainstCreature extends Objective {
 

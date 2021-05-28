@@ -2,14 +2,15 @@ import Doodad from "game/doodad/Doodad";
 import doodadDescriptions from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
 import TileHelpers from "utilities/game/TileHelpers";
+import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { baseInfo, BaseInfoKey, IBaseInfo } from "../../ITars";
 import Objective from "../../Objective";
-import { getBaseDoodads, isGoodWellBuildTile } from "../../Utilities/Base";
-import * as objectUtilities from "../../Utilities/Object";
+import { getBaseDoodads, isGoodWellBuildTile } from "../../utilities/Base";
+import * as objectUtilities from "../../utilities/Object";
 
 const baseDoodadDistanceSq = Math.pow(150, 2);
 

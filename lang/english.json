@@ -20,6 +20,7 @@
 			"dialogTitleMain": "TARS",
 			"dialogButtonEnable": "Enable TARS {#--text-secondary:({Bindings:ModTARSToggleTars})}",
 			"dialogLabelStatus": "Status: {0}",
+			"dialogModeSurvival": "Survival Mode",
 			"dialogStatusNavigatingInitializing": "Initializing navigation system"
 		}
 	}

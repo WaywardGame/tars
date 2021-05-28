@@ -7,10 +7,10 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { DoodadSearchMap } from "../../ITars";
 import Objective from "../../Objective";
-import { findDoodads } from "../../Utilities/Object";
-import { canGather } from "../../Utilities/Tile";
-import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
-import MoveToTarget from "../Core/MoveToTarget";
+import { findDoodads } from "../../utilities/Object";
+import { canGather } from "../../utilities/Tile";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromDoodad extends Objective {
 

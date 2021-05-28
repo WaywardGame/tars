@@ -7,7 +7,7 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import ExecuteAction from "../Core/ExecuteAction";
+import ExecuteAction from "../core/ExecuteAction";
 
 export default class UseItem extends Objective {
 

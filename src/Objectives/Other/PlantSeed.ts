@@ -10,11 +10,11 @@ import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { gardenMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
-import { getBasePosition, isOpenArea } from "../../Utilities/Base";
-import AcquireItem from "../Acquire/Item/AcquireItem";
-import CopyContextData from "../ContextData/CopyContextData";
-import SetContextData from "../ContextData/SetContextData";
-import MoveToTarget from "../Core/MoveToTarget";
+import { getBasePosition, isOpenArea } from "../../utilities/Base";
+import AcquireItem from "../acquire/item/AcquireItem";
+import CopyContextData from "../contextData/CopyContextData";
+import SetContextData from "../contextData/SetContextData";
+import MoveToTarget from "../core/MoveToTarget";
 
 import UseItem from "./UseItem";
 

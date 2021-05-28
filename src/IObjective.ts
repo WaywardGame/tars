@@ -4,7 +4,7 @@ import { ILog, ILogLine } from "utilities/Log";
 
 import Context from "./Context";
 import ContextState from "./ContextState";
-import { IExecutionTree } from "./Core/IPlan";
+import { IExecutionTree } from "./core/IPlan";
 
 export enum ObjectiveResult {
 	// Objective was completed

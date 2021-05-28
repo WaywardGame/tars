@@ -5,7 +5,7 @@ import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
-import { getInventoryItemsWithEquipType, getInventoryItemsWithUse } from "../../Utilities/Item";
+import { getInventoryItemsWithEquipType, getInventoryItemsWithUse } from "../../utilities/Item";
 
 export default class AnalyzeInventory extends Objective {
 

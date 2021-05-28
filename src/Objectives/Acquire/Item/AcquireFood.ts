@@ -6,9 +6,9 @@ import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import SetContextData from "../../../Objectives/ContextData/SetContextData";
-import UseItem from "../../../Objectives/Other/UseItem";
-import { foodItemTypes, processRecipe } from "../../../Utilities/Item";
+import SetContextData from "../../../objectives/contextData/SetContextData";
+import UseItem from "../../../objectives/other/UseItem";
+import { foodItemTypes, processRecipe } from "../../../utilities/Item";
 
 import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";

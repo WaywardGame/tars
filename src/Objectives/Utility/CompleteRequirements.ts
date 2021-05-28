@@ -5,13 +5,13 @@ import { IRequirementInfo, RequirementStatus } from "game/item/IItemManager";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import AcquireBuildMoveToDoodad from "../Acquire/Doodad/AcquireBuildMoveToDoodad";
-import AcquireBuildMoveToFire from "../Acquire/Doodad/AcquireBuildMoveToFire";
-import AnalyzeBase from "../Analyze/AnalyzeBase";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import StartFire from "../Other/StartFire";
+import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
+import AcquireBuildMoveToFire from "../acquire/doodad/AcquireBuildMoveToFire";
+import AnalyzeBase from "../analyze/AnalyzeBase";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import StartFire from "../other/StartFire";
 
 export default class CompleteRequirements extends Objective {
 

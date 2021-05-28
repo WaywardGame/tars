@@ -10,11 +10,11 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
-import { isNearBase } from "../../Utilities/Base";
-import { getReservedItems, getUnusedItems } from "../../Utilities/Item";
-import { isOpenTile } from "../../Utilities/Tile";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import { isNearBase } from "../../utilities/Base";
+import { getReservedItems, getUnusedItems } from "../../utilities/Item";
+import { isOpenTile } from "../../utilities/Tile";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
 
 const maxChestDistance = 128;
 

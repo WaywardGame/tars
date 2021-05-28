@@ -9,16 +9,16 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../Utilities/Item";
-import { findCreatures } from "../../Utilities/Object";
-import AcquireItem from "../Acquire/Item/AcquireItem";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import AnalyzeInventory from "../Analyze/AnalyzeInventory";
-import AddDifficulty from "../Core/AddDifficulty";
-import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import Equip from "../Other/Equip";
+import { getInventoryItemsWithUse } from "../../utilities/Item";
+import { findCreatures } from "../../utilities/Object";
+import AcquireItem from "../acquire/item/AcquireItem";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import AnalyzeInventory from "../analyze/AnalyzeInventory";
+import AddDifficulty from "../core/AddDifficulty";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import Equip from "../other/Equip";
 
 export default class GatherFromCreature extends Objective {
 

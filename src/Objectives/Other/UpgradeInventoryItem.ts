@@ -7,7 +7,7 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { IInventoryItems, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
-import AcquireItem from "../Acquire/Item/AcquireItem";
+import AcquireItem from "../acquire/item/AcquireItem";
 
 export default class UpgradeInventoryItem extends Objective {
 

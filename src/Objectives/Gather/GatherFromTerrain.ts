@@ -7,10 +7,10 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { ITerrainSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { getBestActionItem } from "../../Utilities/Item";
-import { canGather, getNearestTileLocation } from "../../Utilities/Tile";
-import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
-import MoveToTarget from "../Core/MoveToTarget";
+import { getBestActionItem } from "../../utilities/Item";
+import { canGather, getNearestTileLocation } from "../../utilities/Tile";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromTerrain extends Objective {
 
