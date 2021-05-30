@@ -36,7 +36,7 @@ export default class MoveToLand extends Objective {
 			}
 
 			return false;
-		}, defaultMaxTilesChecked);
+		}, { maxTilesChecked: defaultMaxTilesChecked });
 
 		if (!target) {
 			return ObjectiveResult.Impossible;

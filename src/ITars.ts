@@ -21,9 +21,14 @@ export const defaultMaxTilesChecked = 3000;
 export const gardenMaxTilesChecked = 1024;
 
 export interface ISaveData {
-	enabled?: boolean;
-	mode?: TarsMode;
+	enabled: boolean;
+	options: ITarsOptions;
 	shouldOpenDialog?: boolean;
+}
+
+export interface ITarsOptions {
+	mode: TarsMode;
+	stayHealthy: boolean;
 }
 
 export interface ITileLocation {
@@ -383,26 +388,43 @@ export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot 
 
 export enum TarsTranslation {
 	DialogTitleMain,
-	DialogButtonEnable,
-	DialogLabelStatus,
+
 	DialogStatusNavigatingInitializing,
 
+	DialogButtonEnable,
+	DialogButtonAquireItem,
+	DialogButtonAquireItemTooltip,
+	DialogButtonStayHealthy,
+	DialogButtonStayHealthyTooltip,
+
+	DialogLabelStatus,
+	DialogLabelItem,
+
 	DialogModeSurvival,
+	DialogModeSurvivalTooltip,
+	DialogModeTidyUp,
+	DialogModeTidyUpTooltip,
 }
 
 export interface ITarsEvents extends Events<Mod> {
 	/**
-	 * Emitted when tars is enabled or disabled
+	 * Emitted when TARS is enabled or disabled
 	 */
 	enableChange(enabled: boolean): any;
 
 	/**
-	 * Emitted when tars status is changed
+	 * Emitted when TARS options change
+	 */
+	optionsChange(options: ITarsOptions): any;
+
+	/**
+	 * Emitted when TARS status is changed
 	 */
 	statusChange(status: Translation | string): any;
 }
 
 export enum TarsMode {
+	Manual,
 	Survival,
-	// WorldDestroyer,
+	TidyUp,
 }

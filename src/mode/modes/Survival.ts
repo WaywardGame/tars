@@ -7,49 +7,57 @@ import { TurnMode } from "game/IGame";
 import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
 import Item from "game/item/Item";
 
-import Context from "../Context";
-import ContextState from "../ContextState";
-import { ContextDataType, MovingToNewIslandState } from "../IContext";
-import { IObjective, ObjectiveResult } from "../IObjective";
-import { inventoryItemInfo } from "../ITars";
-import AcquireFood from "../objectives/acquire/item/AcquireFood";
-import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AcquireItemByGroup from "../objectives/acquire/item/AcquireItemByGroup";
-import AcquireItemByTypes from "../objectives/acquire/item/AcquireItemByTypes";
-import AcquireItemForAction from "../objectives/acquire/item/AcquireItemForAction";
-import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
-import AcquireWaterContainer from "../objectives/acquire/item/Specific/AcquireWaterContainer";
-import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
-import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
-import ExecuteAction from "../objectives/core/ExecuteAction";
-import Lambda from "../objectives/core/Lambda";
-import Restart from "../objectives/core/Restart";
-import GatherWater from "../objectives/gather/GatherWater";
-import BuildItem from "../objectives/other/BuildItem";
-import EmptyWaterContainer from "../objectives/other/EmptyWaterContainer";
-import Equip from "../objectives/other/Equip";
-import Idle from "../objectives/other/Idle";
-import PlantSeed from "../objectives/other/PlantSeed";
-import ReinforceItem from "../objectives/other/ReinforceItem";
-import ReturnToBase from "../objectives/other/ReturnToBase";
-import StartWaterStillDesalination from "../objectives/other/StartWaterStillDesalination";
-import UpgradeInventoryItem from "../objectives/other/UpgradeInventoryItem";
-import RecoverHealth from "../objectives/recover/RecoverHealth";
-import RecoverHunger from "../objectives/recover/RecoverHunger";
-import MoveToLand from "../objectives/utility/MoveToLand";
-import MoveToNewIsland from "../objectives/utility/MoveToNewIsland";
-import OrganizeBase from "../objectives/utility/OrganizeBase";
-import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import { getTilesWithItemsNearBase, isNearBase } from "../utilities/Base";
-import { canGatherWater, getBestActionItem, getSeeds, isSafeToDrinkItem } from "../utilities/Item";
-import { log } from "../utilities/Logger";
-import { getRecoverThreshold } from "../utilities/Player";
+import Context from "../../Context";
+import ContextState from "../../ContextState";
+import { ContextDataType, MovingToNewIslandState } from "../../IContext";
+import { IObjective, ObjectiveResult } from "../../IObjective";
+import { inventoryItemInfo } from "../../ITars";
+import AcquireFood from "../../objectives/acquire/item/AcquireFood";
+import AcquireItem from "../../objectives/acquire/item/AcquireItem";
+import AcquireItemByGroup from "../../objectives/acquire/item/AcquireItemByGroup";
+import AcquireItemByTypes from "../../objectives/acquire/item/AcquireItemByTypes";
+import AcquireItemForAction from "../../objectives/acquire/item/AcquireItemForAction";
+import AcquireItemForDoodad from "../../objectives/acquire/item/AcquireItemForDoodad";
+import AcquireWaterContainer from "../../objectives/acquire/item/Specific/AcquireWaterContainer";
+import AnalyzeBase from "../../objectives/analyze/AnalyzeBase";
+import AnalyzeInventory from "../../objectives/analyze/AnalyzeInventory";
+import ExecuteAction from "../../objectives/core/ExecuteAction";
+import Lambda from "../../objectives/core/Lambda";
+import Restart from "../../objectives/core/Restart";
+import GatherWater from "../../objectives/gather/GatherWater";
+import BuildItem from "../../objectives/other/BuildItem";
+import EmptyWaterContainer from "../../objectives/other/EmptyWaterContainer";
+import Equip from "../../objectives/other/Equip";
+import Idle from "../../objectives/other/Idle";
+import PlantSeed from "../../objectives/other/PlantSeed";
+import ReinforceItem from "../../objectives/other/ReinforceItem";
+import ReturnToBase from "../../objectives/other/ReturnToBase";
+import StartWaterStillDesalination from "../../objectives/other/StartWaterStillDesalination";
+import UpgradeInventoryItem from "../../objectives/other/UpgradeInventoryItem";
+import RecoverHealth from "../../objectives/recover/RecoverHealth";
+import RecoverHunger from "../../objectives/recover/RecoverHunger";
+import MoveToLand from "../../objectives/utility/MoveToLand";
+import MoveToNewIsland from "../../objectives/utility/MoveToNewIsland";
+import OrganizeBase from "../../objectives/utility/OrganizeBase";
+import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
+import { getTilesWithItemsNearBase, isNearBase } from "../../utilities/Base";
+import { canGatherWater, getBestActionItem, getSeeds, isSafeToDrinkItem } from "../../utilities/Item";
+import { log } from "../../utilities/Logger";
+import { getRecoverThreshold } from "../../utilities/Player";
+import { ITarsMode } from "../IMode";
 
-import { ITarsMode } from "./IMode";
+/**
+ * Survival mode
+ */
+export class SurvivalMode implements ITarsMode {
 
-class SurvivalMode implements ITarsMode {
+	private finished: () => void;
 
-	public determineObjectives(context: Context, stop: () => void): Array<IObjective | IObjective[]> {
+	public async initialize(context: Context, finished: () => void) {
+		this.finished = finished;
+	}
+
+	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const chest = context.player.getEquippedItem(EquipType.Chest);
 		const legs = context.player.getEquippedItem(EquipType.Legs);
 		const belt = context.player.getEquippedItem(EquipType.Belt);
@@ -477,10 +485,7 @@ class SurvivalMode implements ITarsMode {
 		if (!multiplayer.isConnected()) {
 			if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
 				objectives.push(new Lambda(async () => {
-					log.info("Done with all objectives! Disabling...");
-
-					stop();
-
+					this.finished();
 					return ObjectiveResult.Complete;
 				}));
 
@@ -492,5 +497,3 @@ class SurvivalMode implements ITarsMode {
 		return objectives;
 	}
 }
-
-export const survivalMode = new SurvivalMode();

@@ -92,14 +92,14 @@ export default class BuildItem extends Objective {
 				for (const baseDoodad of baseDoodads) {
 					if (isWell) {
 						// look for unlimited wells first
-						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodWellBuildTile(context, point, tile, true), defaultMaxTilesChecked);
+						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 						if (this.target === undefined) {
 							this.log.info("Couldn't find unlimited well tile");
-							this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodWellBuildTile(context, point, tile, false), defaultMaxTilesChecked);
+							this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 						}
 
 					} else {
-						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), defaultMaxTilesChecked);
+						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
 					}
 
 					if (this.target !== undefined) {

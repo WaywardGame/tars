@@ -157,8 +157,15 @@ export function getTilesWithItemsNearBase(context: Context): { tiles: IVector3[]
 		totalCount: 0,
 	};
 
-	const tiles = TileHelpers.tilesInRange(context.player, nearBaseDistance, true);
-	for (const [point, tile] of tiles) {
+	const basePosition = getBasePosition(context);
+
+	const baseTilesWithItems = TileHelpers.findMatchingTiles(
+		basePosition,
+		(_, tile) => tile.containedItems ? tile.containedItems.length > 0 : false, {
+		canVisitTile: (point, tile) => isNearBase(context, point),
+	});
+
+	for (const { point, tile } of baseTilesWithItems) {
 		const containedItems = tile.containedItems;
 		if (!containedItems || containedItems.length === 0) {
 			continue;

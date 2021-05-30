@@ -48,8 +48,6 @@ export default class OrganizeBase extends Objective {
 		for (const position of this.tiles) {
 			const tile = game.getTileFromPoint(position);
 			if (tile.containedItems && tile.containedItems.length > 0) {
-				// const objectives: IObjective[] = [];
-
 				// pickup items from tile
 				objectives.push(new MoveToTarget(position, true));
 
@@ -67,8 +65,6 @@ export default class OrganizeBase extends Objective {
 						action.execute(context.player, item, chests[0] as IContainer);
 					}));
 				}
-
-				// objectivePipelines.push(objectives);
 			}
 		}
 

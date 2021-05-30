@@ -1,9 +1,7 @@
 import { IOverlayInfo, ITerrainDescription, ITile, OverlayType, TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
 import terrainDescriptions from "game/tile/Terrains";
-import Terrains from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
-import { TileType } from "renderer/TileAtlas";
 import Enums from "utilities/enum/Enums";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
@@ -74,12 +72,13 @@ export default class Navigation {
 			}
 		}
 
-		const freshWaterTypes: TileType[] = [];
-		const seaWaterTypes: TileType[] = [];
-		const gatherableTypes: TileType[] = [];
+		const freshWaterTypes: TerrainType[] = [];
+		const seaWaterTypes: TerrainType[] = [];
+		const gatherableTypes: TerrainType[] = [];
 
-		for (const tileType of Enums.values(TileType)) {
-			const tileTypeName = TileType[tileType];
+		for (const tileType of Enums.values(TerrainType)) {
+			const tileTypeName = TerrainType[tileType];
+
 			if (tileTypeName.includes("FreshWater")) {
 				freshWaterTypes.push(tileType);
 
@@ -254,7 +253,7 @@ export default class Navigation {
 	}
 
 	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array): void {
-		const terrainDescription = Terrains[tileType];
+		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return;
 		}
@@ -349,7 +348,7 @@ export default class Navigation {
 		const tile = game.getTileFromPoint(point);
 
 		const tileType = TileHelpers.getType(tile);
-		const terrainDescription = Terrains[tileType];
+		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return 0;
 		}

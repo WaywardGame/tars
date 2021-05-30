@@ -39,7 +39,7 @@ export default class Idle extends Objective {
 
 		} else {
 			if (this.canMoveToIdle) {
-				const target = TileHelpers.findMatchingTile(context.player, (_, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !game.isTileFull(tile) && !tile.doodad, defaultMaxTilesChecked);
+				const target = TileHelpers.findMatchingTile(context.player, (_, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !game.isTileFull(tile) && !tile.doodad, { maxTilesChecked: defaultMaxTilesChecked });
 				if (target) {
 					this.log.info("Moving to idle position");
 

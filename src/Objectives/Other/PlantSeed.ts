@@ -66,13 +66,13 @@ export default class PlantSeed extends Objective {
 				TileHelpers.isTilled(tile) &&
 				this.plantTiles.includes(TileHelpers.getType(tile)) &&
 				(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
-		}, gardenMaxTilesChecked);
+		}, { maxTilesChecked: gardenMaxTilesChecked });
 		if (emptyTilledTile !== undefined) {
 			objectives.push(new MoveToTarget(emptyTilledTile, true));
 
 		} else {
 			const nearbyTillableTile = TileHelpers.findMatchingTile(getBasePosition(context), (point, tile) =>
-				this.plantTiles.includes(TileHelpers.getType(tile)) && isOpenArea(context, point, tile), gardenMaxTilesChecked);
+				this.plantTiles.includes(TileHelpers.getType(tile)) && isOpenArea(context, point, tile), { maxTilesChecked: gardenMaxTilesChecked });
 			if (nearbyTillableTile !== undefined) {
 				objectives.push(new MoveToTarget(nearbyTillableTile, true));
 				objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));

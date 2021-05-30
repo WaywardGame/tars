@@ -19,6 +19,7 @@
         "no-any": false,
         "no-bitwise": false,
         "no-default-export": false,
+        "no-async-without-await": false,
         "no-dynamic-delete": false,
         "no-empty": false,
         "no-floating-promises": false,

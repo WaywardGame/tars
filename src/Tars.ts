@@ -1,6 +1,6 @@
 import { EventBus } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
-import { EventHandler } from "event/EventManager";
+import EventManager, { EventHandler } from "event/EventManager";
 import { ActionType, IActionApi, IActionDescription } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
@@ -44,9 +44,9 @@ import executor, { ExecuteObjectivesResultType } from "./core/Executor";
 import planner from "./core/Planner";
 import { ContextDataType, MovingToNewIslandState } from "./IContext";
 import { IObjective } from "./IObjective";
-import { IBase, IInventoryItems, ISaveData, ITarsEvents, TarsMode, TarsTranslation, TARS_ID } from "./ITars";
-import { ITarsMode } from "./modes/IMode";
-import { modes } from "./modes/Modes";
+import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, TarsMode, TarsTranslation, TARS_ID } from "./ITars";
+import { ITarsMode } from "./mode/IMode";
+import { modes } from "./mode/Modes";
 import Navigation from "./navigation/Navigation";
 import Objective from "./Objective";
 import AnalyzeBase from "./objectives/analyze/AnalyzeBase";
@@ -104,10 +104,10 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////
 
-	@Register.bindable("ToggleDialog", IInput.key("KeyT", "Shift"))
+	@Register.bindable("ToggleDialog", IInput.key("KeyT"))
 	public readonly bindableToggleDialog: Bindable;
 
-	@Register.bindable("ToggleTars", IInput.key("KeyT"))
+	@Register.bindable("ToggleTars", IInput.key("KeyT", "Shift"))
 	public readonly bindableToggleTars: Bindable;
 
 	////////////////////////////////////
@@ -117,6 +117,9 @@ export default class Tars extends Mod {
 
 	@Register.message("Toggle")
 	public readonly messageToggle: Message;
+
+	@Register.message("Finished")
+	public readonly messageFinished: Message;
 
 	@Register.message("NavigationUpdating")
 	public readonly messageNavigationUpdating: Message;
@@ -165,15 +168,7 @@ export default class Tars extends Mod {
 	private navigationSystemState: NavigationSystemState;
 	private navigationQueuedUpdates: Array<() => void>;
 
-	private get modeInstance(): ITarsMode {
-		const modeInstance = modes.get(this.getMode());
-		if (!modeInstance) {
-			this.disable();
-			throw new Error(`Misisng mode instance for ${this.getMode()}`);
-		}
-
-		return modeInstance;
-	}
+	private readonly modeCache: Map<TarsMode, ITarsMode> = new Map();
 
 	public onInitialize(): void {
 		Navigation.setModPath(this.getPath());
@@ -186,7 +181,10 @@ export default class Tars extends Mod {
 	}
 
 	public onLoad(): void {
+		this.ensureOptions();
+
 		this.delete();
+
 		this.navigation = Navigation.get();
 
 		Log.addPreConsoleCallback(preConsoleCallback);
@@ -225,7 +223,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.Game, "play")
 	public onGameStart(): void {
-		if (!this.isEnabled() && (this.saveData.enabled || new URLSearchParams(window.location.search).has("autotars"))) {
+		if (!this.isRunning() && (this.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
 			this.toggle();
 		}
 	}
@@ -238,7 +236,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "writeNote")
 	public onWriteNote(player: Player, note: INote): false | void {
-		if (this.isEnabled()) {
+		if (this.isRunning()) {
 			// hide notes
 			return false;
 		}
@@ -264,7 +262,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "processMovement")
 	public async processMovement(player: Player): Promise<void> {
-		if (this.isEnabled() && player.isLocalPlayer()) {
+		if (this.isRunning() && player.isLocalPlayer()) {
 			if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
 				this.navigation.queueUpdateOrigin(player);
 			}
@@ -284,7 +282,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "restEnd")
 	public restEnd() {
-		if (this.isEnabled()) {
+		if (this.isRunning()) {
 			this.processQueuedNavigationUpdates();
 		}
 	}
@@ -296,7 +294,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.Ui, "interrupt")
 	public onInterrupt(host: Ui, options: Partial<InterruptOptions>, interrupt?: Interrupt): string | boolean | void | InterruptChoice | undefined {
-		if (this.isEnabled() && (interrupt === Interrupt.GameDangerousStep || interrupt === Interrupt.GameTravelConfirmation)) {
+		if (this.isRunning() && (interrupt === Interrupt.GameDangerousStep || interrupt === Interrupt.GameTravelConfirmation)) {
 			log.info(`Returning true for interrupt ${Interrupt[interrupt]}`);
 			return InterruptChoice.Yes;
 		}
@@ -350,7 +348,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "walkPathChange")
 	public onWalkPathChange(player: Player, walkPath: IVector2[] | undefined) {
-		if (!walkPath || walkPath.length === 0 || !this.isEnabled()) {
+		if (!walkPath || walkPath.length === 0 || !this.isRunning()) {
 			return;
 		}
 
@@ -362,7 +360,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "preMove")
 	public preMove(player: Player, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
-		if (!this.isEnabled() || !player.hasWalkPath()) {
+		if (!this.isRunning() || !player.hasWalkPath()) {
 			return;
 		}
 
@@ -387,7 +385,7 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "statChanged")
 	public onStatChange(player: Player, stat: IStat) {
-		if (!this.isEnabled()) {
+		if (!this.isRunning()) {
 			return;
 		}
 
@@ -397,7 +395,7 @@ export default class Tars extends Mod {
 				if (!this.statThresholdExceeded[stat.type]) {
 					this.statThresholdExceeded[stat.type] = true;
 
-					if (this.isEnabled()) {
+					if (this.isRunning()) {
 						log.info(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
 
 						this.interrupt();
@@ -423,7 +421,7 @@ export default class Tars extends Mod {
 						return;
 					}
 
-					if (this.isEnabled()) {
+					if (this.isRunning()) {
 						// players weight status changed
 						// reset objectives so we'll handle this immediately
 						log.info(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
@@ -449,6 +447,10 @@ export default class Tars extends Mod {
 	}
 
 	public isEnabled(): boolean {
+		return this.saveData.enabled;
+	}
+
+	public isRunning(): boolean {
 		return this.tickTimeoutId !== undefined;
 	}
 
@@ -457,14 +459,18 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		const str = !this.isEnabled() ? "Enabled" : "Disabled";
+		const str = !this.isRunning() ? "Enabled" : "Disabled";
 
 		log.info(str);
 
 		localPlayer.messages
 			.source(this.messageSource)
 			.type(MessageType.Good)
-			.send(this.messageToggle, !this.isEnabled());
+			.send(this.messageToggle, !this.isRunning());
+
+		await this.reset();
+
+		this.context = new Context(localPlayer, this.base, this.inventory);
 
 		if (this.navigationSystemState === NavigationSystemState.NotInitialized && this.navigation) {
 			this.navigationSystemState = NavigationSystemState.Initializing;
@@ -493,39 +499,42 @@ export default class Tars extends Mod {
 				.send(this.messageNavigationUpdated);
 		}
 
-		this.context = new Context(localPlayer, this.base, this.inventory);
-
-		this.reset();
-
-		this.saveData.enabled = !this.isEnabled();
-
-		if (this.saveData.enabled) {
-			if (this.navigation) {
-				this.navigation.showOverlay();
-
-				if (this.navigationSystemState === NavigationSystemState.Initialized) {
-					this.navigation.queueUpdateOrigin(localPlayer);
-				}
-			}
-
-			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
+		if (!this.isRunning()) {
+			this.enable();
 
 		} else {
 			this.disable();
 		}
-
-		this.event.emit("enableChange", this.isEnabled());
 	}
 
-	public getMode(): TarsMode {
-		return this.saveData.mode ?? TarsMode.Survival;
-	}
+	public updateOptions(options: Partial<ITarsOptions>) {
+		let changed = false;
 
-	public setMode(mode: TarsMode) {
-		if (this.saveData.mode !== mode) {
-			this.saveData.mode = mode;
+		for (const key of (Object.keys(options) as Array<keyof ITarsOptions>)) {
+			const newValue = options[key];
+			if (newValue !== undefined && this.saveData.options[key] !== newValue) {
+				(this.saveData.options as any)[key] = newValue;
+				changed = true;
+			}
+		}
+
+		if (changed) {
+			this.event.emit("optionsChange", this.saveData.options);
+		}
+
+		if (this.isRunning()) {
 			this.interrupt();
 		}
+	}
+
+	public async activateManualMode(modeInstance: ITarsMode) {
+		this.updateOptions({ mode: TarsMode.Manual });
+
+		if (!this.isRunning()) {
+			this.toggle();
+		}
+
+		await this.initializeMode(this.context, TarsMode.Manual, modeInstance);
 	}
 
 	@Bound
@@ -534,7 +543,7 @@ export default class Tars extends Mod {
 			return this.getTranslation(TarsTranslation.DialogStatusNavigatingInitializing);
 		}
 
-		if (!this.isEnabled()) {
+		if (!this.isRunning()) {
 			return "Waiting to be enabled";
 		}
 
@@ -558,8 +567,64 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
-	private reset() {
+	/**
+	 * Ensure options are valid
+	 */
+	private ensureOptions() {
+		if (!this.saveData.options) {
+			this.saveData.options = {} as any;
+		}
+
+		if (this.saveData.options.mode === undefined || this.saveData.options.mode === TarsMode.Manual) {
+			this.saveData.options.mode = TarsMode.Survival;
+		}
+
+		if (this.saveData.options.stayHealthy === undefined) {
+			this.saveData.options.stayHealthy = true;
+		}
+	}
+
+	private async getOrCreateModeInstance(context: Context): Promise<ITarsMode> {
+		const mode = this.saveData.options.mode;
+
+		let modeInstance = this.modeCache.get(mode);
+		if (!modeInstance) {
+			modeInstance = modes.get(mode);
+			if (!modeInstance) {
+				this.disable();
+				throw new Error(`Missing mode initializer for ${TarsMode[mode]}`);
+			}
+
+			await this.initializeMode(context, mode, modeInstance);
+		}
+
+		return modeInstance;
+	}
+
+	private async initializeMode(context: Context, mode: TarsMode, modeInstance: ITarsMode) {
+		await this.disposeMode(context, mode);
+
+		EventManager.registerEventBusSubscriber(modeInstance);
+		await modeInstance.initialize?.(context, () => { this.stop(true); });
+		this.modeCache.set(mode, modeInstance);
+	}
+
+	private async disposeMode(context: Context, mode: TarsMode) {
+		const modeInstance = this.modeCache.get(TarsMode.Manual);
+		if (modeInstance) {
+			await modeInstance.dispose?.(this.context);
+			EventManager.deregisterEventBusSubscriber(modeInstance);
+			this.modeCache.delete(mode);
+		}
+	}
+
+	private async reset() {
 		executor.reset();
+
+		for (const mode of Array.from(this.modeCache.keys())) {
+			await this.disposeMode(this.context, mode);
+		}
+
 		this.lastStatusMessage = undefined;
 		this.objectivePipeline = undefined;
 		this.interruptObjectivePipeline = undefined;
@@ -592,7 +657,27 @@ export default class Tars extends Mod {
 		Navigation.delete();
 	}
 
+	private enable() {
+		this.saveData.enabled = true;
+		this.event.emit("enableChange", true);
+
+		if (this.navigation) {
+			this.navigation.showOverlay();
+
+			if (this.navigationSystemState === NavigationSystemState.Initialized) {
+				this.navigation.queueUpdateOrigin(localPlayer);
+			}
+		}
+
+		this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
+	}
+
 	private disable(gameIsEnding: boolean = false) {
+		if (!gameIsEnding) {
+			this.saveData.enabled = false;
+			this.event.emit("enableChange", false);
+		}
+
 		if (this.navigation) {
 			this.navigation.hideOverlay();
 		}
@@ -607,6 +692,10 @@ export default class Tars extends Mod {
 		if (localPlayer) {
 			localPlayer.walkAlongPath(undefined);
 			OptionsInterrupt.restore(localPlayer);
+		}
+
+		if (this.saveData.options.mode === TarsMode.Manual) {
+			this.updateOptions({ mode: TarsMode.Survival });
 		}
 	}
 
@@ -643,7 +732,7 @@ export default class Tars extends Mod {
 	}
 
 	private async onTick() {
-		if (!this.isEnabled() || !executor.isReady(this.context, false)) {
+		if (!this.isRunning() || !executor.isReady(this.context, false)) {
 			if (game.playing && this.context.player.isGhost() && game.getGameOptions().respawn) {
 				await new ExecuteAction(ActionType.Respawn, (context, action) => {
 					action.execute(context.player);
@@ -661,7 +750,12 @@ export default class Tars extends Mod {
 		await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
 
 		// interrupts
-		const interrupts = this.getInterrupts(this.context);
+		const modeInstance = await this.getOrCreateModeInstance(this.context);
+
+		const interrupts = modeInstance.getInterrupts ?
+			await modeInstance.getInterrupts(this.context) :
+			this.getInterrupts(this.context);
+
 		const interruptIds = new Set<string>(interrupts
 			.filter(objective => Array.isArray(objective) ? objective.length > 0 : objective !== undefined)
 			.map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective!.getIdentifier()));
@@ -853,9 +947,16 @@ export default class Tars extends Mod {
 
 					return;
 			}
+
+			if (!this.isEnabled()) {
+				// execution finished from running the objectivePipeline
+				return;
+			}
 		}
 
-		const result = await executor.executeObjectives(this.context, this.determineObjectives(this.context), true, true);
+		const objectives = await modeInstance.determineObjectives(this.context);
+
+		const result = await executor.executeObjectives(this.context, objectives, true, true);
 		switch (result.type) {
 			case ExecuteObjectivesResultType.Pending:
 			case ExecuteObjectivesResultType.ContinuingNextTick:
@@ -870,37 +971,31 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private determineObjectives(context: Context): Array<IObjective | IObjective[]> {
-		return this.modeInstance.determineObjectives(context, this.stop);
-	}
-
 	@Bound
-	private stop() {
+	private stop(finished?: boolean) {
 		localPlayer.messages
 			.source(this.messageSource)
 			.type(MessageType.Good)
-			.send(this.messageToggle, false);
+			.send(finished ? this.messageFinished : this.messageToggle, false);
 
 		this.disable();
 	}
 
 	// todo: add severity to stat interrupts to prioritize which one to run
 	private getInterrupts(context: Context): Array<IObjective | IObjective[] | undefined> {
-		if (this.modeInstance.getInterrupts) {
-			return this.modeInstance.getInterrupts(context);
-		}
+		const stayHealthy = this.saveData.options.stayHealthy;
 
 		let interrupts = [
 			this.optionsInterrupt(),
 			this.equipmentInterrupt(context),
 			this.nearbyCreatureInterrupt(context),
-			this.staminaInterrupt(context),
+			stayHealthy ? this.staminaInterrupt(context) : undefined,
 			this.buildItemObjectives(),
-			this.healthInterrupt(context),
+			stayHealthy ? this.healthInterrupt(context) : undefined,
 			this.reduceWeightInterrupt(context),
-			this.thirstInterrupt(context),
+			stayHealthy ? this.thirstInterrupt(context) : undefined,
 			this.gatherFromCorpsesInterrupt(context),
-			this.hungerInterrupt(context),
+			stayHealthy ? this.hungerInterrupt(context) : undefined,
 			this.repairsInterrupt(context),
 			this.escapeCavesInterrupt(context),
 			this.returnToBaseInterrupt(context),

@@ -93,7 +93,7 @@ export default class AnalyzeBase extends Objective {
 
 			const baseDoodads = getBaseDoodads(context);
 			for (const baseDoodad of baseDoodads) {
-				const unlimitedWellTile = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => isGoodWellBuildTile(context, point, tile, true), 50);
+				const unlimitedWellTile = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: 50 });
 				if (unlimitedWellTile) {
 					availableUnlimitedWellLocation = unlimitedWellTile;
 					break;
