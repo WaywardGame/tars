@@ -5,7 +5,7 @@ import { IVector3 } from "utilities/math/IVector";
 
 import ContextState from "./ContextState";
 import { ContextDataType } from "./IContext";
-import { IBase, IInventoryItems } from "./ITars";
+import { IBase, IInventoryItems, ITarsOptions } from "./ITars";
 
 export default class Context {
 
@@ -15,6 +15,7 @@ export default class Context {
 		public readonly player: Player /*| NPC*/,
 		public readonly base: IBase,
 		public readonly inventory: IInventoryItems,
+		public readonly options: Readonly<ITarsOptions>,
 		public state = new ContextState(),
 		public readonly calculatingDifficulty: boolean = false,
 		private initialState?: ContextState) {
@@ -25,7 +26,7 @@ export default class Context {
 	}
 
 	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false): Context {
-		return new Context(this.player, this.base, this.inventory, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
+		return new Context(this.player, this.base, this.inventory, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
 	}
 
 	public merge(state: ContextState): void {
@@ -71,6 +72,10 @@ export default class Context {
 
 	public getData<T = any>(type: string): T | undefined {
 		return this.state.get(type);
+	}
+
+	public getDataOrDefault<T = any>(type: string, defaultValue: T): T {
+		return this.getData(type) ?? defaultValue;
 	}
 
 	public setData<T = any>(type: string, value: T | undefined) {

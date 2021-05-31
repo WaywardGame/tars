@@ -2,12 +2,15 @@ import { ActionType } from "game/entity/action/IAction";
 import Island from "game/Island";
 import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
+import { ItemType } from "game/item/IItem";
 
 import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
+import AcquireItem from "../acquire/item/AcquireItem";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
+import AnalyzeInventory from "../analyze/AnalyzeInventory";
 
 export default class MoveToNewIsland extends Objective {
 
@@ -51,12 +54,25 @@ export default class MoveToNewIsland extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		return unvisitedIslands.map(island => [
-			new MoveToTarget(island.edgePosition, true, { allowBoat: true, disableStaminaCheck: true }),
-			new ExecuteAction(ActionType.Move, (context, action) => {
-				action.execute(context.player, island.direction);
-			}),
-		]);
+		const objectivePipelines: IObjective[][] = [];
+
+		for (const unvisitedIsland of unvisitedIslands) {
+			const objectives: IObjective[] = [];
+
+			if (!context.inventory.sailBoat || !itemManager.isContainableInContainer(context.inventory.sailBoat, context.player.inventory)) {
+				// it should grab it from our chest
+				objectives.push(new AcquireItem(ItemType.Sailboat), new AnalyzeInventory());
+			}
+
+			objectives.push(new MoveToTarget(unvisitedIsland.edgePosition, true, { allowBoat: true, disableStaminaCheck: true }));
+			objectives.push(new ExecuteAction(ActionType.Move, (context, action) => {
+				action.execute(context.player, unvisitedIsland.direction);
+			}));
+
+			objectivePipelines.push(objectives);
+		}
+
+		return objectivePipelines;
 	}
 
 }

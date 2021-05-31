@@ -24,6 +24,8 @@
 			"dialogButtonAquireItemTooltip": "Instruct TARS to acquire the selected item.",
 			"dialogButtonStayHealthy": "Stay Healthy",
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
+			"dialogButtonExploreIslands": "Explore Islands",
+			"dialogButtonExploreIslandsTooltip": "Allow TARS to explore other islands after it has decent equipment and resources. Note: This has no effect when in a multiplayer game.",
 			"dialogLabelStatus": "Status: {0}",
 			"dialogLabelItem": "{#--text-secondary:Item}",
 			"dialogModeSurvival": "Survival Mode",

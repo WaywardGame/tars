@@ -105,6 +105,8 @@ export default class AcquireItemFromDismantle extends Objective {
 
 	protected getBaseDifficulty(context: Context): number {
 		// High base difficulty because we prefer to not dismantle things. Sometimes we want to keep logs until we really need them
-		return 18;
+		// but not too high because sometimes we end up with dozens of logs while trying to look for stripped bark..
+		// it should really take into account the scarcity of the item being dismantled
+		return 5;
 	}
 }

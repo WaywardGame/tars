@@ -35,6 +35,7 @@ export default class TarsDialog extends Dialog {
 	private readonly buttonEnable: CheckButton;
 	private readonly choiceListMode: ChoiceList<Choice<TarsMode>, true>;
 	private readonly buttonStayHealthy: CheckButton;
+	private readonly buttonExploreIslands: CheckButton;
 	private readonly dropdownItemType: ItemDropdown<string>;
 
 	public constructor(id: DialogId) {
@@ -104,6 +105,16 @@ export default class TarsDialog extends Dialog {
 			})
 			.appendTo(this.body);
 
+		this.buttonExploreIslands = new CheckButton()
+			.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonExploreIslands))
+			.setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonExploreIslandsTooltip))))
+			.setRefreshMethod(() => this.TARS.saveData.options.exploreIslands)
+			.event.subscribe("willToggle", (_, checked) => {
+				this.TARS.updateOptions({ exploreIslands: checked });
+				return true;
+			})
+			.appendTo(this.body);
+
 		////////////////////////////////////////////////////
 
 		const events = this.TARS.event.until(this, "close");
@@ -125,6 +136,7 @@ export default class TarsDialog extends Dialog {
 		this.buttonEnable.refresh();
 		this.choiceListMode.refresh();
 		this.buttonStayHealthy.refresh();
+		this.buttonExploreIslands.refresh();
 
 		const isManual = this.TARS.saveData.options.mode === TarsMode.Manual;
 		this.choiceListMode.setDisabled(isManual);

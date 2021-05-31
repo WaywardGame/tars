@@ -41,7 +41,7 @@ import MoveToNewIsland from "../../objectives/utility/MoveToNewIsland";
 import OrganizeBase from "../../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
 import { getTilesWithItemsNearBase, isNearBase } from "../../utilities/Base";
-import { canGatherWater, getBestActionItem, getSeeds, isSafeToDrinkItem } from "../../utilities/Item";
+import { canGatherWater, getBestTool, getSeeds, isSafeToDrinkItem } from "../../utilities/Item";
 import { log } from "../../utilities/Logger";
 import { getRecoverThreshold } from "../../utilities/Player";
 import { ITarsMode } from "../IMode";
@@ -69,16 +69,10 @@ export class SurvivalMode implements ITarsMode {
 
 		const objectives: Array<IObjective | IObjective[]> = [];
 
-		const moveToNewIslandState = context.getData(ContextDataType.MovingToNewIsland) ?? MovingToNewIslandState.None;
+		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
 
 		if (moveToNewIslandState === MovingToNewIslandState.Ready) {
-			if (context.inventory.sailBoat && !itemManager.isContainableInContainer(context.inventory.sailBoat, context.player.inventory)) {
-				// it should grab it from our chest
-				objectives.push(new AcquireItem(ItemType.Sailboat));
-			}
-
 			objectives.push(new MoveToNewIsland());
-
 			return objectives;
 		}
 
@@ -89,11 +83,12 @@ export class SurvivalMode implements ITarsMode {
 				new ExecuteAction(ActionType.Drop, (context, action) => {
 					action.execute(context.player, context.inventory.sailBoat!);
 				}).setStatus("Dropping sailboat"),
+				new AnalyzeInventory(),
 			]);
 		}
 
-		const gatherItem = getBestActionItem(context, ActionType.Gather, DamageType.Slashing);
-		if (gatherItem === undefined) {
+		const nonMiningItem = getBestTool(context, ActionType.Gather, DamageType.Slashing);
+		if (nonMiningItem === undefined) {
 			objectives.push([new AcquireItemForAction(ActionType.Gather)]);
 		}
 
@@ -419,7 +414,7 @@ export class SurvivalMode implements ITarsMode {
 			End game objectives
 		*/
 
-		if (!multiplayer.isConnected()) {
+		if (context.options.exploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
 			const needsFood = context.inventory.food === undefined || context.inventory.food.length < 2;
 
@@ -434,6 +429,8 @@ export class SurvivalMode implements ITarsMode {
 
 				case MovingToNewIslandState.Preparing:
 					// make a sail boat
+
+					// it's possible theres a sailboat at the time this is checked, but it's actually dropped after
 					if (!context.inventory.sailBoat) {
 						objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
 
@@ -454,17 +451,10 @@ export class SurvivalMode implements ITarsMode {
 						context.setInitialState(initialState);
 						return ObjectiveResult.Complete;
 					}));
-
-				case MovingToNewIslandState.Ready:
-					if (context.inventory.sailBoat && !itemManager.isContainableInContainer(context.inventory.sailBoat, context.player.inventory)) {
-						// it should grab it from our chest
-						objectives.push(new AcquireItem(ItemType.Sailboat));
-					}
-
-					objectives.push(new MoveToNewIsland());
-
-					break;
 			}
+
+			// restart now. MovingToNewIslandState.Ready will be handled at the top
+			objectives.push(new Restart());
 
 		} else {
 			const health = context.player.stat.get<IStatMax>(Stat.Health);

@@ -3,7 +3,7 @@ Let TARS play the game for you. Good thing there are no black holes in Wayward.
 
 TARS is a bot that will play Wayward by itself, doing tasks such as gathering resources, setting up a camp, hunting, getting food/water, and more! It's named after the robot from Interstellar.
 
-By default, press `T` to enable / disable TARS. Pressing `Shift + T` will open the TARS dialog, which will display a status showing what it's doing.
+By default, press `T` to open the TARS dialog or press `Shift + T` to immediately enable / disable TARS.
 
 ## Steam Workshop
 

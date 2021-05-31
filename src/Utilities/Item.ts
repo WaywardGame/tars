@@ -2,13 +2,16 @@ import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
-import { EquipType } from "game/entity/IHuman";
+import { EquipType, SkillType } from "game/entity/IHuman";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
 import Item from "game/item/Item";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import Items, { itemDescriptions } from "game/item/Items";
 import Enums from "utilities/enum/Enums";
+import terrainDescriptions from "game/tile/Terrains";
+import Doodad from "game/doodad/Doodad";
+import { TerrainType } from "game/tile/ITerrain";
 
 import Context from "../Context";
 import { IInventoryItems, inventoryItemInfo } from "../ITars";
@@ -107,7 +110,7 @@ export function hasUseActionType(item: Item, actionType: ActionType) {
 	return item.description()?.use?.includes(actionType) ? true : false;
 }
 
-export function getBestActionItem(context: Context, use: ActionType, preferredDamageType?: DamageType): Item | undefined {
+export function getBestTool(context: Context, use: ActionType, preferredDamageType?: DamageType): Item | undefined {
 	let possibleEquips = getPossibleHandEquips(context, use, preferredDamageType);
 	if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
 		// fall back to not caring about the damage type
@@ -115,6 +118,45 @@ export function getBestActionItem(context: Context, use: ActionType, preferredDa
 	}
 
 	return possibleEquips.length > 0 ? possibleEquips[0] : undefined;
+}
+
+export function getBestToolForDoodadGather(context: Context, doodad: Doodad): Item | undefined {
+	const description = doodad.description();
+	if (!description) {
+		return undefined;
+	}
+
+	let tool: Item | undefined;
+
+	const stage = doodad.getGrowingStage();
+	if (stage !== undefined && description.harvest && description.harvest[stage]) {
+		tool = getBestTool(context, ActionType.Harvest);
+
+	} else {
+		const skillType = description.gatherSkillUse ?? description.skillUse ?? SkillType.Mining;
+		const prefersBlunt = skillType === SkillType.Mining;
+		tool = getBestTool(context, ActionType.Gather, prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
+	}
+
+	return tool;
+}
+
+export function getBestToolForTerrainGather(context: Context, terrainType: TerrainType): Item | undefined {
+	const terrainDescription = terrainDescriptions[terrainType];
+	if (!terrainDescription) {
+		return undefined;
+	}
+
+	let tool: Item | undefined;
+
+	if (terrainDescription.gather) {
+		const prefersBlunt = (terrainDescription.gatherSkillUse ?? SkillType.Mining) === SkillType.Mining;
+		tool = getBestTool(context, ActionType.Gather, prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
+	} else {
+		tool = getBestTool(context, ActionType.Dig);
+	}
+
+	return tool;
 }
 
 export function getBestEquipment(context: Context, equip: EquipType): Item[] {
@@ -191,15 +233,15 @@ export function estimateDamageModifier(weapon: Item, target: Creature): number {
 	return weaponAttack + vulnerable - resist;
 }
 
-export function getPossibleHandEquips(context: Context, use: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[] {
-	const items = getInventoryItemsWithUse(context, use, filterEquipped)
+export function getPossibleHandEquips(context: Context, actionType: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[] {
+	const items = getInventoryItemsWithUse(context, actionType, filterEquipped)
 		.filter(item => {
 			const description = item.description();
 			return description && description.equip === EquipType.Held &&
 				(preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
 		});
-	if (use !== ActionType.Attack) {
-		return items.sort((itemA, itemB) => itemB.getItemUseBonus(use) - itemA.getItemUseBonus(use));
+	if (actionType !== ActionType.Attack) {
+		return items.sort((itemA, itemB) => itemB.getItemUseBonus(actionType) - itemA.getItemUseBonus(actionType));
 	}
 
 	return items;
@@ -210,6 +252,22 @@ export function getInventoryItemsWithEquipType(context: Context, equipType: Equi
 		const description = item.description();
 		return description && description.equip === equipType;
 	});
+}
+
+export function hasInventoryItemForAction(context: Context, actionType: ActionType): boolean {
+	return context.player.inventory.containedItems
+		.some(item => {
+			const description = item.description();
+			if (!description) {
+				return false;
+			}
+
+			if (actionType === ActionType.Attack) {
+				return description.attack !== undefined;
+			}
+
+			return description.use && description.use.includes(actionType);
+		});
 }
 
 export function getInventoryItemsWithUse(context: Context, use: ActionType, filterEquipped?: boolean): Item[] {

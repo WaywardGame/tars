@@ -35,7 +35,7 @@ import { InterruptOptions } from "ui/util/IInterrupt";
 import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
-import { IVector2, IVector3 } from "utilities/math/IVector";
+import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
 
@@ -201,7 +201,6 @@ export default class Tars extends Mod {
 	}
 
 	public onUnload(): void {
-		this.disable(true);
 		this.delete();
 
 		Log.removePreConsoleCallback(preConsoleCallback);
@@ -436,12 +435,6 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
-	public async moveToFaceTarget(target: IVector3) {
-		return movementUtilities.moveToFaceTarget(new Context(localPlayer, this.base, this.inventory), target);
-	}
-
-	////////////////////////////////////////////////
-
 	public getTranslation(translation: TarsTranslation | string) {
 		return new Translation(this.dictionary, translation);
 	}
@@ -459,48 +452,29 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		const str = !this.isRunning() ? "Enabled" : "Disabled";
+		this.saveData.enabled = !this.saveData.enabled;
+		this.event.emit("enableChange", true);
 
-		log.info(str);
+		log.info(this.saveData.enabled ? "Enabled" : "Disabled");
 
 		localPlayer.messages
 			.source(this.messageSource)
 			.type(MessageType.Good)
-			.send(this.messageToggle, !this.isRunning());
+			.send(this.messageToggle, this.saveData.enabled);
+
+		this.context = new Context(localPlayer, this.base, this.inventory, this.saveData.options);
+
+		await this.ensureNavigation();
 
 		await this.reset();
 
-		this.context = new Context(localPlayer, this.base, this.inventory);
+		if (this.saveData.enabled) {
+			if (this.navigation) {
+				this.navigation.showOverlay();
+				this.navigation.queueUpdateOrigin(localPlayer);
+			}
 
-		if (this.navigationSystemState === NavigationSystemState.NotInitialized && this.navigation) {
-			this.navigationSystemState = NavigationSystemState.Initializing;
-
-			this.updateStatus();
-
-			localPlayer.messages
-				.source(this.messageSource)
-				.type(MessageType.Good)
-				.send(this.messageNavigationUpdating);
-
-			// give a chance for the message to show up on screen before starting nav update
-			await sleep(100);
-
-			await this.navigation.updateAll();
-
-			this.navigation.queueUpdateOrigin(localPlayer);
-
-			this.navigationSystemState = NavigationSystemState.Initialized;
-
-			this.processQueuedNavigationUpdates();
-
-			localPlayer.messages
-				.source(this.messageSource)
-				.type(MessageType.Good)
-				.send(this.messageNavigationUpdated);
-		}
-
-		if (!this.isRunning()) {
-			this.enable();
+			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
 
 		} else {
 			this.disable();
@@ -508,18 +482,28 @@ export default class Tars extends Mod {
 	}
 
 	public updateOptions(options: Partial<ITarsOptions>) {
-		let changed = false;
+		const changedOptions: Array<keyof ITarsOptions> = [];
 
 		for (const key of (Object.keys(options) as Array<keyof ITarsOptions>)) {
 			const newValue = options[key];
 			if (newValue !== undefined && this.saveData.options[key] !== newValue) {
 				(this.saveData.options as any)[key] = newValue;
-				changed = true;
+				changedOptions.push(key);
 			}
 		}
 
-		if (changed) {
+		if (changedOptions.length > 0) {
+			log.info(`Updating options: ${changedOptions.join(", ")}`);
+
 			this.event.emit("optionsChange", this.saveData.options);
+
+			for (const changedOption of changedOptions) {
+				switch (changedOption) {
+					case "exploreIslands":
+						this.context.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+						break;
+				}
+			}
 		}
 
 		if (this.isRunning()) {
@@ -581,6 +565,39 @@ export default class Tars extends Mod {
 
 		if (this.saveData.options.stayHealthy === undefined) {
 			this.saveData.options.stayHealthy = true;
+		}
+
+		if (this.saveData.options.exploreIslands === undefined) {
+			this.saveData.options.exploreIslands = true;
+		}
+	}
+
+	private async ensureNavigation() {
+		if (this.navigationSystemState === NavigationSystemState.NotInitialized && this.navigation) {
+			this.navigationSystemState = NavigationSystemState.Initializing;
+
+			this.updateStatus();
+
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(MessageType.Good)
+				.send(this.messageNavigationUpdating);
+
+			// give a chance for the message to show up on screen before starting nav update
+			await sleep(100);
+
+			await this.navigation.updateAll();
+
+			this.navigation.queueUpdateOrigin(localPlayer);
+
+			this.navigationSystemState = NavigationSystemState.Initialized;
+
+			this.processQueuedNavigationUpdates();
+
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(MessageType.Good)
+				.send(this.messageNavigationUpdated);
 		}
 	}
 
@@ -657,30 +674,13 @@ export default class Tars extends Mod {
 		Navigation.delete();
 	}
 
-	private enable() {
-		this.saveData.enabled = true;
-		this.event.emit("enableChange", true);
-
-		if (this.navigation) {
-			this.navigation.showOverlay();
-
-			if (this.navigationSystemState === NavigationSystemState.Initialized) {
-				this.navigation.queueUpdateOrigin(localPlayer);
-			}
-		}
-
-		this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
-	}
-
 	private disable(gameIsEnding: boolean = false) {
 		if (!gameIsEnding) {
 			this.saveData.enabled = false;
 			this.event.emit("enableChange", false);
 		}
 
-		if (this.navigation) {
-			this.navigation.hideOverlay();
-		}
+		this.navigation?.hideOverlay();
 
 		if (this.tickTimeoutId !== undefined) {
 			clearTimeout(this.tickTimeoutId);
@@ -694,7 +694,7 @@ export default class Tars extends Mod {
 			OptionsInterrupt.restore(localPlayer);
 		}
 
-		if (this.saveData.options.mode === TarsMode.Manual) {
+		if (!gameIsEnding && this.saveData.options.mode === TarsMode.Manual) {
 			this.updateOptions({ mode: TarsMode.Survival });
 		}
 	}
@@ -953,6 +953,10 @@ export default class Tars extends Mod {
 				return;
 			}
 		}
+
+		// reset before determining objectives
+		this.context.reset();
+		log.debug(`Reset context state. Context hash code: ${this.context.getHashCode()}.`);
 
 		const objectives = await modeInstance.determineObjectives(this.context);
 

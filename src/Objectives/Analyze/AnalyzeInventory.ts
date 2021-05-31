@@ -76,6 +76,9 @@ export default class AnalyzeInventory extends Objective {
 			}
 
 			if (items.size > 0) {
+				const flag = typeof (flags) === "object" ? flags.flag : flags;
+				const flagOption = typeof (flags) === "object" ? flags.option : undefined;
+
 				const sortedItems = Array.from(items).sort((itemA, itemB) => {
 					const descriptionA = itemA.description();
 					const descriptionB = itemB.description();
@@ -84,24 +87,24 @@ export default class AnalyzeInventory extends Objective {
 						return -1;
 					}
 
-					switch (flags) {
+					switch (flag) {
 						case InventoryItemFlag.PreferHigherWorth:
-							const worthA = descriptionA.worth !== undefined ? descriptionA.worth : 0;
-							const worthB = descriptionB.worth !== undefined ? descriptionB.worth : 0;
-							return worthB - worthA;
+							return (descriptionB.worth ?? 0) - (descriptionA.worth ?? 0);
+
+						case InventoryItemFlag.PreferHigherActionBonus:
+							return itemB.getItemUseBonus(flagOption) - itemA.getItemUseBonus(flagOption);
+
+						case InventoryItemFlag.PreferHigherTier:
+							return (descriptionB.tier?.[flagOption] ?? 0) - (descriptionA.tier?.[flagOption] ?? 0);
+
+						case InventoryItemFlag.PreferHigherDurability:
+							return (itemB.minDur ?? 999999) - (itemA.minDur ?? 999999);
+
+						case InventoryItemFlag.PreferHigherDecay:
+							return (itemB.decay ?? 999999) - (itemA.decay ?? 999999);
 
 						case InventoryItemFlag.PreferLowerWeight:
 							return itemA.getTotalWeight() - itemB.getTotalWeight();
-
-						case InventoryItemFlag.PreferHigherDurability:
-							const minDurA = itemA.minDur !== undefined ? itemA.minDur : 999999;
-							const minDurB = itemB.minDur !== undefined ? itemB.minDur : 999999;
-							return minDurB - minDurA;
-
-						case InventoryItemFlag.PreferHigherDecay:
-							const decayA = itemA.decay !== undefined ? itemA.decay : 999999;
-							const decayB = itemB.decay !== undefined ? itemB.decay : 999999;
-							return decayB - decayA;
 					}
 				});
 

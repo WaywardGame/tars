@@ -1,7 +1,6 @@
 import ActionExecutor from "game/entity/action/ActionExecutor";
 import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
-import { DamageType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
@@ -13,7 +12,7 @@ import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { executeAction } from "../../utilities/Action";
-import { getBestActionItem, getInventoryItemsWithUse } from "../../utilities/Item";
+import { getBestToolForTerrainGather, getBestTool, getBestToolForDoodadGather } from "../../utilities/Item";
 import { canCarveCorpse, canDig, canGather } from "../../utilities/Tile";
 
 export enum ExecuteActionType {
@@ -102,29 +101,30 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					actionType = ActionType.Gather;
 				}
 
-				actionArguments.push(getBestActionItem(context, ActionType.Gather, DamageType.Slashing));
+				actionArguments.push(getBestToolForDoodadGather(context, doodad));
 
 				break;
 
 			case ExecuteActionType.Terrain:
 				actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
-				actionArguments.push(terrainDescription.gather ? getBestActionItem(context, ActionType.Gather, DamageType.Blunt) : getBestActionItem(context, ActionType.Dig));
 
 				if (actionType === ActionType.Dig && !canDig(tile)) {
 					return ObjectiveResult.Complete;
 				}
 
+				actionArguments.push(getBestToolForTerrainGather(context, tileType));
+
 				break;
 
 			case ExecuteActionType.Corpse:
-				const carveTool = getInventoryItemsWithUse(context, ActionType.Carve);
+				const carveTool = getBestTool(context, ActionType.Carve);
 
-				if (carveTool.length === 0 || !canCarveCorpse(tile)) {
+				if (carveTool === undefined || !canCarveCorpse(tile)) {
 					return ObjectiveResult.Complete;
 				}
 
 				actionType = ActionType.Carve;
-				actionArguments.push(carveTool[0]);
+				actionArguments.push(carveTool);
 
 				break;
 

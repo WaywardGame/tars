@@ -7,7 +7,7 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { ITerrainSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { getBestActionItem } from "../../utilities/Item";
+import { hasInventoryItemForAction } from "../../utilities/Item";
 import { canGather, getNearestTileLocation } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
@@ -29,7 +29,7 @@ export default class GatherFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const hasDigTool = getBestActionItem(context, ActionType.Dig) !== undefined;
+		const hasDigTool = hasInventoryItemForAction(context, ActionType.Dig);
 
 		for (const terrainSearch of this.search) {
 			const terrainDescription = Terrains[terrainSearch.type];
@@ -93,6 +93,10 @@ export default class GatherFromTerrain extends Objective {
 
 				if (!terrainDescription.gather && !hasDigTool) {
 					difficulty += 500;
+				}
+
+				if (terrainSearch.extraDifficulty !== undefined) {
+					difficulty += terrainSearch.extraDifficulty;
 				}
 
 				difficulty = Math.round(difficulty);

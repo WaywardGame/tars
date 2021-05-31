@@ -29,6 +29,7 @@ export interface ISaveData {
 export interface ITarsOptions {
 	mode: TarsMode;
 	stayHealthy: boolean;
+	exploreIslands: boolean;
 }
 
 export interface ITileLocation {
@@ -167,7 +168,7 @@ export interface IInventoryItemInfo {
 	itemTypes?: Array<ItemType | ItemTypeGroup>;
 	actionTypes?: ActionType[];
 	equipType?: EquipType;
-	flags?: InventoryItemFlag;
+	flags?: InventoryItemFlag | { flag: InventoryItemFlag; option: any; };
 	allowMultiple?: number;
 	allowInChests?: boolean;
 	protect?: boolean;
@@ -178,6 +179,16 @@ export enum InventoryItemFlag {
 	 * Picks the item with a higher worth. Default
 	 */
 	PreferHigherWorth,
+
+	/**
+	 * Picks the item with a higher action bonus for the given action.
+	 */
+	PreferHigherActionBonus,
+
+	/**
+	 * Picks the item with a higher tier for the given item group.
+	 */
+	PreferHigherTier,
 
 	/**
 	 * Picks the item with lower weight.
@@ -209,6 +220,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.WroughtIronAxe,
 			ItemType.WroughtIronDoubleAxe,
 		],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Gather,
+		},
 	},
 	bandage: {
 		itemTypes: [
@@ -226,6 +241,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	carve: {
 		actionTypes: [ActionType.Carve],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Carve,
+		},
 	},
 	chest: {
 		itemTypes: [ItemType.WoodenChest],
@@ -307,6 +326,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	hoe: {
 		actionTypes: [ActionType.Till],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Till,
+		},
 	},
 	intermediateChest: {
 		itemTypes: [
@@ -325,9 +348,17 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.ObsidianKnife,
 			ItemType.StoneKnife,
 		],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Carve,
+		},
 	},
 	tongs: {
 		itemTypes: [ItemTypeGroup.Tongs],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherTier,
+			option: ItemTypeGroup.Tongs,
+		},
 	},
 	pickAxe: {
 		itemTypes: [
@@ -336,6 +367,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.StonePickaxe,
 			ItemType.WroughtIronPickaxe,
 		],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Gather,
+		},
 	},
 	sailBoat: {
 		itemTypes: [ItemType.Sailboat],
@@ -343,6 +378,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	shovel: {
 		actionTypes: [ActionType.Dig],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Dig,
+		},
 	},
 	waterContainer: {
 		actionTypes: [ActionType.GatherWater],
@@ -384,7 +423,7 @@ export interface CreatureSearch {
 	map: Map<CreatureType, ItemType[]>;
 }
 
-export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot };
+export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot; };
 
 export enum TarsTranslation {
 	DialogTitleMain,
@@ -396,6 +435,8 @@ export enum TarsTranslation {
 	DialogButtonAquireItemTooltip,
 	DialogButtonStayHealthy,
 	DialogButtonStayHealthyTooltip,
+	DialogButtonExploreIslands,
+	DialogButtonExploreIslandsTooltip,
 
 	DialogLabelStatus,
 	DialogLabelItem,

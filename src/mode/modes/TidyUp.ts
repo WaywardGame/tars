@@ -17,7 +17,7 @@ import Idle from "../../objectives/other/Idle";
 import ReturnToBase from "../../objectives/other/ReturnToBase";
 import OrganizeBase from "../../objectives/utility/OrganizeBase";
 import { getTilesWithItemsNearBase, isNearBase } from "../../utilities/Base";
-import { getBestActionItem } from "../../utilities/Item";
+import { getBestTool } from "../../utilities/Item";
 import { ITarsMode } from "../IMode";
 
 /**
@@ -57,7 +57,7 @@ export class TidyUpMode implements ITarsMode {
 			// this is reset to false in baseInfo.onAdd
 			context.base.buildAnotherChest = true;
 
-			const gatherItem = getBestActionItem(context, ActionType.Gather, DamageType.Slashing);
+			const gatherItem = getBestTool(context, ActionType.Gather, DamageType.Slashing);
 			if (gatherItem === undefined) {
 				objectives.push([new AcquireItemForAction(ActionType.Gather)]);
 			}

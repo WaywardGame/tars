@@ -47,9 +47,9 @@ export default class OptionsInterrupt extends Objective {
 			game.updateOption(context.player, "autoPickup", false);
 		}
 
-		if (!context.player.options.autoGatherHarvest) {
-			updated.push("Enabling AutoGatherHarvest");
-			game.updateOption(context.player, "autoGatherHarvest", true);
+		if (context.player.options.autoGatherHarvest) {
+			updated.push("Disabling AutoGatherHarvest");
+			game.updateOption(context.player, "autoGatherHarvest", false);
 		}
 
 		if (!context.player.options.autoAttack) {

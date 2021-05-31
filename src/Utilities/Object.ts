@@ -1,7 +1,6 @@
 import Doodad from "game/doodad/Doodad";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
-import { MoveType } from "game/entity/IEntity";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
@@ -105,10 +104,11 @@ export function getNearbyCreature(point: IVector3): Creature | undefined {
 			if (validPoint) {
 				const tile = game.getTileFromPoint(validPoint);
 				if (tile.creature && !tile.creature.isTamed()) {
-					if (tile.creature.getMoveType() === MoveType.None && (Math.abs(point.x - x) > 1 || Math.abs(point.y - y) > 1)) {
-						// a non moving creature that is at least 1 tile away from us is not scary
-						continue;
-					}
+					// that's a lie
+					// if (tile.creature.getMoveType() === MoveType.None && (Math.abs(point.x - x) > 1 || Math.abs(point.y - y) > 1)) {
+					// 	// a non moving creature that is at least 1 tile away from us is not scary
+					// 	continue;
+					// }
 
 					return tile.creature;
 				}

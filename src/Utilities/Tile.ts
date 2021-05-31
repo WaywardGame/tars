@@ -28,8 +28,9 @@ export async function getNearestTileLocation(contextOrPosition: Context | IVecto
 	if (!result) {
 		result = await Navigation.get().getNearestTileLocation(tileType, { x: position.x, y: position.y, z: z });
 		cache.set(cacheId, result);
-		results.push(result);
 	}
+
+	results.push(result);
 	// }
 
 	return results.flat();

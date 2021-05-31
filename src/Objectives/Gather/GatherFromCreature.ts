@@ -9,7 +9,7 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../utilities/Item";
+import { hasInventoryItemForAction } from "../../utilities/Item";
 import { findCreatures } from "../../utilities/Object";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
@@ -31,7 +31,7 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasCarveItem = getInventoryItemsWithUse(context, ActionType.Carve).length > 0;
+		const hasCarveItem = hasInventoryItemForAction(context, ActionType.Carve);
 
 		return findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
 			.map(creature => {

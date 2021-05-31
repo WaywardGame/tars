@@ -1,6 +1,7 @@
 import { WeightStatus } from "game/entity/player/IPlayer";
 
 import Context from "../Context";
+import { MovingToNewIslandState, ContextDataType } from "../IContext";
 import { IObjective } from "../IObjective";
 import { log } from "../utilities/Logger";
 
@@ -107,7 +108,10 @@ class Executor {
 			if (resetContextState) {
 				// reset before running objectives
 				context.reset();
-				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`);
+
+				const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+
+				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`, MovingToNewIslandState[moveToNewIslandState]);
 			}
 
 			let objs: IObjective[];

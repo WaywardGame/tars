@@ -151,7 +151,7 @@ export default class AcquireItem extends AcquireBase {
 										type: terrainType,
 										itemType: this.itemType,
 										resource: terrainSearch.resource,
-										extraDifficulty: 5, // random number. todo: use this
+										extraDifficulty: 5 + ((100 - (leftOver.chance ?? 100)) * 5), // lower chance = higher difficulty
 									});
 								}
 							}
