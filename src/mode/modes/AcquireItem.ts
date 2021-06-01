@@ -1,5 +1,5 @@
 import { EventBus } from "event/EventBuses";
-import EventManager, { EventHandler } from "event/EventManager";
+import { EventHandler } from "event/EventManager";
 import Player from "game/entity/player/Player";
 import { ItemType } from "game/item/IItem";
 import Item from "game/item/Item";
@@ -18,14 +18,9 @@ export class AcquireItemMode implements ITarsMode {
 
 	public async initialize(_: Context, finished: () => void) {
 		this.finished = finished;
-		EventManager.registerEventBusSubscriber(this);
 	}
 
-	public async dispose() {
-		EventManager.deregisterEventBusSubscriber(this);
-	}
-
-	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
+	public async determineObjectives(_: Context): Promise<Array<IObjective | IObjective[]>> {
 		return [new AcquireItem(this.itemType)];
 	}
 

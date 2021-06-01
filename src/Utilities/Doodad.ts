@@ -3,8 +3,8 @@ import Doodads from "game/doodad/Doodads";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Enums from "utilities/enum/Enums";
 
-export function getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): DoodadType[] {
-	const doodadTypes: DoodadType[] = [];
+export function getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): Set<DoodadType> {
+	const doodadTypes: Set<DoodadType> = new Set();
 	if (doodadManager.isGroup(doodadTypeOrGroup)) {
 		for (const dt of Enums.values(DoodadType)) {
 			const doodadDescription = Doodads[dt];
@@ -13,14 +13,14 @@ export function getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup):
 			}
 
 			if (doodadManager.isInGroup(dt, doodadTypeOrGroup)) {
-				doodadTypes.push(dt);
+				doodadTypes.add(dt);
 			}
 
 			const lit = doodadDescription.lit;
 			if (lit !== undefined) {
 				const litDoodadDescription = Doodads[lit];
 				if (litDoodadDescription && doodadManager.isInGroup(lit, doodadTypeOrGroup)) {
-					doodadTypes.push(dt);
+					doodadTypes.add(dt);
 				}
 			}
 
@@ -28,13 +28,13 @@ export function getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup):
 			if (revert !== undefined) {
 				const revertDoodadDescription = Doodads[revert];
 				if (revertDoodadDescription && doodadManager.isInGroup(revert, doodadTypeOrGroup)) {
-					doodadTypes.push(dt);
+					doodadTypes.add(dt);
 				}
 			}
 		}
 
 	} else {
-		doodadTypes.push(doodadTypeOrGroup);
+		doodadTypes.add(doodadTypeOrGroup);
 	}
 
 	return doodadTypes;

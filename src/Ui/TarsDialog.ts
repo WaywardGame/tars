@@ -1,27 +1,35 @@
-import { ItemType } from "game/item/IItem";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import Button from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import ChoiceList, { Choice } from "ui/component/ChoiceList";
-import Divider from "ui/component/Divider";
-import ItemDropdown from "ui/component/dropdown/ItemDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import Dialog from "ui/screen/screens/game/component/Dialog";
-import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import Enums from "utilities/enum/Enums";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
+import { Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import Vector2 from "utilities/math/Vector2";
+import { Tuple } from "utilities/collection/Arrays";
+import { OwnEventHandler } from "event/EventManager";
 
-import { TarsMode, TarsTranslation, TARS_ID } from "../ITars";
-import { AcquireItemMode } from "../mode/modes/AcquireItem";
+import { TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "../ITars";
 import Tars from "../Tars";
+import GeneralPanel from "./panels/GeneralPanel";
+import TarsPanel from "./components/TarsPanel";
+import TasksPanel from "./panels/TasksPanel";
+import OptionsPanel from "./panels/OptionsPanel";
 
-export default class TarsDialog extends Dialog {
+export type TabDialogPanelClass = new () => TarsPanel;
+
+/**
+ * A list of panel classes that will appear in the dialog.
+ */
+const subpanelClasses: TabDialogPanelClass[] = [
+	GeneralPanel,
+	TasksPanel,
+	OptionsPanel
+];
+
+export default class TarsDialog extends TabDialog<TarsPanel> {
 
 	public static description: IDialogDescription = {
-		minSize: new Vector2(15, 21),
-		size: new Vector2(15, 70),
-		maxSize: new Vector2(20, 70),
+		minSize: new Vector2(30, 21),
+		size: new Vector2(40, 70),
+		maxSize: new Vector2(60, 70),
 		edges: [
 			[Edge.Left, 25],
 			[Edge.Bottom, 33],
@@ -31,114 +39,51 @@ export default class TarsDialog extends Dialog {
 	@Mod.instance<Tars>(TARS_ID)
 	public readonly TARS: Tars;
 
-	private readonly labelStatus: LabelledRow;
-	private readonly buttonEnable: CheckButton;
-	private readonly choiceListMode: ChoiceList<Choice<TarsMode>, true>;
-	private readonly buttonStayHealthy: CheckButton;
-	private readonly buttonExploreIslands: CheckButton;
-	private readonly dropdownItemType: ItemDropdown<string>;
+	// public constructor(id: DialogId) {
+	// 	super(id);
+	// }
 
-	public constructor(id: DialogId) {
-		super(id);
+	protected getDefaultSubpanelInformation(): SubpanelInformation {
+		for (const subpanelInformation of this.subpanelInformations) {
+			if (subpanelInformation[0] === this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
+				return subpanelInformation;
+			}
+		}
 
-		this.registerHookHost("TarsDialog");
+		return super.getDefaultSubpanelInformation();
+	}
 
-		this.labelStatus = new LabelledRow()
-			.setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(this.TARS.getStatus)))
-			.appendTo(this.body);
-
-		this.buttonEnable = new CheckButton()
-			.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonEnable))
-			.setRefreshMethod(() => this.TARS.isEnabled())
-			.event.subscribe("willToggle", (_, checked) => {
-				if (this.TARS.isEnabled() !== checked) {
-					this.TARS.toggle();
-				}
-
-				return true;
-			})
-			.appendTo(this.body);
-
-		new Divider().appendTo(this.body);
-
-		const modes = Enums.values(TarsMode).filter(modes => modes !== TarsMode.Manual);
-
-		this.choiceListMode = new ChoiceList<Choice<TarsMode>, true>()
-			.setCanChooseNone()
-			.setChoices(...modes.map(mode => new Choice(mode)
-				.setText(this.TARS.getTranslation(`DialogMode${TarsMode[mode]}`))
-				.setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(`DialogMode${TarsMode[mode]}Tooltip`))))))
-			.setRefreshMethod(list => list.choices(choice => choice.id === this.TARS.saveData.options.mode).first())
-			.event.subscribe("choose", (_, choice) => {
-				if (choice !== undefined) {
-					this.TARS.updateOptions({ mode: choice.id });
-				}
-			})
-			.appendTo(this.body);
-
-		new Divider().appendTo(this.body);
-
-		new LabelledRow()
-			.classes.add("dropdown-label")
-			.setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelItem)))
-			.append(this.dropdownItemType = new ItemDropdown(ItemType.Branch))
-			.appendTo(this.body);
-
-		new Button()
-			.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonAquireItem))
-			.setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonAquireItemTooltip))))
-			.event.subscribe("activate", async () => {
-				await this.TARS.activateManualMode(new AcquireItemMode(this.dropdownItemType.selection as ItemType));
-				return true;
-			})
-			.appendTo(this.body);
-
-		new Divider().appendTo(this.body);
-
-		this.buttonStayHealthy = new CheckButton()
-			.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonStayHealthy))
-			.setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonStayHealthyTooltip))))
-			.setRefreshMethod(() => this.TARS.saveData.options.stayHealthy)
-			.event.subscribe("willToggle", (_, checked) => {
-				this.TARS.updateOptions({ stayHealthy: checked });
-				return true;
-			})
-			.appendTo(this.body);
-
-		this.buttonExploreIslands = new CheckButton()
-			.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonExploreIslands))
-			.setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonExploreIslandsTooltip))))
-			.setRefreshMethod(() => this.TARS.saveData.options.exploreIslands)
-			.event.subscribe("willToggle", (_, checked) => {
-				this.TARS.updateOptions({ exploreIslands: checked });
-				return true;
-			})
-			.appendTo(this.body);
-
-		////////////////////////////////////////////////////
-
-		const events = this.TARS.event.until(this, "close");
-		events.subscribe("enableChange", this.refresh);
-		events.subscribe("optionsChange", this.refresh);
-		events.subscribe("statusChange", (_, status) => {
-			// don't call refresh because we already calculated status when passing it to this method
-			// this.statusLabel.refresh();
-			this.labelStatus.setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(status)));
-		});
+	@OwnEventHandler(TarsDialog, "changeSubpanel")
+	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
+		this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
 	}
 
 	@Override public getName(): Translation {
 		return this.TARS.getTranslation(TarsTranslation.DialogTitleMain);
 	}
 
-	@Bound
-	private refresh() {
-		this.buttonEnable.refresh();
-		this.choiceListMode.refresh();
-		this.buttonStayHealthy.refresh();
-		this.buttonExploreIslands.refresh();
+	/**
+	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
+	 * This will only be called once
+	 */
+	@Override protected getSubpanels(): TarsPanel[] {
+		return subpanelClasses.map(cls => new cls());
+	}
 
-		const isManual = this.TARS.saveData.options.mode === TarsMode.Manual;
-		this.choiceListMode.setDisabled(isManual);
+	/**
+	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
+	 * subpanels of this dialog.
+	 * 
+	 * If the subpanel classes haven't been instantiated yet, it first instantiates them by calling getSubpanels.
+	 * This includes binding a `WillRemove` event handler to the panel, which will `store` (cache) the panel instead of removing it,
+	 * and trigger a `SwitchAway` event on the panel when this occurs.
+	 */
+	@Override protected getSubpanelInformation(subpanels: TarsPanel[]): SubpanelInformation[] {
+		return subpanels
+			.map(subpanel => Tuple(
+				this.TARS.getTranslation(subpanel.getTranslation()).getString(),
+				this.TARS.getTranslation(subpanel.getTranslation()),
+				this.onShowSubpanel(subpanel),
+			));
 	}
 }

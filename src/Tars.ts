@@ -44,7 +44,7 @@ import executor, { ExecuteObjectivesResultType } from "./core/Executor";
 import planner from "./core/Planner";
 import { ContextDataType, MovingToNewIslandState } from "./IContext";
 import { IObjective } from "./IObjective";
-import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, TarsMode, TarsTranslation, TARS_ID } from "./ITars";
+import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
 import { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation from "./navigation/Navigation";
@@ -194,8 +194,8 @@ export default class Tars extends Mod {
 		(window as any).TARS_TileUtilities = tileUtilities;
 
 		// this is to support hot reloading while in game
-		if (this.saveData.shouldOpenDialog) {
-			this.saveData.shouldOpenDialog = undefined;
+		if (this.saveData.ui[TarsUiSaveDataKey.DialogOpened]) {
+			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = undefined;
 			gameScreen?.openDialog(Tars.INSTANCE.dialogMain);
 		}
 	}
@@ -211,7 +211,7 @@ export default class Tars extends Mod {
 
 		// this is to support hot reloading while in game
 		if (gameScreen?.isDialogVisible(Tars.INSTANCE.dialogMain)) {
-			this.saveData.shouldOpenDialog = true;
+			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = true;
 			gameScreen?.closeDialog(Tars.INSTANCE.dialogMain);
 		}
 	}
@@ -435,8 +435,8 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////////////////
 
-	public getTranslation(translation: TarsTranslation | string) {
-		return new Translation(this.dictionary, translation);
+	public getTranslation(translation: TarsTranslation | string | Translation): Translation {
+		return translation instanceof Translation ? translation : new Translation(this.dictionary, translation);
 	}
 
 	public isEnabled(): boolean {
@@ -500,7 +500,7 @@ export default class Tars extends Mod {
 			for (const changedOption of changedOptions) {
 				switch (changedOption) {
 					case "exploreIslands":
-						this.context.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+						this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
 						break;
 				}
 			}
@@ -557,6 +557,10 @@ export default class Tars extends Mod {
 	private ensureOptions() {
 		if (!this.saveData.options) {
 			this.saveData.options = {} as any;
+		}
+
+		if (this.saveData.ui === undefined) {
+			this.saveData.ui = {} as any;
 		}
 
 		if (this.saveData.options.mode === undefined || this.saveData.options.mode === TarsMode.Manual) {
@@ -635,11 +639,13 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private async reset() {
+	private async reset(deleting: boolean = false) {
 		executor.reset();
 
 		for (const mode of Array.from(this.modeCache.keys())) {
-			await this.disposeMode(this.context, mode);
+			if (deleting || mode !== TarsMode.Manual) {
+				await this.disposeMode(this.context, mode);
+			}
 		}
 
 		this.lastStatusMessage = undefined;
@@ -666,7 +672,7 @@ export default class Tars extends Mod {
 
 		this.inventory = {};
 
-		this.reset();
+		this.reset(true);
 
 		this.navigationSystemState = NavigationSystemState.NotInitialized;
 		this.navigationQueuedUpdates = [];

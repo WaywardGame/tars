@@ -23,6 +23,7 @@ import GatherFromTerrain from "../../gather/GatherFromTerrain";
 
 import AcquireBase from "./AcquireBase";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
+import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 
 export default class AcquireItem extends AcquireBase {
@@ -84,8 +85,17 @@ export default class AcquireItem extends AcquireBase {
 			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passContextDataKey(this)]);
 		}
 
-		if (itemDescription && itemDescription.recipe) {
-			objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passContextDataKey(this)]);
+		if (itemDescription) {
+			if (itemDescription.recipe) {
+				objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passContextDataKey(this)]);
+			}
+
+			if (itemDescription.revert !== undefined) {
+				const revertItemDescription = itemDescriptions[itemDescription.revert];
+				if (revertItemDescription?.lit === this.itemType) {
+					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passContextDataKey(this)]);
+				}
+			}
 		}
 
 		return objectivePipelines;

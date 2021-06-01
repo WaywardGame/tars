@@ -23,7 +23,14 @@ export const gardenMaxTilesChecked = 1024;
 export interface ISaveData {
 	enabled: boolean;
 	options: ITarsOptions;
-	shouldOpenDialog?: boolean;
+	ui: Record<TarsUiSaveDataKey, any>;
+}
+
+export enum TarsUiSaveDataKey {
+	DialogOpened,
+	ActivePanelId,
+	AcquireItemDropdown,
+	BuildDoodadDropdown,
 }
 
 export interface ITarsOptions {
@@ -430,9 +437,15 @@ export enum TarsTranslation {
 
 	DialogStatusNavigatingInitializing,
 
+	DialogPanelGeneral,
+	DialogPanelTasks,
+	DialogPanelOptions,
+
 	DialogButtonEnable,
 	DialogButtonAquireItem,
 	DialogButtonAquireItemTooltip,
+	DialogButtonBuildDoodad,
+	DialogButtonBuildDoodadTooltip,
 	DialogButtonStayHealthy,
 	DialogButtonStayHealthyTooltip,
 	DialogButtonExploreIslands,
@@ -440,6 +453,7 @@ export enum TarsTranslation {
 
 	DialogLabelStatus,
 	DialogLabelItem,
+	DialogLabelDoodad,
 
 	DialogModeSurvival,
 	DialogModeSurvivalTooltip,
