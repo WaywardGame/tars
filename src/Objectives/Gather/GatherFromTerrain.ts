@@ -7,8 +7,8 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { ITerrainSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { hasInventoryItemForAction } from "../../utilities/Item";
-import { canGather, getNearestTileLocation } from "../../utilities/Tile";
+import { itemUtilities } from "../../utilities/Item";
+import { tileUtilities } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -29,7 +29,7 @@ export default class GatherFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const hasDigTool = hasInventoryItemForAction(context, ActionType.Dig);
+		const hasDigTool = itemUtilities.hasInventoryItemForAction(context, ActionType.Dig);
 
 		for (const terrainSearch of this.search) {
 			const terrainDescription = Terrains[terrainSearch.type];
@@ -37,10 +37,10 @@ export default class GatherFromTerrain extends Objective {
 				continue;
 			}
 
-			const tileLocations = await getNearestTileLocation(context, terrainSearch.type);
+			const tileLocations = await tileUtilities.getNearestTileLocation(context, terrainSearch.type);
 
 			for (const tileLocation of tileLocations) {
-				if (!canGather(tileLocation.tile)) {
+				if (!tileUtilities.canGather(tileLocation.tile)) {
 					continue;
 				}
 

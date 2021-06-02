@@ -10,12 +10,12 @@ import Context from "../../Context";
 import { IObjective, ObjectiveResult } from "../../IObjective";
 import { ITarsMode } from "../IMode";
 import AcquireItemForDoodad from "../../objectives/acquire/Item/AcquireItemForDoodad";
-import BuildItem from "../../objectives/other/BuildItem";
-import { getInventoryItemForDoodad } from "../../utilities/Item";
+import BuildItem from "../../objectives/other/item/BuildItem";
 import MoveToTarget from "../../objectives/core/MoveToTarget";
-import StartFire from "../../objectives/other/StartFire";
-import { getDoodadTypes } from "../../utilities/Doodad";
+import StartFire from "../../objectives/other/doodad/StartFire";
 import Lambda from "../../objectives/core/Lambda";
+import { doodadUtilities } from "../../utilities/Doodad";
+import { itemUtilities } from "../../utilities/Item";
 // import AcquireBuildMoveToDoodad from "../../objectives/acquire/doodad/AcquireBuildMoveToDoodad";
 
 export class BuildDoodadMode implements ITarsMode {
@@ -27,7 +27,7 @@ export class BuildDoodadMode implements ITarsMode {
 	private doodadTypes: Set<DoodadType>;
 
 	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
-		this.doodadTypes = getDoodadTypes(this.doodadTypeOrGroup);
+		this.doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
 	}
 
 	public async initialize(_: Context, finished: () => void) {
@@ -77,7 +77,7 @@ export class BuildDoodadMode implements ITarsMode {
 			}
 		}
 		else {
-			const inventoryItem = getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
+			const inventoryItem = itemUtilities.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 			if (inventoryItem) {
 				objectives.push(new BuildItem(inventoryItem));
 

@@ -10,16 +10,22 @@ const recoverThresholds: { [index: number]: number } = {
 	[Stat.Thirst]: 10,
 };
 
-export function isHealthy(context: Context) {
-	return context.player.stat.get<IStatMax>(Stat.Health).value > 8
-		&& context.player.stat.get<IStatMax>(Stat.Hunger).value > 8;
+class PlayerUtilities {
+
+	public isHealthy(context: Context) {
+		return context.player.stat.get<IStatMax>(Stat.Health).value > 8
+			&& context.player.stat.get<IStatMax>(Stat.Hunger).value > 8;
+	}
+
+	public isUsingVehicle(context: Context) {
+		return context.player.vehicleItemId !== undefined;
+	}
+
+	public getRecoverThreshold(context: Context, stat: Stat) {
+		const recoverThreshold = recoverThresholds[stat];
+		return recoverThreshold > 0 ? recoverThreshold : context.player.stat.get<IStatMax>(stat).max + recoverThreshold;
+	}
+
 }
 
-export function isUsingVehicle(context: Context) {
-	return context.player.vehicleItemId !== undefined;
-}
-
-export function getRecoverThreshold(context: Context, stat: Stat) {
-	const recoverThreshold = recoverThresholds[stat];
-	return recoverThreshold > 0 ? recoverThreshold : context.player.stat.get<IStatMax>(stat).max + recoverThreshold;
-}
+export const playerUtilities = new PlayerUtilities();

@@ -12,9 +12,9 @@ import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { log } from "../../utilities/Logger";
-import { getMovementPath, move, MoveResult } from "../../utilities/Movement";
+import { movementUtilities, MoveResult } from "../../utilities/Movement";
 import Rest from "../other/Rest";
-import UseItem from "../other/UseItem";
+import UseItem from "../other/item/UseItem";
 
 // import MoveToZ from "../utility/MoveToZ";
 
@@ -38,7 +38,8 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `MoveToTarget:${this.target}:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
+		// ${this.target} - likely an [object] without a ToString
+		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
 	}
 
 	public getStatus(): string {
@@ -64,7 +65,7 @@ export default class MoveToTarget extends Objective {
 		// 	];
 		// }
 
-		const movementPath = await getMovementPath(context, this.target, this.moveAdjacentToTarget);
+		const movementPath = await movementUtilities.getMovementPath(context, this.target, this.moveAdjacentToTarget);
 
 		if (context.calculatingDifficulty) {
 			context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
@@ -143,7 +144,7 @@ export default class MoveToTarget extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		const moveResult = await move(context, this.target, this.moveAdjacentToTarget);
+		const moveResult = await movementUtilities.move(context, this.target, this.moveAdjacentToTarget);
 
 		switch (moveResult) {
 			case MoveResult.NoTarget:
@@ -201,7 +202,7 @@ export default class MoveToTarget extends Objective {
 				this.trackedPosition = trackedCreaturePosition;
 
 				// move to it's latest location
-				const moveResult = await move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true);
+				const moveResult = await movementUtilities.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true);
 
 				switch (moveResult) {
 					case MoveResult.NoTarget:

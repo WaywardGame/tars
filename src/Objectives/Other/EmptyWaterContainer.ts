@@ -5,10 +5,10 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { anyWaterTileLocation } from "../../navigation//INavigation";
 import Objective from "../../Objective";
-import { getNearestTileLocation } from "../../utilities/Tile";
+import { tileUtilities } from "../../utilities/Tile";
 import MoveToTarget from "../core/MoveToTarget";
 
-import UseItem from "./UseItem";
+import UseItem from "./item/UseItem";
 
 /**
  * Emptys a water container into the ocean
@@ -30,7 +30,7 @@ export default class EmptyWaterContainer extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const targets = await getNearestTileLocation(context, anyWaterTileLocation);
+		const targets = await tileUtilities.getNearestTileLocation(context, anyWaterTileLocation);
 
 		for (const { point } of targets) {
 			const objectives: IObjective[] = [];

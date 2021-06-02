@@ -9,8 +9,8 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { hasInventoryItemForAction } from "../../utilities/Item";
-import { findCreatures } from "../../utilities/Object";
+import { itemUtilities } from "../../utilities/Item";
+import { objectUtilities } from "../../utilities/Object";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import AnalyzeInventory from "../analyze/AnalyzeInventory";
@@ -18,7 +18,7 @@ import AddDifficulty from "../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
-import Equip from "../other/Equip";
+import Equip from "../other/item/EquipItem";
 
 export default class GatherFromCreature extends Objective {
 
@@ -31,9 +31,9 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasCarveItem = hasInventoryItemForAction(context, ActionType.Carve);
+		const hasCarveItem = itemUtilities.hasInventoryItemForAction(context, ActionType.Carve);
 
-		return findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
+		return objectUtilities.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
 			.map(creature => {
 				const objectives: IObjective[] = [];
 

@@ -4,10 +4,10 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../utilities/Item";
-import { getNearbyCreature } from "../../utilities/Object";
-import { isUsingVehicle } from "../../utilities/Player";
-import { isOverWater } from "../../utilities/Tile";
+import { itemUtilities } from "../../utilities/Item";
+import { objectUtilities } from "../../utilities/Object";
+import { playerUtilities } from "../../utilities/Player";
+import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
 import ReduceWeight from "../interrupt/ReduceWeight";
 import MoveToLand from "../utility/MoveToLand";
@@ -30,12 +30,14 @@ export default class Rest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (isOverWater(context) && !isUsingVehicle(context)) {
+		if (tileUtilities.isOverWater(context) && !playerUtilities.isUsingVehicle(context)) {
 			return new MoveToLand();
 		}
 
-		const nearbyCreature = getNearbyCreature(context.player);
-		if (nearbyCreature !== undefined) {
+		const nearbyCreatures = objectUtilities.getNearbyCreatures(context.player);
+		if (nearbyCreatures.length > 0) {
+			const nearbyCreature = nearbyCreatures[0];
+
 			this.log.info(`Nearby creature ${nearbyCreature.getName(false).getString()} will prevent resting`);
 
 			const objectivePipelines: IObjective[][] = [
@@ -48,14 +50,14 @@ export default class Rest extends Objective {
 				}
 
 			} else {
-				objectivePipelines.push([new RunAwayFromTarget(nearbyCreature)]);
+				objectivePipelines.push([new RunAwayFromTarget(nearbyCreature, 8)]);
 			}
 
 			// either run away or idle
 			return objectivePipelines;
 		}
 
-		const item = getInventoryItemsWithUse(context, ActionType.Rest)[0];
+		const item = itemUtilities.getInventoryItemsWithUse(context, ActionType.Rest)[0];
 		if (item) {
 			return new ExecuteAction(ActionType.Sleep, (context, action) => {
 				action.execute(context.player, item);

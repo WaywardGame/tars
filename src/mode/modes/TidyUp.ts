@@ -12,13 +12,13 @@ import AcquireItemForDoodad from "../../objectives/acquire/item/AcquireItemForDo
 import AnalyzeBase from "../../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../../objectives/analyze/AnalyzeInventory";
 import Lambda from "../../objectives/core/Lambda";
-import BuildItem from "../../objectives/other/BuildItem";
+import BuildItem from "../../objectives/other/item/BuildItem";
 import Idle from "../../objectives/other/Idle";
 import ReturnToBase from "../../objectives/other/ReturnToBase";
 import OrganizeBase from "../../objectives/utility/OrganizeBase";
-import { getTilesWithItemsNearBase, isNearBase } from "../../utilities/Base";
-import { getBestTool } from "../../utilities/Item";
 import { ITarsMode } from "../IMode";
+import { baseUtilities } from "../../utilities/Base";
+import { itemUtilities } from "../../utilities/Item";
 
 /**
  * Marie Kondo mode
@@ -38,7 +38,7 @@ export class TidyUpMode implements ITarsMode {
 
 		if (context.base.buildAnotherChest) {
 			// build another chest if we're near the base
-			acquireChest = isNearBase(context);
+			acquireChest = baseUtilities.isNearBase(context);
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
@@ -57,7 +57,7 @@ export class TidyUpMode implements ITarsMode {
 			// this is reset to false in baseInfo.onAdd
 			context.base.buildAnotherChest = true;
 
-			const gatherItem = getBestTool(context, ActionType.Gather, DamageType.Slashing);
+			const gatherItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
 			if (gatherItem === undefined) {
 				objectives.push([new AcquireItemForAction(ActionType.Gather)]);
 			}
@@ -77,7 +77,7 @@ export class TidyUpMode implements ITarsMode {
 			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		const tiles = getTilesWithItemsNearBase(context);
+		const tiles = baseUtilities.getTilesWithItemsNearBase(context);
 		if (tiles.totalCount > 0) {
 			objectives.push(new OrganizeBase(tiles.tiles));
 		}

@@ -57,10 +57,10 @@ import DefendAgainstCreature from "./objectives/interrupt/DefendAgainstCreature"
 import OptionsInterrupt from "./objectives/interrupt/OptionsInterrupt";
 import ReduceWeight from "./objectives/interrupt/ReduceWeight";
 import RepairItem from "./objectives/interrupt/RepairItem";
-import BuildItem from "./objectives/other/BuildItem";
-import Equip from "./objectives/other/Equip";
+import BuildItem from "./objectives/other/item/BuildItem";
+import Equip from "./objectives/other/item/EquipItem";
 import ReturnToBase from "./objectives/other/ReturnToBase";
-import Unequip from "./objectives/other/Unequip";
+import Unequip from "./objectives/other/item/UnequipItem";
 import RecoverHealth from "./objectives/recover/RecoverHealth";
 import RecoverHunger from "./objectives/recover/RecoverHunger";
 import RecoverStamina from "./objectives/recover/RecoverStamina";
@@ -68,14 +68,16 @@ import RecoverThirst from "./objectives/recover/RecoverThirst";
 import MoveToZ from "./objectives/utility/MoveToZ";
 import OrganizeInventory from "./objectives/utility/OrganizeInventory";
 import TarsDialog from "./ui/TarsDialog";
-import * as Action from "./utilities/Action";
-import { isNearBase } from "./utilities/Base";
-import { estimateDamageModifier, getBestEquipment, getInventoryItemsWithUse, getPossibleHandEquips, getReservedItems, getUnusedItems } from "./utilities/Item";
-import { log, logSourceName, preConsoleCallback } from "./utilities/Logger";
-import * as movementUtilities from "./utilities/Movement";
-import * as objectUtilities from "./utilities/Object";
-import { getRecoverThreshold } from "./utilities/Player";
-import * as tileUtilities from "./utilities/Tile";
+import { actionUtilities } from "./utilities/Action";
+import { log, loggerUtilities, logSourceName } from "./utilities/Logger";
+import { movementUtilities } from "./utilities/Movement";
+import { objectUtilities } from "./utilities/Object";
+import { tileUtilities } from "./utilities/Tile";
+import { baseUtilities } from "./utilities/Base";
+import { playerUtilities } from "./utilities/Player";
+import { itemUtilities } from "./utilities/Item";
+import { creatureUtilities } from "./utilities/Creature";
+import RunAwayFromTarget from "./objectives/other/RunAwayFromTarget";
 
 const tickSpeed = 333;
 
@@ -187,11 +189,10 @@ export default class Tars extends Mod {
 
 		this.navigation = Navigation.get();
 
-		Log.addPreConsoleCallback(preConsoleCallback);
+		Log.addPreConsoleCallback(loggerUtilities.preConsoleCallback);
 
 		(window as any).TARS = this;
 		(window as any).TARS_Planner = planner;
-		(window as any).TARS_TileUtilities = tileUtilities;
 
 		// this is to support hot reloading while in game
 		if (this.saveData.ui[TarsUiSaveDataKey.DialogOpened]) {
@@ -203,11 +204,10 @@ export default class Tars extends Mod {
 	public onUnload(): void {
 		this.delete();
 
-		Log.removePreConsoleCallback(preConsoleCallback);
+		Log.removePreConsoleCallback(loggerUtilities.preConsoleCallback);
 
 		(window as any).TARS = undefined;
 		(window as any).TARS_Planner = undefined;
-		(window as any).TARS_TileUtilities = undefined;
 
 		// this is to support hot reloading while in game
 		if (gameScreen?.isDialogVisible(Tars.INSTANCE.dialogMain)) {
@@ -223,7 +223,7 @@ export default class Tars extends Mod {
 	@EventHandler(EventBus.Game, "play")
 	public onGameStart(): void {
 		if (!this.isRunning() && (this.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
-			this.toggle();
+			this.toggle(true);
 		}
 	}
 
@@ -342,7 +342,7 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		Action.postExecuteAction(api.type);
+		actionUtilities.postExecuteAction(api.type);
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "walkPathChange")
@@ -388,7 +388,7 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		const recoverThreshold = getRecoverThreshold(this.context, stat.type);
+		const recoverThreshold = playerUtilities.getRecoverThreshold(this.context, stat.type);
 		if (recoverThreshold !== undefined) {
 			if (stat.value <= recoverThreshold) {
 				if (!this.statThresholdExceeded[stat.type]) {
@@ -447,12 +447,12 @@ export default class Tars extends Mod {
 		return this.tickTimeoutId !== undefined;
 	}
 
-	public async toggle() {
+	public async toggle(enabled = !this.saveData.enabled) {
 		if (this.navigationSystemState === NavigationSystemState.Initializing) {
 			return;
 		}
 
-		this.saveData.enabled = !this.saveData.enabled;
+		this.saveData.enabled = enabled;
 		this.event.emit("enableChange", true);
 
 		log.info(this.saveData.enabled ? "Enabled" : "Disabled");
@@ -555,24 +555,20 @@ export default class Tars extends Mod {
 	 * Ensure options are valid
 	 */
 	private ensureOptions() {
-		if (!this.saveData.options) {
-			this.saveData.options = {} as any;
-		}
-
 		if (this.saveData.ui === undefined) {
-			this.saveData.ui = {} as any;
+			this.saveData.ui = {};
 		}
 
-		if (this.saveData.options.mode === undefined || this.saveData.options.mode === TarsMode.Manual) {
+		this.saveData.options = {
+			mode: TarsMode.Survival,
+			stayHealthy: true,
+			exploreIslands: true,
+			useOrbsOfInfluence: true,
+			...(this.saveData.options ?? {}) as Partial<ITarsOptions>,
+		}
+
+		if (this.saveData.options.mode === TarsMode.Manual) {
 			this.saveData.options.mode = TarsMode.Survival;
-		}
-
-		if (this.saveData.options.stayHealthy === undefined) {
-			this.saveData.options.stayHealthy = true;
-		}
-
-		if (this.saveData.options.exploreIslands === undefined) {
-			this.saveData.options.exploreIslands = true;
 		}
 	}
 
@@ -748,9 +744,9 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		objectUtilities.resetCachedObjects();
+		objectUtilities.reset();
+		tileUtilities.reset();
 		movementUtilities.resetCachedPaths();
-		tileUtilities.resetNearestTileLocationCache();
 
 		// system objectives
 		await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
@@ -1042,7 +1038,7 @@ export default class Tars extends Mod {
 			return new Unequip(item);
 		}
 
-		const bestEquipment = getBestEquipment(context, equip);
+		const bestEquipment = itemUtilities.getBestEquipment(context, equip);
 		if (bestEquipment.length > 0) {
 			const itemToEquip = bestEquipment[0];
 			if (itemToEquip === item) {
@@ -1145,7 +1141,7 @@ export default class Tars extends Mod {
 
 		let possibleEquips: Item[];
 		if (use) {
-			possibleEquips = getPossibleHandEquips(context, use, preferredDamageType, false);
+			possibleEquips = itemUtilities.getPossibleHandEquips(context, use, preferredDamageType, false);
 
 			if (use === ActionType.Attack) {
 				// equip based on how effective it will be against nearby creatures
@@ -1171,7 +1167,7 @@ export default class Tars extends Mod {
 				if (closestCreature) {
 					// creature is close, calculate it
 					possibleEquips
-						.sort((a, b) => estimateDamageModifier(b, closestCreature!) - estimateDamageModifier(a, closestCreature!));
+						.sort((a, b) => itemUtilities.estimateDamageModifier(b, closestCreature!) - itemUtilities.estimateDamageModifier(a, closestCreature!));
 
 				} else if (context.player.getEquippedItem(equipType) !== undefined) {
 					// don't switch until we're close to a creature
@@ -1181,7 +1177,7 @@ export default class Tars extends Mod {
 
 			if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
 				// fall back to not caring about the damage type
-				possibleEquips = getPossibleHandEquips(context, use, undefined, false);
+				possibleEquips = itemUtilities.getPossibleHandEquips(context, use, undefined, false);
 			}
 
 		} else if (itemTypes) {
@@ -1217,7 +1213,7 @@ export default class Tars extends Mod {
 
 	private healthInterrupt(context: Context): IObjective | undefined {
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		if (health.value > getRecoverThreshold(context, Stat.Health) && !context.player.status.Bleeding &&
+		if (health.value > playerUtilities.getRecoverThreshold(context, Stat.Health) && !context.player.status.Bleeding &&
 			(!context.player.status.Poisoned || (context.player.status.Poisoned && (health.value / health.max) >= poisonHealthPercentThreshold))) {
 			return undefined;
 		}
@@ -1227,7 +1223,7 @@ export default class Tars extends Mod {
 	}
 
 	private staminaInterrupt(context: Context): IObjective | undefined {
-		if (context.player.stat.get<IStat>(Stat.Stamina).value > getRecoverThreshold(context, Stat.Stamina)) {
+		if (context.player.stat.get<IStat>(Stat.Stamina).value > playerUtilities.getRecoverThreshold(context, Stat.Stamina)) {
 			return undefined;
 		}
 
@@ -1236,11 +1232,11 @@ export default class Tars extends Mod {
 	}
 
 	private hungerInterrupt(context: Context): IObjective | undefined {
-		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= getRecoverThreshold(context, Stat.Hunger));
+		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= playerUtilities.getRecoverThreshold(context, Stat.Hunger));
 	}
 
 	private thirstInterrupt(context: Context): IObjective | undefined {
-		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= getRecoverThreshold(context, Stat.Thirst));
+		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= playerUtilities.getRecoverThreshold(context, Stat.Thirst));
 	}
 
 	private repairsInterrupt(context: Context): IObjective | undefined {
@@ -1266,6 +1262,7 @@ export default class Tars extends Mod {
 			this.repairInterrupt(context, this.inventory.shovel) ||
 			this.repairInterrupt(context, this.inventory.equipSword) ||
 			this.repairInterrupt(context, this.inventory.equipShield) ||
+			this.repairInterrupt(context, this.inventory.tongs) ||
 			this.repairInterrupt(context, this.inventory.bed);
 		if (objective) {
 			return objective;
@@ -1288,7 +1285,7 @@ export default class Tars extends Mod {
 			return undefined;
 		}
 
-		const threshold = isNearBase(context) ? 0.2 : 0.1;
+		const threshold = baseUtilities.isNearBase(context) ? 0.2 : 0.1;
 		if (item.minDur / item.maxDur >= threshold) {
 			return undefined;
 		}
@@ -1302,11 +1299,24 @@ export default class Tars extends Mod {
 	}
 
 	private nearbyCreatureInterrupt(context: Context): IObjective | undefined {
+		const health = context.player.stat.get<IStatMax>(Stat.Health);
+		const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
+
+		const shouldRunAwayFromAllCreatures = context.player.getWeightStatus() !== WeightStatus.Overburdened && ((health.value / health.max) <= 0.15 || stamina.value <= 2);
+
 		for (const facingDirecton of Direction.CARDINALS_AND_NONE) {
 			const creature = this.checkNearbyCreature(context, facingDirecton);
 			if (creature !== undefined) {
 				log.info(`Defend against ${creature.getName().getString()}`);
-				return new DefendAgainstCreature(creature);
+				return new DefendAgainstCreature(creature, shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature));
+			}
+		}
+
+		const nearbyCreatures = objectUtilities.getNearbyCreatures(context.player);
+		for (const creature of nearbyCreatures) {
+			if (shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature)) {
+				log.info(`Run away from ${creature.getName().getString()}`);
+				return new RunAwayFromTarget(creature);
 			}
 		}
 	}
@@ -1361,7 +1371,7 @@ export default class Tars extends Mod {
 	}
 
 	private gatherFromCorpsesInterrupt(context: Context): IObjective[] | undefined {
-		if (getInventoryItemsWithUse(context, ActionType.Carve).length === 0) {
+		if (itemUtilities.getInventoryItemsWithUse(context, ActionType.Carve).length === 0) {
 			return undefined;
 		}
 
@@ -1395,13 +1405,13 @@ export default class Tars extends Mod {
 
 	private reduceWeightInterrupt(context: Context): IObjective | undefined {
 		return new ReduceWeight({
-			allowReservedItems: !isNearBase(context) && this.weightStatus === WeightStatus.Overburdened,
-			disableDrop: this.weightStatus !== WeightStatus.Overburdened && !isNearBase(context),
+			allowReservedItems: !baseUtilities.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened,
+			disableDrop: this.weightStatus !== WeightStatus.Overburdened && !baseUtilities.isNearBase(context),
 		});
 	}
 
 	private returnToBaseInterrupt(context: Context): IObjective | undefined {
-		if (!isNearBase(context) &&
+		if (!baseUtilities.isNearBase(context) &&
 			this.weightStatus !== WeightStatus.None &&
 			this.previousWeightStatus === WeightStatus.Overburdened &&
 			context.getData(ContextDataType.MovingToNewIsland) !== MovingToNewIslandState.Ready) {
@@ -1425,20 +1435,20 @@ export default class Tars extends Mod {
 			return undefined;
 		}
 
-		if (!isNearBase(context)) {
+		if (!baseUtilities.isNearBase(context)) {
 			return undefined;
 		}
 
 		const target = walkPath.path[walkPath.path.length - 1];
-		if (isNearBase(context, { x: target.x, y: target.y, z: context.player.z })) {
+		if (baseUtilities.isNearBase(context, { x: target.x, y: target.y, z: context.player.z })) {
 			return undefined;
 		}
 
 		let objectives: IObjective[] = [];
 
-		const reservedItems = getReservedItems(context);
+		const reservedItems = itemUtilities.getReservedItems(context);
 
-		const interruptReservedItems = interruptContext ? getReservedItems(interruptContext) : undefined;
+		const interruptReservedItems = interruptContext ? itemUtilities.getReservedItems(interruptContext) : undefined;
 		// if (interruptReservedItems) {
 		// 	reservedItems = reservedItems.filter(item => !interruptReservedItems.includes(item));
 		// }
@@ -1450,10 +1460,10 @@ export default class Tars extends Mod {
 			}
 		}
 
-		let unusedItems = getUnusedItems(context);
+		let unusedItems = itemUtilities.getUnusedItems(context);
 
 		// todo: this might be hiding a bug related to CompleteRequirements running after aquiring items from chests (infinite looping)
-		const interruptUnusedItems = interruptContext ? getUnusedItems(interruptContext) : undefined;
+		const interruptUnusedItems = interruptContext ? itemUtilities.getUnusedItems(interruptContext) : undefined;
 		if (interruptUnusedItems) {
 			unusedItems = unusedItems.filter(item => !interruptReservedItems?.includes(item) && !interruptUnusedItems.includes(item));
 		}

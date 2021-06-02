@@ -18,33 +18,35 @@ import AcquireItemByGroup from "../../objectives/acquire/item/AcquireItemByGroup
 import AcquireItemByTypes from "../../objectives/acquire/item/AcquireItemByTypes";
 import AcquireItemForAction from "../../objectives/acquire/item/AcquireItemForAction";
 import AcquireItemForDoodad from "../../objectives/acquire/item/AcquireItemForDoodad";
-import AcquireWaterContainer from "../../objectives/acquire/item/Specific/AcquireWaterContainer";
+import AcquireWaterContainer from "../../objectives/acquire/item/specific/AcquireWaterContainer";
 import AnalyzeBase from "../../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../../objectives/analyze/AnalyzeInventory";
 import ExecuteAction from "../../objectives/core/ExecuteAction";
 import Lambda from "../../objectives/core/Lambda";
 import Restart from "../../objectives/core/Restart";
 import GatherWater from "../../objectives/gather/GatherWater";
-import BuildItem from "../../objectives/other/BuildItem";
+import BuildItem from "../../objectives/other/item/BuildItem";
 import EmptyWaterContainer from "../../objectives/other/EmptyWaterContainer";
-import Equip from "../../objectives/other/Equip";
+import Equip from "../../objectives/other/item/EquipItem";
 import Idle from "../../objectives/other/Idle";
-import PlantSeed from "../../objectives/other/PlantSeed";
-import ReinforceItem from "../../objectives/other/ReinforceItem";
+import PlantSeed from "../../objectives/other/item/PlantSeed";
+import ReinforceItem from "../../objectives/other/item/ReinforceItem";
 import ReturnToBase from "../../objectives/other/ReturnToBase";
-import StartWaterStillDesalination from "../../objectives/other/StartWaterStillDesalination";
+import StartWaterStillDesalination from "../../objectives/other/doodad/StartWaterStillDesalination";
 import UpgradeInventoryItem from "../../objectives/other/UpgradeInventoryItem";
 import RecoverHealth from "../../objectives/recover/RecoverHealth";
 import RecoverHunger from "../../objectives/recover/RecoverHunger";
+import DrainSwamp from "../../objectives/utility/DrainSwamp";
 import MoveToLand from "../../objectives/utility/MoveToLand";
 import MoveToNewIsland from "../../objectives/utility/MoveToNewIsland";
 import OrganizeBase from "../../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
-import { getTilesWithItemsNearBase, isNearBase } from "../../utilities/Base";
-import { canGatherWater, getBestTool, getSeeds, isSafeToDrinkItem } from "../../utilities/Item";
 import { log } from "../../utilities/Logger";
-import { getRecoverThreshold } from "../../utilities/Player";
 import { ITarsMode } from "../IMode";
+import { baseUtilities } from "../../utilities/Base";
+import { playerUtilities } from "../../utilities/Player";
+import { itemUtilities } from "../../utilities/Item";
+import AcquireUseOrbOfInfluence from "../../objectives/acquire/item/specific/AcquireUseOrbOfInfluence";
 
 /**
  * Survival mode
@@ -87,7 +89,7 @@ export class SurvivalMode implements ITarsMode {
 			]);
 		}
 
-		const nonMiningItem = getBestTool(context, ActionType.Gather, DamageType.Slashing);
+		const nonMiningItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
 		if (nonMiningItem === undefined) {
 			objectives.push([new AcquireItemForAction(ActionType.Gather)]);
 		}
@@ -152,7 +154,7 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.base.buildAnotherChest) {
 			// build another chest if we're near the base
-			acquireChest = isNearBase(context);
+			acquireChest = baseUtilities.isNearBase(context);
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
@@ -186,14 +188,14 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tongs), new AnalyzeInventory()]);
 		}
 
-		if (isNearBase(context)) {
+		if (baseUtilities.isNearBase(context)) {
 			// ensure water stills are water stilling
 			for (const waterStill of context.base.waterStill) {
 				objectives.push(new StartWaterStillDesalination(waterStill));
 			}
 
 			// todo: improve seed planting - grab from base chests too! and add reserved items for it
-			const seeds = getSeeds(context);
+			const seeds = itemUtilities.getSeeds(context);
 			if (seeds.length > 0) {
 				objectives.push(new PlantSeed(seeds[0]));
 			}
@@ -207,7 +209,7 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItemForAction(ActionType.Heal), new AnalyzeInventory()]);
 		}
 
-		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= getRecoverThreshold(context, Stat.Thirst) &&
+		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= playerUtilities.getRecoverThreshold(context, Stat.Thirst) &&
 			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;
 
 		const shouldUpgradeToLeather = !waitingForWater;
@@ -254,6 +256,10 @@ export class SurvivalMode implements ITarsMode {
 			Extra objectives
 		*/
 
+		if (context.options.useOrbsOfInfluence) {
+			objectives.push(new AcquireUseOrbOfInfluence());
+		}
+
 		if (context.base.well.length === 0 && context.inventory.well === undefined && context.base.availableUnlimitedWellLocation !== undefined) {
 			// todo: only build a well if we find a good tile?
 			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Well), new BuildItem(), new AnalyzeBase()]);
@@ -272,7 +278,7 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		// run a few extra things before running upgrade objectives if we're near a base 
-		if (isNearBase(context)) {
+		if (baseUtilities.isNearBase(context)) {
 			// build a second water still
 			if (context.base.waterStill.length < 2) {
 				objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
@@ -292,9 +298,9 @@ export class SurvivalMode implements ITarsMode {
 			let availableWaterContainer: Item | undefined;
 
 			if (context.inventory.waterContainer !== undefined) {
-				const hasDrinkableWater = context.inventory.waterContainer.some(isSafeToDrinkItem);
+				const hasDrinkableWater = context.inventory.waterContainer.some(item => itemUtilities.isSafeToDrinkItem(item));
 				if (!hasDrinkableWater) {
-					availableWaterContainer = context.inventory.waterContainer.find(canGatherWater);
+					availableWaterContainer = context.inventory.waterContainer.find(item => itemUtilities.canGatherWater(item));
 					if (!availableWaterContainer) {
 						// use the first water container we have - pour it out first
 						availableWaterContainer = context.inventory.waterContainer[0];
@@ -308,8 +314,14 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
+				// remove swamp tiles near the base
+				const swampTiles = baseUtilities.getSwampTilesNearBase(context);
+				if (swampTiles.length > 0) {
+					objectives.push(new DrainSwamp(swampTiles));
+				}
+
 				// cleanup base if theres items laying around everywhere
-				const tiles = getTilesWithItemsNearBase(context);
+				const tiles = baseUtilities.getTilesWithItemsNearBase(context);
 				if (tiles.totalCount > (availableWaterContainer ? 0 : 20)) {
 					objectives.push(new OrganizeBase(tiles.tiles));
 				}
@@ -322,36 +334,36 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		// keep existing equipment in good shape
-		if (context.inventory.equipSword && context.inventory.equipSword.type !== ItemType.WoodenSword) {
-			objectives.push(new ReinforceItem(context.inventory.equipSword, 0.5));
+		if (context.inventory.equipSword) {
+			objectives.push(new ReinforceItem(context.inventory.equipSword, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
-		if (context.inventory.equipShield && context.inventory.equipShield.type !== ItemType.WoodenShield) {
-			objectives.push(new ReinforceItem(context.inventory.equipShield, 0.5));
+		if (context.inventory.equipShield) {
+			objectives.push(new ReinforceItem(context.inventory.equipShield, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
 		if (context.inventory.equipBelt) {
-			objectives.push(new ReinforceItem(context.inventory.equipBelt, 0.5));
+			objectives.push(new ReinforceItem(context.inventory.equipBelt, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
 		if (context.inventory.equipNeck) {
-			objectives.push(new ReinforceItem(context.inventory.equipNeck, 0.5));
+			objectives.push(new ReinforceItem(context.inventory.equipNeck, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
 		if (context.inventory.equipFeet) {
-			objectives.push(new ReinforceItem(context.inventory.equipFeet, 0.5));
+			objectives.push(new ReinforceItem(context.inventory.equipFeet, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
 		if (context.inventory.equipHands) {
-			objectives.push(new ReinforceItem(context.inventory.equipHands, 0.5));
+			objectives.push(new ReinforceItem(context.inventory.equipHands, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
-		if (context.inventory.equipLegs && context.inventory.equipLegs.type !== ItemType.BarkLeggings) {
-			objectives.push(new ReinforceItem(context.inventory.equipLegs, 0.5));
+		if (context.inventory.equipLegs) {
+			objectives.push(new ReinforceItem(context.inventory.equipLegs, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
-		if (context.inventory.equipChest && context.inventory.equipChest.type !== ItemType.BarkTunic) {
-			objectives.push(new ReinforceItem(context.inventory.equipChest, 0.5));
+		if (context.inventory.equipChest) {
+			objectives.push(new ReinforceItem(context.inventory.equipChest, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
 		/*

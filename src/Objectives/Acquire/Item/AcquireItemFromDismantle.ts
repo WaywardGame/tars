@@ -9,7 +9,7 @@ import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getItemInInventory } from "../../../utilities/Item";
+import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ReserveItems from "../../core/ReserveItems";
@@ -61,7 +61,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				continue;
 			}
 
-			const dismantleItem = getItemInInventory(context, itemType);
+			const dismantleItem = itemUtilities.getItemInInventory(context, itemType);
 			const hasRequirements = description.dismantle.required === undefined || itemManager.getItemForHuman(context.player, description.dismantle.required, false) !== undefined;
 
 			const objectives: IObjective[] = [

@@ -11,7 +11,7 @@ import AnalyzeBase from "../analyze/AnalyzeBase";
 import ExecuteAction from "../core/ExecuteAction";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
-import StartFire from "../other/StartFire";
+import StartFire from "../other/doodad/StartFire";
 
 export default class CompleteRequirements extends Objective {
 

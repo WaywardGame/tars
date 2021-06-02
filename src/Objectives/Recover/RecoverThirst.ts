@@ -6,23 +6,23 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { freshWaterTileLocation } from "../../navigation//INavigation";
 import Objective from "../../Objective";
-import { isNearBase } from "../../utilities/Base";
-import { isWaterStillDesalinating, isWaterStillDrinkable } from "../../utilities/Doodad";
-import { isDrinkableItem, isSafeToDrinkItem } from "../../utilities/Item";
-import { isHealthy } from "../../utilities/Player";
-import { getNearestTileLocation } from "../../utilities/Tile";
 import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import AcquireWaterContainer from "../acquire/item/Specific/AcquireWaterContainer";
+import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
 import AnalyzeBase from "../analyze/AnalyzeBase";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
-import BuildItem from "../other/BuildItem";
+import BuildItem from "../other/item/BuildItem";
 import Idle from "../other/Idle";
-import StartWaterStillDesalination from "../other/StartWaterStillDesalination";
-import UseItem from "../other/UseItem";
+import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
+import UseItem from "../other/item/UseItem";
 
 import RecoverStamina from "./RecoverStamina";
+import { tileUtilities } from "../../utilities/Tile";
+import { baseUtilities } from "../../utilities/Base";
+import { doodadUtilities } from "../../utilities/Doodad";
+import { playerUtilities } from "../../utilities/Player";
+import { itemUtilities } from "../../utilities/Item";
 
 export default class RecoverThirst extends Objective {
 
@@ -43,10 +43,10 @@ export default class RecoverThirst extends Objective {
 
 		if (!this.exceededThreshold) {
 			// todo: maybe remove this near base check?
-			if (isNearBase(context)) {
+			if (baseUtilities.isNearBase(context)) {
 				for (const waterStill of context.base.waterStill) {
 					// if we're near our base, the water still is ready, and we're thirsty, go drink
-					if (isWaterStillDrinkable(waterStill) && (thirstStat.max - thirstStat.value) >= 10) {
+					if (doodadUtilities.isWaterStillDrinkable(waterStill) && (thirstStat.max - thirstStat.value) >= 10) {
 						this.log.info("Near base, going to drink from water still");
 
 						return [
@@ -62,14 +62,14 @@ export default class RecoverThirst extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		const isEmergency = thirstStat.value <= 3 && context.base.waterStill.every(waterStill => !isWaterStillDrinkable(waterStill));
+		const isEmergency = thirstStat.value <= 3 && context.base.waterStill.every(waterStill => !doodadUtilities.isWaterStillDrinkable(waterStill));
 
 		const objectivePipelines: IObjective[][] = [];
 
 		if (context.inventory.waterContainer !== undefined) {
 			for (const waterContainer of context.inventory.waterContainer) {
-				if (isDrinkableItem(waterContainer)) {
-					if (isSafeToDrinkItem(waterContainer)) {
+				if (itemUtilities.isDrinkableItem(waterContainer)) {
+					if (itemUtilities.isSafeToDrinkItem(waterContainer)) {
 						this.log.info("Drink water from container");
 						objectivePipelines.push([new UseItem(ActionType.DrinkItem, waterContainer)]);
 
@@ -85,7 +85,7 @@ export default class RecoverThirst extends Objective {
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
 		if ((isEmergency && health.value > 4) || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
-			const nearestFreshWater = await getNearestTileLocation(context, freshWaterTileLocation);
+			const nearestFreshWater = await tileUtilities.getNearestTileLocation(context, freshWaterTileLocation);
 
 			for (const { point } of nearestFreshWater) {
 				const objectives: IObjective[] = [];
@@ -114,7 +114,7 @@ export default class RecoverThirst extends Objective {
 			objectivePipelines.push(waterStillObjectives);
 
 		} else {
-			const isWaitingForAll = context.base.waterStill.every(isWaterStillDesalinating);
+			const isWaitingForAll = context.base.waterStill.every(doodad => doodadUtilities.isWaterStillDesalinating(doodad));
 			if (isWaitingForAll) {
 				if (isEmergency) {
 					if ((health.value / health.max) <= 0.3) {
@@ -141,7 +141,7 @@ export default class RecoverThirst extends Objective {
 						}
 					}
 
-				} else if (context.base.waterStill.length < 3 && isHealthy(context)) {
+				} else if (context.base.waterStill.length < 3 && playerUtilities.isHealthy(context)) {
 					this.log.info("Building another water still while waiting");
 
 					// build another water still wait waiting
@@ -154,13 +154,13 @@ export default class RecoverThirst extends Objective {
 
 			} else {
 				for (const waterStill of context.base.waterStill) {
-					if (isWaterStillDesalinating(waterStill)) {
+					if (doodadUtilities.isWaterStillDesalinating(waterStill)) {
 						continue;
 					}
 
 					const waterStillObjectives: IObjective[] = [];
 
-					const isWaterDrinkable = isWaterStillDrinkable(waterStill);
+					const isWaterDrinkable = doodadUtilities.isWaterStillDrinkable(waterStill);
 
 					const isEmergency = thirstStat.value <= 3 && !isWaterDrinkable;
 

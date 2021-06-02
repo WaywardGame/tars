@@ -8,18 +8,18 @@ import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { baseInfo, BaseInfoKey, defaultMaxTilesChecked, IBaseInfo } from "../../ITars";
-import Objective from "../../Objective";
-import * as Base from "../../utilities/Base";
-import * as movementUtilities from "../../utilities/Movement";
-import { FindObjectType, getSortedObjects } from "../../utilities/Object";
-import { getNearestTileLocation } from "../../utilities/Tile";
-import AnalyzeBase from "../analyze/AnalyzeBase";
-import Lambda from "../core/Lambda";
-import MoveToTarget from "../core/MoveToTarget";
+import Context from "../../../Context";
+import { ContextDataType } from "../../../IContext";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
+import { baseInfo, BaseInfoKey, defaultMaxTilesChecked, IBaseInfo } from "../../../ITars";
+import Objective from "../../../Objective";
+import { baseUtilities } from "../../../utilities/Base";
+import { movementUtilities } from "../../../utilities/Movement";
+import { FindObjectType, objectUtilities } from "../../../utilities/Object";
+import { tileUtilities } from "../../../utilities/Tile";
+import AnalyzeBase from "../../analyze/AnalyzeBase";
+import Lambda from "../../core/Lambda";
+import MoveToTarget from "../../core/MoveToTarget";
 
 import UseItem from "./UseItem";
 
@@ -73,13 +73,13 @@ export default class BuildItem extends Objective {
 			this.log.info("Going build a well");
 		}
 
-		if (Base.hasBase(context)) {
+		if (baseUtilities.hasBase(context)) {
 			if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
 				const nearDoodads = context.base[baseInfo.tryPlaceNear];
 				const possiblePoints = AnalyzeBase.getNearPoints(nearDoodads);
 
 				for (const point of possiblePoints) {
-					if (Base.isOpenArea(context, point, game.getTileFromPoint(point), 0)) {
+					if (baseUtilities.isOpenArea(context, point, game.getTileFromPoint(point), 0)) {
 						this.target = point;
 						break;
 					}
@@ -87,19 +87,19 @@ export default class BuildItem extends Objective {
 			}
 
 			if (!this.target) {
-				const baseDoodads = Base.getBaseDoodads(context);
+				const baseDoodads = baseUtilities.getBaseDoodads(context);
 
 				for (const baseDoodad of baseDoodads) {
 					if (isWell) {
 						// look for unlimited wells first
-						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 						if (this.target === undefined) {
 							this.log.info("Couldn't find unlimited well tile");
-							this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+							this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 						}
 
 					} else {
-						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => Base.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
+						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
 					}
 
 					if (this.target !== undefined) {
@@ -166,11 +166,11 @@ export default class BuildItem extends Objective {
 		const facingPoint = context.player.getFacingPoint();
 		const facingTile = context.player.getFacingTile();
 
-		if (await this.isGoodTargetOrigin(context, facingPoint) && Base.isGoodBuildTile(context, facingPoint, facingTile)) {
+		if (await this.isGoodTargetOrigin(context, facingPoint) && baseUtilities.isGoodBuildTile(context, facingPoint, facingTile)) {
 			return facingPoint;
 		}
 
-		const sortedObjects = getSortedObjects(context, FindObjectType.Doodad, island.doodads as Doodad[]);
+		const sortedObjects = objectUtilities.getSortedObjects(context, FindObjectType.Doodad, island.doodads as Doodad[]);
 
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.player.z) {
@@ -190,7 +190,7 @@ export default class BuildItem extends Objective {
 
 							const tile = game.getTileFromPoint(point);
 
-							if (Base.isGoodBuildTile(context, point, tile)) {
+							if (baseUtilities.isGoodBuildTile(context, point, tile)) {
 								return point;
 							}
 						}
@@ -257,7 +257,7 @@ export default class BuildItem extends Objective {
 						nearbyTrees++;
 					}
 
-				} else if (Base.isGoodBuildTile(context, point, tile)) {
+				} else if (baseUtilities.isGoodBuildTile(context, point, tile)) {
 					if (TileHelpers.getType(tile) === commonTerrainType) {
 						nearbyCommonTiles++;
 					}
@@ -270,13 +270,13 @@ export default class BuildItem extends Objective {
 		}
 
 		// build close to rocks
-		const rockTileLocations = await getNearestTileLocation(origin, rockType);
+		const rockTileLocations = await tileUtilities.getNearestTileLocation(origin, rockType);
 		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance)) {
 			return false;
 		}
 
 		// buiuld close to a water source
-		const shallowSeawaterTileLocations = await getNearestTileLocation(origin, waterType);
+		const shallowSeawaterTileLocations = await tileUtilities.getNearestTileLocation(origin, waterType);
 		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearWaterDistance)) {
 			return false;
 		}

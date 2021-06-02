@@ -3,8 +3,8 @@ import { IStat, Stat } from "game/entity/IStats";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { isUsingVehicle } from "../../utilities/Player";
-import { isOverWater } from "../../utilities/Tile";
+import { playerUtilities } from "../../utilities/Player";
+import { tileUtilities } from "../../utilities/Tile";
 import Idle from "../other/Idle";
 import Rest from "../other/Rest";
 
@@ -33,7 +33,7 @@ export default class RecoverStamina extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		if (isOverWater(context) && isUsingVehicle(context)) {
+		if (tileUtilities.isOverWater(context) && playerUtilities.isUsingVehicle(context)) {
 			this.log.info("Idling to recover stamina");
 			return new Idle(false);
 		}

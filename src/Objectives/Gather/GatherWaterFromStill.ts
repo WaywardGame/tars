@@ -5,11 +5,11 @@ import Item from "game/item/Item";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { isWaterStillDrinkable } from "../../utilities/Doodad";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Idle from "../other/Idle";
-import StartWaterStillDesalination from "../other/StartWaterStillDesalination";
+import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
+import { doodadUtilities } from "../../utilities/Doodad";
 
 export default class GatherWaterFromStill extends Objective {
 
@@ -22,7 +22,7 @@ export default class GatherWaterFromStill extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!isWaterStillDrinkable(this.waterStill)) {
+		if (!doodadUtilities.isWaterStillDrinkable(this.waterStill)) {
 			if (this.allowStartingWaterStill) {
 				// start desalination and run back to the waterstill and wait
 				const objectives: IObjective[] = [

@@ -1,85 +1,91 @@
 import Log, { ILog, LogLineType, LogSource } from "utilities/Log";
 
-export const logSourceName = "TARS";
+class LoggerUtilities {
+	private queuedMessages: Array<{
+		logOrType: ILog | LogLineType;
+		args: any[];
+	}> | undefined;
 
-export let log = createLog();
-
-let queuedMessages: Array<{
-	logOrType: ILog | LogLineType;
-	args: any[];
-}> | undefined;
-
-export function preConsoleCallback() {
-	processQueuedMessages();
-}
-
-export function queueMessage(logOrType: ILog | LogLineType, args: any[]) {
-	if (!queuedMessages) {
-		queuedMessages = [];
+	@Bound
+	public preConsoleCallback() {
+		this.processQueuedMessages();
 	}
 
-	queuedMessages.push({ logOrType, args });
-}
+	public queueMessage(logOrType: ILog | LogLineType, args: any[]) {
+		if (!this.queuedMessages) {
+			this.queuedMessages = [];
+		}
 
-export function discardQueuedMessages() {
-	queuedMessages = undefined;
-}
-
-export function processQueuedMessages() {
-	if (!queuedMessages) {
-		return;
+		this.queuedMessages.push({ logOrType, args });
 	}
 
-	const messages = queuedMessages.slice();
-	queuedMessages = undefined;
+	public discardQueuedMessages() {
+		this.queuedMessages = undefined;
+	}
 
-	for (const message of messages) {
-		if (typeof (message.logOrType) === "object") {
-			message.logOrType.info(...message.args);
+	public processQueuedMessages() {
+		if (!this.queuedMessages) {
+			return;
+		}
 
-		} else {
-			const method = LogLineType[message.logOrType].toLowerCase();
-			const func = (console as any)[method];
-			if (func) {
-				func(...message.args);
+		const messages = this.queuedMessages.slice();
+		this.queuedMessages = undefined;
+
+		for (const message of messages) {
+			if (typeof (message.logOrType) === "object") {
+				message.logOrType.info(...message.args);
+
+			} else {
+				const method = LogLineType[message.logOrType].toLowerCase();
+				const func = (console as any)[method];
+				if (func) {
+					func(...message.args);
+				}
 			}
 		}
 	}
-}
 
-export function createLog(...name: string[]) {
-	const log = new Log();
+	public createLog(...name: string[]) {
+		const log = new Log();
 
-	const sources: Array<LogSource | string> = ["MOD", logSourceName];
+		const sources: Array<LogSource | string> = ["MOD", logSourceName];
 
-	if (name.length > 0) {
-		sources.push(...name);
+		if (name.length > 0) {
+			sources.push(...name);
+		}
+
+		log.info = (...args: any[]) => {
+			this.processQueuedMessages();
+			Log.info(...sources)(...args);
+		};
+
+		log.warn = (...args: any[]) => {
+			this.processQueuedMessages();
+			Log.warn(...sources)(...args);
+		};
+
+		log.error = (...args: any[]) => {
+			this.processQueuedMessages();
+			Log.error(...sources)(...args);
+		};
+
+		log.trace = (...args: any[]) => {
+			this.processQueuedMessages();
+			Log.trace(...sources)(...args);
+		};
+
+		log.debug = (...args: any[]) => {
+			this.processQueuedMessages();
+			Log.debug(...sources)(...args);
+		};
+
+		return log;
 	}
 
-	log.info = (...args: any[]) => {
-		processQueuedMessages();
-		Log.info(...sources)(...args);
-	};
-
-	log.warn = (...args: any[]) => {
-		processQueuedMessages();
-		Log.warn(...sources)(...args);
-	};
-
-	log.error = (...args: any[]) => {
-		processQueuedMessages();
-		Log.error(...sources)(...args);
-	};
-
-	log.trace = (...args: any[]) => {
-		processQueuedMessages();
-		Log.trace(...sources)(...args);
-	};
-
-	log.debug = (...args: any[]) => {
-		processQueuedMessages();
-		Log.debug(...sources)(...args);
-	};
-
-	return log;
 }
+
+export const loggerUtilities = new LoggerUtilities();
+
+export const logSourceName = "TARS";
+
+export const log = loggerUtilities.createLog();

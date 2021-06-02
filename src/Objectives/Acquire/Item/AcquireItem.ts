@@ -33,7 +33,7 @@ export default class AcquireItem extends AcquireBase {
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
 	private static readonly dismantleSearchCache: Map<ItemType, ItemType[]> = new Map();
 
-	constructor(private readonly itemType: ItemType) {
+	constructor(private readonly itemType: ItemType, private readonly options: Partial<{ disableCreatureSearch: boolean; disableDoodadSearch: boolean }> = {}) {
 		super();
 	}
 
@@ -69,15 +69,19 @@ export default class AcquireItem extends AcquireBase {
 			objectivePipelines.push([new GatherFromTerrain(terrainSearch).passContextDataKey(this)]);
 		}
 
-		const doodadSearch = this.getDoodadSearch();
-		if (doodadSearch.size > 0) {
-			objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passContextDataKey(this)]);
+		if (!this.options.disableCreatureSearch) {
+			const doodadSearch = this.getDoodadSearch();
+			if (doodadSearch.size > 0) {
+				objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passContextDataKey(this)]);
+			}
 		}
 
-		const creatureSearch: CreatureSearch = this.getCreatureSearch();
-		if (creatureSearch.map.size > 0) {
-			objectivePipelines.push([new GatherFromCorpse(creatureSearch).passContextDataKey(this)]);
-			objectivePipelines.push([new GatherFromCreature(creatureSearch).passContextDataKey(this)]);
+		if (!this.options.disableCreatureSearch) {
+			const creatureSearch: CreatureSearch = this.getCreatureSearch();
+			if (creatureSearch.map.size > 0) {
+				objectivePipelines.push([new GatherFromCorpse(creatureSearch).passContextDataKey(this)]);
+				objectivePipelines.push([new GatherFromCreature(creatureSearch).passContextDataKey(this)]);
+			}
 		}
 
 		const dismantleSearch: ItemType[] = this.getDismantleSearch();

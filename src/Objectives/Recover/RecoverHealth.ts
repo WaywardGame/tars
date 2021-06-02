@@ -5,9 +5,9 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../utilities/Item";
+import { itemUtilities } from "../../utilities/Item";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import UseItem from "../other/UseItem";
+import UseItem from "../other/item/UseItem";
 import OrganizeInventory from "../utility/OrganizeInventory";
 
 export default class RecoverHealth extends Objective {
@@ -27,7 +27,7 @@ export default class RecoverHealth extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const healItems = getInventoryItemsWithUse(context, ActionType.Heal);
+		const healItems = itemUtilities.getInventoryItemsWithUse(context, ActionType.Heal);
 		if (healItems.length > 0) {
 			this.log.info(`Healing with ${healItems[0].getName().getString()}`);
 			return new UseItem(ActionType.Heal, healItems[0]);

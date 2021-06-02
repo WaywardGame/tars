@@ -5,7 +5,7 @@ import Context from "../Context";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../IObjective";
 import ReserveItems from "../objectives/core/ReserveItems";
 import Restart from "../objectives/core/Restart";
-import { createLog, discardQueuedMessages, processQueuedMessages, queueMessage } from "../utilities/Logger";
+import { loggerUtilities } from "../utilities/Logger";
 
 import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
 import { IPlanner } from "./IPlanner";
@@ -28,7 +28,7 @@ export default class Plan implements IPlan {
 	public readonly objectives: IObjectiveInfo[];
 
 	constructor(private readonly planner: IPlanner, private readonly context: Context, private readonly objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]) {
-		this.log = createLog("Plan", objectiveInfo.objective.getHashCode());
+		this.log = loggerUtilities.createLog("Plan", objectiveInfo.objective.getHashCode());
 
 		// this.tree = this.createExecutionTree(objective, objectives);
 		this.tree = this.createOptimizedExecutionTree(objectiveInfo.objective, objectives);
@@ -77,7 +77,7 @@ export default class Plan implements IPlan {
 			if (this.objectiveInfo.objective !== objectiveStack[0].objective) {
 				// print logs for the planned objective if it's not in the stack
 				for (const log of this.objectiveInfo.logs) {
-					queueMessage(log.type, log.args);
+					loggerUtilities.queueMessage(log.type, log.args);
 				}
 			}
 		}
@@ -89,7 +89,7 @@ export default class Plan implements IPlan {
 		while (true) {
 			const objectiveInfo = objectiveStack.shift();
 			if (objectiveInfo === undefined) {
-				discardQueuedMessages();
+				loggerUtilities.discardQueuedMessages();
 				break;
 			}
 
@@ -97,7 +97,7 @@ export default class Plan implements IPlan {
 
 			const preExecuteObjectiveResult = preExecuteObjective(() => this.getObjectiveResults(chain, objectiveStack, objectiveInfo));
 			if (preExecuteObjectiveResult !== undefined) {
-				discardQueuedMessages();
+				loggerUtilities.discardQueuedMessages();
 				return preExecuteObjectiveResult;
 			}
 
@@ -109,19 +109,19 @@ export default class Plan implements IPlan {
 				message += `. Context hash code: ${contextHashCode}`;
 			}
 
-			queueMessage(objectiveInfo.objective.log, [message]);
+			loggerUtilities.queueMessage(objectiveInfo.objective.log, [message]);
 
 			for (const log of objectiveInfo.logs) {
-				queueMessage(log.type, log.args);
+				loggerUtilities.queueMessage(log.type, log.args);
 			}
 
 			const result = await objectiveInfo.objective.execute(this.context);
 
 			if (result === ObjectiveResult.Ignore) {
-				discardQueuedMessages();
+				loggerUtilities.discardQueuedMessages();
 
 			} else {
-				processQueuedMessages();
+				loggerUtilities.processQueuedMessages();
 			}
 
 			if (result === ObjectiveResult.Pending) {

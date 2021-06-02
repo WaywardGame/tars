@@ -12,7 +12,7 @@ import AcquireItemForDoodad from "../acquire/item/AcquireItemForDoodad";
 import AnalyzeBase from "../analyze/AnalyzeBase";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
-import BuildItem from "../other/BuildItem";
+import BuildItem from "../other/item/BuildItem";
 
 export default class MoveIntoChest extends Objective {
 

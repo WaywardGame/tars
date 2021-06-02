@@ -9,7 +9,7 @@ import Translation from "language/Translation";
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import { getAvailableInventoryWeight, processRecipe } from "../../../utilities/Item";
+import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteAction from "../../core/ExecuteAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
@@ -46,10 +46,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.itemType);
 
-		const checker = processRecipe(context, this.recipe, false);
-		const checkerWithIntermediateChest = processRecipe(context, this.recipe, true);
+		const checker = itemUtilities.processRecipe(context, this.recipe, false);
+		const checkerWithIntermediateChest = itemUtilities.processRecipe(context, this.recipe, true);
 
-		const availableInventoryWeight = getAvailableInventoryWeight(context);
+		const availableInventoryWeight = itemUtilities.getAvailableInventoryWeight(context);
 		const estimatedItemWeight = itemManager.getWeight(this.itemType, WeightType.Static);
 
 		const mustUseIntermediateChest = availableInventoryWeight < estimatedItemWeight;

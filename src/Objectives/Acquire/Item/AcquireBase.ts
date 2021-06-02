@@ -1,7 +1,7 @@
 import Context from "../../../Context";
 import { IExecutionTree } from "../../../core/IPlan";
 import Objective from "../../../Objective";
-import { isNearBase } from "../../../utilities/Base";
+import { baseUtilities } from "../../../utilities/Base";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";
 import GatherFromCreature from "../../gather/GatherFromCreature";
@@ -71,7 +71,7 @@ export default abstract class AcquireBase extends Objective {
 			// this recipe does not require any gathering
 
 			if (result.emptyAcquireObjectiveCount === 0) {
-				if (isNearBase(context)) {
+				if (baseUtilities.isNearBase(context)) {
 					// todo: replace isNearBase with something that checks for CompleteRequirements?
 
 					// prioritize acquire item objectives that require no gathering

@@ -1,4 +1,4 @@
-define(["require", "exports", "game/doodad/IDoodad", "game/entity/action/IAction", "utilities/math/Vector2", "../../IContext", "../../IObjective", "../../Objective", "../acquire/item/AcquireItemForDoodad", "../analyze/AnalyzeBase", "../core/ExecuteAction", "../core/MoveToTarget", "../other/BuildItem"], function (require, exports, IDoodad_1, IAction_1, Vector2_1, IContext_1, IObjective_1, Objective_1, AcquireItemForDoodad_1, AnalyzeBase_1, ExecuteAction_1, MoveToTarget_1, BuildItem_1) {
+define(["require", "exports", "game/doodad/IDoodad", "game/entity/action/IAction", "utilities/math/Vector2", "../../IContext", "../../IObjective", "../../Objective", "../acquire/item/AcquireItemForDoodad", "../analyze/AnalyzeBase", "../core/ExecuteAction", "../core/MoveToTarget", "../other/item/BuildItem"], function (require, exports, IDoodad_1, IAction_1, Vector2_1, IContext_1, IObjective_1, Objective_1, AcquireItemForDoodad_1, AnalyzeBase_1, ExecuteAction_1, MoveToTarget_1, BuildItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class MoveIntoChest extends Objective_1.default {

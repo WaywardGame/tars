@@ -1,73 +1,79 @@
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 define(["require", "exports", "utilities/Log"], function (require, exports, Log_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.createLog = exports.processQueuedMessages = exports.discardQueuedMessages = exports.queueMessage = exports.preConsoleCallback = exports.log = exports.logSourceName = void 0;
-    exports.logSourceName = "TARS";
-    exports.log = createLog();
-    let queuedMessages;
-    function preConsoleCallback() {
-        processQueuedMessages();
-    }
-    exports.preConsoleCallback = preConsoleCallback;
-    function queueMessage(logOrType, args) {
-        if (!queuedMessages) {
-            queuedMessages = [];
+    exports.log = exports.logSourceName = exports.loggerUtilities = void 0;
+    class LoggerUtilities {
+        preConsoleCallback() {
+            this.processQueuedMessages();
         }
-        queuedMessages.push({ logOrType, args });
-    }
-    exports.queueMessage = queueMessage;
-    function discardQueuedMessages() {
-        queuedMessages = undefined;
-    }
-    exports.discardQueuedMessages = discardQueuedMessages;
-    function processQueuedMessages() {
-        if (!queuedMessages) {
-            return;
-        }
-        const messages = queuedMessages.slice();
-        queuedMessages = undefined;
-        for (const message of messages) {
-            if (typeof (message.logOrType) === "object") {
-                message.logOrType.info(...message.args);
+        queueMessage(logOrType, args) {
+            if (!this.queuedMessages) {
+                this.queuedMessages = [];
             }
-            else {
-                const method = Log_1.LogLineType[message.logOrType].toLowerCase();
-                const func = console[method];
-                if (func) {
-                    func(...message.args);
+            this.queuedMessages.push({ logOrType, args });
+        }
+        discardQueuedMessages() {
+            this.queuedMessages = undefined;
+        }
+        processQueuedMessages() {
+            if (!this.queuedMessages) {
+                return;
+            }
+            const messages = this.queuedMessages.slice();
+            this.queuedMessages = undefined;
+            for (const message of messages) {
+                if (typeof (message.logOrType) === "object") {
+                    message.logOrType.info(...message.args);
+                }
+                else {
+                    const method = Log_1.LogLineType[message.logOrType].toLowerCase();
+                    const func = console[method];
+                    if (func) {
+                        func(...message.args);
+                    }
                 }
             }
         }
-    }
-    exports.processQueuedMessages = processQueuedMessages;
-    function createLog(...name) {
-        const log = new Log_1.default();
-        const sources = ["MOD", exports.logSourceName];
-        if (name.length > 0) {
-            sources.push(...name);
+        createLog(...name) {
+            const log = new Log_1.default();
+            const sources = ["MOD", exports.logSourceName];
+            if (name.length > 0) {
+                sources.push(...name);
+            }
+            log.info = (...args) => {
+                this.processQueuedMessages();
+                Log_1.default.info(...sources)(...args);
+            };
+            log.warn = (...args) => {
+                this.processQueuedMessages();
+                Log_1.default.warn(...sources)(...args);
+            };
+            log.error = (...args) => {
+                this.processQueuedMessages();
+                Log_1.default.error(...sources)(...args);
+            };
+            log.trace = (...args) => {
+                this.processQueuedMessages();
+                Log_1.default.trace(...sources)(...args);
+            };
+            log.debug = (...args) => {
+                this.processQueuedMessages();
+                Log_1.default.debug(...sources)(...args);
+            };
+            return log;
         }
-        log.info = (...args) => {
-            processQueuedMessages();
-            Log_1.default.info(...sources)(...args);
-        };
-        log.warn = (...args) => {
-            processQueuedMessages();
-            Log_1.default.warn(...sources)(...args);
-        };
-        log.error = (...args) => {
-            processQueuedMessages();
-            Log_1.default.error(...sources)(...args);
-        };
-        log.trace = (...args) => {
-            processQueuedMessages();
-            Log_1.default.trace(...sources)(...args);
-        };
-        log.debug = (...args) => {
-            processQueuedMessages();
-            Log_1.default.debug(...sources)(...args);
-        };
-        return log;
     }
-    exports.createLog = createLog;
+    __decorate([
+        Bound
+    ], LoggerUtilities.prototype, "preConsoleCallback", null);
+    exports.loggerUtilities = new LoggerUtilities();
+    exports.logSourceName = "TARS";
+    exports.log = exports.loggerUtilities.createLog();
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiTG9nZ2VyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3V0aWxpdGllcy9Mb2dnZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztJQUVhLFFBQUEsYUFBYSxHQUFHLE1BQU0sQ0FBQztJQUV6QixRQUFBLEdBQUcsR0FBRyxTQUFTLEVBQUUsQ0FBQztJQUU3QixJQUFJLGNBR1UsQ0FBQztJQUVmLFNBQWdCLGtCQUFrQjtRQUNqQyxxQkFBcUIsRUFBRSxDQUFDO0lBQ3pCLENBQUM7SUFGRCxnREFFQztJQUVELFNBQWdCLFlBQVksQ0FBQyxTQUE2QixFQUFFLElBQVc7UUFDdEUsSUFBSSxDQUFDLGNBQWMsRUFBRTtZQUNwQixjQUFjLEdBQUcsRUFBRSxDQUFDO1NBQ3BCO1FBRUQsY0FBYyxDQUFDLElBQUksQ0FBQyxFQUFFLFNBQVMsRUFBRSxJQUFJLEVBQUUsQ0FBQyxDQUFDO0lBQzFDLENBQUM7SUFORCxvQ0FNQztJQUVELFNBQWdCLHFCQUFxQjtRQUNwQyxjQUFjLEdBQUcsU0FBUyxDQUFDO0lBQzVCLENBQUM7SUFGRCxzREFFQztJQUVELFNBQWdCLHFCQUFxQjtRQUNwQyxJQUFJLENBQUMsY0FBYyxFQUFFO1lBQ3BCLE9BQU87U0FDUDtRQUVELE1BQU0sUUFBUSxHQUFHLGNBQWMsQ0FBQyxLQUFLLEVBQUUsQ0FBQztRQUN4QyxjQUFjLEdBQUcsU0FBUyxDQUFDO1FBRTNCLEtBQUssTUFBTSxPQUFPLElBQUksUUFBUSxFQUFFO1lBQy9CLElBQUksT0FBTyxDQUFDLE9BQU8sQ0FBQyxTQUFTLENBQUMsS0FBSyxRQUFRLEVBQUU7Z0JBQzVDLE9BQU8sQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLEdBQUcsT0FBTyxDQUFDLElBQUksQ0FBQyxDQUFDO2FBRXhDO2lCQUFNO2dCQUNOLE1BQU0sTUFBTSxHQUFHLGlCQUFXLENBQUMsT0FBTyxDQUFDLFNBQVMsQ0FBQyxDQUFDLFdBQVcsRUFBRSxDQUFDO2dCQUM1RCxNQUFNLElBQUksR0FBSSxPQUFlLENBQUMsTUFBTSxDQUFDLENBQUM7Z0JBQ3RDLElBQUksSUFBSSxFQUFFO29CQUNULElBQUksQ0FBQyxHQUFHLE9BQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQztpQkFDdEI7YUFDRDtTQUNEO0lBQ0YsQ0FBQztJQXBCRCxzREFvQkM7SUFFRCxTQUFnQixTQUFTLENBQUMsR0FBRyxJQUFjO1FBQzFDLE1BQU0sR0FBRyxHQUFHLElBQUksYUFBRyxFQUFFLENBQUM7UUFFdEIsTUFBTSxPQUFPLEdBQThCLENBQUMsS0FBSyxFQUFFLHFCQUFhLENBQUMsQ0FBQztRQUVsRSxJQUFJLElBQUksQ0FBQyxNQUFNLEdBQUcsQ0FBQyxFQUFFO1lBQ3BCLE9BQU8sQ0FBQyxJQUFJLENBQUMsR0FBRyxJQUFJLENBQUMsQ0FBQztTQUN0QjtRQUVELEdBQUcsQ0FBQyxJQUFJLEdBQUcsQ0FBQyxHQUFHLElBQVcsRUFBRSxFQUFFO1lBQzdCLHFCQUFxQixFQUFFLENBQUM7WUFDeEIsYUFBRyxDQUFDLElBQUksQ0FBQyxHQUFHLE9BQU8sQ0FBQyxDQUFDLEdBQUcsSUFBSSxDQUFDLENBQUM7UUFDL0IsQ0FBQyxDQUFDO1FBRUYsR0FBRyxDQUFDLElBQUksR0FBRyxDQUFDLEdBQUcsSUFBVyxFQUFFLEVBQUU7WUFDN0IscUJBQXFCLEVBQUUsQ0FBQztZQUN4QixhQUFHLENBQUMsSUFBSSxDQUFDLEdBQUcsT0FBTyxDQUFDLENBQUMsR0FBRyxJQUFJLENBQUMsQ0FBQztRQUMvQixDQUFDLENBQUM7UUFFRixHQUFHLENBQUMsS0FBSyxHQUFHLENBQUMsR0FBRyxJQUFXLEVBQUUsRUFBRTtZQUM5QixxQkFBcUIsRUFBRSxDQUFDO1lBQ3hCLGFBQUcsQ0FBQyxLQUFLLENBQUMsR0FBRyxPQUFPLENBQUMsQ0FBQyxHQUFHLElBQUksQ0FBQyxDQUFDO1FBQ2hDLENBQUMsQ0FBQztRQUVGLEdBQUcsQ0FBQyxLQUFLLEdBQUcsQ0FBQyxHQUFHLElBQVcsRUFBRSxFQUFFO1lBQzlCLHFCQUFxQixFQUFFLENBQUM7WUFDeEIsYUFBRyxDQUFDLEtBQUssQ0FBQyxHQUFHLE9BQU8sQ0FBQyxDQUFDLEdBQUcsSUFBSSxDQUFDLENBQUM7UUFDaEMsQ0FBQyxDQUFDO1FBRUYsR0FBRyxDQUFDLEtBQUssR0FBRyxDQUFDLEdBQUcsSUFBVyxFQUFFLEVBQUU7WUFDOUIscUJBQXFCLEVBQUUsQ0FBQztZQUN4QixhQUFHLENBQUMsS0FBSyxDQUFDLEdBQUcsT0FBTyxDQUFDLENBQUMsR0FBRyxJQUFJLENBQUMsQ0FBQztRQUNoQyxDQUFDLENBQUM7UUFFRixPQUFPLEdBQUcsQ0FBQztJQUNaLENBQUM7SUFuQ0QsOEJBbUNDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiTG9nZ2VyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3V0aWxpdGllcy9Mb2dnZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7OztJQUVBLE1BQU0sZUFBZTtRQU9iLGtCQUFrQjtZQUN4QixJQUFJLENBQUMscUJBQXFCLEVBQUUsQ0FBQztRQUM5QixDQUFDO1FBRU0sWUFBWSxDQUFDLFNBQTZCLEVBQUUsSUFBVztZQUM3RCxJQUFJLENBQUMsSUFBSSxDQUFDLGNBQWMsRUFBRTtnQkFDekIsSUFBSSxDQUFDLGNBQWMsR0FBRyxFQUFFLENBQUM7YUFDekI7WUFFRCxJQUFJLENBQUMsY0FBYyxDQUFDLElBQUksQ0FBQyxFQUFFLFNBQVMsRUFBRSxJQUFJLEVBQUUsQ0FBQyxDQUFDO1FBQy9DLENBQUM7UUFFTSxxQkFBcUI7WUFDM0IsSUFBSSxDQUFDLGNBQWMsR0FBRyxTQUFTLENBQUM7UUFDakMsQ0FBQztRQUVNLHFCQUFxQjtZQUMzQixJQUFJLENBQUMsSUFBSSxDQUFDLGNBQWMsRUFBRTtnQkFDekIsT0FBTzthQUNQO1lBRUQsTUFBTSxRQUFRLEdBQUcsSUFBSSxDQUFDLGNBQWMsQ0FBQyxLQUFLLEVBQUUsQ0FBQztZQUM3QyxJQUFJLENBQUMsY0FBYyxHQUFHLFNBQVMsQ0FBQztZQUVoQyxLQUFLLE1BQU0sT0FBTyxJQUFJLFFBQVEsRUFBRTtnQkFDL0IsSUFBSSxPQUFPLENBQUMsT0FBTyxDQUFDLFNBQVMsQ0FBQyxLQUFLLFFBQVEsRUFBRTtvQkFDNUMsT0FBTyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMsR0FBRyxPQUFPLENBQUMsSUFBSSxDQUFDLENBQUM7aUJBRXhDO3FCQUFNO29CQUNOLE1BQU0sTUFBTSxHQUFHLGlCQUFXLENBQUMsT0FBTyxDQUFDLFNBQVMsQ0FBQyxDQUFDLFdBQVcsRUFBRSxDQUFDO29CQUM1RCxNQUFNLElBQUksR0FBSSxPQUFlLENBQUMsTUFBTSxDQUFDLENBQUM7b0JBQ3RDLElBQUksSUFBSSxFQUFFO3dCQUNULElBQUksQ0FBQyxHQUFHLE9BQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQztxQkFDdEI7aUJBQ0Q7YUFDRDtRQUNGLENBQUM7UUFFTSxTQUFTLENBQUMsR0FBRyxJQUFjO1lBQ2pDLE1BQU0sR0FBRyxHQUFHLElBQUksYUFBRyxFQUFFLENBQUM7WUFFdEIsTUFBTSxPQUFPLEdBQThCLENBQUMsS0FBSyxFQUFFLHFCQUFhLENBQUMsQ0FBQztZQUVsRSxJQUFJLElBQUksQ0FBQyxNQUFNLEdBQUcsQ0FBQyxFQUFFO2dCQUNwQixPQUFPLENBQUMsSUFBSSxDQUFDLEdBQUcsSUFBSSxDQUFDLENBQUM7YUFDdEI7WUFFRCxHQUFHLENBQUMsSUFBSSxHQUFHLENBQUMsR0FBRyxJQUFXLEVBQUUsRUFBRTtnQkFDN0IsSUFBSSxDQUFDLHFCQUFxQixFQUFFLENBQUM7Z0JBQzdCLGFBQUcsQ0FBQyxJQUFJLENBQUMsR0FBRyxPQUFPLENBQUMsQ0FBQyxHQUFHLElBQUksQ0FBQyxDQUFDO1lBQy9CLENBQUMsQ0FBQztZQUVGLEdBQUcsQ0FBQyxJQUFJLEdBQUcsQ0FBQyxHQUFHLElBQVcsRUFBRSxFQUFFO2dCQUM3QixJQUFJLENBQUMscUJBQXFCLEVBQUUsQ0FBQztnQkFDN0IsYUFBRyxDQUFDLElBQUksQ0FBQyxHQUFHLE9BQU8sQ0FBQyxDQUFDLEdBQUcsSUFBSSxDQUFDLENBQUM7WUFDL0IsQ0FBQyxDQUFDO1lBRUYsR0FBRyxDQUFDLEtBQUssR0FBRyxDQUFDLEdBQUcsSUFBVyxFQUFFLEVBQUU7Z0JBQzlCLElBQUksQ0FBQyxxQkFBcUIsRUFBRSxDQUFDO2dCQUM3QixhQUFHLENBQUMsS0FBSyxDQUFDLEdBQUcsT0FBTyxDQUFDLENBQUMsR0FBRyxJQUFJLENBQUMsQ0FBQztZQUNoQyxDQUFDLENBQUM7WUFFRixHQUFHLENBQUMsS0FBSyxHQUFHLENBQUMsR0FBRyxJQUFXLEVBQUUsRUFBRTtnQkFDOUIsSUFBSSxDQUFDLHFCQUFxQixFQUFFLENBQUM7Z0JBQzdCLGFBQUcsQ0FBQyxLQUFLLENBQUMsR0FBRyxPQUFPLENBQUMsQ0FBQyxHQUFHLElBQUksQ0FBQyxDQUFDO1lBQ2hDLENBQUMsQ0FBQztZQUVGLEdBQUcsQ0FBQyxLQUFLLEdBQUcsQ0FBQyxHQUFHLElBQVcsRUFBRSxFQUFFO2dCQUM5QixJQUFJLENBQUMscUJBQXFCLEVBQUUsQ0FBQztnQkFDN0IsYUFBRyxDQUFDLEtBQUssQ0FBQyxHQUFHLE9BQU8sQ0FBQyxDQUFDLEdBQUcsSUFBSSxDQUFDLENBQUM7WUFDaEMsQ0FBQyxDQUFDO1lBRUYsT0FBTyxHQUFHLENBQUM7UUFDWixDQUFDO0tBRUQ7SUEzRUE7UUFEQyxLQUFLOzZEQUdMO0lBMkVXLFFBQUEsZUFBZSxHQUFHLElBQUksZUFBZSxFQUFFLENBQUM7SUFFeEMsUUFBQSxhQUFhLEdBQUcsTUFBTSxDQUFDO0lBRXZCLFFBQUEsR0FBRyxHQUFHLHVCQUFlLENBQUMsU0FBUyxFQUFFLENBQUMifQ==

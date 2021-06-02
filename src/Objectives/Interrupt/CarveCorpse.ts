@@ -6,7 +6,7 @@ import Translation from "language/Translation";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getBestTool } from "../../utilities/Item";
+import { itemUtilities } from "../../utilities/Item";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -25,7 +25,7 @@ export default class CarveCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const carveTool = getBestTool(context, ActionType.Carve);
+		const carveTool = itemUtilities.getBestTool(context, ActionType.Carve);
 		if (carveTool === undefined) {
 			this.log.info("Missing carve tool for corpse");
 			return ObjectiveResult.Impossible;

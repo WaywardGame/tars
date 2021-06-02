@@ -5,8 +5,8 @@ import Translation from "language/Translation";
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getItemInInventory } from "../../../utilities/Item";
-import IgniteItem from "../../other/IgniteItem";
+import { itemUtilities } from "../../../utilities/Item";
+import IgniteItem from "../../other/item/IgniteItem";
 
 import AcquireItem from "./AcquireItem";
 
@@ -38,7 +38,7 @@ export default class AcquireItemAndIgnite extends Objective {
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         const objectives: IObjective[] = [];
 
-        const itemToIgnite = getItemInInventory(context, this.itemType);
+        const itemToIgnite = itemUtilities.getItemInInventory(context, this.itemType);
         if (itemToIgnite === undefined) {
             objectives.push(new AcquireItem(this.itemType).setContextDataKey(this.getHashCode()));
         }

@@ -5,7 +5,7 @@ import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
-import { getInventoryItemsWithEquipType, getInventoryItemsWithUse } from "../../utilities/Item";
+import { itemUtilities } from "../../utilities/Item";
 
 export default class AnalyzeInventory extends Objective {
 
@@ -67,12 +67,12 @@ export default class AnalyzeInventory extends Objective {
 
 			if (itemInfo.actionTypes) {
 				for (const useType of itemInfo.actionTypes) {
-					items.addFrom(getInventoryItemsWithUse(context, useType));
+					items.addFrom(itemUtilities.getInventoryItemsWithUse(context, useType));
 				}
 			}
 
 			if (itemInfo.equipType) {
-				items.addFrom(getInventoryItemsWithEquipType(context, itemInfo.equipType));
+				items.addFrom(itemUtilities.getInventoryItemsWithEquipType(context, itemInfo.equipType));
 			}
 
 			if (items.size > 0) {

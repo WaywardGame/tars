@@ -6,7 +6,7 @@ import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { baseInfo, BaseInfoKey } from "../../../ITars";
 import Objective from "../../../Objective";
-import StartFire from "../../other/StartFire";
+import StartFire from "../../other/doodad/StartFire";
 
 import AcquireBuildMoveToDoodad from "./AcquireBuildMoveToDoodad";
 

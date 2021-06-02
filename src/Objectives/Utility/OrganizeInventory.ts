@@ -10,9 +10,9 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
-import { isNearBase } from "../../utilities/Base";
-import { getReservedItems, getUnusedItems } from "../../utilities/Item";
-import { isOpenTile } from "../../utilities/Tile";
+import { baseUtilities } from "../../utilities/Base";
+import { itemUtilities } from "../../utilities/Item";
+import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -56,17 +56,17 @@ export default class OrganizeInventory extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const reservedItems = getReservedItems(context);
+		const reservedItems = itemUtilities.getReservedItems(context);
 		const reservedItemsWeight = reservedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		let unusedItems = getUnusedItems(context);
+		let unusedItems = itemUtilities.getUnusedItems(context);
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
 		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (this.options.onlyIfNearBase && !isNearBase(context)) {
+		if (this.options.onlyIfNearBase && !baseUtilities.isNearBase(context)) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -108,7 +108,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (unusedItems.length === 0 && this.options.allowReservedItems) {
 			// ignore reserved items
-			unusedItems = getUnusedItems(context, true);
+			unusedItems = itemUtilities.getUnusedItems(context, true);
 		}
 
 		if (unusedItems.length === 0) {
@@ -141,7 +141,7 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = TileHelpers.findMatchingTile(context.player, (point, tile) => isOpenTile(context, point, tile) && !game.isTileFull(tile), { maxTilesChecked: defaultMaxTilesChecked });
+		const target = TileHelpers.findMatchingTile(context.player, (point, tile) => tileUtilities.isOpenTile(context, point, tile) && !game.isTileFull(tile), { maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}

@@ -1,7 +1,5 @@
-import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import { IContainer } from "game/item/IItem";
-import Item from "game/item/Item";
 import { IVector3 } from "utilities/math/IVector";
 
 import Context from "../../Context";
@@ -9,6 +7,7 @@ import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IOb
 import Objective from "../../Objective";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
+import Restart from "../core/Restart";
 
 export default class OrganizeBase extends Objective {
 
@@ -43,11 +42,13 @@ export default class OrganizeBase extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const objectives: IObjective[] = [];
+		const objectivePipelines: IObjective[][] = [];
 
 		for (const position of this.tiles) {
 			const tile = game.getTileFromPoint(position);
 			if (tile.containedItems && tile.containedItems.length > 0) {
+				const objectives: IObjective[] = [];
+
 				// pickup items from tile
 				objectives.push(new MoveToTarget(position, true));
 
@@ -57,39 +58,24 @@ export default class OrganizeBase extends Objective {
 					}));
 				}
 
+				// restart now
+				// the ReduceWeight interrupt will handle moving items into chests
+				// this makes it so OrganizeBase will keep picking up the nearest items until the inventory is full
+				objectives.push(new Restart());
+
+				objectivePipelines.push(objectives);
 				// move items into chest
-				objectives.push(new MoveToTarget(chests[0], true));
+				// objectives.push(new MoveToTarget(chests[0], true));
 
-				for (const item of tile.containedItems) {
-					objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, chests[0] as IContainer);
-					}));
-				}
+				// for (const item of tile.containedItems) {
+				// 	objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
+				// 		action.execute(context.player, item, chests[0] as IContainer);
+				// 	}));
+				// }
 			}
 		}
 
-		return objectives;
-	}
-
-	public static moveIntoChestObjectives(chest: Doodad, itemsToMove: Item[]) {
-		const targetContainer = chest as IContainer;
-		const weight = itemManager.computeContainerWeight(targetContainer);
-		if (weight + itemsToMove[0].getTotalWeight() <= itemManager.getWeightCapacity(targetContainer)!) {
-			// at least 1 item fits in the chest
-			const objectives: IObjective[] = [];
-
-			objectives.push(new MoveToTarget(chest, true));
-
-			for (const item of itemsToMove) {
-				objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-					action.execute(context.player, item, targetContainer);
-				}));
-			}
-
-			return objectives;
-		}
-
-		return undefined;
+		return objectivePipelines;
 	}
 
 }

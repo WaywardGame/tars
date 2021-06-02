@@ -11,8 +11,7 @@ import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
-
-import { foodItemTypes } from "./utilities/Item";
+import { itemUtilities } from "./utilities/Item";
 
 export const TARS_ID = "TARS";
 
@@ -20,10 +19,41 @@ export const defaultMaxTilesChecked = 3000;
 
 export const gardenMaxTilesChecked = 1024;
 
+export enum TarsTranslation {
+	DialogTitleMain,
+
+	DialogStatusNavigatingInitializing,
+
+	DialogPanelGeneral,
+	DialogPanelTasks,
+	DialogPanelOptions,
+
+	DialogButtonEnable,
+	DialogButtonAquireItem,
+	DialogButtonAquireItemTooltip,
+	DialogButtonBuildDoodad,
+	DialogButtonBuildDoodadTooltip,
+	DialogButtonExploreIslands,
+	DialogButtonExploreIslandsTooltip,
+	DialogButtonStayHealthy,
+	DialogButtonStayHealthyTooltip,
+	DialogButtonUseOrbsOfInfluence,
+	DialogButtonUseOrbsOfInfluenceTooltip,
+
+	DialogLabelStatus,
+	DialogLabelItem,
+	DialogLabelDoodad,
+
+	DialogModeSurvival,
+	DialogModeSurvivalTooltip,
+	DialogModeTidyUp,
+	DialogModeTidyUpTooltip,
+}
+
 export interface ISaveData {
 	enabled: boolean;
 	options: ITarsOptions;
-	ui: Record<TarsUiSaveDataKey, any>;
+	ui: Partial<Record<TarsUiSaveDataKey, any>>;
 }
 
 export enum TarsUiSaveDataKey {
@@ -33,11 +63,32 @@ export enum TarsUiSaveDataKey {
 	BuildDoodadDropdown,
 }
 
+// list of options. ideally most of them would be boolean's
 export interface ITarsOptions {
 	mode: TarsMode;
-	stayHealthy: boolean;
 	exploreIslands: boolean;
+	stayHealthy: boolean;
+	useOrbsOfInfluence: boolean;
 }
+
+// options to show in the Options panel
+export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mode">; title: TarsTranslation; tooltip: TarsTranslation }> = [
+	{
+		option: "exploreIslands",
+		title: TarsTranslation.DialogButtonExploreIslands,
+		tooltip: TarsTranslation.DialogButtonExploreIslandsTooltip,
+	},
+	{
+		option: "stayHealthy",
+		title: TarsTranslation.DialogButtonStayHealthy,
+		tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
+	},
+	{
+		option: "useOrbsOfInfluence",
+		title: TarsTranslation.DialogButtonUseOrbsOfInfluence,
+		tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
+	}
+];
 
 export interface ITileLocation {
 	type: TerrainType;
@@ -318,7 +369,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		flags: InventoryItemFlag.PreferLowerWeight,
 	},
 	food: {
-		itemTypes: Array.from(foodItemTypes),
+		itemTypes: Array.from(itemUtilities.foodItemTypes),
 		flags: InventoryItemFlag.PreferHigherDecay,
 		allowMultiple: 5,
 	},
@@ -431,35 +482,6 @@ export interface CreatureSearch {
 }
 
 export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot; };
-
-export enum TarsTranslation {
-	DialogTitleMain,
-
-	DialogStatusNavigatingInitializing,
-
-	DialogPanelGeneral,
-	DialogPanelTasks,
-	DialogPanelOptions,
-
-	DialogButtonEnable,
-	DialogButtonAquireItem,
-	DialogButtonAquireItemTooltip,
-	DialogButtonBuildDoodad,
-	DialogButtonBuildDoodadTooltip,
-	DialogButtonStayHealthy,
-	DialogButtonStayHealthyTooltip,
-	DialogButtonExploreIslands,
-	DialogButtonExploreIslandsTooltip,
-
-	DialogLabelStatus,
-	DialogLabelItem,
-	DialogLabelDoodad,
-
-	DialogModeSurvival,
-	DialogModeSurvivalTooltip,
-	DialogModeTidyUp,
-	DialogModeTidyUpTooltip,
-}
 
 export interface ITarsEvents extends Events<Mod> {
 	/**

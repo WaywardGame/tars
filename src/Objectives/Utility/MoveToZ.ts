@@ -5,7 +5,7 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getNearestTileLocation } from "../../utilities/Tile";
+import { tileUtilities } from "../../utilities/Tile";
 import SetContextData from "../contextData/SetContextData";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -30,7 +30,7 @@ export default class MoveToZ extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
-		const tileLocations = await getNearestTileLocation(context, TerrainType.CaveEntrance);
+		const tileLocations = await tileUtilities.getNearestTileLocation(context, TerrainType.CaveEntrance);
 
 		for (const tileLocation of tileLocations) {
 			objectivePipelines.push([

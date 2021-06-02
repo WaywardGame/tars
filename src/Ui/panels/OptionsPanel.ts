@@ -1,36 +1,29 @@
 import Translation from "language/Translation";
 import { CheckButton } from "ui/component/CheckButton";
 
-import { TarsTranslation } from "../../ITars";
+import { TarsTranslation, uiConfigurableOptions } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
 
 export default class OptionsPanel extends TarsPanel {
 
-    private readonly buttonStayHealthy: CheckButton;
-    private readonly buttonExploreIslands: CheckButton;
+    private readonly refreshableComponents: CheckButton[] = [];
 
     constructor() {
         super();
 
-        this.buttonStayHealthy = new CheckButton()
-            .setText(this.TARS.getTranslation(TarsTranslation.DialogButtonStayHealthy))
-            .setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonStayHealthyTooltip))))
-            .setRefreshMethod(() => this.TARS.saveData.options.stayHealthy)
-            .event.subscribe("willToggle", (_, checked) => {
-                this.TARS.updateOptions({ stayHealthy: checked });
-                return true;
-            })
-            .appendTo(this);
+        for (const uiOption of uiConfigurableOptions) {
+            const checkButton = new CheckButton()
+                .setText(this.TARS.getTranslation(uiOption.title))
+                .setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(uiOption.tooltip))))
+                .setRefreshMethod(() => this.TARS.saveData.options[uiOption.option])
+                .event.subscribe("willToggle", (_, checked) => {
+                    this.TARS.updateOptions({ [uiOption.option]: checked });
+                    return true;
+                })
+                .appendTo(this);
 
-        this.buttonExploreIslands = new CheckButton()
-            .setText(this.TARS.getTranslation(TarsTranslation.DialogButtonExploreIslands))
-            .setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonExploreIslandsTooltip))))
-            .setRefreshMethod(() => this.TARS.saveData.options.exploreIslands)
-            .event.subscribe("willToggle", (_, checked) => {
-                this.TARS.updateOptions({ exploreIslands: checked });
-                return true;
-            })
-            .appendTo(this);
+            this.refreshableComponents.push(checkButton);
+        }
     }
 
     public getTranslation(): TarsTranslation | Translation {
@@ -44,7 +37,8 @@ export default class OptionsPanel extends TarsPanel {
 
     @Bound
     protected refresh() {
-        this.buttonStayHealthy.refresh();
-        this.buttonExploreIslands.refresh();
+        for (const button of this.refreshableComponents) {
+            button.refresh();
+        }
     }
 }

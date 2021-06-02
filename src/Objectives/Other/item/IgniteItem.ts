@@ -2,12 +2,12 @@ import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
 import { EquipType } from "game/entity/IHuman";
 
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
-import AcquireBuildMoveToFire from "../acquire/doodad/AcquireBuildMoveToFire";
-import Equip from "./Equip";
+import Context from "../../../Context";
+import { ContextDataType } from "../../../IContext";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
+import Objective from "../../../Objective";
+import AcquireBuildMoveToFire from "../../acquire/doodad/AcquireBuildMoveToFire";
+import Equip from "./EquipItem";
 
 import UseItem from "./UseItem";
 

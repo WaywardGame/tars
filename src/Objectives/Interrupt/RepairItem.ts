@@ -7,8 +7,8 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { isUsingVehicle } from "../../utilities/Player";
-import { isOverWater } from "../../utilities/Tile";
+import { playerUtilities } from "../../utilities/Player";
+import { tileUtilities } from "../../utilities/Tile";
 import AcquireItem from "../acquire/item/AcquireItem";
 import CopyContextData from "../contextData/CopyContextData";
 import SetContextData from "../contextData/SetContextData";
@@ -45,7 +45,7 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (isOverWater(context) && !isUsingVehicle(context)) {
+		if (tileUtilities.isOverWater(context) && !playerUtilities.isUsingVehicle(context)) {
 			return ObjectiveResult.Ignore;
 		}
 

@@ -5,13 +5,13 @@ import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getDoodadTypes } from "../../../utilities/Doodad";
-import { getInventoryItemForDoodad } from "../../../utilities/Item";
-import { findDoodad } from "../../../utilities/Object";
 import MoveToTarget from "../../core/MoveToTarget";
-import BuildItem from "../../other/BuildItem";
-import StartFire from "../../other/StartFire";
+import BuildItem from "../../other/item/BuildItem";
+import StartFire from "../../other/doodad/StartFire";
 import AcquireItemForDoodad from "../Item/AcquireItemForDoodad";
+import { doodadUtilities } from "../../../utilities/Doodad";
+import { objectUtilities } from "../../../utilities/Object";
+import { itemUtilities } from "../../../utilities/Item";
 
 /**
  * Acquires, builds, and moves to the doodad
@@ -35,9 +35,9 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const doodadTypes = getDoodadTypes(this.doodadTypeOrGroup);
+		const doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
 
-		const doodad = findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type));
+		const doodad = objectUtilities.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type));
 
 		let requiresFire = false;
 
@@ -59,7 +59,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 		const objectives: IObjective[] = [];
 
 		if (!doodad) {
-			const inventoryItem = getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
+			const inventoryItem = itemUtilities.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 			if (inventoryItem === undefined) {
 				objectives.push(new AcquireItemForDoodad(this.doodadTypeOrGroup));
 			}

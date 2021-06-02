@@ -5,16 +5,16 @@ import Item from "game/item/Item";
 import { ITileContainer, TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { gardenMaxTilesChecked } from "../../ITars";
-import Objective from "../../Objective";
-import { getBasePosition, isOpenArea } from "../../utilities/Base";
-import AcquireItem from "../acquire/item/AcquireItem";
-import CopyContextData from "../contextData/CopyContextData";
-import SetContextData from "../contextData/SetContextData";
-import MoveToTarget from "../core/MoveToTarget";
+import Context from "../../../Context";
+import { ContextDataType } from "../../../IContext";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
+import { gardenMaxTilesChecked } from "../../../ITars";
+import Objective from "../../../Objective";
+import { baseUtilities } from "../../../utilities/Base";
+import AcquireItem from "../../acquire/item/AcquireItem";
+import CopyContextData from "../../contextData/CopyContextData";
+import SetContextData from "../../contextData/SetContextData";
+import MoveToTarget from "../../core/MoveToTarget";
 
 import UseItem from "./UseItem";
 
@@ -59,7 +59,7 @@ export default class PlantSeed extends Objective {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hoe));
 		}
 
-		const emptyTilledTile = TileHelpers.findMatchingTile(getBasePosition(context), (point, tile) => {
+		const emptyTilledTile = TileHelpers.findMatchingTile(baseUtilities.getBasePosition(context), (point, tile) => {
 			const tileContainer = tile as ITileContainer;
 			return game.isTileEmpty(tile) &&
 				TileHelpers.isOpenTile(point, tile) &&
@@ -71,8 +71,8 @@ export default class PlantSeed extends Objective {
 			objectives.push(new MoveToTarget(emptyTilledTile, true));
 
 		} else {
-			const nearbyTillableTile = TileHelpers.findMatchingTile(getBasePosition(context), (point, tile) =>
-				this.plantTiles.includes(TileHelpers.getType(tile)) && isOpenArea(context, point, tile), { maxTilesChecked: gardenMaxTilesChecked });
+			const nearbyTillableTile = TileHelpers.findMatchingTile(baseUtilities.getBasePosition(context), (point, tile) =>
+				this.plantTiles.includes(TileHelpers.getType(tile)) && baseUtilities.isOpenArea(context, point, tile), { maxTilesChecked: gardenMaxTilesChecked });
 			if (nearbyTillableTile !== undefined) {
 				objectives.push(new MoveToTarget(nearbyTillableTile, true));
 				objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));

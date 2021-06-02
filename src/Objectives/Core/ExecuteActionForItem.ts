@@ -11,9 +11,9 @@ import TileHelpers from "utilities/game/TileHelpers";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { executeAction } from "../../utilities/Action";
-import { getBestToolForTerrainGather, getBestTool, getBestToolForDoodadGather } from "../../utilities/Item";
-import { canCarveCorpse, canDig, canGather } from "../../utilities/Tile";
+import { actionUtilities } from "../../utilities/Action";
+import { itemUtilities } from "../../utilities/Item";
+import { tileUtilities } from "../../utilities/Tile";
 
 export enum ExecuteActionType {
 	Generic,
@@ -89,7 +89,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					return ObjectiveResult.Complete;
 				}
 
-				if (!canGather(tile, true)) {
+				if (!tileUtilities.canGather(tile, true)) {
 					return ObjectiveResult.Complete;
 				}
 
@@ -101,25 +101,25 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					actionType = ActionType.Gather;
 				}
 
-				actionArguments.push(getBestToolForDoodadGather(context, doodad));
+				actionArguments.push(itemUtilities.getBestToolForDoodadGather(context, doodad));
 
 				break;
 
 			case ExecuteActionType.Terrain:
 				actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
 
-				if (actionType === ActionType.Dig && !canDig(tile)) {
+				if (actionType === ActionType.Dig && !tileUtilities.canDig(tile)) {
 					return ObjectiveResult.Complete;
 				}
 
-				actionArguments.push(getBestToolForTerrainGather(context, tileType));
+				actionArguments.push(itemUtilities.getBestToolForTerrainGather(context, tileType));
 
 				break;
 
 			case ExecuteActionType.Corpse:
-				const carveTool = getBestTool(context, ActionType.Carve);
+				const carveTool = itemUtilities.getBestTool(context, ActionType.Carve);
 
-				if (carveTool === undefined || !canCarveCorpse(tile)) {
+				if (carveTool === undefined || !tileUtilities.canCarveCorpse(tile)) {
 					return ObjectiveResult.Complete;
 				}
 
@@ -200,7 +200,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) {
 		const itemsBefore = context.player.inventory.containedItems.slice();
 
-		await executeAction(context, actionType, executor as any);
+		await actionUtilities.executeAction(context, actionType, executor as any);
 
 		const newItems = context.player.inventory.containedItems.filter(item => itemsBefore.indexOf(item) === -1);
 

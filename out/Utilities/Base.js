@@ -1,140 +1,151 @@
 define(["require", "exports", "game/tile/ITerrain", "game/tile/Terrains", "game/WorldZ", "utilities/game/TileHelpers", "utilities/math/Vector2", "../ITars", "./Tile"], function (require, exports, ITerrain_1, Terrains_1, WorldZ_1, TileHelpers_1, Vector2_1, ITars_1, Tile_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getTilesWithItemsNearBase = exports.isNearBase = exports.hasBase = exports.getBasePosition = exports.getBaseDoodads = exports.isOpenArea = exports.isGoodWellBuildTile = exports.isGoodBuildTile = void 0;
+    exports.baseUtilities = void 0;
     const nearBaseDistance = 14;
     const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
-    function isGoodBuildTile(context, point, tile, openAreaRadius) {
-        if (!isOpenArea(context, point, tile, openAreaRadius)) {
-            return false;
+    class BaseUtilities {
+        reset() {
+            this.tilesNearBaseCache = undefined;
         }
-        if (!hasBase(context)) {
-            const tileType = TileHelpers_1.default.getType(tile);
-            if (tileType === ITerrain_1.TerrainType.BeachSand || tileType === ITerrain_1.TerrainType.Gravel) {
+        isGoodBuildTile(context, point, tile, openAreaRadius) {
+            if (!this.isOpenArea(context, point, tile, openAreaRadius)) {
                 return false;
             }
-            return true;
-        }
-        return isNearBase(context, point);
-    }
-    exports.isGoodBuildTile = isGoodBuildTile;
-    function isGoodWellBuildTile(context, point, tile, onlyUnlimited) {
-        if (!isGoodBuildTile(context, point, tile)) {
-            return false;
-        }
-        const x = point.x;
-        const y = point.y;
-        const caveTerrain = Terrains_1.default[TileHelpers_1.default.getType(game.getTile(x, y, WorldZ_1.WorldZ.Cave))];
-        if (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater)) {
-            return true;
-        }
-        if (onlyUnlimited) {
-            return false;
-        }
-        if (caveTerrain && !caveTerrain.passable) {
-            return true;
-        }
-        for (let x2 = x - 6; x2 <= x + 6; x2++) {
-            for (let y2 = y - 6; y2 <= y + 6; y2++) {
-                const validPoint = game.ensureValidPoint({ x: x2, y: y2, z: point.z });
-                if (validPoint) {
-                    const tileDescription = Terrains_1.default[TileHelpers_1.default.getType(game.getTileFromPoint(validPoint))];
-                    if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
-                        return true;
-                    }
+            if (!this.hasBase(context)) {
+                const tileType = TileHelpers_1.default.getType(tile);
+                if (tileType === ITerrain_1.TerrainType.BeachSand || tileType === ITerrain_1.TerrainType.Gravel) {
+                    return false;
                 }
-            }
-        }
-        return false;
-    }
-    exports.isGoodWellBuildTile = isGoodWellBuildTile;
-    function isOpenArea(context, point, tile, radius = 1) {
-        if (!Tile_1.isOpenTile(context, point, tile, false) || Tile_1.hasCorpses(tile)) {
-            return false;
-        }
-        if (radius > 0) {
-            for (let x = -radius; x <= radius; x++) {
-                for (let y = -radius; y <= radius; y++) {
-                    const nearbyPoint = {
-                        x: point.x + x,
-                        y: point.y + y,
-                        z: point.z,
-                    };
-                    if (!game.ensureValidPoint(nearbyPoint)) {
-                        continue;
-                    }
-                    const nearbyTile = game.getTileFromPoint(nearbyPoint);
-                    if (nearbyTile.doodad) {
-                        return false;
-                    }
-                    const container = tile;
-                    if (container.containedItems && container.containedItems.length > 0) {
-                        return false;
-                    }
-                    if (!Tile_1.isOpenTile(context, nearbyPoint, nearbyTile) || game.isTileFull(nearbyTile)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-    exports.isOpenArea = isOpenArea;
-    function getBaseDoodads(context) {
-        let doodads = [];
-        const keys = Object.keys(ITars_1.baseInfo);
-        for (const key of keys) {
-            const baseDoodadOrDoodads = context.base[key];
-            if (Array.isArray(baseDoodadOrDoodads)) {
-                doodads = doodads.concat(baseDoodadOrDoodads);
-            }
-            else {
-                doodads.push(baseDoodadOrDoodads);
-            }
-        }
-        return doodads;
-    }
-    exports.getBaseDoodads = getBaseDoodads;
-    function getBasePosition(context) {
-        return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.player.getPoint();
-    }
-    exports.getBasePosition = getBasePosition;
-    function hasBase(context) {
-        return context.base.campfire.length > 0 || context.base.waterStill.length > 0;
-    }
-    exports.hasBase = hasBase;
-    function isNearBase(context, point = context.player) {
-        if (!hasBase(context)) {
-            return false;
-        }
-        const baseDoodads = getBaseDoodads(context);
-        for (const doodad of baseDoodads) {
-            if (Vector2_1.default.squaredDistance(doodad, point) <= nearBaseDistanceSq) {
                 return true;
             }
+            return this.isNearBase(context, point);
         }
-        return false;
-    }
-    exports.isNearBase = isNearBase;
-    function getTilesWithItemsNearBase(context) {
-        const result = {
-            tiles: [],
-            totalCount: 0,
-        };
-        const basePosition = getBasePosition(context);
-        const baseTilesWithItems = TileHelpers_1.default.findMatchingTiles(basePosition, (_, tile) => tile.containedItems ? tile.containedItems.length > 0 : false, {
-            canVisitTile: (point, tile) => isNearBase(context, point),
-        });
-        for (const { point, tile } of baseTilesWithItems) {
-            const containedItems = tile.containedItems;
-            if (!containedItems || containedItems.length === 0) {
-                continue;
+        isGoodWellBuildTile(context, point, tile, onlyUnlimited) {
+            if (!this.isGoodBuildTile(context, point, tile)) {
+                return false;
             }
-            result.totalCount += containedItems.length;
-            result.tiles.push(point);
+            const x = point.x;
+            const y = point.y;
+            const caveTerrain = Terrains_1.default[TileHelpers_1.default.getType(game.getTile(x, y, WorldZ_1.WorldZ.Cave))];
+            if (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater)) {
+                return true;
+            }
+            if (onlyUnlimited) {
+                return false;
+            }
+            if (caveTerrain && !caveTerrain.passable) {
+                return true;
+            }
+            for (let x2 = x - 6; x2 <= x + 6; x2++) {
+                for (let y2 = y - 6; y2 <= y + 6; y2++) {
+                    const validPoint = game.ensureValidPoint({ x: x2, y: y2, z: point.z });
+                    if (validPoint) {
+                        const tileDescription = Terrains_1.default[TileHelpers_1.default.getType(game.getTileFromPoint(validPoint))];
+                        if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
-        return result;
+        isOpenArea(context, point, tile, radius = 1) {
+            if (!Tile_1.tileUtilities.isOpenTile(context, point, tile, false) || Tile_1.tileUtilities.hasCorpses(tile)) {
+                return false;
+            }
+            if (radius > 0) {
+                for (let x = -radius; x <= radius; x++) {
+                    for (let y = -radius; y <= radius; y++) {
+                        const nearbyPoint = {
+                            x: point.x + x,
+                            y: point.y + y,
+                            z: point.z,
+                        };
+                        if (!game.ensureValidPoint(nearbyPoint)) {
+                            continue;
+                        }
+                        const nearbyTile = game.getTileFromPoint(nearbyPoint);
+                        if (nearbyTile.doodad) {
+                            return false;
+                        }
+                        const container = tile;
+                        if (container.containedItems && container.containedItems.length > 0) {
+                            return false;
+                        }
+                        if (!Tile_1.tileUtilities.isOpenTile(context, nearbyPoint, nearbyTile) || game.isTileFull(nearbyTile)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        getBaseDoodads(context) {
+            let doodads = [];
+            const keys = Object.keys(ITars_1.baseInfo);
+            for (const key of keys) {
+                const baseDoodadOrDoodads = context.base[key];
+                if (Array.isArray(baseDoodadOrDoodads)) {
+                    doodads = doodads.concat(baseDoodadOrDoodads);
+                }
+                else {
+                    doodads.push(baseDoodadOrDoodads);
+                }
+            }
+            return doodads;
+        }
+        getBasePosition(context) {
+            return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.player.getPoint();
+        }
+        hasBase(context) {
+            return context.base.campfire.length > 0 || context.base.waterStill.length > 0;
+        }
+        isNearBase(context, point = context.player) {
+            if (!this.hasBase(context)) {
+                return false;
+            }
+            const baseDoodads = this.getBaseDoodads(context);
+            for (const doodad of baseDoodads) {
+                if (Vector2_1.default.squaredDistance(doodad, point) <= nearBaseDistanceSq) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        getTilesNearBase(context) {
+            var _a;
+            const basePosition = this.getBasePosition(context);
+            (_a = this.tilesNearBaseCache) !== null && _a !== void 0 ? _a : (this.tilesNearBaseCache = TileHelpers_1.default.findMatchingTiles(basePosition, () => true, {
+                canVisitTile: (point) => this.isNearBase(context, point),
+            }));
+            return this.tilesNearBaseCache;
+        }
+        getTilesWithItemsNearBase(context) {
+            const result = {
+                tiles: [],
+                totalCount: 0,
+            };
+            for (const { point, tile } of this.getTilesNearBase(context)) {
+                const containedItems = tile.containedItems;
+                if (!containedItems || containedItems.length === 0) {
+                    continue;
+                }
+                result.totalCount += containedItems.length;
+                result.tiles.push(point);
+            }
+            return result;
+        }
+        getSwampTilesNearBase(context) {
+            const result = [];
+            for (const { point, tile } of this.getTilesNearBase(context)) {
+                if (TileHelpers_1.default.getType(tile) === ITerrain_1.TerrainType.Swamp) {
+                    result.push(point);
+                }
+            }
+            return result;
+        }
     }
-    exports.getTilesWithItemsNearBase = getTilesWithItemsNearBase;
+    exports.baseUtilities = new BaseUtilities();
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQmFzZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy91dGlsaXRpZXMvQmFzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0lBY0EsTUFBTSxnQkFBZ0IsR0FBRyxFQUFFLENBQUM7SUFDNUIsTUFBTSxrQkFBa0IsR0FBRyxJQUFJLENBQUMsR0FBRyxDQUFDLGdCQUFnQixFQUFFLENBQUMsQ0FBQyxDQUFDO0lBRXpELFNBQWdCLGVBQWUsQ0FBQyxPQUFnQixFQUFFLEtBQWUsRUFBRSxJQUFXLEVBQUUsY0FBdUI7UUFDdEcsSUFBSSxDQUFDLFVBQVUsQ0FBQyxPQUFPLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxjQUFjLENBQUMsRUFBRTtZQUN0RCxPQUFPLEtBQUssQ0FBQztTQUNiO1FBRUQsSUFBSSxDQUFDLE9BQU8sQ0FBQyxPQUFPLENBQUMsRUFBRTtZQUV0QixNQUFNLFFBQVEsR0FBRyxxQkFBVyxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUMzQyxJQUFJLFFBQVEsS0FBSyxzQkFBVyxDQUFDLFNBQVMsSUFBSSxRQUFRLEtBQUssc0JBQVcsQ0FBQyxNQUFNLEVBQUU7Z0JBQzFFLE9BQU8sS0FBSyxDQUFDO2FBQ2I7WUFFRCxPQUFPLElBQUksQ0FBQztTQUNaO1FBRUQsT0FBTyxVQUFVLENBQUMsT0FBTyxFQUFFLEtBQUssQ0FBQyxDQUFDO0lBQ25DLENBQUM7SUFoQkQsMENBZ0JDO0lBRUQsU0FBZ0IsbUJBQW1CLENBQUMsT0FBZ0IsRUFBRSxLQUFlLEVBQUUsSUFBVyxFQUFFLGFBQXNCO1FBQ3pHLElBQUksQ0FBQyxlQUFlLENBQUMsT0FBTyxFQUFFLEtBQUssRUFBRSxJQUFJLENBQUMsRUFBRTtZQUMzQyxPQUFPLEtBQUssQ0FBQztTQUNiO1FBRUQsTUFBTSxDQUFDLEdBQUcsS0FBSyxDQUFDLENBQUMsQ0FBQztRQUNsQixNQUFNLENBQUMsR0FBRyxLQUFLLENBQUMsQ0FBQyxDQUFDO1FBRWxCLE1B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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQmFzZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy91dGlsaXRpZXMvQmFzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0lBYUEsTUFBTSxnQkFBZ0IsR0FBRyxFQUFFLENBQUM7SUFDNUIsTUFBTSxrQkFBa0IsR0FBRyxJQUFJLENBQUMsR0FBRyxDQUFDLGdCQUFnQixFQUFFLENBQUMsQ0FBQyxDQUFDO0lBRXpELE1BQU0sYUFBYTtRQUlYLEtBQUs7WUFDWCxJQUFJLENBQUMsa0JBQWtCLEdBQUcsU0FBUyxDQUFDO1FBQ3JDLENBQUM7UUFFTSxlQUFlLENBQUMsT0FBZ0IsRUFBRSxLQUFlLEVBQUUsSUFBVyxFQUFFLGNBQXVCO1lBQzdGLElBQUksQ0FBQyxJQUFJLENBQUMsVUFBVSxDQUFDLE9BQU8sRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLGNBQWMsQ0FBQyxFQUFFO2dCQUMzRCxPQUFPLEtBQUssQ0FBQzthQUNiO1lBRUQsSUFBSSxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsT0FBTyxDQUFDLEVBQUU7Z0JBRTNCLE1BQU0sUUFBUSxHQUFHLHFCQUFXLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUMzQyxJQUFJLFFBQVEsS0FBSyxzQkFBVyxDQUFDLFNBQVMsSUFBSSxRQUFRLEtBQUssc0JBQVcsQ0FBQyxNQUFNLEVBQUU7b0JBQzFFLE9BQU8sS0FBSyxDQUFDO2lCQUNiO2dCQUVELE9BQU8sSUFBSSxDQUFDO2FBQ1o7WUFFRCxPQUFPLElBQUksQ0FBQyxVQUFVLENBQUMsT0FBTyxFQUFFLEtBQUssQ0FBQyxDQUFDO1FBQ3hDLENBQUM7UUFFTSxtQkFBbUIsQ0FBQyxPQUFnQixFQUFFLEtBQWUsRUFBRSxJQUFXLEVBQUUsYUFBc0I7WUFDaEcsSUFBSSxDQUFDLElBQUksQ0FBQyxlQUFlLENBQUMsT0FBTyxFQUFFLEtBQUssRUFBRSxJQUFJLENBQUMsRUFBRTtnQkFDaEQsT0FBTyxLQUFLLENBQUM7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

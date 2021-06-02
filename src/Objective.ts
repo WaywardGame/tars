@@ -5,7 +5,7 @@ import Context from "./Context";
 import Planner from "./core/Planner";
 import { ContextDataType } from "./IContext";
 import { IObjective, ObjectiveExecutionResult } from "./IObjective";
-import { createLog } from "./utilities/Logger";
+import { loggerUtilities } from "./utilities/Logger";
 
 export default abstract class Objective implements IObjective {
 
@@ -33,7 +33,7 @@ export default abstract class Objective implements IObjective {
 	public get log(): ILog {
 		if (!Planner.isCreatingPlan) {
 			if (this._log === undefined) {
-				this._log = createLog(this.getName());
+				this._log = loggerUtilities.createLog(this.getName());
 			}
 
 			return this._log;
@@ -48,6 +48,10 @@ export default abstract class Objective implements IObjective {
 
 	public getHashCode(context?: Context): string {
 		let hashCode = this.getIdentifier(context);
+
+		if (hashCode.includes("[object")) {
+			console.warn("Invalid objective identifier", hashCode);
+		}
 
 		if (this.isDynamic()) {
 			if (this._uniqueIdentifier === undefined) {

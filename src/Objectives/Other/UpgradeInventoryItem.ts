@@ -8,6 +8,7 @@ import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IOb
 import { IInventoryItems, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 
 export default class UpgradeInventoryItem extends Objective {
 
@@ -60,10 +61,21 @@ export default class UpgradeInventoryItem extends Objective {
 		}
 
 		if (itemInfo.equipType) {
-			for (const it of Enums.values(ItemType)) {
-				const description = itemDescriptions[it];
+			for (const itemType of Enums.values(ItemType)) {
+				const description = itemDescriptions[itemType];
 				if (description && description.equip === itemInfo.equipType) {
-					this.addUpgradeObjectives(objectivePipelines, it, worth, description);
+					this.addUpgradeObjectives(objectivePipelines, itemType, worth, description);
+				}
+			}
+		}
+
+		if (itemInfo.actionTypes) {
+			for (const actionType of itemInfo.actionTypes) {
+				for (const itemType of AcquireItemForAction.getItems(actionType)) {
+					const description = itemDescriptions[itemType];
+					if (description) {
+						this.addUpgradeObjectives(objectivePipelines, itemType, worth, description);
+					}
 				}
 			}
 		}

@@ -7,9 +7,9 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { hasInventoryItemForAction } from "../../utilities/Item";
-import { findCarvableCorpses } from "../../utilities/Object";
-import { canCarveCorpse } from "../../utilities/Tile";
+import { itemUtilities } from "../../utilities/Item";
+import { objectUtilities } from "../../utilities/Object";
+import { tileUtilities } from "../../utilities/Tile";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
@@ -25,9 +25,9 @@ export default class GatherFromCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasCarveItem = hasInventoryItemForAction(context, ActionType.Carve);
+		const hasCarveItem = itemUtilities.hasInventoryItemForAction(context, ActionType.Carve);
 
-		return findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
+		return objectUtilities.findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
 			const itemTypes = this.search.map.get(corpse.type);
 			if (itemTypes) {
 				const resources = corpse.getResources(true);
@@ -41,7 +41,7 @@ export default class GatherFromCorpse extends Objective {
 
 				for (const itemType of itemTypes) {
 					if (possibleItems.includes(itemType)) {
-						return canCarveCorpse(game.getTileFromPoint(corpse), true);
+						return tileUtilities.canCarveCorpse(game.getTileFromPoint(corpse), true);
 					}
 				}
 			}
