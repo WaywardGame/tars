@@ -6,6 +6,7 @@ import Enums from "utilities/enum/Enums";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import { sleep } from "utilities/promise/Async";
+import { TileUpdateType } from "game/IGame";
 
 import { ITileLocation } from "../ITars";
 import { log } from "../utilities/Logger";
@@ -252,7 +253,7 @@ export default class Navigation {
 		// }
 	}
 
-	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array): void {
+	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array, tileUpdateType?: TileUpdateType): void {
 		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return;
@@ -264,7 +265,7 @@ export default class Navigation {
 		}
 
 		const isDisabled = this.isDisabled(tile, x, y, z, tileType);
-		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription);
+		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription, tileUpdateType);
 
 		this.addOrUpdateOverlay(tile, x, y, z, isDisabled, penalty);
 
@@ -547,7 +548,7 @@ export default class Navigation {
 		return false;
 	}
 
-	private getPenalty(tile: ITile, tileX: number, tileY: number, tileZ: number, tileType: TerrainType, terrainDescription: ITerrainDescription): number {
+	private getPenalty(tile: ITile, tileX: number, tileY: number, tileZ: number, tileType: TerrainType, terrainDescription: ITerrainDescription, tileUpdateType?: TileUpdateType): number {
 		let penalty = 0;
 
 		if (tileType === TerrainType.Lava || tileEventManager.get(tile, TileEventType.Fire)) {
@@ -558,6 +559,7 @@ export default class Navigation {
 			penalty += 255;
 		}
 
+		// if (tileUpdateType === undefined || tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
 		// penalty for creatures on or next to the tile
 		for (let x = -1; x <= 1; x++) {
 			for (let y = -1; y <= 1; y++) {
@@ -570,6 +572,7 @@ export default class Navigation {
 				}
 			}
 		}
+		// }
 
 		if (tile.doodad !== undefined) {
 			const description = tile.doodad.description();

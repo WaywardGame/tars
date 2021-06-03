@@ -2,12 +2,15 @@ import { IStatMax, Stat } from "game/entity/IStats";
 
 import Context from "../Context";
 
-// can be negative. ex: -8 means [max - 8[]
-const recoverThresholds: { [index: number]: number } = {
+/**
+ * can be negative, so -8 would mean (max - 8)
+ * can be an array, which means the smaller number wins
+ */
+const recoverThresholds: { [index: number]: number | number[] } = {
 	[Stat.Health]: 30,
 	[Stat.Stamina]: 20,
 	[Stat.Hunger]: 8,
-	[Stat.Thirst]: 10,
+	[Stat.Thirst]: [10, -10], // either 10 or (max - 10), whichever is smaller
 };
 
 class PlayerUtilities {
@@ -22,10 +25,20 @@ class PlayerUtilities {
 	}
 
 	public getRecoverThreshold(context: Context, stat: Stat) {
-		const recoverThreshold = recoverThresholds[stat];
-		return recoverThreshold > 0 ? recoverThreshold : context.player.stat.get<IStatMax>(stat).max + recoverThreshold;
+		let recoverThreshold = recoverThresholds[stat];
+
+		if (Array.isArray(recoverThreshold)) {
+			recoverThreshold = Math.min(...recoverThreshold.map((threshold) => this.parseThreshold(context, stat, threshold)));
+		} else {
+			recoverThreshold = this.parseThreshold(context, stat, recoverThreshold);
+		}
+
+		return recoverThreshold;
 	}
 
+	private parseThreshold(context: Context, stat: Stat, threshold: number) {
+		return threshold > 0 ? threshold : context.player.stat.get<IStatMax>(stat).max + threshold;
+	}
 }
 
 export const playerUtilities = new PlayerUtilities();

@@ -1,6 +1,8 @@
 import { ActionType } from "game/entity/action/IAction";
 import { IStatMax, Stat } from "game/entity/IStats";
-import { ItemTypeGroup } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import Enums from "utilities/enum/Enums";
+import itemDescriptions from "game/item/Items";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -23,15 +25,16 @@ import { baseUtilities } from "../../utilities/Base";
 import { doodadUtilities } from "../../utilities/Doodad";
 import { playerUtilities } from "../../utilities/Player";
 import { itemUtilities } from "../../utilities/Item";
+import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
 
 export default class RecoverThirst extends Objective {
 
-	constructor(private readonly exceededThreshold: boolean) {
+	constructor(private readonly onlyUseAvailableItems: boolean, private exceededThreshold: boolean) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return "RecoverThirst";
+		return `RecoverThirst:${this.onlyUseAvailableItems}`;
 	}
 
 	public getStatus(): string {
@@ -41,30 +44,53 @@ export default class RecoverThirst extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const thirstStat = context.player.stat.get<IStatMax>(Stat.Thirst);
 
-		if (!this.exceededThreshold) {
-			// todo: maybe remove this near base check?
-			if (baseUtilities.isNearBase(context)) {
-				for (const waterStill of context.base.waterStill) {
-					// if we're near our base, the water still is ready, and we're thirsty, go drink
-					if (doodadUtilities.isWaterStillDrinkable(waterStill) && (thirstStat.max - thirstStat.value) >= 10) {
-						this.log.info("Near base, going to drink from water still");
+		const objectivePipelines: IObjective[][] = [];
 
-						return [
-							new MoveToTarget(waterStill, true),
-							new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-								action.execute(context.player);
-							}),
-						];
+		if (!this.exceededThreshold) {
+			if (!this.onlyUseAvailableItems) {
+				// todo: maybe remove this near base check?
+				if (baseUtilities.isNearBase(context)) {
+					for (const waterStill of context.base.waterStill) {
+						// if we're near our base, the water still is ready, and we're thirsty, go drink
+						if (doodadUtilities.isWaterStillDrinkable(waterStill) && (thirstStat.max - thirstStat.value) >= 10) {
+							this.log.info("Near base, going to drink from water still");
+
+							objectivePipelines.push([
+								new MoveToTarget(waterStill, true),
+								new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
+									action.execute(context.player);
+								}),
+							]);
+						}
+					}
+
+					if (context.inventory.waterContainer !== undefined) {
+						for (const waterContainer of context.inventory.waterContainer) {
+							if (itemUtilities.isDrinkableItem(waterContainer) && !itemUtilities.isSafeToDrinkItem(waterContainer)) {
+								const baseItemType = waterContainer.description()?.returnOnUseAndDecay?.type;
+								if (baseItemType !== undefined) {
+									const baseItemTypeDescription = itemDescriptions[baseItemType];
+									if (baseItemTypeDescription?.gather?.unpurified === waterContainer.type) {
+										// we have an unpurified container
+										for (const itemType of Enums.values(ItemType)) {
+											const description = itemDescriptions[itemType];
+											if (description && description?.returnOnUseAndDecay?.type === baseItemType && description.recipe?.baseComponent === waterContainer.type) {
+												objectivePipelines.push([new AcquireItemWithRecipe(itemType, description.recipe, true)]);
+												break;
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
 
-			return ObjectiveResult.Ignore;
+			return objectivePipelines.length > 0 ? objectivePipelines : ObjectiveResult.Ignore;
 		}
 
 		const isEmergency = thirstStat.value <= 3 && context.base.waterStill.every(waterStill => !doodadUtilities.isWaterStillDrinkable(waterStill));
-
-		const objectivePipelines: IObjective[][] = [];
 
 		if (context.inventory.waterContainer !== undefined) {
 			for (const waterContainer of context.inventory.waterContainer) {
@@ -80,6 +106,10 @@ export default class RecoverThirst extends Objective {
 					}
 				}
 			}
+		}
+
+		if (this.onlyUseAvailableItems) {
+			return objectivePipelines.length > 0 ? objectivePipelines : ObjectiveResult.Ignore;
 		}
 
 		const health = context.player.stat.get<IStatMax>(Stat.Health);

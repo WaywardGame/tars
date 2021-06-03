@@ -12,6 +12,7 @@ import AcquireItemForDoodad from "../Item/AcquireItemForDoodad";
 import { doodadUtilities } from "../../../utilities/Doodad";
 import { objectUtilities } from "../../../utilities/Object";
 import { itemUtilities } from "../../../utilities/Item";
+import { baseUtilities } from "../../../utilities/Base";
 
 /**
  * Acquires, builds, and moves to the doodad
@@ -37,7 +38,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
 
-		const doodad = objectUtilities.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type));
+		const doodad = objectUtilities.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && baseUtilities.isBaseDoodad(context, d));
 
 		let requiresFire = false;
 

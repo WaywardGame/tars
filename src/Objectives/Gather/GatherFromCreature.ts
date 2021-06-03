@@ -64,6 +64,8 @@ export default class GatherFromCreature extends Objective {
 							.setStatus(() => `Carving ${Translation.nameOf(Dictionary.Creature, creature.type).getString()} corpse`);
 					}
 
+					this.log.warn("Still attacking creature?");
+
 					return ObjectiveResult.Complete;
 				}));
 

@@ -24,7 +24,7 @@ import AcquireItemByGroup from "./AcquireItemByGroup";
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
-	constructor(private readonly itemType: ItemType, private readonly recipe: IRecipe) {
+	constructor(private readonly itemType: ItemType, private readonly recipe: IRecipe, private readonly allowInventoryItems?: boolean) {
 		super();
 	}
 
@@ -46,8 +46,8 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.itemType);
 
-		const checker = itemUtilities.processRecipe(context, this.recipe, false);
-		const checkerWithIntermediateChest = itemUtilities.processRecipe(context, this.recipe, true);
+		const checker = itemUtilities.processRecipe(context, this.recipe, false, this.allowInventoryItems);
+		const checkerWithIntermediateChest = itemUtilities.processRecipe(context, this.recipe, true, this.allowInventoryItems);
 
 		const availableInventoryWeight = itemUtilities.getAvailableInventoryWeight(context);
 		const estimatedItemWeight = itemManager.getWeight(this.itemType, WeightType.Static);

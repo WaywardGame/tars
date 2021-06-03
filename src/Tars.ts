@@ -5,7 +5,7 @@ import { ActionType, IActionApi, IActionDescription } from "game/entity/action/I
 import Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
-import { IStat, IStatMax, Stat } from "game/entity/IStats";
+import { IStat, Stat } from "game/entity/IStats";
 import { MessageType, Source } from "game/entity/player/IMessageManager";
 import { PlayerState, WeightStatus } from "game/entity/player/IPlayer";
 import { INote } from "game/entity/player/note/NoteManager";
@@ -61,10 +61,6 @@ import BuildItem from "./objectives/other/item/BuildItem";
 import Equip from "./objectives/other/item/EquipItem";
 import ReturnToBase from "./objectives/other/ReturnToBase";
 import Unequip from "./objectives/other/item/UnequipItem";
-import RecoverHealth from "./objectives/recover/RecoverHealth";
-import RecoverHunger from "./objectives/recover/RecoverHunger";
-import RecoverStamina from "./objectives/recover/RecoverStamina";
-import RecoverThirst from "./objectives/recover/RecoverThirst";
 import MoveToZ from "./objectives/utility/MoveToZ";
 import OrganizeInventory from "./objectives/utility/OrganizeInventory";
 import TarsDialog from "./ui/TarsDialog";
@@ -78,11 +74,9 @@ import { playerUtilities } from "./utilities/Player";
 import { itemUtilities } from "./utilities/Item";
 import { creatureUtilities } from "./utilities/Creature";
 import RunAwayFromTarget from "./objectives/other/RunAwayFromTarget";
+import Recover from "./objectives/recover/Recover";
 
 const tickSpeed = 333;
-
-// focus on healing if our health is below 85% while poisoned
-const poisonHealthPercentThreshold = 0.85;
 
 enum NavigationSystemState {
 	NotInitialized,
@@ -322,13 +316,13 @@ export default class Tars extends Mod {
 			for (let x = -1; x <= 1; x++) {
 				for (let y = -1; y <= 1; y++) {
 					if (x === 0 && y === 0) {
-						this.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ);
+						this.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ, undefined, tileUpdateType);
 
 					} else {
 						const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
 						if (point) {
 							const otherTile = game.getTileFromPoint(point);
-							this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ);
+							this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ, undefined, tileUpdateType);
 						}
 					}
 				}
@@ -528,7 +522,7 @@ export default class Tars extends Mod {
 		}
 
 		if (!this.isRunning()) {
-			return "Waiting to be enabled";
+			return "Not running";
 		}
 
 		const plan = executor.getPlan();
@@ -699,6 +693,8 @@ export default class Tars extends Mod {
 		if (!gameIsEnding && this.saveData.options.mode === TarsMode.Manual) {
 			this.updateOptions({ mode: TarsMode.Survival });
 		}
+
+		this.updateStatus();
 	}
 
 	private interrupt(...interruptObjectives: IObjective[]) {
@@ -995,13 +991,11 @@ export default class Tars extends Mod {
 			this.optionsInterrupt(),
 			this.equipmentInterrupt(context),
 			this.nearbyCreatureInterrupt(context),
-			stayHealthy ? this.staminaInterrupt(context) : undefined,
+			stayHealthy ? new Recover(true) : undefined,
 			this.buildItemObjectives(),
-			stayHealthy ? this.healthInterrupt(context) : undefined,
 			this.reduceWeightInterrupt(context),
-			stayHealthy ? this.thirstInterrupt(context) : undefined,
+			stayHealthy ? new Recover(false) : undefined,
 			this.gatherFromCorpsesInterrupt(context),
-			stayHealthy ? this.hungerInterrupt(context) : undefined,
 			this.repairsInterrupt(context),
 			this.escapeCavesInterrupt(context),
 			this.returnToBaseInterrupt(context),
@@ -1211,34 +1205,6 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private healthInterrupt(context: Context): IObjective | undefined {
-		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		if (health.value > playerUtilities.getRecoverThreshold(context, Stat.Health) && !context.player.status.Bleeding &&
-			(!context.player.status.Poisoned || (context.player.status.Poisoned && (health.value / health.max) >= poisonHealthPercentThreshold))) {
-			return undefined;
-		}
-
-		log.info("Heal");
-		return new RecoverHealth();
-	}
-
-	private staminaInterrupt(context: Context): IObjective | undefined {
-		if (context.player.stat.get<IStat>(Stat.Stamina).value > playerUtilities.getRecoverThreshold(context, Stat.Stamina)) {
-			return undefined;
-		}
-
-		log.info("Stamina");
-		return new RecoverStamina();
-	}
-
-	private hungerInterrupt(context: Context): IObjective | undefined {
-		return new RecoverHunger(context.player.stat.get<IStat>(Stat.Hunger).value <= playerUtilities.getRecoverThreshold(context, Stat.Hunger));
-	}
-
-	private thirstInterrupt(context: Context): IObjective | undefined {
-		return new RecoverThirst(context.player.stat.get<IStat>(Stat.Thirst).value <= playerUtilities.getRecoverThreshold(context, Stat.Thirst));
-	}
-
 	private repairsInterrupt(context: Context): IObjective | undefined {
 		if (this.inventory.hammer === undefined) {
 			return undefined;
@@ -1299,10 +1265,7 @@ export default class Tars extends Mod {
 	}
 
 	private nearbyCreatureInterrupt(context: Context): IObjective | undefined {
-		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
-
-		const shouldRunAwayFromAllCreatures = context.player.getWeightStatus() !== WeightStatus.Overburdened && ((health.value / health.max) <= 0.15 || stamina.value <= 2);
+		const shouldRunAwayFromAllCreatures = creatureUtilities.shouldRunAwayFromAllCreatures(context);
 
 		for (const facingDirecton of Direction.CARDINALS_AND_NONE) {
 			const creature = this.checkNearbyCreature(context, facingDirecton);
@@ -1312,11 +1275,15 @@ export default class Tars extends Mod {
 			}
 		}
 
-		const nearbyCreatures = objectUtilities.getNearbyCreatures(context.player);
+		const nearbyCreatures = creatureUtilities.getNearbyCreatures(context.player);
 		for (const creature of nearbyCreatures) {
 			if (shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature)) {
-				log.info(`Run away from ${creature.getName().getString()}`);
-				return new RunAwayFromTarget(creature);
+				// only run away if the creature can path to us
+				const path = creature.findPath(context.player, 16);
+				if (path) {
+					log.info(`Run away from ${creature.getName().getString()}`);
+					return new RunAwayFromTarget(creature);
+				}
 			}
 		}
 	}

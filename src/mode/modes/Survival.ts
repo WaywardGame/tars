@@ -47,6 +47,7 @@ import { baseUtilities } from "../../utilities/Base";
 import { playerUtilities } from "../../utilities/Player";
 import { itemUtilities } from "../../utilities/Item";
 import AcquireUseOrbOfInfluence from "../../objectives/acquire/item/specific/AcquireUseOrbOfInfluence";
+import CheckDecayingItems from "../../objectives/other/item/CheckDecayingItems";
 
 /**
  * Survival mode
@@ -199,6 +200,8 @@ export class SurvivalMode implements ITarsMode {
 			if (seeds.length > 0) {
 				objectives.push(new PlantSeed(seeds[0]));
 			}
+
+			objectives.push(new CheckDecayingItems());
 		}
 
 		if (context.base.kiln.length === 0 && context.inventory.kiln === undefined) {
@@ -471,12 +474,12 @@ export class SurvivalMode implements ITarsMode {
 		} else {
 			const health = context.player.stat.get<IStatMax>(Stat.Health);
 			if (health.value / health.max < 0.9) {
-				objectives.push(new RecoverHealth());
+				objectives.push(new RecoverHealth(false));
 			}
 
 			const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
 			if (hunger.value / hunger.max < 0.7) {
-				objectives.push(new RecoverHunger(true));
+				objectives.push(new RecoverHunger(false, true));
 			}
 
 			objectives.push(new ReturnToBase());

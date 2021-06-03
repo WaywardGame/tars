@@ -111,7 +111,7 @@ export default class RunAwayFromTarget extends Objective {
 
 								// don't run into the water
 								if (terrainDescription.water) {
-									pointScore! += 400;
+									pointScore! += 1000;
 								}
 							}
 
@@ -138,7 +138,7 @@ export default class RunAwayFromTarget extends Objective {
 		const objectives: IObjective[] = [];
 
 		const bestPoint = pointsWithSafety.length > 0 ? pointsWithSafety[0] : undefined;
-		console.log("move to", bestPoint);
+		// console.log("move to", bestPoint);
 		if (bestPoint) {
 			if (context.calculatingDifficulty) {
 				// we have a valid run away position - return 0 difficulty so we'll definitely run this action
@@ -149,7 +149,7 @@ export default class RunAwayFromTarget extends Objective {
 
 			// this.log.info(`Running away ${Direction[direction]}`);
 
-			console.log("move to", bestPoint[0]);
+			// console.log("move to", bestPoint[0]);
 
 			objectives.push(new MoveToTarget(bestPoint[0], false, { disableStaminaCheck: true }).setStatus(this));
 

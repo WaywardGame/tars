@@ -89,7 +89,7 @@ export default class CompleteRequirements extends Objective {
 			}
 
 		} else if (requiresDoodads) {
-			this.log.info("Requires doodad");
+			this.log.info("Requires doodad", this.requirementInfo.doodadsRequired[0]);
 			objectives.push(new AcquireBuildMoveToDoodad(this.requirementInfo.doodadsRequired[0]));
 
 		} else if (requiresFire) {

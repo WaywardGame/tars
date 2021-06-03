@@ -8,8 +8,6 @@ import Item from "game/item/Item";
 import Context from "../Context";
 import { tileUtilities } from "./Tile";
 
-const creatureRadius = 5;
-
 export enum FindObjectType {
 	Creature,
 	Doodad,
@@ -103,30 +101,6 @@ class ObjectUtilities {
 
 			return false;
 		});
-	}
-
-	public getNearbyCreatures(point: IVector3): Creature[] {
-		const creatures: Creature[] = [];
-
-		for (let x = creatureRadius * -1; x <= creatureRadius; x++) {
-			for (let y = creatureRadius * -1; y <= creatureRadius; y++) {
-				const validPoint = game.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
-				if (validPoint) {
-					const tile = game.getTileFromPoint(validPoint);
-					if (tile.creature && !tile.creature.isTamed()) {
-						// that's a lie
-						// if (tile.creature.getMoveType() === MoveType.None && (Math.abs(point.x - x) > 1 || Math.abs(point.y - y) > 1)) {
-						// 	// a non moving creature that is at least 1 tile away from us is not scary
-						// 	continue;
-						// }
-
-						creatures.push(tile.creature);
-					}
-				}
-			}
-		}
-
-		return creatures;
 	}
 
 }

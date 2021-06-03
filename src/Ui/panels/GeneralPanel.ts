@@ -1,25 +1,24 @@
 import Translation from "language/Translation";
 import { CheckButton } from "ui/component/CheckButton";
 import ChoiceList, { Choice } from "ui/component/ChoiceList";
-import { LabelledRow } from "ui/component/LabelledRow";
 import Divider from "ui/component/Divider";
 import Enums from "utilities/enum/Enums";
-
 import { TarsMode, TarsTranslation } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
 
+
 export default class GeneralPanel extends TarsPanel {
 
-    private readonly labelStatus: LabelledRow;
+    // private readonly labelStatus: LabelledRow;
     private readonly buttonEnable: CheckButton;
     private readonly choiceListMode: ChoiceList<Choice<TarsMode>, true>;
 
     constructor() {
         super();
 
-        this.labelStatus = new LabelledRow()
-            .setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(this.TARS.getStatus)))
-            .appendTo(this);
+        // this.labelStatus = new LabelledRow()
+        //     .setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(this.TARS.getStatus)))
+        //     .appendTo(this);
 
         this.buttonEnable = new CheckButton()
             .setText(this.TARS.getTranslation(TarsTranslation.DialogButtonEnable))
@@ -68,11 +67,6 @@ export default class GeneralPanel extends TarsPanel {
         const events = this.TARS.event.until(this, "switchAway", "remove");
         events.subscribe("enableChange", this.refresh);
         events.subscribe("optionsChange", this.refresh);
-        events.subscribe("statusChange", (_, status) => {
-            // don't call refresh because we already calculated status when passing it to this method
-            // this.statusLabel.refresh();
-            this.labelStatus.setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(status)));
-        });
     }
 
     @Bound

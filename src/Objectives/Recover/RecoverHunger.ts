@@ -15,12 +15,12 @@ const decayingSoonThreshold = 50;
 
 export default class RecoverHunger extends Objective {
 
-	constructor(private readonly exceededThreshold: boolean) {
+	constructor(private readonly onlyUseAvailableItems: boolean, private readonly exceededThreshold: boolean) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return "RecoverHunger";
+		return `RecoverHunger:${this.onlyUseAvailableItems}`;
 	}
 
 	public getStatus(): string {
@@ -29,6 +29,11 @@ export default class RecoverHunger extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
+
+		if (this.onlyUseAvailableItems) {
+			const foodItems = this.exceededThreshold ? this.getFoodItemsInInventory(context) : undefined;
+			return foodItems?.[0] ? this.eatItem(context, foodItems[0]) : ObjectiveResult.Ignore;
+		}
 
 		if (!this.exceededThreshold) {
 			// if there's more food to cook and we're not at max, we should cook

@@ -10,8 +10,11 @@ import AcquireItem from "../AcquireItem";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteAction from "../../../core/ExecuteAction";
 import Lambda from "../../../core/Lambda";
+import { itemUtilities } from "../../../../utilities/Item";
 
 export default class AcquireUseOrbOfInfluence extends Objective {
+
+	public readonly ignoreInvalidPlans = true;
 
 	public getIdentifier(): string {
 		return "AcquireUseOrbOfInfluence";
@@ -29,7 +32,7 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const orbOfInfluenceItem = itemManager.getItemInContainer(context.player.inventory, ItemType.OrbOfInfluence);
+		const orbOfInfluenceItem = itemUtilities.getItemInInventory(context, ItemType.OrbOfInfluence);
 		if (!orbOfInfluenceItem) {
 			objectives.push(new AcquireItem(ItemType.OrbOfInfluence));
 

@@ -3,7 +3,7 @@ import { IStat, Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
 import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { itemUtilities } from "../../utilities/Item";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
@@ -14,8 +14,12 @@ export default class RecoverHealth extends Objective {
 
 	private saveChildObjectives = false;
 
+	constructor(private readonly onlyUseAvailableItems: boolean) {
+		super();
+	}
+
 	public getIdentifier(): string {
-		return "RecoverHealth";
+		return `RecoverHealth:${this.onlyUseAvailableItems}`;
 	}
 
 	public getStatus(): string {
@@ -31,6 +35,10 @@ export default class RecoverHealth extends Objective {
 		if (healItems.length > 0) {
 			this.log.info(`Healing with ${healItems[0].getName().getString()}`);
 			return new UseItem(ActionType.Heal, healItems[0]);
+		}
+
+		if (this.onlyUseAvailableItems) {
+			return ObjectiveResult.Ignore;
 		}
 
 		const isThirsty = context.player.stat.get<IStat>(Stat.Thirst).value <= 0;

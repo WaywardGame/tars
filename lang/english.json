@@ -9,8 +9,8 @@
 			"modTARSTARS": "TARS"
 		},
 		"message": {
-			"modTARSToggle": "[TARS] {0?Enabled:Disabled}",
-			"modTARSFinished": "[TARS] Finished",
+			"modTARSToggle": "[TARS] {0?Enabled:Disabled}.",
+			"modTARSFinished": "[TARS] Finished.",
 			"modTARSNavigationUpdating": "[TARS] Updating navigation system. This may take a few seconds.",
 			"modTARSNavigationUpdated": "[TARS] Updated navigation system."
 		},
@@ -18,7 +18,7 @@
 			"modTARSTARS": "tars"
 		},
 		"ModTARSTars": {
-			"dialogTitleMain": "TARS",
+			"dialogTitleMain": "TARS: {0}",
 			"dialogPanelGeneral": "General",
 			"dialogPanelTasks": "Tasks",
 			"dialogPanelOptions": "Options",
@@ -33,7 +33,6 @@
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
 			"dialogButtonUseOrbsOfInfluence": "Use Orbs Of Influence",
 			"dialogButtonUseOrbsOfInfluenceTooltip": "Allow TARS to use Orbs of Influence when necessary.",
-			"dialogLabelStatus": "Status: {0}",
 			"dialogLabelItem": "{#--text-secondary:Item}",
 			"dialogLabelDoodad": "{#--text-secondary:Doodad}",
 			"dialogModeSurvival": "Survival Mode",

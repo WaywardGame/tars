@@ -1,17 +1,17 @@
+import { OwnEventHandler } from "event/EventManager";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import { Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import Vector2 from "utilities/math/Vector2";
+import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { Tuple } from "utilities/collection/Arrays";
-import { OwnEventHandler } from "event/EventManager";
-
+import Vector2 from "utilities/math/Vector2";
 import { TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "../ITars";
 import Tars from "../Tars";
-import GeneralPanel from "./panels/GeneralPanel";
 import TarsPanel from "./components/TarsPanel";
-import TasksPanel from "./panels/TasksPanel";
+import GeneralPanel from "./panels/GeneralPanel";
 import OptionsPanel from "./panels/OptionsPanel";
+import TasksPanel from "./panels/TasksPanel";
+
 
 export type TabDialogPanelClass = new () => TarsPanel;
 
@@ -39,9 +39,10 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	@Mod.instance<Tars>(TARS_ID)
 	public readonly TARS: Tars;
 
-	// public constructor(id: DialogId) {
-	// 	super(id);
-	// }
+	public constructor(id: DialogId) {
+		super(id);
+		this.TARS.event.until(this, "remove").subscribe("statusChange", this.header.refresh);
+	}
 
 	protected getDefaultSubpanelInformation(): SubpanelInformation {
 		for (const subpanelInformation of this.subpanelInformations) {
@@ -59,7 +60,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	}
 
 	@Override public getName(): Translation {
-		return this.TARS.getTranslation(TarsTranslation.DialogTitleMain);
+		return this.TARS.getTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TARS.getStatus);
 	}
 
 	/**

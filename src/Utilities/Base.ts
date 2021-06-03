@@ -134,6 +134,10 @@ class BaseUtilities {
 		return doodads;
 	}
 
+	public isBaseDoodad(context: Context, doodad: Doodad): boolean {
+		return this.getBaseDoodads(context).includes(doodad);
+	}
+
 	public getBasePosition(context: Context): IVector3 {
 		return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.player.getPoint();
 	}

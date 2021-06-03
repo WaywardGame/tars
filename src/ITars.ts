@@ -40,7 +40,6 @@ export enum TarsTranslation {
 	DialogButtonUseOrbsOfInfluence,
 	DialogButtonUseOrbsOfInfluenceTooltip,
 
-	DialogLabelStatus,
 	DialogLabelItem,
 	DialogLabelDoodad,
 

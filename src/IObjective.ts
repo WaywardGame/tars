@@ -45,6 +45,8 @@ export enum CalculatedDifficultyStatus {
 export interface IObjective {
 	readonly log: ILog;
 
+	readonly ignoreInvalidPlans?: boolean;
+
 	setLogger(log: ILog | undefined): void;
 
 	execute(context: Context): Promise<ObjectiveExecutionResult>;

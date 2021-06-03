@@ -4,8 +4,8 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
+import { creatureUtilities } from "../../utilities/Creature";
 import { itemUtilities } from "../../utilities/Item";
-import { objectUtilities } from "../../utilities/Object";
 import { playerUtilities } from "../../utilities/Player";
 import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
@@ -34,7 +34,7 @@ export default class Rest extends Objective {
 			return new MoveToLand();
 		}
 
-		const nearbyCreatures = objectUtilities.getNearbyCreatures(context.player);
+		const nearbyCreatures = creatureUtilities.getNearbyCreatures(context.player);
 		if (nearbyCreatures.length > 0) {
 			const nearbyCreature = nearbyCreatures[0];
 

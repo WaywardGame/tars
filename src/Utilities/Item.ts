@@ -25,10 +25,10 @@ class ItemUtilities {
 	public readonly foodItemTypes = this.getFoodItemTypes();
 
 	// allow processing with inventory items assuming they wont be consumed
-	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean): ItemRecipeRequirementChecker {
+	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
 			if (isConsumed) {
-				return !context.isReservedItem(item) && !this.isInventoryItem(context, item);
+				return !context.isReservedItem(item) && (allowInventoryItems || !this.isInventoryItem(context, item));
 			}
 
 			// if (forItemTypeOrGroup === ItemTypeGroup.Sharpened) {

@@ -126,7 +126,10 @@ class Executor {
 			for (const o of objs) {
 				const plan = this.lastPlan = await planner.createPlan(context, o);
 				if (!plan) {
-					log.info(`No valid plan for ${o.getHashCode()}`);
+					if (!o.ignoreInvalidPlans) {
+						log.info(`No valid plan for ${o.getHashCode()}`);
+					}
+
 					break;
 				}
 

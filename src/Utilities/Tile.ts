@@ -46,7 +46,7 @@ class TileUtilities {
 	}
 
 	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {
-		if (!game.isTileEmpty(tile)) {
+		if (game.isTileFull(tile)) {
 			return false;
 		}
 
