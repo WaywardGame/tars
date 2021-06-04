@@ -373,7 +373,7 @@ class Planner implements IPlanner {
 			this.calculationLog = [];
 		}
 
-		const objectiveHashCode = objective.getHashCode(context);
+		const objectiveHashCode = objective.getHashCode();
 
 		// check the difficulty cache for the objective hash code (without context)
 		let cachedDifficulty = this.checkAndMergeDifficultyCache(context, objectiveHashCode);

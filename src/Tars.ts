@@ -58,9 +58,9 @@ import OptionsInterrupt from "./objectives/interrupt/OptionsInterrupt";
 import ReduceWeight from "./objectives/interrupt/ReduceWeight";
 import RepairItem from "./objectives/interrupt/RepairItem";
 import BuildItem from "./objectives/other/item/BuildItem";
-import Equip from "./objectives/other/item/EquipItem";
+import EquipItem from "./objectives/other/item/EquipItem";
 import ReturnToBase from "./objectives/other/ReturnToBase";
-import Unequip from "./objectives/other/item/UnequipItem";
+import UnequipItem from "./objectives/other/item/UnequipItem";
 import MoveToZ from "./objectives/utility/MoveToZ";
 import OrganizeInventory from "./objectives/utility/OrganizeInventory";
 import TarsDialog from "./ui/TarsDialog";
@@ -530,7 +530,7 @@ export default class Tars extends Mod {
 			const statusMessage = plan.tree.objective.getStatusMessage();
 			if (this.lastStatusMessage !== statusMessage) {
 				this.lastStatusMessage = statusMessage;
-				log.info(`Status: ${statusMessage}`, plan.tree.objective);
+				log.info(`Status: ${statusMessage}`); //, plan.tree.objective);
 			}
 
 			return statusMessage;
@@ -1029,7 +1029,7 @@ export default class Tars extends Mod {
 		const item = context.player.getEquippedItem(equip);
 		if (item && item.type === ItemType.SlitherSucker) {
 			// brain slugs are bad
-			return new Unequip(item);
+			return new UnequipItem(item);
 		}
 
 		const bestEquipment = itemUtilities.getBestEquipment(context, equip);
@@ -1040,10 +1040,10 @@ export default class Tars extends Mod {
 			}
 
 			if (item !== undefined) {
-				return new Unequip(item);
+				return new UnequipItem(item);
 			}
 
-			return new Equip(equip, itemToEquip);
+			return new EquipItem(equip, itemToEquip);
 		}
 	}
 
@@ -1054,7 +1054,7 @@ export default class Tars extends Mod {
 		}
 
 		if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped()) {
-			return new Equip(EquipType.RightHand, context.inventory.equipShield);
+			return new EquipItem(EquipType.RightHand, context.inventory.equipShield);
 		}
 
 		const leftHandItem = context.player.getEquippedItem(EquipType.LeftHand);
@@ -1199,7 +1199,7 @@ export default class Tars extends Mod {
 				}
 
 				if (!possibleEquipItem.isEquipped()) {
-					return new Equip(equipType, possibleEquips[i]);
+					return new EquipItem(equipType, possibleEquips[i]);
 				}
 			}
 		}

@@ -51,7 +51,7 @@ export interface IObjective {
 
 	execute(context: Context): Promise<ObjectiveExecutionResult>;
 
-	getHashCode(context?: Context): string;
+	getHashCode(addUniqueIdentifier?: boolean): string;
 	getIdentifier(): string;
 	getName(): string;
 

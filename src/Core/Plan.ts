@@ -102,7 +102,7 @@ export default class Plan implements IPlan {
 			}
 
 			// queue this messsage to be logged if another message occurs
-			let message = `Executing ${objectiveInfo.objective.getHashCode()}`;
+			let message = `Executing ${objectiveInfo.objective.getHashCode()} [${objectiveInfo.objective.getStatusMessage()}]`;
 
 			const contextHashCode = this.context.getHashCode();
 			if (contextHashCode.length > 0) {
@@ -125,9 +125,15 @@ export default class Plan implements IPlan {
 			}
 
 			if (result === ObjectiveResult.Pending) {
+				const pendingop = this.getObjectiveResults(chain, objectiveStack, objectiveInfo);
+				if (pendingop.length > 0 && !(pendingop[pendingop.length - 1] instanceof Restart)) {
+					console.log("pendingfix missing restart", pendingop.map(o => o.getHashCode()).join(","));
+					console.log("pendingfix stacks", `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`, `${objectiveStack.map(o => `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`).join(",")}`);
+				}
+
 				return {
 					type: ExecuteResultType.Pending,
-					objectives: this.getObjectiveResults(chain, objectiveStack, objectiveInfo),
+					objectives: pendingop,
 				};
 			}
 
@@ -296,7 +302,7 @@ export default class Plan implements IPlan {
 					reserveItemObjectives.set(hashCode, objective.items);
 				}
 
-				// // leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
+				// leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
 				continue;
 			}
 
@@ -461,7 +467,7 @@ export default class Plan implements IPlan {
 			if (nextObjectiveInfo.depth < currentObjectiveInfo.depth) {
 				// depth is changing, force a restart
 				// todo: verify that we want this
-				results.push(new Restart().setStatus("Determining objective..."));
+				results.push(new Restart().setStatus("Calculating objective..."));
 				break;
 			}
 

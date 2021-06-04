@@ -24,6 +24,8 @@ export default class CheckDecayingItems extends Objective {
             .map(chest => itemManager.getItemsInContainer(chest, true)
                 .filter(item => item.type === ItemType.AnimalFat && item.decay !== undefined && item.decay <= 500))
             .flat()
+            // it's very important to include items in inventory, so if this objective is restarted after grabing the item from the chest, it will continue to work
+            .concat(itemManager.getItemsInContainerByType(context.player.inventory, ItemType.AnimalFat, true))
             .sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
         if (animalFatItems.length > 0) {
             return new AcquireItemWithRecipe(ItemType.Tallow, itemDescriptions[ItemType.Tallow].recipe!);

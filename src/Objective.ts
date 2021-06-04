@@ -23,10 +23,10 @@ export default abstract class Objective implements IObjective {
 	private _status: IObjective | (() => string) | string | undefined;
 
 	public static getPipelineString(objectives: Array<IObjective | IObjective[]> | undefined): string {
-		return objectives ? objectives.map(objective => Array.isArray(objective) ? Objective.getPipelineString(objective) : objective.getHashCode()).join(" -> ") : "Empty pipeline";
+		return objectives ? objectives.map(objective => Array.isArray(objective) ? Objective.getPipelineString(objective) : `${objective.getHashCode()} (${objective.getStatusMessage()})`).join(" -> ") : "Empty pipeline";
 	}
 
-	public abstract getIdentifier(context?: Context): string;
+	public abstract getIdentifier(): string;
 
 	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
 
@@ -46,14 +46,14 @@ export default abstract class Objective implements IObjective {
 		this._log = log;
 	}
 
-	public getHashCode(context?: Context): string {
-		let hashCode = this.getIdentifier(context);
+	public getHashCode(addUniqueIdentifier?: boolean): string {
+		let hashCode = this.getIdentifier();
 
 		if (hashCode.includes("[object")) {
 			console.warn("Invalid objective identifier", hashCode);
 		}
 
-		if (this.isDynamic()) {
+		if (this.isDynamic() || addUniqueIdentifier) {
 			if (this._uniqueIdentifier === undefined) {
 				this._uniqueIdentifier = Objective.uuid++;
 				if (Objective.uuid >= Number.MAX_SAFE_INTEGER) {

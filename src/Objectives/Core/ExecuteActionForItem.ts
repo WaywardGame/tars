@@ -63,7 +63,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 		const terrainDescription = Terrains[tileType];
 		if (!terrainDescription) {
-			return ObjectiveResult.Complete;
+			return ObjectiveResult.Impossible;
 		}
 
 		if (this.terrainTileType === undefined) {
@@ -71,7 +71,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 		} else if (this.terrainTileType !== tileType) {
 			// tile type changed, give up
-			return ObjectiveResult.Complete;
+			return ObjectiveResult.Restart;
 		}
 
 		let actionType: ActionType;
@@ -81,16 +81,16 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			case ExecuteActionType.Doodad:
 				const doodad = tile.doodad;
 				if (!doodad) {
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}
 
 				const description = doodad.description();
 				if (!description) {
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}
 
 				if (!tileUtilities.canGather(tile, true)) {
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}
 
 				const stage = doodad.getGrowingStage();
@@ -109,7 +109,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
 
 				if (actionType === ActionType.Dig && !tileUtilities.canDig(tile)) {
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}
 
 				actionArguments.push(itemUtilities.getBestToolForTerrainGather(context, tileType));
@@ -120,7 +120,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				const carveTool = itemUtilities.getBestTool(context, ActionType.Carve);
 
 				if (carveTool === undefined || !tileUtilities.canCarveCorpse(tile)) {
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}
 
 				actionType = ActionType.Carve;

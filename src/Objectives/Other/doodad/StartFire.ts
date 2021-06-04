@@ -1,6 +1,7 @@
 import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemTypeGroup } from "game/item/IItem";
+import { TileEventType } from "game/tile/ITileEvent";
 
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
@@ -37,6 +38,10 @@ export default class StartFire extends Objective {
 			objectives.push(new MoveToTarget(doodad, true));
 
 		} else {
+			if (tileEventManager.get(doodad.getTile(), TileEventType.Fire)) {
+				this.log.warn("Doodad already on fire?");
+				return ObjectiveResult.Impossible;
+			}
 
 			if (context.inventory.fireKindling === undefined) {
 				objectives.push(new AcquireItemByGroup(ItemTypeGroup.Kindling));

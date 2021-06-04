@@ -7,7 +7,7 @@ import { ContextDataType } from "../../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import AcquireBuildMoveToFire from "../../acquire/doodad/AcquireBuildMoveToFire";
-import Equip from "./EquipItem";
+import EquipItem from "./EquipItem";
 
 import UseItem from "./UseItem";
 
@@ -40,7 +40,7 @@ export default class IgniteItem extends Objective {
 
         return [
             new AcquireBuildMoveToFire(),
-            new Equip(EquipType.Held, item),
+            new EquipItem(EquipType.Held, item),
             new UseItem(ActionType.Ignite, item),
         ];
     }

@@ -8,14 +8,14 @@ import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 
-export default class Equip extends Objective {
+export default class EquipItem extends Objective {
 
 	constructor(private readonly equip: EquipType, private readonly item?: Item) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `Equip:${this.item}`;
+		return `EquipItem:${this.item}`;
 	}
 
 	public getStatus(): string {

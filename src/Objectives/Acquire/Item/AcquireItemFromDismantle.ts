@@ -69,7 +69,9 @@ export default class AcquireItemFromDismantle extends Objective {
 				new SetContextData(ContextDataType.NextActionAllowsIntermediateChest, false),
 			];
 
-			const hashCode = this.getHashCode();
+			// Set addUniqueIdentifier to true because the pipeline may be ordered and it could run two of the same AcquireItemFromDismantle objectives one after another
+			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
+			const hashCode = this.getHashCode(true);
 
 			if (dismantleItem === undefined) {
 				objectives.push(new AcquireItem(itemType).setContextDataKey(hashCode));

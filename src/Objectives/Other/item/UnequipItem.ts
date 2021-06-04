@@ -7,7 +7,7 @@ import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 
-export default class Unequip extends Objective {
+export default class UnequipItem extends Objective {
 
 	constructor(private readonly item?: Item) {
 		super();

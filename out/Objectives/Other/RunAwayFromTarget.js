@@ -45,7 +45,7 @@ define(["require", "exports", "game/entity/IStats", "game/tile/Terrains", "utili
                 }
                 let score = 0;
                 const distance = Vector2_1.default.squaredDistance(context.player, nearbyOpenTile.point);
-                score -= distance * 3000;
+                score -= distance * 2000;
                 for (const point of movementPath.path) {
                     const index = `${point.x},${point.y}`;
                     let pointScore = scoreCache.get(index);
@@ -56,7 +56,7 @@ define(["require", "exports", "game/entity/IStats", "game/tile/Terrains", "utili
                         TileHelpers_1.default.findMatchingTiles(pointZ, (_, tile) => {
                             var _a;
                             if (tile.creature !== undefined) {
-                                pointScore += 10000;
+                                pointScore += 20000;
                             }
                             if ((_a = tile.doodad) === null || _a === void 0 ? void 0 : _a.blocksMove()) {
                                 pointScore += 20;

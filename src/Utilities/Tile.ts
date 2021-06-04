@@ -50,6 +50,10 @@ class TileUtilities {
 			return false;
 		}
 
+		if (tile.doodad) {
+			return false;
+		}
+
 		const terrainType = TileHelpers.getType(tile);
 		const terrainInfo = Terrains[terrainType];
 		if (terrainInfo) {

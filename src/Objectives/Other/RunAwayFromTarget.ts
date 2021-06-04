@@ -75,7 +75,7 @@ export default class RunAwayFromTarget extends Objective {
 
 			// farther end point is generally better
 			const distance = Vector2.squaredDistance(context.player, nearbyOpenTile.point);
-			score -= distance * 3000;
+			score -= distance * 2000;
 
 			for (const point of movementPath.path) {
 				const index = `${point.x},${point.y}`;
@@ -94,7 +94,7 @@ export default class RunAwayFromTarget extends Objective {
 						(_, tile) => {
 							// creatures are scary
 							if (tile.creature !== undefined) {
-								pointScore! += 10000;
+								pointScore! += 20000;
 							}
 
 							// add score for doodads and terrains because we would rather end up in an open area

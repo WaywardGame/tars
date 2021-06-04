@@ -8,7 +8,7 @@ define(["require", "exports", "../../IObjective", "../../Objective"], function (
             this.value = value;
         }
         getIdentifier() {
-            return `SetContextData:${this.type}:${this.value}`;
+            return `SetContextData:${this.type}=${this.value}`;
         }
         async execute(context) {
             context.setData(this.type, this.value);

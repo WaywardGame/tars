@@ -13,7 +13,6 @@ import Restart from "../../core/Restart";
 import GatherWater from "../../gather/GatherWater";
 import RepairItem from "../../interrupt/RepairItem";
 
-import StartFire from "./StartFire";
 import StokeFire from "./StokeFire";
 import UseItem from "../item/UseItem";
 import { baseUtilities } from "../../../utilities/Base";
@@ -127,17 +126,15 @@ export default class StartWaterStillDesalination extends Objective {
 		if (!waterStillDescription.providesFire) {
 			// only start the fire if we are near the base or if we have an emergency
 			if (baseUtilities.isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
-				// we need to start the fire
-				objectives.push(new StartFire(this.waterStill));
+				// we need to start the fire. stoke fire will do it for us
 				objectives.push(new StokeFire(this.waterStill));
 				objectives.push(new Restart());
 
 			} else {
 				return ObjectiveResult.Ignore;
 			}
-		}
 
-		if (this.waterStill.decay !== undefined && this.waterStill.gatherReady !== undefined) {
+		} else if (this.waterStill.decay !== undefined && this.waterStill.gatherReady !== undefined) {
 			// water still is lit and desalinating
 			if (this.waterStill.decay <= this.waterStill.gatherReady) {
 				this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}`);

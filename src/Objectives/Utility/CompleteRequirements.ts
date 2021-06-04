@@ -64,10 +64,9 @@ export default class CompleteRequirements extends Objective {
 						// the anvil we went to is not our base anvil
 						// it was probably not placed correctly
 						// pick it up. the object will be then built in the correct spot
-						this.log.info("Picking up anvil to place it next to the kiln");
 						return new ExecuteAction(ActionType.Pickup, (context, action) => {
 							action.execute(context.player);
-						});
+						}).setStatus("Picking up anvil to place it next to the kiln");
 					}
 
 					return ObjectiveResult.Complete;

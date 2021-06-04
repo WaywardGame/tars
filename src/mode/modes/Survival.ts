@@ -1,6 +1,6 @@
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import { DamageType } from "game/entity/IEntity";
+import { AiType, DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import { IStat, IStatMax, Stat } from "game/entity/IStats";
 import { TurnMode } from "game/IGame";
@@ -27,7 +27,7 @@ import Restart from "../../objectives/core/Restart";
 import GatherWater from "../../objectives/gather/GatherWater";
 import BuildItem from "../../objectives/other/item/BuildItem";
 import EmptyWaterContainer from "../../objectives/other/EmptyWaterContainer";
-import Equip from "../../objectives/other/item/EquipItem";
+import EquipItem from "../../objectives/other/item/EquipItem";
 import Idle from "../../objectives/other/Idle";
 import PlantSeed from "../../objectives/other/item/PlantSeed";
 import ReinforceItem from "../../objectives/other/item/ReinforceItem";
@@ -48,6 +48,7 @@ import { playerUtilities } from "../../utilities/Player";
 import { itemUtilities } from "../../utilities/Item";
 import AcquireUseOrbOfInfluence from "../../objectives/acquire/item/specific/AcquireUseOrbOfInfluence";
 import CheckDecayingItems from "../../objectives/other/item/CheckDecayingItems";
+import HuntCreatures from "../../objectives/other/creature/HuntCreatures";
 
 /**
  * Survival mode
@@ -128,7 +129,7 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		if (context.inventory.equipSword === undefined) {
-			objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new Equip(EquipType.LeftHand)]);
+			objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
 		}
 
 		if (context.inventory.axe === undefined) {
@@ -136,15 +137,15 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		if (chest === undefined || chest.type === ItemType.TatteredShirt) {
-			objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
+			objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
 		}
 
 		if (legs === undefined || legs.type === ItemType.TatteredPants) {
-			objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
+			objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
 		}
 
 		if (context.inventory.equipShield === undefined) {
-			objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new Equip(EquipType.RightHand)]);
+			objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
 		}
 
 		if (context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
@@ -223,35 +224,35 @@ export class SurvivalMode implements ITarsMode {
 			*/
 
 			if (belt === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherBelt), new AnalyzeInventory(), new Equip(EquipType.Belt)]);
+				objectives.push([new AcquireItem(ItemType.LeatherBelt), new AnalyzeInventory(), new EquipItem(EquipType.Belt)]);
 			}
 
 			if (neck === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherGorget), new AnalyzeInventory(), new Equip(EquipType.Neck)]);
+				objectives.push([new AcquireItem(ItemType.LeatherGorget), new AnalyzeInventory(), new EquipItem(EquipType.Neck)]);
 			}
 
 			if (head === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherCap), new AnalyzeInventory(), new Equip(EquipType.Head)]);
+				objectives.push([new AcquireItem(ItemType.LeatherCap), new AnalyzeInventory(), new EquipItem(EquipType.Head)]);
 			}
 
 			if (back === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherQuiver), new AnalyzeInventory(), new Equip(EquipType.Back)]);
+				objectives.push([new AcquireItem(ItemType.LeatherQuiver), new AnalyzeInventory(), new EquipItem(EquipType.Back)]);
 			}
 
 			if (feet === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherBoots), new AnalyzeInventory(), new Equip(EquipType.Feet)]);
+				objectives.push([new AcquireItem(ItemType.LeatherBoots), new AnalyzeInventory(), new EquipItem(EquipType.Feet)]);
 			}
 
 			if (hands === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherGloves), new AnalyzeInventory(), new Equip(EquipType.Hands)]);
+				objectives.push([new AcquireItem(ItemType.LeatherGloves), new AnalyzeInventory(), new EquipItem(EquipType.Hands)]);
 			}
 
 			if (legs && legs.type === ItemType.BarkLeggings) {
-				objectives.push([new AcquireItem(ItemType.LeatherPants), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
+				objectives.push([new AcquireItem(ItemType.LeatherPants), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
 			}
 
 			if (chest && chest.type === ItemType.BarkTunic) {
-				objectives.push([new AcquireItem(ItemType.LeatherTunic), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
+				objectives.push([new AcquireItem(ItemType.LeatherTunic), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
 			}
 		}
 
@@ -345,6 +346,15 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push(new ReinforceItem(context.inventory.equipShield, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
+		// go on a killing spree once you have a good sword and shield
+		if (baseUtilities.isNearBase(context)) {
+			const creatures = baseUtilities.getCreaturesNearBase(context)
+				.filter(creature => creature.hasAi(AiType.Hostile));
+			if (creatures.length > 0) {
+				objectives.push(new HuntCreatures(creatures));
+			}
+		}
+
 		if (context.inventory.equipBelt) {
 			objectives.push(new ReinforceItem(context.inventory.equipBelt, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
@@ -374,39 +384,39 @@ export class SurvivalMode implements ITarsMode {
 		*/
 
 		if (context.inventory.equipSword && context.inventory.equipSword.type === ItemType.WoodenSword) {
-			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new Equip(EquipType.LeftHand)]);
+			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
 		}
 
 		if (context.inventory.equipShield && context.inventory.equipShield.type === ItemType.WoodenShield) {
-			objectives.push([new UpgradeInventoryItem("equipShield"), new AnalyzeInventory(), new Equip(EquipType.RightHand)]);
+			objectives.push([new UpgradeInventoryItem("equipShield"), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
 		}
 
 		if (context.inventory.equipBelt && context.inventory.equipBelt.type === ItemType.LeatherBelt) {
-			objectives.push([new UpgradeInventoryItem("equipBelt"), new AnalyzeInventory(), new Equip(EquipType.Belt)]);
+			objectives.push([new UpgradeInventoryItem("equipBelt"), new AnalyzeInventory(), new EquipItem(EquipType.Belt)]);
 		}
 
 		if (context.inventory.equipNeck && context.inventory.equipNeck.type === ItemType.LeatherGorget) {
-			objectives.push([new UpgradeInventoryItem("equipNeck"), new AnalyzeInventory(), new Equip(EquipType.Neck)]);
+			objectives.push([new UpgradeInventoryItem("equipNeck"), new AnalyzeInventory(), new EquipItem(EquipType.Neck)]);
 		}
 
 		if (context.inventory.equipHead && context.inventory.equipHead.type === ItemType.LeatherCap) {
-			objectives.push([new UpgradeInventoryItem("equipHead"), new AnalyzeInventory(), new Equip(EquipType.Head)]);
+			objectives.push([new UpgradeInventoryItem("equipHead"), new AnalyzeInventory(), new EquipItem(EquipType.Head)]);
 		}
 
 		if (context.inventory.equipFeet && context.inventory.equipFeet.type === ItemType.LeatherBoots) {
-			objectives.push([new UpgradeInventoryItem("equipFeet"), new AnalyzeInventory(), new Equip(EquipType.Feet)]);
+			objectives.push([new UpgradeInventoryItem("equipFeet"), new AnalyzeInventory(), new EquipItem(EquipType.Feet)]);
 		}
 
 		if (context.inventory.equipHands && context.inventory.equipHands.type === ItemType.LeatherGloves) {
-			objectives.push([new UpgradeInventoryItem("equipHands"), new AnalyzeInventory(), new Equip(EquipType.Hands)]);
+			objectives.push([new UpgradeInventoryItem("equipHands"), new AnalyzeInventory(), new EquipItem(EquipType.Hands)]);
 		}
 
 		if (context.inventory.equipLegs && context.inventory.equipLegs.type === ItemType.LeatherPants) {
-			objectives.push([new UpgradeInventoryItem("equipLegs"), new AnalyzeInventory(), new Equip(EquipType.Legs)]);
+			objectives.push([new UpgradeInventoryItem("equipLegs"), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
 		}
 
 		if (context.inventory.equipChest && context.inventory.equipChest.type === ItemType.LeatherTunic) {
-			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new Equip(EquipType.Chest)]);
+			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
 		}
 
 		if (context.inventory.axe && context.inventory.axe.type === ItemType.StoneAxe) {

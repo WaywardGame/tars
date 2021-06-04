@@ -6,6 +6,7 @@ import { WorldZ } from "game/WorldZ";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import Creature from "game/entity/creature/Creature";
 
 import Context from "../Context";
 import { baseInfo, BaseInfoKey } from "../ITars";
@@ -207,6 +208,17 @@ class BaseUtilities {
 		return result;
 	}
 
+	public getCreaturesNearBase(context: Context): Creature[] {
+		const result: Creature[] = [];
+
+		for (const { tile } of this.getTilesNearBase(context)) {
+			if (tile.creature && !tile.creature.isTamed()) {
+				result.push(tile.creature);
+			}
+		}
+
+		return result;
+	}
 }
 
 export const baseUtilities = new BaseUtilities();

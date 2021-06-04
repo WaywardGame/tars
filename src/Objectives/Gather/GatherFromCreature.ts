@@ -18,7 +18,7 @@ import AddDifficulty from "../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
-import Equip from "../other/item/EquipItem";
+import EquipItem from "../other/item/EquipItem";
 
 export default class GatherFromCreature extends Objective {
 
@@ -43,11 +43,11 @@ export default class GatherFromCreature extends Objective {
 
 				// require a sword and shield before engaging with a creature
 				if (context.inventory.equipSword === undefined) {
-					objectives.push(new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new Equip(EquipType.LeftHand));
+					objectives.push(new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand));
 				}
 
 				if (context.inventory.equipShield === undefined) {
-					objectives.push(new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new Equip(EquipType.RightHand));
+					objectives.push(new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand));
 				}
 
 				if (!hasCarveItem) {

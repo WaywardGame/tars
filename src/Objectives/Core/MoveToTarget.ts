@@ -6,6 +6,9 @@ import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import Doodad from "game/doodad/Doodad";
+import TileEvent from "game/tile/TileEvent";
+import Corpse from "game/entity/creature/corpse/Corpse";
 
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
@@ -43,7 +46,15 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public getStatus(): string {
-		return `Moving to (${this.target.x},${this.target.y},${this.target.z})`;
+		let status = `Moving to `;
+
+		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {
+			status += `${this.target.getName()} `;
+		}
+
+		status += `(${this.target.x},${this.target.y},${this.target.z})`;
+
+		return status;
 	}
 
 	public isDynamic(): boolean {
