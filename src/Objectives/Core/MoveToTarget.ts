@@ -181,7 +181,7 @@ export default class MoveToTarget extends Objective {
 
 	public trackCreature(creature: Creature | undefined) {
 		this.trackedCreature = creature;
-		this.trackedPosition = creature ? creature.getPoint() : undefined;
+		this.trackedPosition = creature?.getPoint();
 
 		return this;
 	}
@@ -213,7 +213,7 @@ export default class MoveToTarget extends Objective {
 				this.trackedPosition = trackedCreaturePosition;
 
 				// move to it's latest location
-				const moveResult = await movementUtilities.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true);
+				const moveResult = await movementUtilities.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);
 
 				switch (moveResult) {
 					case MoveResult.NoTarget:

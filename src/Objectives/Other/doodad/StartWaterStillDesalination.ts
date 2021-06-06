@@ -111,10 +111,6 @@ export default class StartWaterStillDesalination extends Objective {
 						action.execute(context.player, item, context.player.inventory);
 					}));
 				}
-
-				// objectives.push(new ExecuteAction(ActionType.PickupAllItems, (context, action) => {
-				// 	action.execute(context.player);
-				// }).setStatus(() => `Picking up all items under ${this.waterStill.getName()}`));
 			}
 
 			this.log.info("Moving to detach container");

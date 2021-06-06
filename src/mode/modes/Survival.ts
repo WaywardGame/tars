@@ -96,6 +96,14 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItemForAction(ActionType.Gather)]);
 		}
 
+		if (context.inventory.axe === undefined) {
+			objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);
+		}
+
+		if (context.inventory.pickAxe === undefined) {
+			objectives.push([new AcquireItem(ItemType.StonePickaxe), new AnalyzeInventory()]);
+		}
+
 		if (context.base.campfire.length === 0 && context.inventory.campfire === undefined) {
 			log.info("Need campfire");
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Campfire), new BuildItem(), new AnalyzeBase()]);
@@ -130,10 +138,6 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.inventory.equipSword === undefined) {
 			objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
-		}
-
-		if (context.inventory.axe === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);
 		}
 
 		if (chest === undefined || chest.type === ItemType.TatteredShirt) {
@@ -176,10 +180,6 @@ export class SurvivalMode implements ITarsMode {
 			context.base.buildAnotherChest = true;
 
 			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (context.inventory.pickAxe === undefined) {
-			objectives.push([new AcquireItem(ItemType.StonePickaxe), new AnalyzeInventory()]);
 		}
 
 		if (context.inventory.hammer === undefined) {
@@ -431,6 +431,10 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new UpgradeInventoryItem("shovel"), new AnalyzeInventory()]);
 		}
 
+		if (context.inventory.hammer && context.inventory.hammer.type === ItemType.StoneHammer) {
+			objectives.push([new UpgradeInventoryItem("hammer"), new AnalyzeInventory()]);
+		}
+
 		if (context.inventory.hoe && context.inventory.hoe.type === ItemType.StoneHoe) {
 			objectives.push([new UpgradeInventoryItem("hoe"), new AnalyzeInventory()]);
 		}
@@ -441,7 +445,17 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.options.exploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
-			const needsFood = context.inventory.food === undefined || context.inventory.food.length < 2;
+			const needWaterItems = context.inventory.waterContainer === undefined || context.inventory.waterContainer.filter(item => itemUtilities.isSafeToDrinkItem(item)).length < 2;
+			const needFoodItems = context.inventory.food === undefined || context.inventory.food.length < 2;
+
+			console.log("needWaterItems", needWaterItems, context.inventory.waterContainer?.filter(item => itemUtilities.isSafeToDrinkItem(item)));
+
+			const health = context.player.stat.get<IStatMax>(Stat.Health);
+			const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
+			const needHealthRecovery = health.value / health.max < 0.9;
+			const needHungerRecovery = hunger.value / hunger.max < 0.7;
+
+			const isPreparing = needWaterItems || needFoodItems || needHealthRecovery || needHungerRecovery;
 
 			switch (moveToNewIslandState) {
 				case MovingToNewIslandState.None:
@@ -459,14 +473,35 @@ export class SurvivalMode implements ITarsMode {
 					if (!context.inventory.sailBoat) {
 						objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
 
-						if (needsFood) {
+						if (isPreparing) {
 							// this lets TARS drop the sailboat until we're ready
 							objectives.push(new Restart());
 						}
 					}
 
+					if (needHealthRecovery) {
+						objectives.push(new RecoverHealth(false));
+					}
+
+					if (needHungerRecovery) {
+						objectives.push(new RecoverHunger(false, true));
+					}
+
+					// stock up on water
+					if (needWaterItems) {
+						const availableWaterContainer = context.inventory.waterContainer?.find(item => !itemUtilities.isSafeToDrinkItem(item) && itemUtilities.canGatherWater(item));
+						if (!availableWaterContainer) {
+							// get a new water container
+							objectives.push(new AcquireWaterContainer());
+						}
+
+						// we are looking for something drinkable
+						// if there is a well, starting the water still will use it
+						objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+					}
+
 					// stock up on food
-					if (needsFood) {
+					if (needFoodItems) {
 						objectives.push([new AcquireFood(), new AnalyzeInventory()]);
 					}
 

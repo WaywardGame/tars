@@ -1,10 +1,13 @@
 import { ActionType } from "game/entity/action/IAction";
-import { IContainer } from "game/item/IItem";
+import { IContainer, ItemType } from "game/item/IItem";
 import { IVector3 } from "utilities/math/IVector";
+import Item from "game/item/Item";
+import { TileEventType } from "game/tile/ITileEvent";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
+import { playerUtilities } from "../../utilities/Player";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
@@ -46,24 +49,46 @@ export default class OrganizeBase extends Objective {
 
 		for (const position of this.tiles) {
 			const tile = game.getTileFromPoint(position);
-			if (tile.containedItems && tile.containedItems.length > 0) {
+			if (tile.containedItems && tile.containedItems.length > 0 && !tileEventManager.get(tile, TileEventType.Fire)) {
+				let weight = playerUtilities.getWeight(context);
+				const maxWeight = playerUtilities.getMaxWeight(context);
+				const itemsToMove: Item[] = [];
+
+				for (const item of tile.containedItems) {
+					if (item.type === ItemType.Sailboat) {
+						// don't organize sailboats
+						continue;
+					}
+
+					const itemWeight = item.getTotalWeight();
+					if (weight + itemWeight <= maxWeight) {
+						weight += itemWeight;
+						itemsToMove.push(item);
+					}
+				}
+
+				if (itemsToMove.length === 0) {
+					continue;
+				}
+
 				const objectives: IObjective[] = [];
 
 				// pickup items from tile
 				objectives.push(new MoveToTarget(position, true));
 
-				for (const item of tile.containedItems) {
+				for (const item of itemsToMove) {
 					objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
 						action.execute(context.player, item, context.player.inventory);
 					}));
 				}
 
 				// restart now
-				// the ReduceWeight interrupt will handle moving items into chests
+				// the ReduceWeight interrupt will eventually handle moving items into chests
 				// this makes it so OrganizeBase will keep picking up the nearest items until the inventory is full
 				objectives.push(new Restart());
 
 				objectivePipelines.push(objectives);
+
 				// move items into chest
 				// objectives.push(new MoveToTarget(chests[0], true));
 

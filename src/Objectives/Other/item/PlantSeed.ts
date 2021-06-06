@@ -15,6 +15,7 @@ import AcquireItem from "../../acquire/item/AcquireItem";
 import CopyContextData from "../../contextData/CopyContextData";
 import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";
+import Restart from "../../core/Restart";
 
 import UseItem from "./UseItem";
 
@@ -77,6 +78,9 @@ export default class PlantSeed extends Objective {
 				objectives.push(new MoveToTarget(nearbyTillableTile, true));
 				objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
 				objectives.push(new UseItem(ActionType.Till));
+
+				// it's possible tilling failed. restart after tilling to recalculate
+				objectives.push(new Restart());
 
 			} else {
 				return ObjectiveResult.Impossible;

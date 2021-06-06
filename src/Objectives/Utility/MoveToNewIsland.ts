@@ -11,6 +11,7 @@ import AcquireItem from "../acquire/item/AcquireItem";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import AnalyzeInventory from "../analyze/AnalyzeInventory";
+import MoveToWater from "./MoveToWater";
 
 export default class MoveToNewIsland extends Objective {
 
@@ -64,6 +65,7 @@ export default class MoveToNewIsland extends Objective {
 				objectives.push(new AcquireItem(ItemType.Sailboat), new AnalyzeInventory());
 			}
 
+			objectives.push(new MoveToWater(true));
 			objectives.push(new MoveToTarget(unvisitedIsland.edgePosition, true, { allowBoat: true, disableStaminaCheck: true }));
 			objectives.push(new ExecuteAction(ActionType.Move, (context, action) => {
 				action.execute(context.player, unvisitedIsland.direction);

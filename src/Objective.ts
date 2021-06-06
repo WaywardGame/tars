@@ -72,6 +72,10 @@ export default abstract class Objective implements IObjective {
 			hashCode += `:${this._overrideDifficulty}`;
 		}
 
+		if (this.contextDataKey !== ContextDataType.LastAcquiredItem) {
+			hashCode += `:${this.contextDataKey}`;
+		}
+
 		return hashCode;
 	}
 

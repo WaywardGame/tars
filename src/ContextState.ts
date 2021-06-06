@@ -1,3 +1,4 @@
+import { ItemType } from "game/item/IItem";
 
 export default class ContextState {
 
@@ -6,7 +7,8 @@ export default class ContextState {
 		public includeHashCode: boolean = false,
 		public minimumAcceptedDifficulty?: number | undefined,
 		public readonly reservedItems: Set<number> = new Set(),
-		public readonly reservedItemTypes: Set<number> = new Set(),
+		public readonly reservedItemTypes: Set<ItemType> = new Set(),
+		public readonly providedItems: Map<ItemType, number> = new Map(),
 
 		/**
 		 * Dynamic data available during objective execution
@@ -15,7 +17,7 @@ export default class ContextState {
 	}
 
 	public get shouldIncludeHashCode(): boolean {
-		return this.includeHashCode || this.reservedItems.size > 0 || this.reservedItemTypes.size > 0;
+		return this.includeHashCode || this.reservedItems.size > 0 || this.reservedItemTypes.size > 0 || this.providedItems.size > 0;
 	}
 
 	public merge(state: ContextState): void {
@@ -29,6 +31,11 @@ export default class ContextState {
 
 		for (const itemType of state.reservedItemTypes) {
 			this.reservedItemTypes.add(itemType);
+		}
+
+		for (const item of state.providedItems) {
+			// todo: add numbers when merging this?
+			this.providedItems.set(item[0], (this.providedItems.get(item[0]) ?? 0) + item[1]);
 		}
 
 		if (state.data) {
@@ -48,6 +55,7 @@ export default class ContextState {
 		this.minimumAcceptedDifficulty = undefined;
 		this.reservedItems.clear();
 		this.reservedItemTypes.clear();
+		this.providedItems.clear();
 		this.data = undefined;
 	}
 
@@ -70,10 +78,21 @@ export default class ContextState {
 			this.minimumAcceptedDifficulty,
 			new Set(this.reservedItems),
 			new Set(this.reservedItemTypes),
+			new Map(this.providedItems),
 			this.data ? new Map(this.data) : undefined);
 	}
 
 	public getHashCode(): string {
-		return `${this.reservedItems.size > 0 ? `Reserved: ${Array.from(this.reservedItems.values()).map(id => id).join(",")}` : ""}`;
+		let hashCode = "";
+
+		if (this.reservedItems.size > 0) {
+			hashCode += `Reserved: ${Array.from(this.reservedItems).map(id => id).join(",")}`;
+		}
+
+		if (this.providedItems.size > 0) {
+			hashCode += `Provided: ${Array.from(this.providedItems).map(itemType => `${itemType[0]}:${itemType[1]}`).join(",")}`;
+		}
+
+		return hashCode;
 	}
 }

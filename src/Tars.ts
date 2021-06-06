@@ -147,6 +147,7 @@ export default class Tars extends Mod {
 	private inventory: IInventoryItems;
 
 	private readonly statThresholdExceeded: { [index: number]: boolean } = {};
+	private gamePlaying = false;
 	private weightStatus: WeightStatus | undefined;
 	private previousWeightStatus: WeightStatus | undefined;
 	private lastStatusMessage: string | undefined;
@@ -204,7 +205,7 @@ export default class Tars extends Mod {
 		(window as any).TARS_Planner = undefined;
 
 		// this is to support hot reloading while in game
-		if (gameScreen?.isDialogVisible(Tars.INSTANCE.dialogMain)) {
+		if (this.gamePlaying && gameScreen?.isDialogVisible(Tars.INSTANCE.dialogMain)) {
 			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = true;
 			gameScreen?.closeDialog(Tars.INSTANCE.dialogMain);
 		}
@@ -216,6 +217,8 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.Game, "play")
 	public onGameStart(): void {
+		this.gamePlaying = true;
+
 		if (!this.isRunning() && (this.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
 			this.toggle(true);
 		}
@@ -223,6 +226,8 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.Game, "end")
 	public onGameEnd(state?: PlayerState): void {
+		this.gamePlaying = false;
+
 		this.disable(true);
 		this.delete();
 	}
@@ -530,7 +535,7 @@ export default class Tars extends Mod {
 			const statusMessage = plan.tree.objective.getStatusMessage();
 			if (this.lastStatusMessage !== statusMessage) {
 				this.lastStatusMessage = statusMessage;
-				log.info(`Status: ${statusMessage}`); //, plan.tree.objective);
+				log.info(`Status: ${statusMessage}`);
 			}
 
 			return statusMessage;
@@ -740,9 +745,10 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		objectUtilities.reset();
-		tileUtilities.reset();
-		movementUtilities.resetCachedPaths();
+		objectUtilities.clearCache();
+		tileUtilities.clearCache();
+		itemUtilities.clearCache();
+		movementUtilities.clearCache();
 
 		// system objectives
 		await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
@@ -1444,7 +1450,8 @@ export default class Tars extends Mod {
 
 		log.info(
 			objectives.length > 0 ? "Going to organize inventory space" : "Will not organize inventory space",
-			`Reserved items: ${reservedItems.join(",")}, Unused items: ${unusedItems.join(",")}`,
+			`Reserved items: ${reservedItems.join(",")}`,
+			`Unused items: ${unusedItems.join(",")}`,
 			`Context reserved items: ${Array.from(context.state.reservedItems).join(",")}`,
 			`Interrupt context reserved items: ${Array.from(interruptContext?.state.reservedItems ?? []).join(",")}`);
 

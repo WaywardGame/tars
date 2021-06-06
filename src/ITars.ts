@@ -4,7 +4,7 @@ import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { EquipType } from "game/entity/IHuman";
-import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
+import { IContainer, IItemDisassembly, ItemType, ItemTypeGroup } from "game/item/IItem";
 import Item from "game/item/Item";
 import { ITile, TerrainType } from "game/tile/ITerrain";
 import { ITerrainLoot } from "game/tile/TerrainResources";
@@ -462,12 +462,13 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		],
 	},
 };
-export interface BaseItemSearch {
+
+export interface IBaseItemSearch {
 	itemType: ItemType;
 	extraDifficulty?: number;
 }
 
-export interface ItemSearch<T> extends BaseItemSearch {
+export interface ItemSearch<T> extends IBaseItemSearch {
 	type: T;
 }
 
@@ -481,6 +482,11 @@ export interface CreatureSearch {
 }
 
 export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot; };
+
+export interface IDisassemblySearch {
+	item: Item;
+	disassemblyItems: IItemDisassembly[];
+}
 
 export interface ITarsEvents extends Events<Mod> {
 	/**

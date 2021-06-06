@@ -25,6 +25,9 @@ import AcquireBase from "./AcquireBase";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+import { itemUtilities } from "../../../utilities/Item";
+import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
+import UseProvidedItem from "../../core/UseProvidedItem";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -54,7 +57,7 @@ export default class AcquireItem extends AcquireBase {
 		return true;
 	}
 
-	public async execute(): Promise<ObjectiveExecutionResult> {
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		this.log.info(`Acquiring ${ItemType[this.itemType]}...`);
 
 		const itemDescription = itemDescriptions[this.itemType];
@@ -62,6 +65,7 @@ export default class AcquireItem extends AcquireBase {
 		const objectivePipelines: IObjective[][] = [
 			[new GatherFromGround(this.itemType).passContextDataKey(this)],
 			[new GatherFromChest(this.itemType).passContextDataKey(this)],
+			[new UseProvidedItem(this.itemType).passContextDataKey(this)],
 		];
 
 		const terrainSearch = this.getTerrainSearch();
@@ -87,6 +91,11 @@ export default class AcquireItem extends AcquireBase {
 		const dismantleSearch: ItemType[] = this.getDismantleSearch();
 		if (dismantleSearch.length > 0) {
 			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passContextDataKey(this)]);
+		}
+
+		const disassembleSearch = itemUtilities.getDisassembleSearch(context, this.itemType);
+		if (disassembleSearch.length > 0) {
+			objectivePipelines.push([new AcquireItemFromDisassemble(this.itemType, disassembleSearch).passContextDataKey(this)]);
 		}
 
 		if (itemDescription) {

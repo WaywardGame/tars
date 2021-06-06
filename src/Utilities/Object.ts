@@ -20,7 +20,7 @@ class ObjectUtilities {
 	private cachedSorts: Map<string, any> = new Map();
 	private cachedObjects: Map<string, any> = new Map();
 
-	public reset() {
+	public clearCache() {
 		this.cachedSorts.clear();
 		this.cachedObjects.clear();
 	}

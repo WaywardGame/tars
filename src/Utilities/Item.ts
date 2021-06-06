@@ -14,8 +14,9 @@ import Doodad from "game/doodad/Doodad";
 import { TerrainType } from "game/tile/ITerrain";
 
 import Context from "../Context";
-import { IInventoryItems, inventoryItemInfo } from "../ITars";
+import { IDisassemblySearch, IInventoryItems, inventoryItemInfo } from "../ITars";
 import { doodadUtilities } from "./Doodad";
+import { baseUtilities } from "./Base";
 
 // items that can cause poisoning when eaten will be filtered out
 const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
@@ -24,11 +25,72 @@ class ItemUtilities {
 
 	public readonly foodItemTypes = this.getFoodItemTypes();
 
+	private itemCache: Item[] | undefined;
+	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
+
+	public clearCache() {
+		this.itemCache = undefined;
+		this.disassembleSearchCache.clear();
+	}
+
+	public getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[] {
+		let search = this.disassembleSearchCache.get(itemType);
+		if (search === undefined) {
+			search = [];
+
+			if (this.itemCache === undefined) {
+				const baseTileItems = baseUtilities.getTileItemsNearBase(context);
+				const baseChestItems = context.base.chest
+					.map(chest => itemManager.getItemsInContainer(chest, true))
+					.flat();
+				const inventoryItems = itemManager.getItemsInContainer(context.player.inventory, true);
+
+				this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
+			}
+
+			for (const item of this.itemCache) {
+				if (!item.disassembly) {
+					continue;
+				}
+
+				const description = item.description();
+				if (!description || !description.disassemble || description.blockDisassembly) {
+					continue;
+				}
+
+				const disassemblyResult = item.getDisassemblyItems();
+				if (!disassemblyResult) {
+					continue;
+				}
+
+				for (const disassemblyItem of disassemblyResult.items) {
+					if (disassemblyItem.type === itemType) {
+						search.push({
+							item,
+							disassemblyItems: disassemblyResult.items,
+						});
+						break;
+					}
+				}
+			}
+
+			this.disassembleSearchCache.set(itemType, search);
+		}
+
+		return search;
+	}
+
 	// allow processing with inventory items assuming they wont be consumed
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
 			if (isConsumed) {
-				return !context.isReservedItem(item) && (allowInventoryItems || !this.isInventoryItem(context, item));
+				if (context.isReservedItem(item)) {
+					return false;
+				}
+
+				if (!allowInventoryItems && this.isInventoryItem(context, item)) {
+					return false;
+				}
 			}
 
 			// if (forItemTypeOrGroup === ItemTypeGroup.Sharpened) {
@@ -61,13 +123,17 @@ class ItemUtilities {
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
-		return this.getItemInContainer(context, context.player.inventory, itemTypeSearch, true);
+		return this.getItemInContainer(context, context.player.inventory, itemTypeSearch);
 	}
 
-	public getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, excludeUsefulItems: boolean = true): Item | undefined {
+	private getItemInContainer(
+		context: Context,
+		container: IContainer,
+		itemTypeSearch: ItemType,
+		allowInventoryItems?: boolean): Item | undefined {
 		const orderedItems = itemManager.getOrderedContainerItems(container);
 		for (const item of orderedItems) {
-			if (excludeUsefulItems && this.isInventoryItem(context, item)) {
+			if (!allowInventoryItems && this.isInventoryItem(context, item)) {
 				continue;
 			}
 
@@ -81,7 +147,7 @@ class ItemUtilities {
 
 			const description = Items[item.type];
 			if (description && description.weightCapacity !== undefined) {
-				const item2 = this.getItemInContainer(context, item as IContainer, itemTypeSearch, excludeUsefulItems);
+				const item2 = this.getItemInContainer(context, item as IContainer, itemTypeSearch, allowInventoryItems);
 				if (item2) {
 					return item2;
 				}
@@ -332,10 +398,12 @@ class ItemUtilities {
 	/**
 	 * Returns unused items sorted by oldest to newest
 	 */
-	public getUnusedItems(context: Context, ignoreReserved: boolean = false) {
+	public getUnusedItems(context: Context, options: Partial<{ allowReservedItems: boolean; allowSailboat: boolean }> = {}) {
 		return context.player.inventory.containedItems
 			.filter(item => {
-				if (item.isEquipped() || this.isInventoryItem(context, item) || (!ignoreReserved && context.isReservedItem(item))) {
+				if (item.isEquipped() ||
+					((!options.allowSailboat || item !== context.inventory.sailBoat) && this.isInventoryItem(context, item)) ||
+					(!options.allowReservedItems && context.isReservedItem(item))) {
 					return false;
 				}
 

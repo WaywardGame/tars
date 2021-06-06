@@ -41,7 +41,7 @@ class MovementUtilities {
 
     private cachedPaths: Map<string, NavigationPath | undefined> = new Map();
 
-    public resetCachedPaths() {
+    public clearCache() {
         this.cachedPaths.clear();
     }
 
@@ -167,7 +167,7 @@ class MovementUtilities {
         return this.move(context, target, false);
     }
 
-    public async move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean): Promise<MoveResult> {
+    public async move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean, walkOnce?: boolean): Promise<MoveResult> {
         const movementPath = await this.getMovementPath(context, target, moveAdjacentToTarget);
 
         if (movementPath.difficulty !== 0) {
@@ -284,7 +284,12 @@ class MovementUtilities {
                         }
                     }
 
-                    context.player.walkAlongPath(path, true);
+                    if (walkOnce) {
+                        context.player.walkAlongPath([nextPosition], true);
+
+                    } else {
+                        context.player.walkAlongPath(path, true);
+                    }
                 }
 
                 return MoveResult.Moving;

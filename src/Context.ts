@@ -98,6 +98,32 @@ export default class Context {
 		}
 	}
 
+	public addProvidedItems(itemTypes: ItemType[]) {
+		for (const itemType of itemTypes) {
+			this.state.providedItems.set(itemType, (this.state.providedItems.get(itemType) ?? 0) + 1);
+
+			if (this.changes) {
+				this.changes.providedItems.set(itemType, (this.changes.providedItems.get(itemType) ?? 0) + 1);
+			}
+		}
+	}
+
+	public tryUseProvidedItems(itemType: ItemType): boolean {
+		const available = this.state.providedItems.get(itemType) ?? 0;
+		if (available > 0) {
+			this.state.providedItems.set(itemType, available - 1);
+
+			if (this.changes) {
+				this.changes.providedItems.set(itemType, (this.changes.providedItems.get(itemType) ?? 0) - 1);
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+
 	public setInitialState(state: ContextState = this.state.clone(false)) {
 		this.initialState = state;
 	}

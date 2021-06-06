@@ -11,7 +11,7 @@ class TileUtilities {
 
 	private cache: Map<string, ITileLocation[]> = new Map();
 
-	public reset() {
+	public clearCache() {
 		this.cache.clear();
 	}
 
@@ -39,10 +39,11 @@ class TileUtilities {
 	}
 
 	public isOverWater(context: Context) {
-		const tile = game.getTileFromPoint(context.getPosition());
-		const terrainType = TileHelpers.getType(tile);
-		const terrainInfo = Terrains[terrainType];
-		return terrainInfo && terrainInfo.water === true;
+		return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.water === true;
+	}
+
+	public isOverDeepWater(context: Context) {
+		return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
 	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {

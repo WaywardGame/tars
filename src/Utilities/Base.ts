@@ -7,6 +7,7 @@ import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Creature from "game/entity/creature/Creature";
+import Item from "game/item/Item";
 
 import Context from "../Context";
 import { baseInfo, BaseInfoKey } from "../ITars";
@@ -191,6 +192,21 @@ class BaseUtilities {
 
 			result.totalCount += containedItems.length;
 			result.tiles.push(point);
+		}
+
+		return result;
+	}
+
+	public getTileItemsNearBase(context: Context): Item[] {
+		let result: Item[] = [];
+
+		for (const { tile } of this.getTilesNearBase(context)) {
+			const containedItems = tile.containedItems;
+			if (!containedItems || containedItems.length === 0) {
+				continue;
+			}
+
+			result = result.concat(containedItems);
 		}
 
 		return result;

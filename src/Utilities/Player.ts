@@ -15,13 +15,21 @@ const recoverThresholds: { [index: number]: number | number[] } = {
 
 class PlayerUtilities {
 
-	public isHealthy(context: Context) {
-		return context.player.stat.get<IStatMax>(Stat.Health).value > 8
-			&& context.player.stat.get<IStatMax>(Stat.Hunger).value > 8;
+	public getWeight(context: Context) {
+		return context.player.stat.get<IStatMax>(Stat.Weight).value;
+	}
+
+	public getMaxWeight(context: Context) {
+		return context.player.stat.get<IStatMax>(Stat.Weight).max;
 	}
 
 	public isUsingVehicle(context: Context) {
 		return context.player.vehicleItemId !== undefined;
+	}
+
+	public isHealthy(context: Context) {
+		return context.player.stat.get<IStatMax>(Stat.Health).value > 8
+			&& context.player.stat.get<IStatMax>(Stat.Hunger).value > 8;
 	}
 
 	public getRecoverThreshold(context: Context, stat: Stat) {

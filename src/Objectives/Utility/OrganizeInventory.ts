@@ -5,7 +5,7 @@ import Item from "game/item/Item";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
 
-import { ContextDataType } from "../..//IContext";
+import { ContextDataType, MovingToNewIslandState } from "../..//IContext";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
@@ -56,10 +56,12 @@ export default class OrganizeInventory extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+
 		const reservedItems = itemUtilities.getReservedItems(context);
 		const reservedItemsWeight = reservedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		let unusedItems = itemUtilities.getUnusedItems(context);
+		let unusedItems = itemUtilities.getUnusedItems(context, { allowSailboat: moveToNewIslandState === MovingToNewIslandState.None });
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
 		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
@@ -108,7 +110,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (unusedItems.length === 0 && this.options.allowReservedItems) {
 			// ignore reserved items
-			unusedItems = itemUtilities.getUnusedItems(context, true);
+			unusedItems = itemUtilities.getUnusedItems(context, { allowReservedItems: true });
 		}
 
 		if (unusedItems.length === 0) {

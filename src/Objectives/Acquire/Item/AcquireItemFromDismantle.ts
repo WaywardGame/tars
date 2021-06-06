@@ -34,14 +34,10 @@ export default class AcquireItemFromDismantle extends Objective {
 	}
 
 	public getStatus(): string {
-		if (this.dismantleItemTypes.length > 1) {
-			const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
-				.collect(Translation.formatList, ListEnder.Or);
+		const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+			.collect(Translation.formatList, ListEnder.Or);
 
-			return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
-		}
-
-		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${Translation.nameOf(Dictionary.Item, this.dismantleItemTypes[0]).getString()}`;
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -97,7 +93,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				}
 
 				action.execute(context.player, item);
-			}).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+			}).passContextDataKey(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

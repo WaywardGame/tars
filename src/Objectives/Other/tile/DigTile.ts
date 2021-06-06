@@ -40,7 +40,6 @@ export default class DigTile extends Objective {
 		if (digUntilTypeIsNot !== undefined) {
 			objectives.push(new Lambda(async () => {
 				if (digUntilTypeIsNot === TileHelpers.getType(game.getTileFromPoint(this.target))) {
-					console.log("restarting");
 					return ObjectiveResult.Restart;
 				}
 
