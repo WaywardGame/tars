@@ -21,7 +21,7 @@ import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrain from "../../gather/GatherFromTerrain";
 
-import AcquireBase from "./AcquireBase";
+import AcquireBase, { IAcquireItemOptions } from "./AcquireBase";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
@@ -36,7 +36,7 @@ export default class AcquireItem extends AcquireBase {
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
 	private static readonly dismantleSearchCache: Map<ItemType, ItemType[]> = new Map();
 
-	constructor(private readonly itemType: ItemType, private readonly options: Partial<{ disableCreatureSearch: boolean; disableDoodadSearch: boolean }> = {}) {
+	constructor(private readonly itemType: ItemType, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();
 	}
 
@@ -63,8 +63,8 @@ export default class AcquireItem extends AcquireBase {
 		const itemDescription = itemDescriptions[this.itemType];
 
 		const objectivePipelines: IObjective[][] = [
-			[new GatherFromGround(this.itemType).passContextDataKey(this)],
-			[new GatherFromChest(this.itemType).passContextDataKey(this)],
+			[new GatherFromGround(this.itemType, this.options).passContextDataKey(this)],
+			[new GatherFromChest(this.itemType, this.options).passContextDataKey(this)],
 			[new UseProvidedItem(this.itemType).passContextDataKey(this)],
 		];
 

@@ -47,7 +47,7 @@ export default class BuildItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = this.item || context.getData(ContextDataType.LastAcquiredItem);
+		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
 			this.log.error("Invalid build item");
 			return ObjectiveResult.Restart;

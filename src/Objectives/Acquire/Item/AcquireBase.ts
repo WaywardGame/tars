@@ -1,3 +1,4 @@
+import { ItemType } from "../../../../node_modules/@wayward/types/definitions/game/item/IItem";
 import Context from "../../../Context";
 import { IExecutionTree } from "../../../core/IPlan";
 import Objective from "../../../Objective";
@@ -8,6 +9,16 @@ import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrain from "../../gather/GatherFromTerrain";
+
+export interface IAcquireItemOptions extends IGatherItemOptions {
+	disableCreatureSearch: boolean;
+	disableDoodadSearch: boolean;
+	excludeItemTypes: Set<ItemType>;
+}
+
+export interface IGatherItemOptions {
+	requiredMinDur: number;
+}
 
 export interface IObjectivePriority {
 	priority: number;

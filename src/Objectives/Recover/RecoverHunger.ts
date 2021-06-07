@@ -8,7 +8,7 @@ import Objective from "../../Objective";
 import { baseUtilities } from "../../utilities/Base";
 import { itemUtilities } from "../../utilities/Item";
 import AcquireFood from "../acquire/item/AcquireFood";
-import MoveToTarget from "../core/MoveToTarget";
+import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 import UseItem from "../other/item/UseItem";
 
 const decayingSoonThreshold = 50;
@@ -111,11 +111,6 @@ export default class RecoverHunger extends Objective {
 
 	private eatItem(context: Context, item: Item) {
 		this.log.info(`Eating ${item.getName(false).getString()}`);
-
-		if (!itemManager.isContainableInContainer(item, context.player.inventory)) {
-			return [new MoveToTarget(item.getPoint()!, true), new UseItem(ActionType.Eat, item)];
-		}
-
-		return new UseItem(ActionType.Eat, item);
+		return [new MoveItemIntoInventory(item), new UseItem(ActionType.Eat, item)];
 	}
 }

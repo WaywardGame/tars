@@ -8,6 +8,7 @@ import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Creature from "game/entity/creature/Creature";
 import Item from "game/item/Item";
+import { BiomeType } from "game/biome/IBiome";
 
 import Context from "../Context";
 import { baseInfo, BaseInfoKey } from "../ITars";
@@ -22,6 +23,10 @@ class BaseUtilities {
 
 	public reset() {
 		this.tilesNearBaseCache = undefined;
+	}
+
+	public shouldBuildWaterStills(context: Context) {
+		return island.biomeType !== BiomeType.IceCap;
 	}
 
 	public isGoodBuildTile(context: Context, point: IVector3, tile: ITile, openAreaRadius?: number): boolean {

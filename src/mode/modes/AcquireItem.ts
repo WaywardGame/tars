@@ -25,7 +25,8 @@ export class AcquireItemMode implements ITarsMode {
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")
-	public onInventoryItemAdd(_: Player, item: Item) {
+	@EventHandler(EventBus.LocalPlayer, "inventoryItemUpdate")
+	public onInventoryItemAddOrUpdate(_: Player, item: Item) {
 		// todo: compare player with context.player?
 		if (item.type === this.itemType) {
 			this.finished();

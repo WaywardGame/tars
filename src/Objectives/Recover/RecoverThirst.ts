@@ -1,8 +1,6 @@
 import { ActionType } from "game/entity/action/IAction";
 import { IStatMax, Stat } from "game/entity/IStats";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import Enums from "utilities/enum/Enums";
-import itemDescriptions from "game/item/Items";
+import { ItemTypeGroup } from "game/item/IItem";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -25,7 +23,7 @@ import { baseUtilities } from "../../utilities/Base";
 import { doodadUtilities } from "../../utilities/Doodad";
 import { playerUtilities } from "../../utilities/Player";
 import { itemUtilities } from "../../utilities/Item";
-import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
+import GatherWaterWithRecipe from "../gather/GatherWaterWithRecipe";
 
 export default class RecoverThirst extends Objective {
 
@@ -67,20 +65,8 @@ export default class RecoverThirst extends Objective {
 					if (context.inventory.waterContainer !== undefined) {
 						for (const waterContainer of context.inventory.waterContainer) {
 							if (itemUtilities.isDrinkableItem(waterContainer) && !itemUtilities.isSafeToDrinkItem(waterContainer)) {
-								const baseItemType = waterContainer.description()?.returnOnUseAndDecay?.type;
-								if (baseItemType !== undefined) {
-									const baseItemTypeDescription = itemDescriptions[baseItemType];
-									if (baseItemTypeDescription?.gather?.unpurified === waterContainer.type) {
-										// we have an unpurified container
-										for (const itemType of Enums.values(ItemType)) {
-											const description = itemDescriptions[itemType];
-											if (description && description?.returnOnUseAndDecay?.type === baseItemType && description.recipe?.baseComponent === waterContainer.type) {
-												objectivePipelines.push([new AcquireItemWithRecipe(itemType, description.recipe, true)]);
-												break;
-											}
-										}
-									}
-								}
+								// we have an unpurified container. try purifying it
+								objectivePipelines.push([new GatherWaterWithRecipe(waterContainer)]);
 							}
 						}
 					}
@@ -94,15 +80,25 @@ export default class RecoverThirst extends Objective {
 
 		if (context.inventory.waterContainer !== undefined) {
 			for (const waterContainer of context.inventory.waterContainer) {
-				if (itemUtilities.isDrinkableItem(waterContainer)) {
+				if (itemUtilities.canGatherWater(waterContainer)) {
+					// try getting unpurified water
+					objectivePipelines.push([new GatherWaterWithRecipe(waterContainer)]);
+
+				} else if (itemUtilities.isDrinkableItem(waterContainer)) {
 					if (itemUtilities.isSafeToDrinkItem(waterContainer)) {
 						this.log.info("Drink water from container");
 						objectivePipelines.push([new UseItem(ActionType.DrinkItem, waterContainer)]);
 
-					} else if (isEmergency && itemManager.isInGroup(waterContainer.type, ItemTypeGroup.ContainerOfUnpurifiedFreshWater)) {
-						// emergency!
-						this.log.info("Drink unpurified water from container");
-						objectivePipelines.push([new UseItem(ActionType.DrinkItem, waterContainer)]);
+					} else {
+						if (isEmergency && itemManager.isInGroup(waterContainer.type, ItemTypeGroup.ContainerOfUnpurifiedFreshWater)) {
+							// emergency!
+							this.log.info("Drink unpurified water from container");
+							objectivePipelines.push([new UseItem(ActionType.DrinkItem, waterContainer)]);
+
+						} else {
+							// try getting purified water
+							objectivePipelines.push([new GatherWaterWithRecipe(waterContainer)]);
+						}
 					}
 				}
 			}

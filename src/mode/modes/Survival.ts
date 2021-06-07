@@ -29,7 +29,6 @@ import BuildItem from "../../objectives/other/item/BuildItem";
 import EmptyWaterContainer from "../../objectives/other/EmptyWaterContainer";
 import EquipItem from "../../objectives/other/item/EquipItem";
 import Idle from "../../objectives/other/Idle";
-import PlantSeed from "../../objectives/other/item/PlantSeed";
 import ReinforceItem from "../../objectives/other/item/ReinforceItem";
 import ReturnToBase from "../../objectives/other/ReturnToBase";
 import StartWaterStillDesalination from "../../objectives/other/doodad/StartWaterStillDesalination";
@@ -49,6 +48,7 @@ import { itemUtilities } from "../../utilities/Item";
 import AcquireUseOrbOfInfluence from "../../objectives/acquire/item/specific/AcquireUseOrbOfInfluence";
 import CheckDecayingItems from "../../objectives/other/item/CheckDecayingItems";
 import HuntCreatures from "../../objectives/other/creature/HuntCreatures";
+import PlantSeeds from "../../objectives/utility/PlantSeeds";
 
 /**
  * Survival mode
@@ -152,7 +152,7 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
 		}
 
-		if (context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
+		if (baseUtilities.shouldBuildWaterStills(context) && context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
 		}
 
@@ -196,11 +196,7 @@ export class SurvivalMode implements ITarsMode {
 				objectives.push(new StartWaterStillDesalination(waterStill));
 			}
 
-			// todo: improve seed planting - grab from base chests too! and add reserved items for it
-			const seeds = itemUtilities.getSeeds(context);
-			if (seeds.length > 0) {
-				objectives.push(new PlantSeed(seeds[0]));
-			}
+			objectives.push(new PlantSeeds());
 
 			objectives.push(new CheckDecayingItems());
 		}
@@ -284,7 +280,7 @@ export class SurvivalMode implements ITarsMode {
 		// run a few extra things before running upgrade objectives if we're near a base 
 		if (baseUtilities.isNearBase(context)) {
 			// build a second water still
-			if (context.base.waterStill.length < 2) {
+			if (baseUtilities.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
 				objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
 			}
 
@@ -379,64 +375,90 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push(new ReinforceItem(context.inventory.equipChest, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
+		if (context.inventory.axe) {
+			objectives.push(new ReinforceItem(context.inventory.axe, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
+		if (context.inventory.pickAxe) {
+			objectives.push(new ReinforceItem(context.inventory.pickAxe, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
+		if (context.inventory.hammer) {
+			objectives.push(new ReinforceItem(context.inventory.hammer, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
+		if (context.inventory.shovel) {
+			objectives.push(new ReinforceItem(context.inventory.shovel, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
+		if (context.inventory.hoe) {
+			objectives.push(new ReinforceItem(context.inventory.hoe, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
+		if (context.inventory.tongs) {
+			objectives.push(new ReinforceItem(context.inventory.tongs, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
 		/*
 			Upgrade objectives
 		*/
 
+		// restart at the end of each one because we'll likely want to reinforce them right after
+
 		if (context.inventory.equipSword && context.inventory.equipSword.type === ItemType.WoodenSword) {
-			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
+			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand), new Restart()]);
 		}
 
 		if (context.inventory.equipShield && context.inventory.equipShield.type === ItemType.WoodenShield) {
-			objectives.push([new UpgradeInventoryItem("equipShield"), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
+			objectives.push([new UpgradeInventoryItem("equipShield"), new AnalyzeInventory(), new EquipItem(EquipType.RightHand), new Restart()]);
 		}
 
 		if (context.inventory.equipBelt && context.inventory.equipBelt.type === ItemType.LeatherBelt) {
-			objectives.push([new UpgradeInventoryItem("equipBelt"), new AnalyzeInventory(), new EquipItem(EquipType.Belt)]);
+			objectives.push([new UpgradeInventoryItem("equipBelt"), new AnalyzeInventory(), new EquipItem(EquipType.Belt), new Restart()]);
 		}
 
 		if (context.inventory.equipNeck && context.inventory.equipNeck.type === ItemType.LeatherGorget) {
-			objectives.push([new UpgradeInventoryItem("equipNeck"), new AnalyzeInventory(), new EquipItem(EquipType.Neck)]);
+			objectives.push([new UpgradeInventoryItem("equipNeck"), new AnalyzeInventory(), new EquipItem(EquipType.Neck), new Restart()]);
 		}
 
 		if (context.inventory.equipHead && context.inventory.equipHead.type === ItemType.LeatherCap) {
-			objectives.push([new UpgradeInventoryItem("equipHead"), new AnalyzeInventory(), new EquipItem(EquipType.Head)]);
+			objectives.push([new UpgradeInventoryItem("equipHead"), new AnalyzeInventory(), new EquipItem(EquipType.Head), new Restart()]);
 		}
 
 		if (context.inventory.equipFeet && context.inventory.equipFeet.type === ItemType.LeatherBoots) {
-			objectives.push([new UpgradeInventoryItem("equipFeet"), new AnalyzeInventory(), new EquipItem(EquipType.Feet)]);
+			objectives.push([new UpgradeInventoryItem("equipFeet"), new AnalyzeInventory(), new EquipItem(EquipType.Feet), new Restart()]);
 		}
 
 		if (context.inventory.equipHands && context.inventory.equipHands.type === ItemType.LeatherGloves) {
-			objectives.push([new UpgradeInventoryItem("equipHands"), new AnalyzeInventory(), new EquipItem(EquipType.Hands)]);
+			objectives.push([new UpgradeInventoryItem("equipHands"), new AnalyzeInventory(), new EquipItem(EquipType.Hands), new Restart()]);
 		}
 
 		if (context.inventory.equipLegs && context.inventory.equipLegs.type === ItemType.LeatherPants) {
-			objectives.push([new UpgradeInventoryItem("equipLegs"), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
+			objectives.push([new UpgradeInventoryItem("equipLegs"), new AnalyzeInventory(), new EquipItem(EquipType.Legs), new Restart()]);
 		}
 
 		if (context.inventory.equipChest && context.inventory.equipChest.type === ItemType.LeatherTunic) {
-			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
+			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new EquipItem(EquipType.Chest), new Restart()]);
 		}
 
 		if (context.inventory.axe && context.inventory.axe.type === ItemType.StoneAxe) {
-			objectives.push([new UpgradeInventoryItem("axe"), new AnalyzeInventory()]);
+			objectives.push([new UpgradeInventoryItem("axe"), new AnalyzeInventory(), new Restart()]);
 		}
 
 		if (context.inventory.pickAxe && context.inventory.pickAxe.type === ItemType.StonePickaxe) {
-			objectives.push([new UpgradeInventoryItem("pickAxe"), new AnalyzeInventory()]);
+			objectives.push([new UpgradeInventoryItem("pickAxe"), new AnalyzeInventory(), new Restart()]);
 		}
 
 		if (context.inventory.shovel && context.inventory.shovel.type === ItemType.StoneShovel) {
-			objectives.push([new UpgradeInventoryItem("shovel"), new AnalyzeInventory()]);
+			objectives.push([new UpgradeInventoryItem("shovel"), new AnalyzeInventory(), new Restart()]);
 		}
 
 		if (context.inventory.hammer && context.inventory.hammer.type === ItemType.StoneHammer) {
-			objectives.push([new UpgradeInventoryItem("hammer"), new AnalyzeInventory()]);
+			objectives.push([new UpgradeInventoryItem("hammer"), new AnalyzeInventory(), new Restart()]);
 		}
 
 		if (context.inventory.hoe && context.inventory.hoe.type === ItemType.StoneHoe) {
-			objectives.push([new UpgradeInventoryItem("hoe"), new AnalyzeInventory()]);
+			objectives.push([new UpgradeInventoryItem("hoe"), new AnalyzeInventory(), new Restart()]);
 		}
 
 		/*
@@ -447,8 +469,6 @@ export class SurvivalMode implements ITarsMode {
 			// move to a new island
 			const needWaterItems = context.inventory.waterContainer === undefined || context.inventory.waterContainer.filter(item => itemUtilities.isSafeToDrinkItem(item)).length < 2;
 			const needFoodItems = context.inventory.food === undefined || context.inventory.food.length < 2;
-
-			console.log("needWaterItems", needWaterItems, context.inventory.waterContainer?.filter(item => itemUtilities.isSafeToDrinkItem(item)));
 
 			const health = context.player.stat.get<IStatMax>(Stat.Health);
 			const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
@@ -537,7 +557,7 @@ export class SurvivalMode implements ITarsMode {
 				objectives.push(new Lambda(async () => {
 					this.finished();
 					return ObjectiveResult.Complete;
-				}));
+				}).setStatus("Finish"));
 
 			} else {
 				objectives.push(new Idle());

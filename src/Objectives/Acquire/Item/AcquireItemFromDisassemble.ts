@@ -9,15 +9,16 @@ import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import SetContextData from "../../contextData/SetContextData";
-import ExecuteAction from "../../core/ExecuteAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/MoveToLand";
 import ProvideItems from "../../core/ProvideItems";
 import { IDisassemblySearch } from "../../../ITars";
 import { itemUtilities } from "../../../utilities/Item";
+import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
+import AcquireItem from "./AcquireItem";
+import AcquireItemByGroup from "./AcquireItemByGroup";
 
 /**
  * Disassembles one of the items.
@@ -52,7 +53,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		for (const { item, disassemblyItems } of this.searches) {
+		for (const { item, disassemblyItems, requiredForDisassembly } of this.searches) {
 			if (context.isReservedItem(item)) {
 				continue;
 			}
@@ -72,19 +73,15 @@ export default class AcquireItemFromDisassemble extends Objective {
 				new ReserveItems(item),
 				new ProvideItems(...disassemblyItems.map(item => item.type)),
 				new SetContextData(hashCode, item),
+				new MoveItemIntoInventory(item),
 			];
 
-			if (!itemManager.isContainableInContainer(item, context.player.inventory)) {
-				// it might be in a chest
-				const point = item.getPoint();
-				if (!point) {
-					continue;
+			if (requiredForDisassembly) {
+				for (const itemTypeOfGroup of requiredForDisassembly) {
+					if (!itemManager.getItemForHuman(context.player, itemTypeOfGroup)) {
+						objectives.push(itemManager.isGroup(itemTypeOfGroup) ? new AcquireItemByGroup(itemTypeOfGroup) : new AcquireItem(itemTypeOfGroup));
+					}
 				}
-
-				objectives.push(new MoveToTarget(point, true));
-				objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-					action.execute(context.player, item, context.player.inventory);
-				}));
 			}
 
 			if (context.player.swimming) {

@@ -187,7 +187,6 @@ export default class Tars extends Mod {
 		Log.addPreConsoleCallback(loggerUtilities.preConsoleCallback);
 
 		(window as any).TARS = this;
-		(window as any).TARS_Planner = planner;
 
 		// this is to support hot reloading while in game
 		if (this.saveData.ui[TarsUiSaveDataKey.DialogOpened]) {
@@ -202,7 +201,6 @@ export default class Tars extends Mod {
 		Log.removePreConsoleCallback(loggerUtilities.preConsoleCallback);
 
 		(window as any).TARS = undefined;
-		(window as any).TARS_Planner = undefined;
 
 		// this is to support hot reloading while in game
 		if (this.gamePlaying && gameScreen?.isDialogVisible(Tars.INSTANCE.dialogMain)) {
@@ -501,6 +499,10 @@ export default class Tars extends Mod {
 					case "exploreIslands":
 						this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
 						break;
+
+					case "developerMode":
+						planner.debug = this.saveData.options.developerMode;
+						break;
 				}
 			}
 		}
@@ -563,12 +565,15 @@ export default class Tars extends Mod {
 			stayHealthy: true,
 			exploreIslands: true,
 			useOrbsOfInfluence: true,
+			developerMode: false,
 			...(this.saveData.options ?? {}) as Partial<ITarsOptions>,
 		}
 
 		if (this.saveData.options.mode === TarsMode.Manual) {
 			this.saveData.options.mode = TarsMode.Survival;
 		}
+
+		planner.debug = this.saveData.options.developerMode;
 	}
 
 	private async ensureNavigation() {
@@ -703,7 +708,7 @@ export default class Tars extends Mod {
 	}
 
 	private interrupt(...interruptObjectives: IObjective[]) {
-		log.info("Interrupt", interruptObjectives.map(objective => objective.getHashCode()).join(" -> "));
+		log.info("Interrupt", Objective.getPipelineString(interruptObjectives));
 
 		executor.interrupt();
 
@@ -1403,6 +1408,10 @@ export default class Tars extends Mod {
 	 * Explicitly not using OrganizeInventory for this - the exact objectives should be specified to prevent issues
 	 */
 	private organizeInventoryInterrupts(context: Context, interruptContext?: Context): IObjective[] | undefined {
+		if (context.getDataOrDefault(ContextDataType.DisableMoveAwayFromBaseItemOrganization, false)) {
+			return undefined;
+		}
+
 		const walkPath = context.player.walkPath;
 		if (walkPath === undefined || walkPath.path.length === 0) {
 			return undefined;
@@ -1453,7 +1462,8 @@ export default class Tars extends Mod {
 			`Reserved items: ${reservedItems.join(",")}`,
 			`Unused items: ${unusedItems.join(",")}`,
 			`Context reserved items: ${Array.from(context.state.reservedItems).join(",")}`,
-			`Interrupt context reserved items: ${Array.from(interruptContext?.state.reservedItems ?? []).join(",")}`);
+			`Interrupt context reserved items: ${Array.from(interruptContext?.state.reservedItems ?? []).join(",")}`,
+			`Objectives: ${Objective.getPipelineString(objectives)}`);
 
 		return objectives;
 	}

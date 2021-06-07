@@ -8,48 +8,45 @@ import TileHelpers from "utilities/game/TileHelpers";
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import { gardenMaxTilesChecked } from "../../../ITars";
 import Objective from "../../../Objective";
 import { baseUtilities } from "../../../utilities/Base";
+import { tileUtilities } from "../../../utilities/Tile";
 import AcquireItem from "../../acquire/item/AcquireItem";
 import CopyContextData from "../../contextData/CopyContextData";
 import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";
 import Restart from "../../core/Restart";
+import DigTile from "../tile/DigTile";
 
 import UseItem from "./UseItem";
 
+export const gardenMaxTilesChecked = 1536;
+
 export default class PlantSeed extends Objective {
 
-	private readonly plantTiles: TerrainType[];
-
-	constructor(private readonly seed: Item) {
+	constructor(private readonly seed?: Item) {
 		super();
-
-		const description = this.seed.description();
-		if (!description || !description.onUse) {
-			throw new Error("Invalid onUse for seed");
-		}
-
-		const plantType = description.onUse[ActionType.Plant];
-		const plantDescription = doodadDescriptions[plantType!];
-		if (!plantDescription) {
-			throw new Error("Invalid plant description");
-		}
-
-		const allowedTiles = plantDescription.allowedTiles;
-		if (!allowedTiles) {
-			throw new Error("Invalid allowed tiles");
-		}
-
-		this.plantTiles = allowedTiles;
 	}
 
 	public getIdentifier(): string {
 		return `PlantSeed:${this.seed}`;
 	}
 
+	public getStatus(): string {
+		return `Planting ${this.seed?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const seed = this.seed ?? context.getData(ContextDataType.LastAcquiredItem);
+		if (!seed) {
+			return ObjectiveResult.Restart;
+		}
+
+		const allowedTiles = doodadDescriptions[seed.description()?.onUse?.[ActionType.Plant]!]?.allowedTiles;
+		if (!allowedTiles) {
+			return ObjectiveResult.Impossible;
+		}
+
 		const objectives: IObjective[] = [];
 
 		if (context.inventory.hoe === undefined) {
@@ -65,29 +62,48 @@ export default class PlantSeed extends Objective {
 			return game.isTileEmpty(tile) &&
 				TileHelpers.isOpenTile(point, tile) &&
 				TileHelpers.isTilled(tile) &&
-				this.plantTiles.includes(TileHelpers.getType(tile)) &&
+				allowedTiles.includes(TileHelpers.getType(tile)) &&
 				(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
 		}, { maxTilesChecked: gardenMaxTilesChecked });
 		if (emptyTilledTile !== undefined) {
 			objectives.push(new MoveToTarget(emptyTilledTile, true));
 
 		} else {
-			const nearbyTillableTile = TileHelpers.findMatchingTile(baseUtilities.getBasePosition(context), (point, tile) =>
-				this.plantTiles.includes(TileHelpers.getType(tile)) && baseUtilities.isOpenArea(context, point, tile), { maxTilesChecked: gardenMaxTilesChecked });
-			if (nearbyTillableTile !== undefined) {
-				objectives.push(new MoveToTarget(nearbyTillableTile, true));
-				objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
-				objectives.push(new UseItem(ActionType.Till));
+			const nearbyTillableTile = TileHelpers.findMatchingTiles(
+				baseUtilities.getBasePosition(context),
+				(point, tile) => {
+					const tileType = TileHelpers.getType(tile);
+					if (tileType === TerrainType.Grass && !tileUtilities.canDig(tile)) {
+						return false;
+					}
 
-				// it's possible tilling failed. restart after tilling to recalculate
-				objectives.push(new Restart());
+					return allowedTiles.includes(tileType) && baseUtilities.isOpenArea(context, point, tile);
+				},
+				{
+					maxTilesChecked: gardenMaxTilesChecked,
+					maxTiles: 1,
+				}
+			);
 
-			} else {
+			if (nearbyTillableTile.length === 0) {
 				return ObjectiveResult.Impossible;
 			}
+
+			const { tile, point } = nearbyTillableTile[0];
+
+			if (TileHelpers.getType(tile) === TerrainType.Grass) {
+				objectives.push(new DigTile(point, { digUntilTypeIsNot: TerrainType.Grass }));
+			}
+
+			objectives.push(new MoveToTarget(point, true));
+			objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
+			objectives.push(new UseItem(ActionType.Till));
+
+			// it's possible tilling failed. restart after tilling to recalculate
+			objectives.push(new Restart());
 		}
 
-		objectives.push(new UseItem(ActionType.Plant, this.seed));
+		objectives.push(new UseItem(ActionType.Plant, seed));
 
 		return objectives;
 	}

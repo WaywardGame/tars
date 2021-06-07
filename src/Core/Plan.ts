@@ -126,9 +126,11 @@ export default class Plan implements IPlan {
 
 			if (result === ObjectiveResult.Pending) {
 				const pendingop = this.getObjectiveResults(chain, objectiveStack, objectiveInfo);
-				if (pendingop.length > 0 && !(pendingop[pendingop.length - 1] instanceof Restart)) {
-					console.log("pendingfix missing restart", pendingop.map(o => o.getHashCode()).join(","));
-					console.log("pendingfix stacks", `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`, `${objectiveStack.map(o => `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`).join(",")}`);
+				if (this.context.options.developerMode) {
+					if (pendingop.length > 0 && !(pendingop[pendingop.length - 1] instanceof Restart)) {
+						console.log("pendingfix missing restart", pendingop.map(o => o.getHashCode()).join(","));
+						console.log("pendingfix stacks", `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`, `${objectiveStack.map(o => `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`).join(",")}`);
+					}
 				}
 
 				return {

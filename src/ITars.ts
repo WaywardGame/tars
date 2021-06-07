@@ -17,8 +17,6 @@ export const TARS_ID = "TARS";
 
 export const defaultMaxTilesChecked = 3000;
 
-export const gardenMaxTilesChecked = 1024;
-
 export enum TarsTranslation {
 	DialogTitleMain,
 
@@ -39,6 +37,8 @@ export enum TarsTranslation {
 	DialogButtonStayHealthyTooltip,
 	DialogButtonUseOrbsOfInfluence,
 	DialogButtonUseOrbsOfInfluenceTooltip,
+	DialogButtonDeveloperMode,
+	DialogButtonDeveloperModeTooltip,
 
 	DialogLabelItem,
 	DialogLabelDoodad,
@@ -47,6 +47,8 @@ export enum TarsTranslation {
 	DialogModeSurvivalTooltip,
 	DialogModeTidyUp,
 	DialogModeTidyUpTooltip,
+	DialogModeGardener,
+	DialogModeGardenerTooltip,
 }
 
 export interface ISaveData {
@@ -68,10 +70,11 @@ export interface ITarsOptions {
 	exploreIslands: boolean;
 	stayHealthy: boolean;
 	useOrbsOfInfluence: boolean;
+	developerMode: boolean;
 }
 
 // options to show in the Options panel
-export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mode">; title: TarsTranslation; tooltip: TarsTranslation }> = [
+export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mode">; title: TarsTranslation; tooltip: TarsTranslation } | undefined> = [
 	{
 		option: "exploreIslands",
 		title: TarsTranslation.DialogButtonExploreIslands,
@@ -86,6 +89,12 @@ export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mo
 		option: "useOrbsOfInfluence",
 		title: TarsTranslation.DialogButtonUseOrbsOfInfluence,
 		tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
+	},
+	undefined, // creates a Divider
+	{
+		option: "developerMode",
+		title: TarsTranslation.DialogButtonDeveloperMode,
+		tooltip: TarsTranslation.DialogButtonDeveloperModeTooltip,
 	}
 ];
 
@@ -225,11 +234,14 @@ export interface IInventoryItemInfo {
 	itemTypes?: Array<ItemType | ItemTypeGroup>;
 	actionTypes?: ActionType[];
 	equipType?: EquipType;
-	flags?: InventoryItemFlag | { flag: InventoryItemFlag; option: any; };
+	flags?: InventoryItemFlags;
 	allowMultiple?: number;
 	allowInChests?: boolean;
+	allowOnTiles?: boolean;
 	protect?: boolean;
 }
+
+export type InventoryItemFlags = InventoryItemFlag | { flag: InventoryItemFlag; option: any; };
 
 export enum InventoryItemFlag {
 	/**
@@ -377,6 +389,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	hammer: {
 		itemTypes: [ItemTypeGroup.Hammer],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Repair,
+		},
 	},
 	heal: {
 		actionTypes: [ActionType.Heal],
@@ -432,6 +448,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	sailBoat: {
 		itemTypes: [ItemType.Sailboat],
 		allowInChests: true,
+		allowOnTiles: true,
 	},
 	shovel: {
 		actionTypes: [ActionType.Dig],
@@ -486,6 +503,7 @@ export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot;
 export interface IDisassemblySearch {
 	item: Item;
 	disassemblyItems: IItemDisassembly[];
+	requiredForDisassembly?: Array<ItemType | ItemTypeGroup>;
 }
 
 export interface ITarsEvents extends Events<Mod> {
@@ -509,4 +527,5 @@ export enum TarsMode {
 	Manual,
 	Survival,
 	TidyUp,
+	Gardener,
 }

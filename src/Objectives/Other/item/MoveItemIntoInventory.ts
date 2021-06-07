@@ -1,47 +1,47 @@
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
-import { EquipType } from "game/entity/IHuman";
 
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import AcquireBuildMoveToFire from "../../acquire/doodad/AcquireBuildMoveToFire";
-import EquipItem from "./EquipItem";
+import ExecuteAction from "../../core/ExecuteAction";
+import MoveToTarget from "../../core/MoveToTarget";
 
-import UseItem from "./UseItem";
-
-export default class IgniteItem extends Objective {
+export default class MoveItemIntoInventory extends Objective {
 
     constructor(private readonly item?: Item) {
         super();
     }
 
     public getIdentifier(): string {
-        return `IgniteItem:${this.item}`;
+        return `MoveItemIntoInventory:${this.item}`;
     }
 
     public getStatus(): string {
-        return `Igniting ${this.item?.getName()}`;
+        return `Moving ${this.item?.getName()} into inventory`;
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
         if (!item) {
-            this.log.error("Invalid ignite item");
             return ObjectiveResult.Restart;
         }
 
-        const description = item.description();
-        if (!description || !description.lit || !description.use?.includes(ActionType.Ignite)) {
-            this.log.error("Invalid ignite item", item);
+        if (itemManager.isContainableInContainer(item, context.player.inventory)) {
+            return ObjectiveResult.Complete;
+        }
+
+        const point = item.getPoint();
+        if (!point) {
             return ObjectiveResult.Impossible;
         }
 
         return [
-            new AcquireBuildMoveToFire(),
-            new EquipItem(EquipType.Held, item),
-            new UseItem(ActionType.Ignite, item),
+            new MoveToTarget(point, true),
+            new ExecuteAction(ActionType.MoveItem, (context, action) => {
+                action.execute(context.player, item, context.player.inventory);
+            }),
         ];
     }
 

@@ -29,6 +29,11 @@ export enum ContextDataType {
 	 * Set when TARS is moving to a new island
 	 */
 	MovingToNewIsland = "MovingToNewIsland",
+
+	/**
+	 * Disables moving items into intermediate chests when moving far away from the base
+	 */
+	DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
 }
 
 export enum MovingToNewIslandState {

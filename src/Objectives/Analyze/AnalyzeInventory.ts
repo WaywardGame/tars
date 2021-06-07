@@ -49,7 +49,7 @@ export default class AnalyzeInventory extends Objective {
 				}
 			}
 
-			const flags = itemInfo.flags !== undefined ? itemInfo.flags : InventoryItemFlag.PreferHigherWorth;
+			const flags = itemInfo.flags ?? InventoryItemFlag.PreferHigherWorth;
 
 			// use a set to prevent duplicates
 			const items: Set<Item> = new Set();
@@ -167,8 +167,12 @@ export default class AnalyzeInventory extends Objective {
 			return true;
 		}
 
-		if (itemInfo.allowInChests) {
-			return context.base.chest.some(chest => itemManager.isContainableInContainer(item, chest));
+		if (itemInfo.allowInChests && context.base.chest.some(chest => itemManager.isContainableInContainer(item, chest))) {
+			return true;
+		}
+
+		if (itemInfo.allowOnTiles && itemManager.isTileContainer(item.containedWithin)) {
+			return true;
 		}
 
 		return false;

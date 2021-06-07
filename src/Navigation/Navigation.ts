@@ -80,6 +80,11 @@ export default class Navigation {
 		for (const tileType of Enums.values(TerrainType)) {
 			const tileTypeName = TerrainType[tileType];
 
+			const terrainDescription = terrainDescriptions[tileType];
+			if (!terrainDescription || terrainDescription.ice) {
+				continue;
+			}
+
 			if (tileTypeName.includes("FreshWater")) {
 				freshWaterTypes.push(tileType);
 
@@ -87,8 +92,7 @@ export default class Navigation {
 				seaWaterTypes.push(tileType);
 			}
 
-			const terrainDescription = terrainDescriptions[tileType];
-			if (terrainDescription?.gather) {
+			if (terrainDescription.gather) {
 				gatherableTypes.push(tileType);
 			}
 		}

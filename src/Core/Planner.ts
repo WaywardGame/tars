@@ -33,7 +33,7 @@ class Planner implements IPlanner {
 
 	private readonly _log: Log;
 
-	constructor(private readonly debug = false) {
+	constructor(public debug = false) {
 		this._log = loggerUtilities.createLog("Planner");
 	}
 

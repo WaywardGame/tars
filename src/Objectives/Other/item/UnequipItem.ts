@@ -22,7 +22,7 @@ export default class UnequipItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = this.item || context.getData(ContextDataType.LastAcquiredItem);
+		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
 			return ObjectiveResult.Restart;
 		}

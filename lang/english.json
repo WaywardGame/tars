@@ -33,12 +33,16 @@
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
 			"dialogButtonUseOrbsOfInfluence": "Use Orbs Of Influence",
 			"dialogButtonUseOrbsOfInfluenceTooltip": "Allow TARS to use Orbs of Influence when necessary.",
+			"dialogButtonDeveloperMode": "Enable Developer Mode",
+			"dialogButtonDeveloperModeTooltip": "Enables extra debug logging to the console, which may significally decrease performance.",
 			"dialogLabelItem": "{#--text-secondary:Item}",
 			"dialogLabelDoodad": "{#--text-secondary:Doodad}",
 			"dialogModeSurvival": "Survival Mode",
 			"dialogModeSurvivalTooltip": "TARS will setup a camp, gather resources, build equipment, stay healthy, and survive.",
 			"dialogModeTidyUp": "Tidy Up Mode",
 			"dialogModeTidyUpTooltip": "TARS will tidy up items around the base by building & moving items into chests.",
+			"dialogModeGardener": "Gardener Mode",
+			"dialogModeGardenerTooltip": "TARS will gather seeds and plant them to make a garden.",
 			"dialogStatusNavigatingInitializing": "Initializing navigation system"
 		}
 	}

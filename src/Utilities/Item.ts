@@ -1,4 +1,4 @@
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
@@ -12,18 +12,17 @@ import Enums from "utilities/enum/Enums";
 import terrainDescriptions from "game/tile/Terrains";
 import Doodad from "game/doodad/Doodad";
 import { TerrainType } from "game/tile/ITerrain";
+import doodadDescriptions from "game/doodad/Doodads";
 
 import Context from "../Context";
 import { IDisassemblySearch, IInventoryItems, inventoryItemInfo } from "../ITars";
 import { doodadUtilities } from "./Doodad";
 import { baseUtilities } from "./Base";
 
-// items that can cause poisoning when eaten will be filtered out
-const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
-
 class ItemUtilities {
 
 	public readonly foodItemTypes = this.getFoodItemTypes();
+	public readonly seedItemTypes = this.getSeedItemTypes();
 
 	private itemCache: Item[] | undefined;
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
@@ -33,22 +32,26 @@ class ItemUtilities {
 		this.disassembleSearchCache.clear();
 	}
 
+	public getBaseItems(context: Context): Item[] {
+		if (this.itemCache === undefined) {
+			const baseTileItems = baseUtilities.getTileItemsNearBase(context);
+			const baseChestItems = context.base.chest
+				.map(chest => itemManager.getItemsInContainer(chest, true))
+				.flat();
+			const inventoryItems = itemManager.getItemsInContainer(context.player.inventory, true);
+
+			this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
+		}
+
+		return this.itemCache;
+	}
+
 	public getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[] {
 		let search = this.disassembleSearchCache.get(itemType);
 		if (search === undefined) {
 			search = [];
 
-			if (this.itemCache === undefined) {
-				const baseTileItems = baseUtilities.getTileItemsNearBase(context);
-				const baseChestItems = context.base.chest
-					.map(chest => itemManager.getItemsInContainer(chest, true))
-					.flat();
-				const inventoryItems = itemManager.getItemsInContainer(context.player.inventory, true);
-
-				this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
-			}
-
-			for (const item of this.itemCache) {
+			for (const item of this.getBaseItems(context)) {
 				if (!item.disassembly) {
 					continue;
 				}
@@ -68,6 +71,7 @@ class ItemUtilities {
 						search.push({
 							item,
 							disassemblyItems: disassemblyResult.items,
+							requiredForDisassembly: description.requiredForDisassembly,
 						});
 						break;
 					}
@@ -426,8 +430,13 @@ class ItemUtilities {
 	}
 
 	public getSeeds(context: Context): Item[] {
-		return itemManager.getItemsInContainerByGroup(context.player.inventory, ItemTypeGroup.Seed, true)
-			.filter(seed => seed.minDur !== undefined && seed.minDur > 0 && seed.type !== ItemType.GrassSeeds && seed.type !== ItemType.MapleSeeds);
+		const baseItems = this.getBaseItems(context);
+		return baseItems.filter(
+			item =>
+				item.minDur !== undefined &&
+				item.minDur > 0 &&
+				this.seedItemTypes.has(item.type)
+		);
 	}
 
 	public getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: DoodadType | DoodadTypeGroup): Item | undefined {
@@ -448,28 +457,66 @@ class ItemUtilities {
 		return matchingItems[0];
 	}
 
+	/**
+	 * Get a list of item types that are healthy to eat
+	 */
 	private getFoodItemTypes(): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
+
+		const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
 
 		for (const itemTypeOrGroup of goodFoodItems) {
 			const itemTypes = itemManager.isGroup(itemTypeOrGroup) ? itemManager.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
 			for (const itemType of itemTypes) {
-				const description = itemDescriptions[itemType];
-				if (description) {
-					const onUse = description.onUse;
-					if (onUse) {
-						const onEat = onUse[ActionType.Eat];
-						if (onEat) {
-							if (onEat[0] > 1) {
-								result.add(itemType);
-							}
-						}
+				if (this.isHealthyToEat(itemType)) {
+					result.add(itemType);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Get a list of item types that are plantable and produce doodads with items that are healthy to eat
+	 */
+	private getSeedItemTypes(): Set<ItemType> {
+		const result: Set<ItemType> = new Set();
+
+		const growingStages = Enums.values(GrowingStage);
+
+		for (const itemType of Enums.values(ItemType)) {
+			const description = itemDescriptions[itemType];
+			const doodadType = description?.onUse?.[ActionType.Plant];
+			if (doodadType === undefined) {
+				continue;
+			}
+
+			const gatherDoodadDescription = doodadDescriptions[doodadType]?.gather;
+			if (gatherDoodadDescription === undefined) {
+				continue;
+			}
+
+			for (const growingStage of growingStages) {
+				const resourceItems = gatherDoodadDescription[growingStage];
+				if (!resourceItems) {
+					continue;
+				}
+
+				for (const resourceItem of resourceItems) {
+					if (this.isHealthyToEat(resourceItem.type)) {
+						result.add(itemType);
 					}
 				}
 			}
 		}
 
 		return result;
+	}
+
+	private isHealthyToEat(itemType: ItemType): boolean {
+		const onEat = itemDescriptions[itemType]?.onUse?.[ActionType.Eat];
+		return onEat !== undefined && onEat[0] > 1;
 	}
 }
 

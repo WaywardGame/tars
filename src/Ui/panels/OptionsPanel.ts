@@ -1,5 +1,6 @@
 import Translation from "language/Translation";
 import { CheckButton } from "ui/component/CheckButton";
+import Divider from "ui/component/Divider";
 
 import { TarsTranslation, uiConfigurableOptions } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
@@ -12,6 +13,12 @@ export default class OptionsPanel extends TarsPanel {
         super();
 
         for (const uiOption of uiConfigurableOptions) {
+            if (uiOption === undefined) {
+                new Divider()
+                    .appendTo(this);
+                continue;
+            }
+
             const checkButton = new CheckButton()
                 .setText(this.TARS.getTranslation(uiOption.title))
                 .setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(uiOption.tooltip))))
