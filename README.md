@@ -78,11 +78,15 @@ Open the folder in Visual Studio Code and build with `Ctrl+Shift+B`.
 ## Screenshots
 ![TARS](https://raw.githubusercontent.com/WaywardGame/tars/master/mod.png "TARS")
 
-![Screenshot #1](https://steamuserimages-a.akamaihd.net/ugc/914673076759393814/8BA90395A7E4E6AEB28C5FEB6EC32A532864D3B6/ "Screenshot #1")
+![Screenshot #1](https://steamuserimages-a.akamaihd.net/ugc/1765954876790907179/DE91BDA9541B396706AF9A85DB8A99E64ABEB6E7/ "Screenshot #1")
 
-![Screenshot #2](https://steamuserimages-a.akamaihd.net/ugc/914673076759393836/147FEFC71A6182CDB23F1EFF8E9E9C13F04DD225/ "Screenshot #2")
+![Screenshot #2](https://steamuserimages-a.akamaihd.net/ugc/1765954876790907515/05230A57F2B7C5A1AA27291E3213544CEE6A43BF/ "Screenshot #2")
 
-![Screenshot #3](https://steamuserimages-a.akamaihd.net/ugc/914673076759393844/AC6C0AEE19C47E99A36B3E817742C1FCE089B910/ "Screenshot #3")
+![Screenshot #3](https://steamuserimages-a.akamaihd.net/ugc/1765954876790907924/9B380053FF3B253DA3249351855FF70AF3B2F247/ "Screenshot #3")
+
+![Screenshot #4](https://steamuserimages-a.akamaihd.net/ugc/1765954876790907929/09D5D83B02E3E4DB9D26EDD48C9A6F4E36B891EA/ "Screenshot #4")
+
+![Screenshot #5](https://steamuserimages-a.akamaihd.net/ugc/1765954876790907934/C929F4168CD10E27C6322DE3BE83B874E46BD6FE/ "Screenshot #5")
 
 ## References
 
