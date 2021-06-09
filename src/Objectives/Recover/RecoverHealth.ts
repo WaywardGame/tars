@@ -3,19 +3,23 @@ import { IStat, Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
 import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../Utilities/Item";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import UseItem from "../Other/UseItem";
-import OrganizeInventory from "../Utility/OrganizeInventory";
+import { itemUtilities } from "../../utilities/Item";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import UseItem from "../other/item/UseItem";
+import OrganizeInventory from "../utility/OrganizeInventory";
 
 export default class RecoverHealth extends Objective {
 
 	private saveChildObjectives = false;
 
+	constructor(private readonly onlyUseAvailableItems: boolean) {
+		super();
+	}
+
 	public getIdentifier(): string {
-		return "RecoverHealth";
+		return `RecoverHealth:${this.onlyUseAvailableItems}`;
 	}
 
 	public getStatus(): string {
@@ -27,10 +31,14 @@ export default class RecoverHealth extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const healItems = getInventoryItemsWithUse(context, ActionType.Heal);
+		const healItems = itemUtilities.getInventoryItemsWithUse(context, ActionType.Heal);
 		if (healItems.length > 0) {
 			this.log.info(`Healing with ${healItems[0].getName().getString()}`);
 			return new UseItem(ActionType.Heal, healItems[0]);
+		}
+
+		if (this.onlyUseAvailableItems) {
+			return ObjectiveResult.Ignore;
 		}
 
 		const isThirsty = context.player.stat.get<IStat>(Stat.Thirst).value <= 0;

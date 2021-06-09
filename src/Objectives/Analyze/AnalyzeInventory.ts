@@ -5,7 +5,7 @@ import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
-import { getInventoryItemsWithEquipType, getInventoryItemsWithUse } from "../../Utilities/Item";
+import { itemUtilities } from "../../utilities/Item";
 
 export default class AnalyzeInventory extends Objective {
 
@@ -49,7 +49,7 @@ export default class AnalyzeInventory extends Objective {
 				}
 			}
 
-			const flags = itemInfo.flags !== undefined ? itemInfo.flags : InventoryItemFlag.PreferHigherWorth;
+			const flags = itemInfo.flags ?? InventoryItemFlag.PreferHigherWorth;
 
 			// use a set to prevent duplicates
 			const items: Set<Item> = new Set();
@@ -67,15 +67,18 @@ export default class AnalyzeInventory extends Objective {
 
 			if (itemInfo.actionTypes) {
 				for (const useType of itemInfo.actionTypes) {
-					items.addFrom(getInventoryItemsWithUse(context, useType));
+					items.addFrom(itemUtilities.getInventoryItemsWithUse(context, useType));
 				}
 			}
 
 			if (itemInfo.equipType) {
-				items.addFrom(getInventoryItemsWithEquipType(context, itemInfo.equipType));
+				items.addFrom(itemUtilities.getInventoryItemsWithEquipType(context, itemInfo.equipType));
 			}
 
 			if (items.size > 0) {
+				const flag = typeof (flags) === "object" ? flags.flag : flags;
+				const flagOption = typeof (flags) === "object" ? flags.option : undefined;
+
 				const sortedItems = Array.from(items).sort((itemA, itemB) => {
 					const descriptionA = itemA.description();
 					const descriptionB = itemB.description();
@@ -84,24 +87,24 @@ export default class AnalyzeInventory extends Objective {
 						return -1;
 					}
 
-					switch (flags) {
+					switch (flag) {
 						case InventoryItemFlag.PreferHigherWorth:
-							const worthA = descriptionA.worth !== undefined ? descriptionA.worth : 0;
-							const worthB = descriptionB.worth !== undefined ? descriptionB.worth : 0;
-							return worthB - worthA;
+							return (descriptionB.worth ?? 0) - (descriptionA.worth ?? 0);
+
+						case InventoryItemFlag.PreferHigherActionBonus:
+							return itemB.getItemUseBonus(flagOption) - itemA.getItemUseBonus(flagOption);
+
+						case InventoryItemFlag.PreferHigherTier:
+							return (descriptionB.tier?.[flagOption] ?? 0) - (descriptionA.tier?.[flagOption] ?? 0);
+
+						case InventoryItemFlag.PreferHigherDurability:
+							return (itemB.minDur ?? 999999) - (itemA.minDur ?? 999999);
+
+						case InventoryItemFlag.PreferHigherDecay:
+							return (itemB.decay ?? 999999) - (itemA.decay ?? 999999);
 
 						case InventoryItemFlag.PreferLowerWeight:
 							return itemA.getTotalWeight() - itemB.getTotalWeight();
-
-						case InventoryItemFlag.PreferHigherDurability:
-							const minDurA = itemA.minDur !== undefined ? itemA.minDur : 999999;
-							const minDurB = itemB.minDur !== undefined ? itemB.minDur : 999999;
-							return minDurB - minDurA;
-
-						case InventoryItemFlag.PreferHigherDecay:
-							const decayA = itemA.decay !== undefined ? itemA.decay : 999999;
-							const decayB = itemB.decay !== undefined ? itemB.decay : 999999;
-							return decayB - decayA;
 					}
 				});
 
@@ -164,8 +167,12 @@ export default class AnalyzeInventory extends Objective {
 			return true;
 		}
 
-		if (itemInfo.allowInChests) {
-			return context.base.chest.some(chest => itemManager.isContainableInContainer(item, chest));
+		if (itemInfo.allowInChests && context.base.chest.some(chest => itemManager.isContainableInContainer(item, chest))) {
+			return true;
+		}
+
+		if (itemInfo.allowOnTiles && itemManager.isTileContainer(item.containedWithin)) {
+			return true;
 		}
 
 		return false;

@@ -4,26 +4,99 @@ import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { EquipType } from "game/entity/IHuman";
-import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
+import { IContainer, IItemDisassembly, ItemType, ItemTypeGroup } from "game/item/IItem";
 import Item from "game/item/Item";
 import { ITile, TerrainType } from "game/tile/ITerrain";
 import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
-
-import { foodItemTypes } from "./Utilities/Item";
+import { itemUtilities } from "./utilities/Item";
 
 export const TARS_ID = "TARS";
 
 export const defaultMaxTilesChecked = 3000;
 
-export const gardenMaxTilesChecked = 1024;
+export enum TarsTranslation {
+	DialogTitleMain,
+
+	DialogStatusNavigatingInitializing,
+
+	DialogPanelGeneral,
+	DialogPanelTasks,
+	DialogPanelOptions,
+
+	DialogButtonEnable,
+	DialogButtonAquireItem,
+	DialogButtonAquireItemTooltip,
+	DialogButtonBuildDoodad,
+	DialogButtonBuildDoodadTooltip,
+	DialogButtonExploreIslands,
+	DialogButtonExploreIslandsTooltip,
+	DialogButtonStayHealthy,
+	DialogButtonStayHealthyTooltip,
+	DialogButtonUseOrbsOfInfluence,
+	DialogButtonUseOrbsOfInfluenceTooltip,
+	DialogButtonDeveloperMode,
+	DialogButtonDeveloperModeTooltip,
+
+	DialogLabelItem,
+	DialogLabelDoodad,
+
+	DialogModeSurvival,
+	DialogModeSurvivalTooltip,
+	DialogModeTidyUp,
+	DialogModeTidyUpTooltip,
+	DialogModeGardener,
+	DialogModeGardenerTooltip,
+}
 
 export interface ISaveData {
-	enabled?: boolean;
-	shouldOpenDialog?: boolean;
+	enabled: boolean;
+	options: ITarsOptions;
+	ui: Partial<Record<TarsUiSaveDataKey, any>>;
 }
+
+export enum TarsUiSaveDataKey {
+	DialogOpened,
+	ActivePanelId,
+	AcquireItemDropdown,
+	BuildDoodadDropdown,
+}
+
+// list of options. ideally most of them would be boolean's
+export interface ITarsOptions {
+	mode: TarsMode;
+	exploreIslands: boolean;
+	stayHealthy: boolean;
+	useOrbsOfInfluence: boolean;
+	developerMode: boolean;
+}
+
+// options to show in the Options panel
+export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mode">; title: TarsTranslation; tooltip: TarsTranslation } | undefined> = [
+	{
+		option: "exploreIslands",
+		title: TarsTranslation.DialogButtonExploreIslands,
+		tooltip: TarsTranslation.DialogButtonExploreIslandsTooltip,
+	},
+	{
+		option: "stayHealthy",
+		title: TarsTranslation.DialogButtonStayHealthy,
+		tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
+	},
+	{
+		option: "useOrbsOfInfluence",
+		title: TarsTranslation.DialogButtonUseOrbsOfInfluence,
+		tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
+	},
+	undefined, // creates a Divider
+	{
+		option: "developerMode",
+		title: TarsTranslation.DialogButtonDeveloperMode,
+		tooltip: TarsTranslation.DialogButtonDeveloperModeTooltip,
+	}
+];
 
 export interface ITileLocation {
 	type: TerrainType;
@@ -161,17 +234,30 @@ export interface IInventoryItemInfo {
 	itemTypes?: Array<ItemType | ItemTypeGroup>;
 	actionTypes?: ActionType[];
 	equipType?: EquipType;
-	flags?: InventoryItemFlag;
+	flags?: InventoryItemFlags;
 	allowMultiple?: number;
 	allowInChests?: boolean;
+	allowOnTiles?: boolean;
 	protect?: boolean;
 }
+
+export type InventoryItemFlags = InventoryItemFlag | { flag: InventoryItemFlag; option: any; };
 
 export enum InventoryItemFlag {
 	/**
 	 * Picks the item with a higher worth. Default
 	 */
 	PreferHigherWorth,
+
+	/**
+	 * Picks the item with a higher action bonus for the given action.
+	 */
+	PreferHigherActionBonus,
+
+	/**
+	 * Picks the item with a higher tier for the given item group.
+	 */
+	PreferHigherTier,
 
 	/**
 	 * Picks the item with lower weight.
@@ -203,6 +289,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.WroughtIronAxe,
 			ItemType.WroughtIronDoubleAxe,
 		],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Gather,
+		},
 	},
 	bandage: {
 		itemTypes: [
@@ -220,6 +310,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	carve: {
 		actionTypes: [ActionType.Carve],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Carve,
+		},
 	},
 	chest: {
 		itemTypes: [ItemType.WoodenChest],
@@ -286,7 +380,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		flags: InventoryItemFlag.PreferLowerWeight,
 	},
 	food: {
-		itemTypes: Array.from(foodItemTypes),
+		itemTypes: Array.from(itemUtilities.foodItemTypes),
 		flags: InventoryItemFlag.PreferHigherDecay,
 		allowMultiple: 5,
 	},
@@ -295,12 +389,20 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	hammer: {
 		itemTypes: [ItemTypeGroup.Hammer],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Repair,
+		},
 	},
 	heal: {
 		actionTypes: [ActionType.Heal],
 	},
 	hoe: {
 		actionTypes: [ActionType.Till],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Till,
+		},
 	},
 	intermediateChest: {
 		itemTypes: [
@@ -319,9 +421,17 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.ObsidianKnife,
 			ItemType.StoneKnife,
 		],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Carve,
+		},
 	},
 	tongs: {
 		itemTypes: [ItemTypeGroup.Tongs],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherTier,
+			option: ItemTypeGroup.Tongs,
+		},
 	},
 	pickAxe: {
 		itemTypes: [
@@ -330,13 +440,22 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.StonePickaxe,
 			ItemType.WroughtIronPickaxe,
 		],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Gather,
+		},
 	},
 	sailBoat: {
 		itemTypes: [ItemType.Sailboat],
 		allowInChests: true,
+		allowOnTiles: true,
 	},
 	shovel: {
 		actionTypes: [ActionType.Dig],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Dig,
+		},
 	},
 	waterContainer: {
 		actionTypes: [ActionType.GatherWater],
@@ -360,12 +479,13 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		],
 	},
 };
-export interface BaseItemSearch {
+
+export interface IBaseItemSearch {
 	itemType: ItemType;
 	extraDifficulty?: number;
 }
 
-export interface ItemSearch<T> extends BaseItemSearch {
+export interface ItemSearch<T> extends IBaseItemSearch {
 	type: T;
 }
 
@@ -378,24 +498,34 @@ export interface CreatureSearch {
 	map: Map<CreatureType, ItemType[]>;
 }
 
-export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot };
+export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot; };
 
-export enum TarsTranslation {
-	DialogTitleMain,
-	DialogButtonEnable,
-	DialogLabelStatus,
-
-	DialogStatusNavigatingInitializing,
+export interface IDisassemblySearch {
+	item: Item;
+	disassemblyItems: IItemDisassembly[];
+	requiredForDisassembly?: Array<ItemType | ItemTypeGroup>;
 }
 
 export interface ITarsEvents extends Events<Mod> {
 	/**
-	 * Emitted when tars is enabled or disabled
+	 * Emitted when TARS is enabled or disabled
 	 */
 	enableChange(enabled: boolean): any;
 
 	/**
-	 * Emitted when tars status is changed
+	 * Emitted when TARS options change
+	 */
+	optionsChange(options: ITarsOptions): any;
+
+	/**
+	 * Emitted when TARS status is changed
 	 */
 	statusChange(status: Translation | string): any;
+}
+
+export enum TarsMode {
+	Manual,
+	Survival,
+	TidyUp,
+	Gardener,
 }

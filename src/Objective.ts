@@ -2,10 +2,10 @@ import Creature from "game/entity/creature/Creature";
 import { ILog, nullLog } from "utilities/Log";
 
 import Context from "./Context";
-import Planner from "./Core/Planner";
+import Planner from "./core/Planner";
 import { ContextDataType } from "./IContext";
 import { IObjective, ObjectiveExecutionResult } from "./IObjective";
-import { createLog } from "./Utilities/Logger";
+import { loggerUtilities } from "./utilities/Logger";
 
 export default abstract class Objective implements IObjective {
 
@@ -23,17 +23,17 @@ export default abstract class Objective implements IObjective {
 	private _status: IObjective | (() => string) | string | undefined;
 
 	public static getPipelineString(objectives: Array<IObjective | IObjective[]> | undefined): string {
-		return objectives ? objectives.map(objective => Array.isArray(objective) ? Objective.getPipelineString(objective) : objective.getHashCode()).join(" -> ") : "Empty pipeline";
+		return objectives ? objectives.map(objective => Array.isArray(objective) ? Objective.getPipelineString(objective) : `${objective.getHashCode()} (${objective.getStatusMessage()})`).join(" -> ") : "Empty pipeline";
 	}
 
-	public abstract getIdentifier(context?: Context): string;
+	public abstract getIdentifier(): string;
 
 	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
 
 	public get log(): ILog {
 		if (!Planner.isCreatingPlan) {
 			if (this._log === undefined) {
-				this._log = createLog(this.getName());
+				this._log = loggerUtilities.createLog(this.getName());
 			}
 
 			return this._log;
@@ -46,10 +46,14 @@ export default abstract class Objective implements IObjective {
 		this._log = log;
 	}
 
-	public getHashCode(context?: Context): string {
-		let hashCode = this.getIdentifier(context);
+	public getHashCode(addUniqueIdentifier?: boolean): string {
+		let hashCode = this.getIdentifier();
 
-		if (this.isDynamic()) {
+		if (hashCode.includes("[object")) {
+			console.warn("Invalid objective identifier", hashCode);
+		}
+
+		if (this.isDynamic() || addUniqueIdentifier) {
 			if (this._uniqueIdentifier === undefined) {
 				this._uniqueIdentifier = Objective.uuid++;
 				if (Objective.uuid >= Number.MAX_SAFE_INTEGER) {
@@ -66,6 +70,10 @@ export default abstract class Objective implements IObjective {
 
 		if (this._overrideDifficulty !== undefined) {
 			hashCode += `:${this._overrideDifficulty}`;
+		}
+
+		if (this.contextDataKey !== ContextDataType.LastAcquiredItem) {
+			hashCode += `:${this.contextDataKey}`;
 		}
 
 		return hashCode;

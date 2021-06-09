@@ -9,16 +9,16 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../Utilities/Item";
-import { findCreatures } from "../../Utilities/Object";
-import AcquireItem from "../Acquire/Item/AcquireItem";
-import AcquireItemForAction from "../Acquire/Item/AcquireItemForAction";
-import AnalyzeInventory from "../Analyze/AnalyzeInventory";
-import AddDifficulty from "../Core/AddDifficulty";
-import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import Equip from "../Other/Equip";
+import { itemUtilities } from "../../utilities/Item";
+import { objectUtilities } from "../../utilities/Object";
+import AcquireItem from "../acquire/item/AcquireItem";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import AnalyzeInventory from "../analyze/AnalyzeInventory";
+import AddDifficulty from "../core/AddDifficulty";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import EquipItem from "../other/item/EquipItem";
 
 export default class GatherFromCreature extends Objective {
 
@@ -31,9 +31,9 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasCarveItem = getInventoryItemsWithUse(context, ActionType.Carve).length > 0;
+		const hasCarveItem = itemUtilities.hasInventoryItemForAction(context, ActionType.Carve);
 
-		return findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
+		return objectUtilities.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
 			.map(creature => {
 				const objectives: IObjective[] = [];
 
@@ -43,11 +43,11 @@ export default class GatherFromCreature extends Objective {
 
 				// require a sword and shield before engaging with a creature
 				if (context.inventory.equipSword === undefined) {
-					objectives.push(new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new Equip(EquipType.LeftHand));
+					objectives.push(new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand));
 				}
 
 				if (context.inventory.equipShield === undefined) {
-					objectives.push(new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new Equip(EquipType.RightHand));
+					objectives.push(new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand));
 				}
 
 				if (!hasCarveItem) {
@@ -63,6 +63,8 @@ export default class GatherFromCreature extends Objective {
 						return new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(creature.type)!)
 							.setStatus(() => `Carving ${Translation.nameOf(Dictionary.Creature, creature.type).getString()} corpse`);
 					}
+
+					this.log.warn("Still attacking creature?");
 
 					return ObjectiveResult.Complete;
 				}));

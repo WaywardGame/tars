@@ -9,14 +9,14 @@ import Translation from "language/Translation";
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import { getAvailableInventoryWeight, processRecipe } from "../../../Utilities/Item";
-import SetContextData from "../../ContextData/SetContextData";
-import ExecuteAction from "../../Core/ExecuteAction";
-import ExecuteActionForItem, { ExecuteActionType } from "../../Core/ExecuteActionForItem";
-import MoveToTarget from "../../Core/MoveToTarget";
-import ReserveItems from "../../Core/ReserveItems";
-import CompleteRequirements from "../../Utility/CompleteRequirements";
-import MoveToLand from "../../Utility/MoveToLand";
+import { itemUtilities } from "../../../utilities/Item";
+import SetContextData from "../../contextData/SetContextData";
+import ExecuteAction from "../../core/ExecuteAction";
+import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
+import MoveToTarget from "../../core/MoveToTarget";
+import ReserveItems from "../../core/ReserveItems";
+import CompleteRequirements from "../../utility/CompleteRequirements";
+import MoveToLand from "../../utility/MoveToLand";
 
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
@@ -24,7 +24,7 @@ import AcquireItemByGroup from "./AcquireItemByGroup";
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
-	constructor(private readonly itemType: ItemType, private readonly recipe: IRecipe) {
+	constructor(private readonly itemType: ItemType, private readonly recipe: IRecipe, private readonly allowInventoryItems?: boolean) {
 		super();
 	}
 
@@ -46,10 +46,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.itemType);
 
-		const checker = processRecipe(context, this.recipe, false);
-		const checkerWithIntermediateChest = processRecipe(context, this.recipe, true);
+		const checker = itemUtilities.processRecipe(context, this.recipe, false, this.allowInventoryItems);
+		const checkerWithIntermediateChest = itemUtilities.processRecipe(context, this.recipe, true, this.allowInventoryItems);
 
-		const availableInventoryWeight = getAvailableInventoryWeight(context);
+		const availableInventoryWeight = itemUtilities.getAvailableInventoryWeight(context);
 		const estimatedItemWeight = itemManager.getWeight(this.itemType, WeightType.Static);
 
 		const mustUseIntermediateChest = availableInventoryWeight < estimatedItemWeight;

@@ -3,12 +3,12 @@ import Item from "game/item/Item";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { anyWaterTileLocation } from "../../Navigation/INavigation";
+import { anyWaterTileLocation } from "../../navigation//INavigation";
 import Objective from "../../Objective";
-import { getNearestTileLocation } from "../../Utilities/Tile";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
+import { tileUtilities } from "../../utilities/Tile";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherWaterFromTerrain extends Objective {
 
@@ -23,7 +23,7 @@ export default class GatherWaterFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const targets = await getNearestTileLocation(context, anyWaterTileLocation);
+		const targets = await tileUtilities.getNearestTileLocation(context, anyWaterTileLocation);
 
 		for (const { tile, point } of targets) {
 			if (tile.creature || tile.npc || game.isPlayerAtTile(tile)) {
@@ -38,9 +38,11 @@ export default class GatherWaterFromTerrain extends Objective {
 				const objectives: IObjective[] = [];
 
 				if (game.isTileFull(context.player.getFacingTile())) {
-					objectives.push(new ExecuteAction(ActionType.PickupAllItems, (context, action) => {
-						action.execute(context.player);
-					}).setStatus("Picking up all items from full tile"));
+					for (const item of tile.containedItems!) {
+						objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
+							action.execute(context.player, item, context.player.inventory);
+						}));
+					}
 				}
 
 				objectives.push(new ExecuteAction(ActionType.UseItem, (context, action) => {

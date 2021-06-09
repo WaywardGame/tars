@@ -5,15 +5,16 @@ import { IVector3 } from "utilities/math/IVector";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
-import SetContextData from "../ContextData/SetContextData";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import ReserveItems from "../Core/ReserveItems";
+import { IGatherItemOptions } from "../acquire/item/AcquireBase";
+import SetContextData from "../contextData/SetContextData";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import ReserveItems from "../core/ReserveItems";
 
 export default class GatherFromGround extends Objective {
 
-	constructor(private readonly itemType: ItemType) {
+	constructor(private readonly itemType: ItemType, private readonly options: Partial<IGatherItemOptions> = {}) {
 		super();
 	}
 
@@ -38,7 +39,9 @@ export default class GatherFromGround extends Objective {
 		const items = tile.containedItems;
 		if (items !== undefined) {
 			for (const item of items) {
-				if (item.type === this.itemType && !context.isReservedItem(item)) {
+				if (item.type === this.itemType &&
+					!context.isReservedItem(item) &&
+					(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur))) {
 					return [
 						new ReserveItems(item),
 						new SetContextData(this.contextDataKey, item),
@@ -52,7 +55,11 @@ export default class GatherFromGround extends Objective {
 
 		return island.items
 			.map(item => {
-				if (item && item.type === this.itemType && itemManager.isTileContainer(item.containedWithin) && !context.isReservedItem(item)) {
+				if (item &&
+					item.type === this.itemType &&
+					itemManager.isTileContainer(item.containedWithin) &&
+					!context.isReservedItem(item) &&
+					(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur))) {
 					return {
 						item: item,
 						point: item.containedWithin as any as IVector3,

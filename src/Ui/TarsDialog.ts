@@ -1,20 +1,35 @@
+import { OwnEventHandler } from "event/EventManager";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import { CheckButton } from "ui/component/CheckButton";
-import { LabelledRow } from "ui/component/LabelledRow";
-import Dialog from "ui/screen/screens/game/component/Dialog";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
+import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
-
-import { TarsTranslation, TARS_ID } from "../ITars";
+import { TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "../ITars";
 import Tars from "../Tars";
+import TarsPanel from "./components/TarsPanel";
+import GeneralPanel from "./panels/GeneralPanel";
+import OptionsPanel from "./panels/OptionsPanel";
+import TasksPanel from "./panels/TasksPanel";
 
-export default class TarsDialog extends Dialog {
+
+export type TabDialogPanelClass = new () => TarsPanel;
+
+/**
+ * A list of panel classes that will appear in the dialog.
+ */
+const subpanelClasses: TabDialogPanelClass[] = [
+	GeneralPanel,
+	TasksPanel,
+	OptionsPanel
+];
+
+export default class TarsDialog extends TabDialog<TarsPanel> {
 
 	public static description: IDialogDescription = {
-		minSize: new Vector2(15, 20),
-		size: new Vector2(15, 25),
-		maxSize: new Vector2(20, 25),
+		minSize: new Vector2(30, 21),
+		size: new Vector2(40, 70),
+		maxSize: new Vector2(60, 70),
 		edges: [
 			[Edge.Left, 25],
 			[Edge.Bottom, 33],
@@ -24,40 +39,52 @@ export default class TarsDialog extends Dialog {
 	@Mod.instance<Tars>(TARS_ID)
 	public readonly TARS: Tars;
 
-	private readonly statusLabel: LabelledRow;
-	private readonly enableButton: CheckButton;
-
 	public constructor(id: DialogId) {
 		super(id);
+		this.TARS.event.until(this, "remove").subscribe("statusChange", this.header.refresh);
+	}
 
-		this.registerHookHost("TarsDialog");
+	protected getDefaultSubpanelInformation(): SubpanelInformation {
+		for (const subpanelInformation of this.subpanelInformations) {
+			if (subpanelInformation[0] === this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
+				return subpanelInformation;
+			}
+		}
 
-		this.statusLabel = new LabelledRow()
-			.setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(this.TARS.getStatus)))
-			.appendTo(this.body);
+		return super.getDefaultSubpanelInformation();
+	}
 
-		this.enableButton = new CheckButton()
-			.setText(this.TARS.getTranslation(TarsTranslation.DialogButtonEnable))
-			.setRefreshMethod(() => this.TARS.isEnabled())
-			.event.subscribe("willToggle", (_, checked) => {
-				if (this.TARS.isEnabled() !== checked) {
-					this.TARS.toggle();
-				}
-
-				return true;
-			})
-			.appendTo(this.body);
-
-		const events = this.TARS.event.until(this, "close");
-		events.subscribe("enableChange", () => this.enableButton.refresh());
-		events.subscribe("statusChange", (_, status) => {
-			// don't call refresh because we already calculated status when passing it to this method
-			// this.statusLabel.refresh();
-			this.statusLabel.setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(status)));
-		});
+	@OwnEventHandler(TarsDialog, "changeSubpanel")
+	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
+		this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
 	}
 
 	@Override public getName(): Translation {
-		return this.TARS.getTranslation(TarsTranslation.DialogTitleMain);
+		return this.TARS.getTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TARS.getStatus);
+	}
+
+	/**
+	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
+	 * This will only be called once
+	 */
+	@Override protected getSubpanels(): TarsPanel[] {
+		return subpanelClasses.map(cls => new cls());
+	}
+
+	/**
+	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
+	 * subpanels of this dialog.
+	 * 
+	 * If the subpanel classes haven't been instantiated yet, it first instantiates them by calling getSubpanels.
+	 * This includes binding a `WillRemove` event handler to the panel, which will `store` (cache) the panel instead of removing it,
+	 * and trigger a `SwitchAway` event on the panel when this occurs.
+	 */
+	@Override protected getSubpanelInformation(subpanels: TarsPanel[]): SubpanelInformation[] {
+		return subpanels
+			.map(subpanel => Tuple(
+				this.TARS.getTranslation(subpanel.getTranslation()).getString(),
+				this.TARS.getTranslation(subpanel.getTranslation()),
+				this.onShowSubpanel(subpanel),
+			));
 	}
 }

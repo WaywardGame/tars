@@ -7,15 +7,20 @@ import Objective from "../../Objective";
 import GatherWaterFromStill from "./GatherWaterFromStill";
 import GatherWaterFromTerrain from "./GatherWaterFromTerrain";
 import GatherWaterFromWell from "./GatherWaterFromWell";
+import GatherWaterWithRecipe from "./GatherWaterWithRecipe";
 
 export interface IGatherWaterOptions {
+	allowStartingWaterStill?: boolean;
+	allowWaitingForWaterStill?: boolean;
+	disallowRecipe?: boolean;
 	disallowTerrain?: boolean;
 	disallowWaterStill?: boolean;
 	disallowWell?: boolean;
-	allowStartingWaterStill?: boolean;
-	allowWaitingForWaterStill?: boolean;
 }
-
+/**
+ * Gathers water into the container
+ * The water may be unpurified
+ */
 export default class GatherWater extends Objective {
 
 	constructor(private readonly item?: Item, private readonly options?: IGatherWaterOptions) {
@@ -23,7 +28,7 @@ export default class GatherWater extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `GatherWater:${this.item}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
+		return `GatherWater:${this.item}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.disallowRecipe}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
 	}
 
 	public getStatus(): string {
@@ -51,6 +56,10 @@ export default class GatherWater extends Objective {
 			for (const well of context.base.well) {
 				objectivePipelines.push([new GatherWaterFromWell(well, this.item)]);
 			}
+		}
+
+		if (!this.options?.disallowRecipe) {
+			objectivePipelines.push([new GatherWaterWithRecipe(this.item)]);
 		}
 
 		return objectivePipelines;

@@ -1,7 +1,6 @@
 import ActionExecutor from "game/entity/action/ActionExecutor";
 import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
-import { DamageType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
@@ -12,9 +11,9 @@ import TileHelpers from "utilities/game/TileHelpers";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { executeAction } from "../../Utilities/Action";
-import { getBestActionItem, getInventoryItemsWithUse } from "../../Utilities/Item";
-import { canCarveCorpse, canDig, canGather } from "../../Utilities/Tile";
+import { actionUtilities } from "../../utilities/Action";
+import { itemUtilities } from "../../utilities/Item";
+import { tileUtilities } from "../../utilities/Tile";
 
 export enum ExecuteActionType {
 	Generic,
@@ -64,7 +63,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 		const terrainDescription = Terrains[tileType];
 		if (!terrainDescription) {
-			return ObjectiveResult.Complete;
+			return ObjectiveResult.Impossible;
 		}
 
 		if (this.terrainTileType === undefined) {
@@ -72,7 +71,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 		} else if (this.terrainTileType !== tileType) {
 			// tile type changed, give up
-			return ObjectiveResult.Complete;
+			return ObjectiveResult.Restart;
 		}
 
 		let actionType: ActionType;
@@ -82,16 +81,16 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			case ExecuteActionType.Doodad:
 				const doodad = tile.doodad;
 				if (!doodad) {
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}
 
 				const description = doodad.description();
 				if (!description) {
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}
 
-				if (!canGather(tile, true)) {
-					return ObjectiveResult.Complete;
+				if (!tileUtilities.canGather(tile, true)) {
+					return ObjectiveResult.Restart;
 				}
 
 				const stage = doodad.getGrowingStage();
@@ -102,29 +101,30 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					actionType = ActionType.Gather;
 				}
 
-				actionArguments.push(getBestActionItem(context, ActionType.Gather, DamageType.Slashing));
+				actionArguments.push(itemUtilities.getBestToolForDoodadGather(context, doodad));
 
 				break;
 
 			case ExecuteActionType.Terrain:
 				actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
-				actionArguments.push(terrainDescription.gather ? getBestActionItem(context, ActionType.Gather, DamageType.Blunt) : getBestActionItem(context, ActionType.Dig));
 
-				if (actionType === ActionType.Dig && !canDig(tile)) {
-					return ObjectiveResult.Complete;
+				if (actionType === ActionType.Dig && !tileUtilities.canDig(tile)) {
+					return ObjectiveResult.Restart;
 				}
+
+				actionArguments.push(itemUtilities.getBestToolForTerrainGather(context, tileType));
 
 				break;
 
 			case ExecuteActionType.Corpse:
-				const carveTool = getInventoryItemsWithUse(context, ActionType.Carve);
+				const carveTool = itemUtilities.getBestTool(context, ActionType.Carve);
 
-				if (carveTool.length === 0 || !canCarveCorpse(tile)) {
-					return ObjectiveResult.Complete;
+				if (carveTool === undefined || !tileUtilities.canCarveCorpse(tile)) {
+					return ObjectiveResult.Restart;
 				}
 
 				actionType = ActionType.Carve;
-				actionArguments.push(carveTool[0]);
+				actionArguments.push(carveTool);
 
 				break;
 
@@ -200,7 +200,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) {
 		const itemsBefore = context.player.inventory.containedItems.slice();
 
-		await executeAction(context, actionType, executor as any);
+		await actionUtilities.executeAction(context, actionType, executor as any);
 
 		const newItems = context.player.inventory.containedItems.filter(item => itemsBefore.indexOf(item) === -1);
 

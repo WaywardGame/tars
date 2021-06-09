@@ -6,9 +6,9 @@ import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import SetContextData from "../../../Objectives/ContextData/SetContextData";
-import UseItem from "../../../Objectives/Other/UseItem";
-import { foodItemTypes, processRecipe } from "../../../Utilities/Item";
+import SetContextData from "../../../objectives/contextData/SetContextData";
+import { itemUtilities } from "../../../utilities/Item";
+import UseItem from "../../other/item/UseItem";
 
 import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";
@@ -34,7 +34,7 @@ export default class AcquireFood extends Objective {
 		// check if we can craft food based on our current items
 		objectivePipelines.push(...AcquireFood.getFoodRecipeObjectivePipelines(context, false));
 
-		for (const itemType of foodItemTypes) {
+		for (const itemType of itemUtilities.foodItemTypes) {
 			objectivePipelines.push([
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
 				new AcquireItem(itemType).passContextDataKey(this),
@@ -55,7 +55,7 @@ export default class AcquireFood extends Objective {
 	public static getFoodRecipeObjectivePipelines(context: Context, eatFood: boolean) {
 		const objectivePipelines: IObjective[][] = [];
 
-		for (const itemType of foodItemTypes) {
+		for (const itemType of itemUtilities.foodItemTypes) {
 			const description = itemDescriptions[itemType];
 			if (!description || description.craftable === false) {
 				continue;
@@ -66,7 +66,7 @@ export default class AcquireFood extends Objective {
 				continue;
 			}
 
-			const checker = processRecipe(context, recipe, true);
+			const checker = itemUtilities.processRecipe(context, recipe, true);
 
 			for (const chest of context.base.chest) {
 				checker.processContainer(chest as IContainer);

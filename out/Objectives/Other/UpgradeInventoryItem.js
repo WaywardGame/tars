@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/IItem", "game/item/Items", "utilities/enum/Enums", "../../IObjective", "../../ITars", "../../Objective", "../Acquire/Item/AcquireItem"], function (require, exports, IItem_1, Items_1, Enums_1, IObjective_1, ITars_1, Objective_1, AcquireItem_1) {
+define(["require", "exports", "game/item/IItem", "game/item/Items", "utilities/enum/Enums", "../../IObjective", "../../ITars", "../../Objective", "../acquire/item/AcquireItem", "../acquire/item/AcquireItemForAction"], function (require, exports, IItem_1, Items_1, Enums_1, IObjective_1, ITars_1, Objective_1, AcquireItem_1, AcquireItemForAction_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class UpgradeInventoryItem extends Objective_1.default {
@@ -13,6 +13,7 @@ define(["require", "exports", "game/item/IItem", "game/item/Items", "utilities/e
             return `Upgrading ${this.upgrade}`;
         }
         async execute(context) {
+            var _a, _b, _c;
             const item = context.inventory[this.upgrade];
             if (!item || Array.isArray(item)) {
                 return IObjective_1.ObjectiveResult.Complete;
@@ -21,44 +22,80 @@ define(["require", "exports", "game/item/IItem", "game/item/Items", "utilities/e
             if (!description) {
                 return IObjective_1.ObjectiveResult.Complete;
             }
-            const worth = description.worth;
-            if (worth === undefined) {
+            const currentWorth = description.worth;
+            if (currentWorth === undefined) {
                 return IObjective_1.ObjectiveResult.Complete;
             }
             const objectivePipelines = [];
             const itemInfo = ITars_1.inventoryItemInfo[this.upgrade];
+            const flags = (_a = itemInfo.flags) !== null && _a !== void 0 ? _a : ITars_1.InventoryItemFlag.PreferHigherWorth;
+            let isUpgrade;
+            if (typeof (flags) === "object") {
+                switch (flags.flag) {
+                    case ITars_1.InventoryItemFlag.PreferHigherActionBonus:
+                        const currentActionTier = item.getItemUseBonus(flags.option);
+                        isUpgrade = (itemType) => {
+                            var _a, _b;
+                            const actionTier = (_b = (_a = Items_1.default[itemType]) === null || _a === void 0 ? void 0 : _a.actionTier) === null || _b === void 0 ? void 0 : _b[flags.option];
+                            return actionTier !== undefined && actionTier > currentActionTier;
+                        };
+                        break;
+                    case ITars_1.InventoryItemFlag.PreferHigherTier:
+                        const currentItemTier = (_c = (_b = item.description()) === null || _b === void 0 ? void 0 : _b.tier) === null || _c === void 0 ? void 0 : _c[flags.option];
+                        isUpgrade = (itemType) => {
+                            var _a, _b;
+                            const tier = (_b = (_a = Items_1.default[itemType]) === null || _a === void 0 ? void 0 : _a.tier) === null || _b === void 0 ? void 0 : _b[flags.option];
+                            return tier !== undefined && currentItemTier !== undefined && tier > currentItemTier;
+                        };
+                        break;
+                }
+            }
+            if (!isUpgrade) {
+                isUpgrade = (itemType) => {
+                    var _a;
+                    const worth = (_a = Items_1.default[itemType]) === null || _a === void 0 ? void 0 : _a.worth;
+                    return worth !== undefined && currentWorth !== undefined && worth > currentWorth;
+                };
+            }
+            ;
             if (itemInfo.itemTypes) {
                 for (const itemTypeOrGroup of itemInfo.itemTypes) {
                     if (itemTypeOrGroup !== item.type) {
                         if (itemManager.isGroup(itemTypeOrGroup)) {
                             const groupItems = itemManager.getGroupItems(itemTypeOrGroup);
                             for (const groupItemType of groupItems) {
-                                this.addUpgradeObjectives(objectivePipelines, groupItemType, worth);
+                                this.addUpgradeObjectives(objectivePipelines, groupItemType, isUpgrade);
                             }
                         }
                         else {
-                            this.addUpgradeObjectives(objectivePipelines, itemTypeOrGroup, worth);
+                            this.addUpgradeObjectives(objectivePipelines, itemTypeOrGroup, isUpgrade);
                         }
                     }
                 }
             }
             if (itemInfo.equipType) {
-                for (const it of Enums_1.default.values(IItem_1.ItemType)) {
-                    const description = Items_1.default[it];
+                for (const itemType of Enums_1.default.values(IItem_1.ItemType)) {
+                    const description = Items_1.default[itemType];
                     if (description && description.equip === itemInfo.equipType) {
-                        this.addUpgradeObjectives(objectivePipelines, it, worth, description);
+                        this.addUpgradeObjectives(objectivePipelines, itemType, isUpgrade);
+                    }
+                }
+            }
+            if (itemInfo.actionTypes) {
+                for (const actionType of itemInfo.actionTypes) {
+                    for (const itemType of AcquireItemForAction_1.default.getItems(actionType)) {
+                        this.addUpgradeObjectives(objectivePipelines, itemType, isUpgrade);
                     }
                 }
             }
             return objectivePipelines;
         }
-        addUpgradeObjectives(objectives, itemType, currentWorth, description = Items_1.default[itemType]) {
-            const itemTypeWorth = description.worth;
-            if (itemTypeWorth !== undefined && itemTypeWorth > currentWorth) {
+        addUpgradeObjectives(objectives, itemType, isUpgrade) {
+            if (isUpgrade(itemType)) {
                 objectives.push([new AcquireItem_1.default(itemType)]);
             }
         }
     }
     exports.default = UpgradeInventoryItem;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVXBncmFkZUludmVudG9yeUl0ZW0uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvT2JqZWN0aXZlcy9PdGhlci9VcGdyYWRlSW52ZW50b3J5SXRlbS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFXQSxNQUFxQixvQkFBcUIsU0FBUSxtQkFBUztRQUUxRCxZQUE2QixPQUE4QjtZQUMxRCxLQUFLLEVBQUUsQ0FBQztZQURvQixZQUFPLEdBQVAsT0FBTyxDQUF1QjtRQUUzRCxDQUFDO1FBRU0sYUFBYTtZQUNuQixPQUFPLHdCQUF3QixJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7UUFDL0MsQ0FBQztRQUVNLFNBQVM7WUFDZixPQUFPLGFBQWEsSUFBSSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ3BDLENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCO1lBQ3BDLE1BQU0sSUFBSSxHQUFHLE9BQU8sQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBQzdDLElBQUksQ0FBQyxJQUFJLElBQUksS0FBSyxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsRUFBRTtnQkFDakMsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQzthQUNoQztZQUVELE1BQU0sV0FBVyxHQUFHLElBQUksQ0FBQyxXQUFXLEVBQUUsQ0FBQztZQUN2QyxJQUFJLENBQUMsV0FBVyxFQUFFO2dCQUNqQixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2FBQ2hDO1lBRUQsTUFBTSxLQUFLLEdBQUcsV0FBVyxDQUFDLEtBQUssQ0FBQztZQUNoQyxJQUFJLEtBQUssS0FBSyxTQUFTLEVBQUU7Z0JBQ3hCLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7YUFDaEM7WUFFRCxNQUFNLGtCQUFrQixHQUFtQixFQUFFLENBQUM7WUFFOUMsTUFBTSxRQUFRLEdBQUcseUJBQWlCLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBRWpELElBQUksUUFBUSxDQUFDLFNBQVMsRUFBRTtnQkFDdkIsS0FBSyxNQUFNLGVBQWUsSUFBSSxRQUFRLENBQUMsU0FBUyxFQUFFO29CQUNqRCxJQUFJLGVBQWUsS0FBSyxJQUFJLENBQUMsSUFBSSxFQUFFO3dCQUNsQyxJQUFJLFdBQVcsQ0FBQyxPQUFPLENBQUMsZUFBZSxDQUFDLEVBQUU7NEJBQ3pDLE1BQU0sVUFBVSxHQUFHLFdBQVcsQ0FBQyxhQUFhLENBQUMsZUFBZSxDQUFDLENBQUM7NEJBQzlELEtBQUssTUFBTSxhQUFhLElBQUksVUFBVSxFQUFFO2dDQUN2QyxJQUFJLENBQUMsb0JBQW9CLENBQUMsa0JBQWtCLEVBQUUsYUFBYSxFQUFFLEtBQUssQ0FBQyxDQUFDOzZCQUNwRTt5QkFFRDs2QkFBTTs0QkFDTixJQUFJLENBQUMsb0JBQW9CLENBQUMsa0JBQWtCLEVBQUUsZUFBZSxFQUFFLEtBQUssQ0FBQyxDQUFDO3lCQUN0RTtxQkFDRDtpQkFDRDthQUNEO1lBRUQsSUFBSSxRQUFRLENBQUMsU0FBUyxFQUFFO2dCQUN2QixLQUFLLE1BQU0sRUFBRSxJQUFJLGVBQUssQ0FBQyxNQUFNLENBQUMsZ0JBQVEsQ0FBQyxFQUFFO29CQUN4QyxNQUFNLFdBQVcsR0FBRyxlQUFnQixDQUFDLEVBQUUsQ0FBQyxDQUFDO29CQUN6QyxJQUFJLFdBQVcsSUFBSSxXQUFXLENBQUMsS0FBSyxLQUFLLFFBQVEsQ0FBQyxTQUFTLEVBQUU7d0JBQzVELElBQUksQ0FBQyxvQkFBb0IsQ0FBQyxrQkFBa0IsRUFBRSxFQUFFLEVBQUUsS0FBSyxFQUFFLFdBQVcsQ0FBQyxDQUFDO3FCQUN0RTtpQkFDRDthQUNEO1lBRUQsT0FBTyxrQkFBa0IsQ0FBQztRQUMzQixDQUFDO1FBRU8sb0JBQW9CLENBQUMsVUFBMEIsRUFBRSxRQUFrQixFQUFFLFlBQW9CLEVBQUUsV0FBVyxHQUFHLGVBQWdCLENBQUMsUUFBUSxDQUFDO1lBQzFJLE1BQU0sYUFBYSxHQUFHLFdBQVcsQ0FBQyxLQUFLLENBQUM7WUFDeEMsSUFBSSxhQUFhLEtBQUssU0FBUyxJQUFJLGFBQWEsR0FBRyxZQUFZLEVBQUU7Z0JBQ2hFLFVBQVUsQ0FBQyxJQUFJLENBQUMsQ0FBQyxJQUFJLHFCQUFXLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQyxDQUFDO2FBQzdDO1FBQ0YsQ0FBQztLQUNEO0lBcEVELHVDQW9FQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVXBncmFkZUludmVudG9yeUl0ZW0uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvb2JqZWN0aXZlcy9vdGhlci9VcGdyYWRlSW52ZW50b3J5SXRlbS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFZQSxNQUFxQixvQkFBcUIsU0FBUSxtQkFBUztRQUUxRCxZQUE2QixPQUE4QjtZQUMxRCxLQUFLLEVBQUUsQ0FBQztZQURvQixZQUFPLEdBQVAsT0FBTyxDQUF1QjtRQUUzRCxDQUFDO1FBRU0sYUFBYTtZQUNuQixPQUFPLHdCQUF3QixJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7UUFDL0MsQ0FBQztRQUVNLFNBQVM7WUFDZixPQUFPLGFBQWEsSUFBSSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ3BDLENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCOztZQUNwQyxNQUFNLElBQUksR0FBRyxPQUFPLENBQUMsU0FBUyxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsQ0FBQztZQUM3QyxJQUFJLENBQUMsSUFBSSxJQUFJLEtBQUssQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLEVBQUU7Z0JBQ2pDLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7YUFDaEM7WUFFRCxNQUFNLFdBQVcsR0FBRyxJQUFJLENBQUMsV0FBVyxFQUFFLENBQUM7WUFDdkMsSUFBSSxDQUFDLFdBQVcsRUFBRTtnQkFDakIsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQzthQUNoQztZQUVELE1BQU0sWUFBWSxHQUFHLFdBQVcsQ0FBQyxLQUFLLENBQUM7WUFDdkMsSUFBSSxZQUFZLEtBQUssU0FBUyxFQUFFO2dCQUMvQixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2FBQ2hDO1lBRUQsTUFBTSxrQkFBa0IsR0FBbUIsRUFBRSxDQUFDO1lBRTlDLE1BQU0sUUFBUSxHQUFHLHlCQUFpQixDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsQ0FBQztZQUVqRCxNQUFNLEtBQUssR0FBRyxNQUFBLFFBQVEsQ0FBQyxLQUFLLG1DQUFJLHlCQUFpQixDQUFDLGlCQUFpQixDQUFDO1lBRXBFLElBQUksU0FBd0QsQ0FBQztZQUU3RCxJQUFJLE9BQU8sQ0FBQyxLQUFLLENBQUMsS0FBSyxRQUFRLEVBQUU7Z0JBQ2hDLFFBQVEsS0FBSyxDQUFDLElBQUksRUFBRTtvQkFDbkIsS0FBSyx5QkFBaUIsQ0FBQyx1QkFBdUI7d0JBQzdDLE1BQU0saUJBQWlCLEdBQUcsSUFBSSxDQUFDLGVBQWUsQ0FBQyxLQUFLLENBQUMsTUFBTSxDQUFDLENBQUM7d0JBRTdELFNBQVMsR0FBRyxDQUFDLFFBQWtCLEVBQUUsRUFBRTs7NEJBQ2xDLE1BQU0sVUFBVSxHQUFHLE1BQUEsTUFBQSxlQUFnQixDQUFDLFFBQVEsQ0FBQywwQ0FBRSxVQUFVLDBDQUFHLEtBQUssQ0FBQyxNQUFNLENBQUMsQ0FBQzs0QkFDMUUsT0FBTyxVQUFVLEtBQUssU0FBUyxJQUFJLFVBQVUsR0FBRyxpQkFBaUIsQ0FBQzt3QkFDbkUsQ0FBQyxDQUFDO3dCQUVGLE1BQU07b0JBRVAsS0FBSyx5QkFBaUIsQ0FBQyxnQkFBZ0I7d0JBQ3RDLE1BQU0sZUFBZSxHQUFHLE1BQUEsTUFBQSxJQUFJLENBQUMsV0FBVyxFQUFFLDBDQUFFLElBQUksMENBQUcsS0FBSyxDQUFDLE1BQU0sQ0FBQyxDQUFDO3dCQUVqRSxTQUFTLEdBQUcsQ0FBQyxRQUFrQixFQUFFLEVBQUU7OzRCQUNsQyxNQUFNLElBQUksR0FBRyxNQUFBLE1BQUEsZUFBZ0IsQ0FBQyxRQUFRLENBQUMsMENBQUUsSUFBSSwwQ0FBRyxLQUFLLENBQUMsTUFBTSxDQUFDLENBQUM7NEJBQzlELE9BQU8sSUFBSSxLQUFLLFNBQVMsSUFBSSxlQUFlLEtBQUssU0FBUyxJQUFJLElBQUksR0FBRyxlQUFlLENBQUM7d0JBQ3RGLENBQUMsQ0FBQzt3QkFFRixNQUFNO2lCQUNQO2FBQ0Q7WUFFRCxJQUFJLENBQUMsU0FBUyxFQUFFO2dCQUVmLFNBQVMsR0FBRyxDQUFDLFFBQWtCLEVBQUUsRUFBRTs7b0JBQ2xDLE1BQU0sS0FBSyxHQUFHLE1BQUEsZUFBZ0IsQ0FBQyxRQUFRLENBQUMsMENBQUUsS0FBSyxDQUFDO29CQUNoRCxPQUFPLEtBQUssS0FBSyxTQUFTLElBQUksWUFBWSxLQUFLLFNBQVMsSUFBSSxLQUFLLEdBQUcsWUFBWSxDQUFDO2dCQUNsRixDQUFDLENBQUM7YUFDRjtZQUFBLENBQUM7WUFFRixJQUFJLFFBQVEsQ0FBQyxTQUFTLEVBQUU7Z0JBQ3ZCLEtBQUssTUFBTSxlQUFlLElBQUksUUFBUSxDQUFDLFNBQVMsRUFBRTtvQkFDakQsSUFBSSxlQUFlLEtBQUssSUFBSSxDQUFDLElBQUksRUFBRTt3QkFDbEMsSUFBSSxXQUFXLENBQUMsT0FBTyxDQUFDLGVBQWUsQ0FBQyxFQUFFOzRCQUN6QyxNQUFNLFVBQVUsR0FBRyxXQUFXLENBQUMsYUFBYSxDQUFDLGVBQWUsQ0FBQyxDQUFDOzRCQUM5RCxLQUFLLE1BQU0sYUFBYSxJQUFJLFVBQVUsRUFBRTtnQ0FDdkMsSUFBSSxDQUFDLG9CQUFvQixDQUFDLGtCQUFrQixFQUFFLGFBQWEsRUFBRSxTQUFTLENBQUMsQ0FBQzs2QkFDeEU7eUJBRUQ7NkJBQU07NEJBQ04sSUFBSSxDQUFDLG9CQUFvQixDQUFDLGtCQUFrQixFQUFFLGVBQWUsRUFBRSxTQUFTLENBQUMsQ0FBQzt5QkFDMUU7cUJBQ0Q7aUJBQ0Q7YUFDRDtZQUVELElBQUksUUFBUSxDQUFDLFNBQVMsRUFBRTtnQkFDdkIsS0FBSyxNQUFNLFFBQVEsSUFBSSxlQUFLLENBQUMsTUFBTSxDQUFDLGdCQUFRLENBQUMsRUFBRTtvQkFDOUMsTUFBTSxXQUFXLEdBQUcsZUFBZ0IsQ0FBQyxRQUFRLENBQUMsQ0FBQztvQkFDL0MsSUFBSSxXQUFXLElBQUksV0FBVyxDQUFDLEtBQUssS0FBSyxRQUFRLENBQUMsU0FBUyxFQUFFO3dCQUM1RCxJQUFJLENBQUMsb0JBQW9CLENBQUMsa0JBQWtCLEVBQUUsUUFBUSxFQUFFLFNBQVMsQ0FBQyxDQUFDO3FCQUNuRTtpQkFDRDthQUNEO1lBRUQsSUFBSSxRQUFRLENBQUMsV0FBVyxFQUFFO2dCQUN6QixLQUFLLE1BQU0sVUFBVSxJQUFJLFFBQVEsQ0FBQyxXQUFXLEVBQUU7b0JBQzlDLEtBQUssTUFBTSxRQUFRLElBQUksOEJBQW9CLENBQUMsUUFBUSxDQUFDLFVBQVUsQ0FBQyxFQUFFO3dCQUNqRSxJQUFJLENBQUMsb0JBQW9CLENBQUMsa0JBQWtCLEVBQUUsUUFBUSxFQUFFLFNBQVMsQ0FBQyxDQUFDO3FCQUNuRTtpQkFDRDthQUNEO1lBRUQsT0FBTyxrQkFBa0IsQ0FBQztRQUMzQixDQUFDO1FBRU8sb0JBQW9CLENBQUMsVUFBMEIsRUFBRSxRQUFrQixFQUFFLFNBQTBDO1lBQ3RILElBQUksU0FBUyxDQUFDLFFBQVEsQ0FBQyxFQUFFO2dCQUN4QixVQUFVLENBQUMsSUFBSSxDQUFDLENBQUMsSUFBSSxxQkFBVyxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUMsQ0FBQzthQUM3QztRQUNGLENBQUM7S0FDRDtJQS9HRCx1Q0ErR0MifQ==

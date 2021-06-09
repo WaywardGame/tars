@@ -6,14 +6,15 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
-import SetContextData from "../ContextData/SetContextData";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
-import ReserveItems from "../Core/ReserveItems";
+import { IGatherItemOptions } from "../acquire/item/AcquireBase";
+import SetContextData from "../contextData/SetContextData";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
+import ReserveItems from "../core/ReserveItems";
 
 export default class GatherFromChest extends Objective {
 
-	constructor(private readonly itemType: ItemType) {
+	constructor(private readonly itemType: ItemType, private readonly options: Partial<IGatherItemOptions> = {}) {
 		super();
 	}
 
@@ -51,7 +52,9 @@ export default class GatherFromChest extends Objective {
 			.map(chest => ({
 				chest: chest,
 				items: itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true)
-					.filter(item => !context.isReservedItem(item)),
+					.filter(item =>
+						!context.isReservedItem(item) &&
+						(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur))),
 			}))
 			.filter(chestInfo => chestInfo.items.length > 0)
 			.map(({ chest, items }) => {

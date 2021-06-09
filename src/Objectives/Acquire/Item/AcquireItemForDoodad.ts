@@ -9,7 +9,7 @@ import Enums from "utilities/enum/Enums";
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getDoodadTypes } from "../../../Utilities/Doodad";
+import { doodadUtilities } from "../../../utilities/Doodad";
 
 import AcquireItem from "./AcquireItem";
 
@@ -47,7 +47,7 @@ export default class AcquireItemForDoodad extends Objective {
 		if (result === undefined) {
 			result = [];
 
-			const doodadTypes = getDoodadTypes(this.doodadTypeOrGroup);
+			const doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
 			for (const doodadType of doodadTypes) {
 				for (const itemType of Enums.values(ItemType)) {
 					const itemDescription = Items[itemType];

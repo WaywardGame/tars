@@ -5,16 +5,16 @@ import Item from "game/item/Item";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
 
-import { ContextDataType } from "../..//IContext";
+import { ContextDataType, MovingToNewIslandState } from "../..//IContext";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
-import { isNearBase } from "../../Utilities/Base";
-import { getReservedItems, getUnusedItems } from "../../Utilities/Item";
-import { isOpenTile } from "../../Utilities/Tile";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import { baseUtilities } from "../../utilities/Base";
+import { itemUtilities } from "../../utilities/Item";
+import { tileUtilities } from "../../utilities/Tile";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
 
 const maxChestDistance = 128;
 
@@ -56,17 +56,19 @@ export default class OrganizeInventory extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const reservedItems = getReservedItems(context);
+		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+
+		const reservedItems = itemUtilities.getReservedItems(context);
 		const reservedItemsWeight = reservedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		let unusedItems = getUnusedItems(context);
+		let unusedItems = itemUtilities.getUnusedItems(context, { allowSailboat: moveToNewIslandState === MovingToNewIslandState.None });
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
 		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (this.options.onlyIfNearBase && !isNearBase(context)) {
+		if (this.options.onlyIfNearBase && !baseUtilities.isNearBase(context)) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -108,7 +110,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (unusedItems.length === 0 && this.options.allowReservedItems) {
 			// ignore reserved items
-			unusedItems = getUnusedItems(context, true);
+			unusedItems = itemUtilities.getUnusedItems(context, { allowReservedItems: true });
 		}
 
 		if (unusedItems.length === 0) {
@@ -141,7 +143,7 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = TileHelpers.findMatchingTile(context.player, (point, tile) => isOpenTile(context, point, tile) && !game.isTileFull(tile), defaultMaxTilesChecked);
+		const target = TileHelpers.findMatchingTile(context.player, (point, tile) => tileUtilities.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}

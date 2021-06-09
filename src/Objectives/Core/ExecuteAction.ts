@@ -7,7 +7,7 @@ import Translation, { TextContext } from "language/Translation";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { executeAction } from "../../Utilities/Action";
+import { actionUtilities } from "../../utilities/Action";
 
 export default class ExecuteAction<T extends ActionType> extends Objective {
 
@@ -34,7 +34,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 			return 0;
 		}
 
-		await executeAction(context, this.actionType, this.executor as any);
+		await actionUtilities.executeAction(context, this.actionType, this.executor as any);
 
 		return ObjectiveResult.Complete;
 	}

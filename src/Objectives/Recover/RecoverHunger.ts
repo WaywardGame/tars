@@ -5,19 +5,22 @@ import Item from "game/item/Item";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { isNearBase } from "../../Utilities/Base";
-import { foodItemTypes, getInventoryItemsWithUse } from "../../Utilities/Item";
-import AcquireFood from "../Acquire/Item/AcquireFood";
-import UseItem from "../Other/UseItem";
+import { baseUtilities } from "../../utilities/Base";
+import { itemUtilities } from "../../utilities/Item";
+import AcquireFood from "../acquire/item/AcquireFood";
+import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import UseItem from "../other/item/UseItem";
+
+const decayingSoonThreshold = 50;
 
 export default class RecoverHunger extends Objective {
 
-	constructor(private readonly exceededThreshold: boolean) {
+	constructor(private readonly onlyUseAvailableItems: boolean, private readonly exceededThreshold: boolean) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return "RecoverHunger";
+		return `RecoverHunger:${this.onlyUseAvailableItems}`;
 	}
 
 	public getStatus(): string {
@@ -27,24 +30,35 @@ export default class RecoverHunger extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
 
+		if (this.onlyUseAvailableItems) {
+			const foodItems = this.exceededThreshold ? this.getFoodItemsInInventory(context) : undefined;
+			return foodItems?.[0] ? this.eatItem(context, foodItems[0]) : ObjectiveResult.Ignore;
+		}
+
 		if (!this.exceededThreshold) {
 			// if there's more food to cook and we're not at max, we should cook
 			if ((hunger.value / hunger.max) < 0.9) {
-				if (isNearBase(context)) {
+				let decayingSoonFoodItems: Item[] = [];
+
+				if (baseUtilities.isNearBase(context)) {
 					// only make food if theres not enough
-					const availableFoodItems = this.getFoodItemsInBase(context).concat(this.getFoodItemsInInventory(context));
+					const foodItemsInBase = this.getFoodItemsInBase(context);
+
+					const availableFoodItems = foodItemsInBase.concat(this.getFoodItemsInInventory(context));
 					if (availableFoodItems.length < 10) {
 						const foodRecipeObjectivePipelines = AcquireFood.getFoodRecipeObjectivePipelines(context, false);
 						if (foodRecipeObjectivePipelines.length > 0) {
 							return foodRecipeObjectivePipelines;
 						}
 					}
+
+					decayingSoonFoodItems = decayingSoonFoodItems.concat(foodItemsInBase.filter(item => item.decay === undefined || item.decay <= decayingSoonThreshold));
 				}
 
-				const decayingSoonFoodItems = this.getFoodItemsInInventory(context).filter(item => item.decay === undefined || item.decay < 10);
+				decayingSoonFoodItems = decayingSoonFoodItems.concat(this.getFoodItemsInInventory(context).filter(item => item.decay === undefined || item.decay <= decayingSoonThreshold));
+
 				if (decayingSoonFoodItems.length > 0) {
-					this.log.info(`Eating ${decayingSoonFoodItems[0].getName(false).getString()} since it's decaying soon (${decayingSoonFoodItems[0].decay})`);
-					return new UseItem(ActionType.Eat, decayingSoonFoodItems[0]);
+					return this.eatItem(context, decayingSoonFoodItems[0]);
 				}
 			}
 
@@ -53,15 +67,23 @@ export default class RecoverHunger extends Objective {
 
 		const isEmergency = hunger.value < 0;
 
-		let foodItems = this.getFoodItemsInInventory(context);
+		let foodItems: Item[] = [];
 
-		if (isEmergency && foodItems.length === 0) {
-			foodItems = getInventoryItemsWithUse(context, ActionType.Eat);
+		// prefer eating food that was prepared ahead of time if we're near our base
+		if (baseUtilities.isNearBase(context)) {
+			foodItems = this.getFoodItemsInBase(context);
+		}
+
+		if (foodItems.length === 0) {
+			foodItems = this.getFoodItemsInInventory(context);
+
+			if (isEmergency && foodItems.length === 0) {
+				foodItems = itemUtilities.getInventoryItemsWithUse(context, ActionType.Eat);
+			}
 		}
 
 		if (foodItems.length > 0) {
-			this.log.info(`Eating ${foodItems[0].getName(false).getString()}`);
-			return new UseItem(ActionType.Eat, foodItems[0]);
+			return this.eatItem(context, foodItems[0]);
 		}
 
 		return [
@@ -71,34 +93,24 @@ export default class RecoverHunger extends Objective {
 	}
 
 	private getFoodItemsInInventory(context: Context) {
-		const items: Item[] = [];
-
-		for (const itemType of foodItemTypes) {
-			items.push(...itemManager.getItemsInContainerByType(context.player.inventory, itemType, true));
-		}
-
 		// prioritize ones that will decay sooner
-		return items
-			.sort((a, b) => {
-				const decayA = a.decay !== undefined ? a.decay : 999999;
-				const decayB = b.decay !== undefined ? b.decay : 999999;
-				return decayA - decayB;
-			});
+		return Array.from(itemUtilities.foodItemTypes)
+			.map(foodItemType => itemManager.getItemsInContainerByType(context.player.inventory, foodItemType, true))
+			.flat()
+			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
 	}
 
-	private getFoodItemsInBase(context: Context) {
-		const items: Item[] = [];
-
-		for (const chest of context.base.chest) {
-			items.push(...itemManager.getItemsInContainer(chest, true).filter(item => foodItemTypes.has(item.type)));
-		}
-
+	private getFoodItemsInBase(context: Context): Item[] {
 		// prioritize ones that will decay sooner
-		return items
-			.sort((a, b) => {
-				const decayA = a.decay !== undefined ? a.decay : 999999;
-				const decayB = b.decay !== undefined ? b.decay : 999999;
-				return decayA - decayB;
-			});
+		return context.base.chest
+			.map(chest => itemManager.getItemsInContainer(chest, true)
+				.filter(item => itemUtilities.foodItemTypes.has(item.type)))
+			.flat()
+			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
+	}
+
+	private eatItem(context: Context, item: Item) {
+		this.log.info(`Eating ${item.getName(false).getString()}`);
+		return [new MoveItemIntoInventory(item), new UseItem(ActionType.Eat, item)];
 	}
 }

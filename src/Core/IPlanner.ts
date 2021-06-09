@@ -23,6 +23,11 @@ export interface IPlanner {
 	readonly isCreatingPlan: boolean;
 
 	/**
+	 * Enables debug mode, which emits additional logs to the console
+	 */
+	debug: boolean;
+
+	/**
 	 * Reset the cached difficulties for objectives
 	 */
 	reset(): void;

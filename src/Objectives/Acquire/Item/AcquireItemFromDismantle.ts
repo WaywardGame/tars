@@ -9,11 +9,11 @@ import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import { getItemInInventory } from "../../../Utilities/Item";
-import SetContextData from "../../ContextData/SetContextData";
-import ExecuteActionForItem, { ExecuteActionType } from "../../Core/ExecuteActionForItem";
-import ReserveItems from "../../Core/ReserveItems";
-import MoveToLand from "../../Utility/MoveToLand";
+import { itemUtilities } from "../../../utilities/Item";
+import SetContextData from "../../contextData/SetContextData";
+import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
+import ReserveItems from "../../core/ReserveItems";
+import MoveToLand from "../../utility/MoveToLand";
 
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
@@ -34,14 +34,10 @@ export default class AcquireItemFromDismantle extends Objective {
 	}
 
 	public getStatus(): string {
-		if (this.dismantleItemTypes.length > 1) {
-			const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
-				.collect(Translation.formatList, ListEnder.Or);
+		const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+			.collect(Translation.formatList, ListEnder.Or);
 
-			return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
-		}
-
-		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${Translation.nameOf(Dictionary.Item, this.dismantleItemTypes[0]).getString()}`;
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -61,7 +57,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				continue;
 			}
 
-			const dismantleItem = getItemInInventory(context, itemType);
+			const dismantleItem = itemUtilities.getItemInInventory(context, itemType);
 			const hasRequirements = description.dismantle.required === undefined || itemManager.getItemForHuman(context.player, description.dismantle.required, false) !== undefined;
 
 			const objectives: IObjective[] = [
@@ -69,7 +65,9 @@ export default class AcquireItemFromDismantle extends Objective {
 				new SetContextData(ContextDataType.NextActionAllowsIntermediateChest, false),
 			];
 
-			const hashCode = this.getHashCode();
+			// Set addUniqueIdentifier to true because the pipeline may be ordered and it could run two of the same AcquireItemFromDismantle objectives one after another
+			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
+			const hashCode = this.getHashCode(true);
 
 			if (dismantleItem === undefined) {
 				objectives.push(new AcquireItem(itemType).setContextDataKey(hashCode));
@@ -95,7 +93,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				}
 
 				action.execute(context.player, item);
-			}).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+			}).passContextDataKey(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);
 		}
@@ -105,6 +103,8 @@ export default class AcquireItemFromDismantle extends Objective {
 
 	protected getBaseDifficulty(context: Context): number {
 		// High base difficulty because we prefer to not dismantle things. Sometimes we want to keep logs until we really need them
-		return 18;
+		// but not too high because sometimes we end up with dozens of logs while trying to look for stripped bark..
+		// it should really take into account the scarcity of the item being dismantled
+		return 5;
 	}
 }

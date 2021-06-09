@@ -1,13 +1,24 @@
+import { ItemType } from "../../../../node_modules/@wayward/types/definitions/game/item/IItem";
 import Context from "../../../Context";
-import { IExecutionTree } from "../../../Core/IPlan";
+import { IExecutionTree } from "../../../core/IPlan";
 import Objective from "../../../Objective";
-import { isNearBase } from "../../../Utilities/Base";
-import GatherFromChest from "../../Gather/GatherFromChest";
-import GatherFromCorpse from "../../Gather/GatherFromCorpse";
-import GatherFromCreature from "../../Gather/GatherFromCreature";
-import GatherFromDoodad from "../../Gather/GatherFromDoodad";
-import GatherFromGround from "../../Gather/GatherFromGround";
-import GatherFromTerrain from "../../Gather/GatherFromTerrain";
+import { baseUtilities } from "../../../utilities/Base";
+import GatherFromChest from "../../gather/GatherFromChest";
+import GatherFromCorpse from "../../gather/GatherFromCorpse";
+import GatherFromCreature from "../../gather/GatherFromCreature";
+import GatherFromDoodad from "../../gather/GatherFromDoodad";
+import GatherFromGround from "../../gather/GatherFromGround";
+import GatherFromTerrain from "../../gather/GatherFromTerrain";
+
+export interface IAcquireItemOptions extends IGatherItemOptions {
+	disableCreatureSearch: boolean;
+	disableDoodadSearch: boolean;
+	excludeItemTypes: Set<ItemType>;
+}
+
+export interface IGatherItemOptions {
+	requiredMinDur: number;
+}
 
 export interface IObjectivePriority {
 	priority: number;
@@ -36,6 +47,9 @@ export default abstract class AcquireBase extends Objective {
 		return priorityA.priority === priorityB.priority ? 0 : priorityA.priority < priorityB.priority ? 1 : -1;
 	}
 
+	/**
+	 * Higher number = higher priority = it will be executed first
+	 */
 	public calculatePriority(context: Context, tree: IExecutionTree): IObjectivePriority {
 		const result: IObjectivePriority = {
 			priority: 0,
@@ -53,6 +67,7 @@ export default abstract class AcquireBase extends Objective {
 
 			for (const child of tree.children) {
 				this.addGatherObjectivePriorities(result, child);
+				this.addAcquireObjectivePriorities(result, child);
 			}
 		}
 
@@ -67,24 +82,32 @@ export default abstract class AcquireBase extends Objective {
 			result.emptyAcquireObjectiveCount++;
 		}
 
-		if (isAcquireObjective && tree.objective.getName() === "AcquireItemWithRecipe" && result.gatherObjectiveCount === 0) {
-			// this recipe does not require any gathering
+		if (isAcquireObjective) {
+			const objectiveName = tree.objective.getName();
 
-			if (result.emptyAcquireObjectiveCount === 0) {
-				if (isNearBase(context)) {
-					// todo: replace isNearBase with something that checks for CompleteRequirements?
+			if (objectiveName === "AcquireItemWithRecipe" && result.gatherWithoutChestObjectiveCount === 0) {
+				// this recipe does not require any gathering
 
-					// prioritize acquire item objectives that require no gathering
-					// this means the required items are already in the inventory
-					result.priority += 50000;
-					result.craftsRequiringNoGatheringCount++;
+				if (result.emptyAcquireObjectiveCount === 0 || (result.gatherWithoutChestObjectiveCount === 0 && result.gatherObjectiveCount > 0)) {
+					if (baseUtilities.isNearBase(context)) {
+						// todo: replace isNearBase with something that checks for CompleteRequirements?
+
+						// prioritize acquire item objectives that require no gathering
+						// this means the required items are already in the inventory
+						result.priority += 50000;
+
+						// gatherObjectiveCount is only acquire chest objectives. prioritze ones with the least amount of gather chest objectives
+						result.priority += result.gatherObjectiveCount * -20;
+
+						result.craftsRequiringNoGatheringCount++;
+					}
+
+				} else {
+					// deprioritize this. it won't be able to run until after other acquire objects ran (ones that gather)
+					// an empty acquire objective means the pipeline was goruped together towards the top
+					// the gather object has canGroupTogether returning true
+					result.priority -= 50000;
 				}
-
-			} else {
-				// deprioritize this. it won't be able to run until after other acquire objects ran (ones that gather)
-				// an empty acquire objective means the pipeline was goruped together towards the top
-				// the gather object has canGroupTogether returning true
-				result.priority -= 50000;
 			}
 		}
 
@@ -92,13 +115,9 @@ export default abstract class AcquireBase extends Objective {
 	}
 
 	public addResult(source: IObjectivePriority, destination: IObjectivePriority) {
-		destination.priority += source.priority;
-		destination.objectiveCount += source.objectiveCount;
-		destination.acquireObjectiveCount += source.acquireObjectiveCount;
-		destination.emptyAcquireObjectiveCount += source.emptyAcquireObjectiveCount;
-		destination.gatherObjectiveCount += source.gatherObjectiveCount;
-		destination.gatherWithoutChestObjectiveCount += source.gatherWithoutChestObjectiveCount;
-		destination.craftsRequiringNoGatheringCount += source.craftsRequiringNoGatheringCount;
+		for (const key of Object.keys(source) as Array<keyof IObjectivePriority>) {
+			destination[key] += source[key];
+		}
 	}
 
 	/**
@@ -135,6 +154,19 @@ export default abstract class AcquireBase extends Objective {
 			// gather from chest last, since the chests are likely in our base
 			result.gatherObjectiveCount++;
 			result.priority += 20;
+		}
+	}
+
+
+	/**
+	 * Higher number = higher priority = it will be executed first
+	 */
+	private addAcquireObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree) {
+		if (tree.objective.getName() === "AcquireItemFromDisassemble") {
+			// this objective may be providing items used by others in the tree
+			// move this up
+			// todo: implement actual objective dependency system? ex: objective B requires objective A to be ran first
+			result.priority += 100000;
 		}
 	}
 

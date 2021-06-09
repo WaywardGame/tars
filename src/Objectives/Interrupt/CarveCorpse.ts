@@ -6,9 +6,9 @@ import Translation from "language/Translation";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { getInventoryItemsWithUse } from "../../Utilities/Item";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import { itemUtilities } from "../../utilities/Item";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class CarveCorpse extends Objective {
 
@@ -25,8 +25,8 @@ export default class CarveCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const carveTool = getInventoryItemsWithUse(context, ActionType.Carve);
-		if (carveTool.length === 0) {
+		const carveTool = itemUtilities.getBestTool(context, ActionType.Carve);
+		if (carveTool === undefined) {
 			this.log.info("Missing carve tool for corpse");
 			return ObjectiveResult.Impossible;
 		}
@@ -42,7 +42,7 @@ export default class CarveCorpse extends Objective {
 		objectives.push(new MoveToTarget(this.corpse, true));
 
 		objectives.push(new ExecuteAction(ActionType.Carve, (context, action) => {
-			action.execute(context.player, carveTool[0]);
+			action.execute(context.player, carveTool);
 		}).setStatus(this));
 
 		return objectives;

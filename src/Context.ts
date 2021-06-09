@@ -5,7 +5,7 @@ import { IVector3 } from "utilities/math/IVector";
 
 import ContextState from "./ContextState";
 import { ContextDataType } from "./IContext";
-import { IBase, IInventoryItems } from "./ITars";
+import { IBase, IInventoryItems, ITarsOptions } from "./ITars";
 
 export default class Context {
 
@@ -15,6 +15,7 @@ export default class Context {
 		public readonly player: Player /*| NPC*/,
 		public readonly base: IBase,
 		public readonly inventory: IInventoryItems,
+		public readonly options: Readonly<ITarsOptions>,
 		public state = new ContextState(),
 		public readonly calculatingDifficulty: boolean = false,
 		private initialState?: ContextState) {
@@ -25,7 +26,7 @@ export default class Context {
 	}
 
 	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false): Context {
-		return new Context(this.player, this.base, this.inventory, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
+		return new Context(this.player, this.base, this.inventory, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
 	}
 
 	public merge(state: ContextState): void {
@@ -73,6 +74,10 @@ export default class Context {
 		return this.state.get(type);
 	}
 
+	public getDataOrDefault<T = any>(type: string, defaultValue: T): T {
+		return this.getData(type) ?? defaultValue;
+	}
+
 	public setData<T = any>(type: string, value: T | undefined) {
 		this.state.set(type, value);
 
@@ -92,6 +97,32 @@ export default class Context {
 			}
 		}
 	}
+
+	public addProvidedItems(itemTypes: ItemType[]) {
+		for (const itemType of itemTypes) {
+			this.state.providedItems.set(itemType, (this.state.providedItems.get(itemType) ?? 0) + 1);
+
+			if (this.changes) {
+				this.changes.providedItems.set(itemType, (this.changes.providedItems.get(itemType) ?? 0) + 1);
+			}
+		}
+	}
+
+	public tryUseProvidedItems(itemType: ItemType): boolean {
+		const available = this.state.providedItems.get(itemType) ?? 0;
+		if (available > 0) {
+			this.state.providedItems.set(itemType, available - 1);
+
+			if (this.changes) {
+				this.changes.providedItems.set(itemType, (this.changes.providedItems.get(itemType) ?? 0) - 1);
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
 
 	public setInitialState(state: ContextState = this.state.clone(false)) {
 		this.initialState = state;

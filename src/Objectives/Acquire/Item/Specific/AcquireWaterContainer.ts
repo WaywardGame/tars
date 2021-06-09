@@ -5,8 +5,9 @@ import Context from "../../../../Context";
 import { ContextDataType } from "../../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../../IObjective";
 import Objective from "../../../../Objective";
-import SetContextData from "../../../ContextData/SetContextData";
-import ExecuteActionForItem, { ExecuteActionType } from "../../../Core/ExecuteActionForItem";
+import { itemUtilities } from "../../../../utilities/Item";
+import SetContextData from "../../../contextData/SetContextData";
+import ExecuteActionForItem, { ExecuteActionType } from "../../../core/ExecuteActionForItem";
 import AcquireItem from "../AcquireItem";
 
 export default class AcquireWaterContainer extends Objective {
@@ -22,7 +23,7 @@ export default class AcquireWaterContainer extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const messageInABottleObjectives: IObjective[] = [];
 
-		const messageInABottleItem = itemManager.getItemInContainer(context.player.inventory, ItemType.MessageInABottle);
+		const messageInABottleItem = itemUtilities.getItemInInventory(context, ItemType.MessageInABottle);
 		if (!messageInABottleItem) {
 			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle));
 

@@ -1,3 +1,4 @@
+// import type { IVector2, IVector3 } from "utilities/math/IVector";
 
 interface IVector2 {
 	x: number;
@@ -57,17 +58,6 @@ interface IGetTileLocationsResponse extends INavigationResponseBase {
 
 type NavigationRequest = IUpdateAllTilesRequest | IUpdateTileRequest | IGetTileLocationsRequest;
 
-enum TerrainType {
-	DeepSeawater = 0,
-	Seawater = 1,
-	ShallowSeawater = 2,
-	DeepFreshWater = 3,
-	FreshWater = 4,
-	ShallowFreshWater = 5,
-	FreezingFreshWater = 41,
-	FreezingSeawater = 43,
-}
-
 enum WorldZ {
 	Min = 0,
 	Max = 1,
@@ -75,11 +65,18 @@ enum WorldZ {
 	Overworld = 1,
 }
 
+type TerrainType = number;
+
 const freshWaterTileLocation = -1;
 const anyWaterTileLocation = -2;
+const gatherableTileLocation = -3;
 
 let mapSize: number;
 let mapSizeSq: number;
+
+let freshWaterTypes: Set<TerrainType>;
+let seaWaterTypes: Set<TerrainType>;
+let gatherableTypes: Set<TerrainType>;
 
 /////////////////////////////
 
@@ -134,6 +131,7 @@ class Navigation {
 
 			navigationInfo.tileLocations[freshWaterTileLocation] = new Module.KDTree();
 			navigationInfo.tileLocations[anyWaterTileLocation] = new Module.KDTree();
+			navigationInfo.tileLocations[gatherableTileLocation] = new Module.KDTree();
 
 			for (let x = 0; x < mapSize; x++) {
 				for (let y = 0; y < mapSize; y++) {
@@ -195,7 +193,7 @@ class Navigation {
 
 			navigationInfo.tileLocations[kdTreeTileType].deletePoint(x, y);
 
-			this.updateWaterTiles(navigationInfo, kdTreeTileType, x, y, false);
+			this.updateSpecialTileTypes(navigationInfo, kdTreeTileType, x, y, false);
 		}
 
 		navigationInfo.kdTreeTileTypes[kdTreeIndex] = tileType + 1;
@@ -206,12 +204,12 @@ class Navigation {
 
 		navigationInfo.tileLocations[tileType].insertPoint(x, y);
 
-		this.updateWaterTiles(navigationInfo, tileType, x, y, true);
+		this.updateSpecialTileTypes(navigationInfo, tileType, x, y, true);
 	}
 
-	private updateWaterTiles(navigationInfo: INavigationInfo, tileType: TerrainType, x: number, y: number, insert: boolean) {
-		const isFreshWater = tileType === TerrainType.ShallowFreshWater || tileType === TerrainType.FreezingFreshWater || tileType === TerrainType.FreshWater || tileType === TerrainType.DeepFreshWater;
-		const isSeawater = tileType === TerrainType.ShallowSeawater || tileType === TerrainType.FreezingSeawater || tileType === TerrainType.Seawater || tileType === TerrainType.DeepSeawater;
+	private updateSpecialTileTypes(navigationInfo: INavigationInfo, tileType: TerrainType, x: number, y: number, insert: boolean) {
+		const isFreshWater = freshWaterTypes.has(tileType);
+		const isSeawater = seaWaterTypes.has(tileType);
 
 		if (isFreshWater || isSeawater) {
 			if (insert) {
@@ -228,6 +226,15 @@ class Navigation {
 				} else {
 					navigationInfo.tileLocations[freshWaterTileLocation].deletePoint(x, y);
 				}
+			}
+		}
+
+		if (gatherableTypes.has(tileType)) {
+			if (insert) {
+				navigationInfo.tileLocations[gatherableTileLocation].insertPoint(x, y);
+
+			} else {
+				navigationInfo.tileLocations[gatherableTileLocation].deletePoint(x, y);
 			}
 		}
 	}
@@ -257,20 +264,29 @@ function WaywardPlusPlusLoaded() {
 
 // the initial message will send the path
 webWorkerSelf.onmessage = (event: MessageEvent) => {
+	const data = event.data;
+
 	if (queuedMessages) {
-		queuedMessages.push(event.data);
+		queuedMessages.push(data);
 		return;
 	}
 
+	// tslint:disable-next-line: no-console
+	console.log("Navigation worker initial data", data);
+
 	queuedMessages = [];
 
-	let pathPrefix: string = event.data.pathPrefix;
+	let pathPrefix: string = data.pathPrefix;
 	if (pathPrefix.endsWith("\\")) {
 		pathPrefix = pathPrefix.substring(0, pathPrefix.length - 1);
 	}
 
-	mapSize = event.data.mapSize;
-	mapSizeSq = event.data.mapSizeSq;
+	mapSize = data.mapSize;
+	mapSizeSq = data.mapSizeSq;
+
+	freshWaterTypes = new Set(data.freshWaterTypes);
+	seaWaterTypes = new Set(data.seaWaterTypes);
+	gatherableTypes = new Set(data.gatherableTypes);
 
 	// Fix emscripten loading
 	const oldFetch = fetch;

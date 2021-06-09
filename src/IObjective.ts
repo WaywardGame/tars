@@ -4,7 +4,7 @@ import { ILog, ILogLine } from "utilities/Log";
 
 import Context from "./Context";
 import ContextState from "./ContextState";
-import { IExecutionTree } from "./Core/IPlan";
+import { IExecutionTree } from "./core/IPlan";
 
 export enum ObjectiveResult {
 	// Objective was completed
@@ -45,11 +45,13 @@ export enum CalculatedDifficultyStatus {
 export interface IObjective {
 	readonly log: ILog;
 
+	readonly ignoreInvalidPlans?: boolean;
+
 	setLogger(log: ILog | undefined): void;
 
 	execute(context: Context): Promise<ObjectiveExecutionResult>;
 
-	getHashCode(context?: Context): string;
+	getHashCode(addUniqueIdentifier?: boolean): string;
 	getIdentifier(): string;
 	getName(): string;
 

@@ -5,13 +5,13 @@ import { IRequirementInfo, RequirementStatus } from "game/item/IItemManager";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import AcquireBuildMoveToDoodad from "../Acquire/Doodad/AcquireBuildMoveToDoodad";
-import AcquireBuildMoveToFire from "../Acquire/Doodad/AcquireBuildMoveToFire";
-import AnalyzeBase from "../Analyze/AnalyzeBase";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import StartFire from "../Other/StartFire";
+import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
+import AcquireBuildMoveToFire from "../acquire/doodad/AcquireBuildMoveToFire";
+import AnalyzeBase from "../analyze/AnalyzeBase";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import StartFire from "../other/doodad/StartFire";
 
 export default class CompleteRequirements extends Objective {
 
@@ -64,10 +64,9 @@ export default class CompleteRequirements extends Objective {
 						// the anvil we went to is not our base anvil
 						// it was probably not placed correctly
 						// pick it up. the object will be then built in the correct spot
-						this.log.info("Picking up anvil to place it next to the kiln");
 						return new ExecuteAction(ActionType.Pickup, (context, action) => {
 							action.execute(context.player);
-						});
+						}).setStatus("Picking up anvil to place it next to the kiln");
 					}
 
 					return ObjectiveResult.Complete;
@@ -89,7 +88,7 @@ export default class CompleteRequirements extends Objective {
 			}
 
 		} else if (requiresDoodads) {
-			this.log.info("Requires doodad");
+			this.log.info("Requires doodad", this.requirementInfo.doodadsRequired[0]);
 			objectives.push(new AcquireBuildMoveToDoodad(this.requirementInfo.doodadsRequired[0]));
 
 		} else if (requiresFire) {

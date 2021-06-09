@@ -4,18 +4,22 @@ import Creature from "game/entity/creature/Creature";
 import { IStatMax, Stat } from "game/entity/IStats";
 import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
+import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import Doodad from "game/doodad/Doodad";
+import TileEvent from "game/tile/TileEvent";
+import Corpse from "game/entity/creature/corpse/Corpse";
 
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { log } from "../../Utilities/Logger";
-import { getMovementPath, move, MoveResult } from "../../Utilities/Movement";
-import Rest from "../Other/Rest";
-import UseItem from "../Other/UseItem";
+import { log } from "../../utilities/Logger";
+import { movementUtilities, MoveResult } from "../../utilities/Movement";
+import Rest from "../other/Rest";
+import UseItem from "../other/item/UseItem";
 
-// import MoveToZ from "../Utility/MoveToZ";
+// import MoveToZ from "../utility/MoveToZ";
 
 export interface IMoveToTargetOptions {
 	range?: number;
@@ -37,11 +41,20 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `MoveToTarget:${this.target}:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
+		// ${this.target} - likely an [object] without a ToString
+		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
 	}
 
 	public getStatus(): string {
-		return `Moving to (${this.target.x},${this.target.y},${this.target.z})`;
+		let status = `Moving to `;
+
+		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {
+			status += `${this.target.getName()} `;
+		}
+
+		status += `(${this.target.x},${this.target.y},${this.target.z})`;
+
+		return status;
 	}
 
 	public isDynamic(): boolean {
@@ -63,7 +76,7 @@ export default class MoveToTarget extends Objective {
 		// 	];
 		// }
 
-		const movementPath = await getMovementPath(context, this.target, this.moveAdjacentToTarget);
+		const movementPath = await movementUtilities.getMovementPath(context, this.target, this.moveAdjacentToTarget);
 
 		if (context.calculatingDifficulty) {
 			context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
@@ -142,7 +155,7 @@ export default class MoveToTarget extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		const moveResult = await move(context, this.target, this.moveAdjacentToTarget);
+		const moveResult = await movementUtilities.move(context, this.target, this.moveAdjacentToTarget);
 
 		switch (moveResult) {
 			case MoveResult.NoTarget:
@@ -168,7 +181,7 @@ export default class MoveToTarget extends Objective {
 
 	public trackCreature(creature: Creature | undefined) {
 		this.trackedCreature = creature;
-		this.trackedPosition = creature ? creature.getPoint() : undefined;
+		this.trackedPosition = creature?.getPoint();
 
 		return this;
 	}
@@ -200,7 +213,7 @@ export default class MoveToTarget extends Objective {
 				this.trackedPosition = trackedCreaturePosition;
 
 				// move to it's latest location
-				const moveResult = await move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true);
+				const moveResult = await movementUtilities.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);
 
 				switch (moveResult) {
 					case MoveResult.NoTarget:

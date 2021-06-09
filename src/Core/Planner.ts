@@ -3,7 +3,7 @@ import Log, { MemoryLog, nullLog } from "utilities/Log";
 import Context from "../Context";
 import ContextState from "../ContextState";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectivePipeline, ObjectiveResult, PossibleObjectivePipeline } from "../IObjective";
-import { createLog } from "../Utilities/Logger";
+import { loggerUtilities } from "../utilities/Logger";
 
 import { IPlanner } from "./IPlanner";
 import Plan from "./Plan";
@@ -33,8 +33,8 @@ class Planner implements IPlanner {
 
 	private readonly _log: Log;
 
-	constructor(private readonly debug = false) {
-		this._log = createLog("Planner");
+	constructor(public debug = false) {
+		this._log = loggerUtilities.createLog("Planner");
 	}
 
 	public get log(): Log {
@@ -117,15 +117,17 @@ class Planner implements IPlanner {
 		let includeHashCode = false;
 
 		for (const objectivesSet of objectives) {
+			const objectiveStartTime = performance.now();
 			const objectivePipeline = await this.getObjectivePipeline(clonedContext, objectivesSet);
+			const objectiveDeltaTime = performance.now() - objectiveStartTime;
 
 			if (this.debug) {
-				this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}`);
+				this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 			}
 
 			switch (objectivePipeline.status) {
 				case CalculatedDifficultyStatus.Impossible:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Impossible.`);
+					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 					if (objectivePipeline.changes && objectivePipeline.changes.includeHashCode) {
 						// this pipeline was impossible because one or more required items were reserved
@@ -136,7 +138,7 @@ class Planner implements IPlanner {
 					break;
 
 				case CalculatedDifficultyStatus.NotCalculatedYet:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotCalculatedYet.`);
+					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 					if (result.status === CalculatedDifficultyStatus.Impossible) {
 						result = objectivePipeline;
@@ -148,7 +150,7 @@ class Planner implements IPlanner {
 					break;
 
 				case CalculatedDifficultyStatus.NotPlausible:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}.`);
+					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 					if (result.status === CalculatedDifficultyStatus.NotPlausible) {
 						if (result.minimumDifficulty > objectivePipeline.minimumDifficulty) {
@@ -169,7 +171,7 @@ class Planner implements IPlanner {
 					break;
 
 				case CalculatedDifficultyStatus.Possible:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}.`);
+					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 					if (easiestObjectivePipeline === undefined || easiestObjectivePipeline.difficulty > objectivePipeline.difficulty) {
 						easiestObjectivePipeline = objectivePipeline;
@@ -371,7 +373,7 @@ class Planner implements IPlanner {
 			this.calculationLog = [];
 		}
 
-		const objectiveHashCode = objective.getHashCode(context);
+		const objectiveHashCode = objective.getHashCode();
 
 		// check the difficulty cache for the objective hash code (without context)
 		let cachedDifficulty = this.checkAndMergeDifficultyCache(context, objectiveHashCode);

@@ -1,8 +1,9 @@
 import { WeightStatus } from "game/entity/player/IPlayer";
 
 import Context from "../Context";
+import { MovingToNewIslandState, ContextDataType } from "../IContext";
 import { IObjective } from "../IObjective";
-import { log } from "../Utilities/Logger";
+import { log } from "../utilities/Logger";
 
 import { ExecuteResultType, IPlan } from "./IPlan";
 import planner from "./Planner";
@@ -107,7 +108,10 @@ class Executor {
 			if (resetContextState) {
 				// reset before running objectives
 				context.reset();
-				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`);
+
+				const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+
+				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`, MovingToNewIslandState[moveToNewIslandState]);
 			}
 
 			let objs: IObjective[];
@@ -122,7 +126,10 @@ class Executor {
 			for (const o of objs) {
 				const plan = this.lastPlan = await planner.createPlan(context, o);
 				if (!plan) {
-					log.info(`No valid plan for ${o.getHashCode()}`);
+					if (!o.ignoreInvalidPlans) {
+						log.info(`No valid plan for ${o.getHashCode()}`);
+					}
+
 					break;
 				}
 

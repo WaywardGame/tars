@@ -1,13 +1,15 @@
 import { IOverlayInfo, ITerrainDescription, ITile, OverlayType, TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
-import Terrains from "game/tile/Terrains";
+import terrainDescriptions from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
+import Enums from "utilities/enum/Enums";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import { sleep } from "utilities/promise/Async";
+import { TileUpdateType } from "game/IGame";
 
 import { ITileLocation } from "../ITars";
-import { log } from "../Utilities/Logger";
+import { log } from "../utilities/Logger";
 
 import { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationMessageType, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
 
@@ -71,6 +73,30 @@ export default class Navigation {
 			}
 		}
 
+		const freshWaterTypes: TerrainType[] = [];
+		const seaWaterTypes: TerrainType[] = [];
+		const gatherableTypes: TerrainType[] = [];
+
+		for (const tileType of Enums.values(TerrainType)) {
+			const tileTypeName = TerrainType[tileType];
+
+			const terrainDescription = terrainDescriptions[tileType];
+			if (!terrainDescription || terrainDescription.ice) {
+				continue;
+			}
+
+			if (tileTypeName.includes("FreshWater")) {
+				freshWaterTypes.push(tileType);
+
+			} else if (tileTypeName.includes("Seawater")) {
+				seaWaterTypes.push(tileType);
+			}
+
+			if (terrainDescription.gather) {
+				gatherableTypes.push(tileType);
+			}
+		}
+
 		let pathPrefix: string;
 		try {
 			pathPrefix = steamworks.getAppPath();
@@ -103,6 +129,9 @@ export default class Navigation {
 				pathPrefix: pathPrefix,
 				mapSize: game.mapSize,
 				mapSizeSq: game.mapSizeSq,
+				freshWaterTypes,
+				seaWaterTypes,
+				gatherableTypes,
 			});
 		}
 	}
@@ -228,8 +257,8 @@ export default class Navigation {
 		// }
 	}
 
-	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array): void {
-		const terrainDescription = Terrains[tileType];
+	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array, tileUpdateType?: TileUpdateType): void {
+		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return;
 		}
@@ -240,7 +269,7 @@ export default class Navigation {
 		}
 
 		const isDisabled = this.isDisabled(tile, x, y, z, tileType);
-		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription);
+		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription, tileUpdateType);
 
 		this.addOrUpdateOverlay(tile, x, y, z, isDisabled, penalty);
 
@@ -324,7 +353,7 @@ export default class Navigation {
 		const tile = game.getTileFromPoint(point);
 
 		const tileType = TileHelpers.getType(tile);
-		const terrainDescription = Terrains[tileType];
+		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return 0;
 		}
@@ -523,7 +552,7 @@ export default class Navigation {
 		return false;
 	}
 
-	private getPenalty(tile: ITile, tileX: number, tileY: number, tileZ: number, tileType: TerrainType, terrainDescription: ITerrainDescription): number {
+	private getPenalty(tile: ITile, tileX: number, tileY: number, tileZ: number, tileType: TerrainType, terrainDescription: ITerrainDescription, tileUpdateType?: TileUpdateType): number {
 		let penalty = 0;
 
 		if (tileType === TerrainType.Lava || tileEventManager.get(tile, TileEventType.Fire)) {
@@ -534,6 +563,7 @@ export default class Navigation {
 			penalty += 255;
 		}
 
+		// if (tileUpdateType === undefined || tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
 		// penalty for creatures on or next to the tile
 		for (let x = -1; x <= 1; x++) {
 			for (let y = -1; y <= 1; y++) {
@@ -546,6 +576,7 @@ export default class Navigation {
 				}
 			}
 		}
+		// }
 
 		if (tile.doodad !== undefined) {
 			const description = tile.doodad.description();

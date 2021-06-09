@@ -7,10 +7,10 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { DoodadSearchMap } from "../../ITars";
 import Objective from "../../Objective";
-import { findDoodads } from "../../Utilities/Object";
-import { canGather } from "../../Utilities/Tile";
-import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
-import MoveToTarget from "../Core/MoveToTarget";
+import { objectUtilities } from "../../utilities/Object";
+import { tileUtilities } from "../../utilities/Tile";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromDoodad extends Objective {
 
@@ -27,7 +27,7 @@ export default class GatherFromDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const targets = findDoodads(context, `${this.getIdentifier()}|1`, (doodad: Doodad) => {
+		const targets = objectUtilities.findDoodads(context, `${this.getIdentifier()}|1`, (doodad: Doodad) => {
 			const searchMap = this.doodadSearchMap.get(doodad.type);
 			if (!searchMap) {
 				return false;
@@ -50,7 +50,7 @@ export default class GatherFromDoodad extends Objective {
 
 			// todo: use difficulty
 
-			return canGather(doodad.getTile(), true);
+			return tileUtilities.canGather(doodad.getTile(), true);
 		}, 5);
 
 		return targets.map(target => {

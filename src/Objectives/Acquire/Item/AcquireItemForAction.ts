@@ -1,5 +1,5 @@
 import { ActionType } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { itemDescriptions as Items } from "game/item/Items";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
@@ -32,27 +32,35 @@ export default class AcquireItemForAction extends Objective {
 	}
 
 	public shouldIncludeContextHashCode(context: Context): boolean {
-		return this.getItems().some(itemType => context.isReservedItemType(itemType));
+		return AcquireItemForAction.getItems(this.actionType).some(itemType => context.isReservedItemType(itemType));
 	}
 
 	public async execute(): Promise<ObjectiveExecutionResult> {
-		return this.getItems()
+		return AcquireItemForAction.getItems(this.actionType)
 			.map(item => [new AcquireItem(item).passContextDataKey(this)]);
 	}
 
-	private getItems(): ItemType[] {
-		let result = AcquireItemForAction.cache.get(this.actionType);
+	public static getItems(actionType: ActionType): ItemType[] {
+		let result = AcquireItemForAction.cache.get(actionType);
 		if (result === undefined) {
 			result = [];
 
 			for (const it of Enums.values(ItemType)) {
 				const itemDescription = Items[it];
-				if (itemDescription && itemDescription.use !== undefined && itemDescription.use.includes(this.actionType)) {
+				if (itemDescription && itemDescription.use !== undefined && itemDescription.use.includes(actionType)) {
+					if (actionType === ActionType.StartFire) {
+						// prefer fire starter items
+						// don't use torches
+						if (itemManager.isInGroup(it, ItemTypeGroup.LitTorch)) {
+							continue;
+						}
+					}
+
 					result.push(it);
 				}
 			}
 
-			AcquireItemForAction.cache.set(this.actionType, result);
+			AcquireItemForAction.cache.set(actionType, result);
 		}
 
 		return result;

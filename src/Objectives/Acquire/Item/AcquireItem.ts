@@ -14,16 +14,20 @@ import Enums from "utilities/enum/Enums";
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { CreatureSearch, DoodadSearchMap, ITerrainSearch } from "../../../ITars";
-import GatherFromChest from "../../Gather/GatherFromChest";
-import GatherFromCorpse from "../../Gather/GatherFromCorpse";
-import GatherFromCreature from "../../Gather/GatherFromCreature";
-import GatherFromDoodad from "../../Gather/GatherFromDoodad";
-import GatherFromGround from "../../Gather/GatherFromGround";
-import GatherFromTerrain from "../../Gather/GatherFromTerrain";
+import GatherFromChest from "../../gather/GatherFromChest";
+import GatherFromCorpse from "../../gather/GatherFromCorpse";
+import GatherFromCreature from "../../gather/GatherFromCreature";
+import GatherFromDoodad from "../../gather/GatherFromDoodad";
+import GatherFromGround from "../../gather/GatherFromGround";
+import GatherFromTerrain from "../../gather/GatherFromTerrain";
 
-import AcquireBase from "./AcquireBase";
+import AcquireBase, { IAcquireItemOptions } from "./AcquireBase";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
+import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+import { itemUtilities } from "../../../utilities/Item";
+import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
+import UseProvidedItem from "../../core/UseProvidedItem";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -32,7 +36,7 @@ export default class AcquireItem extends AcquireBase {
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
 	private static readonly dismantleSearchCache: Map<ItemType, ItemType[]> = new Map();
 
-	constructor(private readonly itemType: ItemType) {
+	constructor(private readonly itemType: ItemType, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();
 	}
 
@@ -53,14 +57,15 @@ export default class AcquireItem extends AcquireBase {
 		return true;
 	}
 
-	public async execute(): Promise<ObjectiveExecutionResult> {
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		this.log.info(`Acquiring ${ItemType[this.itemType]}...`);
 
 		const itemDescription = itemDescriptions[this.itemType];
 
 		const objectivePipelines: IObjective[][] = [
-			[new GatherFromGround(this.itemType).passContextDataKey(this)],
-			[new GatherFromChest(this.itemType).passContextDataKey(this)],
+			[new GatherFromGround(this.itemType, this.options).passContextDataKey(this)],
+			[new GatherFromChest(this.itemType, this.options).passContextDataKey(this)],
+			[new UseProvidedItem(this.itemType).passContextDataKey(this)],
 		];
 
 		const terrainSearch = this.getTerrainSearch();
@@ -68,15 +73,19 @@ export default class AcquireItem extends AcquireBase {
 			objectivePipelines.push([new GatherFromTerrain(terrainSearch).passContextDataKey(this)]);
 		}
 
-		const doodadSearch = this.getDoodadSearch();
-		if (doodadSearch.size > 0) {
-			objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passContextDataKey(this)]);
+		if (!this.options.disableCreatureSearch) {
+			const doodadSearch = this.getDoodadSearch();
+			if (doodadSearch.size > 0) {
+				objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passContextDataKey(this)]);
+			}
 		}
 
-		const creatureSearch: CreatureSearch = this.getCreatureSearch();
-		if (creatureSearch.map.size > 0) {
-			objectivePipelines.push([new GatherFromCorpse(creatureSearch).passContextDataKey(this)]);
-			objectivePipelines.push([new GatherFromCreature(creatureSearch).passContextDataKey(this)]);
+		if (!this.options.disableCreatureSearch) {
+			const creatureSearch: CreatureSearch = this.getCreatureSearch();
+			if (creatureSearch.map.size > 0) {
+				objectivePipelines.push([new GatherFromCorpse(creatureSearch).passContextDataKey(this)]);
+				objectivePipelines.push([new GatherFromCreature(creatureSearch).passContextDataKey(this)]);
+			}
 		}
 
 		const dismantleSearch: ItemType[] = this.getDismantleSearch();
@@ -84,8 +93,22 @@ export default class AcquireItem extends AcquireBase {
 			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passContextDataKey(this)]);
 		}
 
-		if (itemDescription && itemDescription.recipe) {
-			objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passContextDataKey(this)]);
+		const disassembleSearch = itemUtilities.getDisassembleSearch(context, this.itemType);
+		if (disassembleSearch.length > 0) {
+			objectivePipelines.push([new AcquireItemFromDisassemble(this.itemType, disassembleSearch).passContextDataKey(this)]);
+		}
+
+		if (itemDescription) {
+			if (itemDescription.recipe) {
+				objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passContextDataKey(this)]);
+			}
+
+			if (itemDescription.revert !== undefined) {
+				const revertItemDescription = itemDescriptions[itemDescription.revert];
+				if (revertItemDescription?.lit === this.itemType) {
+					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passContextDataKey(this)]);
+				}
+			}
 		}
 
 		return objectivePipelines;
@@ -151,7 +174,7 @@ export default class AcquireItem extends AcquireBase {
 										type: terrainType,
 										itemType: this.itemType,
 										resource: terrainSearch.resource,
-										extraDifficulty: 5, // random number. todo: use this
+										extraDifficulty: 5 + ((100 - (leftOver.chance ?? 100)) * 5), // lower chance = higher difficulty
 									});
 								}
 							}

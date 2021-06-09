@@ -5,9 +5,10 @@ import Enums from "utilities/enum/Enums";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { IInventoryItems, inventoryItemInfo } from "../../ITars";
+import { IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
 import Objective from "../../Objective";
-import AcquireItem from "../Acquire/Item/AcquireItem";
+import AcquireItem from "../acquire/item/AcquireItem";
+import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 
 export default class UpgradeInventoryItem extends Objective {
 
@@ -34,8 +35,8 @@ export default class UpgradeInventoryItem extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		const worth = description.worth;
-		if (worth === undefined) {
+		const currentWorth = description.worth;
+		if (currentWorth === undefined) {
 			return ObjectiveResult.Complete;
 		}
 
@@ -43,27 +44,71 @@ export default class UpgradeInventoryItem extends Objective {
 
 		const itemInfo = inventoryItemInfo[this.upgrade];
 
+		const flags = itemInfo.flags ?? InventoryItemFlag.PreferHigherWorth;
+
+		let isUpgrade: ((itemType: ItemType) => boolean) | undefined;
+
+		if (typeof (flags) === "object") {
+			switch (flags.flag) {
+				case InventoryItemFlag.PreferHigherActionBonus:
+					const currentActionTier = item.getItemUseBonus(flags.option);
+
+					isUpgrade = (itemType: ItemType) => {
+						const actionTier = itemDescriptions[itemType]?.actionTier?.[flags.option];
+						return actionTier !== undefined && actionTier > currentActionTier;
+					};
+
+					break;
+
+				case InventoryItemFlag.PreferHigherTier:
+					const currentItemTier = item.description()?.tier?.[flags.option];
+
+					isUpgrade = (itemType: ItemType) => {
+						const tier = itemDescriptions[itemType]?.tier?.[flags.option];
+						return tier !== undefined && currentItemTier !== undefined && tier > currentItemTier;
+					};
+
+					break;
+			}
+		}
+
+		if (!isUpgrade) {
+			// default to worth
+			isUpgrade = (itemType: ItemType) => {
+				const worth = itemDescriptions[itemType]?.worth;
+				return worth !== undefined && currentWorth !== undefined && worth > currentWorth;
+			};
+		};
+
 		if (itemInfo.itemTypes) {
 			for (const itemTypeOrGroup of itemInfo.itemTypes) {
 				if (itemTypeOrGroup !== item.type) {
 					if (itemManager.isGroup(itemTypeOrGroup)) {
 						const groupItems = itemManager.getGroupItems(itemTypeOrGroup);
 						for (const groupItemType of groupItems) {
-							this.addUpgradeObjectives(objectivePipelines, groupItemType, worth);
+							this.addUpgradeObjectives(objectivePipelines, groupItemType, isUpgrade);
 						}
 
 					} else {
-						this.addUpgradeObjectives(objectivePipelines, itemTypeOrGroup, worth);
+						this.addUpgradeObjectives(objectivePipelines, itemTypeOrGroup, isUpgrade);
 					}
 				}
 			}
 		}
 
 		if (itemInfo.equipType) {
-			for (const it of Enums.values(ItemType)) {
-				const description = itemDescriptions[it];
+			for (const itemType of Enums.values(ItemType)) {
+				const description = itemDescriptions[itemType];
 				if (description && description.equip === itemInfo.equipType) {
-					this.addUpgradeObjectives(objectivePipelines, it, worth, description);
+					this.addUpgradeObjectives(objectivePipelines, itemType, isUpgrade);
+				}
+			}
+		}
+
+		if (itemInfo.actionTypes) {
+			for (const actionType of itemInfo.actionTypes) {
+				for (const itemType of AcquireItemForAction.getItems(actionType)) {
+					this.addUpgradeObjectives(objectivePipelines, itemType, isUpgrade);
 				}
 			}
 		}
@@ -71,9 +116,8 @@ export default class UpgradeInventoryItem extends Objective {
 		return objectivePipelines;
 	}
 
-	private addUpgradeObjectives(objectives: IObjective[][], itemType: ItemType, currentWorth: number, description = itemDescriptions[itemType]) {
-		const itemTypeWorth = description.worth;
-		if (itemTypeWorth !== undefined && itemTypeWorth > currentWorth) {
+	private addUpgradeObjectives(objectives: IObjective[][], itemType: ItemType, isUpgrade: (itemType: ItemType) => boolean) {
+		if (isUpgrade(itemType)) {
 			objectives.push([new AcquireItem(itemType)]);
 		}
 	}

@@ -6,10 +6,10 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { defaultMaxTilesChecked } from "../../ITars";
 import Objective from "../../Objective";
-import ExecuteAction from "../Core/ExecuteAction";
-import Lambda from "../Core/Lambda";
-import MoveToTarget from "../Core/MoveToTarget";
-import Restart from "../Core/Restart";
+import ExecuteAction from "../core/ExecuteAction";
+import Lambda from "../core/Lambda";
+import MoveToTarget from "../core/MoveToTarget";
+import Restart from "../core/Restart";
 
 export default class Idle extends Objective {
 
@@ -39,7 +39,7 @@ export default class Idle extends Objective {
 
 		} else {
 			if (this.canMoveToIdle) {
-				const target = TileHelpers.findMatchingTile(context.player, (_, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !game.isTileFull(tile) && !tile.doodad, defaultMaxTilesChecked);
+				const target = TileHelpers.findMatchingTile(context.player, (_, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !game.isTileFull(tile) && !tile.doodad, { maxTilesChecked: defaultMaxTilesChecked });
 				if (target) {
 					this.log.info("Moving to idle position");
 

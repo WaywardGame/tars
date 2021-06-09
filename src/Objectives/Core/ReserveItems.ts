@@ -4,6 +4,9 @@ import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 
+/**
+ * Marks items that will be used to complete the objective
+ */
 export default class ReserveItems extends Objective {
 
 	public items: Item[];

@@ -7,10 +7,10 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { ITerrainSearch } from "../../ITars";
 import Objective from "../../Objective";
-import { getBestActionItem } from "../../Utilities/Item";
-import { canGather, getNearestTileLocation } from "../../Utilities/Tile";
-import ExecuteActionForItem, { ExecuteActionType } from "../Core/ExecuteActionForItem";
-import MoveToTarget from "../Core/MoveToTarget";
+import { itemUtilities } from "../../utilities/Item";
+import { tileUtilities } from "../../utilities/Tile";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
+import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromTerrain extends Objective {
 
@@ -29,7 +29,7 @@ export default class GatherFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const hasDigTool = getBestActionItem(context, ActionType.Dig) !== undefined;
+		const hasDigTool = itemUtilities.hasInventoryItemForAction(context, ActionType.Dig);
 
 		for (const terrainSearch of this.search) {
 			const terrainDescription = Terrains[terrainSearch.type];
@@ -37,10 +37,10 @@ export default class GatherFromTerrain extends Objective {
 				continue;
 			}
 
-			const tileLocations = await getNearestTileLocation(context, terrainSearch.type);
+			const tileLocations = await tileUtilities.getNearestTileLocation(context, terrainSearch.type);
 
 			for (const tileLocation of tileLocations) {
-				if (!canGather(tileLocation.tile)) {
+				if (!tileUtilities.canGather(tileLocation.tile)) {
 					continue;
 				}
 
@@ -93,6 +93,10 @@ export default class GatherFromTerrain extends Objective {
 
 				if (!terrainDescription.gather && !hasDigTool) {
 					difficulty += 500;
+				}
+
+				if (terrainSearch.extraDifficulty !== undefined) {
+					difficulty += terrainSearch.extraDifficulty;
 				}
 
 				difficulty = Math.round(difficulty);

@@ -2,14 +2,15 @@ import Doodad from "game/doodad/Doodad";
 import doodadDescriptions from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
 import TileHelpers from "utilities/game/TileHelpers";
+import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { baseInfo, BaseInfoKey, IBaseInfo } from "../../ITars";
 import Objective from "../../Objective";
-import { getBaseDoodads, isGoodWellBuildTile } from "../../Utilities/Base";
-import * as objectUtilities from "../../Utilities/Object";
+import { baseUtilities } from "../../utilities/Base";
+import { objectUtilities } from "../../utilities/Object";
 
 const baseDoodadDistanceSq = Math.pow(150, 2);
 
@@ -90,9 +91,9 @@ export default class AnalyzeBase extends Objective {
 		if (changed) {
 			let availableUnlimitedWellLocation: IVector3 | undefined;
 
-			const baseDoodads = getBaseDoodads(context);
+			const baseDoodads = baseUtilities.getBaseDoodads(context);
 			for (const baseDoodad of baseDoodads) {
-				const unlimitedWellTile = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => isGoodWellBuildTile(context, point, tile, true), 50);
+				const unlimitedWellTile = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: 50 });
 				if (unlimitedWellTile) {
 					availableUnlimitedWellLocation = unlimitedWellTile;
 					break;
@@ -112,6 +113,8 @@ export default class AnalyzeBase extends Objective {
 				context.base.availableUnlimitedWellLocation = undefined;
 				this.log.info("Lost unlimited well location");
 			}
+
+			baseUtilities.reset();
 
 			// execute it again.
 			// one of the doodads might need to be near another - but depending on the ordering it might be get set yet

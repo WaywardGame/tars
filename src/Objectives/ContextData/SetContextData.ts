@@ -9,7 +9,7 @@ export default class SetContextData extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `SetContextData:${this.type}:${this.value}`;
+		return `SetContextData:${this.type}=${this.value}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

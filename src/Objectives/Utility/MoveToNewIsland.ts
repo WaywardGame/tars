@@ -2,12 +2,17 @@ import { ActionType } from "game/entity/action/IAction";
 import Island from "game/Island";
 import { Direction } from "utilities/math/Direction";
 import { IVector3 } from "utilities/math/IVector";
+import { ItemType } from "game/item/IItem";
 
 import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import ExecuteAction from "../Core/ExecuteAction";
-import MoveToTarget from "../Core/MoveToTarget";
+import AcquireItem from "../acquire/item/AcquireItem";
+import ExecuteAction from "../core/ExecuteAction";
+import MoveToTarget from "../core/MoveToTarget";
+import AnalyzeInventory from "../analyze/AnalyzeInventory";
+import MoveToWater from "./MoveToWater";
+import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 
 export default class MoveToNewIsland extends Objective {
 
@@ -51,12 +56,20 @@ export default class MoveToNewIsland extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		return unvisitedIslands.map(island => [
-			new MoveToTarget(island.edgePosition, true, { allowBoat: true, disableStaminaCheck: true }),
-			new ExecuteAction(ActionType.Move, (context, action) => {
-				action.execute(context.player, island.direction);
-			}),
-		]);
+		const objectivePipelines: IObjective[][] = [];
+
+		for (const unvisitedIsland of unvisitedIslands) {
+			objectivePipelines.push([
+				...(context.inventory.sailBoat ? [new MoveItemIntoInventory(context.inventory.sailBoat)] : [new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]),
+				new MoveToWater(true),
+				new MoveToTarget(unvisitedIsland.edgePosition, true, { allowBoat: true, disableStaminaCheck: true }),
+				new ExecuteAction(ActionType.Move, (context, action) => {
+					action.execute(context.player, unvisitedIsland.direction);
+				}),
+			]);
+		}
+
+		return objectivePipelines;
 	}
 
 }
