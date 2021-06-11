@@ -19,6 +19,7 @@ import OrganizeBase from "../../objectives/utility/OrganizeBase";
 import { ITarsMode } from "../IMode";
 import { baseUtilities } from "../../utilities/Base";
 import { itemUtilities } from "../../utilities/Item";
+import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
 
 /**
  * Marie Kondo mode
@@ -83,6 +84,8 @@ export class TidyUpMode implements ITarsMode {
 		}
 
 		objectives.push(new ReturnToBase());
+
+		objectives.push(new OrganizeInventory());
 
 		if (!multiplayer.isConnected()) {
 			if (game.getTurnMode() !== TurnMode.RealTime) {

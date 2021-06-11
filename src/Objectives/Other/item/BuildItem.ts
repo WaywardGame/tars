@@ -20,6 +20,7 @@ import { tileUtilities } from "../../../utilities/Tile";
 import AnalyzeBase from "../../analyze/AnalyzeBase";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
+import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 
 import UseItem from "./UseItem";
 
@@ -121,6 +122,7 @@ export default class BuildItem extends Objective {
 
 		return [
 			new MoveToTarget(this.target, true),
+			new PickUpAllTileItems(this.target),
 			new UseItem(ActionType.Build, item),
 			new Lambda(async context => {
 				const tile = context.player.getFacingTile();

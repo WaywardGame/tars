@@ -1,14 +1,13 @@
 import { IVector3 } from "utilities/math/IVector";
 import { TerrainType } from "game/tile/ITerrain";
-import { ActionType } from "game/entity/action/IAction";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import DigTile from "../other/tile/DigTile";
 import Restart from "../core/Restart";
-import ExecuteAction from "../core/ExecuteAction";
 import { tileUtilities } from "../../utilities/Tile";
+import PickUpAllTileItems from "../other/tile/PickUpAllTileItems";
 
 export default class DrainSwamp extends Objective {
 
@@ -41,11 +40,7 @@ export default class DrainSwamp extends Objective {
                     continue;
                 }
 
-                for (const item of tile.containedItems!) {
-                    objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-                        action.execute(context.player, item, context.player.inventory);
-                    }));
-                }
+                objectives.push(new PickUpAllTileItems(target));
             }
 
             objectives.push(new DigTile(target, { digUntilTypeIsNot: TerrainType.Swamp }), new Restart());

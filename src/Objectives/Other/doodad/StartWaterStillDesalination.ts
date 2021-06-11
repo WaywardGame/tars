@@ -18,6 +18,7 @@ import UseItem from "../item/UseItem";
 import { baseUtilities } from "../../../utilities/Base";
 import { doodadUtilities } from "../../../utilities/Doodad";
 import { itemUtilities } from "../../../utilities/Item";
+import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 
 /**
  * It will ensure the water still is desalinating as long as we're near the base
@@ -103,15 +104,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 			objectives.push(new MoveToTarget(this.waterStill, true));
 
-			const waterStillTile = this.waterStill.getTile();
-			if (waterStillTile.containedItems && waterStillTile.containedItems.length > 0) {
-				// cleanup water still tile
-				for (const item of waterStillTile.containedItems!) {
-					objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, context.player.inventory);
-					}));
-				}
-			}
+			objectives.push(new PickUpAllTileItems(this.waterStill));
 
 			this.log.info("Moving to detach container");
 

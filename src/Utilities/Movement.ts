@@ -195,6 +195,7 @@ class MovementUtilities {
                     const terrainDescription = Terrains[tileType];
 
                     if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
+                        // some terrain is blocking our path
                         if (terrainDescription.gather) {
                             if (direction !== context.player.facingDirection) {
                                 await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
@@ -215,7 +216,9 @@ class MovementUtilities {
                         return MoveResult.NoPath;
 
                     } else if (doodad?.blocksMove()) {
-                        // walking into a doodad we can pickup
+                        // doodad is blocking our path
+
+                        // face it
                         if (direction !== context.player.facingDirection) {
                             await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                                 action.execute(context.player, direction, undefined);
@@ -223,11 +226,21 @@ class MovementUtilities {
                         }
 
                         if (doodad.canPickup(context.player)) {
-                            log.info("Picking up doodad", Direction[direction]);
+                            const doodadDescription = doodad.description();
+                            if (doodadDescription && (doodadDescription.isDoor || doodadDescription.isGate) && doodadDescription.isClosed) {
+                                log.info("Opening doodad blocking the path", Direction[direction]);
 
-                            await actionUtilities.executeAction(context, ActionType.Pickup, (context, action) => {
-                                action.execute(context.player);
-                            });
+                                await actionUtilities.executeAction(context, ActionType.OpenDoor, (context, action) => {
+                                    action.execute(context.player);
+                                });
+
+                            } else {
+                                log.info("Picking up doodad blocking the path", Direction[direction]);
+
+                                await actionUtilities.executeAction(context, ActionType.Pickup, (context, action) => {
+                                    action.execute(context.player);
+                                });
+                            }
 
                         } else if (tileUtilities.hasCorpses(nextTile)) {
                             log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);

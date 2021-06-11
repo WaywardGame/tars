@@ -114,7 +114,7 @@ export default class AnalyzeBase extends Objective {
 				this.log.info("Lost unlimited well location");
 			}
 
-			baseUtilities.reset();
+			baseUtilities.clearCache();
 
 			// execute it again.
 			// one of the doodads might need to be near another - but depending on the ordering it might be get set yet

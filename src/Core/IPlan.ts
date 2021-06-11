@@ -44,10 +44,11 @@ export enum ExecuteResultType {
 	Completed,
 	Pending,
 	Restart,
+	Ignored,
 	ContinuingNextTick,
 }
 
-export type ExecuteResult = IExecuteCompleted | IExecutePending | IExecuteWaitingForNextTick | IExecuteRestart;
+export type ExecuteResult = IExecuteCompleted | IExecutePending | IExecuteWaitingForNextTick | IExecuteRestart | IExecuteIgnored;
 
 export interface IExecuteCompleted {
 	type: ExecuteResultType.Completed;
@@ -65,4 +66,8 @@ export interface IExecuteWaitingForNextTick {
 
 export interface IExecuteRestart {
 	type: ExecuteResultType.Restart;
+}
+
+export interface IExecuteIgnored {
+	type: ExecuteResultType.Ignored;
 }

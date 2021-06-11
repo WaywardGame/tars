@@ -672,6 +672,8 @@ export default class Tars extends Mod {
 
 		this.inventory = {};
 
+		baseUtilities.clearCache();
+
 		this.reset(true);
 
 		this.navigationSystemState = NavigationSystemState.NotInitialized;

@@ -3,6 +3,7 @@ import Log, { ILogLine } from "utilities/Log";
 
 import Context from "../Context";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../IObjective";
+import Objective from "../Objective";
 import ReserveItems from "../objectives/core/ReserveItems";
 import Restart from "../objectives/core/Restart";
 import { loggerUtilities } from "../utilities/Logger";
@@ -72,7 +73,7 @@ export default class Plan implements IPlan {
 		const objectiveStack: IObjectiveInfo[] = [...this.objectives];
 
 		if (objectiveStack.length > 1) {
-			this.log.info("Executing plan", objectiveStack.map(objectiveInfo => objectiveInfo.objective.getIdentifier()).join(" -> "));
+			this.log.info("Executing plan", Objective.getPipelineString(objectiveStack.map(objectiveInfo => objectiveInfo.objective)));
 
 			if (this.objectiveInfo.objective !== objectiveStack[0].objective) {
 				// print logs for the planned objective if it's not in the stack
@@ -85,6 +86,7 @@ export default class Plan implements IPlan {
 		// todo: print original objective logs?
 
 		let dynamic = false;
+		let ignored = false;
 
 		while (true) {
 			const objectiveInfo = objectiveStack.shift();
@@ -125,17 +127,19 @@ export default class Plan implements IPlan {
 			}
 
 			if (result === ObjectiveResult.Pending) {
-				const pendingop = this.getObjectiveResults(chain, objectiveStack, objectiveInfo);
-				if (this.context.options.developerMode) {
-					if (pendingop.length > 0 && !(pendingop[pendingop.length - 1] instanceof Restart)) {
-						console.log("pendingfix missing restart", pendingop.map(o => o.getHashCode()).join(","));
-						console.log("pendingfix stacks", `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`, `${objectiveStack.map(o => `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`).join(",")}`);
-					}
-				}
+				const objectiveResults = this.getObjectiveResults(chain, objectiveStack, objectiveInfo);
+				// console.log("chain", Objective.getPipelineString(chain));
+				// // console.log("chain", Objective.getPipelineString(objectiveStack.map(objectiveInfo => objective));
+				// if (this.context.options.developerMode) {
+				// 	if (pendingop.length > 0 && !(pendingop[pendingop.length - 1] instanceof Restart)) {
+				// 		console.log("pendingfix missing restart", Objective.getPipelineString(pendingop));
+				// 		console.log("pendingfix stacks", `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`, `${objectiveStack.map(o => `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`).join(",")}`);
+				// 	}
+				// }
 
 				return {
 					type: ExecuteResultType.Pending,
-					objectives: pendingop,
+					objectives: objectiveResults,
 				};
 			}
 
@@ -143,6 +147,10 @@ export default class Plan implements IPlan {
 				return {
 					type: ExecuteResultType.Restart,
 				};
+			}
+
+			if (result === ObjectiveResult.Ignore) {
+				ignored = true;
 			}
 
 			// don't include the current objective here because we completed it
@@ -200,9 +208,13 @@ export default class Plan implements IPlan {
 				}
 			}*/
 		}
+		if (objectiveStack.length > 0) {
+			console.warn("maybe a bug - Ignoreobjective stack", objectiveStack);
+		}
 
+		// return Ignored if at least one was ignored
 		return {
-			type: ExecuteResultType.Completed,
+			type: ignored ? ExecuteResultType.Ignored : ExecuteResultType.Completed,
 		};
 	}
 
