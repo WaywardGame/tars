@@ -1,7 +1,6 @@
 import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import { IStat, Stat } from "game/entity/IStats";
-import { ItemTypeGroup } from "game/item/IItem";
 
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
@@ -51,7 +50,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const availableWaterContainer = context.inventory.waterContainer?.find(waterContainer => !itemManager.isInGroup(waterContainer.type, ItemTypeGroup.ContainerOfDesalinatedWater));
+		const availableWaterContainer = context.inventory.waterContainer?.find(waterContainer => !itemUtilities.isSafeToDrinkItem(waterContainer));
 
 		if (this.waterStill.gatherReady === undefined) {
 			// water still cannot be desalinated yet

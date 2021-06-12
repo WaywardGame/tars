@@ -192,11 +192,21 @@ class ItemUtilities {
 		return item.description()?.use?.includes(actionType) ? true : false;
 	}
 
+
+	public getTools(context: Context, actionType: ActionType, preferredDamageType?: DamageType): Item[] {
+		return this.getInventoryItemsWithUse(context, actionType)
+			.filter(item => {
+				const description = item.description();
+				return description && (preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
+			})
+			.sort((itemA, itemB) => itemB.getItemUseBonus(actionType) - itemA.getItemUseBonus(actionType));
+	}
+
 	public getBestTool(context: Context, use: ActionType, preferredDamageType?: DamageType): Item | undefined {
-		let possibleEquips = this.getPossibleHandEquips(context, use, preferredDamageType);
+		let possibleEquips = this.getTools(context, use, preferredDamageType);
 		if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
 			// fall back to not caring about the damage type
-			possibleEquips = this.getPossibleHandEquips(context, use);
+			possibleEquips = this.getTools(context, use);
 		}
 
 		return possibleEquips.length > 0 ? possibleEquips[0] : undefined;
@@ -413,7 +423,7 @@ class ItemUtilities {
 
 				// todo: remove this?
 				const description = item.description();
-				if (description && description.use && (description.use.includes(ActionType.GatherWater) || description.use.includes(ActionType.DrinkItem))) {
+				if (description?.use && (description.use.includes(ActionType.GatherWater) || (description.use.includes(ActionType.DrinkItem) && !description.tier?.[ItemTypeGroup.FrozenWater]))) {
 					return false;
 				}
 
