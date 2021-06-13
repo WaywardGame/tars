@@ -22,6 +22,10 @@ interface INavigationWorker {
 
 const workerCount = 1; // navigator.hardwareConcurrency;
 
+export const tileUpdateRadius = 2;
+
+export const creaturePenaltyRadius = 2;
+
 export default class Navigation {
 
 	private static instance: Navigation | undefined;
@@ -349,9 +353,7 @@ export default class Navigation {
 		return this.isDisabled(tile, point.x, point.y, point.z, tileType);
 	}
 
-	public getPenaltyFromPoint(point: IVector3): number {
-		const tile = game.getTileFromPoint(point);
-
+	public getPenaltyFromPoint(point: IVector3, tile: ITile = game.getTileFromPoint(point)): number {
 		const tileType = TileHelpers.getType(tile);
 		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
@@ -563,20 +565,32 @@ export default class Navigation {
 			penalty += 255;
 		}
 
-		// if (tileUpdateType === undefined || tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
-		// penalty for creatures on or next to the tile
-		for (let x = -1; x <= 1; x++) {
-			for (let y = -1; y <= 1; y++) {
-				const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
-				if (point) {
-					const otherTile = game.getTileFromPoint(point);
-					if (otherTile.creature && !otherTile.creature.isTamed()) {
-						penalty += (x === 0 && y === 0) ? 36 : 20;
+		if (tileUpdateType === undefined || tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
+			// penalty for creatures on or near the tile
+			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
+				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
+					const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+					if (point) {
+						const creature = game.getTileFromPoint(point).creature;
+						if (creature && !creature.isTamed()) {
+							penalty += 20;
+
+							if (x === 0 && y === 0) {
+								penalty += 16;
+							}
+
+							if (Math.abs(x) <= 1 && Math.abs(y) <= 1) {
+								penalty += 16;
+							}
+
+							if (creature.aberrant) {
+								penalty += 100;
+							}
+						}
 					}
 				}
 			}
 		}
-		// }
 
 		if (tile.doodad !== undefined) {
 			const description = tile.doodad.description();

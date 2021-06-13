@@ -4,6 +4,7 @@ import itemDescriptions from "game/item/Items";
 import Context from "../../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
+import { itemUtilities } from "../../../utilities/Item";
 import AcquireItemWithRecipe from "../../acquire/item/AcquireItemWithRecipe";
 
 /**
@@ -20,15 +21,22 @@ export default class CheckDecayingItems extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const animalFatItems = context.base.chest
-            .map(chest => itemManager.getItemsInContainer(chest, true)
-                .filter(item => item.type === ItemType.AnimalFat && item.decay !== undefined && item.decay <= 500))
-            .flat()
-            // it's very important to include items in inventory, so if this objective is restarted after grabing the item from the chest, it will continue to work
-            .concat(itemManager.getItemsInContainerByType(context.player.inventory, ItemType.AnimalFat, true))
+        // it's very important to include items in inventory, so if this objective is restarted after grabing the item from the chest, it will continue to work
+        const baseItemsWithDecay = itemUtilities.getBaseItems(context)
+            .filter(item => item.decay !== undefined)
+
+        const animalFatItemsDecayingSoon = baseItemsWithDecay
+            .filter(item => item.type === ItemType.AnimalFat && item.decay! <= 500)
             .sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
-        if (animalFatItems.length > 0) {
+        if (animalFatItemsDecayingSoon.length > 0) {
             return new AcquireItemWithRecipe(ItemType.Tallow, itemDescriptions[ItemType.Tallow].recipe!);
+        }
+
+        const offalItemsDecayingSoon = baseItemsWithDecay
+            .filter(item => item.type === ItemType.Offal && item.decay! <= 200)
+            .sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
+        if (offalItemsDecayingSoon.length > 0) {
+            return new AcquireItemWithRecipe(ItemType.AnimalGlue, itemDescriptions[ItemType.AnimalGlue].recipe!);
         }
 
         return ObjectiveResult.Ignore;

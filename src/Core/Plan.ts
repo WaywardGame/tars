@@ -49,9 +49,15 @@ export default class Plan implements IPlan {
 		let str = "";
 
 		const writeTree = (tree: IExecutionTree, depth = 0) => {
-			str += `${"  ".repeat(depth)}${tree?.hashCode}\n`;
+			str += `${"  ".repeat(depth)}${tree.hashCode}`;
 
-			for (const child of tree?.children) {
+			if (tree.groupedAway) {
+				str += " (Regrouped children)";
+			}
+
+			str += "\n";
+
+			for (const child of tree.children) {
 				writeTree(child, depth + 1);
 			}
 		};
@@ -333,6 +339,9 @@ export default class Plan implements IPlan {
 				const objectiveGroupId = `${depth},${hashCode}`;
 				const objectiveGroupParent = objectiveGroups.get(objectiveGroupId);
 				if (objectiveGroupParent) {
+					// we are changing the parent for this objective
+					// flag the original parent as being changed
+					parent.groupedAway = true;
 					parent = objectiveGroupParent;
 
 				} else {
@@ -342,13 +351,13 @@ export default class Plan implements IPlan {
 
 			const childTree: IExecutionTree = {
 				id: id++,
-				depth: depth,
-				objective: objective,
-				hashCode: hashCode,
-				difficulty: difficulty,
-				logs: logs,
+				depth,
+				objective,
+				hashCode,
+				difficulty,
+				logs,
+				parent,
 				children: [],
-				parent: parent,
 			};
 
 			parent.children.push(childTree);

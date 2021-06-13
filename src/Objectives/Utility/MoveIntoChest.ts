@@ -1,5 +1,4 @@
 import { DoodadType } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
 import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
 import Vector2 from "utilities/math/Vector2";
@@ -10,9 +9,9 @@ import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IOb
 import Objective from "../../Objective";
 import AcquireItemForDoodad from "../acquire/item/AcquireItemForDoodad";
 import AnalyzeBase from "../analyze/AnalyzeBase";
-import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import BuildItem from "../other/item/BuildItem";
+import MoveItem from "../other/item/MoveItem";
 
 export default class MoveIntoChest extends Objective {
 
@@ -51,9 +50,7 @@ export default class MoveIntoChest extends Objective {
 				objectives.push(new MoveToTarget(chest, true));
 
 				for (const item of itemsToMove) {
-					objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, targetContainer);
-					}));
+					objectives.push(new MoveItem(item, targetContainer));
 				}
 
 				objectivePipelines.push(objectives);

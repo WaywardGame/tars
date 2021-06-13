@@ -1,11 +1,10 @@
-import { ActionType } from "game/entity/action/IAction";
 import { IVector3 } from "utilities/math/IVector";
 
 import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 
-import ExecuteAction from "../../core/ExecuteAction";
+import MoveItem from "../item/MoveItem";
 
 export default class PickUpAllTileItems extends Objective {
 
@@ -27,15 +26,7 @@ export default class PickUpAllTileItems extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        const objectives: IObjective[] = [];
-
-        for (const item of targetTile.containedItems) {
-            objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-                action.execute(context.player, item, context.player.inventory);
-            }));
-        }
-
-        return objectives;
+        return targetTile.containedItems.map(item => new MoveItem(item, context.player.inventory));
     }
 
 }

@@ -1,5 +1,4 @@
 import Doodad from "game/doodad/Doodad";
-import { ActionType } from "game/entity/action/IAction";
 import { IContainer, ItemType } from "game/item/IItem";
 
 import Context from "../../Context";
@@ -8,9 +7,9 @@ import { ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
-import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
+import MoveItem from "../other/item/MoveItem";
 
 export default class GatherFromChest extends Objective {
 
@@ -63,9 +62,7 @@ export default class GatherFromChest extends Objective {
 					new MoveToTarget(chest, true).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
 					new ReserveItems(item),
 					new SetContextData(this.contextDataKey, item),
-					new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, context.player.inventory);
-					}).setStatus(() => `Moving ${item.getName()} to inventory`),
+					new MoveItem(item, context.player.inventory),
 				];
 			});
 	}

@@ -9,7 +9,7 @@ import Context from "../Context";
 
 class CreatureUtilities {
 
-	public readonly creatureRadius = 5;
+	private readonly nearbyCreatureRadius = 5;
 
 	public shouldRunAwayFromAllCreatures(context: Context) {
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
@@ -21,8 +21,8 @@ class CreatureUtilities {
 	public getNearbyCreatures(point: IVector3): Creature[] {
 		const creatures: Creature[] = [];
 
-		for (let x = this.creatureRadius * -1; x <= this.creatureRadius; x++) {
-			for (let y = this.creatureRadius * -1; y <= this.creatureRadius; y++) {
+		for (let x = -this.nearbyCreatureRadius; x <= this.nearbyCreatureRadius; x++) {
+			for (let y = -this.nearbyCreatureRadius; y <= this.nearbyCreatureRadius; y++) {
 				const validPoint = game.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
 				if (validPoint) {
 					const tile = game.getTileFromPoint(validPoint);

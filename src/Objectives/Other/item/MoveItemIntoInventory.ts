@@ -1,12 +1,11 @@
-import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
 
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import ExecuteAction from "../../core/ExecuteAction";
 import MoveToTarget from "../../core/MoveToTarget";
+import MoveItem from "./MoveItem";
 
 export default class MoveItemIntoInventory extends Objective {
 
@@ -39,9 +38,7 @@ export default class MoveItemIntoInventory extends Objective {
 
         return [
             new MoveToTarget(point, true),
-            new ExecuteAction(ActionType.MoveItem, (context, action) => {
-                action.execute(context.player, item, context.player.inventory);
-            }),
+            new MoveItem(item, context.player.inventory),
         ];
     }
 

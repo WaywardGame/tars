@@ -318,7 +318,7 @@ define(["require", "exports", "game/doodad/IDoodad", "game/entity/action/IAction
                 IItem_1.ItemTypeGroup.ContainerOfSeawater,
                 IItem_1.ItemTypeGroup.ContainerOfUnpurifiedFreshWater,
             ],
-            allowMultiple: 3,
+            allowMultiple: 4,
         },
         waterStill: {
             itemTypes: [IItem_1.ItemTypeGroup.WaterStill],

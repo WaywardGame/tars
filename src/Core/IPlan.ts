@@ -38,6 +38,7 @@ export interface IExecutionTree<T extends IObjective = IObjective> {
 	logs: ILogLine[];
 	children: IExecutionTree[];
 	parent?: IExecutionTree;
+	groupedAway?: boolean;
 }
 
 export enum ExecuteResultType {

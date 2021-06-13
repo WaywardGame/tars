@@ -1,4 +1,3 @@
-import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { IVector3 } from "utilities/math/IVector";
 
@@ -7,10 +6,10 @@ import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
-import ExecuteAction from "../core/ExecuteAction";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
+import MoveItem from "../other/item/MoveItem";
 
 export default class GatherFromGround extends Objective {
 
@@ -45,9 +44,7 @@ export default class GatherFromGround extends Objective {
 					return [
 						new ReserveItems(item),
 						new SetContextData(this.contextDataKey, item),
-						new ExecuteAction(ActionType.MoveItem, (context, action) => {
-							action.execute(context.player, item, context.player.inventory);
-						}).setStatus(() => `Moving ${item.getName()} to inventory`),
+						new MoveItem(item, context.player.inventory),
 					];
 				}
 			}
@@ -88,9 +85,7 @@ export default class GatherFromGround extends Objective {
 					const item = context.player.getFacingTile().containedItems?.find(item => item.type === this.itemType);
 					if (item) {
 						objectives.push(new SetContextData(this.contextDataKey, item));
-						objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-							action.execute(context.player, item, context.player.inventory);
-						}).setStatus(() => `Moving ${item.getName()} to inventory`));
+						objectives.push(new MoveItem(item, context.player.inventory));
 					}
 
 					return objectives;

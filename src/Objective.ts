@@ -53,13 +53,8 @@ export default abstract class Objective implements IObjective {
 			console.warn("Invalid objective identifier", hashCode);
 		}
 
-		if (this.isDynamic() || addUniqueIdentifier) {
-			if (this._uniqueIdentifier === undefined) {
-				this._uniqueIdentifier = Objective.uuid++;
-				if (Objective.uuid >= Number.MAX_SAFE_INTEGER) {
-					Objective.uuid = 0;
-				}
-			}
+		if (this.isDynamic() || addUniqueIdentifier || this._uniqueIdentifier !== undefined) {
+			this.addUniqueIdentifier();
 
 			hashCode += `:${this._uniqueIdentifier}`;
 		}
@@ -222,4 +217,16 @@ export default abstract class Objective implements IObjective {
 		return 0;
 	}
 
+	/**
+	 * Adds a unique identifier to this objective
+	 * Prevents some caching logic related to hash codes
+	 */
+	protected addUniqueIdentifier() {
+		if (this._uniqueIdentifier === undefined) {
+			this._uniqueIdentifier = Objective.uuid++;
+			if (Objective.uuid >= Number.MAX_SAFE_INTEGER) {
+				Objective.uuid = 0;
+			}
+		}
+	}
 }

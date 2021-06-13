@@ -26,7 +26,6 @@ import Lambda from "../../objectives/core/Lambda";
 import Restart from "../../objectives/core/Restart";
 import GatherWater from "../../objectives/gather/GatherWater";
 import BuildItem from "../../objectives/other/item/BuildItem";
-import EmptyWaterContainer from "../../objectives/other/EmptyWaterContainer";
 import EquipItem from "../../objectives/other/item/EquipItem";
 import Idle from "../../objectives/other/Idle";
 import ReinforceItem from "../../objectives/other/item/ReinforceItem";
@@ -49,6 +48,7 @@ import AcquireUseOrbOfInfluence from "../../objectives/acquire/item/specific/Acq
 import CheckDecayingItems from "../../objectives/other/item/CheckDecayingItems";
 import HuntCreatures from "../../objectives/other/creature/HuntCreatures";
 import PlantSeeds from "../../objectives/utility/PlantSeeds";
+import GatherWaters from "../../objectives/gather/GatherWaters";
 
 /**
  * Survival mode
@@ -295,21 +295,22 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			// carry drinkable water with you
-			let availableWaterContainer: Item | undefined;
+			const drinkableWaterContainers: Item[] = [];
+			const availableWaterContainers: Item[] = [];
 
 			if (context.inventory.waterContainer !== undefined) {
-				const hasDrinkableWater = context.inventory.waterContainer.some(item => itemUtilities.isSafeToDrinkItem(item));
-				if (!hasDrinkableWater) {
-					availableWaterContainer = context.inventory.waterContainer.find(item => itemUtilities.canGatherWater(item));
-					if (!availableWaterContainer) {
-						// use the first water container we have - pour it out first
-						availableWaterContainer = context.inventory.waterContainer[0];
-						objectives.push(new EmptyWaterContainer(availableWaterContainer));
+				for (const waterContainer of context.inventory.waterContainer) {
+					if (itemUtilities.isSafeToDrinkItem(waterContainer)) {
+						drinkableWaterContainers.push(waterContainer);
+					} else {
+						availableWaterContainers.push(waterContainer);
 					}
+				}
 
+				if (availableWaterContainers.length > 0) {
 					// we are looking for something drinkable
 					// if there is a well, starting the water still will use it
-					objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }));
+					objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }));
 				}
 			}
 
@@ -322,14 +323,14 @@ export class SurvivalMode implements ITarsMode {
 
 				// cleanup base if theres items laying around everywhere
 				const tiles = baseUtilities.getTilesWithItemsNearBase(context);
-				if (tiles.totalCount > (availableWaterContainer ? 0 : 20)) {
+				if (tiles.totalCount > 20) {
 					objectives.push(new OrganizeBase(tiles.tiles));
 				}
 			}
 
-			if (availableWaterContainer) {
+			if (drinkableWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+				objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
 			}
 		}
 
@@ -345,7 +346,7 @@ export class SurvivalMode implements ITarsMode {
 		// go on a killing spree once you have a good sword and shield
 		if (baseUtilities.isNearBase(context)) {
 			const creatures = baseUtilities.getCreaturesNearBase(context)
-				.filter(creature => creature.hasAi(AiType.Hostile));
+				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
 				objectives.push(new HuntCreatures(creatures));
 			}
@@ -509,15 +510,17 @@ export class SurvivalMode implements ITarsMode {
 
 					// stock up on water
 					if (needWaterItems) {
-						const availableWaterContainer = context.inventory.waterContainer?.find(item => !itemUtilities.isSafeToDrinkItem(item) && itemUtilities.canGatherWater(item));
-						if (!availableWaterContainer) {
+						const availableWaterContainers = context.inventory.waterContainer?.filter(item => !itemUtilities.isSafeToDrinkItem(item));
+						if (availableWaterContainers && availableWaterContainers.length > 0) {
+							// we are looking for something drinkable
+							// if there is a well, starting the water still will use it
+							objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+
+						} else {
 							// get a new water container
 							objectives.push(new AcquireWaterContainer());
+							objectives.push(new GatherWater(undefined, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
 						}
-
-						// we are looking for something drinkable
-						// if there is a well, starting the water still will use it
-						objectives.push(new GatherWater(availableWaterContainer, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
 					}
 
 					// stock up on food
@@ -548,6 +551,8 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			objectives.push(new ReturnToBase());
+
+			objectives.push(new OrganizeBase(baseUtilities.getTilesWithItemsNearBase(context).tiles));
 
 			objectives.push(new OrganizeInventory());
 		}

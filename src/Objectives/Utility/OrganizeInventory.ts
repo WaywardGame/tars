@@ -16,6 +16,7 @@ import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
+import MoveItem from "../other/item/MoveItem";
 
 const maxChestDistance = 128;
 
@@ -196,9 +197,7 @@ export default class OrganizeInventory extends Objective {
 
 				chestWeight += itemWeight;
 
-				objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-					action.execute(context.player, item, targetContainer);
-				}));
+				objectives.push(new MoveItem(item, targetContainer));
 			}
 
 			// restart in case there's more to move

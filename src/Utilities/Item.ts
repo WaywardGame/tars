@@ -421,11 +421,10 @@ class ItemUtilities {
 					return false;
 				}
 
-				// todo: remove this?
-				const description = item.description();
-				if (description?.use && (description.use.includes(ActionType.GatherWater) || (description.use.includes(ActionType.DrinkItem) && !description.tier?.[ItemTypeGroup.FrozenWater]))) {
-					return false;
-				}
+				// const description = item.description();
+				// if (description?.use && (description.use.includes(ActionType.GatherWater) || (description.use.includes(ActionType.DrinkItem) && !description.tier?.[ItemTypeGroup.FrozenWater]))) {
+				// 	return false;
+				// }
 
 				return true;
 			})

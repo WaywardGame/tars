@@ -8,6 +8,7 @@ import Objective from "../../Objective";
 import { baseUtilities } from "../../utilities/Base";
 import { itemUtilities } from "../../utilities/Item";
 import AcquireFood from "../acquire/item/AcquireFood";
+import ReserveItems from "../core/ReserveItems";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 import UseItem from "../other/item/UseItem";
 
@@ -111,6 +112,6 @@ export default class RecoverHunger extends Objective {
 
 	private eatItem(context: Context, item: Item) {
 		this.log.info(`Eating ${item.getName(false).getString()}`);
-		return [new MoveItemIntoInventory(item), new UseItem(ActionType.Eat, item)];
+		return [new ReserveItems(item), new MoveItemIntoInventory(item), new UseItem(ActionType.Eat, item)];
 	}
 }

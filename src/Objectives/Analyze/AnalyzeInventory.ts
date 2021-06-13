@@ -52,28 +52,7 @@ export default class AnalyzeInventory extends Objective {
 			const flags = itemInfo.flags ?? InventoryItemFlag.PreferHigherWorth;
 
 			// use a set to prevent duplicates
-			const items: Set<Item> = new Set();
-
-			if (itemInfo.itemTypes) {
-				for (const itemTypeOrGroup of itemInfo.itemTypes) {
-					if (itemManager.isGroup(itemTypeOrGroup)) {
-						items.addFrom(itemManager.getItemsInContainerByGroup(context.player.inventory, itemTypeOrGroup));
-
-					} else {
-						items.addFrom(itemManager.getItemsInContainerByType(context.player.inventory, itemTypeOrGroup));
-					}
-				}
-			}
-
-			if (itemInfo.actionTypes) {
-				for (const useType of itemInfo.actionTypes) {
-					items.addFrom(itemUtilities.getInventoryItemsWithUse(context, useType));
-				}
-			}
-
-			if (itemInfo.equipType) {
-				items.addFrom(itemUtilities.getInventoryItemsWithEquipType(context, itemInfo.equipType));
-			}
+			const items = AnalyzeInventory.getItems(context, itemInfo);
 
 			if (items.size > 0) {
 				const flag = typeof (flags) === "object" ? flags.flag : flags;
@@ -143,7 +122,7 @@ export default class AnalyzeInventory extends Objective {
 						}
 
 						context.inventory[key] = item as any;
-						this.log.info(`Found "${key}" - ${item} `);
+						this.log.info(`Found "${key}" - ${item}`);
 
 						if (itemInfo.protect) {
 							ProtectItem.execute(context.player, item, true);
@@ -153,9 +132,34 @@ export default class AnalyzeInventory extends Objective {
 			}
 		}
 
-		this.log.debug(context.inventory);
-
 		return ObjectiveResult.Ignore;
+	}
+
+	public static getItems(context: Context, itemInfo: IInventoryItemInfo) {
+		const items: Set<Item> = new Set();
+
+		if (itemInfo.itemTypes) {
+			for (const itemTypeOrGroup of itemInfo.itemTypes) {
+				if (itemManager.isGroup(itemTypeOrGroup)) {
+					items.addFrom(itemManager.getItemsInContainerByGroup(context.player.inventory, itemTypeOrGroup));
+
+				} else {
+					items.addFrom(itemManager.getItemsInContainerByType(context.player.inventory, itemTypeOrGroup));
+				}
+			}
+		}
+
+		if (itemInfo.actionTypes) {
+			for (const useType of itemInfo.actionTypes) {
+				items.addFrom(itemUtilities.getInventoryItemsWithUse(context, useType));
+			}
+		}
+
+		if (itemInfo.equipType) {
+			items.addFrom(itemUtilities.getInventoryItemsWithEquipType(context, itemInfo.equipType));
+		}
+
+		return items;
 	}
 
 	private isValid(context: Context, itemInfo: IInventoryItemInfo, item: Item) {

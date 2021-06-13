@@ -18,6 +18,8 @@ import { baseUtilities } from "../../../utilities/Base";
 import { doodadUtilities } from "../../../utilities/Doodad";
 import { itemUtilities } from "../../../utilities/Item";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
+import AnalyzeInventory from "../../analyze/AnalyzeInventory";
+import { inventoryItemInfo } from "../../../ITars";
 
 /**
  * It will ensure the water still is desalinating as long as we're near the base
@@ -50,7 +52,9 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const availableWaterContainer = context.inventory.waterContainer?.find(waterContainer => !itemUtilities.isSafeToDrinkItem(waterContainer));
+		const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
+
+		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !itemUtilities.isSafeToDrinkItem(waterContainer));
 
 		if (this.waterStill.gatherReady === undefined) {
 			// water still cannot be desalinated yet

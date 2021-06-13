@@ -47,7 +47,7 @@ import { IObjective } from "./IObjective";
 import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
 import { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
-import Navigation from "./navigation/Navigation";
+import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
 import Objective from "./Objective";
 import AnalyzeBase from "./objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "./objectives/analyze/AnalyzeInventory";
@@ -308,24 +308,25 @@ export default class Tars extends Mod {
 	}
 
 	@EventHandler(EventBus.Game, "tileUpdate")
-	public onTileUpdate(game: any, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
+	public onTileUpdate(_: any, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
 		if (this.navigationSystemState === NavigationSystemState.Initializing || localPlayer.isResting()) {
 			this.navigationQueuedUpdates.push(() => {
-				this.onTileUpdate(game, tile, tileX, tileY, tileZ, tileUpdateType);
+				this.onTileUpdate(undefined, tile, tileX, tileY, tileZ, tileUpdateType);
 			});
 
 		} else if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
-			// update this tile and its neighbors
-			for (let x = -1; x <= 1; x++) {
-				for (let y = -1; y <= 1; y++) {
-					if (x === 0 && y === 0) {
-						this.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ, undefined, tileUpdateType);
+			this.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ, undefined, tileUpdateType);
 
-					} else {
-						const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
-						if (point) {
-							const otherTile = game.getTileFromPoint(point);
-							this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ, undefined, tileUpdateType);
+			const updateNeighbors = tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn;
+			if (updateNeighbors) {
+				for (let x = -tileUpdateRadius; x <= tileUpdateRadius; x++) {
+					for (let y = -tileUpdateRadius; y <= tileUpdateRadius; y++) {
+						if (x !== 0 || y !== 0) {
+							const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+							if (point) {
+								const otherTile = game.getTileFromPoint(point);
+								this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ, undefined, tileUpdateType);
+							}
 						}
 					}
 				}
@@ -494,6 +495,8 @@ export default class Tars extends Mod {
 
 			this.event.emit("optionsChange", this.saveData.options);
 
+			let shouldInterrupt = this.isRunning();
+
 			for (const changedOption of changedOptions) {
 				switch (changedOption) {
 					case "exploreIslands":
@@ -501,14 +504,15 @@ export default class Tars extends Mod {
 						break;
 
 					case "developerMode":
+						shouldInterrupt = false;
 						planner.debug = this.saveData.options.developerMode;
 						break;
 				}
 			}
-		}
 
-		if (this.isRunning()) {
-			this.interrupt();
+			if (shouldInterrupt) {
+				this.interrupt();
+			}
 		}
 	}
 
@@ -532,18 +536,34 @@ export default class Tars extends Mod {
 			return "Not running";
 		}
 
+		let statusMessage: string = "Idle";
+
+		let planStatusMessage: string | undefined;
+
 		const plan = executor.getPlan();
 		if (plan !== undefined) {
-			const statusMessage = plan.tree.objective.getStatusMessage();
-			if (this.lastStatusMessage !== statusMessage) {
-				this.lastStatusMessage = statusMessage;
-				log.info(`Status: ${statusMessage}`);
-			}
-
-			return statusMessage;
+			planStatusMessage = plan.tree.objective.getStatusMessage();
 		}
 
-		return "Idle";
+		const objectivePipeline = this.objectivePipeline ?? this.interruptObjectivePipeline;
+		if (objectivePipeline) {
+			statusMessage = objectivePipeline.flat()[0].getStatusMessage();
+
+			// todo: make this more generic. only show statusMessage if it's interesting
+			if (planStatusMessage && planStatusMessage !== statusMessage && statusMessage !== "Miscellaneous processing" && statusMessage !== "Calculating objective...") {
+				statusMessage = `${planStatusMessage} - ${statusMessage}`;
+			}
+
+		} else if (planStatusMessage) {
+			statusMessage = planStatusMessage;
+		}
+
+		if (this.lastStatusMessage !== statusMessage) {
+			this.lastStatusMessage = statusMessage;
+			log.info(`Status: ${statusMessage}`);
+		}
+
+		return statusMessage;
 	}
 
 	public updateStatus() {
@@ -978,6 +998,7 @@ export default class Tars extends Mod {
 				// save the active objective
 				this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
 				log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.objectivePipeline));
+				this.updateStatus();
 				return;
 
 			default:
@@ -1292,7 +1313,7 @@ export default class Tars extends Mod {
 		for (const creature of nearbyCreatures) {
 			if (shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature)) {
 				// only run away if the creature can path to us
-				const path = creature.findPath(context.player, 16);
+				const path = creature.findPath(context.player, 16, context.player);
 				if (path) {
 					log.info(`Run away from ${creature.getName().getString()}`);
 					return new RunAwayFromTarget(creature);

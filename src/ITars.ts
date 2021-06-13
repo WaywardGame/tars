@@ -466,7 +466,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemTypeGroup.ContainerOfSeawater,
 			ItemTypeGroup.ContainerOfUnpurifiedFreshWater,
 		],
-		allowMultiple: 3,
+		allowMultiple: 4,
 	},
 	waterStill: {
 		itemTypes: [ItemTypeGroup.WaterStill],

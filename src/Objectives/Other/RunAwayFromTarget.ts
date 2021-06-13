@@ -3,6 +3,7 @@ import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import Entity from "game/entity/Entity";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
@@ -16,7 +17,7 @@ const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
 
 export default class RunAwayFromTarget extends Objective {
 
-	constructor(private readonly target: IVector3, private readonly maxRunAwayDistance = 20) {
+	constructor(private readonly target: Entity | IVector3, private readonly maxRunAwayDistance = 20) {
 		super();
 	}
 
@@ -25,7 +26,7 @@ export default class RunAwayFromTarget extends Objective {
 	}
 
 	public getStatus(): string {
-		return "Running away";
+		return `Running away from ${this.target instanceof Entity ? this.target.getName() : `(${this.target.x},${this.target.y},${this.target.z})`}`;
 	}
 
 	public isDynamic(): boolean {
@@ -75,7 +76,7 @@ export default class RunAwayFromTarget extends Objective {
 
 			// farther end point is generally better
 			const distance = Vector2.squaredDistance(context.player, nearbyOpenTile.point);
-			score -= distance * 2000;
+			score -= distance * 200;
 
 			for (const point of movementPath.path) {
 				const index = `${point.x},${point.y}`;
@@ -88,32 +89,48 @@ export default class RunAwayFromTarget extends Objective {
 
 					pointScore += navigation.getPenaltyFromPoint(pointZ) * 10;
 
+					// try to avoid paths that has blocking things
+					const tile = game.getTileFromPoint(pointZ);
+					if (tile.doodad?.blocksMove()) {
+						pointScore! += 2000;
+					}
+
+					const terrainType = TileHelpers.getType(tile);
+					const terrainDescription = terrainDescriptions[terrainType];
+					if (terrainDescription) {
+						if (!terrainDescription.passable && !terrainDescription.water) {
+							pointScore! += 2000;
+						}
+					}
+
 					// use this method to walk all tiles along the path to calculate a "safety" score
 					TileHelpers.findMatchingTiles(
 						pointZ,
-						(_, tile) => {
+						(point, tile) => {
+							pointScore! += navigation.getPenaltyFromPoint(point, tile);
+
 							// creatures are scary
-							if (tile.creature !== undefined) {
-								pointScore! += 20000;
-							}
+							// if (tile.creature !== undefined) {
+							// 	pointScore! += 10000;
+							// }
 
-							// add score for doodads and terrains because we would rather end up in an open area
-							if (tile.doodad?.blocksMove()) {
-								pointScore! += 20;
-							}
+							// // add score for doodads and terrains because we would rather end up in an open area
+							// if (tile.doodad?.blocksMove()) {
+							// 	pointScore! += 100;
+							// }
 
-							const terrainType = TileHelpers.getType(tile);
-							const terrainDescription = terrainDescriptions[terrainType];
-							if (terrainDescription) {
-								if (!terrainDescription.passable && !terrainDescription.water) {
-									pointScore! += 20;
-								}
+							// const terrainType = TileHelpers.getType(tile);
+							// const terrainDescription = terrainDescriptions[terrainType];
+							// if (terrainDescription) {
+							// 	if (!terrainDescription.passable && !terrainDescription.water) {
+							// 		pointScore! += 100;
+							// 	}
 
-								// don't run into the water
-								if (terrainDescription.water) {
-									pointScore! += 1000;
-								}
-							}
+							// 	// don't run into the water
+							// 	if (terrainDescription.water) {
+							// 		pointScore! += 1000;
+							// 	}
+							// }
 
 							return true;
 						},
@@ -126,9 +143,9 @@ export default class RunAwayFromTarget extends Objective {
 				}
 
 				score += pointScore;
-
-				pointsWithSafety.push([nearbyOpenTile.point, score]);
 			}
+
+			pointsWithSafety.push([nearbyOpenTile.point, score]);
 		}
 
 		pointsWithSafety.sort((a, b) => a[1] - b[1]);
@@ -145,17 +162,7 @@ export default class RunAwayFromTarget extends Objective {
 				return 0;
 			}
 
-			// const direction = getDirectionFromMovement(bestPoint.x - context.player.x, bestPoint.y - context.player.y);
-
-			// this.log.info(`Running away ${Direction[direction]}`);
-
-			// console.log("move to", bestPoint[0]);
-
 			objectives.push(new MoveToTarget(bestPoint[0], false, { disableStaminaCheck: true }).setStatus(this));
-
-			// objectives.push(new ExecuteAction(ActionType.Move, (context, action) => {
-			// 	action.execute(context.player, direction);
-			// }).setStatus(this));
 
 		} else {
 			this.log.info("Unable to run away from target");
