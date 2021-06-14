@@ -38,13 +38,14 @@ import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
+import ResolvablePromise from "utilities/promise/ResolvablePromise";
 
 import Context from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./core/Executor";
 import planner from "./core/Planner";
 import { ContextDataType, MovingToNewIslandState } from "./IContext";
 import { IObjective } from "./IObjective";
-import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
+import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, setTarsInstance, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
 import { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
@@ -163,11 +164,14 @@ export default class Tars extends Mod {
 
 	private navigation: Navigation | undefined;
 	private navigationSystemState: NavigationSystemState;
+	private navigationUpdatePromise: ResolvablePromise<void> | undefined;
 	private navigationQueuedUpdates: Array<() => void>;
 
 	private readonly modeCache: Map<TarsMode, ITarsMode> = new Map();
 
 	public onInitialize(): void {
+		setTarsInstance(this);
+
 		Navigation.setModPath(this.getPath());
 
 		Log.setSourceFilter(Log.LogType.File, false, logSourceName);
@@ -175,6 +179,8 @@ export default class Tars extends Mod {
 
 	public onUninitialize(): void {
 		this.onGameEnd();
+
+		setTarsInstance(undefined);
 	}
 
 	public onLoad(): void {
@@ -462,7 +468,7 @@ export default class Tars extends Mod {
 
 		this.context = new Context(localPlayer, this.base, this.inventory, this.saveData.options);
 
-		await this.ensureNavigation();
+		await this.ensureNavigation(this.context.player.vehicleItemId !== undefined);
 
 		await this.reset();
 
@@ -570,6 +576,29 @@ export default class Tars extends Mod {
 		this.event.emit("statusChange", this.getStatus());
 	}
 
+	public async ensureSailingMode(sailingMode: boolean) {
+		if (!this.navigation) {
+			return;
+		}
+
+		if (this.navigationUpdatePromise) {
+			return this.navigationUpdatePromise;
+		}
+
+		if (this.navigation.shouldUpdateSailingMode(sailingMode)) {
+			log.info("Updating sailing mode", sailingMode);
+
+			this.navigationUpdatePromise = new ResolvablePromise();
+
+			this.navigationSystemState = NavigationSystemState.NotInitialized;
+
+			await this.ensureNavigation(sailingMode);
+
+			this.navigationUpdatePromise.resolve();
+			this.navigationUpdatePromise = undefined;
+		}
+	}
+
 	////////////////////////////////////////////////
 
 	/**
@@ -596,7 +625,10 @@ export default class Tars extends Mod {
 		planner.debug = this.saveData.options.developerMode;
 	}
 
-	private async ensureNavigation() {
+	/**
+	 * Ensure navigation is running and up to date
+	 */
+	private async ensureNavigation(sailingMode: boolean) {
 		if (this.navigationSystemState === NavigationSystemState.NotInitialized && this.navigation) {
 			this.navigationSystemState = NavigationSystemState.Initializing;
 
@@ -610,7 +642,7 @@ export default class Tars extends Mod {
 			// give a chance for the message to show up on screen before starting nav update
 			await sleep(100);
 
-			await this.navigation.updateAll();
+			await this.navigation.updateAll(sailingMode);
 
 			this.navigation.queueUpdateOrigin(localPlayer);
 
@@ -1431,7 +1463,8 @@ export default class Tars extends Mod {
 	 * Explicitly not using OrganizeInventory for this - the exact objectives should be specified to prevent issues
 	 */
 	private organizeInventoryInterrupts(context: Context, interruptContext?: Context): IObjective[] | undefined {
-		if (context.getDataOrDefault(ContextDataType.DisableMoveAwayFromBaseItemOrganization, false)) {
+		if (context.getDataOrDefault(ContextDataType.DisableMoveAwayFromBaseItemOrganization, false) ||
+			context.getData(ContextDataType.MovingToNewIsland) === MovingToNewIslandState.Ready) {
 			return undefined;
 		}
 

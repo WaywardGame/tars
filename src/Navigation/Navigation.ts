@@ -46,6 +46,10 @@ export default class Navigation {
 
 	private originUpdateTimeout: number | undefined;
 
+	private sailingMode = false;
+
+	private workerInitialized = false;
+
 	public static get(): Navigation {
 		if (!Navigation.instance) {
 			Navigation.instance = new Navigation();
@@ -186,10 +190,18 @@ export default class Navigation {
 		}
 	}
 
-	public async updateAll(): Promise<void> {
+	public shouldUpdateSailingMode(sailingMode: boolean) {
+		return this.sailingMode !== sailingMode;
+	}
+
+	public async updateAll(sailingMode: boolean): Promise<void> {
 		log.info("Updating navigation. Please wait...");
 
-		const array = new Uint8Array(game.mapSizeSq * this.dijkstraMaps.size * 3);
+		this.sailingMode = sailingMode;
+
+		const skipWorkerUpdate = this.workerInitialized;
+
+		const array = !skipWorkerUpdate ? new Uint8Array(game.mapSizeSq * this.dijkstraMaps.size * 3) : undefined;
 
 		const start = performance.now();
 
@@ -197,25 +209,29 @@ export default class Navigation {
 			for (let x = 0; x < game.mapSize; x++) {
 				for (let y = 0; y < game.mapSize; y++) {
 					const tile = game.getTile(x, y, z);
-					this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z, array);
+					this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z, array, undefined, skipWorkerUpdate);
 				}
 			}
 		}
 
-		const promises: Array<Promise<NavigationResponse>> = [];
+		if (array) {
+			const promises: Array<Promise<NavigationResponse>> = [];
 
-		for (const navigationWorker of this.navigationWorkers) {
-			const messageArray = new Uint8Array(array.buffer.slice(0));
+			for (const navigationWorker of this.navigationWorkers) {
+				const messageArray = new Uint8Array(array.buffer.slice(0));
 
-			const updateAllTilesMessage: IUpdateAllTilesRequest = {
-				type: NavigationMessageType.UpdateAllTiles,
-				array: messageArray,
-			};
+				const updateAllTilesMessage: IUpdateAllTilesRequest = {
+					type: NavigationMessageType.UpdateAllTiles,
+					array: messageArray,
+				};
 
-			promises.push(this.submitRequest(updateAllTilesMessage, navigationWorker.id, [messageArray.buffer]));
+				promises.push(this.submitRequest(updateAllTilesMessage, navigationWorker.id, [messageArray.buffer]));
+			}
+
+			await Promise.all(promises);
+
+			this.workerInitialized = true;
 		}
-
-		await Promise.all(promises);
 
 		const time = performance.now() - start;
 
@@ -261,7 +277,7 @@ export default class Navigation {
 		// }
 	}
 
-	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array, tileUpdateType?: TileUpdateType): void {
+	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void {
 		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return;
@@ -293,7 +309,7 @@ export default class Navigation {
 			array[index + 1] = penalty;
 			array[index + 2] = tileType;
 
-		} else {
+		} else if (!skipWorkerUpdate) {
 			const updateTileMessage: IUpdateTileRequest = {
 				type: NavigationMessageType.UpdateTile,
 				pos: { x, y, z },
@@ -617,9 +633,14 @@ export default class Navigation {
 			// stay away from coasts
 			penalty += 6;
 
-		} else if (terrainDescription.water) {
+		} else if (terrainDescription.water && !this.sailingMode) {
 			// stay out of water
 			penalty += 20;
+		}
+
+		if (this.sailingMode && !terrainDescription.water && !terrainDescription.shallowWater) {
+			// try to stay in water while sailing
+			penalty += 200;
 		}
 
 		return Math.min(penalty, 255);

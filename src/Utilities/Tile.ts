@@ -38,8 +38,8 @@ class TileUtilities {
 		return results.flat();
 	}
 
-	public isOverWater(context: Context) {
-		return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.water === true;
+	public isSwimmingOrOverWater(context: Context) {
+		return context.player.isSwimming() || Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.water === true;
 	}
 
 	public isOverDeepWater(context: Context) {

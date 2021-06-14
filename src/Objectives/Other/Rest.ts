@@ -30,7 +30,7 @@ export default class Rest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (tileUtilities.isOverWater(context) && !playerUtilities.isUsingVehicle(context)) {
+		if (tileUtilities.isSwimmingOrOverWater(context) && !playerUtilities.isUsingVehicle(context)) {
 			return new MoveToLand();
 		}
 

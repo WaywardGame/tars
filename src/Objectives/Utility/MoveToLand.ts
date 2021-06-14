@@ -20,7 +20,7 @@ export default class MoveToLand extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!tileUtilities.isOverWater(context)) {
+		if (!tileUtilities.isSwimmingOrOverWater(context)) {
 			return ObjectiveResult.Complete;
 		}
 

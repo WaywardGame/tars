@@ -106,7 +106,7 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.base.campfire.length === 0 && context.inventory.campfire === undefined) {
 			log.info("Need campfire");
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Campfire), new BuildItem(), new AnalyzeBase()]);
+			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitCampfire), new BuildItem(), new AnalyzeBase()]);
 		}
 
 		if (context.inventory.fireStarter === undefined) {
@@ -153,7 +153,7 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		if (baseUtilities.shouldBuildWaterStills(context) && context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
+			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);
 		}
 
 		let acquireChest = true;
@@ -281,7 +281,7 @@ export class SurvivalMode implements ITarsMode {
 		if (baseUtilities.isNearBase(context)) {
 			// build a second water still
 			if (baseUtilities.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
-				objectives.push([new AcquireItemByGroup(ItemTypeGroup.WaterStill), new BuildItem(), new AnalyzeBase()]);
+				objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);
 			}
 
 			// carry food with you

@@ -11,6 +11,7 @@ import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
+import Tars from "./Tars";
 import { itemUtilities } from "./utilities/Item";
 
 export const TARS_ID = "TARS";
@@ -239,6 +240,7 @@ export interface IInventoryItemInfo {
 	allowInChests?: boolean;
 	allowOnTiles?: boolean;
 	protect?: boolean;
+	requiredMinDur?: number;
 }
 
 export type InventoryItemFlags = InventoryItemFlag | { flag: InventoryItemFlag; option: any; };
@@ -278,6 +280,7 @@ export enum InventoryItemFlag {
 export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo> = {
 	anvil: {
 		itemTypes: [ItemTypeGroup.Anvil],
+		requiredMinDur: 1,
 	},
 	axe: {
 		itemTypes: [
@@ -304,9 +307,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	bed: {
 		itemTypes: [ItemTypeGroup.Bedding],
+		requiredMinDur: 1,
 	},
 	campfire: {
 		itemTypes: [ItemTypeGroup.Campfire],
+		requiredMinDur: 1,
 	},
 	carve: {
 		actionTypes: [ActionType.Carve],
@@ -317,6 +322,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	chest: {
 		itemTypes: [ItemType.WoodenChest],
+		requiredMinDur: 1,
 	},
 	equipBack: {
 		equipType: EquipType.Back,
@@ -386,6 +392,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	furnace: {
 		itemTypes: [ItemTypeGroup.Furnace],
+		requiredMinDur: 1,
 	},
 	hammer: {
 		itemTypes: [ItemTypeGroup.Hammer],
@@ -412,9 +419,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.WoodenChest,
 			ItemType.WroughtIronChest,
 		],
+		requiredMinDur: 1,
 	},
 	kiln: {
 		itemTypes: [ItemTypeGroup.Kiln],
+		requiredMinDur: 1,
 	},
 	knife: {
 		itemTypes: [
@@ -470,6 +479,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	waterStill: {
 		itemTypes: [ItemTypeGroup.WaterStill],
+		requiredMinDur: 1,
 	},
 	well: {
 		itemTypes: [
@@ -477,6 +487,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.SandstoneWell,
 			ItemType.StoneWell,
 		],
+		requiredMinDur: 1,
 	},
 };
 
@@ -528,4 +539,22 @@ export enum TarsMode {
 	Survival,
 	TidyUp,
 	Gardener,
+}
+
+let tars: Tars | undefined;
+
+export function getTarsInstance() {
+	if (!tars) {
+		throw new Error("Invalid Tars instance");
+	}
+
+	return tars;
+}
+
+export function setTarsInstance(instance: Tars | undefined) {
+	tars = instance;
+}
+
+export function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation {
+	return getTarsInstance().getTranslation(translation);
 }

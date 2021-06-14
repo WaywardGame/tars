@@ -7,9 +7,8 @@ import { ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
-import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
-import MoveItem from "../other/item/MoveItem";
+import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 
 export default class GatherFromChest extends Objective {
 
@@ -59,10 +58,9 @@ export default class GatherFromChest extends Objective {
 			.map(({ chest, items }) => {
 				const item = items[0];
 				return [
-					new MoveToTarget(chest, true).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
 					new ReserveItems(item),
 					new SetContextData(this.contextDataKey, item),
-					new MoveItem(item, context.player.inventory),
+					new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
 				];
 			});
 	}

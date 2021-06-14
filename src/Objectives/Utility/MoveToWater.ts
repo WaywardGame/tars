@@ -3,7 +3,6 @@ import TileHelpers from "utilities/game/TileHelpers";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { defaultMaxTilesChecked } from "../../ITars";
 import Navigation from "../../navigation/Navigation";
 import Objective from "../../Objective";
 import { tileUtilities } from "../../utilities/Tile";
@@ -24,7 +23,7 @@ export default class MoveToWater extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (this.deepWater ? tileUtilities.isOverDeepWater(context) : tileUtilities.isOverWater(context)) {
+		if (this.deepWater ? tileUtilities.isOverDeepWater(context) : tileUtilities.isSwimmingOrOverWater(context)) {
 			return ObjectiveResult.Complete;
 		}
 
@@ -40,7 +39,7 @@ export default class MoveToWater extends Objective {
 			}
 
 			return false;
-		}, { maxTilesChecked: defaultMaxTilesChecked });
+		});
 
 		if (!target) {
 			return ObjectiveResult.Impossible;

@@ -42,13 +42,15 @@ export default class Recover extends Objective {
             objectives.push(new RecoverHealth(this.onlyUseAvailableItems));
         }
 
-        objectives.push(new RecoverThirst(this.onlyUseAvailableItems, exceededThirstThreshold));
+        objectives.push(new RecoverThirst(this.onlyUseAvailableItems, exceededThirstThreshold, false));
 
         objectives.push(new RecoverHunger(this.onlyUseAvailableItems, exceededHungerThreshold));
 
         if (exceededStaminaThreshold) {
             objectives.push(new RecoverStamina());
         }
+
+        objectives.push(new RecoverThirst(this.onlyUseAvailableItems, exceededThirstThreshold, true));
 
         return objectives;
     }

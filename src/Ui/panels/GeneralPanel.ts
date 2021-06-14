@@ -3,7 +3,7 @@ import { CheckButton } from "ui/component/CheckButton";
 import ChoiceList, { Choice } from "ui/component/ChoiceList";
 import Divider from "ui/component/Divider";
 import Enums from "utilities/enum/Enums";
-import { TarsMode, TarsTranslation } from "../../ITars";
+import { getTarsTranslation, TarsMode, TarsTranslation } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
 
 
@@ -17,11 +17,11 @@ export default class GeneralPanel extends TarsPanel {
         super();
 
         // this.labelStatus = new LabelledRow()
-        //     .setLabel(label => label.setText(this.TARS.getTranslation(TarsTranslation.DialogLabelStatus).addArgs(this.TARS.getStatus)))
+        //     .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelStatus).addArgs(this.TARS.getStatus)))
         //     .appendTo(this);
 
         this.buttonEnable = new CheckButton()
-            .setText(this.TARS.getTranslation(TarsTranslation.DialogButtonEnable))
+            .setText(getTarsTranslation(TarsTranslation.DialogButtonEnable))
             .setRefreshMethod(() => this.TARS.isEnabled())
             .event.subscribe("willToggle", (_, checked) => {
                 if (this.TARS.isEnabled() !== checked) {
@@ -43,8 +43,8 @@ export default class GeneralPanel extends TarsPanel {
 
                 } else {
                     choice
-                        .setText(this.TARS.getTranslation(`DialogMode${TarsMode[mode]}`))
-                        .setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(`DialogMode${TarsMode[mode]}Tooltip`))))
+                        .setText(getTarsTranslation(`DialogMode${TarsMode[mode]}`))
+                        .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(`DialogMode${TarsMode[mode]}Tooltip`))))
                 }
 
                 return choice;

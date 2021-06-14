@@ -19,6 +19,10 @@ export default class GatherWaters extends Objective {
 		return `GatherWaters:${this.waterContainers?.join(",")}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.disallowRecipe}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
 	}
 
+	public getStatus() {
+		return "Gathering water";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		return this.waterContainers.map(waterContainer => ([new GatherWater(waterContainer, this.options)]));
 	}

@@ -10,6 +10,18 @@ export default class OptionsInterrupt extends Objective {
 
 	public static previousOptions: IOptions | undefined;
 
+	private static desiredOptions: Partial<IOptions> = {
+		autoAttack: true, // todo: I think this should be false
+		autoGatherHarvest: false,
+		autoPickup: false,
+		dropLocation: DropLocation.Feet,
+		dropOnDismantle: false, // todo: why is this false?
+		dropOnGatherHarvest: true,
+		warnOnDangerousActions: false,
+		warnWhenBreakingItems: false,
+		warnWhenBreakingItemsOnCraft: false,
+	}
+
 	/**
 	 * Restores options to the original state before starting TARS
 	 */
@@ -42,39 +54,11 @@ export default class OptionsInterrupt extends Objective {
 
 		const updated: string[] = [];
 
-		if (context.player.options.autoPickup) {
-			updated.push("Disabling AutoPickup");
-			game.updateOption(context.player, "autoPickup", false);
-		}
-
-		if (context.player.options.autoGatherHarvest) {
-			updated.push("Disabling AutoGatherHarvest");
-			game.updateOption(context.player, "autoGatherHarvest", false);
-		}
-
-		if (!context.player.options.autoAttack) {
-			updated.push("Enabling AutoAttack");
-			game.updateOption(context.player, "autoAttack", true);
-		}
-
-		if (!context.player.options.dropOnGatherHarvest) {
-			updated.push("Enabling DropOnGatherHarvest");
-			game.updateOption(context.player, "dropOnGatherHarvest", true);
-		}
-
-		// if (!context.player.options.dropOnDismantle) {
-		//	updated.push("Enabling DropOnDismantle");
-		// 	game.updateOption(context.player, "dropOnDismantle", true);
-		// }
-
-		if (context.player.options.dropOnDismantle) {
-			updated.push("Disabling DropOnDismantle");
-			game.updateOption(context.player, "dropOnDismantle", false);
-		}
-
-		if (context.player.options.dropLocation !== DropLocation.Feet) {
-			updated.push("Setting DropLocation to Feet");
-			game.updateOption(context.player, "dropLocation", DropLocation.Feet);
+		for (const optionKey of Object.keys(OptionsInterrupt.desiredOptions) as Array<keyof IOptions>) {
+			if (context.player.options[optionKey] !== OptionsInterrupt.desiredOptions[optionKey]) {
+				updated.push(`Updating ${optionKey}`);
+				game.updateOption(context.player, optionKey, OptionsInterrupt.desiredOptions[optionKey] as any);
+			}
 		}
 
 		if (updated.length > 0) {

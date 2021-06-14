@@ -10,6 +10,7 @@ import { IVector2, IVector3 } from "utilities/math/IVector";
 
 import Context from "../Context";
 import { ObjectiveResult } from "../IObjective";
+import { getTarsInstance } from "../ITars";
 import { NavigationPath } from "../navigation//INavigation";
 import Navigation from "../navigation/Navigation";
 
@@ -101,6 +102,9 @@ class MovementUtilities {
 
         } else {
             const navigation = Navigation.get();
+
+            // ensure sailing mode is up to date
+            await getTarsInstance().ensureSailingMode(context.player.vehicleItemId !== undefined);
 
             const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
             if (ends.length === 0) {

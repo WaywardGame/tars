@@ -1,12 +1,12 @@
 import { ActionType } from "game/entity/action/IAction";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { ItemTypeGroup } from "game/item/IItem";
+import { DoodadTypeGroup } from "game/doodad/IDoodad";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { freshWaterTileLocation } from "../../navigation//INavigation";
 import Objective from "../../Objective";
-import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
 import AnalyzeBase from "../analyze/AnalyzeBase";
@@ -24,10 +24,11 @@ import { doodadUtilities } from "../../utilities/Doodad";
 import { playerUtilities } from "../../utilities/Player";
 import { itemUtilities } from "../../utilities/Item";
 import GatherWaterWithRecipe from "../gather/GatherWaterWithRecipe";
+import AcquireItemForDoodad from "../acquire/Item/AcquireItemForDoodad";
 
 export default class RecoverThirst extends Objective {
 
-	constructor(private readonly onlyUseAvailableItems: boolean, private exceededThreshold: boolean) {
+	constructor(private readonly onlyUseAvailableItems: boolean, private exceededThreshold: boolean, private allowEmergencies = false) {
 		super();
 	}
 
@@ -76,7 +77,7 @@ export default class RecoverThirst extends Objective {
 			return objectivePipelines.length > 0 ? objectivePipelines : ObjectiveResult.Ignore;
 		}
 
-		const isEmergency = thirstStat.value <= 3 && context.base.waterStill.every(waterStill => !doodadUtilities.isWaterStillDrinkable(waterStill));
+		const isEmergency = this.allowEmergencies && thirstStat.value <= 3 && context.base.waterStill.every(waterStill => !doodadUtilities.isWaterStillDrinkable(waterStill));
 
 		if (context.inventory.waterContainer !== undefined) {
 			for (const waterContainer of context.inventory.waterContainer) {
@@ -162,7 +163,7 @@ export default class RecoverThirst extends Objective {
 							objectivePipelines.push([
 								// new MoveToTarget(waterStill, true, { range: 5 }),
 								new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
-								new Idle(),
+								new Idle().setStatus("Waiting for water still due to emergency"),
 							]);
 						}
 					}
@@ -172,7 +173,7 @@ export default class RecoverThirst extends Objective {
 
 					// build another water still wait waiting
 					objectivePipelines.push([
-						new AcquireItemByGroup(ItemTypeGroup.WaterStill),
+						new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill),
 						new BuildItem(),
 						new AnalyzeBase(),
 					]);
@@ -188,7 +189,7 @@ export default class RecoverThirst extends Objective {
 
 					const isWaterDrinkable = doodadUtilities.isWaterStillDrinkable(waterStill);
 
-					const isEmergency = thirstStat.value <= 3 && !isWaterDrinkable;
+					const isEmergency = this.allowEmergencies && thirstStat.value <= 3 && !isWaterDrinkable;
 
 					if (isWaterDrinkable) {
 						waterStillObjectives.push(new MoveToTarget(waterStill, true));
@@ -207,7 +208,7 @@ export default class RecoverThirst extends Objective {
 
 							} else {
 								// wait for water still to finish
-								waterStillObjectives.push(new Idle());
+								waterStillObjectives.push(new Idle().setStatus("Waiting for water still due to emergency"));
 							}
 						}
 					}

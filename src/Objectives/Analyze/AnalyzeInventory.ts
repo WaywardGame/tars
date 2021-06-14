@@ -159,11 +159,23 @@ export default class AnalyzeInventory extends Objective {
 			items.addFrom(itemUtilities.getInventoryItemsWithEquipType(context, itemInfo.equipType));
 		}
 
+		if (itemInfo.requiredMinDur !== undefined) {
+			for (const item of Array.from(items)) {
+				if (item.minDur !== undefined && item.minDur < itemInfo.requiredMinDur) {
+					items.delete(item);
+				}
+			}
+		}
+
 		return items;
 	}
 
 	private isValid(context: Context, itemInfo: IInventoryItemInfo, item: Item) {
 		if (!item.isValid()) {
+			return false;
+		}
+
+		if (itemInfo.requiredMinDur !== undefined && item.minDur !== undefined && item.minDur < itemInfo.requiredMinDur) {
 			return false;
 		}
 
