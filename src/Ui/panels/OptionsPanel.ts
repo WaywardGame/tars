@@ -29,6 +29,10 @@ export default class OptionsPanel extends TarsPanel {
                 })
                 .appendTo(this);
 
+            if (uiOption.isDisabled?.()) {
+                checkButton.setDisabled(true);
+            }
+
             this.refreshableComponents.push(checkButton);
         }
     }

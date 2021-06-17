@@ -124,6 +124,15 @@ export default class Tars extends Mod {
 	@Register.message("NavigationUpdated")
 	public readonly messageNavigationUpdated: Message;
 
+	@Register.message("QuantumBurstStart")
+	public readonly messageQuantumBurstStart: Message;
+
+	@Register.message("QuantumBurstCooldownStart")
+	public readonly messageQuantumBurstCooldownStart: Message;
+
+	@Register.message("QuantumBurstCooldownEnd")
+	public readonly messageQuantumBurstCooldownEnd: Message;
+
 	////////////////////////////////////
 
 	@Register.dictionary("Tars", TarsTranslation)
@@ -149,6 +158,7 @@ export default class Tars extends Mod {
 
 	private readonly statThresholdExceeded: { [index: number]: boolean } = {};
 	private gamePlaying = false;
+	private quantumBurstCooldown = 0;
 	private weightStatus: WeightStatus | undefined;
 	private previousWeightStatus: WeightStatus | undefined;
 	private lastStatusMessage: string | undefined;
@@ -184,7 +194,7 @@ export default class Tars extends Mod {
 	}
 
 	public onLoad(): void {
-		this.ensureOptions();
+		this.ensureSaveData();
 
 		this.delete();
 
@@ -222,6 +232,10 @@ export default class Tars extends Mod {
 	@EventHandler(EventBus.Game, "play")
 	public onGameStart(): void {
 		this.gamePlaying = true;
+
+		if (!this.saveData.island[island.id]) {
+			this.saveData.island[island.id] = {};
+		}
 
 		if (!this.isRunning() && (this.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
 			this.toggle(true);
@@ -268,6 +282,8 @@ export default class Tars extends Mod {
 			if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
 				this.navigation.queueUpdateOrigin(player);
 			}
+
+			this.processQuantumBurst();
 
 			const objective = this.interruptObjectivePipeline || this.objectivePipeline;
 			if (objective !== undefined && !Array.isArray(objective[0])) {
@@ -345,8 +361,15 @@ export default class Tars extends Mod {
 		if (api.executor !== localPlayer) {
 			return;
 		}
+		this.processQuantumBurst();
 
 		actionUtilities.postExecuteAction(api.type);
+	}
+
+	@HookMethod
+	public processInput(player: Player): boolean | undefined {
+		this.processQuantumBurst();
+		return undefined;
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "walkPathChange")
@@ -451,6 +474,10 @@ export default class Tars extends Mod {
 		return this.tickTimeoutId !== undefined;
 	}
 
+	public isQuantumBurstEnabled(): boolean {
+		return this.isEnabled() && this.saveData.options.quantumBurst && !multiplayer.isConnected();
+	}
+
 	public async toggle(enabled = !this.saveData.enabled) {
 		if (this.navigationSystemState === NavigationSystemState.Initializing) {
 			return;
@@ -507,6 +534,21 @@ export default class Tars extends Mod {
 				switch (changedOption) {
 					case "exploreIslands":
 						this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+						break;
+
+					case "quantumBurst":
+						shouldInterrupt = false;
+
+						if (this.saveData.options.quantumBurst) {
+							localPlayer.messages
+								.source(this.messageSource)
+								.type(MessageType.Good)
+								.send(this.messageQuantumBurstStart);
+
+						} else {
+							this.quantumBurstCooldown = 2;
+						}
+
 						break;
 
 					case "developerMode":
@@ -602,9 +644,13 @@ export default class Tars extends Mod {
 	////////////////////////////////////////////////
 
 	/**
-	 * Ensure options are valid
+	 * Ensure save data is valid
 	 */
-	private ensureOptions() {
+	private ensureSaveData() {
+		if (this.saveData.island === undefined) {
+			this.saveData.island = {};
+		}
+
 		if (this.saveData.ui === undefined) {
 			this.saveData.ui = {};
 		}
@@ -614,6 +660,7 @@ export default class Tars extends Mod {
 			stayHealthy: true,
 			exploreIslands: true,
 			useOrbsOfInfluence: true,
+			quantumBurst: false,
 			developerMode: false,
 			...(this.saveData.options ?? {}) as Partial<ITarsOptions>,
 		}
@@ -778,6 +825,10 @@ export default class Tars extends Mod {
 
 	private async tick() {
 		try {
+			if (this.context.player.hasDelay()) {
+				this.processQuantumBurst();
+			}
+
 			await this.onTick();
 			this.updateStatus();
 
@@ -790,11 +841,24 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
+		if (this.context.player.hasDelay()) {
+			this.processQuantumBurst();
+		}
+
+		this.tickTimeoutId = setTimeout(this.tick.bind(this), this.isQuantumBurstEnabled() ? game.interval : tickSpeed);
 	}
 
 	private async onTick() {
 		if (!this.isRunning() || !executor.isReady(this.context, false)) {
+			if (this.quantumBurstCooldown === 2) {
+				this.quantumBurstCooldown--;
+
+				localPlayer.messages
+					.source(this.messageSource)
+					.type(MessageType.Good)
+					.send(this.messageQuantumBurstCooldownStart, false);
+			}
+
 			if (game.playing && this.context.player.isGhost() && game.getGameOptions().respawn) {
 				await new ExecuteAction(ActionType.Respawn, (context, action) => {
 					action.execute(context.player);
@@ -802,6 +866,15 @@ export default class Tars extends Mod {
 			}
 
 			return;
+		}
+
+		if (this.quantumBurstCooldown === 1) {
+			this.quantumBurstCooldown--;
+
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(MessageType.Good)
+				.send(this.messageQuantumBurstCooldownEnd, false);
 		}
 
 		objectUtilities.clearCache();
@@ -1055,7 +1128,7 @@ export default class Tars extends Mod {
 
 		let interrupts = [
 			this.optionsInterrupt(),
-			this.equipmentInterrupt(context),
+			...this.equipmentInterrupt(context),
 			this.nearbyCreatureInterrupt(context),
 			stayHealthy ? new Recover(true) : undefined,
 			this.buildItemObjectives(),
@@ -1079,16 +1152,18 @@ export default class Tars extends Mod {
 		return new OptionsInterrupt();
 	}
 
-	private equipmentInterrupt(context: Context): IObjective | undefined {
-		return this.handsEquipInterrupt(context) ||
-			this.equipInterrupt(context, EquipType.Chest) ||
-			this.equipInterrupt(context, EquipType.Legs) ||
-			this.equipInterrupt(context, EquipType.Head) ||
-			this.equipInterrupt(context, EquipType.Belt) ||
-			this.equipInterrupt(context, EquipType.Feet) ||
-			this.equipInterrupt(context, EquipType.Hands) ||
-			this.equipInterrupt(context, EquipType.Neck) ||
-			this.equipInterrupt(context, EquipType.Back);
+	private equipmentInterrupt(context: Context): Array<IObjective | undefined> {
+		return [
+			this.handsEquipInterrupt(context),
+			this.equipInterrupt(context, EquipType.Chest),
+			this.equipInterrupt(context, EquipType.Legs),
+			this.equipInterrupt(context, EquipType.Head),
+			this.equipInterrupt(context, EquipType.Belt),
+			this.equipInterrupt(context, EquipType.Feet),
+			this.equipInterrupt(context, EquipType.Hands),
+			this.equipInterrupt(context, EquipType.Neck),
+			this.equipInterrupt(context, EquipType.Back),
+		];
 	}
 
 	private equipInterrupt(context: Context, equip: EquipType): IObjective | undefined {
@@ -1271,45 +1346,41 @@ export default class Tars extends Mod {
 		}
 	}
 
-	private repairsInterrupt(context: Context): IObjective | undefined {
+	private repairsInterrupt(context: Context): IObjective[] | undefined {
 		if (this.inventory.hammer === undefined) {
 			return undefined;
 		}
 
-		let objective = this.repairInterrupt(context, context.player.getEquippedItem(EquipType.LeftHand)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.RightHand)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Chest)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Legs)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Head)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Belt)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Feet)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Neck)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Hands)) ||
-			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Back)) ||
-			this.repairInterrupt(context, this.inventory.knife) ||
-			this.repairInterrupt(context, this.inventory.fireStarter) ||
-			this.repairInterrupt(context, this.inventory.hoe) ||
-			this.repairInterrupt(context, this.inventory.axe) ||
-			this.repairInterrupt(context, this.inventory.pickAxe) ||
-			this.repairInterrupt(context, this.inventory.shovel) ||
-			this.repairInterrupt(context, this.inventory.equipSword) ||
-			this.repairInterrupt(context, this.inventory.equipShield) ||
-			this.repairInterrupt(context, this.inventory.tongs) ||
-			this.repairInterrupt(context, this.inventory.bed);
-		if (objective) {
-			return objective;
-		}
+		const objectives = [
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.LeftHand)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.RightHand)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Chest)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Legs)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Head)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Belt)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Feet)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Neck)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Hands)),
+			this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Back)),
+			this.repairInterrupt(context, this.inventory.knife),
+			this.repairInterrupt(context, this.inventory.fireStarter),
+			this.repairInterrupt(context, this.inventory.hoe),
+			this.repairInterrupt(context, this.inventory.axe),
+			this.repairInterrupt(context, this.inventory.pickAxe),
+			this.repairInterrupt(context, this.inventory.shovel),
+			this.repairInterrupt(context, this.inventory.equipSword),
+			this.repairInterrupt(context, this.inventory.equipShield),
+			this.repairInterrupt(context, this.inventory.tongs),
+			this.repairInterrupt(context, this.inventory.bed),
+		];
 
 		if (this.inventory.waterContainer) {
 			for (const waterContainer of this.inventory.waterContainer) {
-				objective = this.repairInterrupt(context, waterContainer);
-				if (objective) {
-					return objective;
-				}
+				objectives.push(this.repairInterrupt(context, waterContainer));
 			}
 		}
 
-		return undefined;
+		return objectives.filter(objective => objective !== undefined) as IObjective[];
 	}
 
 	private repairInterrupt(context: Context, item: Item | undefined): IObjective | undefined {
@@ -1532,4 +1603,17 @@ export default class Tars extends Mod {
 		this.navigationQueuedUpdates = [];
 	}
 
+	private processQuantumBurst() {
+		if (!this.isQuantumBurstEnabled()) {
+			return;
+		}
+
+		this.context.player.nextMoveTime = 0;
+		this.context.player.movementFinishTime = 0;
+		this.context.player.attackAnimationEndTime = 0;
+
+		while (this.context.player.hasDelay()) {
+			game.absoluteTime += 100;
+		}
+	}
 }

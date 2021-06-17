@@ -40,6 +40,8 @@ export enum TarsTranslation {
 	DialogButtonUseOrbsOfInfluenceTooltip,
 	DialogButtonDeveloperMode,
 	DialogButtonDeveloperModeTooltip,
+	DialogButtonQuantumBurst,
+	DialogButtonQuantumBurstTooltip,
 
 	DialogLabelItem,
 	DialogLabelDoodad,
@@ -55,6 +57,7 @@ export enum TarsTranslation {
 export interface ISaveData {
 	enabled: boolean;
 	options: ITarsOptions;
+	island: Record<string, Record<string, any>>;
 	ui: Partial<Record<TarsUiSaveDataKey, any>>;
 }
 
@@ -71,11 +74,19 @@ export interface ITarsOptions {
 	exploreIslands: boolean;
 	stayHealthy: boolean;
 	useOrbsOfInfluence: boolean;
+	quantumBurst: boolean;
 	developerMode: boolean;
 }
 
 // options to show in the Options panel
-export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mode">; title: TarsTranslation; tooltip: TarsTranslation } | undefined> = [
+export interface ITarsOptionSection {
+	option: keyof Omit<ITarsOptions, "mode">;
+	title: TarsTranslation;
+	tooltip: TarsTranslation;
+	isDisabled?: () => boolean;
+}
+
+export const uiConfigurableOptions: Array<ITarsOptionSection | undefined> = [
 	{
 		option: "exploreIslands",
 		title: TarsTranslation.DialogButtonExploreIslands,
@@ -92,6 +103,11 @@ export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mo
 		tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
 	},
 	undefined, // creates a Divider
+	{
+		option: "quantumBurst",
+		title: TarsTranslation.DialogButtonQuantumBurst,
+		tooltip: TarsTranslation.DialogButtonQuantumBurstTooltip,
+	},
 	{
 		option: "developerMode",
 		title: TarsTranslation.DialogButtonDeveloperMode,
@@ -557,4 +573,8 @@ export function setTarsInstance(instance: Tars | undefined) {
 
 export function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation {
 	return getTarsInstance().getTranslation(translation);
+}
+
+export function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T] {
+	return getTarsInstance().saveData[key];
 }

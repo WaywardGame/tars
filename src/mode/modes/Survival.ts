@@ -11,7 +11,7 @@ import Context from "../../Context";
 import ContextState from "../../ContextState";
 import { ContextDataType, MovingToNewIslandState } from "../../IContext";
 import { IObjective, ObjectiveResult } from "../../IObjective";
-import { inventoryItemInfo } from "../../ITars";
+import { getTarsSaveData, IInventoryItems, inventoryItemInfo } from "../../ITars";
 import AcquireFood from "../../objectives/acquire/item/AcquireFood";
 import AcquireItem from "../../objectives/acquire/item/AcquireItem";
 import AcquireItemByGroup from "../../objectives/acquire/item/AcquireItemByGroup";
@@ -404,63 +404,20 @@ export class SurvivalMode implements ITarsMode {
 			Upgrade objectives
 		*/
 
-		// restart at the end of each one because we'll likely want to reinforce them right after
-
-		if (context.inventory.equipSword && context.inventory.equipSword.type === ItemType.WoodenSword) {
-			objectives.push([new UpgradeInventoryItem("equipSword"), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand), new Restart()]);
-		}
-
-		if (context.inventory.equipShield && context.inventory.equipShield.type === ItemType.WoodenShield) {
-			objectives.push([new UpgradeInventoryItem("equipShield"), new AnalyzeInventory(), new EquipItem(EquipType.RightHand), new Restart()]);
-		}
-
-		if (context.inventory.equipBelt && context.inventory.equipBelt.type === ItemType.LeatherBelt) {
-			objectives.push([new UpgradeInventoryItem("equipBelt"), new AnalyzeInventory(), new EquipItem(EquipType.Belt), new Restart()]);
-		}
-
-		if (context.inventory.equipNeck && context.inventory.equipNeck.type === ItemType.LeatherGorget) {
-			objectives.push([new UpgradeInventoryItem("equipNeck"), new AnalyzeInventory(), new EquipItem(EquipType.Neck), new Restart()]);
-		}
-
-		if (context.inventory.equipHead && context.inventory.equipHead.type === ItemType.LeatherCap) {
-			objectives.push([new UpgradeInventoryItem("equipHead"), new AnalyzeInventory(), new EquipItem(EquipType.Head), new Restart()]);
-		}
-
-		if (context.inventory.equipFeet && context.inventory.equipFeet.type === ItemType.LeatherBoots) {
-			objectives.push([new UpgradeInventoryItem("equipFeet"), new AnalyzeInventory(), new EquipItem(EquipType.Feet), new Restart()]);
-		}
-
-		if (context.inventory.equipHands && context.inventory.equipHands.type === ItemType.LeatherGloves) {
-			objectives.push([new UpgradeInventoryItem("equipHands"), new AnalyzeInventory(), new EquipItem(EquipType.Hands), new Restart()]);
-		}
-
-		if (context.inventory.equipLegs && context.inventory.equipLegs.type === ItemType.LeatherPants) {
-			objectives.push([new UpgradeInventoryItem("equipLegs"), new AnalyzeInventory(), new EquipItem(EquipType.Legs), new Restart()]);
-		}
-
-		if (context.inventory.equipChest && context.inventory.equipChest.type === ItemType.LeatherTunic) {
-			objectives.push([new UpgradeInventoryItem("equipChest"), new AnalyzeInventory(), new EquipItem(EquipType.Chest), new Restart()]);
-		}
-
-		if (context.inventory.axe && context.inventory.axe.type === ItemType.StoneAxe) {
-			objectives.push([new UpgradeInventoryItem("axe"), new AnalyzeInventory(), new Restart()]);
-		}
-
-		if (context.inventory.pickAxe && context.inventory.pickAxe.type === ItemType.StonePickaxe) {
-			objectives.push([new UpgradeInventoryItem("pickAxe"), new AnalyzeInventory(), new Restart()]);
-		}
-
-		if (context.inventory.shovel && context.inventory.shovel.type === ItemType.StoneShovel) {
-			objectives.push([new UpgradeInventoryItem("shovel"), new AnalyzeInventory(), new Restart()]);
-		}
-
-		if (context.inventory.hammer && context.inventory.hammer.type === ItemType.StoneHammer) {
-			objectives.push([new UpgradeInventoryItem("hammer"), new AnalyzeInventory(), new Restart()]);
-		}
-
-		if (context.inventory.hoe && context.inventory.hoe.type === ItemType.StoneHoe) {
-			objectives.push([new UpgradeInventoryItem("hoe"), new AnalyzeInventory(), new Restart()]);
-		}
+		this.addUpgradeItemObjectives(context, objectives, "equipSword", ItemType.WoodenSword);
+		this.addUpgradeItemObjectives(context, objectives, "equipShield", ItemType.WoodenShield);
+		this.addUpgradeItemObjectives(context, objectives, "equipBelt", ItemType.LeatherBelt);
+		this.addUpgradeItemObjectives(context, objectives, "equipNeck", ItemType.LeatherGorget);
+		this.addUpgradeItemObjectives(context, objectives, "equipHead", ItemType.LeatherCap);
+		this.addUpgradeItemObjectives(context, objectives, "equipFeet", ItemType.LeatherBoots);
+		this.addUpgradeItemObjectives(context, objectives, "equipHands", ItemType.LeatherGloves);
+		this.addUpgradeItemObjectives(context, objectives, "equipLegs", ItemType.LeatherPants);
+		this.addUpgradeItemObjectives(context, objectives, "equipChest", ItemType.LeatherTunic);
+		this.addUpgradeItemObjectives(context, objectives, "axe", ItemType.StoneAxe);
+		this.addUpgradeItemObjectives(context, objectives, "pickAxe", ItemType.StonePickaxe);
+		this.addUpgradeItemObjectives(context, objectives, "shovel", ItemType.StoneShovel);
+		this.addUpgradeItemObjectives(context, objectives, "hammer", ItemType.StoneHammer);
+		this.addUpgradeItemObjectives(context, objectives, "hoe", ItemType.StoneHoe);
 
 		/*
 			End game objectives
@@ -570,5 +527,39 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		return objectives;
+	}
+
+	/**
+	 * Upgrades items if we haven't already upgraded them while on this island
+	 */
+	private addUpgradeItemObjectives(context: Context, objectives: Array<IObjective | IObjective[]>, inventoryItemKey: keyof IInventoryItems, fromItemType: ItemType) {
+		const item = context.inventory[inventoryItemKey];
+		if (!item) {
+			// no existing item
+			return;
+		}
+
+		const upgradeItemKey = `UpgradeItem:${inventoryItemKey}`;
+
+		const islandSaveData = getTarsSaveData("island")[island.id];
+
+		if ((item as Item).type !== fromItemType) {
+			return;
+		}
+
+		// if (islandSaveData[upgradeItemKey]) {
+		// 	// already upgraded
+		// 	return;
+		// }
+
+		objectives.push([
+			new UpgradeInventoryItem(inventoryItemKey),
+			new Lambda(async () => {
+				islandSaveData[upgradeItemKey] = true;
+				return ObjectiveResult.Complete;
+			}),
+			new AnalyzeInventory(),
+			new Restart(), // restart because we'll likely want to reinforce them right after
+		]);
 	}
 }
