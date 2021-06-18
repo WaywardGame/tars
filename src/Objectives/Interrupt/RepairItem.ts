@@ -69,10 +69,11 @@ export default class RepairItem extends Objective {
 			const hammer = context.getData(ContextDataType.Item1);
 			if (!hammer) {
 				this.log.error("Invalid hammer");
-				return;
+				return ObjectiveResult.Restart;
 			}
 
 			action.execute(context.player, hammer, this.item);
+			return ObjectiveResult.Complete;
 		}).setStatus(this));
 
 		return objectives;

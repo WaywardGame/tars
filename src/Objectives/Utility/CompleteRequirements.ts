@@ -66,6 +66,7 @@ export default class CompleteRequirements extends Objective {
 						// pick it up. the object will be then built in the correct spot
 						return new ExecuteAction(ActionType.Pickup, (context, action) => {
 							action.execute(context.player);
+							return ObjectiveResult.Complete;
 						}).setStatus("Picking up anvil to place it next to the kiln");
 					}
 

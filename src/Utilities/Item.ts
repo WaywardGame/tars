@@ -192,7 +192,6 @@ class ItemUtilities {
 		return item.description()?.use?.includes(actionType) ? true : false;
 	}
 
-
 	public getTools(context: Context, actionType: ActionType, preferredDamageType?: DamageType): Item[] {
 		return this.getInventoryItemsWithUse(context, actionType)
 			.filter(item => {

@@ -75,6 +75,7 @@ export default class ReinforceItem extends Objective {
 
 			return (new ExecuteAction(ActionType.Reinforce, (context, action) => {
 				action.execute(context.player, reinforceItem, this.item);
+				return ObjectiveResult.Complete;
 			}).setStatus(this));
 		}));
 

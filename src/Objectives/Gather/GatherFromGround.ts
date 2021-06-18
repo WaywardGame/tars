@@ -50,6 +50,7 @@ export default class GatherFromGround extends Objective {
 					return [
 						new MoveToTarget(item.containedWithin as ITileContainer, true),
 						new ReserveItems(item),
+						new SetContextData(this.contextDataKey, item), // todo: this might be wrong
 						new Lambda(async context => {
 							const objectives: IObjective[] = [];
 

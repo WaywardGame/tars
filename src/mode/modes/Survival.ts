@@ -86,6 +86,7 @@ export class SurvivalMode implements ITarsMode {
 				new MoveToLand(),
 				new ExecuteAction(ActionType.Drop, (context, action) => {
 					action.execute(context.player, context.inventory.sailBoat!);
+					return ObjectiveResult.Complete;
 				}).setStatus("Dropping sailboat"),
 				new AnalyzeInventory(),
 			]);

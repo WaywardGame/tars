@@ -204,6 +204,7 @@ class MovementUtilities {
                             if (direction !== context.player.facingDirection) {
                                 await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                                     action.execute(context.player, direction, undefined);
+                                    return ObjectiveResult.Complete;
                                 });
                             }
 
@@ -211,6 +212,7 @@ class MovementUtilities {
 
                             await actionUtilities.executeAction(context, actionType, (context, action) => {
                                 action.execute(context.player, itemUtilities.getBestToolForTerrainGather(context, tileType));
+                                return ObjectiveResult.Complete;
                             });
 
                             return MoveResult.Moving;
@@ -226,6 +228,7 @@ class MovementUtilities {
                         if (direction !== context.player.facingDirection) {
                             await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                                 action.execute(context.player, direction, undefined);
+                                return ObjectiveResult.Complete;
                             });
                         }
 
@@ -236,6 +239,7 @@ class MovementUtilities {
 
                                 await actionUtilities.executeAction(context, ActionType.OpenDoor, (context, action) => {
                                     action.execute(context.player);
+                                    return ObjectiveResult.Complete;
                                 });
 
                             } else {
@@ -243,6 +247,7 @@ class MovementUtilities {
 
                                 await actionUtilities.executeAction(context, ActionType.Pickup, (context, action) => {
                                     action.execute(context.player);
+                                    return ObjectiveResult.Complete;
                                 });
                             }
 
@@ -258,6 +263,7 @@ class MovementUtilities {
                             // todo: what if you don't have a carve item?
                             await actionUtilities.executeAction(context, ActionType.Carve, (context, action) => {
                                 action.execute(context.player, tool);
+                                return ObjectiveResult.Complete;
                             });
 
                         } else {
@@ -265,6 +271,7 @@ class MovementUtilities {
 
                             await actionUtilities.executeAction(context, ActionType.Gather, (context, action) => {
                                 action.execute(context.player, itemUtilities.getBestToolForDoodadGather(context, doodad));
+                                return ObjectiveResult.Complete;
                             });
                         }
 
@@ -274,6 +281,7 @@ class MovementUtilities {
                         // walking into a creature
                         await actionUtilities.executeAction(context, ActionType.Move, (context, action) => {
                             action.execute(context.player, direction);
+                            return ObjectiveResult.Complete;
                         });
 
                         return MoveResult.Moving;
@@ -318,6 +326,7 @@ class MovementUtilities {
             if (direction !== context.player.facingDirection) {
                 await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                     action.execute(context.player, direction, undefined);
+                    return ObjectiveResult.Complete;
                 });
             }
         }

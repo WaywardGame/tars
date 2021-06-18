@@ -28,8 +28,13 @@ export default class MoveItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
+		if (item.containedWithin === this.targetContainer) {
+			return ObjectiveResult.Complete;
+		}
+
 		return new ExecuteAction(ActionType.MoveItem, (context, action) => {
 			action.execute(context.player, item, this.targetContainer);
+			return ObjectiveResult.Complete;
 		})
 	}
 

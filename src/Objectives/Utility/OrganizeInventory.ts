@@ -162,6 +162,7 @@ export default class OrganizeInventory extends Objective {
 			new MoveToTarget(target, false),
 			new ExecuteAction(ActionType.Drop, (context, action) => {
 				action.execute(context.player, itemToDrop);
+				return ObjectiveResult.Complete;
 			}),
 		];
 	}

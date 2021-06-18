@@ -20,6 +20,7 @@ import { itemUtilities } from "../../../utilities/Item";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import { inventoryItemInfo } from "../../../ITars";
+import EmptyWaterContainer from "../EmptyWaterContainer";
 
 /**
  * It will ensure the water still is desalinating as long as we're near the base
@@ -82,6 +83,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 				objectives.push(new ExecuteAction(ActionType.DetachContainer, (context, action) => {
 					action.execute(context.player);
+					return ObjectiveResult.Complete;
 				}).setStatus(() => `Detaching container from ${this.waterStill.getName()}`));
 			}
 
@@ -103,6 +105,12 @@ export default class StartWaterStillDesalination extends Objective {
 
 			if (availableWaterContainer === undefined) {
 				objectives.push(new AcquireWaterContainer());
+			}
+
+			if (availableWaterContainer && !itemUtilities.canGatherWater(availableWaterContainer)) {
+				// theres water in the container - it's like seawater
+				// pour it out so we can attach it to the container
+				objectives.push(new EmptyWaterContainer(availableWaterContainer));
 			}
 
 			objectives.push(new MoveToTarget(this.waterStill, true));

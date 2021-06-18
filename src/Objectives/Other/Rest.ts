@@ -2,7 +2,7 @@ import { ActionType } from "game/entity/action/IAction";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
 import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { creatureUtilities } from "../../utilities/Creature";
 import { itemUtilities } from "../../utilities/Item";
@@ -61,11 +61,13 @@ export default class Rest extends Objective {
 		if (item) {
 			return new ExecuteAction(ActionType.Sleep, (context, action) => {
 				action.execute(context.player, item);
+				return ObjectiveResult.Complete;
 			}).setStatus(this);
 		}
 
 		return new ExecuteAction(ActionType.Rest, (context, action) => {
 			action.execute(context.player);
+			return ObjectiveResult.Complete;
 		}).setStatus(this);
 	}
 

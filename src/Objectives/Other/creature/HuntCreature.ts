@@ -57,6 +57,7 @@ export default class HuntCreature extends Objective {
                 if (context.player.facingDirection !== direction) {
                     objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
                         action.execute(context.player, direction, undefined);
+                        return ObjectiveResult.Complete;
                     }));
                 }
 
@@ -72,6 +73,7 @@ export default class HuntCreature extends Objective {
                 // } else {
                 objectives.push(new ExecuteAction(ActionType.Attack, (context, action) => {
                     action.execute(context.player);
+                    return ObjectiveResult.Complete;
                 }));
                 // }
 

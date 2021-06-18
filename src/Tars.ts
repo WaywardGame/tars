@@ -5,7 +5,7 @@ import { ActionType, IActionApi, IActionDescription } from "game/entity/action/I
 import Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
-import { IStat, Stat } from "game/entity/IStats";
+import { IStat, IStatMax, Stat } from "game/entity/IStats";
 import { MessageType, Source } from "game/entity/player/IMessageManager";
 import { PlayerState, WeightStatus } from "game/entity/player/IPlayer";
 import { INote } from "game/entity/player/note/NoteManager";
@@ -44,7 +44,7 @@ import Context from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./core/Executor";
 import planner from "./core/Planner";
 import { ContextDataType, MovingToNewIslandState } from "./IContext";
-import { IObjective } from "./IObjective";
+import { IObjective, ObjectiveResult } from "./IObjective";
 import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, setTarsInstance, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
 import { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
@@ -75,7 +75,10 @@ import { playerUtilities } from "./utilities/Player";
 import { itemUtilities } from "./utilities/Item";
 import { creatureUtilities } from "./utilities/Creature";
 import RunAwayFromTarget from "./objectives/other/RunAwayFromTarget";
-import Recover from "./objectives/recover/Recover";
+import RecoverHealth from "./objectives/recover/RecoverHealth";
+import RecoverHunger from "./objectives/recover/RecoverHunger";
+import RecoverStamina from "./objectives/recover/RecoverStamina";
+import RecoverThirst from "./objectives/recover/RecoverThirst";
 
 const tickSpeed = 333;
 
@@ -862,6 +865,7 @@ export default class Tars extends Mod {
 			if (game.playing && this.context.player.isGhost() && game.getGameOptions().respawn) {
 				await new ExecuteAction(ActionType.Respawn, (context, action) => {
 					action.execute(context.player);
+					return ObjectiveResult.Complete;
 				}).execute(this.context);
 			}
 
@@ -1126,19 +1130,31 @@ export default class Tars extends Mod {
 	private getInterrupts(context: Context): Array<IObjective | IObjective[] | undefined> {
 		const stayHealthy = this.saveData.options.stayHealthy;
 
-		let interrupts = [
+		let interrupts: Array<IObjective | IObjective[] | undefined> = [
 			this.optionsInterrupt(),
 			...this.equipmentInterrupt(context),
 			this.nearbyCreatureInterrupt(context),
-			stayHealthy ? new Recover(true) : undefined,
+		];
+
+		if (stayHealthy) {
+			interrupts.push(...this.getRecoverInterrupts(context, true));
+		}
+
+		interrupts = interrupts.concat([
 			this.buildItemObjectives(),
 			this.reduceWeightInterrupt(context),
-			stayHealthy ? new Recover(false) : undefined,
+		]);
+
+		if (stayHealthy) {
+			interrupts.push(...this.getRecoverInterrupts(context, false));
+		}
+
+		interrupts = interrupts.concat([
 			this.gatherFromCorpsesInterrupt(context),
 			this.repairsInterrupt(context),
 			this.escapeCavesInterrupt(context),
 			this.returnToBaseInterrupt(context),
-		];
+		]);
 
 		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(context);
 		if (organizeInventoryInterrupts) {
@@ -1146,6 +1162,46 @@ export default class Tars extends Mod {
 		}
 
 		return interrupts;
+	}
+
+	private getRecoverInterrupts(context: Context, onlyUseAvailableItems: boolean) {
+		// focus on healing if our health is below 85% while poisoned
+		const poisonHealthPercentThreshold = 0.85;
+
+		const health = context.player.stat.get<IStatMax>(Stat.Health);
+		const needsHealthRecovery = health.value <= playerUtilities.getRecoverThreshold(context, Stat.Health) ||
+			context.player.status.Bleeding ||
+			(context.player.status.Poisoned && (health.value / health.max) <= poisonHealthPercentThreshold);
+
+		const exceededThirstThreshold = context.player.stat.get<IStat>(Stat.Thirst).value <= playerUtilities.getRecoverThreshold(context, Stat.Thirst);
+		const exceededHungerThreshold = context.player.stat.get<IStat>(Stat.Hunger).value <= playerUtilities.getRecoverThreshold(context, Stat.Hunger);
+		const exceededStaminaThreshold = context.player.stat.get<IStat>(Stat.Stamina).value <= playerUtilities.getRecoverThreshold(context, Stat.Stamina);
+
+		const objectives: IObjective[] = [];
+
+		if (needsHealthRecovery) {
+			objectives.push(new RecoverHealth(onlyUseAvailableItems));
+		}
+
+		objectives.push(new RecoverThirst({
+			onlyUseAvailableItems: onlyUseAvailableItems,
+			exceededThreshold: exceededThirstThreshold,
+			onlyEmergencies: false,
+		}));
+
+		objectives.push(new RecoverHunger(onlyUseAvailableItems, exceededHungerThreshold));
+
+		if (exceededStaminaThreshold) {
+			objectives.push(new RecoverStamina());
+		}
+
+		objectives.push(new RecoverThirst({
+			onlyUseAvailableItems: onlyUseAvailableItems,
+			exceededThreshold: exceededThirstThreshold,
+			onlyEmergencies: true,
+		}));
+
+		return objectives;
 	}
 
 	private optionsInterrupt(): IObjective | undefined {
