@@ -11,10 +11,10 @@ import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
-import ExecuteAction from "../../core/ExecuteAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
+import MoveItem from "../../other/item/MoveItem";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/MoveToLand";
 
@@ -144,9 +144,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item && item.containedWithin === context.base.intermediateChest[0]) {
-							objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-								action.execute(context.player, item, context.player.inventory);
-							}).setStatus(() => `Moving ${item.getName()} to inventory`));
+							objectives.push(new MoveItem(item, context.player.inventory));
 						}
 					};
 

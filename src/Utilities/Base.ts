@@ -21,7 +21,7 @@ class BaseUtilities {
 
 	private tilesNearBaseCache: Array<{ point: IVector3; tile: ITile; }> | undefined;
 
-	public reset() {
+	public clearCache() {
 		this.tilesNearBaseCache = undefined;
 	}
 

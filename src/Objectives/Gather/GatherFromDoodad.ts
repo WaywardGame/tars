@@ -27,7 +27,7 @@ export default class GatherFromDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const targets = objectUtilities.findDoodads(context, `${this.getIdentifier()}|1`, (doodad: Doodad) => {
+		return objectUtilities.findDoodads(context, `${this.getIdentifier()}|1`, (doodad: Doodad) => {
 			const searchMap = this.doodadSearchMap.get(doodad.type);
 			if (!searchMap) {
 				return false;
@@ -51,19 +51,18 @@ export default class GatherFromDoodad extends Objective {
 			// todo: use difficulty
 
 			return tileUtilities.canGather(doodad.getTile(), true);
-		}, 5);
+		}, 5)
+			.map(target => {
+				const objectives: IObjective[] = [];
 
-		return targets.map(target => {
-			const objectives: IObjective[] = [];
+				objectives.push(new MoveToTarget(target, true));
 
-			objectives.push(new MoveToTarget(target, true));
+				objectives.push(new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType])
+					.passContextDataKey(this)
+					.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from ${target.getName()}`));
 
-			objectives.push(new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType])
-				.passContextDataKey(this)
-				.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from ${target.getName()}`));
-
-			return objectives;
-		});
+				return objectives;
+			});
 	}
 
 	protected getBaseDifficulty(context: Context): number {

@@ -65,6 +65,7 @@ export default class MoveToNewIsland extends Objective {
 				new MoveToTarget(unvisitedIsland.edgePosition, true, { allowBoat: true, disableStaminaCheck: true }),
 				new ExecuteAction(ActionType.Move, (context, action) => {
 					action.execute(context.player, unvisitedIsland.direction);
+					return ObjectiveResult.Complete;
 				}),
 			]);
 		}

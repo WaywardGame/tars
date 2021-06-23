@@ -4,6 +4,7 @@ import { ItemType } from "game/item/IItem";
 import Item from "game/item/Item";
 import { ITileContainer, TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
+import terrainDescriptions from "game/tile/Terrains";
 
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
@@ -47,6 +48,8 @@ export default class PlantSeed extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
+		const allowedTilesSet = new Set(allowedTiles);
+
 		const objectives: IObjective[] = [];
 
 		if (context.inventory.hoe === undefined) {
@@ -77,7 +80,16 @@ export default class PlantSeed extends Objective {
 						return false;
 					}
 
-					return allowedTiles.includes(tileType) && baseUtilities.isOpenArea(context, point, tile);
+					if (!allowedTilesSet.has(tileType)) {
+						return false;
+					}
+
+					const terrainDescription = terrainDescriptions[tileType];
+					if (!terrainDescription?.tillable) {
+						return false;
+					}
+
+					return baseUtilities.isOpenArea(context, point, tile);
 				},
 				{
 					maxTilesChecked: gardenMaxTilesChecked,

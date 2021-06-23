@@ -49,6 +49,7 @@ export default class Idle extends Objective {
 
 			objectivePipelines.push(new ExecuteAction(ActionType.Idle, (context, action) => {
 				action.execute(context.player);
+				return ObjectiveResult.Complete;
 			}).setStatus(this));
 		}
 

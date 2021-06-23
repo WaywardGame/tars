@@ -1,7 +1,6 @@
 import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import { IStat, Stat } from "game/entity/IStats";
-import { ItemTypeGroup } from "game/item/IItem";
 
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
@@ -18,6 +17,10 @@ import UseItem from "../item/UseItem";
 import { baseUtilities } from "../../../utilities/Base";
 import { doodadUtilities } from "../../../utilities/Doodad";
 import { itemUtilities } from "../../../utilities/Item";
+import PickUpAllTileItems from "../tile/PickUpAllTileItems";
+import AnalyzeInventory from "../../analyze/AnalyzeInventory";
+import { inventoryItemInfo } from "../../../ITars";
+import EmptyWaterContainer from "../EmptyWaterContainer";
 
 /**
  * It will ensure the water still is desalinating as long as we're near the base
@@ -50,7 +53,9 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const availableWaterContainer = context.inventory.waterContainer?.find(waterContainer => !itemManager.isInGroup(waterContainer.type, ItemTypeGroup.ContainerOfDesalinatedWater));
+		const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
+
+		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !itemUtilities.isSafeToDrinkItem(waterContainer));
 
 		if (this.waterStill.gatherReady === undefined) {
 			// water still cannot be desalinated yet
@@ -78,6 +83,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 				objectives.push(new ExecuteAction(ActionType.DetachContainer, (context, action) => {
 					action.execute(context.player);
+					return ObjectiveResult.Complete;
 				}).setStatus(() => `Detaching container from ${this.waterStill.getName()}`));
 			}
 
@@ -101,17 +107,15 @@ export default class StartWaterStillDesalination extends Objective {
 				objectives.push(new AcquireWaterContainer());
 			}
 
+			if (availableWaterContainer && !itemUtilities.canGatherWater(availableWaterContainer)) {
+				// theres water in the container - it's like seawater
+				// pour it out so we can attach it to the container
+				objectives.push(new EmptyWaterContainer(availableWaterContainer));
+			}
+
 			objectives.push(new MoveToTarget(this.waterStill, true));
 
-			const waterStillTile = this.waterStill.getTile();
-			if (waterStillTile.containedItems && waterStillTile.containedItems.length > 0) {
-				// cleanup water still tile
-				for (const item of waterStillTile.containedItems!) {
-					objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, context.player.inventory);
-					}));
-				}
-			}
+			objectives.push(new PickUpAllTileItems(this.waterStill));
 
 			this.log.info("Moving to detach container");
 

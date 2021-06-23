@@ -12,7 +12,10 @@
 			"modTARSToggle": "[TARS] {0?Enabled:Disabled}.",
 			"modTARSFinished": "[TARS] Finished.",
 			"modTARSNavigationUpdating": "[TARS] Updating navigation system. This may take a few seconds.",
-			"modTARSNavigationUpdated": "[TARS] Updated navigation system."
+			"modTARSNavigationUpdated": "[TARS] Updated navigation system.",
+			"modTARSQuantumBurstStart": "[TARS] Quantum burst started.",
+			"modTARSQuantumBurstCooldownStart": "[TARS] Quantum burst ended. Cooling down...",
+			"modTARSQuantumBurstCooldownEnd": "[TARS] Quantum burst cooldown complete."
 		},
 		"command": {
 			"modTARSTARS": "tars"
@@ -33,6 +36,8 @@
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
 			"dialogButtonUseOrbsOfInfluence": "Use Orbs Of Influence",
 			"dialogButtonUseOrbsOfInfluenceTooltip": "Allow TARS to use Orbs of Influence when necessary.",
+			"dialogButtonQuantumBurst": "Enable Quantum Burst",
+			"dialogButtonQuantumBurstTooltip": "Allow TARS to harness the power of interdimensional energy allowing for quantum computating.\nWarning: The cooldown after disabling this is directly proportional to the time active\nNote: This has no effect when in a multiplayer game.",
 			"dialogButtonDeveloperMode": "Enable Developer Mode",
 			"dialogButtonDeveloperModeTooltip": "Enables extra debug logging to the console, which may significally decrease performance.",
 			"dialogLabelItem": "{#--text-secondary:Item}",

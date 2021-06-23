@@ -31,12 +31,19 @@ export default class UseItem extends Objective {
 
 		const description = item.description();
 		if (!description || !description.use || !description.use.includes(this.actionType)) {
-			this.log.error("Invalid use item", item, this.actionType);
+			this.log.error("Invalid use item. Missing action type", item);
 			return ObjectiveResult.Restart;
 		}
 
 		return new ExecuteAction(ActionType.UseItem, (context, action) => {
+			if (!item.isNearby(context.player, true)) {
+				this.log.warn("Invalid use item. Item is not nearby", item, this.getStatus());
+				return ObjectiveResult.Restart;
+			}
+
 			action.execute(context.player, item, this.actionType);
+
+			return ObjectiveResult.Complete;
 		}).setStatus(this);
 	}
 

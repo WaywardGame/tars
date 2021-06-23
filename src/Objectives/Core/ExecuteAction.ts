@@ -13,7 +13,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 
 	constructor(
 		private readonly actionType: T,
-		private readonly executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void) {
+		private readonly executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => ObjectiveResult) {
 		super();
 	}
 
@@ -34,9 +34,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 			return 0;
 		}
 
-		await actionUtilities.executeAction(context, this.actionType, this.executor as any);
-
-		return ObjectiveResult.Complete;
+		return actionUtilities.executeAction(context, this.actionType, this.executor as any);
 	}
 
 	protected getBaseDifficulty(context: Context): number {

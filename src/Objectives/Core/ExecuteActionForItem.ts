@@ -54,6 +54,9 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		// only set this once we get the item
+		context.setData(this.contextDataKey, undefined);
+
 		if (context.calculatingDifficulty) {
 			return 0;
 		}

@@ -5,11 +5,11 @@ import Item from "game/item/Item";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import { doodadUtilities } from "../../utilities/Doodad";
+import UseItem from "../other/item/UseItem";
 
 export default class GatherWaterFromStill extends Objective {
 
@@ -44,9 +44,8 @@ export default class GatherWaterFromStill extends Objective {
 
 		return [
 			new MoveToTarget(this.waterStill, true),
-			new ExecuteAction(ActionType.UseItem, (context, action) => {
-				action.execute(context.player, this.item, ActionType.GatherWater);
-			}).setStatus(() => `Gathering water from ${this.waterStill.getName()}`),
+			new UseItem(ActionType.GatherWater, this.item)
+				.setStatus(() => `Gathering water from ${this.waterStill.getName()}`),
 		];
 	}
 

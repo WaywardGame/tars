@@ -49,6 +49,7 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 			// reduce malignity
 			return (new ExecuteAction(ActionType.RubCounterclockwise, (context, action) => {
 				action.execute(context.player, item);
+				return ObjectiveResult.Complete;
 			}).setStatus(this));
 		}));
 

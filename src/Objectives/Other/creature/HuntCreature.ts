@@ -2,7 +2,6 @@ import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { IStat, Stat } from "game/entity/IStats";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
-import { EquipType } from "game/entity/IHuman";
 import Context from "../../../Context";
 
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
@@ -45,41 +44,47 @@ export default class HuntCreature extends Objective {
         return [
             new MoveToTarget(this.creature, true).trackCreature(this.track ? this.creature : undefined),
             new Lambda(async context => {
+                if (!this.creature.isValid()) {
+                    return ObjectiveResult.Complete;
+                }
+
                 const direction = getDirectionFromMovement(this.creature.x - context.player.x, this.creature.y - context.player.y);
 
-                if (this.creature.description()?.passable) {
-                    // face the creature and attack with a weapon
-                    let objectives: IObjective[] = [];
+                // if (this.creature.description()?.passable) {
+                // face the creature and attack with a weapon
+                let objectives: IObjective[] = [];
 
-                    if (context.player.facingDirection !== direction) {
-                        objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
-                            action.execute(context.player, direction, undefined);
-                        }));
-                    }
-
-                    const leftHandItem = context.player.options.leftHand ? context.player.getEquippedItem(EquipType.LeftHand) : undefined;
-                    const rightHandItem = context.player.options.rightHand ? context.player.getEquippedItem(EquipType.RightHand) : undefined;
-
-                    const weapon = leftHandItem ?? rightHandItem;
-                    if (weapon) {
-                        objectives.push(new ExecuteAction(ActionType.Melee, (context, action) => {
-                            action.execute(context.player, weapon);
-                        }));
-
-                    } else {
-                        objectives.push(new ExecuteAction(ActionType.Attack, (context, action) => {
-                            action.execute(context.player);
-                        }));
-                    }
-
-                    return objectives;
-
-                } else {
-                    // move into the creature
-                    return new ExecuteAction(ActionType.Move, (context, action) => {
-                        action.execute(context.player, direction);
-                    });
+                if (context.player.facingDirection !== direction) {
+                    objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
+                        action.execute(context.player, direction, undefined);
+                        return ObjectiveResult.Complete;
+                    }));
                 }
+
+                // const leftHandItem = context.player.options.leftHand ? context.player.getEquippedItem(EquipType.LeftHand) : undefined;
+                // const rightHandItem = context.player.options.rightHand ? context.player.getEquippedItem(EquipType.RightHand) : undefined;
+
+                // const weapon = leftHandItem ?? rightHandItem;
+                // if (weapon) {
+                //     objectives.push(new ExecuteAction(ActionType.Melee, (context, action) => {
+                //         action.execute(context.player, weapon);
+                //     }));
+
+                // } else {
+                objectives.push(new ExecuteAction(ActionType.Attack, (context, action) => {
+                    action.execute(context.player);
+                    return ObjectiveResult.Complete;
+                }));
+                // }
+
+                return objectives;
+
+                // } else {
+                //     // move into the creature
+                //     return new ExecuteAction(ActionType.Move, (context, action) => {
+                //         action.execute(context.player, direction);
+                //     });
+                // }
             }),
             new Restart(), // ensures that no other objectives are ran after this one
         ];

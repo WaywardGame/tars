@@ -15,6 +15,8 @@ import { itemUtilities } from "../../utilities/Item";
 import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
+import Restart from "../core/Restart";
+import MoveItem from "../other/item/MoveItem";
 
 const maxChestDistance = 128;
 
@@ -58,10 +60,12 @@ export default class OrganizeInventory extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
 
-		const reservedItems = itemUtilities.getReservedItems(context);
+		const reservedItems = itemUtilities.getReservedItems(context)
+			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const reservedItemsWeight = reservedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		let unusedItems = itemUtilities.getUnusedItems(context, { allowSailboat: moveToNewIslandState === MovingToNewIslandState.None });
+		let unusedItems = itemUtilities.getUnusedItems(context, { allowSailboat: moveToNewIslandState === MovingToNewIslandState.None })
+			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
 		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
@@ -73,7 +77,9 @@ export default class OrganizeInventory extends Objective {
 		}
 
 		if (this.options.items) {
-			const validItems = this.options.items.filter(item => itemManager.getPlayerWithItemInInventory(item) === context.player);
+			const validItems = this.options.items
+				.filter(item => itemManager.getPlayerWithItemInInventory(item) === context.player)
+				.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 			if (validItems.length === 0) {
 				return ObjectiveResult.Ignore;
 			}
@@ -156,6 +162,7 @@ export default class OrganizeInventory extends Objective {
 			new MoveToTarget(target, false),
 			new ExecuteAction(ActionType.Drop, (context, action) => {
 				action.execute(context.player, itemToDrop);
+				return ObjectiveResult.Complete;
 			}),
 		];
 	}
@@ -174,24 +181,31 @@ export default class OrganizeInventory extends Objective {
 	}
 
 	private static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]) {
-		const targetContainer = chest as IContainer;
-		const weight = itemManager.computeContainerWeight(targetContainer);
-		if (weight + itemsToMove[0].getTotalWeight() <= itemManager.getWeightCapacity(targetContainer)!) {
-			// at least 1 item fits in the chest
-			const objectives: IObjective[] = [];
+		const objectives: IObjective[] = [];
 
+		const targetContainer = chest as IContainer;
+		let chestWeight = itemManager.computeContainerWeight(targetContainer);
+		const chestWeightCapacity = itemManager.getWeightCapacity(targetContainer);
+		if (chestWeightCapacity !== undefined && chestWeight + itemsToMove[0].getTotalWeight() <= chestWeightCapacity) {
+			// at least 1 item fits in the chest. move to it and start moving items
 			objectives.push(new MoveToTarget(chest, true));
 
 			for (const item of itemsToMove) {
-				objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-					action.execute(context.player, item, targetContainer);
-				}));
+				const itemWeight = item.getTotalWeight();
+				if (chestWeight + itemWeight > chestWeightCapacity) {
+					break;
+				}
+
+				chestWeight += itemWeight;
+
+				objectives.push(new MoveItem(item, targetContainer));
 			}
 
-			return objectives;
+			// restart in case there's more to move
+			objectives.push(new Restart());
 		}
 
-		return undefined;
+		return objectives.length > 0 ? objectives : undefined;
 	}
 
 }

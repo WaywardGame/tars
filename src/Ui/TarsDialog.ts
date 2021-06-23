@@ -5,7 +5,7 @@ import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
-import { TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "../ITars";
+import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "../ITars";
 import Tars from "../Tars";
 import TarsPanel from "./components/TarsPanel";
 import GeneralPanel from "./panels/GeneralPanel";
@@ -60,7 +60,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	}
 
 	@Override public getName(): Translation {
-		return this.TARS.getTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TARS.getStatus);
+		return getTarsTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TARS.getStatus);
 	}
 
 	/**
@@ -82,8 +82,8 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	@Override protected getSubpanelInformation(subpanels: TarsPanel[]): SubpanelInformation[] {
 		return subpanels
 			.map(subpanel => Tuple(
-				this.TARS.getTranslation(subpanel.getTranslation()).getString(),
-				this.TARS.getTranslation(subpanel.getTranslation()),
+				getTarsTranslation(subpanel.getTranslation()).getString(),
+				getTarsTranslation(subpanel.getTranslation()),
 				this.onShowSubpanel(subpanel),
 			));
 	}

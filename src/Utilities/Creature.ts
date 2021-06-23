@@ -9,7 +9,7 @@ import Context from "../Context";
 
 class CreatureUtilities {
 
-	public readonly creatureRadius = 5;
+	private readonly nearbyCreatureRadius = 5;
 
 	public shouldRunAwayFromAllCreatures(context: Context) {
 		const health = context.player.stat.get<IStatMax>(Stat.Health);
@@ -21,8 +21,8 @@ class CreatureUtilities {
 	public getNearbyCreatures(point: IVector3): Creature[] {
 		const creatures: Creature[] = [];
 
-		for (let x = this.creatureRadius * -1; x <= this.creatureRadius; x++) {
-			for (let y = this.creatureRadius * -1; y <= this.creatureRadius; y++) {
+		for (let x = -this.nearbyCreatureRadius; x <= this.nearbyCreatureRadius; x++) {
+			for (let y = -this.nearbyCreatureRadius; y <= this.nearbyCreatureRadius; y++) {
 				const validPoint = game.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
 				if (validPoint) {
 					const tile = game.getTileFromPoint(validPoint);
@@ -36,12 +36,8 @@ class CreatureUtilities {
 		return creatures;
 	}
 
-	public isScaredOfCreature(context: Context, creature: Creature) {
-		return this.isScaredOfCreatureType(context, creature.type);
-	}
-
-	public isScaredOfCreatureType(context: Context, type: CreatureType) {
-		switch (type) {
+	public isScaredOfCreature(context: Context, creature: Creature): boolean {
+		switch (creature.type) {
 			case CreatureType.Shark:
 			case CreatureType.Zombie:
 				return !this.hasDecentEquipment(context);
@@ -50,9 +46,10 @@ class CreatureUtilities {
 				return !this.hasDecentEquipment(context) ||
 					context.player.getEquippedItem(EquipType.Legs)!.type === ItemType.BarkLeggings ||
 					context.player.getEquippedItem(EquipType.Chest)!.type === ItemType.BarkTunic;
-		}
 
-		return false;
+			default:
+				return creature.aberrant ? !this.hasDecentEquipment(context) : false;
+		}
 	}
 
 	private hasDecentEquipment(context: Context): boolean {

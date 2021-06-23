@@ -81,7 +81,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				objectives.push(new AcquireItemByGroup(description.dismantle.required!));
 			}
 
-			if (context.player.swimming) {
+			if (context.player.isSwimming()) {
 				objectives.push(new MoveToLand());
 			}
 

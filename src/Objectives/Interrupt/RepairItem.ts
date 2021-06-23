@@ -7,8 +7,6 @@ import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import { playerUtilities } from "../../utilities/Player";
-import { tileUtilities } from "../../utilities/Tile";
 import AcquireItem from "../acquire/item/AcquireItem";
 import CopyContextData from "../contextData/CopyContextData";
 import SetContextData from "../contextData/SetContextData";
@@ -45,7 +43,7 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (tileUtilities.isOverWater(context) && !playerUtilities.isUsingVehicle(context)) {
+		if (context.player.isSwimming()) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -71,10 +69,11 @@ export default class RepairItem extends Objective {
 			const hammer = context.getData(ContextDataType.Item1);
 			if (!hammer) {
 				this.log.error("Invalid hammer");
-				return;
+				return ObjectiveResult.Restart;
 			}
 
 			action.execute(context.player, hammer, this.item);
+			return ObjectiveResult.Complete;
 		}).setStatus(this));
 
 		return objectives;

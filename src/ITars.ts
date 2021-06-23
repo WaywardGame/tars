@@ -11,6 +11,7 @@ import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
+import Tars from "./Tars";
 import { itemUtilities } from "./utilities/Item";
 
 export const TARS_ID = "TARS";
@@ -39,6 +40,8 @@ export enum TarsTranslation {
 	DialogButtonUseOrbsOfInfluenceTooltip,
 	DialogButtonDeveloperMode,
 	DialogButtonDeveloperModeTooltip,
+	DialogButtonQuantumBurst,
+	DialogButtonQuantumBurstTooltip,
 
 	DialogLabelItem,
 	DialogLabelDoodad,
@@ -54,6 +57,7 @@ export enum TarsTranslation {
 export interface ISaveData {
 	enabled: boolean;
 	options: ITarsOptions;
+	island: Record<string, Record<string, any>>;
 	ui: Partial<Record<TarsUiSaveDataKey, any>>;
 }
 
@@ -70,11 +74,19 @@ export interface ITarsOptions {
 	exploreIslands: boolean;
 	stayHealthy: boolean;
 	useOrbsOfInfluence: boolean;
+	quantumBurst: boolean;
 	developerMode: boolean;
 }
 
 // options to show in the Options panel
-export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mode">; title: TarsTranslation; tooltip: TarsTranslation } | undefined> = [
+export interface ITarsOptionSection {
+	option: keyof Omit<ITarsOptions, "mode">;
+	title: TarsTranslation;
+	tooltip: TarsTranslation;
+	isDisabled?: () => boolean;
+}
+
+export const uiConfigurableOptions: Array<ITarsOptionSection | undefined> = [
 	{
 		option: "exploreIslands",
 		title: TarsTranslation.DialogButtonExploreIslands,
@@ -91,6 +103,11 @@ export const uiConfigurableOptions: Array<{ option: keyof Omit<ITarsOptions, "mo
 		tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
 	},
 	undefined, // creates a Divider
+	{
+		option: "quantumBurst",
+		title: TarsTranslation.DialogButtonQuantumBurst,
+		tooltip: TarsTranslation.DialogButtonQuantumBurstTooltip,
+	},
 	{
 		option: "developerMode",
 		title: TarsTranslation.DialogButtonDeveloperMode,
@@ -239,6 +256,7 @@ export interface IInventoryItemInfo {
 	allowInChests?: boolean;
 	allowOnTiles?: boolean;
 	protect?: boolean;
+	requiredMinDur?: number;
 }
 
 export type InventoryItemFlags = InventoryItemFlag | { flag: InventoryItemFlag; option: any; };
@@ -278,6 +296,7 @@ export enum InventoryItemFlag {
 export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo> = {
 	anvil: {
 		itemTypes: [ItemTypeGroup.Anvil],
+		requiredMinDur: 1,
 	},
 	axe: {
 		itemTypes: [
@@ -304,9 +323,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	bed: {
 		itemTypes: [ItemTypeGroup.Bedding],
+		requiredMinDur: 1,
 	},
 	campfire: {
 		itemTypes: [ItemTypeGroup.Campfire],
+		requiredMinDur: 1,
 	},
 	carve: {
 		actionTypes: [ActionType.Carve],
@@ -317,6 +338,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	chest: {
 		itemTypes: [ItemType.WoodenChest],
+		requiredMinDur: 1,
 	},
 	equipBack: {
 		equipType: EquipType.Back,
@@ -386,6 +408,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	},
 	furnace: {
 		itemTypes: [ItemTypeGroup.Furnace],
+		requiredMinDur: 1,
 	},
 	hammer: {
 		itemTypes: [ItemTypeGroup.Hammer],
@@ -412,9 +435,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.WoodenChest,
 			ItemType.WroughtIronChest,
 		],
+		requiredMinDur: 1,
 	},
 	kiln: {
 		itemTypes: [ItemTypeGroup.Kiln],
+		requiredMinDur: 1,
 	},
 	knife: {
 		itemTypes: [
@@ -466,10 +491,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemTypeGroup.ContainerOfSeawater,
 			ItemTypeGroup.ContainerOfUnpurifiedFreshWater,
 		],
-		allowMultiple: 3,
+		allowMultiple: 4,
 	},
 	waterStill: {
 		itemTypes: [ItemTypeGroup.WaterStill],
+		requiredMinDur: 1,
 	},
 	well: {
 		itemTypes: [
@@ -477,6 +503,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			ItemType.SandstoneWell,
 			ItemType.StoneWell,
 		],
+		requiredMinDur: 1,
 	},
 };
 
@@ -528,4 +555,26 @@ export enum TarsMode {
 	Survival,
 	TidyUp,
 	Gardener,
+}
+
+let tars: Tars | undefined;
+
+export function getTarsInstance() {
+	if (!tars) {
+		throw new Error("Invalid Tars instance");
+	}
+
+	return tars;
+}
+
+export function setTarsInstance(instance: Tars | undefined) {
+	tars = instance;
+}
+
+export function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation {
+	return getTarsInstance().getTranslation(translation);
+}
+
+export function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T] {
+	return getTarsInstance().saveData[key];
 }

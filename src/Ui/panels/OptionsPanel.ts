@@ -2,7 +2,7 @@ import Translation from "language/Translation";
 import { CheckButton } from "ui/component/CheckButton";
 import Divider from "ui/component/Divider";
 
-import { TarsTranslation, uiConfigurableOptions } from "../../ITars";
+import { getTarsTranslation, TarsTranslation, uiConfigurableOptions } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
 
 export default class OptionsPanel extends TarsPanel {
@@ -20,14 +20,18 @@ export default class OptionsPanel extends TarsPanel {
             }
 
             const checkButton = new CheckButton()
-                .setText(this.TARS.getTranslation(uiOption.title))
-                .setTooltip(tooltip => tooltip.addText(text => text.setText(this.TARS.getTranslation(uiOption.tooltip))))
+                .setText(getTarsTranslation(uiOption.title))
+                .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(uiOption.tooltip))))
                 .setRefreshMethod(() => this.TARS.saveData.options[uiOption.option])
                 .event.subscribe("willToggle", (_, checked) => {
                     this.TARS.updateOptions({ [uiOption.option]: checked });
                     return true;
                 })
                 .appendTo(this);
+
+            if (uiOption.isDisabled?.()) {
+                checkButton.setDisabled(true);
+            }
 
             this.refreshableComponents.push(checkButton);
         }

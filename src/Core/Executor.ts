@@ -86,6 +86,7 @@ class Executor {
 
 	/**
 	 * Execute objectives
+	 * @param context Context object
 	 * @param objectives Array of objectives
 	 * @param resetContextState True to reset the context before running each objective
 	 * @param checkForInterrupts True to interrupt objective execution when an interrupt occurs
@@ -114,74 +115,94 @@ class Executor {
 				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`, MovingToNewIslandState[moveToNewIslandState]);
 			}
 
-			let objs: IObjective[];
+			let objectiveChain: IObjective[];
 			if (Array.isArray(objective)) {
-				objs = objective;
+				objectiveChain = objective;
 			} else {
-				objs = [objective];
+				objectiveChain = [objective];
 			}
 
 			planner.reset();
 
-			for (const o of objs) {
-				const plan = this.lastPlan = await planner.createPlan(context, o);
-				if (!plan) {
-					if (!o.ignoreInvalidPlans) {
-						log.info(`No valid plan for ${o.getHashCode()}`);
+			const result = await this.executeObjectiveChain(context, objectiveChain, checkForInterrupts);
+
+			if (result.type === ExecuteObjectivesResultType.Restart) {
+				return result;
+
+			} else if (result.type !== ExecuteObjectivesResultType.Completed) {
+				return {
+					type: ExecuteObjectivesResultType.Pending,
+					objectives: result.objectives.concat(objectives.slice(i + 1)),
+				};
+			}
+		}
+
+		return {
+			type: ExecuteObjectivesResultType.Completed,
+		};
+	}
+
+	/**
+	 * Execute an objective chain
+	 * @param context Context object
+	 * @param objectives Array of objectives
+	 * @param checkForInterrupts True to interrupt objective execution when an interrupt occurs
+	 */
+	private async executeObjectiveChain(context: Context, objectives: IObjective[], checkForInterrupts: boolean): Promise<ExecuteObjectivesResult> {
+		for (let i = 0; i < objectives.length; i++) {
+			const objective = objectives[i];
+			const plan = this.lastPlan = await planner.createPlan(context, objective);
+			if (!plan) {
+				if (!objective.ignoreInvalidPlans) {
+					log.info(`No valid plan for ${objective.getHashCode()}`);
+				}
+
+				break;
+			}
+
+			const result = await plan.execute(
+				() => {
+					this.weightChanged = false;
+					return undefined;
+				},
+				(getObjectiveResults: () => IObjective[]) => {
+					if (this.weightChanged && context.player.getWeightStatus() !== WeightStatus.None) {
+						log.info("Weight changed. Stopping execution");
+						return {
+							type: ExecuteResultType.Restart,
+						};
 					}
 
-					break;
-				}
-
-				const result = await plan.execute(
-					() => {
-						this.weightChanged = false;
-						return undefined;
-					},
-					(getObjectiveResults: () => IObjective[]) => {
-						if (this.weightChanged && context.player.getWeightStatus() !== WeightStatus.None) {
-							log.info("Weight changed. Stopping execution");
-							return {
-								type: ExecuteResultType.Restart,
-							};
-						}
-
-						if (!this.isReady(context, checkForInterrupts)) {
-							return {
-								type: ExecuteResultType.ContinuingNextTick,
-								objectives: getObjectiveResults(),
-							};
-						}
-
-						return undefined;
-					});
-
-				switch (result.type) {
-					case ExecuteResultType.Completed:
-						// continue and run the next objective
-						break;
-
-					case ExecuteResultType.Pending:
+					if (!this.isReady(context, checkForInterrupts)) {
 						return {
-							type: ExecuteObjectivesResultType.Pending,
-							objectives: result.objectives.concat(objectives.slice(i + 1)),
+							type: ExecuteResultType.ContinuingNextTick,
+							objectives: getObjectiveResults(),
 						};
+					}
 
-					case ExecuteResultType.ContinuingNextTick:
-						return {
-							type: ExecuteObjectivesResultType.ContinuingNextTick,
-							objectives: result.objectives.concat(objectives.slice(i + 1)),
-						};
+					return undefined;
+				});
 
-					case ExecuteResultType.Restart:
-						return {
-							type: ExecuteObjectivesResultType.Restart,
-						};
-				}
+			if (result.type === ExecuteResultType.Restart) {
+				return {
+					type: ExecuteObjectivesResultType.Restart,
+				};
 
-				// the plan finished
-				this.lastPlan = undefined;
+			} else if (result.type === ExecuteResultType.Ignored) {
+				// stop running this chain and bail out if we're ignoring one of the objectives
+				return {
+					type: ExecuteObjectivesResultType.Completed,
+				};
+
+			} else if (result.type !== ExecuteResultType.Completed) {
+				return {
+					type: ExecuteObjectivesResultType.ContinuingNextTick,
+					objectives: result.objectives.concat(objectives.slice(i + 1)),
+				};
 			}
+
+			// the plan finished
+			this.lastPlan = undefined;
 		}
 
 		return {

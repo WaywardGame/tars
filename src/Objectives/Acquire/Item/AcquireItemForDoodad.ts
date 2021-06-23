@@ -38,8 +38,9 @@ export default class AcquireItemForDoodad extends Objective {
 	}
 
 	public async execute(): Promise<ObjectiveExecutionResult> {
+		// min dur of 1 is required to build doodads
 		return this.getItems()
-			.map(item => [new AcquireItem(item).passContextDataKey(this)]);
+			.map(item => [new AcquireItem(item, { requiredMinDur: 1 }).passContextDataKey(this)]);
 	}
 
 	private getItems(): ItemType[] {

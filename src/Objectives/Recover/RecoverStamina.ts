@@ -33,7 +33,7 @@ export default class RecoverStamina extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		if (tileUtilities.isOverWater(context) && playerUtilities.isUsingVehicle(context)) {
+		if (tileUtilities.isSwimmingOrOverWater(context) && playerUtilities.isUsingVehicle(context)) {
 			this.log.info("Idling to recover stamina");
 			return new Idle(false);
 		}

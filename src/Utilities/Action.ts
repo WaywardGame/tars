@@ -3,6 +3,7 @@ import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
 
 import Context from "../Context";
+import { ObjectiveResult } from "../IObjective";
 
 class ActionUtilities {
 
@@ -16,7 +17,7 @@ class ActionUtilities {
 	public async executeAction<T extends ActionType>(
 		context: Context,
 		actionType: T,
-		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void): Promise<void> {
+		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => ObjectiveResult): Promise<ObjectiveResult> {
 		let waiter: Promise<boolean> | undefined;
 
 		if (context.player.hasDelay()) {
@@ -39,11 +40,13 @@ class ActionUtilities {
 			waiter = this.waitForAction(actionType);
 		}
 
-		executor(context, ActionExecutor.get(actionDescriptions[actionType]).skipConfirmation() as any);
+		const objectiveResult = executor(context, ActionExecutor.get(actionDescriptions[actionType]).skipConfirmation() as any);
 
 		if (waiter) {
 			await waiter;
 		}
+
+		return objectiveResult;
 	}
 
 	public postExecuteAction(actionType: ActionType) {

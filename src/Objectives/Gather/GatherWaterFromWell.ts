@@ -6,8 +6,8 @@ import { getTileId } from "utilities/game/TilePosition";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
-import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
+import UseItem from "../other/item/UseItem";
 
 export default class GatherWaterFromWell extends Objective {
 
@@ -29,9 +29,8 @@ export default class GatherWaterFromWell extends Objective {
 
 		return [
 			new MoveToTarget(this.well, true),
-			new ExecuteAction(ActionType.UseItem, (context, action) => {
-				action.execute(context.player, this.item, ActionType.GatherWater);
-			}).setStatus(() => `Gathering water from ${this.well.getName()}`),
+			new UseItem(ActionType.GatherWater, this.item)
+				.setStatus(() => `Gathering water from ${this.well.getName()}`),
 		];
 	}
 }

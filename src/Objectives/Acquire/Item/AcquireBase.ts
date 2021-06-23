@@ -28,6 +28,7 @@ export interface IObjectivePriority {
 	gatherObjectiveCount: number;
 	gatherWithoutChestObjectiveCount: number;
 	craftsRequiringNoGatheringCount: number;
+	regroupedChildrenCount: number;
 }
 
 export default abstract class AcquireBase extends Objective {
@@ -59,7 +60,12 @@ export default abstract class AcquireBase extends Objective {
 			gatherObjectiveCount: 0,
 			gatherWithoutChestObjectiveCount: 0,
 			craftsRequiringNoGatheringCount: 0,
+			regroupedChildrenCount: 0,
 		};
+
+		if (tree.groupedAway) {
+			result.regroupedChildrenCount++;
+		}
 
 		const isAcquireObjective = tree.objective instanceof AcquireBase;
 		if (isAcquireObjective) {
@@ -88,7 +94,7 @@ export default abstract class AcquireBase extends Objective {
 			if (objectiveName === "AcquireItemWithRecipe" && result.gatherWithoutChestObjectiveCount === 0) {
 				// this recipe does not require any gathering
 
-				if (result.emptyAcquireObjectiveCount === 0 || (result.gatherWithoutChestObjectiveCount === 0 && result.gatherObjectiveCount > 0)) {
+				if (result.regroupedChildrenCount === 0 && (result.emptyAcquireObjectiveCount === 0 || (result.gatherWithoutChestObjectiveCount === 0 && result.gatherObjectiveCount > 0))) {
 					if (baseUtilities.isNearBase(context)) {
 						// todo: replace isNearBase with something that checks for CompleteRequirements?
 

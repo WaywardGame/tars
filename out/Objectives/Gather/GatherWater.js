@@ -2,44 +2,44 @@ define(["require", "exports", "../../IObjective", "../../Objective", "./GatherWa
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherWater extends Objective_1.default {
-        constructor(item, options) {
+        constructor(waterContainer, options) {
             super();
-            this.item = item;
+            this.waterContainer = waterContainer;
             this.options = options;
         }
         getIdentifier() {
             var _a, _b, _c, _d, _e, _f;
-            return `GatherWater:${this.item}:${(_a = this.options) === null || _a === void 0 ? void 0 : _a.disallowTerrain}:${(_b = this.options) === null || _b === void 0 ? void 0 : _b.disallowWaterStill}:${(_c = this.options) === null || _c === void 0 ? void 0 : _c.disallowWell}:${(_d = this.options) === null || _d === void 0 ? void 0 : _d.disallowRecipe}:${(_e = this.options) === null || _e === void 0 ? void 0 : _e.allowStartingWaterStill}:${(_f = this.options) === null || _f === void 0 ? void 0 : _f.allowWaitingForWaterStill}`;
+            return `GatherWater:${this.waterContainer}:${(_a = this.options) === null || _a === void 0 ? void 0 : _a.disallowTerrain}:${(_b = this.options) === null || _b === void 0 ? void 0 : _b.disallowWaterStill}:${(_c = this.options) === null || _c === void 0 ? void 0 : _c.disallowWell}:${(_d = this.options) === null || _d === void 0 ? void 0 : _d.disallowRecipe}:${(_e = this.options) === null || _e === void 0 ? void 0 : _e.allowStartingWaterStill}:${(_f = this.options) === null || _f === void 0 ? void 0 : _f.allowWaitingForWaterStill}`;
         }
         getStatus() {
             var _a;
-            return `Gathering water into ${(_a = this.item) === null || _a === void 0 ? void 0 : _a.getName()}`;
+            return `Gathering water into ${(_a = this.waterContainer) === null || _a === void 0 ? void 0 : _a.getName()}`;
         }
         async execute(context) {
             var _a, _b, _c, _d, _e, _f;
-            if (!this.item) {
+            if (!this.waterContainer) {
                 return IObjective_1.ObjectiveResult.Restart;
             }
             const objectivePipelines = [];
             if (!((_a = this.options) === null || _a === void 0 ? void 0 : _a.disallowTerrain)) {
-                objectivePipelines.push([new GatherWaterFromTerrain_1.default(this.item)]);
+                objectivePipelines.push([new GatherWaterFromTerrain_1.default(this.waterContainer)]);
             }
             if (!((_b = this.options) === null || _b === void 0 ? void 0 : _b.disallowWaterStill)) {
                 for (const waterStill of context.base.waterStill) {
-                    objectivePipelines.push([new GatherWaterFromStill_1.default(waterStill, this.item, (_c = this.options) === null || _c === void 0 ? void 0 : _c.allowStartingWaterStill, (_d = this.options) === null || _d === void 0 ? void 0 : _d.allowWaitingForWaterStill)]);
+                    objectivePipelines.push([new GatherWaterFromStill_1.default(waterStill, this.waterContainer, (_c = this.options) === null || _c === void 0 ? void 0 : _c.allowStartingWaterStill, (_d = this.options) === null || _d === void 0 ? void 0 : _d.allowWaitingForWaterStill)]);
                 }
             }
             if (!((_e = this.options) === null || _e === void 0 ? void 0 : _e.disallowWell)) {
                 for (const well of context.base.well) {
-                    objectivePipelines.push([new GatherWaterFromWell_1.default(well, this.item)]);
+                    objectivePipelines.push([new GatherWaterFromWell_1.default(well, this.waterContainer)]);
                 }
             }
             if (!((_f = this.options) === null || _f === void 0 ? void 0 : _f.disallowRecipe)) {
-                objectivePipelines.push([new GatherWaterWithRecipe_1.default(this.item)]);
+                objectivePipelines.push([new GatherWaterWithRecipe_1.default(this.waterContainer)]);
             }
             return objectivePipelines;
         }
     }
     exports.default = GatherWater;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiR2F0aGVyV2F0ZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvb2JqZWN0aXZlcy9nYXRoZXIvR2F0aGVyV2F0ZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBdUJBLE1BQXFCLFdBQVksU0FBUSxtQkFBUztRQUVqRCxZQUE2QixJQUFXLEVBQW1CLE9BQTZCO1lBQ3ZGLEtBQUssRUFBRSxDQUFDO1lBRG9CLFNBQUksR0FBSixJQUFJLENBQU87WUFBbUIsWUFBTyxHQUFQLE9BQU8sQ0FBc0I7UUFFeEYsQ0FBQztRQUVNLGFBQWE7O1lBQ25CLE9BQU8sZUFBZSxJQUFJLENBQUMsSUFBSSxJQUFJLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUsZUFBZSxJQUFJLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUsa0JBQWtCLElBQUksTUFBQSxJQUFJLENBQUMsT0FBTywwQ0FBRSxZQUFZLElBQUksTUFBQSxJQUFJLENBQUMsT0FBTywwQ0FBRSxjQUFjLElBQUksTUFBQSxJQUFJLENBQUMsT0FBTywwQ0FBRSx1QkFBdUIsSUFBSSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLHlCQUF5QixFQUFFLENBQUM7UUFDMVAsQ0FBQztRQUVNLFNBQVM7O1lBQ2YsT0FBTyx3QkFBd0IsTUFBQSxJQUFJLENBQUMsSUFBSSwwQ0FBRSxPQUFPLEVBQUUsRUFBRSxDQUFDO1FBQ3ZELENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCOztZQUNwQyxJQUFJLENBQUMsSUFBSSxDQUFDLElBQUksRUFBRTtnQkFDZixPQUFPLDRCQUFlLENBQUMsT0FBTyxDQUFDO2FBQy9CO1lBRUQsTUFBTSxrQkFBa0IsR0FBbUIsRUFBRSxDQUFDO1lBRTlDLElBQUksQ0FBQyxDQUFBLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUsZUFBZSxDQUFBLEVBQUU7Z0JBQ25DLGtCQUFrQixDQUFDLElBQUksQ0FBQyxDQUFDLElBQUksZ0NBQXNCLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsQ0FBQzthQUNqRTtZQUVELElBQUksQ0FBQyxDQUFBLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUsa0JBQWtCLENBQUEsRUFBRTtnQkFDdEMsS0FBSyxNQUFNLFVBQVUsSUFBSSxPQUFPLENBQUMsSUFBSSxDQUFDLFVBQVUsRUFBRTtvQkFDakQsa0JBQWtCLENBQUMsSUFBSSxDQUFDLENBQUMsSUFBSSw4QkFBb0IsQ0FBQyxVQUFVLEVBQUUsSUFBSSxDQUFDLElBQUksRUFBRSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLHVCQUF1QixFQUFFLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUseUJBQXlCLENBQUMsQ0FBQyxDQUFDLENBQUM7aUJBQzNKO2FBQ0Q7WUFFRCxJQUFJLENBQUMsQ0FBQSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLFlBQVksQ0FBQSxFQUFFO2dCQUNoQyxLQUFLLE1BQU0sSUFBSSxJQUFJLE9BQU8sQ0FBQyxJQUFJLENBQUMsSUFBSSxFQUFFO29CQUNyQyxrQkFBa0IsQ0FBQyxJQUFJLENBQUMsQ0FBQyxJQUFJLDZCQUFtQixDQUFDLElBQUksRUFBRSxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDO2lCQUNwRTthQUNEO1lBRUQsSUFBSSxDQUFDLENBQUEsTUFBQSxJQUFJLENBQUMsT0FBTywwQ0FBRSxjQUFjLENBQUEsRUFBRTtnQkFDbEMsa0JBQWtCLENBQUMsSUFBSSxDQUFDLENBQUMsSUFBSSwrQkFBcUIsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDO2FBQ2hFO1lBRUQsT0FBTyxrQkFBa0IsQ0FBQztRQUMzQixDQUFDO0tBQ0Q7SUEzQ0QsOEJBMkNDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiR2F0aGVyV2F0ZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvb2JqZWN0aXZlcy9nYXRoZXIvR2F0aGVyV2F0ZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBdUJBLE1BQXFCLFdBQVksU0FBUSxtQkFBUztRQUVqRCxZQUE2QixjQUFxQixFQUFtQixPQUE2QjtZQUNqRyxLQUFLLEVBQUUsQ0FBQztZQURvQixtQkFBYyxHQUFkLGNBQWMsQ0FBTztZQUFtQixZQUFPLEdBQVAsT0FBTyxDQUFzQjtRQUVsRyxDQUFDO1FBRU0sYUFBYTs7WUFDbkIsT0FBTyxlQUFlLElBQUksQ0FBQyxjQUFjLElBQUksTUFBQSxJQUFJLENBQUMsT0FBTywwQ0FBRSxlQUFlLElBQUksTUFBQSxJQUFJLENBQUMsT0FBTywwQ0FBRSxrQkFBa0IsSUFBSSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLFlBQVksSUFBSSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLGNBQWMsSUFBSSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLHVCQUF1QixJQUFJLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUseUJBQXlCLEVBQUUsQ0FBQztRQUNwUSxDQUFDO1FBRU0sU0FBUzs7WUFDZixPQUFPLHdCQUF3QixNQUFBLElBQUksQ0FBQyxjQUFjLDBDQUFFLE9BQU8sRUFBRSxFQUFFLENBQUM7UUFDakUsQ0FBQztRQUVNLEtBQUssQ0FBQyxPQUFPLENBQUMsT0FBZ0I7O1lBQ3BDLElBQUksQ0FBQyxJQUFJLENBQUMsY0FBYyxFQUFFO2dCQUN6QixPQUFPLDRCQUFlLENBQUMsT0FBTyxDQUFDO2FBQy9CO1lBRUQsTUFBTSxrQkFBa0IsR0FBbUIsRUFBRSxDQUFDO1lBRTlDLElBQUksQ0FBQyxDQUFBLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUsZUFBZSxDQUFBLEVBQUU7Z0JBQ25DLGtCQUFrQixDQUFDLElBQUksQ0FBQyxDQUFDLElBQUksZ0NBQXNCLENBQUMsSUFBSSxDQUFDLGNBQWMsQ0FBQyxDQUFDLENBQUMsQ0FBQzthQUMzRTtZQUVELElBQUksQ0FBQyxDQUFBLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUsa0JBQWtCLENBQUEsRUFBRTtnQkFDdEMsS0FBSyxNQUFNLFVBQVUsSUFBSSxPQUFPLENBQUMsSUFBSSxDQUFDLFVBQVUsRUFBRTtvQkFDakQsa0JBQWtCLENBQUMsSUFBSSxDQUFDLENBQUMsSUFBSSw4QkFBb0IsQ0FBQyxVQUFVLEVBQUUsSUFBSSxDQUFDLGNBQWMsRUFBRSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLHVCQUF1QixFQUFFLE1BQUEsSUFBSSxDQUFDLE9BQU8sMENBQUUseUJBQXlCLENBQUMsQ0FBQyxDQUFDLENBQUM7aUJBQ3JLO2FBQ0Q7WUFFRCxJQUFJLENBQUMsQ0FBQSxNQUFBLElBQUksQ0FBQyxPQUFPLDBDQUFFLFlBQVksQ0FBQSxFQUFFO2dCQUNoQyxLQUFLLE1BQU0sSUFBSSxJQUFJLE9BQU8sQ0FBQyxJQUFJLENBQUMsSUFBSSxFQUFFO29CQUNyQyxrQkFBa0IsQ0FBQyxJQUFJLENBQUMsQ0FBQyxJQUFJLDZCQUFtQixDQUFDLElBQUksRUFBRSxJQUFJLENBQUMsY0FBYyxDQUFDLENBQUMsQ0FBQyxDQUFDO2lCQUM5RTthQUNEO1lBRUQsSUFBSSxDQUFDLENBQUEsTUFBQSxJQUFJLENBQUMsT0FBTywwQ0FBRSxjQUFjLENBQUEsRUFBRTtnQkFDbEMsa0JBQWtCLENBQUMsSUFBSSxDQUFDLENBQUMsSUFBSSwrQkFBcUIsQ0FBQyxJQUFJLENBQUMsY0FBYyxDQUFDLENBQUMsQ0FBQyxDQUFDO2FBQzFFO1lBRUQsT0FBTyxrQkFBa0IsQ0FBQztRQUMzQixDQUFDO0tBQ0Q7SUEzQ0QsOEJBMkNDIn0=

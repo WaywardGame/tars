@@ -1,4 +1,3 @@
-import { ActionType } from "game/entity/action/IAction";
 import { IContainer, ItemType } from "game/item/IItem";
 import { IVector3 } from "utilities/math/IVector";
 import Item from "game/item/Item";
@@ -8,9 +7,9 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { playerUtilities } from "../../utilities/Player";
-import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
+import MoveItem from "../other/item/MoveItem";
 
 export default class OrganizeBase extends Objective {
 
@@ -77,9 +76,7 @@ export default class OrganizeBase extends Objective {
 				objectives.push(new MoveToTarget(position, true));
 
 				for (const item of itemsToMove) {
-					objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-						action.execute(context.player, item, context.player.inventory);
-					}));
+					objectives.push(new MoveItem(item, context.player.inventory));
 				}
 
 				// restart now

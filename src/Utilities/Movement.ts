@@ -10,6 +10,7 @@ import { IVector2, IVector3 } from "utilities/math/IVector";
 
 import Context from "../Context";
 import { ObjectiveResult } from "../IObjective";
+import { getTarsInstance } from "../ITars";
 import { NavigationPath } from "../navigation//INavigation";
 import Navigation from "../navigation/Navigation";
 
@@ -101,6 +102,9 @@ class MovementUtilities {
 
         } else {
             const navigation = Navigation.get();
+
+            // ensure sailing mode is up to date
+            await getTarsInstance().ensureSailingMode(context.player.vehicleItemId !== undefined);
 
             const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
             if (ends.length === 0) {
@@ -195,10 +199,12 @@ class MovementUtilities {
                     const terrainDescription = Terrains[tileType];
 
                     if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
+                        // some terrain is blocking our path
                         if (terrainDescription.gather) {
                             if (direction !== context.player.facingDirection) {
                                 await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                                     action.execute(context.player, direction, undefined);
+                                    return ObjectiveResult.Complete;
                                 });
                             }
 
@@ -206,6 +212,7 @@ class MovementUtilities {
 
                             await actionUtilities.executeAction(context, actionType, (context, action) => {
                                 action.execute(context.player, itemUtilities.getBestToolForTerrainGather(context, tileType));
+                                return ObjectiveResult.Complete;
                             });
 
                             return MoveResult.Moving;
@@ -215,19 +222,34 @@ class MovementUtilities {
                         return MoveResult.NoPath;
 
                     } else if (doodad?.blocksMove()) {
-                        // walking into a doodad we can pickup
+                        // doodad is blocking our path
+
+                        // face it
                         if (direction !== context.player.facingDirection) {
                             await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                                 action.execute(context.player, direction, undefined);
+                                return ObjectiveResult.Complete;
                             });
                         }
 
                         if (doodad.canPickup(context.player)) {
-                            log.info("Picking up doodad", Direction[direction]);
+                            const doodadDescription = doodad.description();
+                            if (doodadDescription && (doodadDescription.isDoor || doodadDescription.isGate) && doodadDescription.isClosed) {
+                                log.info("Opening doodad blocking the path", Direction[direction]);
 
-                            await actionUtilities.executeAction(context, ActionType.Pickup, (context, action) => {
-                                action.execute(context.player);
-                            });
+                                await actionUtilities.executeAction(context, ActionType.OpenDoor, (context, action) => {
+                                    action.execute(context.player);
+                                    return ObjectiveResult.Complete;
+                                });
+
+                            } else {
+                                log.info("Picking up doodad blocking the path", Direction[direction]);
+
+                                await actionUtilities.executeAction(context, ActionType.Pickup, (context, action) => {
+                                    action.execute(context.player);
+                                    return ObjectiveResult.Complete;
+                                });
+                            }
 
                         } else if (tileUtilities.hasCorpses(nextTile)) {
                             log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);
@@ -241,6 +263,7 @@ class MovementUtilities {
                             // todo: what if you don't have a carve item?
                             await actionUtilities.executeAction(context, ActionType.Carve, (context, action) => {
                                 action.execute(context.player, tool);
+                                return ObjectiveResult.Complete;
                             });
 
                         } else {
@@ -248,6 +271,7 @@ class MovementUtilities {
 
                             await actionUtilities.executeAction(context, ActionType.Gather, (context, action) => {
                                 action.execute(context.player, itemUtilities.getBestToolForDoodadGather(context, doodad));
+                                return ObjectiveResult.Complete;
                             });
                         }
 
@@ -257,6 +281,7 @@ class MovementUtilities {
                         // walking into a creature
                         await actionUtilities.executeAction(context, ActionType.Move, (context, action) => {
                             action.execute(context.player, direction);
+                            return ObjectiveResult.Complete;
                         });
 
                         return MoveResult.Moving;
@@ -301,6 +326,7 @@ class MovementUtilities {
             if (direction !== context.player.facingDirection) {
                 await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                     action.execute(context.player, direction, undefined);
+                    return ObjectiveResult.Complete;
                 });
             }
         }

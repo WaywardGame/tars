@@ -43,6 +43,7 @@ export default class CarveCorpse extends Objective {
 
 		objectives.push(new ExecuteAction(ActionType.Carve, (context, action) => {
 			action.execute(context.player, carveTool);
+			return ObjectiveResult.Complete;
 		}).setStatus(this));
 
 		return objectives;

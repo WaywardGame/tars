@@ -34,6 +34,7 @@ export default class EquipItem extends Objective {
 
 		return new ExecuteAction(ActionType.Equip, (context, action) => {
 			action.execute(context.player, item, this.equip);
+			return ObjectiveResult.Complete;
 		});
 	}
 

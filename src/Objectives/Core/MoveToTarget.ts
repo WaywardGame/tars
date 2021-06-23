@@ -143,7 +143,7 @@ export default class MoveToTarget extends Objective {
 					return [
 						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
 						new UseItem(ActionType.Paddle, context.inventory.sailBoat),
-						new MoveToTarget(this.target, this.moveAdjacentToTarget),
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, this.options),
 					];
 				}
 			}

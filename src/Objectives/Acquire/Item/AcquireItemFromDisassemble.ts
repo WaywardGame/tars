@@ -84,7 +84,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				}
 			}
 
-			if (context.player.swimming) {
+			if (context.player.isSwimming()) {
 				objectives.push(new MoveToLand());
 			}
 
