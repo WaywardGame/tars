@@ -2,6 +2,7 @@ import { DoodadType } from "game/doodad/IDoodad";
 import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
 import Vector2 from "utilities/math/Vector2";
+import Translation, { ListEnder } from "language/Translation";
 
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
@@ -21,6 +22,17 @@ export default class MoveIntoChest extends Objective {
 
 	public getIdentifier(): string {
 		return `MoveIntoChest:${this.itemsToMove ? this.itemsToMove.join(", ") : undefined}`;
+	}
+
+	public getStatus(): string | undefined {
+		if (!this.itemsToMove) {
+			return "Moving items into chests";
+		}
+
+		const translation = Stream.values(this.itemsToMove.map(item => item.getName()))
+			.collect(Translation.formatList, ListEnder.And);
+
+		return `Moving ${translation.getString()} into chests`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -50,7 +62,7 @@ export default class MoveIntoChest extends Objective {
 				objectives.push(new MoveToTarget(chest, true));
 
 				for (const item of itemsToMove) {
-					objectives.push(new MoveItem(item, targetContainer));
+					objectives.push(new MoveItem(item, targetContainer, chest));
 				}
 
 				objectivePipelines.push(objectives);

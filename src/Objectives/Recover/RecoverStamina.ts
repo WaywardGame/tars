@@ -14,7 +14,7 @@ export default class RecoverStamina extends Objective {
 		return "RecoverStamina";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Recovering stamina";
 	}
 

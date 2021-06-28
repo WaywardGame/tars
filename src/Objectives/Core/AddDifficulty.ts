@@ -12,6 +12,10 @@ export default class AddDifficulty extends Objective {
 		return "AddDifficulty";
 	}
 
+	public getStatus(): string | undefined {
+		return undefined;
+	}
+
 	public isDynamic(): boolean {
 		return true;
 	}

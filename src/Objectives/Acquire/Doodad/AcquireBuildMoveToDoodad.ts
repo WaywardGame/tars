@@ -1,6 +1,8 @@
 import Doodad from "game/doodad/Doodad";
 import Doodads from "game/doodad/Doodads";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
@@ -33,6 +35,10 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 
 	public getIdentifier(): string {
 		return `AcquireBuildMoveToDoodad:${doodadManager.isGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
+	}
+
+	public getStatus(): string | undefined {
+		return `Acquiring ${doodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

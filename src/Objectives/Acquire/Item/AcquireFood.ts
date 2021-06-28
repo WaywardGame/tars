@@ -24,7 +24,7 @@ export default class AcquireFood extends Objective {
 		return "AcquireFood";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Acquiring food";
 	}
 

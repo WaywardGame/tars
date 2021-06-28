@@ -21,7 +21,7 @@ export default class Idle extends Objective {
 		return "Idle";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Idling";
 	}
 

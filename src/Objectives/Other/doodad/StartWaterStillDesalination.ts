@@ -36,7 +36,7 @@ export default class StartWaterStillDesalination extends Objective {
 		return `StartWaterStillDesalination:${this.waterStill}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Starting desalination process for ${this.waterStill.getName()}`;
 	}
 

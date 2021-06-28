@@ -1,6 +1,7 @@
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
-import { IContainer } from "../../../../node_modules/@wayward/types/definitions/game/item/IItem";
+import { IContainer } from "game/item/IItem";
+import Doodad from "game/doodad/Doodad";
 
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
@@ -10,7 +11,7 @@ import ExecuteAction from "../../core/ExecuteAction";
 
 export default class MoveItem extends Objective {
 
-	constructor(private readonly item: Item | undefined, private readonly targetContainer: IContainer) {
+	constructor(private readonly item: Item | undefined, private readonly targetContainer: IContainer, private readonly source: Doodad | IVector3) {
 		super();
 	}
 
@@ -18,8 +19,12 @@ export default class MoveItem extends Objective {
 		return `MoveItem:${this.item}`;
 	}
 
-	public getStatus(): string {
-		return `Moving ${this.item?.getName()}`;
+	public getStatus(): string | undefined {
+		if (Doodad.is(this.source)) {
+			return `Moving ${this.item?.getName()} into the inventory from ${this.source.getName()}`;
+		}
+
+		return `Moving ${this.item?.getName()} into the inventory from (${this.source.x},${this.source.y},${this.source.z})`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

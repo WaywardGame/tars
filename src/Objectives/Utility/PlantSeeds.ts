@@ -16,7 +16,7 @@ export default class PlantSeeds extends Objective {
         return "PlantSeeds";
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return "Planting seeds";
     }
 

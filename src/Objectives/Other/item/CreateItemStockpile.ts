@@ -22,6 +22,10 @@ export default class CreateItemStockpile extends Objective {
 		return `CreateItemStockpile:${ItemType[this.itemType]}:${this.count}`;
 	}
 
+	public getStatus(): string | undefined {
+		return undefined;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const baseItems = [...context.base.chest, ...context.base.intermediateChest]
 			.map(chest => itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true))

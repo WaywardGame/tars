@@ -32,6 +32,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		return `AcquireItemWithRecipe:${ItemType[this.itemType]}`;
 	}
 
+	public getStatus(): string | undefined {
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} with a recipe`;
+	}
+
 	public canIncludeContextHashCode(): boolean {
 		return true;
 	}
@@ -143,8 +147,11 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 					// move all the items we need from the chest
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
-						if (item && item.containedWithin === context.base.intermediateChest[0]) {
-							objectives.push(new MoveItem(item, context.player.inventory));
+						if (item) {
+							const intermediateChest = context.base.intermediateChest[0];
+							if (item.containedWithin === intermediateChest) {
+								objectives.push(new MoveItem(item, context.player.inventory, intermediateChest));
+							}
 						}
 					};
 

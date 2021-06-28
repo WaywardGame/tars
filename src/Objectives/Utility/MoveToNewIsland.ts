@@ -20,7 +20,7 @@ export default class MoveToNewIsland extends Objective {
 		return "MoveToNewIsland";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Moving to a new island";
 	}
 

@@ -21,6 +21,10 @@ export default class StokeFire extends Objective {
 		return `StokeFire:${this.doodad}`;
 	}
 
+	public getStatus(): string | undefined {
+		return `Stoking ${this.doodad?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const doodad = this.doodad || context.getData(ContextDataType.LastBuiltDoodad);
 		if (!doodad) {

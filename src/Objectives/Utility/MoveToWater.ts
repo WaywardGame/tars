@@ -18,7 +18,7 @@ export default class MoveToWater extends Objective {
 		return `MoveToWater:${this.deepWater}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Moving to water";
 	}
 

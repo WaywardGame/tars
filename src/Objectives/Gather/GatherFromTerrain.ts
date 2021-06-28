@@ -22,6 +22,10 @@ export default class GatherFromTerrain extends Objective {
 		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]}:${itemManager.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
 	}
 
+	public getStatus(): string | undefined {
+		return "Gathering items from terrain";
+	}
+
 	public canGroupTogether(): boolean {
 		return true;
 	}

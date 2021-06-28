@@ -587,7 +587,7 @@ export default class Tars extends Mod {
 			return "Not running";
 		}
 
-		let statusMessage: string = "Idle";
+		let statusMessage: string | undefined = "Idle";
 
 		let planStatusMessage: string | undefined;
 
@@ -601,12 +601,24 @@ export default class Tars extends Mod {
 			statusMessage = objectivePipeline.flat()[0].getStatusMessage();
 
 			// todo: make this more generic. only show statusMessage if it's interesting
-			if (planStatusMessage && planStatusMessage !== statusMessage && statusMessage !== "Miscellaneous processing" && statusMessage !== "Calculating objective...") {
+			if (!statusMessage) {
+				statusMessage = planStatusMessage;
+
+			} else if (planStatusMessage && planStatusMessage !== statusMessage &&
+				statusMessage !== "Miscellaneous processing" && statusMessage !== "Calculating objective...") {
 				statusMessage = `${planStatusMessage} - ${statusMessage}`;
 			}
 
 		} else if (planStatusMessage) {
 			statusMessage = planStatusMessage;
+		}
+
+		if (statusMessage === undefined) {
+			statusMessage = "Miscellaneous processing";
+
+			if (plan) {
+				log.warn("Missing status message for objective", plan.tree.objective.getIdentifier());
+			}
 		}
 
 		if (this.lastStatusMessage !== statusMessage) {

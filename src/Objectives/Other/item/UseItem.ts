@@ -19,7 +19,7 @@ export default class UseItem extends Objective {
 		return `UseItem:${this.item}:${ActionType[this.actionType]}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Using ${this.item?.getName()} for ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 

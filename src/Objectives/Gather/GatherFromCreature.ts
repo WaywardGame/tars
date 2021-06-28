@@ -30,6 +30,10 @@ export default class GatherFromCreature extends Objective {
 		return `GatherFromCreature:${this.search.identifier}`;
 	}
 
+	public getStatus(): string | undefined {
+		return "Gathering items from creatures";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const hasCarveItem = itemUtilities.hasInventoryItemForAction(context, ActionType.Carve);
 

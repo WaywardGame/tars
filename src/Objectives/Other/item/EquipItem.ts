@@ -18,7 +18,7 @@ export default class EquipItem extends Objective {
 		return `EquipItem:${this.item}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Equipping ${this.item?.getName()}`;
 	}
 

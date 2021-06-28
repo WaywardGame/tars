@@ -27,6 +27,10 @@ export default class AcquireBuildMoveToFire extends Objective {
 		return "AcquireBuildMoveToFire";
 	}
 
+	public getStatus(): string | undefined {
+		return `Acquiring fire`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectives: IObjective[] = [];
 

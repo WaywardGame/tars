@@ -11,7 +11,7 @@ export default class AcquireSeed extends Objective {
         return "AcquireSeed";
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return "Acquiring a seed";
     }
 

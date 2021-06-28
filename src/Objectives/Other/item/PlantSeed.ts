@@ -33,7 +33,7 @@ export default class PlantSeed extends Objective {
 		return `PlantSeed:${this.seed}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Planting ${this.seed?.getName()}`;
 	}
 

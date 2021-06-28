@@ -1,6 +1,8 @@
 import { ItemType } from "game/item/IItem";
 import { ITileContainer } from "game/tile/ITerrain";
 import Item from "game/item/Item";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
@@ -22,6 +24,10 @@ export default class GatherFromGround extends Objective {
 		return `GatherFromGround:${ItemType[this.itemType]}`;
 	}
 
+	public getStatus(): string | undefined {
+		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from the ground`;
+	}
+
 	public canGroupTogether(): boolean {
 		return true;
 	}
@@ -35,12 +41,13 @@ export default class GatherFromGround extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = context.player.getTile().containedItems?.find(item => this.itemMatches(context, item));
+		const point = context.player.getPoint();
+		const item = game.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
 		if (item) {
 			return [
 				new ReserveItems(item),
 				new SetContextData(this.contextDataKey, item),
-				new MoveItem(item, context.player.inventory),
+				new MoveItem(item, context.player.inventory, point),
 			];
 		}
 
@@ -55,11 +62,12 @@ export default class GatherFromGround extends Objective {
 							const objectives: IObjective[] = [];
 
 							// itemMatches must not check that the item is not reserved (because it is)
-							const item = context.player.getFacingTile().containedItems?.find(item => this.itemMatches(context, item, true));
+							const point = context.player.getFacingPoint();
+							const item = game.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item, true));
 							if (item) {
 								objectives.push(new ReserveItems(item));
 								objectives.push(new SetContextData(this.contextDataKey, item));
-								objectives.push(new MoveItem(item, context.player.inventory));
+								objectives.push(new MoveItem(item, context.player.inventory, point));
 							}
 
 							return objectives;

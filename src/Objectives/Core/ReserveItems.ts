@@ -21,6 +21,10 @@ export default class ReserveItems extends Objective {
 		return `ReserveItem:${this.items.join(",")}`;
 	}
 
+	public getStatus(): string | undefined {
+		return undefined;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		context.addReservedItems(...this.items);
 		return ObjectiveResult.Complete;

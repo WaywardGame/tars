@@ -13,7 +13,7 @@ export default class Lambda extends Objective {
 		return "Lambda";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Miscellaneous processing";
 	}
 

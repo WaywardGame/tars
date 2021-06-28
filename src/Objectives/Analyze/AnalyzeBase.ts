@@ -20,6 +20,10 @@ export default class AnalyzeBase extends Objective {
 		return "AnalyzeBase";
 	}
 
+	public getStatus(): string | undefined {
+		return "Analyzing base";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (context.calculatingDifficulty) {
 			return 0;

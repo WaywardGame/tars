@@ -26,7 +26,7 @@ export default class ReinforceItem extends Objective {
 		return `ReinforceItem:${this.item}:${this.options.targetDurabilityMultipler}:${this.options.minWorth}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Reinforcing ${this.item.getName()}`;
 	}
 

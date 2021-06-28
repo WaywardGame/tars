@@ -45,7 +45,7 @@ export default class MoveToTarget extends Objective {
 		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		let status = `Moving to `;
 
 		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {

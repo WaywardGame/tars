@@ -23,6 +23,10 @@ export default class CompleteRequirements extends Objective {
 		return `CompleteRequirements:${this.requirementInfo.fireRequirement}:${this.requirementInfo.doodadsRequired.join(",")}`;
 	}
 
+	public getStatus(): string | undefined {
+		return "Completing requirements for a recipe";
+	}
+
 	public canIncludeContextHashCode(): boolean {
 		return true;
 	}

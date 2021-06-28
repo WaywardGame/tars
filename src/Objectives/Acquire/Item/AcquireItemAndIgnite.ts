@@ -23,7 +23,7 @@ export default class AcquireItemAndIgnite extends Objective {
         return `AcquireItemAndIgnite:${ItemType[this.itemType]}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} and igniting it`;
     }
 

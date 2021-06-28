@@ -13,6 +13,10 @@ export default class CopyContextData<T extends ContextDataType, T2 extends Conte
 		return `CopyContextData:${ContextDataType[this.source]},${ContextDataType[this.destination]}`;
 	}
 
+	public getStatus(): string | undefined {
+		return undefined;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const data = context.getData(this.source);
 		context.setData(this.destination, data);

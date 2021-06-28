@@ -18,7 +18,7 @@ export default class AcquireItemByGroup extends AcquireBase {
 		return `AcquireItemByGroup:${ItemTypeGroup[this.itemTypeGroup]}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Acquiring ${itemManager.getItemTypeGroupName(this.itemTypeGroup)}`;
 	}
 

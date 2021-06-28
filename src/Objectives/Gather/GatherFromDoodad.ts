@@ -22,6 +22,10 @@ export default class GatherFromDoodad extends Objective {
 		return `GatherFromDoodad:${ItemType[this.itemType]}`;
 	}
 
+	public getStatus(): string | undefined {
+		return "Gathering items from doodads";
+	}
+
 	public canGroupTogether(): boolean {
 		return true;
 	}

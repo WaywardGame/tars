@@ -28,6 +28,11 @@ export default abstract class Objective implements IObjective {
 
 	public abstract getIdentifier(): string;
 
+	/**
+	 * Human readable status for what the objective is doing
+	 */
+	public abstract getStatus(): string | undefined;
+
 	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
 
 	public get log(): ILog {
@@ -85,14 +90,7 @@ export default abstract class Objective implements IObjective {
 	/**
 	 * Human readable status for what the objective is doing
 	 */
-	public getStatus(): string {
-		return this.getIdentifier();
-	}
-
-	/**
-	 * Human readable status for what the objective is doing
-	 */
-	public getStatusMessage(): string {
+	public getStatusMessage(): string | undefined {
 		switch (typeof (this._status)) {
 			case "string":
 				return this._status;

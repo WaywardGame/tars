@@ -22,7 +22,7 @@ export default class HuntCreature extends Objective {
         return `HuntCreature:${this.creature}:${this.track}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Hunting ${this.creature.getName()}`;
     }
 

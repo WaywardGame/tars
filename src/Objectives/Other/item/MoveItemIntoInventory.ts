@@ -17,7 +17,7 @@ export default class MoveItemIntoInventory extends Objective {
         return `MoveItemIntoInventory:${this.item}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Moving ${this.item?.getName()} into inventory`;
     }
 
@@ -38,7 +38,7 @@ export default class MoveItemIntoInventory extends Objective {
 
         return [
             new MoveToTarget(point, true),
-            new MoveItem(item, context.player.inventory),
+            new MoveItem(item, context.player.inventory, point),
         ];
     }
 

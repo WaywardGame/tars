@@ -15,7 +15,7 @@ export default class MoveToLand extends Objective {
 		return "MoveToLand";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Moving to land";
 	}
 

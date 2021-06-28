@@ -1,5 +1,7 @@
 import Doodad from "game/doodad/Doodad";
 import { IContainer, ItemType } from "game/item/IItem";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
@@ -18,6 +20,10 @@ export default class GatherFromChest extends Objective {
 
 	public getIdentifier(context?: Context): string {
 		return `GatherFromChest:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseChests)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}`;
+	}
+
+	public getStatus(): string | undefined {
+		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a chest`;
 	}
 
 	public canIncludeContextHashCode(): boolean {

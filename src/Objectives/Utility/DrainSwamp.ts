@@ -19,7 +19,7 @@ export default class DrainSwamp extends Objective {
         return "DrainSwamp";
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return "Draining swamp";
     }
 

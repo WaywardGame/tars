@@ -23,7 +23,7 @@ export default class AcquireItemForAction extends Objective {
 		return `AcquireItemForAction:${ActionType[this.actionType]}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Acquiring an item to use for ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 

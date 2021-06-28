@@ -25,7 +25,7 @@ export default class Rest extends Objective {
 		return "Rest";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Resting";
 	}
 

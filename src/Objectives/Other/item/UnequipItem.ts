@@ -17,7 +17,7 @@ export default class UnequipItem extends Objective {
 		return `Unequip:${this.item}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Unequipping ${this.item?.getName()}`;
 	}
 

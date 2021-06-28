@@ -272,7 +272,7 @@ webWorkerSelf.onmessage = (event: MessageEvent) => {
 	}
 
 	// tslint:disable-next-line: no-console
-	console.log("Navigation worker initial data", data);
+	console.log("[TARS] Navigation worker initial data", data);
 
 	queuedMessages = [];
 

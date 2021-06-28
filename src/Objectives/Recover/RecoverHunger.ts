@@ -24,7 +24,7 @@ export default class RecoverHunger extends Objective {
 		return `RecoverHunger:${this.onlyUseAvailableItems}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Recovering hunger";
 	}
 

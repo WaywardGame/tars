@@ -31,7 +31,7 @@ export default class GatherWater extends Objective {
 		return `GatherWater:${this.waterContainer}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.disallowRecipe}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Gathering water into ${this.waterContainer?.getName()}`;
 	}
 

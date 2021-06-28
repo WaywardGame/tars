@@ -18,7 +18,7 @@ export default class AcquireItemByTypes extends AcquireBase {
 		return `AcquireItemByTypes:${this.itemTypes.map(itemType => ItemType[itemType]).join(",")}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		const itemTypesString = this.itemTypes
 			.map(itemType => Translation.nameOf(Dictionary.Item, itemType))
 			.collect(Translation.formatList, ListEnder.Or);

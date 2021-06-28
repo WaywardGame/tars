@@ -22,7 +22,7 @@ export default class DigTile extends Objective {
 		return `DigTile:${this.target.x},${this.target.y},${this.target.z}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Digging ${this.target.x},${this.target.y},${this.target.z}`;
 	}
 

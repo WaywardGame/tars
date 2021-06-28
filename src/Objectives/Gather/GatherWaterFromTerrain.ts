@@ -20,6 +20,10 @@ export default class GatherWaterFromTerrain extends Objective {
 		return `GatherWaterFromTerrain:${this.item}`;
 	}
 
+	public getStatus(): string | undefined {
+		return `Gathering water into ${this.item.getName()} from terrain`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 

@@ -24,6 +24,10 @@ export default class GatherFromCorpse extends Objective {
 		return `GatherFromCorpse:${this.search.identifier}`;
 	}
 
+	public getStatus(): string | undefined {
+		return "Gathering items from corpses";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const hasCarveItem = itemUtilities.hasInventoryItemForAction(context, ActionType.Carve);
 

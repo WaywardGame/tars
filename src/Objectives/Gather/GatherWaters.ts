@@ -1,4 +1,5 @@
 import Item from "game/item/Item";
+import Translation, { ListEnder } from "language/Translation";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult } from "../../IObjective";
@@ -19,8 +20,11 @@ export default class GatherWaters extends Objective {
 		return `GatherWaters:${this.waterContainers?.join(",")}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.disallowRecipe}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
 	}
 
-	public getStatus() {
-		return "Gathering water";
+	public getStatus(): string | undefined {
+		const translation = Stream.values(this.waterContainers.map(item => item.getName()))
+			.collect(Translation.formatList, ListEnder.Or);
+
+		return `Gathering water into ${translation.getString()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

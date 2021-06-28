@@ -44,7 +44,7 @@ export default class AcquireItem extends AcquireBase {
 		return `AcquireItem:${ItemType[this.itemType]}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
 	}
 

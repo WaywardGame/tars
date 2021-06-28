@@ -23,7 +23,7 @@ export default class EmptyWaterContainer extends Objective {
 		return `EmptyWaterContainer:${this.item}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Emptying ${this.item?.getName()}`;
 	}
 

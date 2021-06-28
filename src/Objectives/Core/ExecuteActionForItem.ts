@@ -38,7 +38,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		return `ExecuteActionForItem:${ExecuteActionType[this.type]}${this.actionType !== undefined ? `:${ActionType[this.actionType]}` : ""}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		if (this.itemTypes.length > 1) {
 			const translation = Stream.values(Array.from(new Set(this.itemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
 				.collect(Translation.formatList, ListEnder.Or);
