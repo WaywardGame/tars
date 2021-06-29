@@ -36,7 +36,7 @@ export default class AcquireItemByTypes extends AcquireBase {
 
 	public async execute(): Promise<ObjectiveExecutionResult> {
 		return this.itemTypes
-			.map(item => [new AcquireItem(item).passContextDataKey(this)]);
+			.map(item => [new AcquireItem(item).passAcquireData(this)]);
 	}
 
 }

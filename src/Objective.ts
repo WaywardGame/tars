@@ -5,6 +5,7 @@ import Context from "./Context";
 import Planner from "./core/Planner";
 import { ContextDataType } from "./IContext";
 import { IObjective, ObjectiveExecutionResult } from "./IObjective";
+import { ReserveType } from "./ITars";
 import { loggerUtilities } from "./utilities/Logger";
 
 export default abstract class Objective implements IObjective {
@@ -12,6 +13,7 @@ export default abstract class Objective implements IObjective {
 	private static uuid = 0;
 
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
+	protected reserveType: ReserveType | undefined; // defaults to Hard
 
 	private _log: ILog | undefined;
 
@@ -74,6 +76,10 @@ export default abstract class Objective implements IObjective {
 
 		if (this.contextDataKey !== ContextDataType.LastAcquiredItem) {
 			hashCode += `:${this.contextDataKey}`;
+		}
+
+		if (this.reserveType !== undefined) {
+			hashCode += `:${ReserveType[this.reserveType]}`;
 		}
 
 		return hashCode;
@@ -206,8 +212,17 @@ export default abstract class Objective implements IObjective {
 		return this;
 	}
 
-	public passContextDataKey(objective: Objective) {
+	/**
+	 * Set the reserve type for the acquired item
+	 */
+	public setReserveType(reserveType: ReserveType | undefined) {
+		this.reserveType = reserveType;
+		return this;
+	}
+
+	public passAcquireData(objective: Objective, reserveType?: ReserveType) {
 		this.contextDataKey = objective.contextDataKey;
+		this.reserveType = reserveType ?? objective.reserveType;
 		return this;
 	}
 

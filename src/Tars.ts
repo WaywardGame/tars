@@ -1656,8 +1656,10 @@ export default class Tars extends Mod {
 			objectives.length > 0 ? "Going to organize inventory space" : "Will not organize inventory space",
 			`Reserved items: ${reservedItems.join(",")}`,
 			`Unused items: ${unusedItems.join(",")}`,
-			`Context reserved items: ${Array.from(context.state.reservedItems).join(",")}`,
-			`Interrupt context reserved items: ${Array.from(interruptContext?.state.reservedItems ?? []).join(",")}`,
+			`Context soft reserved items: ${Array.from(context.state.softReservedItems).join(",")}`,
+			`Context hard reserved items: ${Array.from(context.state.hardReservedItems).join(",")}`,
+			`Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).join(",")}`,
+			`Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).join(",")}`,
 			`Objectives: ${Objective.getPipelineString(objectives)}`);
 
 		return objectives;

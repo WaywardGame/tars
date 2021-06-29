@@ -62,7 +62,7 @@ export default class GatherFromDoodad extends Objective {
 				objectives.push(new MoveToTarget(target, true));
 
 				objectives.push(new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType])
-					.passContextDataKey(this)
+					.passAcquireData(this)
 					.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from ${target.getName()}`));
 
 				return objectives;

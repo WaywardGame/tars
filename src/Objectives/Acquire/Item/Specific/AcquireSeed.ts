@@ -16,7 +16,7 @@ export default class AcquireSeed extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        return Array.from(itemUtilities.seedItemTypes).map(itemType => [new AcquireItem(itemType, { requiredMinDur: 1 }).passContextDataKey(this)]);
+        return Array.from(itemUtilities.seedItemTypes).map(itemType => [new AcquireItem(itemType, { requiredMinDur: 1 }).passAcquireData(this)]);
     }
 
 }

@@ -6,7 +6,8 @@ export default class ContextState {
 		public depth: number = 0,
 		public includeHashCode: boolean = false,
 		public minimumAcceptedDifficulty?: number | undefined,
-		public readonly reservedItems: Set<number> = new Set(),
+		public readonly softReservedItems: Set<number> = new Set(), // items that will be used but not consumed
+		public readonly hardReservedItems: Set<number> = new Set(), // items that will be used and consumed
 		public readonly reservedItemTypes: Set<ItemType> = new Set(),
 		public readonly providedItems: Map<ItemType, number> = new Map(),
 
@@ -17,7 +18,7 @@ export default class ContextState {
 	}
 
 	public get shouldIncludeHashCode(): boolean {
-		return this.includeHashCode || this.reservedItems.size > 0 || this.reservedItemTypes.size > 0 || this.providedItems.size > 0;
+		return this.includeHashCode || this.softReservedItems.size > 0 || this.hardReservedItems.size > 0 || this.reservedItemTypes.size > 0 || this.providedItems.size > 0;
 	}
 
 	public merge(state: ContextState): void {
@@ -25,8 +26,12 @@ export default class ContextState {
 			this.includeHashCode = true;
 		}
 
-		for (const item of state.reservedItems) {
-			this.reservedItems.add(item);
+		for (const item of state.softReservedItems) {
+			this.softReservedItems.add(item);
+		}
+
+		for (const item of state.hardReservedItems) {
+			this.hardReservedItems.add(item);
 		}
 
 		for (const itemType of state.reservedItemTypes) {
@@ -53,7 +58,8 @@ export default class ContextState {
 		this.depth = 0;
 		this.includeHashCode = false;
 		this.minimumAcceptedDifficulty = undefined;
-		this.reservedItems.clear();
+		this.softReservedItems.clear();
+		this.hardReservedItems.clear();
 		this.reservedItemTypes.clear();
 		this.providedItems.clear();
 		this.data = undefined;
@@ -76,7 +82,8 @@ export default class ContextState {
 			increaseDepth ? this.depth + 1 : this.depth,
 			this.includeHashCode,
 			this.minimumAcceptedDifficulty,
-			new Set(this.reservedItems),
+			new Set(this.softReservedItems),
+			new Set(this.hardReservedItems),
 			new Set(this.reservedItemTypes),
 			new Map(this.providedItems),
 			this.data ? new Map(this.data) : undefined);
@@ -85,8 +92,12 @@ export default class ContextState {
 	public getHashCode(): string {
 		let hashCode = "";
 
-		if (this.reservedItems.size > 0) {
-			hashCode += `Reserved: ${Array.from(this.reservedItems).map(id => id).join(",")}`;
+		if (this.softReservedItems.size > 0) {
+			hashCode += `Soft Reserved: ${Array.from(this.softReservedItems).map(id => id).join(",")}`;
+		}
+
+		if (this.hardReservedItems.size > 0) {
+			hashCode += `Hard Reserved: ${Array.from(this.hardReservedItems).map(id => id).join(",")}`;
 		}
 
 		if (this.providedItems.size > 0) {

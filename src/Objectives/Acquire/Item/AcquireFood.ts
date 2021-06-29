@@ -37,7 +37,7 @@ export default class AcquireFood extends Objective {
 		for (const itemType of itemUtilities.foodItemTypes) {
 			objectivePipelines.push([
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
-				new AcquireItem(itemType).passContextDataKey(this),
+				new AcquireItem(itemType).passAcquireData(this),
 			]);
 		}
 
@@ -45,7 +45,7 @@ export default class AcquireFood extends Objective {
 			// make this harder since it could result in poison
 			objectivePipelines.push([
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
-				new AcquireItemForAction(ActionType.Eat).passContextDataKey(this).addDifficulty(100),
+				new AcquireItemForAction(ActionType.Eat).passAcquireData(this).addDifficulty(100),
 			]);
 		}
 

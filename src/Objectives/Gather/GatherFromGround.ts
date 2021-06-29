@@ -45,7 +45,7 @@ export default class GatherFromGround extends Objective {
 		const item = game.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
 		if (item) {
 			return [
-				new ReserveItems(item),
+				new ReserveItems(item).passAcquireData(this),
 				new SetContextData(this.contextDataKey, item),
 				new MoveItem(item, context.player.inventory, point),
 			];
@@ -56,7 +56,7 @@ export default class GatherFromGround extends Objective {
 				if (item && this.itemMatches(context, item)) {
 					return [
 						new MoveToTarget(item.containedWithin as ITileContainer, true),
-						new ReserveItems(item),
+						new ReserveItems(item).passAcquireData(this),
 						new SetContextData(this.contextDataKey, item), // todo: this might be wrong
 						new Lambda(async context => {
 							const objectives: IObjective[] = [];
@@ -65,7 +65,7 @@ export default class GatherFromGround extends Objective {
 							const point = context.player.getFacingPoint();
 							const item = game.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item, true));
 							if (item) {
-								objectives.push(new ReserveItems(item));
+								objectives.push(new ReserveItems(item).passAcquireData(this));
 								objectives.push(new SetContextData(this.contextDataKey, item));
 								objectives.push(new MoveItem(item, context.player.inventory, point));
 							}
@@ -86,7 +86,7 @@ export default class GatherFromGround extends Objective {
 
 	private itemMatches(context: Context, item: Item, fromLambda?: boolean): boolean {
 		return item.type === this.itemType &&
-			(fromLambda || (itemManager.isTileContainer(item.containedWithin) && !context.isReservedItem(item))) &&
+			(fromLambda || (itemManager.isTileContainer(item.containedWithin) && !context.isHardReservedItem(item))) &&
 			(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur));
 	}
 }

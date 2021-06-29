@@ -36,7 +36,7 @@ export default class AcquireItemByGroup extends AcquireBase {
 			itemTypes = itemTypes.filter(itemType => !this.options.excludeItemTypes!.has(itemType));
 		}
 
-		return itemTypes.map(itemType => [new AcquireItem(itemType, this.options).passContextDataKey(this)]);
+		return itemTypes.map(itemType => [new AcquireItem(itemType, this.options).passAcquireData(this)]);
 	}
 
 	private getItemTypes(): ItemType[] {

@@ -70,6 +70,7 @@ export default class ReinforceItem extends Objective {
 		objectives.push(new Lambda(async context => {
 			const reinforceItem = context.getData(ContextDataType.LastAcquiredItem);
 			if (!reinforceItem) {
+				this.log.error("Invalid reinforce item");
 				return ObjectiveResult.Restart;
 			}
 

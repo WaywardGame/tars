@@ -63,50 +63,50 @@ export default class AcquireItem extends AcquireBase {
 		const itemDescription = itemDescriptions[this.itemType];
 
 		const objectivePipelines: IObjective[][] = [
-			[new GatherFromGround(this.itemType, this.options).passContextDataKey(this)],
-			[new GatherFromChest(this.itemType, this.options).passContextDataKey(this)],
-			[new UseProvidedItem(this.itemType).passContextDataKey(this)],
+			[new GatherFromGround(this.itemType, this.options).passAcquireData(this)],
+			[new GatherFromChest(this.itemType, this.options).passAcquireData(this)],
+			[new UseProvidedItem(this.itemType).passAcquireData(this)],
 		];
 
 		const terrainSearch = this.getTerrainSearch();
 		if (terrainSearch.length > 0) {
-			objectivePipelines.push([new GatherFromTerrain(terrainSearch).passContextDataKey(this)]);
+			objectivePipelines.push([new GatherFromTerrain(terrainSearch).passAcquireData(this)]);
 		}
 
 		if (!this.options.disableCreatureSearch) {
 			const doodadSearch = this.getDoodadSearch();
 			if (doodadSearch.size > 0) {
-				objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passContextDataKey(this)]);
+				objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passAcquireData(this)]);
 			}
 		}
 
 		if (!this.options.disableCreatureSearch) {
 			const creatureSearch: CreatureSearch = this.getCreatureSearch();
 			if (creatureSearch.map.size > 0) {
-				objectivePipelines.push([new GatherFromCorpse(creatureSearch).passContextDataKey(this)]);
-				objectivePipelines.push([new GatherFromCreature(creatureSearch).passContextDataKey(this)]);
+				objectivePipelines.push([new GatherFromCorpse(creatureSearch).passAcquireData(this)]);
+				objectivePipelines.push([new GatherFromCreature(creatureSearch).passAcquireData(this)]);
 			}
 		}
 
 		const dismantleSearch: ItemType[] = this.getDismantleSearch();
 		if (dismantleSearch.length > 0) {
-			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passContextDataKey(this)]);
+			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passAcquireData(this)]);
 		}
 
 		const disassembleSearch = itemUtilities.getDisassembleSearch(context, this.itemType);
 		if (disassembleSearch.length > 0) {
-			objectivePipelines.push([new AcquireItemFromDisassemble(this.itemType, disassembleSearch).passContextDataKey(this)]);
+			objectivePipelines.push([new AcquireItemFromDisassemble(this.itemType, disassembleSearch).passAcquireData(this)]);
 		}
 
 		if (itemDescription) {
 			if (itemDescription.recipe) {
-				objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passContextDataKey(this)]);
+				objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);
 			}
 
 			if (itemDescription.revert !== undefined) {
 				const revertItemDescription = itemDescriptions[itemDescription.revert];
 				if (revertItemDescription?.lit === this.itemType) {
-					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passContextDataKey(this)]);
+					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passAcquireData(this)]);
 				}
 			}
 		}

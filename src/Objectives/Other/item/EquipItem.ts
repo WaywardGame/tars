@@ -25,6 +25,7 @@ export default class EquipItem extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
+			this.log.error("Invalid equip item");
 			return ObjectiveResult.Restart;
 		}
 

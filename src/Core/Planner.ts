@@ -599,10 +599,6 @@ class Planner implements IPlanner {
 
 		this.calculateDifficultyCache.set(cacheHashCode, result);
 
-		if (this.debug) {
-			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}.`);
-		}
-
 		if (waitingHashCodes.length > 0) {
 			if (this.debug) {
 				this.writeCalculationLog(`Waiting hash codes: ${waitingHashCodes.join(", ")}`);
@@ -634,6 +630,10 @@ class Planner implements IPlanner {
 		}
 
 		this.calculatingDifficultyDepth--;
+
+		if (this.debug) {
+			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}. Difficulty is ${difficulty}`);
+		}
 
 		if (this.calculatingDifficultyDepth === 0 && this.debug) {
 			const logString = this.calculationLog.join("");

@@ -557,6 +557,11 @@ export enum TarsMode {
 	Gardener,
 }
 
+export enum ReserveType {
+	Soft,
+	Hard
+}
+
 let tars: Tars | undefined;
 
 export function getTarsInstance() {

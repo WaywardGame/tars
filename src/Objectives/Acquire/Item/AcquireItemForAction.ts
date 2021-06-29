@@ -37,7 +37,7 @@ export default class AcquireItemForAction extends Objective {
 
 	public async execute(): Promise<ObjectiveExecutionResult> {
 		return AcquireItemForAction.getItems(this.actionType)
-			.map(item => [new AcquireItem(item).passContextDataKey(this)]);
+			.map(item => [new AcquireItem(item).passAcquireData(this)]);
 	}
 
 	public static getItems(actionType: ActionType): ItemType[] {

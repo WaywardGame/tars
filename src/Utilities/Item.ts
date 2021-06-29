@@ -88,7 +88,7 @@ class ItemUtilities {
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
 			if (isConsumed) {
-				if (context.isReservedItem(item)) {
+				if (context.isHardReservedItem(item)) {
 					return false;
 				}
 
@@ -142,7 +142,7 @@ class ItemUtilities {
 			}
 
 			if (item.type === itemTypeSearch) {
-				if (context.isReservedItem(item)) {
+				if (context.isHardReservedItem(item)) {
 					continue;
 				}
 
@@ -405,7 +405,7 @@ class ItemUtilities {
 	// todo: make this and related methods return a Set?
 	public getReservedItems(context: Context) {
 		return context.player.inventory.containedItems
-			.filter(item => context.isReservedItem(item) && !this.isInventoryItem(context, item));
+			.filter(item => context.isHardReservedItem(item) && !this.isInventoryItem(context, item));
 	}
 
 	/**

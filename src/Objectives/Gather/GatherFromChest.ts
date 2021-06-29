@@ -56,12 +56,12 @@ export default class GatherFromChest extends Objective {
 			.map(chest => {
 				const items = itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true)
 					.filter(item =>
-						!context.isReservedItem(item) &&
+						!context.isHardReservedItem(item) &&
 						(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur)));
 				if (items.length > 0) {
 					const item = items[0];
 					return [
-						new ReserveItems(item),
+						new ReserveItems(item).passAcquireData(this),
 						new SetContextData(this.contextDataKey, item),
 						new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
 					];

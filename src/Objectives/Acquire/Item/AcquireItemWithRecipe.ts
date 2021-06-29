@@ -9,6 +9,7 @@ import Translation from "language/Translation";
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
+import { ReserveType } from "../../../ITars";
 import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
@@ -99,7 +100,8 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		for (let i = 0; i < requires.length; i++) {
 			const itemsForComponent = checker.getItemsForComponent(i);
 			if (itemsForComponent.length > 0) {
-				objectives.push(new ReserveItems(...itemsForComponent));
+				const reserveType = requires[i].consumedAmount === 0 ? ReserveType.Soft : ReserveType.Hard;
+				objectives.push(new ReserveItems(...itemsForComponent).setReserveType(reserveType));
 			}
 		}
 
@@ -108,10 +110,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 				this.log.info(`Missing base component ${itemManager.isGroup(this.recipe.baseComponent) ? ItemTypeGroup[this.recipe.baseComponent] : ItemType[this.recipe.baseComponent]}`);
 
 				if (itemManager.isGroup(this.recipe.baseComponent)) {
-					objectives.push(new AcquireItemByGroup(this.recipe.baseComponent).passContextDataKey(this));
+					objectives.push(new AcquireItemByGroup(this.recipe.baseComponent).passAcquireData(this, ReserveType.Hard));
 
 				} else {
-					objectives.push(new AcquireItem(this.recipe.baseComponent).passContextDataKey(this));
+					objectives.push(new AcquireItem(this.recipe.baseComponent).passAcquireData(this, ReserveType.Hard));
 				}
 			}
 
@@ -119,16 +121,18 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			for (let i = 0; i < requires.length; i++) {
 				const missingAmount = checker.amountNeededForComponent(i);
 				if (missingAmount > 0) {
-					const componentType = requires[i].type;
+					const requirementInfo = requires[i];
+					const componentType = requirementInfo.type;
+					const reserveType = requirementInfo.consumedAmount === 0 ? ReserveType.Soft : ReserveType.Hard;
 
 					this.log.info(`Missing component ${itemManager.isGroup(componentType) ? ItemTypeGroup[componentType] : ItemType[componentType]} x${missingAmount}`);
 
 					for (let j = 0; j < missingAmount; j++) {
 						if (itemManager.isGroup(componentType)) {
-							objectives.push(new AcquireItemByGroup(componentType).passContextDataKey(this));
+							objectives.push(new AcquireItemByGroup(componentType).passAcquireData(this, reserveType));
 
 						} else {
-							objectives.push(new AcquireItem(componentType).passContextDataKey(this));
+							objectives.push(new AcquireItem(componentType).passAcquireData(this, reserveType));
 						}
 					}
 				}
@@ -177,7 +181,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Craft, (context, action) => {
 			action.execute(context.player, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
-		}).passContextDataKey(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+		}).passAcquireData(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 		return objectives;
 	}
