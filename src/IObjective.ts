@@ -124,7 +124,7 @@ export type NotPlausibleObjectivePipeline = IBaseObjectivePipeline & {
 export type NotCalculatedYetObjectivePipeline = IBaseObjectivePipeline & {
 	status: CalculatedDifficultyStatus.NotCalculatedYet;
 	hashCode: string;
-	waitingHashCodes: string[];
+	waitingHashCodes: Set<string>;
 };
 
 export type PossibleObjectivePipeline = Required<IBaseObjectivePipeline> & {

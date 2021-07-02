@@ -141,6 +141,10 @@ class ItemUtilities {
 				continue;
 			}
 
+			if (item.isProtected()) {
+				continue;
+			}
+
 			if (item.type === itemTypeSearch) {
 				if (context.isHardReservedItem(item)) {
 					continue;

@@ -121,9 +121,9 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			for (let i = 0; i < requires.length; i++) {
 				const missingAmount = checker.amountNeededForComponent(i);
 				if (missingAmount > 0) {
-					const requirementInfo = requires[i];
-					const componentType = requirementInfo.type;
-					const reserveType = requirementInfo.consumedAmount === 0 ? ReserveType.Soft : ReserveType.Hard;
+					const recipeComponent = requires[i];
+					const componentType = recipeComponent.type;
+					const reserveType = recipeComponent.consumedAmount === 0 ? ReserveType.Soft : ReserveType.Hard;
 
 					this.log.info(`Missing component ${itemManager.isGroup(componentType) ? ItemTypeGroup[componentType] : ItemType[componentType]} x${missingAmount}`);
 
@@ -141,19 +141,19 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		objectives.push(new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false));
 
-		if (checkerWithoutIntermediateChest && context.base.intermediateChest[0]) {
+		if (checkerWithoutIntermediateChest) {
 			// check if we need items in our intermediate container
-			if (!checkerWithoutIntermediateChest.requirementsMet()) {
+			const intermediateChest = context.base.intermediateChest[0];
+			if (intermediateChest && !checkerWithoutIntermediateChest.requirementsMet()) {
 				// move to our container before crafting
-				objectives.push(new MoveToTarget(context.base.intermediateChest[0], true));
+				objectives.push(new MoveToTarget(intermediateChest, true));
 
 				if (!canCraftFromIntermediateChest) {
 					// move all the items we need from the chest
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item) {
-							const intermediateChest = context.base.intermediateChest[0];
-							if (item.containedWithin === intermediateChest) {
+							if (itemManager.isContainableInContainer(item, intermediateChest)) {
 								objectives.push(new MoveItem(item, context.player.inventory, intermediateChest));
 							}
 						}
