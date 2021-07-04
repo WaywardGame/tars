@@ -106,7 +106,7 @@ class ItemUtilities {
 		});
 
 		// move the knife to the front so it will be preferred for sharpened items
-		const items = context.player.inventory.containedItems
+		const items = this.getItemsInInventory(context)
 			.slice()
 			.sort((a, b) => {
 				return a === context.inventory.knife ? -1 : 1;
@@ -124,6 +124,10 @@ class ItemUtilities {
 		}
 
 		return checker;
+	}
+
+	public getItemsInInventory(context: Context) {
+		return itemManager.getItemsInContainer(context.player.inventory, true, true);
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
@@ -255,7 +259,7 @@ class ItemUtilities {
 	}
 
 	public getBestEquipment(context: Context, equip: EquipType): Item[] {
-		return context.player.inventory.containedItems
+		return this.getItemsInInventory(context)
 			.filter(item => {
 				if (item.type === ItemType.AnimalPelt) {
 					// we're not savages
@@ -343,7 +347,7 @@ class ItemUtilities {
 	}
 
 	public getInventoryItemsWithEquipType(context: Context, equipType: EquipType): Item[] {
-		return context.player.inventory.containedItems
+		return this.getItemsInInventory(context)
 			.filter(item => {
 				const description = item.description();
 				return description && description.equip === equipType;
@@ -351,7 +355,7 @@ class ItemUtilities {
 	}
 
 	public hasInventoryItemForAction(context: Context, actionType: ActionType): boolean {
-		return context.player.inventory.containedItems
+		return this.getItemsInInventory(context)
 			.some(item => {
 				const description = item.description();
 				if (!description) {
@@ -367,7 +371,7 @@ class ItemUtilities {
 	}
 
 	public getInventoryItemsWithUse(context: Context, use: ActionType, filterEquipped?: boolean): Item[] {
-		return context.player.inventory.containedItems
+		return this.getItemsInInventory(context)
 			.filter(item => {
 				if (filterEquipped && item.isEquipped()) {
 					return false;
@@ -408,7 +412,7 @@ class ItemUtilities {
 
 	// todo: make this and related methods return a Set?
 	public getReservedItems(context: Context) {
-		return context.player.inventory.containedItems
+		return this.getItemsInInventory(context)
 			.filter(item => context.isHardReservedItem(item) && !this.isInventoryItem(context, item));
 	}
 
@@ -416,7 +420,8 @@ class ItemUtilities {
 	 * Returns unused items sorted by oldest to newest
 	 */
 	public getUnusedItems(context: Context, options: Partial<{ allowReservedItems: boolean; allowSailboat: boolean }> = {}) {
-		return context.player.inventory.containedItems
+		const items = this.getItemsInInventory(context);
+		return items
 			.filter(item => {
 				if (item.isEquipped() ||
 					((!options.allowSailboat || item !== context.inventory.sailBoat) && this.isInventoryItem(context, item)) ||
@@ -431,11 +436,11 @@ class ItemUtilities {
 
 				return true;
 			})
-			.sort((a, b) => context.player.inventory.containedItems.indexOf(a) - context.player.inventory.containedItems.indexOf(b));
+			.sort((a, b) => items.indexOf(a) - items.indexOf(b));
 	}
 
 	public getAvailableInventoryWeight(context: Context) {
-		const items = context.player.inventory.containedItems
+		const items = this.getItemsInInventory(context)
 			.filter(item => this.isInventoryItem(context, item));
 		const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
 		return context.player.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
