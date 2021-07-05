@@ -45,7 +45,7 @@ import executor, { ExecuteObjectivesResultType } from "./core/Executor";
 import planner from "./core/Planner";
 import { ContextDataType, MovingToNewIslandState } from "./IContext";
 import { IObjective, ObjectiveResult } from "./IObjective";
-import { IBase, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, setTarsInstance, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
+import { IBase, IContext, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, setTarsInstance, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
 import { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
@@ -418,8 +418,8 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		const recoverThreshold = playerUtilities.getRecoverThreshold(this.context, stat.type);
-		if (recoverThreshold !== undefined) {
+		if (stat.type === Stat.Health || stat.type === Stat.Stamina || stat.type === Stat.Hunger || stat.type === Stat.Thirst) {
+			const recoverThreshold = playerUtilities.getRecoverThreshold(this.context, stat.type);
 			if (stat.value <= recoverThreshold) {
 				if (!this.statThresholdExceeded[stat.type]) {
 					this.statThresholdExceeded[stat.type] = true;
@@ -464,6 +464,10 @@ export default class Tars extends Mod {
 	}
 
 	////////////////////////////////////////////////
+
+	public getContext(): IContext {
+		return this.context ?? new Context(localPlayer, this.base, this.inventory, this.saveData.options);
+	}
 
 	public getTranslation(translation: TarsTranslation | string | Translation): Translation {
 		return translation instanceof Translation ? translation : new Translation(this.dictionary, translation);
@@ -672,9 +676,14 @@ export default class Tars extends Mod {
 
 		this.saveData.options = {
 			mode: TarsMode.Survival,
-			stayHealthy: true,
 			exploreIslands: true,
 			useOrbsOfInfluence: true,
+			stayHealthy: true,
+			recoverThresholdHealth: 30,
+			recoverThresholdStamina: 20,
+			recoverThresholdHunger: 8,
+			recoverThresholdThirst: 10,
+			recoverThresholdThirstFromMax: -10,
 			quantumBurst: false,
 			developerMode: false,
 			...(this.saveData.options ?? {}) as Partial<ITarsOptions>,
@@ -1236,7 +1245,7 @@ export default class Tars extends Mod {
 
 	private equipInterrupt(context: Context, equip: EquipType): IObjective | undefined {
 		const item = context.player.getEquippedItem(equip);
-		if (item && item.type === ItemType.SlitherSucker) {
+		if (item && (item.type === ItemType.SlitherSucker || item.type === ItemType.AberrantSlitherSucker)) {
 			// brain slugs are bad
 			return new UnequipItem(item);
 		}

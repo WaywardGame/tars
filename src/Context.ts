@@ -5,9 +5,9 @@ import { IVector3 } from "utilities/math/IVector";
 
 import ContextState from "./ContextState";
 import { ContextDataType } from "./IContext";
-import { IBase, IInventoryItems, ITarsOptions } from "./ITars";
+import { IBase, IContext, IInventoryItems, ITarsOptions } from "./ITars";
 
-export default class Context {
+export default class Context implements IContext {
 
 	private changes: ContextState | undefined;
 

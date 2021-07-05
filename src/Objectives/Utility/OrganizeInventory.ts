@@ -163,7 +163,7 @@ export default class OrganizeInventory extends Objective {
 			new ExecuteAction(ActionType.Drop, (context, action) => {
 				action.execute(context.player, itemToDrop);
 				return ObjectiveResult.Complete;
-			}),
+			}).setStatus(`Dropping ${itemToDrop.getName()}`),
 		];
 	}
 

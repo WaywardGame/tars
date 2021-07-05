@@ -145,11 +145,11 @@ class Planner implements IPlanner {
 					case CalculatedDifficultyStatus.NotCalculatedYet:
 						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
-						if (this.calculatingDifficultyDepth === 1) {
-							// this can infinite loop if objectives rely on each other?
-							// calculateObjectives = true;
-							this.log.warn("Nested calculation!");
-						}
+						// if (this.calculatingDifficultyDepth === 1) {
+						// this can infinite loop if objectives rely on each other?
+						// calculateObjectives = true;
+						// this.log.warn("Nested calculation!");
+						// }
 
 						if (result.status === CalculatedDifficultyStatus.Impossible) {
 							result = objectivePipeline;

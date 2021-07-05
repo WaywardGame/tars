@@ -111,7 +111,7 @@ export default class RecoverHunger extends Objective {
 	}
 
 	private eatItem(context: Context, item: Item) {
-		this.log.info(`Eating ${item.getName(false).getString()}`);
+		this.log.info(`Eating ${item.getName().getString()}`);
 		return [new ReserveItems(item), new MoveItemIntoInventory(item), new UseItem(ActionType.Eat, item)];
 	}
 }

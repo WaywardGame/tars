@@ -66,7 +66,7 @@ export default class MoveToNewIsland extends Objective {
 				new ExecuteAction(ActionType.Move, (context, action) => {
 					action.execute(context.player, unvisitedIsland.direction);
 					return ObjectiveResult.Complete;
-				}),
+				}).setStatus(this),
 			]);
 		}
 

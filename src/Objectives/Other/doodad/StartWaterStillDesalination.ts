@@ -131,6 +131,7 @@ export default class StartWaterStillDesalination extends Objective {
 				objectives.push(new Restart());
 
 			} else {
+				this.log.info("Too far away from water still");
 				return ObjectiveResult.Ignore;
 			}
 

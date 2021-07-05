@@ -8,6 +8,7 @@ import { ContextDataType } from "../../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import ExecuteAction from "../../core/ExecuteAction";
+import Lambda from "../../core/Lambda";
 
 export default class MoveItem extends Objective {
 
@@ -34,14 +35,15 @@ export default class MoveItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		if (item.containedWithin === this.targetContainer) {
-			return ObjectiveResult.Complete;
-		}
+		return new Lambda(async context => {
+			if (item.containedWithin === this.targetContainer) {
+				return ObjectiveResult.Complete;
+			}
 
-		return new ExecuteAction(ActionType.MoveItem, (context, action) => {
-			action.execute(context.player, item, this.targetContainer);
-			return ObjectiveResult.Complete;
-		})
+			return new ExecuteAction(ActionType.MoveItem, (context, action) => {
+				action.execute(context.player, item, this.targetContainer);
+				return ObjectiveResult.Complete;
+			}).setStatus(this);
+		}).setStatus(this);
 	}
-
 }

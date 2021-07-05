@@ -35,7 +35,7 @@ export default class UnequipItem extends Objective {
 		return new ExecuteAction(ActionType.Unequip, (context, action) => {
 			action.execute(context.player, item);
 			return ObjectiveResult.Complete;
-		});
+		}).setStatus(this);
 	}
 
 }
