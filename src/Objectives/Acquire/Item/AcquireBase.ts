@@ -164,7 +164,6 @@ export default abstract class AcquireBase extends Objective {
 		}
 	}
 
-
 	/**
 	 * Higher number = higher priority = it will be executed first
 	 */

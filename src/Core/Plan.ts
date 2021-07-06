@@ -1,5 +1,6 @@
 import Item from "game/item/Item";
 import Log, { ILogLine } from "utilities/Log";
+import Vector2 from "utilities/math/Vector2";
 
 import Context from "../Context";
 import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../IObjective";
@@ -10,6 +11,11 @@ import { loggerUtilities } from "../utilities/Logger";
 
 import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
 import { IPlanner } from "./IPlanner";
+
+interface ITreeVertex {
+	tree: IExecutionTree;
+	position: IVector3;
+}
 
 /**
  * Represents a chain of objectives that can be executed in order to complete the plan.
@@ -32,7 +38,8 @@ export default class Plan implements IPlan {
 		this.log = loggerUtilities.createLog("Plan", objectiveInfo.objective.getHashCode());
 
 		// this.tree = this.createExecutionTree(objective, objectives);
-		this.tree = this.createOptimizedExecutionTree(objectiveInfo.objective, objectives);
+		// this.tree = this.createOptimizedExecutionTree(objectiveInfo.objective, objectives);
+		this.tree = this.createOptimizedExecutionTreeV2(context, objectiveInfo.objective, objectives);
 
 		this.objectives = this.flattenTree(this.tree);
 
@@ -294,6 +301,7 @@ export default class Plan implements IPlan {
 		return tree;
 	}
 
+	// @ts-ignore
 	private createOptimizedExecutionTree(objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
 		let id = 0;
 
@@ -469,6 +477,195 @@ export default class Plan implements IPlan {
 		}
 
 		return tree;
+	}
+
+	private createOptimizedExecutionTreeV2(context: Context, objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
+		let id = 0;
+
+		const rootTree: IExecutionTree = {
+			id: id++,
+			depth: 0,
+			objective: objective,
+			hashCode: objective.getHashCode(),
+			difficulty: 0,
+			logs: [],
+			children: [],
+		};
+
+		const objectiveGroups = new Map<string, IExecutionTree>();
+
+		const depthMap = new Map<number, IExecutionTree>();
+		depthMap.set(1, rootTree);
+
+		const gatherObjectiveTrees: IExecutionTree[] = [];
+		const reserveItemObjectives: Map<string, Item[]> = new Map();
+
+		for (const { depth, objective, difficulty, logs } of objectives) {
+			const hashCode = objective.getHashCode();
+
+			if (objective instanceof ReserveItems) {
+				if (!reserveItemObjectives.has(hashCode)) {
+					reserveItemObjectives.set(hashCode, objective.items);
+				}
+
+				// leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
+				continue;
+			}
+
+			let parent = depthMap.get(depth - 1);
+			if (!parent) {
+				this.log.error(`Root objective: ${objective}`);
+				this.log.error("Objectives", objectives);
+
+				throw new Error(`Invalid parent tree ${depth - 1}. Objective: ${hashCode}`);
+			}
+
+			if (objective.canGroupTogether()) {
+				// group objectives with the same hash codes together under the same parent
+				const objectiveGroupId = `${depth},${hashCode}`;
+				const objectiveGroupParent = objectiveGroups.get(objectiveGroupId);
+				if (objectiveGroupParent) {
+					// we are changing the parent for this objective
+					// flag the original parent as being changed
+					parent.groupedAway = true;
+					parent = objectiveGroupParent;
+
+				} else {
+					objectiveGroups.set(objectiveGroupId, parent);
+				}
+			}
+
+			const childTree: IExecutionTree = {
+				id: id++,
+				depth,
+				objective,
+				hashCode,
+				difficulty,
+				logs,
+				parent,
+				children: [],
+			};
+
+			parent.children.push(childTree);
+
+			depthMap.set(depth, childTree);
+
+			if (objective.gatherObjectivePriority !== undefined) {
+				gatherObjectiveTrees.push(childTree);
+			}
+		}
+
+		const walkAndSortTree = (tree: IExecutionTree) => {
+			tree.children = tree.children.sort((treeA, treeB) => {
+				if (treeA.objective.sort && treeB.objective.sort) {
+					return treeA.objective.sort(this.context, treeA, treeB);
+				}
+
+				return 0;
+			});
+
+			for (const child of tree.children) {
+				walkAndSortTree(child);
+			}
+		};
+
+		walkAndSortTree(rootTree);
+
+		// move gather objectives to the front with sorting
+		if (gatherObjectiveTrees.length > 0) {
+			// travelling salesman problem with the first vertex being the players location
+			const unvisited: Array<ITreeVertex> = [];
+			const visited: Array<ITreeVertex> = [];
+
+			for (const gatherObjectiveTree of gatherObjectiveTrees) {
+				let position: IVector3 | undefined;
+
+				for (const child of gatherObjectiveTree.children) {
+					position = child.objective.getPosition?.();
+					if (position !== undefined) {
+						break;
+					}
+				}
+
+				if (position === undefined) {
+					throw new Error(`Unknown gather objective position ${gatherObjectiveTree.objective.getHashCode()} ${this.getTreeString(gatherObjectiveTree)}`);
+				}
+
+				const vertex = { tree: gatherObjectiveTree, position };
+				unvisited.push(vertex);
+			}
+
+			visited.push({ tree: rootTree, position: context.getPosition() });
+
+			while (unvisited.length > 0) {
+				const vertex = visited[visited.length - 1];
+
+				let closestVertex: { vertex: ITreeVertex; index: number; distance: number } | undefined;
+
+				for (let i = 0; i < unvisited.length; i++) {
+					const unvisitedVertex = unvisited[i];
+					const distance = Vector2.squaredDistance(vertex.position, unvisitedVertex.position);
+
+					if (closestVertex === undefined || closestVertex.distance > distance) {
+						closestVertex = {
+							vertex: unvisitedVertex,
+							index: i,
+							distance,
+						}
+					}
+				}
+
+				if (closestVertex === undefined) {
+					throw new Error("Impossible vertex");
+				}
+
+				unvisited.splice(closestVertex.index, 1);
+				visited.push(closestVertex.vertex);
+			}
+
+			for (const { tree: visitedTree } of visited) {
+				if (!visitedTree.parent) {
+					continue;
+				}
+
+				visitedTree.parent.groupedAway = true;
+
+				const index = visitedTree.parent.children.indexOf(visitedTree);
+				if (index === -1) {
+					throw new Error(`Invalid gather objective tree for ${visitedTree.objective.getHashCode()}`);
+				}
+
+				visitedTree.parent.children.splice(index, 1);
+				visitedTree.parent = rootTree;
+			}
+
+			rootTree.children = visited.slice(1).map(({ tree: visitedTree }) => visitedTree).concat(rootTree.children);
+		}
+
+		// move all reserve item objectives to the top of the tree so they are executed first
+		// this will prevent interrupt objectives from messing with these items
+		if (reserveItemObjectives.size > 0) {
+			const reserveItemObjective = new ReserveItems();
+			reserveItemObjective.items = Array.from(reserveItemObjectives)
+				.sort(([a], [b]) => a.localeCompare(b, navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
+				.map(a => a[1])
+				.flat();
+
+			const reserveItemObjectiveTree: IExecutionTree = {
+				id: id++,
+				depth: 1,
+				objective: reserveItemObjective,
+				hashCode: reserveItemObjective.getHashCode(),
+				difficulty: 0,
+				logs: [],
+				children: [],
+				parent: rootTree,
+			};
+
+			rootTree.children = [reserveItemObjectiveTree].concat(rootTree.children);
+		}
+
+		return rootTree;
 	}
 
 	private getObjectiveResults(chain: IObjective[] = [], objectiveStack: IObjectiveInfo[], currentObjectiveInfo: IObjectiveInfo, includeCurrent: boolean = true) {

@@ -1,5 +1,6 @@
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
+import { TerrainType } from "game/tile/ITerrain";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -10,12 +11,12 @@ import MoveToTarget from "../core/MoveToTarget";
 
 export default class MoveToWater extends Objective {
 
-	constructor(private readonly deepWater = true) {
+	constructor(private readonly deepSeaWater = true) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `MoveToWater:${this.deepWater}`;
+		return `MoveToWater:${this.deepSeaWater}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -23,7 +24,12 @@ export default class MoveToWater extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (this.deepWater ? tileUtilities.isOverDeepWater(context) : tileUtilities.isSwimmingOrOverWater(context)) {
+		if (context.player.vehicleItemId !== undefined) {
+			// todo: confirm this
+			return ObjectiveResult.Complete;
+		}
+
+		if (this.deepSeaWater ? tileUtilities.isOverDeepSeaWater(context) : tileUtilities.isSwimmingOrOverWater(context)) {
 			return ObjectiveResult.Complete;
 		}
 
@@ -32,7 +38,7 @@ export default class MoveToWater extends Objective {
 		const target = TileHelpers.findMatchingTile(context.getPosition(), (point, tile) => {
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = Terrains[tileType];
-			if (terrainDescription && (this.deepWater ? terrainDescription.deepWater : terrainDescription.water) &&
+			if (terrainDescription && (this.deepSeaWater ? tileType === TerrainType.DeepSeawater : terrainDescription.water) &&
 				!navigation.isDisabledFromPoint(point)) {
 				// find the safest point
 				return true;

@@ -16,6 +16,8 @@ import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromTerrain extends Objective {
 
+	public readonly gatherObjectivePriority = 200;
+
 	constructor(private readonly search: ITerrainSearch[]) {
 		super();
 	}

@@ -14,6 +14,8 @@ import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromDoodad extends Objective {
 
+	public readonly gatherObjectivePriority = 200;
+
 	constructor(private readonly itemType: ItemType, private readonly doodadSearchMap: DoodadSearchMap) {
 		super();
 	}

@@ -42,8 +42,9 @@ class TileUtilities {
 		return context.player.isSwimming() || Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.water === true;
 	}
 
-	public isOverDeepWater(context: Context) {
-		return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
+	public isOverDeepSeaWater(context: Context) {
+		return TileHelpers.getType(game.getTileFromPoint(context.getPosition())) === TerrainType.DeepSeawater;
+		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
 	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {

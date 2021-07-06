@@ -57,6 +57,10 @@ export default class MoveToTarget extends Objective {
 		return status;
 	}
 
+	public getPosition(): IVector3 {
+		return this.target;
+	}
+
 	public isDynamic(): boolean {
 		return true;
 	}
@@ -121,7 +125,10 @@ export default class MoveToTarget extends Objective {
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];
 			if (terrainDescription && terrainDescription.water) {
-				return new UseItem(ActionType.Paddle, context.inventory.sailBoat);
+				return [
+					new UseItem(ActionType.Paddle, context.inventory.sailBoat),
+					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
+				];
 			}
 
 			const path = movementPath.path;

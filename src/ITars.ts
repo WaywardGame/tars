@@ -64,8 +64,8 @@ export enum TarsTranslation {
 
 	DialogLabelItem,
 	DialogLabelDoodad,
-	DialogLabelGeneralOptions,
-	DialogLabelAdvancedOptions,
+	DialogLabelGeneral,
+	DialogLabelAdvanced,
 	DialogLabelRecoverThresholds,
 
 	DialogModeSurvival,
@@ -121,7 +121,7 @@ export interface ITarsOptionSection {
 }
 
 export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation | undefined> = [
-	TarsTranslation.DialogLabelGeneralOptions,
+	TarsTranslation.DialogLabelGeneral,
 	{
 		option: "exploreIslands",
 		title: TarsTranslation.DialogButtonExploreIslands,
@@ -137,7 +137,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
 		title: TarsTranslation.DialogButtonStayHealthy,
 		tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
 	},
-	TarsTranslation.DialogLabelAdvancedOptions,
+	TarsTranslation.DialogLabelAdvanced,
 	{
 		option: "quantumBurst",
 		title: TarsTranslation.DialogButtonQuantumBurst,
@@ -223,7 +223,6 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	anvil: {
 		doodadTypes: [DoodadTypeGroup.Anvil],
 		tryPlaceNear: "kiln",
-		// openAreaRadius: 0, // todo: verify this
 	},
 	campfire: {
 		doodadTypes: [DoodadTypeGroup.LitCampfire],
@@ -266,6 +265,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	kiln: {
 		doodadTypes: [DoodadTypeGroup.LitKiln],
 		litType: DoodadTypeGroup.LitKiln,
+		tryPlaceNear: "anvil",
 	},
 	waterStill: {
 		doodadTypes: [DoodadTypeGroup.LitWaterStill],

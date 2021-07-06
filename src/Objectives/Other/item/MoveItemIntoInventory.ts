@@ -38,7 +38,8 @@ export default class MoveItemIntoInventory extends Objective {
         }
 
         return [
-            new MoveToTarget(point, true),
+            // todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
+            new MoveToTarget(point, true).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
             new MoveItem(item, context.player.inventory, point),
         ];
     }

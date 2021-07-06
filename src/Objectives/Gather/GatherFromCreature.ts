@@ -22,6 +22,8 @@ import EquipItem from "../other/item/EquipItem";
 
 export default class GatherFromCreature extends Objective {
 
+	public readonly gatherObjectivePriority = 700;
+
 	constructor(private readonly search: CreatureSearch) {
 		super();
 	}

@@ -16,6 +16,8 @@ import MoveItem from "../other/item/MoveItem";
 
 export default class GatherFromGround extends Objective {
 
+	public readonly gatherObjectivePriority = 500;
+
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IGatherItemOptions> = {}) {
 		super();
 	}
@@ -46,6 +48,7 @@ export default class GatherFromGround extends Objective {
 		if (item) {
 			return [
 				new ReserveItems(item).passAcquireData(this),
+				new MoveToTarget(item.containedWithin as ITileContainer, false), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
 				new MoveItem(item, context.player.inventory, point),
 			];
@@ -55,8 +58,8 @@ export default class GatherFromGround extends Objective {
 			.map(item => {
 				if (item && this.itemMatches(context, item)) {
 					return [
-						new MoveToTarget(item.containedWithin as ITileContainer, true),
 						new ReserveItems(item).passAcquireData(this),
+						new MoveToTarget(item.containedWithin as ITileContainer, true),
 						new SetContextData(this.contextDataKey, item), // todo: this might be wrong
 						new Lambda(async context => {
 							const objectives: IObjective[] = [];

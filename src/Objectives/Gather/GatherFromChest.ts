@@ -14,6 +14,9 @@ import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 
 export default class GatherFromChest extends Objective {
 
+	// don't reorder these
+	// public readonly isGatherObjective = true;
+
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IGatherItemOptions> = {}) {
 		super();
 	}

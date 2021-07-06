@@ -83,6 +83,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		checker: ItemRecipeRequirementChecker,
 		checkerWithoutIntermediateChest?: ItemRecipeRequirementChecker): IObjective[] {
 		const objectives: IObjective[] = [
+			// todo: always make this true?
 			new SetContextData(ContextDataType.PrioritizeBaseChests, canCraftFromIntermediateChest),
 			new SetContextData(ContextDataType.CanCraftFromIntermediateChest, canCraftFromIntermediateChest),
 			new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, allowOrganizingItemsIntoIntermediateChest),

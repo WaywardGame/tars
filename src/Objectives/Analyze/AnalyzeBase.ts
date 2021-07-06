@@ -49,7 +49,7 @@ export default class AnalyzeBase extends Objective {
 				let targets: Doodad[];
 
 				const placeNear = info.tryPlaceNear;
-				if (placeNear !== undefined) {
+				if (placeNear !== undefined && context.base[placeNear].length > 0) {
 					targets = [];
 
 					const nearDoodads = context.base[placeNear];
