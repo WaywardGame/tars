@@ -10,7 +10,7 @@ import Objective from "../../../Objective";
 import MoveToTarget from "../../core/MoveToTarget";
 import BuildItem from "../../other/item/BuildItem";
 import StartFire from "../../other/doodad/StartFire";
-import AcquireItemForDoodad from "../Item/AcquireItemForDoodad";
+import AcquireItemForDoodad from "../item/AcquireItemForDoodad";
 import { doodadUtilities } from "../../../utilities/Doodad";
 import { objectUtilities } from "../../../utilities/Object";
 import { itemUtilities } from "../../../utilities/Item";
