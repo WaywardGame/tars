@@ -9,7 +9,7 @@ By default, press `T` to open the TARS dialog or press `Shift + T` to immediatel
 
 Subscribe to the mod on the Steam Workshop to use it.
 
-[http://steamcommunity.com/sharedfiles/filedetails/?id=1218286592](http://steamcommunity.com/sharedfiles/filedetails/?id=1218286592)
+[https://steamcommunity.com/sharedfiles/filedetails/?id=1218286592](https://steamcommunity.com/sharedfiles/filedetails/?id=1218286592)
 
 ## Overview
 
