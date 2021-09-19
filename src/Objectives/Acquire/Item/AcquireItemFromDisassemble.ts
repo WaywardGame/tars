@@ -35,7 +35,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 		return `AcquireItemFromDisassemble:${ItemType[this.itemType]}:${this.searches.map(({ item }) => item.toString()).join(",")}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		const translation = Stream.values(this.searches.map(({ item }) => item.getName()))
 			.collect(Translation.formatList, ListEnder.Or);
 
@@ -54,7 +54,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const { item, disassemblyItems, requiredForDisassembly } of this.searches) {
-			if (context.isReservedItem(item)) {
+			if (context.isHardReservedItem(item) || item.isProtected()) {
 				continue;
 			}
 
@@ -102,7 +102,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				}
 
 				action.execute(context.player, item);
-			}).passContextDataKey(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
+			}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

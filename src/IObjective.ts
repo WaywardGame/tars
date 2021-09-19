@@ -47,6 +47,8 @@ export interface IObjective {
 
 	readonly ignoreInvalidPlans?: boolean;
 
+	readonly gatherObjectivePriority?: number;
+
 	setLogger(log: ILog | undefined): void;
 
 	execute(context: Context): Promise<ObjectiveExecutionResult>;
@@ -58,9 +60,11 @@ export interface IObjective {
 	/**
 	 * Human readable status for what the objective is doing
 	 */
-	getStatusMessage(): string;
+	getStatusMessage(): string | undefined;
 
 	sort?(context: Context, executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number;
+
+	getPosition?(): IVector3;
 
 	/**
 	 * The result can change between the planning and execution phase
@@ -124,7 +128,7 @@ export type NotPlausibleObjectivePipeline = IBaseObjectivePipeline & {
 export type NotCalculatedYetObjectivePipeline = IBaseObjectivePipeline & {
 	status: CalculatedDifficultyStatus.NotCalculatedYet;
 	hashCode: string;
-	waitingHashCodes: string[];
+	waitingHashCodes: Set<string>;
 };
 
 export type PossibleObjectivePipeline = Required<IBaseObjectivePipeline> & {

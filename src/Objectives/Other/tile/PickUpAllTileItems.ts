@@ -16,7 +16,7 @@ export default class PickUpAllTileItems extends Objective {
         return `PickUpAllTileItems:${this.target.x},${this.target.y},${this.target.z}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Picking up all items on ${this.target.x},${this.target.y},${this.target.z}`;
     }
 
@@ -26,7 +26,7 @@ export default class PickUpAllTileItems extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        return targetTile.containedItems.map(item => new MoveItem(item, context.player.inventory));
+        return targetTile.containedItems.map(item => new MoveItem(item, context.player.inventory, this.target));
     }
 
 }

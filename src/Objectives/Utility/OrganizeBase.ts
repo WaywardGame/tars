@@ -1,7 +1,6 @@
 import { IContainer, ItemType } from "game/item/IItem";
 import { IVector3 } from "utilities/math/IVector";
 import Item from "game/item/Item";
-import { TileEventType } from "game/tile/ITileEvent";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -21,7 +20,7 @@ export default class OrganizeBase extends Objective {
 		return "OrganizeBase";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Organizing base";
 	}
 
@@ -48,7 +47,7 @@ export default class OrganizeBase extends Objective {
 
 		for (const position of this.tiles) {
 			const tile = game.getTileFromPoint(position);
-			if (tile.containedItems && tile.containedItems.length > 0 && !tileEventManager.get(tile, TileEventType.Fire)) {
+			if (tile.containedItems && tile.containedItems.length > 0) {
 				let weight = playerUtilities.getWeight(context);
 				const maxWeight = playerUtilities.getMaxWeight(context);
 				const itemsToMove: Item[] = [];
@@ -76,7 +75,7 @@ export default class OrganizeBase extends Objective {
 				objectives.push(new MoveToTarget(position, true));
 
 				for (const item of itemsToMove) {
-					objectives.push(new MoveItem(item, context.player.inventory));
+					objectives.push(new MoveItem(item, context.player.inventory, position));
 				}
 
 				// restart now

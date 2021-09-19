@@ -33,7 +33,7 @@ export default class AcquireItemFromDismantle extends Objective {
 		return `AcquireItemFromDismantle:${ItemType[this.itemType]}:${this.dismantleItemTypes.map((itemType: ItemType) => ItemType[itemType]).join(",")}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
 			.collect(Translation.formatList, ListEnder.Or);
 
@@ -93,7 +93,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				}
 
 				action.execute(context.player, item);
-			}).passContextDataKey(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+			}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

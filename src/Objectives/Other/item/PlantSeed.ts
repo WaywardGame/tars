@@ -33,13 +33,14 @@ export default class PlantSeed extends Objective {
 		return `PlantSeed:${this.seed}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Planting ${this.seed?.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const seed = this.seed ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!seed) {
+			this.log.error("Invalid seed item");
 			return ObjectiveResult.Restart;
 		}
 

@@ -12,6 +12,10 @@ export default class SetContextData extends Objective {
 		return `SetContextData:${this.type}=${this.value}`;
 	}
 
+	public getStatus(): string | undefined {
+		return undefined;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		context.setData(this.type, this.value);
 		return ObjectiveResult.Complete;

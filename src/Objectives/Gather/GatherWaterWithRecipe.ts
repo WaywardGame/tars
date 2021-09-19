@@ -21,7 +21,7 @@ export default class GatherWaterWithRecipe extends Objective {
         return `GatherWaterWithRecipe:${this.item}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Gathering water into ${this.item?.getName()}`;
     }
 

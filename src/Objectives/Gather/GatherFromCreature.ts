@@ -22,12 +22,18 @@ import EquipItem from "../other/item/EquipItem";
 
 export default class GatherFromCreature extends Objective {
 
+	public readonly gatherObjectivePriority = 700;
+
 	constructor(private readonly search: CreatureSearch) {
 		super();
 	}
 
 	public getIdentifier(): string {
 		return `GatherFromCreature:${this.search.identifier}`;
+	}
+
+	public getStatus(): string | undefined {
+		return "Gathering items from creatures";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

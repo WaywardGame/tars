@@ -21,7 +21,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 		return `ExecuteAction:${ActionType[this.actionType]}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Executing ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 

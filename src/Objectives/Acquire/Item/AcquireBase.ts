@@ -1,4 +1,5 @@
-import { ItemType } from "../../../../node_modules/@wayward/types/definitions/game/item/IItem";
+import { ItemType } from "game/item/IItem";
+
 import Context from "../../../Context";
 import { IExecutionTree } from "../../../core/IPlan";
 import Objective from "../../../Objective";
@@ -162,7 +163,6 @@ export default abstract class AcquireBase extends Objective {
 			result.priority += 20;
 		}
 	}
-
 
 	/**
 	 * Higher number = higher priority = it will be executed first

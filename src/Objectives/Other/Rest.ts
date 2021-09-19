@@ -25,7 +25,7 @@ export default class Rest extends Objective {
 		return "Rest";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Resting";
 	}
 
@@ -38,7 +38,7 @@ export default class Rest extends Objective {
 		if (nearbyCreatures.length > 0) {
 			const nearbyCreature = nearbyCreatures[0];
 
-			this.log.info(`Nearby creature ${nearbyCreature.getName(false).getString()} will prevent resting`);
+			this.log.info(`Nearby creature ${nearbyCreature.getName().getString()} will prevent resting`);
 
 			const objectivePipelines: IObjective[][] = [
 				[new Idle(false)],

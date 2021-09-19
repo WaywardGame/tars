@@ -2,6 +2,8 @@ import { ActionType } from "game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
@@ -14,12 +16,18 @@ import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromTerrain extends Objective {
 
+	public readonly gatherObjectivePriority = 200;
+
 	constructor(private readonly search: ITerrainSearch[]) {
 		super();
 	}
 
 	public getIdentifier(): string {
 		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]}:${itemManager.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
+	}
+
+	public getStatus(): string | undefined {
+		return "Gathering items from terrain";
 	}
 
 	public canGroupTogether(): boolean {
@@ -105,7 +113,9 @@ export default class GatherFromTerrain extends Objective {
 
 				objectives.push(new MoveToTarget(point, true).addDifficulty(difficulty));
 
-				objectives.push(new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType)).passContextDataKey(this));
+				objectives.push(new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType))
+					.passAcquireData(this)
+					.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, terrainSearch.itemType).getString()} from ${Translation.nameOf(Dictionary.Terrain, terrainSearch.type).getString()}`));
 
 				objectivePipelines.push(objectives);
 			}

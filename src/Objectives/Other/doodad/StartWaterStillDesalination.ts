@@ -36,7 +36,7 @@ export default class StartWaterStillDesalination extends Objective {
 		return `StartWaterStillDesalination:${this.waterStill}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Starting desalination process for ${this.waterStill.getName()}`;
 	}
 
@@ -131,6 +131,7 @@ export default class StartWaterStillDesalination extends Objective {
 				objectives.push(new Restart());
 
 			} else {
+				this.log.info("Too far away from water still");
 				return ObjectiveResult.Ignore;
 			}
 

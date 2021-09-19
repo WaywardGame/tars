@@ -16,12 +16,18 @@ import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromCorpse extends Objective {
 
+	public readonly gatherObjectivePriority = 600;
+
 	constructor(private readonly search: CreatureSearch) {
 		super();
 	}
 
 	public getIdentifier(): string {
 		return `GatherFromCorpse:${this.search.identifier}`;
+	}
+
+	public getStatus(): string | undefined {
+		return "Gathering items from corpses";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

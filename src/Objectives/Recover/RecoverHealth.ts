@@ -22,7 +22,7 @@ export default class RecoverHealth extends Objective {
 		return `RecoverHealth:${this.onlyUseAvailableItems}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Recovering health";
 	}
 

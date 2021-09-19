@@ -43,7 +43,7 @@ export default class BuildItem extends Objective {
 		return `BuildItem:${this.item}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Building ${this.item?.getName()}`;
 	}
 

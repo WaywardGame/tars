@@ -20,6 +20,10 @@ export default class AnalyzeBase extends Objective {
 		return "AnalyzeBase";
 	}
 
+	public getStatus(): string | undefined {
+		return "Analyzing base";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (context.calculatingDifficulty) {
 			return 0;
@@ -45,7 +49,7 @@ export default class AnalyzeBase extends Objective {
 				let targets: Doodad[];
 
 				const placeNear = info.tryPlaceNear;
-				if (placeNear !== undefined) {
+				if (placeNear !== undefined && context.base[placeNear].length > 0) {
 					targets = [];
 
 					const nearDoodads = context.base[placeNear];

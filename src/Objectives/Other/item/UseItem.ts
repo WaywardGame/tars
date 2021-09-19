@@ -19,13 +19,14 @@ export default class UseItem extends Objective {
 		return `UseItem:${this.item}:${ActionType[this.actionType]}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Using ${this.item?.getName()} for ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
+			this.log.error("Invalid use item");
 			return ObjectiveResult.Restart;
 		}
 

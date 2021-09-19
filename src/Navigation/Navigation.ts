@@ -573,7 +573,7 @@ export default class Navigation {
 	private getPenalty(tile: ITile, tileX: number, tileY: number, tileZ: number, tileType: TerrainType, terrainDescription: ITerrainDescription, tileUpdateType?: TileUpdateType): number {
 		let penalty = 0;
 
-		if (tileType === TerrainType.Lava || tileEventManager.get(tile, TileEventType.Fire)) {
+		if (tileType === TerrainType.Lava || tile.events?.some(tileEvent => tileEvent.type === TileEventType.Fire || tileEvent.type === TileEventType.Acid)) {
 			penalty += 150;
 		}
 

@@ -21,7 +21,7 @@ export default class IgniteItem extends Objective {
         return `IgniteItem:${this.item}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Igniting ${this.item?.getName()}`;
     }
 

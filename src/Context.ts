@@ -5,9 +5,9 @@ import { IVector3 } from "utilities/math/IVector";
 
 import ContextState from "./ContextState";
 import { ContextDataType } from "./IContext";
-import { IBase, IInventoryItems, ITarsOptions } from "./ITars";
+import { IBase, IContext, IInventoryItems, ITarsOptions } from "./ITars";
 
-export default class Context {
+export default class Context implements IContext {
 
 	private changes: ContextState | undefined;
 
@@ -55,7 +55,31 @@ export default class Context {
 	 * Checks if the item is reserved by another objective
 	 */
 	public isReservedItem(item: Item) {
-		if (this.state.reservedItems.has(item.id)) {
+		if (this.state.softReservedItems.has(item.id) || this.state.hardReservedItems.has(item.id)) {
+			this.markShouldIncludeHashCode();
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if the item is reserved by another objective and is not going to be consumed
+	 */
+	public isSoftReservedItem(item: Item) {
+		if (this.state.softReservedItems.has(item.id)) {
+			this.markShouldIncludeHashCode();
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if the item is reserved by another objective and is going to be consumed
+	 */
+	public isHardReservedItem(item: Item) {
+		if (this.state.hardReservedItems.has(item.id)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -86,13 +110,25 @@ export default class Context {
 		}
 	}
 
-	public addReservedItems(...items: Item[]) {
+	public addSoftReservedItems(...items: Item[]) {
 		for (const item of items) {
-			this.state.reservedItems.add(item.id);
+			this.state.softReservedItems.add(item.id);
 			this.state.reservedItemTypes.add(item.type);
 
 			if (this.changes) {
-				this.changes.reservedItems.add(item.id);
+				this.changes.softReservedItems.add(item.id);
+				this.changes.reservedItemTypes.add(item.type);
+			}
+		}
+	}
+
+	public addHardReservedItems(...items: Item[]) {
+		for (const item of items) {
+			this.state.hardReservedItems.add(item.id);
+			this.state.reservedItemTypes.add(item.type);
+
+			if (this.changes) {
+				this.changes.hardReservedItems.add(item.id);
 				this.changes.reservedItemTypes.add(item.type);
 			}
 		}

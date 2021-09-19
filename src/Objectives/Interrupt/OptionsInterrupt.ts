@@ -44,6 +44,10 @@ export default class OptionsInterrupt extends Objective {
 		return "OptionsInterrupt";
 	}
 
+	public getStatus(): string | undefined {
+		return undefined;
+	}
+
 	/**
 	 * Updates options that helps TARS
 	 */

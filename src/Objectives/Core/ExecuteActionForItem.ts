@@ -10,6 +10,7 @@ import TileHelpers from "utilities/game/TileHelpers";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
+import { ReserveType } from "../../ITars";
 import Objective from "../../Objective";
 import { actionUtilities } from "../../utilities/Action";
 import { itemUtilities } from "../../utilities/Item";
@@ -38,7 +39,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		return `ExecuteActionForItem:${ExecuteActionType[this.type]}${this.actionType !== undefined ? `:${ActionType[this.actionType]}` : ""}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		if (this.itemTypes.length > 1) {
 			const translation = Stream.values(Array.from(new Set(this.itemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
 				.collect(Translation.formatList, ListEnder.Or);
@@ -174,8 +175,16 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, actionType, executor as any);
 		if (matchingNewItem !== undefined) {
 			this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id})`);
+
+			if (this.reserveType === ReserveType.Soft) {
+				context.addSoftReservedItems(matchingNewItem);
+
+			} else {
+				context.addHardReservedItems(matchingNewItem);
+			}
+
 			context.setData(this.contextDataKey, matchingNewItem);
-			context.addReservedItems(matchingNewItem);
+
 			return ObjectiveResult.Complete;
 		}
 
@@ -187,8 +196,16 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 			if (matchingNewItem !== undefined) {
 				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}) (via MoveItem)`);
+
+				if (this.reserveType === ReserveType.Soft) {
+					context.addSoftReservedItems(matchingNewItem);
+
+				} else {
+					context.addHardReservedItems(matchingNewItem);
+				}
+
 				context.setData(this.contextDataKey, matchingNewItem);
-				context.addReservedItems(matchingNewItem);
+
 				return ObjectiveResult.Complete;
 			}
 		}

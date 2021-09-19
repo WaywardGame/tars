@@ -1,5 +1,7 @@
 import Doodad from "game/doodad/Doodad";
 import { IContainer, ItemType } from "game/item/IItem";
+import { Dictionary } from "language/Dictionaries";
+import Translation from "language/Translation";
 
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
@@ -12,12 +14,19 @@ import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 
 export default class GatherFromChest extends Objective {
 
+	// don't reorder these
+	// public readonly isGatherObjective = true;
+
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IGatherItemOptions> = {}) {
 		super();
 	}
 
 	public getIdentifier(context?: Context): string {
 		return `GatherFromChest:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseChests)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}`;
+	}
+
+	public getStatus(): string | undefined {
+		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a chest`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -50,12 +59,12 @@ export default class GatherFromChest extends Objective {
 			.map(chest => {
 				const items = itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true)
 					.filter(item =>
-						!context.isReservedItem(item) &&
+						!context.isHardReservedItem(item) &&
 						(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur)));
 				if (items.length > 0) {
 					const item = items[0];
 					return [
-						new ReserveItems(item),
+						new ReserveItems(item).passAcquireData(this),
 						new SetContextData(this.contextDataKey, item),
 						new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
 					];

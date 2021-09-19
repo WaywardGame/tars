@@ -15,7 +15,7 @@ export default class ReduceWeight extends Objective {
 		return "ReduceWeight";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Reducing weight";
 	}
 

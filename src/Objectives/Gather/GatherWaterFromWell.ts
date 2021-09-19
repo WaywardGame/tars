@@ -19,6 +19,10 @@ export default class GatherWaterFromWell extends Objective {
 		return `GatherWaterFromWell:${this.well}`;
 	}
 
+	public getStatus(): string | undefined {
+		return `Gathering water from ${this.well.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const pos = this.well.getPoint();
 

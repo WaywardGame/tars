@@ -116,76 +116,88 @@ class Planner implements IPlanner {
 
 		let includeHashCode = false;
 
-		for (const objectivesSet of objectives) {
-			const objectiveStartTime = performance.now();
-			const objectivePipeline = await this.getObjectivePipeline(clonedContext, objectivesSet);
-			const objectiveDeltaTime = performance.now() - objectiveStartTime;
+		let calculateObjectives = true;
 
-			if (this.debug) {
-				this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
-			}
+		while (calculateObjectives) {
+			calculateObjectives = false;
 
-			switch (objectivePipeline.status) {
-				case CalculatedDifficultyStatus.Impossible:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+			for (const objectivesSet of objectives) {
+				const objectiveStartTime = performance.now();
+				const objectivePipeline = await this.getObjectivePipeline(clonedContext, objectivesSet);
+				const objectiveDeltaTime = performance.now() - objectiveStartTime;
 
-					if (objectivePipeline.changes && objectivePipeline.changes.includeHashCode) {
-						// this pipeline was impossible because one or more required items were reserved
-						// mark that the hash code should be included in the parent objectives
-						includeHashCode = true;
-					}
+				if (this.debug) {
+					this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+				}
 
-					break;
+				switch (objectivePipeline.status) {
+					case CalculatedDifficultyStatus.Impossible:
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
-				case CalculatedDifficultyStatus.NotCalculatedYet:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						if (objectivePipeline.changes && objectivePipeline.changes.includeHashCode) {
+							// this pipeline was impossible because one or more required items were reserved
+							// mark that the hash code should be included in the parent objectives
+							includeHashCode = true;
+						}
 
-					if (result.status === CalculatedDifficultyStatus.Impossible) {
-						result = objectivePipeline;
+						break;
 
-					} else if (this.debug) {
-						this.writeCalculationLog("Not setting result");
-					}
+					case CalculatedDifficultyStatus.NotCalculatedYet:
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
-					break;
+						// if (this.calculatingDifficultyDepth === 1) {
+						// this can infinite loop if objectives rely on each other?
+						// calculateObjectives = true;
+						// this.log.warn("Nested calculation!");
+						// }
 
-				case CalculatedDifficultyStatus.NotPlausible:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
-
-					if (result.status === CalculatedDifficultyStatus.NotPlausible) {
-						if (result.minimumDifficulty > objectivePipeline.minimumDifficulty) {
-							// only set result to the "easiest" NotPlausible objective
+						if (result.status === CalculatedDifficultyStatus.Impossible) {
 							result = objectivePipeline;
 
 						} else if (this.debug) {
 							this.writeCalculationLog("Not setting result");
 						}
 
-					} else if (result.status === CalculatedDifficultyStatus.Impossible) {
-						result = objectivePipeline;
+						break;
 
-					} else if (this.debug) {
-						this.writeCalculationLog("Not setting result");
-					}
+					case CalculatedDifficultyStatus.NotPlausible:
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
-					break;
+						if (result.status === CalculatedDifficultyStatus.NotPlausible) {
+							if (result.minimumDifficulty > objectivePipeline.minimumDifficulty) {
+								// only set result to the "easiest" NotPlausible objective
+								result = objectivePipeline;
 
-				case CalculatedDifficultyStatus.Possible:
-					this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+							} else if (this.debug) {
+								this.writeCalculationLog("Not setting result");
+							}
 
-					if (easiestObjectivePipeline === undefined || easiestObjectivePipeline.difficulty > objectivePipeline.difficulty) {
-						easiestObjectivePipeline = objectivePipeline;
-						clonedContext.state.minimumAcceptedDifficulty = objectivePipeline.difficulty;
+						} else if (result.status === CalculatedDifficultyStatus.Impossible) {
+							result = objectivePipeline;
 
-						if (this.debug) {
-							this.writeCalculationLog(`Set minimumAcceptedDifficulty to "${objectivePipeline.difficulty}"`);
+						} else if (this.debug) {
+							this.writeCalculationLog("Not setting result");
 						}
 
-					} else if (this.debug) {
-						this.writeCalculationLog(`Not the easiest objective. "${easiestObjectivePipeline.difficulty} > ${objectivePipeline.difficulty}"`);
-					}
+						break;
 
-					break;
+					case CalculatedDifficultyStatus.Possible:
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+
+						if (easiestObjectivePipeline === undefined || easiestObjectivePipeline.difficulty > objectivePipeline.difficulty) {
+							easiestObjectivePipeline = objectivePipeline;
+							clonedContext.state.minimumAcceptedDifficulty = objectivePipeline.difficulty;
+
+							if (this.debug) {
+								this.writeCalculationLog(`Set minimumAcceptedDifficulty to "${objectivePipeline.difficulty}"`);
+							}
+
+						} else if (this.debug) {
+							this.writeCalculationLog(`Not the easiest objective. "${easiestObjectivePipeline.difficulty} > ${objectivePipeline.difficulty}"`);
+						}
+
+						break;
+				}
 			}
 		}
 
@@ -283,6 +295,7 @@ class Planner implements IPlanner {
 					if (this.debug) {
 						this.writeCalculationLog(`Still not plausible. ${CalculatedDifficultyStatus[calculatedDifficulty.status]}`);
 					}
+
 					return calculatedDifficulty;
 				}
 			}
@@ -403,12 +416,12 @@ class Planner implements IPlanner {
 
 		this.calculatingDifficultyDepth++;
 
-		const waitingHashCodes: string[] = [];
+		const waitingHashCodes = new Set<string>();
 
 		this.calculateDifficultyCache.set(objectiveHashCode, {
 			hashCode: cacheHashCode,
 			status: CalculatedDifficultyStatus.NotCalculatedYet,
-			waitingHashCodes: waitingHashCodes,
+			waitingHashCodes,
 		});
 
 		let difficulty: number = objective.getDifficulty(context);
@@ -491,12 +504,12 @@ class Planner implements IPlanner {
 
 					if (pipelineResult.status === CalculatedDifficultyStatus.NotCalculatedYet) {
 						if (this.debug) {
-							this.writeCalculationLog(`Adding ${objectiveHashCode} to waiting hash codes for ${pipelineResult.hashCode} (${pipelineResult.waitingHashCodes.join(", ")})`);
+							this.writeCalculationLog(`Adding ${objectiveHashCode} to waiting hash codes for ${pipelineResult.hashCode} (${Array.from(pipelineResult.waitingHashCodes).join(", ")})`);
 						}
 
-						pipelineResult.waitingHashCodes.push(objectiveHashCode);
+						pipelineResult.waitingHashCodes.add(objectiveHashCode);
 
-						waitingHashCodes.push(...pipelineResult.waitingHashCodes);
+						waitingHashCodes.addFrom(pipelineResult.waitingHashCodes);
 
 					} else if (pipelineResult.status === CalculatedDifficultyStatus.NotPlausible) {
 						minimumDifficulty = pipelineResult.minimumDifficulty;
@@ -554,7 +567,7 @@ class Planner implements IPlanner {
 					status: CalculatedDifficultyStatus.NotCalculatedYet,
 					hashCode: cacheHashCode,
 					changes: changes,
-					waitingHashCodes: [...waitingHashCodes],
+					waitingHashCodes: new Set(waitingHashCodes),
 				};
 
 				break;
@@ -599,20 +612,16 @@ class Planner implements IPlanner {
 
 		this.calculateDifficultyCache.set(cacheHashCode, result);
 
-		if (this.debug) {
-			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}.`);
-		}
-
-		if (waitingHashCodes.length > 0) {
+		if (waitingHashCodes.size > 0) {
 			if (this.debug) {
-				this.writeCalculationLog(`Waiting hash codes: ${waitingHashCodes.join(", ")}`);
+				this.writeCalculationLog(`Waiting hash codes: ${Array.from(waitingHashCodes).join(", ")}`);
 			}
 
 			let clearWaitingHashCodes = false;
 			if (result.status !== CalculatedDifficultyStatus.NotCalculatedYet) {
 				clearWaitingHashCodes = true;
 
-			} else if (waitingHashCodes.includes(objectiveHashCode)) {
+			} else if (waitingHashCodes.has(objectiveHashCode)) {
 				clearWaitingHashCodes = true;
 
 				if (this.debug) {
@@ -622,18 +631,28 @@ class Planner implements IPlanner {
 
 			if (clearWaitingHashCodes) {
 				if (this.debug) {
-					this.writeCalculationLog(`Clearing waiting hash codes: ${waitingHashCodes.join(", ")}`);
+					this.writeCalculationLog(`Clearing waiting hash codes: ${Array.from(waitingHashCodes).join(", ")}`);
 				}
 
 				for (const waitingHashCode of waitingHashCodes) {
 					this.calculateDifficultyCache.delete(waitingHashCode);
 				}
 
-				waitingHashCodes.length = 0;
+				waitingHashCodes.clear();
+
+				if (this.calculatingDifficultyDepth === 1) {
+					// this is the root level
+					// one of the multiple objective pipelines was likely incalculable due to the loop
+
+				}
 			}
 		}
 
 		this.calculatingDifficultyDepth--;
+
+		if (this.debug) {
+			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}. Difficulty is ${difficulty}`);
+		}
 
 		if (this.calculatingDifficultyDepth === 0 && this.debug) {
 			const logString = this.calculationLog.join("");

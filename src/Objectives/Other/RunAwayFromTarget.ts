@@ -25,7 +25,7 @@ export default class RunAwayFromTarget extends Objective {
 		return `RunAwayFromTarget:(${this.target.x},${this.target.y},${this.target.z})`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Running away from ${this.target instanceof Entity ? this.target.getName() : `(${this.target.x},${this.target.y},${this.target.z})`}`;
 	}
 

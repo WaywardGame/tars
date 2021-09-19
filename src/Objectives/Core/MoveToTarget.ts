@@ -45,7 +45,7 @@ export default class MoveToTarget extends Objective {
 		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		let status = `Moving to `;
 
 		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {
@@ -55,6 +55,10 @@ export default class MoveToTarget extends Objective {
 		status += `(${this.target.x},${this.target.y},${this.target.z})`;
 
 		return status;
+	}
+
+	public getPosition(): IVector3 {
+		return this.target;
 	}
 
 	public isDynamic(): boolean {
@@ -121,7 +125,10 @@ export default class MoveToTarget extends Objective {
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];
 			if (terrainDescription && terrainDescription.water) {
-				return new UseItem(ActionType.Paddle, context.inventory.sailBoat);
+				return [
+					new UseItem(ActionType.Paddle, context.inventory.sailBoat),
+					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
+				];
 			}
 
 			const path = movementPath.path;

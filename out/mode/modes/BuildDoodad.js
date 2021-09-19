@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "event/EventBuses", "event/EventManager", "game/doodad/Doodads", "../../IObjective", "../../objectives/acquire/Item/AcquireItemForDoodad", "../../objectives/other/item/BuildItem", "../../objectives/core/MoveToTarget", "../../objectives/other/doodad/StartFire", "../../objectives/core/Lambda", "../../utilities/Doodad", "../../utilities/Item"], function (require, exports, EventBuses_1, EventManager_1, Doodads_1, IObjective_1, AcquireItemForDoodad_1, BuildItem_1, MoveToTarget_1, StartFire_1, Lambda_1, Doodad_1, Item_1) {
+define(["require", "exports", "event/EventBuses", "event/EventManager", "game/doodad/Doodads", "../../IObjective", "../../objectives/acquire/item/AcquireItemForDoodad", "../../objectives/other/item/BuildItem", "../../objectives/core/MoveToTarget", "../../objectives/other/doodad/StartFire", "../../objectives/core/Lambda", "../../utilities/Doodad", "../../utilities/Item"], function (require, exports, EventBuses_1, EventManager_1, Doodads_1, IObjective_1, AcquireItemForDoodad_1, BuildItem_1, MoveToTarget_1, StartFire_1, Lambda_1, Doodad_1, Item_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BuildDoodadMode = void 0;

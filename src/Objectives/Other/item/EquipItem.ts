@@ -18,13 +18,14 @@ export default class EquipItem extends Objective {
 		return `EquipItem:${this.item}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Equipping ${this.item?.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
+			this.log.error("Invalid equip item");
 			return ObjectiveResult.Restart;
 		}
 
@@ -35,7 +36,7 @@ export default class EquipItem extends Objective {
 		return new ExecuteAction(ActionType.Equip, (context, action) => {
 			action.execute(context.player, item, this.equip);
 			return ObjectiveResult.Complete;
-		});
+		}).setStatus(this);
 	}
 
 }

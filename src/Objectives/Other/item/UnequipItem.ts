@@ -17,13 +17,14 @@ export default class UnequipItem extends Objective {
 		return `Unequip:${this.item}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Unequipping ${this.item?.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
+			this.log.error("Invalid unequip item");
 			return ObjectiveResult.Restart;
 		}
 
@@ -34,7 +35,7 @@ export default class UnequipItem extends Objective {
 		return new ExecuteAction(ActionType.Unequip, (context, action) => {
 			action.execute(context.player, item);
 			return ObjectiveResult.Complete;
-		});
+		}).setStatus(this);
 	}
 
 }

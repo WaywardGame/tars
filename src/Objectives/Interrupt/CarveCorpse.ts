@@ -20,7 +20,7 @@ export default class CarveCorpse extends Objective {
 		return `CarveCorpse:${this.corpse.id}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Carving ${Translation.nameOf(Dictionary.Creature, this.corpse.type).getString()} corpse`;
 	}
 

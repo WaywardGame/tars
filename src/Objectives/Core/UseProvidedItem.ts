@@ -1,4 +1,6 @@
 import { ItemType } from "game/item/IItem";
+import Translation from "language/Translation";
+import { Dictionary } from "language/Dictionaries";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -15,6 +17,10 @@ export default class UseProvidedItem extends Objective {
 
     public getIdentifier(): string {
         return `UseProvidedItem:${ItemType[this.itemType]}`;
+    }
+
+    public getStatus(): string | undefined {
+        return `Using ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
     }
 
     public canIncludeContextHashCode(): boolean {

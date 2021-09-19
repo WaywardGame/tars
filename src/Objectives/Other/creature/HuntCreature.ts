@@ -22,7 +22,7 @@ export default class HuntCreature extends Objective {
         return `HuntCreature:${this.creature}:${this.track}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Hunting ${this.creature.getName()}`;
     }
 
@@ -58,7 +58,7 @@ export default class HuntCreature extends Objective {
                     objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
                         action.execute(context.player, direction, undefined);
                         return ObjectiveResult.Complete;
-                    }));
+                    }).setStatus(this));
                 }
 
                 // const leftHandItem = context.player.options.leftHand ? context.player.getEquippedItem(EquipType.LeftHand) : undefined;
@@ -74,7 +74,7 @@ export default class HuntCreature extends Objective {
                 objectives.push(new ExecuteAction(ActionType.Attack, (context, action) => {
                     action.execute(context.player);
                     return ObjectiveResult.Complete;
-                }));
+                }).setStatus(this));
                 // }
 
                 return objectives;

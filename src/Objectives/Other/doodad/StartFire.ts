@@ -23,6 +23,10 @@ export default class StartFire extends Objective {
 		return `StartFire:${this.doodad}`;
 	}
 
+	public getStatus(): string | undefined {
+		return `Starting a fire for ${this.doodad?.getName()}`;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const doodad = this.doodad || context.getData(ContextDataType.LastBuiltDoodad);
 		if (!doodad) {

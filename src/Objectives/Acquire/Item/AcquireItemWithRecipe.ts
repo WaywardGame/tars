@@ -9,6 +9,7 @@ import Translation from "language/Translation";
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
+import { ReserveType } from "../../../ITars";
 import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
@@ -30,6 +31,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 	public getIdentifier(): string {
 		return `AcquireItemWithRecipe:${ItemType[this.itemType]}`;
+	}
+
+	public getStatus(): string | undefined {
+		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} with a recipe`;
 	}
 
 	public canIncludeContextHashCode(): boolean {
@@ -78,6 +83,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		checker: ItemRecipeRequirementChecker,
 		checkerWithoutIntermediateChest?: ItemRecipeRequirementChecker): IObjective[] {
 		const objectives: IObjective[] = [
+			// todo: always make this true?
 			new SetContextData(ContextDataType.PrioritizeBaseChests, canCraftFromIntermediateChest),
 			new SetContextData(ContextDataType.CanCraftFromIntermediateChest, canCraftFromIntermediateChest),
 			new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, allowOrganizingItemsIntoIntermediateChest),
@@ -95,7 +101,8 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		for (let i = 0; i < requires.length; i++) {
 			const itemsForComponent = checker.getItemsForComponent(i);
 			if (itemsForComponent.length > 0) {
-				objectives.push(new ReserveItems(...itemsForComponent));
+				const reserveType = requires[i].consumedAmount === 0 ? ReserveType.Soft : ReserveType.Hard;
+				objectives.push(new ReserveItems(...itemsForComponent).setReserveType(reserveType));
 			}
 		}
 
@@ -104,10 +111,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 				this.log.info(`Missing base component ${itemManager.isGroup(this.recipe.baseComponent) ? ItemTypeGroup[this.recipe.baseComponent] : ItemType[this.recipe.baseComponent]}`);
 
 				if (itemManager.isGroup(this.recipe.baseComponent)) {
-					objectives.push(new AcquireItemByGroup(this.recipe.baseComponent).passContextDataKey(this));
+					objectives.push(new AcquireItemByGroup(this.recipe.baseComponent).passAcquireData(this, ReserveType.Hard));
 
 				} else {
-					objectives.push(new AcquireItem(this.recipe.baseComponent).passContextDataKey(this));
+					objectives.push(new AcquireItem(this.recipe.baseComponent).passAcquireData(this, ReserveType.Hard));
 				}
 			}
 
@@ -115,16 +122,18 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			for (let i = 0; i < requires.length; i++) {
 				const missingAmount = checker.amountNeededForComponent(i);
 				if (missingAmount > 0) {
-					const componentType = requires[i].type;
+					const recipeComponent = requires[i];
+					const componentType = recipeComponent.type;
+					const reserveType = recipeComponent.consumedAmount === 0 ? ReserveType.Soft : ReserveType.Hard;
 
 					this.log.info(`Missing component ${itemManager.isGroup(componentType) ? ItemTypeGroup[componentType] : ItemType[componentType]} x${missingAmount}`);
 
 					for (let j = 0; j < missingAmount; j++) {
 						if (itemManager.isGroup(componentType)) {
-							objectives.push(new AcquireItemByGroup(componentType).passContextDataKey(this));
+							objectives.push(new AcquireItemByGroup(componentType).passAcquireData(this, reserveType));
 
 						} else {
-							objectives.push(new AcquireItem(componentType).passContextDataKey(this));
+							objectives.push(new AcquireItem(componentType).passAcquireData(this, reserveType));
 						}
 					}
 				}
@@ -133,18 +142,21 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		objectives.push(new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false));
 
-		if (checkerWithoutIntermediateChest && context.base.intermediateChest[0]) {
+		if (checkerWithoutIntermediateChest) {
 			// check if we need items in our intermediate container
-			if (!checkerWithoutIntermediateChest.requirementsMet()) {
+			const intermediateChest = context.base.intermediateChest[0];
+			if (intermediateChest && !checkerWithoutIntermediateChest.requirementsMet()) {
 				// move to our container before crafting
-				objectives.push(new MoveToTarget(context.base.intermediateChest[0], true));
+				objectives.push(new MoveToTarget(intermediateChest, true));
 
 				if (!canCraftFromIntermediateChest) {
 					// move all the items we need from the chest
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
-						if (item && item.containedWithin === context.base.intermediateChest[0]) {
-							objectives.push(new MoveItem(item, context.player.inventory));
+						if (item) {
+							if (itemManager.isContainableInContainer(item, intermediateChest)) {
+								objectives.push(new MoveItem(item, context.player.inventory, intermediateChest));
+							}
 						}
 					};
 
@@ -170,7 +182,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Craft, (context, action) => {
 			action.execute(context.player, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
-		}).passContextDataKey(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+		}).passAcquireData(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 		return objectives;
 	}

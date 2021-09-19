@@ -18,7 +18,7 @@ export default class AcquireItemByGroup extends AcquireBase {
 		return `AcquireItemByGroup:${ItemTypeGroup[this.itemTypeGroup]}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Acquiring ${itemManager.getItemTypeGroupName(this.itemTypeGroup)}`;
 	}
 
@@ -36,7 +36,7 @@ export default class AcquireItemByGroup extends AcquireBase {
 			itemTypes = itemTypes.filter(itemType => !this.options.excludeItemTypes!.has(itemType));
 		}
 
-		return itemTypes.map(itemType => [new AcquireItem(itemType, this.options).passContextDataKey(this)]);
+		return itemTypes.map(itemType => [new AcquireItem(itemType, this.options).passAcquireData(this)]);
 	}
 
 	private getItemTypes(): ItemType[] {

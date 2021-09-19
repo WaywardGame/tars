@@ -15,6 +15,10 @@ export default class ReturnToBase extends Objective {
 		return "ReturnToBase";
 	}
 
+	public getStatus(): string | undefined {
+		return "Returning to base";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const position = context.getPosition();
 		const basePosition = baseUtilities.getBasePosition(context);

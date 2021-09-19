@@ -15,7 +15,7 @@ export default class HuntCreatures extends Objective {
         return `HuntCreatures:${this.creatures.map(creature => creature.toString()).join(",")}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Hunting ${this.creatures.length} creatures`;
     }
 

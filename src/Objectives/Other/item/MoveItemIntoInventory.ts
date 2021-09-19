@@ -17,13 +17,14 @@ export default class MoveItemIntoInventory extends Objective {
         return `MoveItemIntoInventory:${this.item}`;
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return `Moving ${this.item?.getName()} into inventory`;
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
         if (!item) {
+            this.log.error("Invalid move item");
             return ObjectiveResult.Restart;
         }
 
@@ -37,8 +38,9 @@ export default class MoveItemIntoInventory extends Objective {
         }
 
         return [
-            new MoveToTarget(point, true),
-            new MoveItem(item, context.player.inventory),
+            // todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
+            new MoveToTarget(point, true).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
+            new MoveItem(item, context.player.inventory, point),
         ];
     }
 

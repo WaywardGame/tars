@@ -17,7 +17,7 @@ export default class DefendAgainstCreature extends Objective {
 		return `DefendAgainstCreature:${this.creature}:${this.shouldRunAway}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Defending against ${this.creature.getName()}`;
 	}
 

@@ -41,7 +41,7 @@ export default class RecoverThirst extends Objective {
 		return `RecoverThirst:${this.options.onlyUseAvailableItems}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Recovering thirst";
 	}
 
@@ -161,7 +161,6 @@ export default class RecoverThirst extends Objective {
 
 		if (context.base.waterStill.length > 0) {
 			const isWaitingForAll = context.base.waterStill.every(doodad => doodadUtilities.isWaterStillDesalinating(doodad));
-			console.log("isWaitingForAll", isWaitingForAll);
 			if (isWaitingForAll) {
 				if ((health.value / health.max) <= 0.3) {
 					this.log.info("Making health items");
@@ -193,26 +192,26 @@ export default class RecoverThirst extends Objective {
 						continue;
 					}
 
-					const waterStillObjectives: IObjective[] = [];
-
 					if (!doodadUtilities.isWaterStillDrinkable(waterStill)) {
 						if (isEmergency) {
 							const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
 							if ((stamina.value / stamina.max) < 0.9) {
-								waterStillObjectives.push(new RecoverStamina());
+								objectivePipelines.push([new RecoverStamina()]);
 
 							} else {
 								// wait for water still to finish
-								waterStillObjectives.push(new Idle().setStatus("Waiting for water still due to emergency"));
+								objectivePipelines.push([
+									// new MoveToTarget(waterStill, true, { range: 5 }),
+									new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
+									new Idle().setStatus("Waiting for water still due to emergency"),
+								]);
 							}
 						}
 					}
-
-					objectivePipelines.push(waterStillObjectives);
 				}
 			}
 		}
-		console.log("emergency", objectivePipelines);
+
 		return objectivePipelines;
 	}
 

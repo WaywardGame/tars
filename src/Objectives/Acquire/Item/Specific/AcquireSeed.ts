@@ -11,12 +11,12 @@ export default class AcquireSeed extends Objective {
         return "AcquireSeed";
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return "Acquiring a seed";
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        return Array.from(itemUtilities.seedItemTypes).map(itemType => [new AcquireItem(itemType, { requiredMinDur: 1 }).passContextDataKey(this)]);
+        return Array.from(itemUtilities.seedItemTypes).map(itemType => [new AcquireItem(itemType, { requiredMinDur: 1 }).passAcquireData(this)]);
     }
 
 }

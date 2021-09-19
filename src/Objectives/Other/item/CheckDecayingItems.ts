@@ -16,7 +16,7 @@ export default class CheckDecayingItems extends Objective {
         return "CheckDecayingItems";
     }
 
-    public getStatus(): string {
+    public getStatus(): string | undefined {
         return "Checking for decaying items in base chests";
     }
 

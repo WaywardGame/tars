@@ -19,7 +19,7 @@ export default class MoveToZ extends Objective {
 		return `MoveToZ:${this.z}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Moving to ${WorldZ[this.z]}`;
 	}
 

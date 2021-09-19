@@ -16,7 +16,7 @@ export default class AcquireWaterContainer extends Objective {
 		return "AcquireWaterContainer";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Acquiring a water container";
 	}
 

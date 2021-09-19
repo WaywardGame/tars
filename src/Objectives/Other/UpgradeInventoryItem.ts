@@ -20,7 +20,7 @@ export default class UpgradeInventoryItem extends Objective {
 		return `UpgradeInventoryItem:${this.upgrade}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Upgrading ${this.upgrade}`;
 	}
 

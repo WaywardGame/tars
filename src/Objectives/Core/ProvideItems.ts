@@ -21,6 +21,10 @@ export default class ProvideItems extends Objective {
         return `ProvideItems:${this.itemTypes.map(itemType => ItemType[itemType]).join(",")}`;
     }
 
+    public getStatus(): string | undefined {
+        return undefined;
+    }
+
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         context.addProvidedItems(this.itemTypes);
         return ObjectiveResult.Complete;

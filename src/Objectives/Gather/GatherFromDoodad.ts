@@ -14,12 +14,18 @@ import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromDoodad extends Objective {
 
+	public readonly gatherObjectivePriority = 200;
+
 	constructor(private readonly itemType: ItemType, private readonly doodadSearchMap: DoodadSearchMap) {
 		super();
 	}
 
 	public getIdentifier(): string {
 		return `GatherFromDoodad:${ItemType[this.itemType]}`;
+	}
+
+	public getStatus(): string | undefined {
+		return "Gathering items from doodads";
 	}
 
 	public canGroupTogether(): boolean {
@@ -58,7 +64,7 @@ export default class GatherFromDoodad extends Objective {
 				objectives.push(new MoveToTarget(target, true));
 
 				objectives.push(new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType])
-					.passContextDataKey(this)
+					.passAcquireData(this)
 					.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from ${target.getName()}`));
 
 				return objectives;

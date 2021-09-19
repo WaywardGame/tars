@@ -13,6 +13,10 @@ export default class AnalyzeInventory extends Objective {
 		return "AnalyzeInventory";
 	}
 
+	public getStatus(): string | undefined {
+		return "Analyzing inventory";
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (context.calculatingDifficulty) {
 			return 0;

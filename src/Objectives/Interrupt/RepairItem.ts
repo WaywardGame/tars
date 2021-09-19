@@ -23,7 +23,7 @@ export default class RepairItem extends Objective {
 		return `RepairItem:${this.item}`;
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return `Repairing ${this.item.getName()}`;
 	}
 

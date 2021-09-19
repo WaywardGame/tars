@@ -9,7 +9,7 @@ import Doodads from "game/doodad/Doodads";
 import Context from "../../Context";
 import { IObjective, ObjectiveResult } from "../../IObjective";
 import { ITarsMode } from "../IMode";
-import AcquireItemForDoodad from "../../objectives/acquire/Item/AcquireItemForDoodad";
+import AcquireItemForDoodad from "../../objectives/acquire/item/AcquireItemForDoodad";
 import BuildItem from "../../objectives/other/item/BuildItem";
 import MoveToTarget from "../../objectives/core/MoveToTarget";
 import StartFire from "../../objectives/other/doodad/StartFire";

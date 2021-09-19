@@ -20,7 +20,7 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 		return "AcquireUseOrbOfInfluence";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Acquiring and using an orb of influence";
 	}
 

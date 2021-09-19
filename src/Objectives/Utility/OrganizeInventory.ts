@@ -45,7 +45,7 @@ export default class OrganizeInventory extends Objective {
 		return "OrganizeInventory";
 	}
 
-	public getStatus(): string {
+	public getStatus(): string | undefined {
 		return "Organizing inventory";
 	}
 
@@ -163,7 +163,7 @@ export default class OrganizeInventory extends Objective {
 			new ExecuteAction(ActionType.Drop, (context, action) => {
 				action.execute(context.player, itemToDrop);
 				return ObjectiveResult.Complete;
-			}),
+			}).setStatus(`Dropping ${itemToDrop.getName()}`),
 		];
 	}
 
@@ -198,7 +198,7 @@ export default class OrganizeInventory extends Objective {
 
 				chestWeight += itemWeight;
 
-				objectives.push(new MoveItem(item, targetContainer));
+				objectives.push(new MoveItem(item, targetContainer, chest));
 			}
 
 			// restart in case there's more to move

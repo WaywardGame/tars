@@ -49,6 +49,7 @@ import CheckDecayingItems from "../../objectives/other/item/CheckDecayingItems";
 import HuntCreatures from "../../objectives/other/creature/HuntCreatures";
 import PlantSeeds from "../../objectives/utility/PlantSeeds";
 import GatherWaters from "../../objectives/gather/GatherWaters";
+import CheckSpecialItems from "../../objectives/other/item/CheckSpecialItems";
 
 /**
  * Survival mode
@@ -91,6 +92,8 @@ export class SurvivalMode implements ITarsMode {
 				new AnalyzeInventory(),
 			]);
 		}
+
+		objectives.push(new CheckSpecialItems());
 
 		const nonMiningItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
 		if (nonMiningItem === undefined) {

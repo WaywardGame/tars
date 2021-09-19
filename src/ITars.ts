@@ -11,12 +11,21 @@ import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
+import Player from "game/entity/player/Player";
+import { IStatMax, Stat } from "game/entity/IStats";
+
 import Tars from "./Tars";
 import { itemUtilities } from "./utilities/Item";
 
 export const TARS_ID = "TARS";
 
 export const defaultMaxTilesChecked = 3000;
+
+export interface IContext {
+	readonly player: Player;
+	readonly base: IBase;
+	readonly inventory: IInventoryItems;
+}
 
 export enum TarsTranslation {
 	DialogTitleMain,
@@ -34,17 +43,30 @@ export enum TarsTranslation {
 	DialogButtonBuildDoodadTooltip,
 	DialogButtonExploreIslands,
 	DialogButtonExploreIslandsTooltip,
-	DialogButtonStayHealthy,
-	DialogButtonStayHealthyTooltip,
 	DialogButtonUseOrbsOfInfluence,
 	DialogButtonUseOrbsOfInfluenceTooltip,
+	DialogButtonStayHealthy,
+	DialogButtonStayHealthyTooltip,
 	DialogButtonDeveloperMode,
 	DialogButtonDeveloperModeTooltip,
 	DialogButtonQuantumBurst,
 	DialogButtonQuantumBurstTooltip,
 
+	DialogRangeLabel,
+	DialogRangeRecoverHealthThreshold,
+	DialogRangeRecoverHealthThresholdTooltip,
+	DialogRangeRecoverStaminaThreshold,
+	DialogRangeRecoverStaminaThresholdTooltip,
+	DialogRangeRecoverHungerThreshold,
+	DialogRangeRecoverHungerThresholdTooltip,
+	DialogRangeRecoverThirstThreshold,
+	DialogRangeRecoverThirstThresholdTooltip,
+
 	DialogLabelItem,
 	DialogLabelDoodad,
+	DialogLabelGeneral,
+	DialogLabelAdvanced,
+	DialogLabelRecoverThresholds,
 
 	DialogModeSurvival,
 	DialogModeSurvivalTooltip,
@@ -71,9 +93,17 @@ export enum TarsUiSaveDataKey {
 // list of options. ideally most of them would be boolean's
 export interface ITarsOptions {
 	mode: TarsMode;
+
 	exploreIslands: boolean;
-	stayHealthy: boolean;
 	useOrbsOfInfluence: boolean;
+
+	stayHealthy: boolean;
+	recoverThresholdHealth: number;
+	recoverThresholdStamina: number;
+	recoverThresholdHunger: number;
+	recoverThresholdThirst: number;
+	recoverThresholdThirstFromMax: number;
+
 	quantumBurst: boolean;
 	developerMode: boolean;
 }
@@ -84,25 +114,30 @@ export interface ITarsOptionSection {
 	title: TarsTranslation;
 	tooltip: TarsTranslation;
 	isDisabled?: () => boolean;
+	slider?: {
+		min: number | ((context: IContext) => number);
+		max: number | ((context: IContext) => number)
+	};
 }
 
-export const uiConfigurableOptions: Array<ITarsOptionSection | undefined> = [
+export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation | undefined> = [
+	TarsTranslation.DialogLabelGeneral,
 	{
 		option: "exploreIslands",
 		title: TarsTranslation.DialogButtonExploreIslands,
 		tooltip: TarsTranslation.DialogButtonExploreIslandsTooltip,
 	},
 	{
-		option: "stayHealthy",
-		title: TarsTranslation.DialogButtonStayHealthy,
-		tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
-	},
-	{
 		option: "useOrbsOfInfluence",
 		title: TarsTranslation.DialogButtonUseOrbsOfInfluence,
 		tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
 	},
-	undefined, // creates a Divider
+	{
+		option: "stayHealthy",
+		title: TarsTranslation.DialogButtonStayHealthy,
+		tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
+	},
+	TarsTranslation.DialogLabelAdvanced,
 	{
 		option: "quantumBurst",
 		title: TarsTranslation.DialogButtonQuantumBurst,
@@ -112,7 +147,44 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | undefined> = [
 		option: "developerMode",
 		title: TarsTranslation.DialogButtonDeveloperMode,
 		tooltip: TarsTranslation.DialogButtonDeveloperModeTooltip,
-	}
+	},
+	TarsTranslation.DialogLabelRecoverThresholds,
+	{
+		option: "recoverThresholdHealth",
+		title: TarsTranslation.DialogRangeRecoverHealthThreshold,
+		tooltip: TarsTranslation.DialogRangeRecoverHealthThresholdTooltip,
+		slider: {
+			min: 0,
+			max: (context) => context.player.stat.get<IStatMax>(Stat.Health).max,
+		}
+	},
+	{
+		option: "recoverThresholdStamina",
+		title: TarsTranslation.DialogRangeRecoverStaminaThreshold,
+		tooltip: TarsTranslation.DialogRangeRecoverStaminaThresholdTooltip,
+		slider: {
+			min: 0,
+			max: (context) => context.player.stat.get<IStatMax>(Stat.Stamina).max,
+		}
+	},
+	{
+		option: "recoverThresholdHunger",
+		title: TarsTranslation.DialogRangeRecoverHungerThreshold,
+		tooltip: TarsTranslation.DialogRangeRecoverHungerThresholdTooltip,
+		slider: {
+			min: 0,
+			max: (context) => context.player.stat.get<IStatMax>(Stat.Hunger).max,
+		}
+	},
+	{
+		option: "recoverThresholdThirst",
+		title: TarsTranslation.DialogRangeRecoverThirstThreshold,
+		tooltip: TarsTranslation.DialogRangeRecoverThirstThresholdTooltip,
+		slider: {
+			min: 0,
+			max: (context) => context.player.stat.get<IStatMax>(Stat.Thirst).max,
+		}
+	},
 ];
 
 export interface ITileLocation {
@@ -151,7 +223,6 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	anvil: {
 		doodadTypes: [DoodadTypeGroup.Anvil],
 		tryPlaceNear: "kiln",
-		// openAreaRadius: 0, // todo: verify this
 	},
 	campfire: {
 		doodadTypes: [DoodadTypeGroup.LitCampfire],
@@ -194,6 +265,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	kiln: {
 		doodadTypes: [DoodadTypeGroup.LitKiln],
 		litType: DoodadTypeGroup.LitKiln,
+		tryPlaceNear: "anvil",
 	},
 	waterStill: {
 		doodadTypes: [DoodadTypeGroup.LitWaterStill],
@@ -555,6 +627,11 @@ export enum TarsMode {
 	Survival,
 	TidyUp,
 	Gardener,
+}
+
+export enum ReserveType {
+	Soft,
+	Hard
 }
 
 let tars: Tars | undefined;

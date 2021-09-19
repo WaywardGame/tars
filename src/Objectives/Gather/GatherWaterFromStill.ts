@@ -10,6 +10,8 @@ import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import { doodadUtilities } from "../../utilities/Doodad";
 import UseItem from "../other/item/UseItem";
+import { itemUtilities } from "../../utilities/Item";
+import EmptyWaterContainer from "../other/EmptyWaterContainer";
 
 export default class GatherWaterFromStill extends Objective {
 
@@ -19,6 +21,10 @@ export default class GatherWaterFromStill extends Objective {
 
 	public getIdentifier(): string {
 		return `GatherWaterFromStill:${this.waterStill}:${this.item}:${this.allowStartingWaterStill}`;
+	}
+
+	public getStatus(): string | undefined {
+		return `Gathering water from ${this.waterStill.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -42,11 +48,17 @@ export default class GatherWaterFromStill extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		return [
-			new MoveToTarget(this.waterStill, true),
-			new UseItem(ActionType.GatherWater, this.item)
-				.setStatus(() => `Gathering water from ${this.waterStill.getName()}`),
-		];
+		const objectives: IObjective[] = [];
+
+		if (!itemUtilities.canGatherWater(this.item)) {
+			objectives.push(new EmptyWaterContainer(this.item));
+		}
+
+		objectives.push(new MoveToTarget(this.waterStill, true));
+		objectives.push(new UseItem(ActionType.GatherWater, this.item)
+			.setStatus(() => `Gathering water from ${this.waterStill.getName()}`));
+
+		return objectives;
 	}
 
 }
