@@ -185,7 +185,7 @@ export default class Plan implements IPlan {
 							resultObjectives = objectivePipeline.objectives;
 
 						} else {
-							this.log.error("Invalid return value", objectiveInfo.objective.getHashCode(), objectivePipeline);
+							this.log.warn(`Invalid return value for ${objectiveInfo.objective.getHashCode()}. status: ${objectivePipeline.status}`);
 							break;
 						}
 
