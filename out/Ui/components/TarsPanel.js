@@ -17,8 +17,8 @@ define(["require", "exports", "ui/screen/screens/game/component/TabDialogPanel",
         Mod_1.default.instance(ITars_1.TARS_ID)
     ], TarsPanel.prototype, "TARS", void 0);
     __decorate([
-        EventManager_1.OwnEventHandler(TarsPanel, "switchTo")
+        (0, EventManager_1.OwnEventHandler)(TarsPanel, "switchTo")
     ], TarsPanel.prototype, "_onSwitchTo", null);
     exports.default = TarsPanel;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGFyc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudHMvVGFyc1BhbmVsLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztJQVFBLE1BQThCLFNBQVUsU0FBUSx3QkFBYztRQVloRCxXQUFXO1lBQ2pCLElBQUksQ0FBQyxVQUFVLEVBQUUsQ0FBQztZQUNsQixJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7UUFDbkIsQ0FBQztLQUNKO0lBYkc7UUFEQyxhQUFHLENBQUMsUUFBUSxDQUFPLGVBQU8sQ0FBQzsyQ0FDRDtJQVMzQjtRQURDLDhCQUFlLENBQUMsU0FBUyxFQUFFLFVBQVUsQ0FBQztnREFJdEM7SUFmTCw0QkFnQkMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGFyc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudHMvVGFyc1BhbmVsLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztJQVFBLE1BQThCLFNBQVUsU0FBUSx3QkFBYztRQVloRCxXQUFXO1lBQ2pCLElBQUksQ0FBQyxVQUFVLEVBQUUsQ0FBQztZQUNsQixJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7UUFDbkIsQ0FBQztLQUNKO0lBYkc7UUFEQyxhQUFHLENBQUMsUUFBUSxDQUFPLGVBQU8sQ0FBQzsyQ0FDRDtJQVMzQjtRQURDLElBQUEsOEJBQWUsRUFBQyxTQUFTLEVBQUUsVUFBVSxDQUFDO2dEQUl0QztJQWZMLDRCQWdCQyJ9

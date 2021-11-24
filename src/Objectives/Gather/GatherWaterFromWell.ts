@@ -26,14 +26,14 @@ export default class GatherWaterFromWell extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const pos = this.well.getPoint();
 
-		const wellData = island.wellData[getTileId(pos.x, pos.y, pos.z)];
+		const wellData = context.island.wellData[getTileId(pos.x, pos.y, pos.z)];
 		if (!wellData || wellData.quantity === 0) {
 			return ObjectiveResult.Impossible;
 		}
 
 		return [
 			new MoveToTarget(this.well, true),
-			new UseItem(ActionType.GatherWater, this.item)
+			new UseItem(ActionType.GatherLiquid, this.item)
 				.setStatus(() => `Gathering water from ${this.well.getName()}`),
 		];
 	}

@@ -60,7 +60,7 @@ export interface IObjective {
 	/**
 	 * Human readable status for what the objective is doing
 	 */
-	getStatusMessage(): string | undefined;
+	getStatusMessage(context: Context): string | undefined;
 
 	sort?(context: Context, executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number;
 

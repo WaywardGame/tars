@@ -1,3 +1,4 @@
+import { IDijkstraMap, IDijkstraMapFindPathResult } from "@cplusplus/index";
 import { IOverlayInfo, ITerrainDescription, ITile, OverlayType, TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
 import terrainDescriptions from "game/tile/Terrains";
@@ -120,7 +121,7 @@ export default class Navigation {
 		log.info(`Creating ${workerCount} navigation workers`);
 
 		for (let i = 0; i < workerCount; i++) {
-			const worker = new Worker(`${Navigation.modPath}\\out\\Navigation\\NavigationWorker.js`);
+			const worker = new Worker(`${Navigation.modPath}\\out\\navigation\\NavigationWorker.js`);
 
 			this.navigationWorkers[i] = {
 				id: i,
@@ -176,7 +177,7 @@ export default class Navigation {
 	public deleteOverlay() {
 		for (const [key, overlay] of this.overlay.entries()) {
 			const [x, y, z] = key.split(",");
-			TileHelpers.Overlay.remove(game.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)), overlay);
+			TileHelpers.Overlay.remove(localIsland.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)), overlay);
 		}
 
 		this.overlay.clear();
@@ -208,7 +209,7 @@ export default class Navigation {
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			for (let x = 0; x < game.mapSize; x++) {
 				for (let y = 0; y < game.mapSize; y++) {
-					const tile = game.getTile(x, y, z);
+					const tile = localIsland.getTile(x, y, z);
 					this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z, array, undefined, skipWorkerUpdate);
 				}
 			}
@@ -248,7 +249,7 @@ export default class Navigation {
 		}
 
 		if (this.originUpdateTimeout === undefined) {
-			this.originUpdateTimeout = setTimeout(() => {
+			this.originUpdateTimeout = window.setTimeout(() => {
 				this.originUpdateTimeout = undefined;
 				this.updateOrigin();
 			}, 10);
@@ -353,23 +354,23 @@ export default class Navigation {
 			return {
 				type: tileType,
 				point: nearestPoint,
-				tile: game.getTileFromPoint(nearestPoint),
+				tile: localIsland.getTileFromPoint(nearestPoint),
 			} as ITileLocation;
 		});
 	}
 
 	public isDisabledFromPoint(point: IVector3): boolean {
-		if (!game.ensureValidPoint(point)) {
+		if (!localIsland.ensureValidPoint(point)) {
 			return true;
 		}
 
-		const tile = game.getTileFromPoint(point);
+		const tile = localIsland.getTileFromPoint(point);
 		const tileType = TileHelpers.getType(tile);
 
 		return this.isDisabled(tile, point.x, point.y, point.z, tileType);
 	}
 
-	public getPenaltyFromPoint(point: IVector3, tile: ITile = game.getTileFromPoint(point)): number {
+	public getPenaltyFromPoint(point: IVector3, tile: ITile = localIsland.getTileFromPoint(point)): number {
 		const tileType = TileHelpers.getType(tile);
 		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
@@ -558,7 +559,7 @@ export default class Navigation {
 			return true;
 		}
 
-		const players = game.getPlayersAtPosition(x, y, z, false, true);
+		const players = localIsland.getPlayersAtPosition(x, y, z, false, true);
 		if (players.length > 0) {
 			for (const player of players) {
 				if (!player.isLocalPlayer()) {
@@ -585,9 +586,9 @@ export default class Navigation {
 			// penalty for creatures on or near the tile
 			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
 				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
-					const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+					const point = localIsland.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
 					if (point) {
-						const creature = game.getTileFromPoint(point).creature;
+						const creature = localIsland.getTileFromPoint(point).creature;
 						if (creature && !creature.isTamed()) {
 							penalty += 20;
 

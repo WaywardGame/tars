@@ -7,27 +7,27 @@ import { itemDescriptions } from "game/item/Items";
 import { TerrainType } from "game/tile/ITerrain";
 import TerrainResources from "game/tile/TerrainResources";
 import terrainDescriptions from "game/tile/Terrains";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import { CreatureSearch, DoodadSearchMap, ITerrainSearch } from "../../../ITars";
+import { itemUtilities } from "../../../utilities/Item";
+import UseProvidedItem from "../../core/UseProvidedItem";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";
 import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrain from "../../gather/GatherFromTerrain";
-
 import AcquireBase, { IAcquireItemOptions } from "./AcquireBase";
-import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
-import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
-import { itemUtilities } from "../../../utilities/Item";
 import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
-import UseProvidedItem from "../../core/UseProvidedItem";
+import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
+import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+
+
 
 export default class AcquireItem extends AcquireBase {
 
@@ -48,11 +48,11 @@ export default class AcquireItem extends AcquireBase {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		// we care about the context's reserved items
 		return true;
 	}

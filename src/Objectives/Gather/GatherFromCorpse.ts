@@ -1,8 +1,7 @@
 import { ActionType } from "game/entity/action/IAction";
 import Corpse from "game/entity/creature/corpse/Corpse";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
@@ -13,6 +12,7 @@ import { tileUtilities } from "../../utilities/Tile";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
+
 
 export default class GatherFromCorpse extends Objective {
 
@@ -31,7 +31,7 @@ export default class GatherFromCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasCarveItem = itemUtilities.hasInventoryItemForAction(context, ActionType.Carve);
+		const hasTool = itemUtilities.hasInventoryItemForAction(context, ActionType.Butcher);
 
 		return objectUtilities.findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
 			const itemTypes = this.search.map.get(corpse.type);
@@ -47,7 +47,7 @@ export default class GatherFromCorpse extends Objective {
 
 				for (const itemType of itemTypes) {
 					if (possibleItems.includes(itemType)) {
-						return tileUtilities.canCarveCorpse(game.getTileFromPoint(corpse), true);
+						return tileUtilities.canButcherCorpse(context, context.island.getTileFromPoint(corpse), true);
 					}
 				}
 			}
@@ -57,8 +57,8 @@ export default class GatherFromCorpse extends Objective {
 			.map(corpse => {
 				const objectives: IObjective[] = [];
 
-				if (!hasCarveItem) {
-					objectives.push(new AcquireItemForAction(ActionType.Carve));
+				if (!hasTool) {
+					objectives.push(new AcquireItemForAction(ActionType.Butcher));
 				}
 
 				objectives.push(new MoveToTarget(corpse, true));
@@ -70,7 +70,7 @@ export default class GatherFromCorpse extends Objective {
 			});
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		return 20;
 	}
 

@@ -28,10 +28,10 @@ export default class CreateItemStockpile extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const baseItems = [...context.base.chest, ...context.base.intermediateChest]
-			.map(chest => itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true))
+			.map(chest => context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, true))
 			.flat();
 
-		const inventoryItems = itemManager.getItemsInContainerByType(context.player.inventory, this.itemType, true);
+		const inventoryItems = context.island.items.getItemsInContainerByType(context.player.inventory, this.itemType, true);
 
 		const acquireCount = this.count - baseItems.length - inventoryItems.length;
 		if (acquireCount <= 0) {

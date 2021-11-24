@@ -59,7 +59,7 @@ export default class RepairItem extends Objective {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hammer));
 		}
 
-		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
+		const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
 		if (requirementInfo.requirements === RequirementStatus.Missing) {
 			this.log.info("Repair requirements not met");
 			objectives.push(new CompleteRequirements(requirementInfo));

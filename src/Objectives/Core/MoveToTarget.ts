@@ -1,25 +1,25 @@
 
+import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
+import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import { IStatMax, Stat } from "game/entity/IStats";
 import terrainDescriptions from "game/tile/Terrains";
+import TileEvent from "game/tile/TileEvent";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Doodad from "game/doodad/Doodad";
-import TileEvent from "game/tile/TileEvent";
-import Corpse from "game/entity/creature/corpse/Corpse";
-
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { log } from "../../utilities/Logger";
 import { movementUtilities, MoveResult } from "../../utilities/Movement";
-import Rest from "../other/Rest";
 import UseItem from "../other/item/UseItem";
+import Rest from "../other/Rest";
 
-// import MoveToZ from "../utility/MoveToZ";
+
+// import MoveToZ from "../utility/moveTo/MoveToZ";
 
 export interface IMoveToTargetOptions {
 	range?: number;
@@ -61,7 +61,7 @@ export default class MoveToTarget extends Objective {
 		return this.target;
 	}
 
-	public isDynamic(): boolean {
+	public override isDynamic(): boolean {
 		return true;
 	}
 
@@ -87,7 +87,7 @@ export default class MoveToTarget extends Objective {
 			return movementPath.difficulty;
 		}
 
-		if (!this.options?.disableStaminaCheck && context.player.vehicleItemId === undefined) {
+		if (!this.options?.disableStaminaCheck && !context.player.vehicleItemReference) {
 			const path = movementPath.path;
 			if (path) {
 				// check how our stamina is
@@ -97,7 +97,7 @@ export default class MoveToTarget extends Objective {
 
 					for (let i = 4; i < path.length; i++) {
 						const point = path[i];
-						const tile = game.getTile(point.x, point.y, context.player.z);
+						const tile = context.island.getTile(point.x, point.y, context.player.z);
 						const tileType = TileHelpers.getType(tile);
 						const terrainDescription = terrainDescriptions[tileType];
 						if (terrainDescription && terrainDescription.water) {
@@ -120,7 +120,7 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailBoat && context.player.vehicleItemId === undefined) {
+		if (this.options?.allowBoat && context.inventory.sailBoat && !context.player.vehicleItemReference) {
 			const tile = context.player.getTile();
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];
@@ -137,7 +137,7 @@ export default class MoveToTarget extends Objective {
 
 				for (let i = 0; i < path.length - 1; i++) {
 					const point = path[i];
-					const tile = game.getTile(point.x, point.y, context.player.z);
+					const tile = context.island.getTile(point.x, point.y, context.player.z);
 					const tileType = TileHelpers.getType(tile);
 					const terrainDescription = terrainDescriptions[tileType];
 					if (terrainDescription && terrainDescription.water) {
@@ -193,7 +193,7 @@ export default class MoveToTarget extends Objective {
 		return this;
 	}
 
-	public async onMove(context: Context) {
+	public override async onMove(context: Context) {
 		if (this.trackedCreature && this.trackedPosition) {
 			if (!this.trackedCreature.isValid()) {
 				this.log.info("Creature died");
@@ -242,7 +242,7 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailBoat && context.player.vehicleItemId === undefined) {
+		if (this.options?.allowBoat && context.inventory.sailBoat && !context.player.vehicleItemReference) {
 			const tile = context.player.getTile();
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];

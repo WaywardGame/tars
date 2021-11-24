@@ -1,5 +1,4 @@
 import { IStat, Stat } from "game/entity/IStats";
-
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -7,6 +6,7 @@ import { playerUtilities } from "../../utilities/Player";
 import { tileUtilities } from "../../utilities/Tile";
 import Idle from "../other/Idle";
 import Rest from "../other/Rest";
+
 
 export default class RecoverStamina extends Objective {
 
@@ -18,7 +18,7 @@ export default class RecoverStamina extends Objective {
 		return "Recovering stamina";
 	}
 
-	public isDynamic(): boolean {
+	public override isDynamic(): boolean {
 		return true;
 	}
 

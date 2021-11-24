@@ -1,10 +1,11 @@
+import Stream from "@wayward/goodstream/Stream";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import Item from "game/item/Item";
 import { itemDescriptions } from "game/item/Items";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { ListEnder } from "language/Translation";
-
+import Dictionary from "language/Dictionary";
+import { ListEnder } from "language/ITranslation";
+import Translation from "language/Translation";
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
@@ -13,10 +14,11 @@ import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ReserveItems from "../../core/ReserveItems";
-import MoveToLand from "../../utility/MoveToLand";
-
+import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+
+
 
 /**
  * Dismantles one of the item types.
@@ -40,11 +42,11 @@ export default class AcquireItemFromDismantle extends Objective {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return this.dismantleItemTypes.some(itemType => context.isReservedItemType(itemType));
 	}
 
@@ -58,7 +60,7 @@ export default class AcquireItemFromDismantle extends Objective {
 			}
 
 			const dismantleItem = itemUtilities.getItemInInventory(context, itemType);
-			const hasRequirements = description.dismantle.required === undefined || itemManager.getItemForHuman(context.player, description.dismantle.required, false) !== undefined;
+			const hasRequirements = description.dismantle.required === undefined || context.island.items.getItemForHuman(context.player, description.dismantle.required, false) !== undefined;
 
 			const objectives: IObjective[] = [
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
@@ -101,7 +103,7 @@ export default class AcquireItemFromDismantle extends Objective {
 		return objectivePipelines;
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		// High base difficulty because we prefer to not dismantle things. Sometimes we want to keep logs until we really need them
 		// but not too high because sometimes we end up with dozens of logs while trying to look for stripped bark..
 		// it should really take into account the scarcity of the item being dismantled

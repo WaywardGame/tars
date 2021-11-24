@@ -1,9 +1,8 @@
 import { ItemType } from "game/item/IItem";
-import { ITileContainer } from "game/tile/ITerrain";
 import Item from "game/item/Item";
-import { Dictionary } from "language/Dictionaries";
+import { ITileContainer } from "game/tile/ITerrain";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -13,6 +12,7 @@ import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
 import MoveItem from "../other/item/MoveItem";
+
 
 export default class GatherFromGround extends Objective {
 
@@ -30,21 +30,21 @@ export default class GatherFromGround extends Objective {
 		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from the ground`;
 	}
 
-	public canGroupTogether(): boolean {
+	public override canGroupTogether(): boolean {
 		return true;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return context.isReservedItemType(this.itemType);
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const point = context.player.getPoint();
-		const item = game.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
+		const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
 		if (item) {
 			return [
 				new ReserveItems(item).passAcquireData(this),
@@ -54,7 +54,7 @@ export default class GatherFromGround extends Objective {
 			];
 		}
 
-		return island.items
+		return context.island.items.getObjects()
 			.map(item => {
 				if (item && this.itemMatches(context, item)) {
 					return [
@@ -66,7 +66,7 @@ export default class GatherFromGround extends Objective {
 
 							// itemMatches must not check that the item is not reserved (because it is)
 							const point = context.player.getFacingPoint();
-							const item = game.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item, true));
+							const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item, true));
 							if (item) {
 								objectives.push(new ReserveItems(item).passAcquireData(this));
 								objectives.push(new SetContextData(this.contextDataKey, item));
@@ -83,13 +83,13 @@ export default class GatherFromGround extends Objective {
 			.filter(objectives => objectives !== undefined) as IObjective[][];
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		return 6;
 	}
 
 	private itemMatches(context: Context, item: Item, fromLambda?: boolean): boolean {
 		return item.type === this.itemType &&
-			(fromLambda || (itemManager.isTileContainer(item.containedWithin) && !context.isHardReservedItem(item))) &&
+			(fromLambda || (context.island.items.isTileContainer(item.containedWithin) && !context.isHardReservedItem(item))) &&
 			(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur));
 	}
 }

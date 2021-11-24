@@ -21,7 +21,7 @@ export default class PickUpAllTileItems extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const targetTile = game.getTileFromPoint(this.target);
+        const targetTile = context.island.getTileFromPoint(this.target);
         if (targetTile.containedItems === undefined || targetTile.containedItems.length === 0) {
             return ObjectiveResult.Complete;
         }

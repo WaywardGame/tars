@@ -143,12 +143,14 @@ export default class AnalyzeInventory extends Objective {
 		const items: Set<Item> = new Set();
 
 		if (itemInfo.itemTypes) {
-			for (const itemTypeOrGroup of itemInfo.itemTypes) {
-				if (itemManager.isGroup(itemTypeOrGroup)) {
-					items.addFrom(itemManager.getItemsInContainerByGroup(context.player.inventory, itemTypeOrGroup));
+			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes() : itemInfo.itemTypes;
+
+			for (const itemTypeOrGroup of itemTypes) {
+				if (context.island.items.isGroup(itemTypeOrGroup)) {
+					items.addFrom(context.island.items.getItemsInContainerByGroup(context.player.inventory, itemTypeOrGroup));
 
 				} else {
-					items.addFrom(itemManager.getItemsInContainerByType(context.player.inventory, itemTypeOrGroup));
+					items.addFrom(context.island.items.getItemsInContainerByType(context.player.inventory, itemTypeOrGroup));
 				}
 			}
 		}
@@ -183,15 +185,15 @@ export default class AnalyzeInventory extends Objective {
 			return false;
 		}
 
-		if (itemManager.isContainableInContainer(item, context.player.inventory)) {
+		if (context.island.items.isContainableInContainer(item, context.player.inventory)) {
 			return true;
 		}
 
-		if (itemInfo.allowInChests && context.base.chest.some(chest => itemManager.isContainableInContainer(item, chest))) {
+		if (itemInfo.allowInChests && context.base.chest.some(chest => context.island.items.isContainableInContainer(item, chest))) {
 			return true;
 		}
 
-		if (itemInfo.allowOnTiles && itemManager.isTileContainer(item.containedWithin)) {
+		if (itemInfo.allowOnTiles && context.island.items.isTileContainer(item.containedWithin)) {
 			return true;
 		}
 

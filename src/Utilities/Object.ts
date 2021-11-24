@@ -74,25 +74,26 @@ class ObjectUtilities {
 	}
 
 	public findDoodad(context: Context, id: string, isTarget: (doodad: Doodad) => boolean): Doodad | undefined {
-		return this.findObject(context, FindObjectType.Doodad, id, island.doodads as Doodad[], isTarget);
+		return this.findObject(context, FindObjectType.Doodad, id, context.player.island.doodads.getObjects() as Doodad[], isTarget);
 	}
 
 	public findDoodads(context: Context, id: string, isTarget: (doodad: Doodad) => boolean, top?: number): Doodad[] {
-		return this.findObjects(context, FindObjectType.Doodad, id, island.doodads as Doodad[], isTarget, top);
+		return this.findObjects(context, FindObjectType.Doodad, id, context.player.island.doodads.getObjects() as Doodad[], isTarget, top);
 	}
 
 	public findCreatures(context: Context, id: string, isTarget: (creature: Creature) => boolean, top?: number): Creature[] {
-		return this.findObjects(context, FindObjectType.Creature, id, island.creatures as Creature[], isTarget, top);
+		return this.findObjects(context, FindObjectType.Creature, id, context.player.island.creatures.getObjects() as Creature[], isTarget, top);
 	}
 
 	public findItem(context: Context, id: string, isTarget: (item: Item) => boolean, top?: number): Item[] {
-		return this.findObjects(context, FindObjectType.Item, id, island.items, isTarget, top, (object) => object.getPoint()!);
+		return this.findObjects(context, FindObjectType.Item, id, context.player.island.items.getObjects(), isTarget, top, (object) => object.getPoint()!);
 	}
 
 	public findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {
-		return this.findObjects(context, FindObjectType.Corpse, id, island.corpses as Corpse[], corpse => {
+		const island = context.player.island;
+		return this.findObjects(context, FindObjectType.Corpse, id, island.corpses.getObjects() as Corpse[], corpse => {
 			if (isTarget(corpse)) {
-				const tile = game.getTileFromPoint(corpse);
+				const tile = island.getTileFromPoint(corpse);
 				return tile.creature === undefined &&
 					tile.npc === undefined &&
 					tile.events === undefined &&

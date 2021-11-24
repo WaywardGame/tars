@@ -3,9 +3,10 @@ import { CheckButton } from "ui/component/CheckButton";
 import ChoiceList, { Choice } from "ui/component/ChoiceList";
 import Divider from "ui/component/Divider";
 import Enums from "utilities/enum/Enums";
+import { Bound } from "utilities/Decorators";
+
 import { getTarsTranslation, TarsMode, TarsTranslation } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
-
 
 export default class GeneralPanel extends TarsPanel {
 

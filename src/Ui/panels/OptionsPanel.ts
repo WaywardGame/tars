@@ -6,6 +6,7 @@ import { IRefreshable } from "ui/component/Refreshable";
 import Component from "ui/component/Component";
 import { Heading } from "ui/component/Text";
 import { TooltipLocation } from "ui/component/IComponent";
+import { Bound } from "utilities/Decorators";
 
 import { getTarsTranslation, TarsTranslation, uiConfigurableOptions } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";

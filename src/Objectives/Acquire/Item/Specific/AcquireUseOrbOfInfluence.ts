@@ -26,7 +26,7 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const malign = context.player.stat.get(Stat.Malignity)!;
-		if (malign < 5000) {
+		if (malign.value < 5000) {
 			return ObjectiveResult.Ignore;
 		}
 

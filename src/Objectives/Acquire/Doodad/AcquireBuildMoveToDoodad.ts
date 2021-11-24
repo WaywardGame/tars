@@ -1,20 +1,21 @@
 import Doodad from "game/doodad/Doodad";
+import DoodadManager from "game/doodad/DoodadManager";
 import Doodads from "game/doodad/Doodads";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-import MoveToTarget from "../../core/MoveToTarget";
-import BuildItem from "../../other/item/BuildItem";
-import StartFire from "../../other/doodad/StartFire";
-import AcquireItemForDoodad from "../item/AcquireItemForDoodad";
-import { doodadUtilities } from "../../../utilities/Doodad";
-import { objectUtilities } from "../../../utilities/Object";
-import { itemUtilities } from "../../../utilities/Item";
 import { baseUtilities } from "../../../utilities/Base";
+import { doodadUtilities } from "../../../utilities/Doodad";
+import { itemUtilities } from "../../../utilities/Item";
+import { objectUtilities } from "../../../utilities/Object";
+import MoveToTarget from "../../core/MoveToTarget";
+import StartFire from "../../other/doodad/StartFire";
+import BuildItem from "../../other/item/BuildItem";
+import AcquireItemForDoodad from "../item/AcquireItemForDoodad";
+
 
 /**
  * Acquires, builds, and moves to the doodad
@@ -34,11 +35,11 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `AcquireBuildMoveToDoodad:${doodadManager.isGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
+		return `AcquireBuildMoveToDoodad:${DoodadManager.isGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
 	}
 
 	public getStatus(): string | undefined {
-		return `Acquiring ${doodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
+		return `Acquiring ${DoodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -51,9 +52,9 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 		if (doodad) {
 			const description = doodad.description();
 			if (description && description.lit !== undefined) {
-				if (doodadManager.isGroup(this.doodadTypeOrGroup)) {
+				if (DoodadManager.isGroup(this.doodadTypeOrGroup)) {
 					const litDescription = Doodads[description.lit];
-					if (litDescription && doodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {
+					if (litDescription && DoodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {
 						requiresFire = true;
 					}
 

@@ -24,8 +24,11 @@ export default abstract class Objective implements IObjective {
 
 	private _status: IObjective | (() => string) | string | undefined;
 
-	public static getPipelineString(objectives: Array<IObjective | IObjective[]> | undefined): string {
-		return objectives ? objectives.map(objective => Array.isArray(objective) ? Objective.getPipelineString(objective) : `${objective.getHashCode()} (${objective.getStatusMessage()})`).join(" -> ") : "Empty pipeline";
+	public static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string {
+		return objectives ?
+			objectives.map(objective =>
+				Array.isArray(objective) ? Objective.getPipelineString(context, objective) : `${objective.getHashCode()} (${objective.getStatusMessage(context)})`).join(" -> ") :
+			"Empty pipeline";
 	}
 
 	public abstract getIdentifier(): string;
@@ -33,7 +36,7 @@ export default abstract class Objective implements IObjective {
 	/**
 	 * Human readable status for what the objective is doing
 	 */
-	public abstract getStatus(): string | undefined;
+	public abstract getStatus(context: Context): string | undefined;
 
 	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
 
@@ -74,8 +77,11 @@ export default abstract class Objective implements IObjective {
 			hashCode += `:${this._overrideDifficulty}`;
 		}
 
-		if (this.contextDataKey !== ContextDataType.LastAcquiredItem) {
-			hashCode += `:${this.contextDataKey}`;
+		// the context data key check prevents an infinite loop
+		// AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll
+		// -> AcquireItemFromDismantle:Twigs:Branch,SaguaroCactusRibs,Winterberries:156707:[AcquireItemFromDismantle:WoodenShavings:WoodenDowels,Twigs:155925:[AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll:155553:[AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll:154175:
+		if (this.contextDataKey !== ContextDataType.LastAcquiredItem && this.contextDataKey.startsWith(this.getIdentifier())) {
+			hashCode += `:[${this.contextDataKey}]`;
 		}
 
 		if (this.reserveType !== undefined) {
@@ -96,7 +102,7 @@ export default abstract class Objective implements IObjective {
 	/**
 	 * Human readable status for what the objective is doing
 	 */
-	public getStatusMessage(): string | undefined {
+	public getStatusMessage(context: Context): string | undefined {
 		switch (typeof (this._status)) {
 			case "string":
 				return this._status;
@@ -105,10 +111,10 @@ export default abstract class Objective implements IObjective {
 				return this._status();
 
 			case "object":
-				return this._status.getStatusMessage();
+				return this._status.getStatusMessage(context);
 
 			default:
-				return this.getStatus();
+				return this.getStatus(context);
 		}
 	}
 
@@ -193,7 +199,7 @@ export default abstract class Objective implements IObjective {
 			// interrupt if an npc or creature moved along our walk path (only close point)
 			for (let i = 0; i < Math.min(20, walkPath.path.length); i++) {
 				const point = walkPath.path[i];
-				const tile = game.getTile(point.x, point.y, context.player.z);
+				const tile = context.island.getTile(point.x, point.y, context.player.z);
 				if (tile.npc !== undefined || (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature)) {
 					this.log.info("NPC or creature moved along walk path, recalculating");
 					return true;

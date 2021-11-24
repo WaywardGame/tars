@@ -1,7 +1,6 @@
 import { IContainer, ItemType } from "game/item/IItem";
-import { IVector3 } from "utilities/math/IVector";
 import Item from "game/item/Item";
-
+import { IVector3 } from "utilities/math/IVector";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
@@ -9,6 +8,7 @@ import { playerUtilities } from "../../utilities/Player";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 import MoveItem from "../other/item/MoveItem";
+
 
 export default class OrganizeBase extends Objective {
 
@@ -24,11 +24,11 @@ export default class OrganizeBase extends Objective {
 		return "Organizing base";
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return true;
 	}
 
@@ -38,7 +38,7 @@ export default class OrganizeBase extends Objective {
 		}
 
 		// pick the chest with the most room available
-		const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
+		const chests = context.base.chest.slice().sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
 		if (chests.length === 0) {
 			return ObjectiveResult.Impossible;
 		}
@@ -46,7 +46,7 @@ export default class OrganizeBase extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const position of this.tiles) {
-			const tile = game.getTileFromPoint(position);
+			const tile = context.island.getTileFromPoint(position);
 			if (tile.containedItems && tile.containedItems.length > 0) {
 				let weight = playerUtilities.getWeight(context);
 				const maxWeight = playerUtilities.getMaxWeight(context);
@@ -94,6 +94,10 @@ export default class OrganizeBase extends Objective {
 				// 	}));
 				// }
 			}
+		}
+
+		if (objectivePipelines.length === 0) {
+			return ObjectiveResult.Complete;
 		}
 
 		return objectivePipelines;

@@ -1,16 +1,16 @@
+import Entity from "game/entity/Entity";
 import { Stat } from "game/entity/IStats";
 import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Entity from "game/entity/Entity";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import Navigation from "../../navigation/Navigation";
 import Objective from "../../Objective";
 import { movementUtilities } from "../../utilities/Movement";
 import MoveToTarget from "../core/MoveToTarget";
+
 
 const safetyCheckDistance = 5;
 const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
@@ -29,7 +29,7 @@ export default class RunAwayFromTarget extends Objective {
 		return `Running away from ${this.target instanceof Entity ? this.target.getName() : `(${this.target.x},${this.target.y},${this.target.z})`}`;
 	}
 
-	public isDynamic(): boolean {
+	public override isDynamic(): boolean {
 		return true;
 	}
 
@@ -41,8 +41,9 @@ export default class RunAwayFromTarget extends Objective {
 
 		// get a list of all nearby tiles that are open
 		const nearbyOpenTiles = TileHelpers.findMatchingTiles(
+			context.island,
 			context.player,
-			(point, tile) => {
+			(_, point, tile) => {
 				const terrainType = TileHelpers.getType(tile);
 				const terrainDescription = terrainDescriptions[terrainType];
 				if (terrainDescription &&
@@ -57,7 +58,7 @@ export default class RunAwayFromTarget extends Objective {
 				return true;
 			},
 			{
-				canVisitTile: (nextPoint) => Vector2.squaredDistance(context.player, nextPoint) <= nearbyTilesDistanceSq,
+				canVisitTile: (_, nextPoint) => Vector2.squaredDistance(context.player, nextPoint) <= nearbyTilesDistanceSq,
 			},
 		);
 
@@ -90,7 +91,7 @@ export default class RunAwayFromTarget extends Objective {
 					pointScore += navigation.getPenaltyFromPoint(pointZ) * 10;
 
 					// try to avoid paths that has blocking things
-					const tile = game.getTileFromPoint(pointZ);
+					const tile = context.island.getTileFromPoint(pointZ);
 					if (tile.doodad?.blocksMove()) {
 						pointScore! += 2000;
 					}
@@ -105,8 +106,9 @@ export default class RunAwayFromTarget extends Objective {
 
 					// use this method to walk all tiles along the path to calculate a "safety" score
 					TileHelpers.findMatchingTiles(
+						context.island,
 						pointZ,
-						(point, tile) => {
+						(_, point, tile) => {
 							pointScore! += navigation.getPenaltyFromPoint(point, tile);
 
 							// creatures are scary
@@ -135,7 +137,7 @@ export default class RunAwayFromTarget extends Objective {
 							return true;
 						},
 						{
-							canVisitTile: (nextPoint) => Vector2.squaredDistance(point, nextPoint) <= safetyCheckDistanceSq,
+							canVisitTile: (_, nextPoint) => Vector2.squaredDistance(point, nextPoint) <= safetyCheckDistanceSq,
 						},
 					);
 

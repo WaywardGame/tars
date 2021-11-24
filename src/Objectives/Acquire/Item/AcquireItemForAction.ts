@@ -1,15 +1,16 @@
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { itemDescriptions as Items } from "game/item/Items";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
+import Dictionary from "language/Dictionary";
+import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
-
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemForAction extends Objective {
 
@@ -27,20 +28,20 @@ export default class AcquireItemForAction extends Objective {
 		return `Acquiring an item to use for ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
-		return AcquireItemForAction.getItems(this.actionType).some(itemType => context.isReservedItemType(itemType));
+	public override shouldIncludeContextHashCode(context: Context): boolean {
+		return AcquireItemForAction.getItems(context, this.actionType).some(itemType => context.isReservedItemType(itemType));
 	}
 
-	public async execute(): Promise<ObjectiveExecutionResult> {
-		return AcquireItemForAction.getItems(this.actionType)
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		return AcquireItemForAction.getItems(context, this.actionType)
 			.map(item => [new AcquireItem(item).passAcquireData(this)]);
 	}
 
-	public static getItems(actionType: ActionType): ItemType[] {
+	public static getItems(context: Context, actionType: ActionType): ItemType[] {
 		let result = AcquireItemForAction.cache.get(actionType);
 		if (result === undefined) {
 			result = [];
@@ -51,7 +52,7 @@ export default class AcquireItemForAction extends Objective {
 					if (actionType === ActionType.StartFire) {
 						// prefer fire starter items
 						// don't use torches
-						if (itemManager.isInGroup(it, ItemTypeGroup.LitTorch)) {
+						if (context.island.items.isInGroup(it, ItemTypeGroup.LitTorch)) {
 							continue;
 						}
 					}

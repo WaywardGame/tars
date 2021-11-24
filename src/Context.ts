@@ -2,10 +2,10 @@ import Player from "game/entity/player/Player";
 import { ItemType } from "game/item/IItem";
 import Item from "game/item/Item";
 import { IVector3 } from "utilities/math/IVector";
-
 import ContextState from "./ContextState";
 import { ContextDataType } from "./IContext";
 import { IBase, IContext, IInventoryItems, ITarsOptions } from "./ITars";
+
 
 export default class Context implements IContext {
 
@@ -19,6 +19,10 @@ export default class Context implements IContext {
 		public state = new ContextState(),
 		public readonly calculatingDifficulty: boolean = false,
 		private initialState?: ContextState) {
+	}
+
+	public get island() {
+		return this.player.island;
 	}
 
 	public toString() {

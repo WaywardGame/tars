@@ -4,6 +4,7 @@ import { DoodadType } from "game/doodad/IDoodad";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import DoodadManager from "game/doodad/DoodadManager";
 
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -56,7 +57,7 @@ export default class AnalyzeBase extends Objective {
 					const possiblePoints = AnalyzeBase.getNearPoints(nearDoodads);
 
 					for (const point of possiblePoints) {
-						const tile = game.getTileFromPoint(point);
+						const tile = context.island.getTileFromPoint(point);
 						const doodad = tile.doodad;
 						if (doodad && AnalyzeBase.matchesBaseInfo(info, doodad.type)) {
 							targets.push(doodad);
@@ -65,7 +66,7 @@ export default class AnalyzeBase extends Objective {
 
 				} else {
 					targets = info.findTargets ?
-						info.findTargets(context.base) :
+						info.findTargets(context) :
 						objectUtilities.findDoodads(context, key, doodad => doodad.ownerIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(info, doodad.type));
 				}
 
@@ -97,7 +98,7 @@ export default class AnalyzeBase extends Objective {
 
 			const baseDoodads = baseUtilities.getBaseDoodads(context);
 			for (const baseDoodad of baseDoodads) {
-				const unlimitedWellTile = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: 50 });
+				const unlimitedWellTile = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: 50 });
 				if (unlimitedWellTile) {
 					availableUnlimitedWellLocation = unlimitedWellTile;
 					break;
@@ -151,8 +152,8 @@ export default class AnalyzeBase extends Objective {
 
 		if (info.doodadTypes) {
 			for (const doodadTypeOrGroup of info.doodadTypes) {
-				if (doodadManager.isGroup(doodadTypeOrGroup)) {
-					if (doodadManager.isInGroup(doodadType, doodadTypeOrGroup)) {
+				if (DoodadManager.isGroup(doodadTypeOrGroup)) {
+					if (DoodadManager.isInGroup(doodadType, doodadTypeOrGroup)) {
 						return true;
 					}
 
@@ -168,7 +169,7 @@ export default class AnalyzeBase extends Objective {
 
 		if (info.litType !== undefined && doodadDescription.lit !== undefined) {
 			const litDescription = doodadDescriptions[doodadDescription.lit];
-			if (litDescription && doodadManager.isInGroup(doodadDescription.lit, info.litType)) {
+			if (litDescription && DoodadManager.isInGroup(doodadDescription.lit, info.litType)) {
 				return true;
 			}
 		}

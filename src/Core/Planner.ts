@@ -122,6 +122,8 @@ class Planner implements IPlanner {
 			calculateObjectives = false;
 
 			for (const objectivesSet of objectives) {
+				// this.log.debug(`Checking status for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}...`);
+
 				const objectiveStartTime = performance.now();
 				const objectivePipeline = await this.getObjectivePipeline(clonedContext, objectivesSet);
 				const objectiveDeltaTime = performance.now() - objectiveStartTime;

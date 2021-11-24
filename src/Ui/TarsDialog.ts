@@ -9,9 +9,9 @@ import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from 
 import Tars from "../Tars";
 import TarsPanel from "./components/TarsPanel";
 import GeneralPanel from "./panels/GeneralPanel";
+import MoveToPanel from "./panels/MoveToPanel";
 import OptionsPanel from "./panels/OptionsPanel";
 import TasksPanel from "./panels/TasksPanel";
-
 
 export type TabDialogPanelClass = new () => TarsPanel;
 
@@ -21,6 +21,7 @@ export type TabDialogPanelClass = new () => TarsPanel;
 const subpanelClasses: TabDialogPanelClass[] = [
 	GeneralPanel,
 	TasksPanel,
+	MoveToPanel,
 	OptionsPanel
 ];
 
@@ -44,7 +45,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 		this.TARS.event.until(this, "remove").subscribe("statusChange", this.header.refresh);
 	}
 
-	protected getDefaultSubpanelInformation(): SubpanelInformation {
+	protected override getDefaultSubpanelInformation(): SubpanelInformation {
 		for (const subpanelInformation of this.subpanelInformations) {
 			if (subpanelInformation[0] === this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
 				return subpanelInformation;
@@ -59,7 +60,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 		this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
 	}
 
-	@Override public getName(): Translation {
+	public override getName(): Translation {
 		return getTarsTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TARS.getStatus);
 	}
 
@@ -67,7 +68,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
 	 * This will only be called once
 	 */
-	@Override protected getSubpanels(): TarsPanel[] {
+	protected override getSubpanels(): TarsPanel[] {
 		return subpanelClasses.map(cls => new cls());
 	}
 
@@ -79,7 +80,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	 * This includes binding a `WillRemove` event handler to the panel, which will `store` (cache) the panel instead of removing it,
 	 * and trigger a `SwitchAway` event on the panel when this occurs.
 	 */
-	@Override protected getSubpanelInformation(subpanels: TarsPanel[]): SubpanelInformation[] {
+	protected override getSubpanelInformation(subpanels: TarsPanel[]): SubpanelInformation[] {
 		return subpanels
 			.map(subpanel => Tuple(
 				getTarsTranslation(subpanel.getTranslation()).getString(),

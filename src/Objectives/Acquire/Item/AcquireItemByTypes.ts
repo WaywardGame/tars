@@ -1,12 +1,13 @@
 import { ItemType } from "game/item/IItem";
-import Translation, { ListEnder } from "language/Translation";
-import { Dictionary } from "language/Dictionaries";
-
+import Dictionary from "language/Dictionary";
+import { ListEnder } from "language/ITranslation";
+import Translation from "language/Translation";
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
-
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemByTypes extends AcquireBase {
 
@@ -26,11 +27,11 @@ export default class AcquireItemByTypes extends AcquireBase {
 		return `Acquiring ${itemTypesString}`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return this.itemTypes.some(itemType => context.isReservedItemType(itemType));
 	}
 

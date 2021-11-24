@@ -2,7 +2,7 @@ import Context from "../Context";
 import { IObjective } from "../IObjective";
 
 export interface ITarsMode {
-	initialize?(context: Context, finished: () => void): Promise<void>;
+	initialize?(context: Context, finished: (success: boolean) => void): Promise<void>;
 
 	dispose?(context: Context): Promise<void>;
 

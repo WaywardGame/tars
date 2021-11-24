@@ -21,11 +21,16 @@ import { baseUtilities } from "./Base";
 
 class ItemUtilities {
 
-	public readonly foodItemTypes = this.getFoodItemTypes();
-	public readonly seedItemTypes = this.getSeedItemTypes();
+	public foodItemTypes: Set<ItemType>;
+	public seedItemTypes: Set<ItemType>;
 
 	private itemCache: Item[] | undefined;
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
+
+	public initialize(context: Context) {
+		this.foodItemTypes = this.getFoodItemTypes(context);
+		this.seedItemTypes = this.getSeedItemTypes(context);
+	}
 
 	public clearCache() {
 		this.itemCache = undefined;
@@ -36,9 +41,9 @@ class ItemUtilities {
 		if (this.itemCache === undefined) {
 			const baseTileItems = baseUtilities.getTileItemsNearBase(context);
 			const baseChestItems = context.base.chest
-				.map(chest => itemManager.getItemsInContainer(chest, true))
+				.map(chest => context.island.items.getItemsInContainer(chest, true))
 				.flat();
-			const inventoryItems = itemManager.getItemsInContainer(context.player.inventory, true);
+			const inventoryItems = context.island.items.getItemsInContainer(context.player.inventory, true);
 
 			this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
 		}
@@ -116,18 +121,18 @@ class ItemUtilities {
 			containedItems: items,
 			itemOrders: items.map(i => i.id),
 		};
-		checker.processContainer(container, true);
+		checker.processContainer(container);
 
 		if (useIntermediateChest && context.base.intermediateChest[0] && !checker.requirementsMet()) {
 			// process with the intermediate chest in mind
-			checker.processContainer(context.base.intermediateChest[0], true);
+			checker.processContainer(context.base.intermediateChest[0]);
 		}
 
 		return checker;
 	}
 
 	public getItemsInInventory(context: Context) {
-		return itemManager.getItemsInContainer(context.player.inventory, true, true);
+		return context.island.items.getItemsInContainer(context.player.inventory, true, true);
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
@@ -139,7 +144,7 @@ class ItemUtilities {
 		container: IContainer,
 		itemTypeSearch: ItemType,
 		allowInventoryItems?: boolean): Item | undefined {
-		const orderedItems = itemManager.getOrderedContainerItems(container);
+		const orderedItems = context.island.items.getOrderedContainerItems(container);
 		for (const item of orderedItems) {
 			if (!allowInventoryItems && this.isInventoryItem(context, item)) {
 				continue;
@@ -183,9 +188,9 @@ class ItemUtilities {
 	}
 
 	public isSafeToDrinkItem(item: Item) {
-		return itemManager.isInGroup(item.type, ItemTypeGroup.ContainerOfMedicinalWater)
-			|| itemManager.isInGroup(item.type, ItemTypeGroup.ContainerOfDesalinatedWater)
-			|| itemManager.isInGroup(item.type, ItemTypeGroup.ContainerOfPurifiedFreshWater);
+		return item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfMedicinalWater) ||
+			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfDesalinatedWater) ||
+			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfPurifiedFreshWater);
 	}
 
 	public isDrinkableItem(item: Item) {
@@ -193,7 +198,7 @@ class ItemUtilities {
 	}
 
 	public canGatherWater(item: Item) {
-		return this.hasUseActionType(item, ActionType.GatherWater);
+		return this.hasUseActionType(item, ActionType.GatherLiquid);
 	}
 
 	public hasUseActionType(item: Item, actionType: ActionType) {
@@ -232,9 +237,9 @@ class ItemUtilities {
 			tool = this.getBestTool(context, ActionType.Harvest);
 
 		} else {
-			const skillType = description.gatherSkillUse ?? description.skillUse ?? SkillType.Mining;
-			const prefersBlunt = skillType === SkillType.Mining;
-			tool = this.getBestTool(context, ActionType.Gather, prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
+			const skillType = description.gatherSkillUse ?? description.skillUse; // ?? SkillType.Mining;
+			// const prefersBlunt = skillType === SkillType.Mining;
+			tool = this.getBestTool(context, skillType === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Gather); // prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
 		}
 
 		return tool;
@@ -250,7 +255,7 @@ class ItemUtilities {
 
 		if (terrainDescription.gather) {
 			const prefersBlunt = (terrainDescription.gatherSkillUse ?? SkillType.Mining) === SkillType.Mining;
-			tool = this.getBestTool(context, ActionType.Gather, prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
+			tool = this.getBestTool(context, ActionType.Mine, prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
 		} else {
 			tool = this.getBestTool(context, ActionType.Dig);
 		}
@@ -469,7 +474,7 @@ class ItemUtilities {
 			}
 		}
 
-		const matchingItems = itemManager.getItemsInContainer(context.player.inventory, true).filter(item => itemTypes.includes(item.type));
+		const matchingItems = context.island.items.getItemsInContainer(context.player.inventory, true).filter(item => itemTypes.includes(item.type));
 
 		return matchingItems[0];
 	}
@@ -477,13 +482,13 @@ class ItemUtilities {
 	/**
 	 * Get a list of item types that are healthy to eat
 	 */
-	private getFoodItemTypes(): Set<ItemType> {
+	private getFoodItemTypes(context: Context): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
 
 		const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
 
 		for (const itemTypeOrGroup of goodFoodItems) {
-			const itemTypes = itemManager.isGroup(itemTypeOrGroup) ? itemManager.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
+			const itemTypes = context.island.items.isGroup(itemTypeOrGroup) ? context.island.items.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
 			for (const itemType of itemTypes) {
 				if (this.isHealthyToEat(itemType)) {
 					result.add(itemType);
@@ -497,7 +502,7 @@ class ItemUtilities {
 	/**
 	 * Get a list of item types that are plantable and produce doodads with items that are healthy to eat
 	 */
-	private getSeedItemTypes(): Set<ItemType> {
+	private getSeedItemTypes(context: Context): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
 
 		const growingStages = Enums.values(GrowingStage);

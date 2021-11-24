@@ -23,9 +23,9 @@ import Restart from "../../objectives/core/Restart";
 
 export class GardenerMode implements ITarsMode {
 
-	private finished: () => void;
+	private finished: (success: boolean) => void;
 
-	public async initialize(context: Context, finished: () => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void) {
 		this.finished = finished;
 	}
 
@@ -40,7 +40,7 @@ export class GardenerMode implements ITarsMode {
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
-				if ((itemManager.computeContainerWeight(c as IContainer) / itemManager.getWeightCapacity(c)!) < 0.9) {
+				if ((context.player.island.items.computeContainerWeight(c as IContainer) / context.player.island.items.getWeightCapacity(c)!) < 0.9) {
 					acquireChest = false;
 					break;
 				}
@@ -87,7 +87,7 @@ export class GardenerMode implements ITarsMode {
 		if (!multiplayer.isConnected()) {
 			if (game.getTurnMode() !== TurnMode.RealTime) {
 				objectives.push(new Lambda(async () => {
-					this.finished();
+					this.finished(true);
 					return ObjectiveResult.Complete;
 				}));
 

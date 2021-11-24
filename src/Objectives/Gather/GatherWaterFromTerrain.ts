@@ -30,14 +30,14 @@ export default class GatherWaterFromTerrain extends Objective {
 		const targets = await tileUtilities.getNearestTileLocation(context, anyWaterTileLocation);
 
 		for (const { tile, point } of targets) {
-			if (tile.creature || tile.npc || game.isPlayerAtTile(tile)) {
+			if (tile.creature || tile.npc || context.island.isPlayerAtTile(tile)) {
 				continue;
 			}
 
 			objectivePipelines.push([
 				new MoveToTarget(point, true),
 				new PickUpAllTileItems(point),
-				new UseItem(ActionType.GatherWater, this.item)
+				new UseItem(ActionType.GatherLiquid, this.item)
 					.setStatus("Gathering water from terrain"),
 			]);
 		}

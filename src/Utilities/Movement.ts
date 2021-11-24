@@ -1,23 +1,23 @@
 import { ActionType } from "game/entity/action/IAction";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
-import { RenderSource } from "game/IGame";
 import { IOverlayInfo, ITile, TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
+import { RenderSource } from "renderer/IRenderer";
 import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOverlayFootPrints";
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import { IVector2, IVector3 } from "utilities/math/IVector";
-
 import Context from "../Context";
 import { ObjectiveResult } from "../IObjective";
 import { getTarsInstance } from "../ITars";
 import { NavigationPath } from "../navigation//INavigation";
 import Navigation from "../navigation/Navigation";
-
 import { actionUtilities } from "./Action";
 import { itemUtilities } from "./Item";
 import { log } from "./Logger";
 import { tileUtilities } from "./Tile";
+
+
 
 export interface IMovementPath {
     difficulty: number;
@@ -73,7 +73,7 @@ class MovementUtilities {
             const pos = path[i];
             const nextPos: IVector2 | undefined = path[i + 1];
 
-            const tile = game.getTile(pos.x, pos.y, localPlayer.z);
+            const tile = localIsland.getTile(pos.x, pos.y, localPlayer.z);
 
             const overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos, false);
             if (overlay) {
@@ -104,7 +104,7 @@ class MovementUtilities {
             const navigation = Navigation.get();
 
             // ensure sailing mode is up to date
-            await getTarsInstance().ensureSailingMode(context.player.vehicleItemId !== undefined);
+            await getTarsInstance().ensureSailingMode(!!context.player.vehicleItemReference);
 
             const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
             if (ends.length === 0) {
@@ -189,11 +189,11 @@ class MovementUtilities {
 
             const atEnd = context.player.x === end.x && context.player.y === end.y;
             if (!atEnd) {
-                const nextPosition = movementPath.path[1];
+                const nextPosition: IVector2 | undefined = movementPath.path[1];
                 if (nextPosition) {
                     const direction = getDirectionFromMovement(nextPosition.x - context.player.x, nextPosition.y - context.player.y);
 
-                    const nextTile = game.getTile(nextPosition.x, nextPosition.y, target.z);
+                    const nextTile = localIsland.getTile(nextPosition.x, nextPosition.y, target.z);
                     const doodad = nextTile.doodad;
                     const tileType = TileHelpers.getType(nextTile);
                     const terrainDescription = Terrains[tileType];
@@ -208,7 +208,7 @@ class MovementUtilities {
                                 });
                             }
 
-                            const actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
+                            const actionType = terrainDescription.gather ? ActionType.Mine : ActionType.Dig;
 
                             await actionUtilities.executeAction(context, actionType, (context, action) => {
                                 action.execute(context.player, itemUtilities.getBestToolForTerrainGather(context, tileType));
@@ -254,14 +254,13 @@ class MovementUtilities {
                         } else if (tileUtilities.hasCorpses(nextTile)) {
                             log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);
 
-                            const tool = itemUtilities.getBestTool(context, ActionType.Carve);
+                            const tool = itemUtilities.getBestTool(context, ActionType.Butcher);
                             if (!tool) {
-                                log.info("Missing tool for carve");
+                                log.info("Missing butchering tool");
                                 return MoveResult.NoPath;
                             }
 
-                            // todo: what if you don't have a carve item?
-                            await actionUtilities.executeAction(context, ActionType.Carve, (context, action) => {
+                            await actionUtilities.executeAction(context, ActionType.Butcher, (context, action) => {
                                 action.execute(context.player, tool);
                                 return ObjectiveResult.Complete;
                             });
@@ -269,7 +268,7 @@ class MovementUtilities {
                         } else {
                             log.info("Gathering from doodad blocking the path", Direction[direction]);
 
-                            await actionUtilities.executeAction(context, ActionType.Gather, (context, action) => {
+                            await actionUtilities.executeAction(context, ActionType.Chop, (context, action) => {
                                 action.execute(context.player, itemUtilities.getBestToolForDoodadGather(context, doodad));
                                 return ObjectiveResult.Complete;
                             });
@@ -299,7 +298,7 @@ class MovementUtilities {
                     let path = movementPath.path;
                     for (let i = 2; i < path.length; i++) {
                         const position = path[i];
-                        const tile = game.getTile(position.x, position.y, target.z);
+                        const tile = localIsland.getTile(position.x, position.y, target.z);
                         const tileType = TileHelpers.getType(tile);
                         const terrainDescription = Terrains[tileType];
 
@@ -310,6 +309,11 @@ class MovementUtilities {
                     }
 
                     if (walkOnce) {
+                        if (!nextPosition) {
+                            log.info("No nextPosition");
+                            return MoveResult.NoPath;
+                        }
+
                         context.player.walkAlongPath([nextPosition], true);
 
                     } else {

@@ -1,24 +1,26 @@
+import Stream from "@wayward/goodstream/Stream";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { ListEnder } from "language/Translation";
 import { RequirementStatus } from "game/item/IItemManager";
-
+import Item from "game/item/Item";
+import Dictionary from "language/Dictionary";
+import { ListEnder } from "language/ITranslation";
+import Translation from "language/Translation";
 import Context from "../../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
+import { IDisassemblySearch } from "../../../ITars";
 import Objective from "../../../Objective";
+import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import ReserveItems from "../../core/ReserveItems";
-import CompleteRequirements from "../../utility/CompleteRequirements";
-import MoveToLand from "../../utility/MoveToLand";
 import ProvideItems from "../../core/ProvideItems";
-import { IDisassemblySearch } from "../../../ITars";
-import { itemUtilities } from "../../../utilities/Item";
+import ReserveItems from "../../core/ReserveItems";
 import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
+import CompleteRequirements from "../../utility/CompleteRequirements";
+import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+
 
 /**
  * Disassembles one of the items.
@@ -42,11 +44,11 @@ export default class AcquireItemFromDisassemble extends Objective {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by disassembling ${translation.getString()}`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return this.searches.some(({ item }) => context.isReservedItemType(item.type));
 	}
 
@@ -78,8 +80,8 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 			if (requiredForDisassembly) {
 				for (const itemTypeOfGroup of requiredForDisassembly) {
-					if (!itemManager.getItemForHuman(context.player, itemTypeOfGroup)) {
-						objectives.push(itemManager.isGroup(itemTypeOfGroup) ? new AcquireItemByGroup(itemTypeOfGroup) : new AcquireItem(itemTypeOfGroup));
+					if (!context.island.items.getItemForHuman(context.player, itemTypeOfGroup)) {
+						objectives.push(context.island.items.isGroup(itemTypeOfGroup) ? new AcquireItemByGroup(itemTypeOfGroup) : new AcquireItem(itemTypeOfGroup));
 					}
 				}
 			}
@@ -88,7 +90,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				objectives.push(new MoveToLand());
 			}
 
-			const requirementInfo = itemManager.hasAdditionalRequirements(context.player, item.type, undefined, undefined, true);
+			const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, item.type, undefined, undefined, true);
 			if (requirementInfo.requirements === RequirementStatus.Missing) {
 				this.log.info("Disassemble requirements not met");
 				objectives.push(new CompleteRequirements(requirementInfo));
@@ -110,7 +112,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 		return objectivePipelines;
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		// High base difficulty because we prefer to not disassemble things.
 		// it should really take into account the scarcity of the item being disassembled
 		return 5;
