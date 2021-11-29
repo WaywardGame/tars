@@ -353,7 +353,7 @@ export class SurvivalMode implements ITarsMode {
 
 		// go on a killing spree once you have a good sword and shield
 		if (baseUtilities.isNearBase(context)) {
-			const creatures = baseUtilities.getCreaturesNearBase(context)
+			const creatures = baseUtilities.getNonTamedCreaturesNearBase(context)
 				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
 				objectives.push(new HuntCreatures(creatures));

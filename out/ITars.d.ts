@@ -43,34 +43,38 @@ export declare enum TarsTranslation {
     DialogButtonDeveloperModeTooltip = 18,
     DialogButtonQuantumBurst = 19,
     DialogButtonQuantumBurstTooltip = 20,
-    DialogButtonMoveToTerrain = 21,
-    DialogButtonMoveToPlayer = 22,
-    DialogButtonMoveToDoodad = 23,
-    DialogButtonMoveToIsland = 24,
-    DialogButtonMoveToBase = 25,
-    DialogRangeLabel = 26,
-    DialogRangeRecoverHealthThreshold = 27,
-    DialogRangeRecoverHealthThresholdTooltip = 28,
-    DialogRangeRecoverStaminaThreshold = 29,
-    DialogRangeRecoverStaminaThresholdTooltip = 30,
-    DialogRangeRecoverHungerThreshold = 31,
-    DialogRangeRecoverHungerThresholdTooltip = 32,
-    DialogRangeRecoverThirstThreshold = 33,
-    DialogRangeRecoverThirstThresholdTooltip = 34,
-    DialogLabelAdvanced = 35,
-    DialogLabelDoodad = 36,
-    DialogLabelGeneral = 37,
-    DialogLabelIsland = 38,
-    DialogLabelItem = 39,
-    DialogLabelPlayer = 40,
-    DialogLabelRecoverThresholds = 41,
-    DialogLabelTerrain = 42,
-    DialogModeSurvival = 43,
-    DialogModeSurvivalTooltip = 44,
-    DialogModeTidyUp = 45,
-    DialogModeTidyUpTooltip = 46,
-    DialogModeGardener = 47,
-    DialogModeGardenerTooltip = 48
+    DialogButtonMoveToBase = 21,
+    DialogButtonMoveToDoodad = 22,
+    DialogButtonMoveToIsland = 23,
+    DialogButtonMoveToNPC = 24,
+    DialogButtonMoveToPlayer = 25,
+    DialogButtonMoveToTerrain = 26,
+    DialogRangeLabel = 27,
+    DialogRangeRecoverHealthThreshold = 28,
+    DialogRangeRecoverHealthThresholdTooltip = 29,
+    DialogRangeRecoverStaminaThreshold = 30,
+    DialogRangeRecoverStaminaThresholdTooltip = 31,
+    DialogRangeRecoverHungerThreshold = 32,
+    DialogRangeRecoverHungerThresholdTooltip = 33,
+    DialogRangeRecoverThirstThreshold = 34,
+    DialogRangeRecoverThirstThresholdTooltip = 35,
+    DialogLabelAdvanced = 36,
+    DialogLabelDoodad = 37,
+    DialogLabelGeneral = 38,
+    DialogLabelIsland = 39,
+    DialogLabelItem = 40,
+    DialogLabelNPC = 41,
+    DialogLabelPlayer = 42,
+    DialogLabelRecoverThresholds = 43,
+    DialogLabelTerrain = 44,
+    DialogModeSurvival = 45,
+    DialogModeSurvivalTooltip = 46,
+    DialogModeTidyUp = 47,
+    DialogModeTidyUpTooltip = 48,
+    DialogModeGardener = 49,
+    DialogModeGardenerTooltip = 50,
+    DialogModeTerminator = 51,
+    DialogModeTerminatorTooltip = 52
 }
 export interface ISaveData {
     enabled: boolean;
@@ -87,7 +91,8 @@ export declare enum TarsUiSaveDataKey {
     MoveToIslandDropdown = 4,
     MoveToTerrainDropdown = 5,
     MoveToDoodadDropdown = 6,
-    MoveToPlayerDropdown = 7
+    MoveToPlayerDropdown = 7,
+    MoveToNPCDropdown = 8
 }
 export interface ITarsOptions {
     mode: TarsMode;
@@ -236,7 +241,8 @@ export declare enum TarsMode {
     Manual = 0,
     Survival = 1,
     TidyUp = 2,
-    Gardener = 3
+    Gardener = 3,
+    Terminator = 4
 }
 export declare enum ReserveType {
     Soft = 0,

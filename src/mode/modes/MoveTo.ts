@@ -1,3 +1,5 @@
+import { NPCType } from "game/entity/npc/INPCs";
+import NPC from "game/entity/npc/NPC";
 import Doodad from "game/doodad/Doodad";
 import { DoodadType } from "game/doodad/IDoodad";
 import { IslandId } from "game/island/IIsland";
@@ -20,6 +22,7 @@ export enum MoveToType {
     Doodad,
     Player,
     Base,
+    NPC,
 }
 
 interface IMoveTo {
@@ -27,12 +30,12 @@ interface IMoveTo {
 }
 
 export interface IMoveToIsland extends IMoveTo {
-    type: MoveToType.Island,
+    type: MoveToType.Island;
     islandId: IslandId;
 }
 
 export interface IMoveToTerrain extends IMoveTo {
-    type: MoveToType.Terrain,
+    type: MoveToType.Terrain;
     terrainType: TerrainType;
 }
 
@@ -42,15 +45,20 @@ export interface IMoveToDoodad extends IMoveTo {
 }
 
 export interface IMoveToPlayer extends IMoveTo {
-    type: MoveToType.Player,
+    type: MoveToType.Player;
     playerIdentifier: string;
 }
 
-export interface IMoveToBase extends IMoveTo {
-    type: MoveToType.Base,
+export interface IMoveToNPC extends IMoveTo {
+    type: MoveToType.NPC;
+    npcType: NPCType;
 }
 
-export type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToBase;
+export interface IMoveToBase extends IMoveTo {
+    type: MoveToType.Base;
+}
+
+export type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToNPC | IMoveToBase;
 
 export class MoveToMode implements ITarsMode {
 
@@ -92,7 +100,7 @@ export class MoveToMode implements ITarsMode {
             case MoveToType.Doodad:
                 const doodadTypes = doodadUtilities.getDoodadTypes(this.target.doodadType, true);
 
-                const objectives = objectUtilities.findDoodads(context, "MoveToDoodad", (doodad: Doodad) => doodadTypes.has(doodad.type), 5)
+                const doodadObjectives = objectUtilities.findDoodads(context, "MoveToDoodad", (doodad: Doodad) => doodadTypes.has(doodad.type), 5)
                     .map(doodad => ([
                         new MoveToTarget(doodad, true),
                         new Lambda(async () => {
@@ -101,8 +109,26 @@ export class MoveToMode implements ITarsMode {
                         }),
                     ]));
 
-                if (objectives.length > 0) {
-                    return objectives;
+                if (doodadObjectives.length > 0) {
+                    return doodadObjectives;
+                }
+
+                break;
+
+            case MoveToType.NPC:
+                const npcType = this.target.npcType;
+
+                const npcObjectives = objectUtilities.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcType, 5)
+                    .map(doodad => ([
+                        new MoveToTarget(doodad, true),
+                        new Lambda(async () => {
+                            this.finished(true);
+                            return ObjectiveResult.Complete;
+                        }),
+                    ]));
+
+                if (npcObjectives.length > 0) {
+                    return npcObjectives;
                 }
 
                 break;

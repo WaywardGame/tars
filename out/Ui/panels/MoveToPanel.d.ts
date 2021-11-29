@@ -5,6 +5,7 @@ export default class MoveToPanel extends TarsPanel {
     private readonly dropdownIsland;
     private readonly dropdownTerrainType;
     private readonly dropdownDoodad;
+    private readonly dropdownNPC;
     private readonly dropdownPlayer;
     constructor();
     getTranslation(): TarsTranslation | Translation;

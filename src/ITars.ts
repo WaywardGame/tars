@@ -54,11 +54,12 @@ export enum TarsTranslation {
 	DialogButtonQuantumBurst,
 	DialogButtonQuantumBurstTooltip,
 
-	DialogButtonMoveToTerrain,
-	DialogButtonMoveToPlayer,
+	DialogButtonMoveToBase,
 	DialogButtonMoveToDoodad,
 	DialogButtonMoveToIsland,
-	DialogButtonMoveToBase,
+	DialogButtonMoveToNPC,
+	DialogButtonMoveToPlayer,
+	DialogButtonMoveToTerrain,
 
 	DialogRangeLabel,
 	DialogRangeRecoverHealthThreshold,
@@ -75,6 +76,7 @@ export enum TarsTranslation {
 	DialogLabelGeneral,
 	DialogLabelIsland,
 	DialogLabelItem,
+	DialogLabelNPC,
 	DialogLabelPlayer,
 	DialogLabelRecoverThresholds,
 	DialogLabelTerrain,
@@ -85,6 +87,8 @@ export enum TarsTranslation {
 	DialogModeTidyUpTooltip,
 	DialogModeGardener,
 	DialogModeGardenerTooltip,
+	DialogModeTerminator,
+	DialogModeTerminatorTooltip,
 }
 
 export interface ISaveData {
@@ -104,6 +108,7 @@ export enum TarsUiSaveDataKey {
 	MoveToTerrainDropdown,
 	MoveToDoodadDropdown,
 	MoveToPlayerDropdown,
+	MoveToNPCDropdown,
 }
 
 // list of options. ideally most of them would be boolean's
@@ -647,6 +652,7 @@ export enum TarsMode {
 	Survival,
 	TidyUp,
 	Gardener,
+	Terminator,
 }
 
 export enum ReserveType {

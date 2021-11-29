@@ -26,7 +26,7 @@ declare class BaseUtilities {
     };
     getTileItemsNearBase(context: Context): Item[];
     getSwampTilesNearBase(context: Context): IVector3[];
-    getCreaturesNearBase(context: Context): Creature[];
+    getNonTamedCreaturesNearBase(context: Context): Creature[];
 }
 export declare const baseUtilities: BaseUtilities;
 export {};

@@ -226,7 +226,7 @@ class BaseUtilities {
 		return result;
 	}
 
-	public getCreaturesNearBase(context: Context): Creature[] {
+	public getNonTamedCreaturesNearBase(context: Context): Creature[] {
 		const result: Creature[] = [];
 
 		for (const { tile } of this.getTilesNearBase(context)) {

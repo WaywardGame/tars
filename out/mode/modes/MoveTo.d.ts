@@ -1,3 +1,4 @@
+import { NPCType } from "game/entity/npc/INPCs";
 import { DoodadType } from "game/doodad/IDoodad";
 import { IslandId } from "game/island/IIsland";
 import { TerrainType } from "game/tile/ITerrain";
@@ -9,7 +10,8 @@ export declare enum MoveToType {
     Terrain = 1,
     Doodad = 2,
     Player = 3,
-    Base = 4
+    Base = 4,
+    NPC = 5
 }
 interface IMoveTo {
     type: MoveToType;
@@ -30,10 +32,14 @@ export interface IMoveToPlayer extends IMoveTo {
     type: MoveToType.Player;
     playerIdentifier: string;
 }
+export interface IMoveToNPC extends IMoveTo {
+    type: MoveToType.NPC;
+    npcType: NPCType;
+}
 export interface IMoveToBase extends IMoveTo {
     type: MoveToType.Base;
 }
-export declare type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToBase;
+export declare type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToNPC | IMoveToBase;
 export declare class MoveToMode implements ITarsMode {
     private readonly target;
     private finished;

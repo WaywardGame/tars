@@ -3,6 +3,7 @@ import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import NPC from "game/entity/npc/NPC";
 import Item from "game/item/Item";
 
 import Context from "../Context";
@@ -13,6 +14,7 @@ export enum FindObjectType {
 	Doodad,
 	Corpse,
 	Item,
+	NPC,
 }
 
 class ObjectUtilities {
@@ -83,6 +85,10 @@ class ObjectUtilities {
 
 	public findCreatures(context: Context, id: string, isTarget: (creature: Creature) => boolean, top?: number): Creature[] {
 		return this.findObjects(context, FindObjectType.Creature, id, context.player.island.creatures.getObjects() as Creature[], isTarget, top);
+	}
+
+	public findNPCS(context: Context, id: string, isTarget: (npc: NPC) => boolean, top?: number): NPC[] {
+		return this.findObjects(context, FindObjectType.NPC, id, context.player.island.npcs.getObjects() as NPC[], isTarget, top);
 	}
 
 	public findItem(context: Context, id: string, isTarget: (item: Item) => boolean, top?: number): Item[] {
