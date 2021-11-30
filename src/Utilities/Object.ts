@@ -5,6 +5,7 @@ import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import NPC from "game/entity/npc/NPC";
 import Item from "game/item/Item";
+import { AiType } from "game/entity/IEntity";
 
 import Context from "../Context";
 import { tileUtilities } from "./Tile";
@@ -108,6 +109,10 @@ class ObjectUtilities {
 
 			return false;
 		});
+	}
+
+	public findHuntableCreatures(context: Context, id: string, onlyHostile?: boolean, top?: number) {
+		return objectUtilities.findCreatures(context, id, creature => !creature.isTamed() && (!onlyHostile || creature.hasAi(AiType.Hostile)), top);
 	}
 
 }

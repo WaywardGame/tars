@@ -74,7 +74,9 @@ export declare enum TarsTranslation {
     DialogModeGardener = 49,
     DialogModeGardenerTooltip = 50,
     DialogModeTerminator = 51,
-    DialogModeTerminatorTooltip = 52
+    DialogModeTerminatorTooltip = 52,
+    DialogModeQuest = 53,
+    DialogModeQuestTooltip = 54
 }
 export interface ISaveData {
     enabled: boolean;
@@ -242,7 +244,8 @@ export declare enum TarsMode {
     Survival = 1,
     TidyUp = 2,
     Gardener = 3,
-    Terminator = 4
+    Terminator = 4,
+    Quest = 5
 }
 export declare enum ReserveType {
     Soft = 0,

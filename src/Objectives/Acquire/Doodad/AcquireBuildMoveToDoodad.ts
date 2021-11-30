@@ -16,6 +16,10 @@ import StartFire from "../../other/doodad/StartFire";
 import BuildItem from "../../other/item/BuildItem";
 import AcquireItemForDoodad from "../item/AcquireItemForDoodad";
 
+export interface IAcquireBuildMoveToDoodadOptions {
+	ignoreExistingDoodads: boolean;
+	disableMoveTo: boolean;
+}
 
 /**
  * Acquires, builds, and moves to the doodad
@@ -30,7 +34,7 @@ import AcquireItemForDoodad from "../item/AcquireItemForDoodad";
  */
 export default class AcquireBuildMoveToDoodad extends Objective {
 
-	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
+	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup, private readonly options: Partial<IAcquireBuildMoveToDoodadOptions> = {}) {
 		super();
 	}
 
@@ -45,7 +49,9 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
 
-		const doodad = objectUtilities.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && baseUtilities.isBaseDoodad(context, d));
+		const doodad = !this.options.ignoreExistingDoodads ?
+			objectUtilities.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && baseUtilities.isBaseDoodad(context, d)) :
+			undefined;
 
 		let requiresFire = false;
 
@@ -79,7 +85,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 			// StartFire handles fetching fire supplies and moving to the doodad to light it
 			objectives.push(new StartFire(doodad));
 
-		} else if (doodad) {
+		} else if (doodad && !this.options.disableMoveTo) {
 			objectives.push(new MoveToTarget(doodad, true));
 		}
 

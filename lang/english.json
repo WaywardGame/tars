@@ -66,6 +66,8 @@
 			"dialogModeTidyUpTooltip": "TARS will tidy up items around the base by building & moving items into chests.",
 			"dialogModeTerminator": "Terminator Mode",
 			"dialogModeTerminatorTooltip": "TARS will go around terminating hostile wildlife.\nNote: It's recommended to only use this mode when TARS has decent equipment!",
+			"dialogModeQuest": "Quest Mode",
+			"dialogModeQuestTooltip": "TARS will work on completing quests.",
 			"dialogPanelGeneral": "General",
 			"dialogPanelMoveTo": "Move To",
 			"dialogPanelOptions": "Options",

@@ -25,6 +25,7 @@ declare class ObjectUtilities {
     findNPCS(context: Context, id: string, isTarget: (npc: NPC) => boolean, top?: number): NPC[];
     findItem(context: Context, id: string, isTarget: (item: Item) => boolean, top?: number): Item[];
     findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[];
+    findHuntableCreatures(context: Context, id: string, onlyHostile?: boolean, top?: number): Creature[];
 }
 export declare const objectUtilities: ObjectUtilities;
 export {};

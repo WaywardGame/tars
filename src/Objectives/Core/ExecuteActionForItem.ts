@@ -58,8 +58,9 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		// settings this here screws up AcquireWaterContainer
 		// only set this once we get the item
-		context.setData(this.contextDataKey, undefined);
+		// context.setData(this.contextDataKey, undefined);
 
 		if (context.calculatingDifficulty) {
 			return 0;
@@ -212,6 +213,8 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				return ObjectiveResult.Complete;
 			}
 		}
+
+		context.setData(this.contextDataKey, undefined);
 
 		return ObjectiveResult.Pending;
 	}

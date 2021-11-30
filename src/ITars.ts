@@ -89,6 +89,8 @@ export enum TarsTranslation {
 	DialogModeGardenerTooltip,
 	DialogModeTerminator,
 	DialogModeTerminatorTooltip,
+	DialogModeQuest,
+	DialogModeQuestTooltip,
 }
 
 export interface ISaveData {
@@ -653,6 +655,7 @@ export enum TarsMode {
 	TidyUp,
 	Gardener,
 	Terminator,
+	Quest,
 }
 
 export enum ReserveType {

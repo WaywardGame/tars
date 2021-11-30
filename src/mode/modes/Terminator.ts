@@ -1,4 +1,3 @@
-import { AiType } from "game/entity/IEntity";
 import { TurnMode } from "game/IGame";
 import { ItemType } from "game/item/IItem";
 import { EquipType } from "game/entity/IHuman";
@@ -42,7 +41,7 @@ export class TerminatorMode implements ITarsMode {
             objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
         }
 
-        const creatures = objectUtilities.findCreatures(context, "Terminator", creature => !creature.isTamed() && creature.hasAi(AiType.Hostile), 10);
+        const creatures = objectUtilities.findHuntableCreatures(context, "Terminator", true, 10);
         if (creatures.length > 0) {
             objectives.push(new HuntCreatures(creatures));
         }
