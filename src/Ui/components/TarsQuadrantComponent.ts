@@ -35,6 +35,8 @@ export default class TarsQuadrantComponent extends QuadrantComponent {
     public constructor(id: QuadrantComponentId) {
         super(id);
 
+        this.classes.add("hide-in-screenshot-mode");
+
         // advanced styling
         this.element.style.textAlign = "right";
 
