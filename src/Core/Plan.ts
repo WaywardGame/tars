@@ -221,9 +221,10 @@ export default class Plan implements IPlan {
 				}
 			}*/
 		}
-		if (objectiveStack.length > 0) {
-			console.warn("maybe a bug - Ignoreobjective stack", objectiveStack);
-		}
+
+		// if (objectiveStack.length > 0) {
+		// 	console.warn("maybe a bug - Ignoreobjective stack", objectiveStack);
+		// }
 
 		// return Ignored if at least one was ignored
 		return {
