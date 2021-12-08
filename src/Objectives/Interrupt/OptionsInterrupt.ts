@@ -45,7 +45,7 @@ export default class OptionsInterrupt extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return undefined;
+		return "Updating options";
 	}
 
 	/**
