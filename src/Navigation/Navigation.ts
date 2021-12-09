@@ -351,10 +351,15 @@ export default class Navigation {
 				z: point.z,
 			};
 
+			const tile = localIsland.getTileFromPoint(nearestPoint);
+			if (!tile) {
+				throw new Error(`Invalid point ${nearestPoint.x},${nearestPoint.y}`);
+			}
+
 			return {
 				type: tileType,
 				point: nearestPoint,
-				tile: localIsland.getTileFromPoint(nearestPoint),
+				tile,
 			} as ITileLocation;
 		});
 	}
