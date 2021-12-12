@@ -26,14 +26,14 @@ export default class UseItem extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
-		if (!item) {
-			this.log.error(`Invalid use item for action ${ActionType[this.actionType]}`);
+		if (!item || !item.isValid()) {
+			this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}`);
 			return ObjectiveResult.Restart;
 		}
 
 		const description = item.description();
 		if (!description || !description.use || !description.use.includes(this.actionType)) {
-			this.log.error(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is missing that action type`);
+			this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is missing that action type`);
 			return ObjectiveResult.Restart;
 		}
 
