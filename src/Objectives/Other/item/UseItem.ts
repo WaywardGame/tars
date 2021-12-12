@@ -27,19 +27,19 @@ export default class UseItem extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
 		if (!item) {
-			this.log.error("Invalid use item");
+			this.log.error(`Invalid use item for action ${ActionType[this.actionType]}`);
 			return ObjectiveResult.Restart;
 		}
 
 		const description = item.description();
 		if (!description || !description.use || !description.use.includes(this.actionType)) {
-			this.log.error(`Invalid use item. Missing action type. ${item}`);
+			this.log.error(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is missing that action type`);
 			return ObjectiveResult.Restart;
 		}
 
 		return new ExecuteAction(ActionType.UseItem, (context, action) => {
 			if (!item.isNearby(context.player, true)) {
-				this.log.warn(`Invalid use item. Item is not nearby. ${item}`, this.getStatus());
+				this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is not nearby`, this.getStatus());
 				return ObjectiveResult.Restart;
 			}
 
