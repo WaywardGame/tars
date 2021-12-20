@@ -26,9 +26,9 @@ import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
  */
 export class TidyUpMode implements ITarsMode {
 
-	private finished: () => void;
+	private finished: (success: boolean) => void;
 
-	public async initialize(context: Context, finished: () => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void) {
 		this.finished = finished;
 	}
 
@@ -43,7 +43,7 @@ export class TidyUpMode implements ITarsMode {
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
-				if ((itemManager.computeContainerWeight(c as IContainer) / itemManager.getWeightCapacity(c)!) < 0.9) {
+				if ((context.player.island.items.computeContainerWeight(c as IContainer) / context.player.island.items.getWeightCapacity(c)!) < 0.9) {
 					acquireChest = false;
 					break;
 				}
@@ -58,9 +58,9 @@ export class TidyUpMode implements ITarsMode {
 			// this is reset to false in baseInfo.onAdd
 			context.base.buildAnotherChest = true;
 
-			const gatherItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
-			if (gatherItem === undefined) {
-				objectives.push([new AcquireItemForAction(ActionType.Gather)]);
+			const chopItem = itemUtilities.getBestTool(context, ActionType.Chop, DamageType.Slashing);
+			if (chopItem === undefined) {
+				objectives.push([new AcquireItemForAction(ActionType.Chop)]);
 			}
 
 			if (context.inventory.shovel === undefined) {
@@ -90,7 +90,7 @@ export class TidyUpMode implements ITarsMode {
 		if (!multiplayer.isConnected()) {
 			if (game.getTurnMode() !== TurnMode.RealTime) {
 				objectives.push(new Lambda(async () => {
-					this.finished();
+					this.finished(true);
 					return ObjectiveResult.Complete;
 				}));
 

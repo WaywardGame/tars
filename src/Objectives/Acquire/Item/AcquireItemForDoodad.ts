@@ -1,17 +1,18 @@
+import DoodadManager from "game/doodad/DoodadManager";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { itemDescriptions as Items } from "game/item/Items";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import { doodadUtilities } from "../../../utilities/Doodad";
-
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemForDoodad extends Objective {
 
@@ -22,18 +23,18 @@ export default class AcquireItemForDoodad extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `AcquireItemForDoodad:${doodadManager.isGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
+		return `AcquireItemForDoodad:${DoodadManager.isGroup(this.doodadTypeOrGroup) ? DoodadTypeGroup[this.doodadTypeOrGroup] : DoodadType[this.doodadTypeOrGroup]}`;
 	}
 
 	public getStatus(): string | undefined {
-		return `Acquiring ${doodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
+		return `Acquiring ${DoodadManager.isGroup(this.doodadTypeOrGroup) ? Translation.nameOf(Dictionary.DoodadGroup, this.doodadTypeOrGroup).getString() : Translation.nameOf(Dictionary.Doodad, this.doodadTypeOrGroup).getString()}`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return this.getItems().some(itemType => context.isReservedItemType(itemType));
 	}
 

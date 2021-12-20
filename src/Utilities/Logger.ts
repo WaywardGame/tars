@@ -1,4 +1,5 @@
 import Log, { ILog, LogLineType, LogSource } from "utilities/Log";
+import { Bound } from "utilities/Decorators";
 
 class LoggerUtilities {
 	private queuedMessages: Array<{

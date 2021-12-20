@@ -1,7 +1,9 @@
+import { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
+import CommandManager from "command/CommandManager";
 import { EventBus } from "event/EventBuses";
-import { IEventEmitter } from "event/EventEmitter";
+import { IEventEmitter, Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
-import { ActionType, IActionApi, IActionDescription } from "game/entity/action/IAction";
+import { ActionType, IActionApi } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
@@ -11,27 +13,26 @@ import { PlayerState, WeightStatus } from "game/entity/player/IPlayer";
 import { INote } from "game/entity/player/note/NoteManager";
 import Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
+import Island from "game/island/Island";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import Item from "game/item/Item";
+import { IPromptDescriptionBase, Prompt } from "game/meta/prompt/IPrompt";
+import Prompts, { IPrompt } from "game/meta/prompt/Prompts";
 import { ITile } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
-import { Dictionary } from "language/Dictionaries";
-import Interrupt from "language/dictionary/Interrupt";
+import Dictionary from "language/Dictionary";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
+import TranslationImpl from "language/impl/TranslationImpl";
 import Translation from "language/Translation";
-import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import Bind from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import { IInput } from "ui/input/IInput";
 import { DialogId } from "ui/screen/screens/game/Dialogs";
-import { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import { MenuBarButtonGroup } from "ui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import { gameScreen } from "ui/screen/screens/GameScreen";
-import { Ui } from "ui/Ui";
-import { InterruptOptions } from "ui/util/IInterrupt";
+import { MenuBarButtonGroup, MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
+import { Bound } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
@@ -39,7 +40,6 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
-
 import Context from "./Context";
 import executor, { ExecuteObjectivesResultType } from "./core/Executor";
 import planner from "./core/Planner";
@@ -53,32 +53,33 @@ import Objective from "./Objective";
 import AnalyzeBase from "./objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "./objectives/analyze/AnalyzeInventory";
 import ExecuteAction from "./objectives/core/ExecuteAction";
-import CarveCorpse from "./objectives/interrupt/CarveCorpse";
+import ButcherCorpse from "./objectives/interrupt/ButcherCorpse";
 import DefendAgainstCreature from "./objectives/interrupt/DefendAgainstCreature";
 import OptionsInterrupt from "./objectives/interrupt/OptionsInterrupt";
 import ReduceWeight from "./objectives/interrupt/ReduceWeight";
 import RepairItem from "./objectives/interrupt/RepairItem";
 import BuildItem from "./objectives/other/item/BuildItem";
 import EquipItem from "./objectives/other/item/EquipItem";
-import ReturnToBase from "./objectives/other/ReturnToBase";
 import UnequipItem from "./objectives/other/item/UnequipItem";
-import MoveToZ from "./objectives/utility/MoveToZ";
-import OrganizeInventory from "./objectives/utility/OrganizeInventory";
-import TarsDialog from "./ui/TarsDialog";
-import { actionUtilities } from "./utilities/Action";
-import { log, loggerUtilities, logSourceName } from "./utilities/Logger";
-import { movementUtilities } from "./utilities/Movement";
-import { objectUtilities } from "./utilities/Object";
-import { tileUtilities } from "./utilities/Tile";
-import { baseUtilities } from "./utilities/Base";
-import { playerUtilities } from "./utilities/Player";
-import { itemUtilities } from "./utilities/Item";
-import { creatureUtilities } from "./utilities/Creature";
+import ReturnToBase from "./objectives/other/ReturnToBase";
 import RunAwayFromTarget from "./objectives/other/RunAwayFromTarget";
 import RecoverHealth from "./objectives/recover/RecoverHealth";
 import RecoverHunger from "./objectives/recover/RecoverHunger";
 import RecoverStamina from "./objectives/recover/RecoverStamina";
 import RecoverThirst from "./objectives/recover/RecoverThirst";
+import MoveToZ from "./objectives/utility/moveTo/MoveToZ";
+import OrganizeInventory from "./objectives/utility/OrganizeInventory";
+import TarsDialog from "./ui/TarsDialog";
+import { actionUtilities } from "./utilities/Action";
+import { baseUtilities } from "./utilities/Base";
+import { creatureUtilities } from "./utilities/Creature";
+import { itemUtilities } from "./utilities/Item";
+import { log, loggerUtilities, logSourceName } from "./utilities/Logger";
+import { movementUtilities } from "./utilities/Movement";
+import { objectUtilities } from "./utilities/Object";
+import { playerUtilities } from "./utilities/Player";
+import { tileUtilities } from "./utilities/Tile";
+import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
 
 const tickSpeed = 333;
 
@@ -95,7 +96,7 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////
 
-	public event: IEventEmitter<this, ITarsEvents>;
+	public override event: IEventEmitter<this, ITarsEvents>;
 
 	////////////////////////////////////
 
@@ -104,10 +105,10 @@ export default class Tars extends Mod {
 
 	////////////////////////////////////
 
-	@Register.bindable("ToggleDialog", IInput.key("KeyT"))
+	@Register.bindable("ToggleDialog", IInput.key("Comma"))
 	public readonly bindableToggleDialog: Bindable;
 
-	@Register.bindable("ToggleTars", IInput.key("KeyT", "Shift"))
+	@Register.bindable("ToggleTars", IInput.key("Period"))
 	public readonly bindableToggleTars: Bindable;
 
 	////////////////////////////////////
@@ -118,8 +119,11 @@ export default class Tars extends Mod {
 	@Register.message("Toggle")
 	public readonly messageToggle: Message;
 
-	@Register.message("Finished")
-	public readonly messageFinished: Message;
+	@Register.message("TaskComplete")
+	public readonly messageTaskComplete: Message;
+
+	@Register.message("TaskUnableToComplete")
+	public readonly messageTaskUnableToComplete: Message;
 
 	@Register.message("NavigationUpdating")
 	public readonly messageNavigationUpdating: Message;
@@ -147,14 +151,17 @@ export default class Tars extends Mod {
 	public readonly dialogMain: DialogId;
 
 	@Register.menuBarButton("Dialog", {
-		onActivate: () => gameScreen?.toggleDialog(Tars.INSTANCE.dialogMain),
+		onActivate: () => gameScreen?.dialogs.toggle(Tars.INSTANCE.dialogMain),
 		group: MenuBarButtonGroup.Meta,
 		bindable: Registry<Tars>().get("bindableToggleDialog"),
-		tooltip: tooltip => tooltip.addText(text => text.setText(new Translation(Tars.INSTANCE.dictionary, TarsTranslation.DialogTitleMain))),
+		tooltip: tooltip => tooltip.dump().addText(text => text.setText(Translation.get(Tars.INSTANCE.dictionary, TarsTranslation.DialogTitleMain))),
 	})
 	public readonly menuBarButton: MenuBarButtonType;
 
 	////////////////////////////////////
+
+	@Register.quadrantComponent("TARS", TarsQuadrantComponent)
+	public readonly quadrantComponent: QuadrantComponentId;
 
 	private base: IBase;
 	private inventory: IInventoryItems;
@@ -182,7 +189,7 @@ export default class Tars extends Mod {
 
 	private readonly modeCache: Map<TarsMode, ITarsMode> = new Map();
 
-	public onInitialize(): void {
+	public override onInitialize(): void {
 		setTarsInstance(this);
 
 		Navigation.setModPath(this.getPath());
@@ -190,13 +197,13 @@ export default class Tars extends Mod {
 		Log.setSourceFilter(Log.LogType.File, false, logSourceName);
 	}
 
-	public onUninitialize(): void {
+	public override onUninitialize(): void {
 		this.onGameEnd();
 
 		setTarsInstance(undefined);
 	}
 
-	public onLoad(): void {
+	public override onLoad(): void {
 		this.ensureSaveData();
 
 		this.delete();
@@ -210,11 +217,11 @@ export default class Tars extends Mod {
 		// this is to support hot reloading while in game
 		if (this.saveData.ui[TarsUiSaveDataKey.DialogOpened]) {
 			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = undefined;
-			gameScreen?.openDialog(Tars.INSTANCE.dialogMain);
+			gameScreen?.dialogs.open(Tars.INSTANCE.dialogMain);
 		}
 	}
 
-	public onUnload(): void {
+	public override onUnload(): void {
 		this.delete();
 
 		Log.removePreConsoleCallback(loggerUtilities.preConsoleCallback);
@@ -222,9 +229,9 @@ export default class Tars extends Mod {
 		(window as any).TARS = undefined;
 
 		// this is to support hot reloading while in game
-		if (this.gamePlaying && gameScreen?.isDialogVisible(Tars.INSTANCE.dialogMain)) {
+		if (this.gamePlaying && gameScreen?.dialogs.isVisible(Tars.INSTANCE.dialogMain)) {
 			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = true;
-			gameScreen?.closeDialog(Tars.INSTANCE.dialogMain);
+			gameScreen?.dialogs.close(Tars.INSTANCE.dialogMain);
 		}
 	}
 
@@ -236,8 +243,8 @@ export default class Tars extends Mod {
 	public onGameStart(): void {
 		this.gamePlaying = true;
 
-		if (!this.saveData.island[island.id]) {
-			this.saveData.island[island.id] = {};
+		if (!this.saveData.island[localIsland.id]) {
+			this.saveData.island[localIsland.id] = {};
 		}
 
 		if (!this.isRunning() && (this.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
@@ -245,12 +252,27 @@ export default class Tars extends Mod {
 		}
 	}
 
-	@EventHandler(EventBus.Game, "end")
+	@EventHandler(EventBus.Game, "stoppingPlay")
 	public onGameEnd(state?: PlayerState): void {
 		this.gamePlaying = false;
 
 		this.disable(true);
 		this.delete();
+	}
+
+	@EventHandler(EventBus.LocalPlayer, "spawn")
+	public onPlayerSpawn(player: Player) {
+		if (!this.saveData.configuredThresholds) {
+			this.saveData.configuredThresholds = true;
+
+			this.saveData.options.recoverThresholdHealth = Math.round(player.stat.get<IStatMax>(Stat.Health).max * 0.6);
+			this.saveData.options.recoverThresholdStamina = Math.round(player.stat.get<IStatMax>(Stat.Stamina).max * 0.25);
+			this.saveData.options.recoverThresholdHunger = Math.round(player.stat.get<IStatMax>(Stat.Hunger).max * 0.40);
+			this.saveData.options.recoverThresholdThirst = 10;
+			this.saveData.options.recoverThresholdThirstFromMax = -10;
+
+			log.info(`Configured recover thresholds. health: ${this.saveData.options.recoverThresholdHealth}. stamina: ${this.saveData.options.recoverThresholdStamina}. hunger: ${this.saveData.options.recoverThresholdHunger}`);
+		}
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "writeNote")
@@ -265,13 +287,13 @@ export default class Tars extends Mod {
 
 	@EventHandler(EventBus.LocalPlayer, "die")
 	public onPlayerDeath() {
-		this.interrupt();
+		this.fullInterrupt();
 		movementUtilities.resetMovementOverlays();
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "respawn")
 	public onPlayerRespawn() {
-		this.interrupt();
+		this.fullInterrupt();
 		movementUtilities.resetMovementOverlays();
 
 		if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
@@ -313,16 +335,16 @@ export default class Tars extends Mod {
 		movementUtilities.clearOverlay(player.getTile());
 	}
 
-	@EventHandler(EventBus.Ui, "interrupt")
-	public onInterrupt(host: Ui, options: Partial<InterruptOptions>, interrupt?: Interrupt): string | boolean | void | InterruptChoice | undefined {
-		if (this.isRunning() && (interrupt === Interrupt.GameDangerousStep || interrupt === Interrupt.GameTravelConfirmation)) {
-			log.info(`Returning true for interrupt ${Interrupt[interrupt]}`);
-			return InterruptChoice.Yes;
+	@EventHandler(EventBus.Prompt, "queue", Priority.High)
+	public onPrompt(host: Prompts.Events, prompt: IPrompt<IPromptDescriptionBase<any[]>>): string | boolean | void | InterruptChoice | undefined {
+		if (this.isRunning() && (prompt.type === Prompt.GameDangerousStep || prompt.type === Prompt.GameIslandTravelConfirmation)) {
+			log.info(`Resolving true for prompt ${Prompt[prompt.type]}`);
+			prompt.resolve(InterruptChoice.Yes as any);
 		}
 	}
 
 	@Register.command("TARS")
-	public command(_player: Player, _args: string) {
+	public command(_: CommandManager, _player: Player, _args: string) {
 		this.toggle();
 	}
 
@@ -332,11 +354,15 @@ export default class Tars extends Mod {
 		return true;
 	}
 
-	@EventHandler(EventBus.Game, "tileUpdate")
-	public onTileUpdate(_: any, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
+	@EventHandler(EventBus.Island, "tileUpdate")
+	public onTileUpdate(island: Island, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
+		if (island !== localPlayer.island) {
+			return;
+		}
+
 		if (this.navigationSystemState === NavigationSystemState.Initializing || localPlayer.isResting()) {
 			this.navigationQueuedUpdates.push(() => {
-				this.onTileUpdate(undefined, tile, tileX, tileY, tileZ, tileUpdateType);
+				this.onTileUpdate(island, tile, tileX, tileY, tileZ, tileUpdateType);
 			});
 
 		} else if (this.navigationSystemState === NavigationSystemState.Initialized && this.navigation) {
@@ -347,9 +373,9 @@ export default class Tars extends Mod {
 				for (let x = -tileUpdateRadius; x <= tileUpdateRadius; x++) {
 					for (let y = -tileUpdateRadius; y <= tileUpdateRadius; y++) {
 						if (x !== 0 || y !== 0) {
-							const point = game.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+							const point = island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
 							if (point) {
-								const otherTile = game.getTileFromPoint(point);
+								const otherTile = island.getTileFromPoint(point);
 								this.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ, undefined, tileUpdateType);
 							}
 						}
@@ -359,17 +385,18 @@ export default class Tars extends Mod {
 		}
 	}
 
-	@HookMethod
-	public postExecuteAction(api: IActionApi, action: IActionDescription, args: any[]): void {
+	@EventHandler(EventBus.Actions, "postExecuteAction")
+	public postExecuteAction(_: any, actionType: ActionType, api: IActionApi, args: any[]): void {
 		if (api.executor !== localPlayer) {
 			return;
 		}
+
 		this.processQuantumBurst();
 
 		actionUtilities.postExecuteAction(api.type);
 	}
 
-	@HookMethod
+	@EventHandler(EventBus.LocalPlayer, "processInput")
 	public processInput(player: Player): boolean | undefined {
 		this.processQuantumBurst();
 		return undefined;
@@ -393,7 +420,7 @@ export default class Tars extends Mod {
 			return;
 		}
 
-		if (nextTile.npc || (nextTile.doodad && nextTile.doodad.blocksMove()) || game.isPlayerAtTile(nextTile, false, true)) {
+		if (nextTile.npc || (nextTile.doodad && nextTile.doodad.blocksMove()) || player.island.isPlayerAtTile(nextTile, false, true)) {
 			log.info("Interrupting due to blocked movement");
 			this.interrupt();
 		}
@@ -470,7 +497,7 @@ export default class Tars extends Mod {
 	}
 
 	public getTranslation(translation: TarsTranslation | string | Translation): Translation {
-		return translation instanceof Translation ? translation : new Translation(this.dictionary, translation);
+		return translation instanceof TranslationImpl ? translation : new TranslationImpl(this.dictionary, translation);
 	}
 
 	public isEnabled(): boolean {
@@ -502,7 +529,9 @@ export default class Tars extends Mod {
 
 		this.context = new Context(localPlayer, this.base, this.inventory, this.saveData.options);
 
-		await this.ensureNavigation(this.context.player.vehicleItemId !== undefined);
+		itemUtilities.initialize(this.context);
+
+		await this.ensureNavigation(!!this.context.player.vehicleItemReference);
 
 		await this.reset();
 
@@ -512,7 +541,7 @@ export default class Tars extends Mod {
 				this.navigation.queueUpdateOrigin(localPlayer);
 			}
 
-			this.tickTimeoutId = setTimeout(this.tick.bind(this), tickSpeed);
+			this.tickTimeoutId = window.setTimeout(this.tick.bind(this), tickSpeed);
 
 		} else {
 			this.disable();
@@ -566,7 +595,7 @@ export default class Tars extends Mod {
 			}
 
 			if (shouldInterrupt) {
-				this.interrupt();
+				this.fullInterrupt();
 			}
 		}
 	}
@@ -597,12 +626,12 @@ export default class Tars extends Mod {
 
 		const plan = executor.getPlan();
 		if (plan !== undefined) {
-			planStatusMessage = plan.tree.objective.getStatusMessage();
+			planStatusMessage = plan.tree.objective.getStatusMessage(this.context);
 		}
 
 		const objectivePipeline = this.objectivePipeline ?? this.interruptObjectivePipeline;
 		if (objectivePipeline) {
-			statusMessage = objectivePipeline.flat()[0].getStatusMessage();
+			statusMessage = objectivePipeline.flat()[0].getStatusMessage(this.context);
 
 			// todo: make this more generic. only show statusMessage if it's interesting
 			if (!statusMessage) {
@@ -746,10 +775,22 @@ export default class Tars extends Mod {
 	}
 
 	private async initializeMode(context: Context, mode: TarsMode, modeInstance: ITarsMode) {
+		log.info(`Initializing ${TarsMode[mode]}`);
+
 		await this.disposeMode(context, mode);
 
 		EventManager.registerEventBusSubscriber(modeInstance);
-		await modeInstance.initialize?.(context, () => { this.stop(true); });
+		await modeInstance.initialize?.(context, (success: boolean) => {
+			const message = success ? this.messageTaskComplete : this.messageTaskUnableToComplete;
+			const messageType = success ? MessageType.Good : MessageType.Bad;
+
+			localPlayer.messages
+				.source(this.messageSource)
+				.type(messageType)
+				.send(message);
+
+			this.disable();
+		});
 		this.modeCache.set(mode, modeInstance);
 	}
 
@@ -777,6 +818,15 @@ export default class Tars extends Mod {
 		this.interruptIds = undefined;
 		this.interruptContext = undefined;
 		this.interruptContexts.clear();
+
+		this.clearCaches();
+	}
+
+	private clearCaches(): void {
+		objectUtilities.clearCache();
+		tileUtilities.clearCache();
+		itemUtilities.clearCache();
+		movementUtilities.clearCache();
 	}
 
 	private delete() {
@@ -794,6 +844,8 @@ export default class Tars extends Mod {
 		};
 
 		this.inventory = {};
+
+		this.context = undefined as any;
 
 		baseUtilities.clearCache();
 
@@ -833,7 +885,7 @@ export default class Tars extends Mod {
 	}
 
 	private interrupt(...interruptObjectives: IObjective[]) {
-		log.info("Interrupt", Objective.getPipelineString(interruptObjectives));
+		log.info("Interrupt", Objective.getPipelineString(this.context, interruptObjectives));
 
 		executor.interrupt();
 
@@ -845,6 +897,13 @@ export default class Tars extends Mod {
 
 		movementUtilities.resetMovementOverlays();
 		localPlayer.walkAlongPath(undefined);
+	}
+
+	private fullInterrupt() {
+		this.interrupt();
+
+		this.interruptObjectivePipeline = undefined;
+		this.interruptIds = undefined;
 	}
 
 	private async tick() {
@@ -869,7 +928,7 @@ export default class Tars extends Mod {
 			this.processQuantumBurst();
 		}
 
-		this.tickTimeoutId = setTimeout(this.tick.bind(this), this.isQuantumBurstEnabled() ? game.interval : tickSpeed);
+		this.tickTimeoutId = window.setTimeout(this.tick.bind(this), this.isQuantumBurstEnabled() ? game.interval : tickSpeed);
 	}
 
 	private async onTick() {
@@ -902,10 +961,7 @@ export default class Tars extends Mod {
 				.send(this.messageQuantumBurstCooldownEnd, false);
 		}
 
-		objectUtilities.clearCache();
-		tileUtilities.clearCache();
-		itemUtilities.clearCache();
-		movementUtilities.clearCache();
+		this.clearCaches();
 
 		// system objectives
 		await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
@@ -956,7 +1012,7 @@ export default class Tars extends Mod {
 			}
 
 			if (this.interruptObjectivePipeline) {
-				const interruptHashCode = Objective.getPipelineString(this.interruptObjectivePipeline);
+				const interruptHashCode = Objective.getPipelineString(this.context, this.interruptObjectivePipeline);
 
 				log.info("Continuing interrupt execution", interruptHashCode);
 
@@ -964,20 +1020,22 @@ export default class Tars extends Mod {
 				switch (result.type) {
 					case ExecuteObjectivesResultType.Completed:
 						this.interruptObjectivePipeline = undefined;
+						// this.interruptIds = undefined;
 						log.info("Completed interrupt objectives");
 						break;
 
 					case ExecuteObjectivesResultType.Restart:
 						this.interruptObjectivePipeline = undefined;
+						// this.interruptIds = undefined;
 						return;
 
 					case ExecuteObjectivesResultType.Pending:
-						const afterInterruptHashCode = Objective.getPipelineString(this.interruptObjectivePipeline);
+						const afterInterruptHashCode = Objective.getPipelineString(this.context, this.interruptObjectivePipeline);
 
 						if (interruptHashCode === afterInterruptHashCode) {
 							this.interruptObjectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
 							// this.objectivePipeline = undefined;
-							log.info(`Updated continuing interrupt objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.interruptObjectivePipeline));
+							log.info(`Updated continuing interrupt objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.context, this.interruptObjectivePipeline));
 
 						} else {
 							log.info(`Ignoring continuing interrupt objectives due to changed interrupts - ${ExecuteObjectivesResultType[result.type]}. Before: ${interruptHashCode}. After: ${afterInterruptHashCode}`);
@@ -987,6 +1045,7 @@ export default class Tars extends Mod {
 
 					case ExecuteObjectivesResultType.ContinuingNextTick:
 						this.interruptObjectivePipeline = undefined;
+						// this.interruptIds = undefined;
 						// this.objectivePipeline = undefined;
 						log.info("Clearing interrupt objective pipeline");
 						return;
@@ -1004,12 +1063,12 @@ export default class Tars extends Mod {
 					if (savedContext) {
 						this.interruptContext = savedContext;
 
-						log.debug(`Restored saved context from ${i}. ${this.interruptContext}`);
+						log.debug(`Restored saved context from ${i}. ${this.interruptContext.getHashCode()}`);
 					}
 
 					const result = await executor.executeObjectives(this.interruptContext, [interruptObjectives], true);
 
-					log.debug("Interrupt result", result);
+					// log.debug("Interrupt result", result);
 
 					if (!this.interruptContext) {
 						// tars was disabled mid run
@@ -1038,7 +1097,7 @@ export default class Tars extends Mod {
 
 							// save this context so it will be restored next time
 							this.interruptContexts.set(i, this.interruptContext.clone());
-							log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext}`);
+							log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext.getHashCode()}`);
 
 							// update the initial state so we don't mess with items between interrupts
 							this.interruptContext.setInitialState();
@@ -1077,7 +1136,7 @@ export default class Tars extends Mod {
 
 		if (this.objectivePipeline !== undefined) {
 			// we have an objective we are working on
-			const hashCode = Objective.getPipelineString(this.objectivePipeline);
+			const hashCode = Objective.getPipelineString(this.context, this.objectivePipeline);
 
 			log.info("Continuing execution of objectives", hashCode);
 
@@ -1093,11 +1152,11 @@ export default class Tars extends Mod {
 
 				case ExecuteObjectivesResultType.Pending:
 				case ExecuteObjectivesResultType.ContinuingNextTick:
-					const afterHashCode = Objective.getPipelineString(this.objectivePipeline);
+					const afterHashCode = Objective.getPipelineString(this.context, this.objectivePipeline);
 
 					if (hashCode === afterHashCode) {
 						this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
-						log.info(`Updated continuing objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.objectivePipeline));
+						log.info(`Updated continuing objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.context, this.objectivePipeline));
 
 					} else {
 						log.info(`Ignoring continuing objectives due to changed objectives - ${ExecuteObjectivesResultType[result.type]}. Resetting. Before: ${hashCode}. After: ${afterHashCode}`);
@@ -1127,7 +1186,7 @@ export default class Tars extends Mod {
 			case ExecuteObjectivesResultType.ContinuingNextTick:
 				// save the active objective
 				this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
-				log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.objectivePipeline));
+				log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, Objective.getPipelineString(this.context, this.objectivePipeline));
 				this.updateStatus();
 				return;
 
@@ -1135,16 +1194,6 @@ export default class Tars extends Mod {
 				this.objectivePipeline = undefined;
 				return;
 		}
-	}
-
-	@Bound
-	private stop(finished?: boolean) {
-		localPlayer.messages
-			.source(this.messageSource)
-			.type(MessageType.Good)
-			.send(finished ? this.messageFinished : this.messageToggle, false);
-
-		this.disable();
 	}
 
 	// todo: add severity to stat interrupts to prioritize which one to run
@@ -1362,9 +1411,9 @@ export default class Tars extends Mod {
 
 				for (let x = -2; x <= 2; x++) {
 					for (let y = -2; y <= 2; y++) {
-						const point = game.ensureValidPoint({ x: context.player.x + x, y: context.player.y + y, z: context.player.z });
+						const point = context.player.island.ensureValidPoint({ x: context.player.x + x, y: context.player.y + y, z: context.player.z });
 						if (point) {
-							const tile = game.getTileFromPoint(point);
+							const tile = context.island.getTileFromPoint(point);
 							if (tile.creature && !tile.creature.isTamed()) {
 								const distance = Vector2.squaredDistance(context.player, tile.creature.getPoint());
 								if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
@@ -1396,11 +1445,11 @@ export default class Tars extends Mod {
 			possibleEquips = [];
 
 			for (const itemType of itemTypes) {
-				if (itemManager.isGroup(itemType)) {
-					possibleEquips.push(...itemManager.getItemsInContainerByGroup(context.player.inventory, itemType));
+				if (context.island.items.isGroup(itemType)) {
+					possibleEquips.push(...context.island.items.getItemsInContainerByGroup(context.player.inventory, itemType));
 
 				} else {
-					possibleEquips.push(...itemManager.getItemsInContainerByType(context.player.inventory, itemType));
+					possibleEquips.push(...context.island.items.getItemsInContainerByType(context.player.inventory, itemType));
 				}
 			}
 
@@ -1489,7 +1538,7 @@ export default class Tars extends Mod {
 			}
 		}
 
-		const nearbyCreatures = creatureUtilities.getNearbyCreatures(context.player);
+		const nearbyCreatures = creatureUtilities.getNearbyCreatures(context);
 		for (const creature of nearbyCreatures) {
 			if (shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature)) {
 				// only run away if the creature can path to us
@@ -1504,10 +1553,10 @@ export default class Tars extends Mod {
 
 	private checkNearbyCreature(context: Context, direction: Direction.Cardinal | Direction.None): Creature | undefined {
 		if (direction !== Direction.None) {
-			const point = game.directionToMovement(direction);
-			const validPoint = game.ensureValidPoint({ x: context.player.x + point.x, y: context.player.y + point.y, z: context.player.z });
+			const point = Vector2.DIRECTIONS[direction];
+			const validPoint = context.island.ensureValidPoint({ x: context.player.x + point.x, y: context.player.y + point.y, z: context.player.z });
 			if (validPoint) {
-				const tile = game.getTileFromPoint(validPoint);
+				const tile = context.island.getTileFromPoint(validPoint);
 				if (tile && tile.creature && !tile.creature.isTamed()) {
 					//  && (tile.creature.ai & AiType.Hostile) !== 0
 					return tile.creature;
@@ -1552,7 +1601,7 @@ export default class Tars extends Mod {
 	}
 
 	private gatherFromCorpsesInterrupt(context: Context): IObjective[] | undefined {
-		if (itemUtilities.getInventoryItemsWithUse(context, ActionType.Carve).length === 0) {
+		if (itemUtilities.getInventoryItemsWithUse(context, ActionType.Butcher).length === 0) {
 			return undefined;
 		}
 
@@ -1561,7 +1610,7 @@ export default class Tars extends Mod {
 			const objectives: IObjective[] = [];
 
 			for (const target of targets) {
-				const tile = game.getTileFromPoint(target);
+				const tile = context.island.getTileFromPoint(target);
 				const corpses = tile.corpses;
 				if (corpses && corpses.length > 0) {
 					for (const corpse of corpses) {
@@ -1571,10 +1620,10 @@ export default class Tars extends Mod {
 						}
 
 						const step = corpse.step || 0;
-						const carveCount = resources.length - step;
+						const count = resources.length - step;
 
-						for (let i = 0; i < carveCount; i++) {
-							objectives.push(new CarveCorpse(corpse));
+						for (let i = 0; i < count; i++) {
+							objectives.push(new ButcherCorpse(corpse));
 						}
 					}
 				}
@@ -1669,7 +1718,7 @@ export default class Tars extends Mod {
 			`Context hard reserved items: ${Array.from(context.state.hardReservedItems).join(",")}`,
 			`Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).join(",")}`,
 			`Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).join(",")}`,
-			`Objectives: ${Objective.getPipelineString(objectives)}`);
+			`Objectives: ${Objective.getPipelineString(this.context, objectives)}`);
 
 		return objectives;
 	}
@@ -1683,7 +1732,7 @@ export default class Tars extends Mod {
 	}
 
 	private processQuantumBurst() {
-		if (!this.isQuantumBurstEnabled()) {
+		if (!this.isRunning() || !this.isQuantumBurstEnabled()) {
 			return;
 		}
 

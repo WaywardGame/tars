@@ -1,13 +1,14 @@
 import ActionExecutor from "game/entity/action/ActionExecutor";
 import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-
+import Dictionary from "language/Dictionary";
+import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import { actionUtilities } from "../../utilities/Action";
+
 
 export default class ExecuteAction<T extends ActionType> extends Objective {
 
@@ -25,7 +26,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 		return `Executing ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
 	}
 
-	public isDynamic(): boolean {
+	public override isDynamic(): boolean {
 		return true;
 	}
 
@@ -37,7 +38,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 		return actionUtilities.executeAction(context, this.actionType, this.executor as any);
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		return 1;
 	}
 }

@@ -28,7 +28,7 @@ export default class MoveItemIntoInventory extends Objective {
             return ObjectiveResult.Restart;
         }
 
-        if (itemManager.isContainableInContainer(item, context.player.inventory)) {
+        if (context.island.items.isContainableInContainer(item, context.player.inventory)) {
             return ObjectiveResult.Complete;
         }
 

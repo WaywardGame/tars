@@ -4,6 +4,9 @@ import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { EquipType } from "game/entity/IHuman";
+import { IStatMax, Stat } from "game/entity/IStats";
+import Player from "game/entity/player/Player";
+import Island from "game/island/Island";
 import { IContainer, IItemDisassembly, ItemType, ItemTypeGroup } from "game/item/IItem";
 import Item from "game/item/Item";
 import { ITile, TerrainType } from "game/tile/ITerrain";
@@ -11,11 +14,9 @@ import { ITerrainLoot } from "game/tile/TerrainResources";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { IVector3 } from "utilities/math/IVector";
-import Player from "game/entity/player/Player";
-import { IStatMax, Stat } from "game/entity/IStats";
-
 import Tars from "./Tars";
 import { itemUtilities } from "./utilities/Item";
+
 
 export const TARS_ID = "TARS";
 
@@ -34,6 +35,7 @@ export enum TarsTranslation {
 
 	DialogPanelGeneral,
 	DialogPanelTasks,
+	DialogPanelMoveTo,
 	DialogPanelOptions,
 
 	DialogButtonEnable,
@@ -52,6 +54,13 @@ export enum TarsTranslation {
 	DialogButtonQuantumBurst,
 	DialogButtonQuantumBurstTooltip,
 
+	DialogButtonMoveToBase,
+	DialogButtonMoveToDoodad,
+	DialogButtonMoveToIsland,
+	DialogButtonMoveToNPC,
+	DialogButtonMoveToPlayer,
+	DialogButtonMoveToTerrain,
+
 	DialogRangeLabel,
 	DialogRangeRecoverHealthThreshold,
 	DialogRangeRecoverHealthThresholdTooltip,
@@ -62,11 +71,15 @@ export enum TarsTranslation {
 	DialogRangeRecoverThirstThreshold,
 	DialogRangeRecoverThirstThresholdTooltip,
 
-	DialogLabelItem,
+	DialogLabelAdvanced,
 	DialogLabelDoodad,
 	DialogLabelGeneral,
-	DialogLabelAdvanced,
+	DialogLabelIsland,
+	DialogLabelItem,
+	DialogLabelNPC,
+	DialogLabelPlayer,
 	DialogLabelRecoverThresholds,
+	DialogLabelTerrain,
 
 	DialogModeSurvival,
 	DialogModeSurvivalTooltip,
@@ -74,10 +87,15 @@ export enum TarsTranslation {
 	DialogModeTidyUpTooltip,
 	DialogModeGardener,
 	DialogModeGardenerTooltip,
+	DialogModeTerminator,
+	DialogModeTerminatorTooltip,
+	DialogModeQuest,
+	DialogModeQuestTooltip,
 }
 
 export interface ISaveData {
 	enabled: boolean;
+	configuredThresholds?: boolean;
 	options: ITarsOptions;
 	island: Record<string, Record<string, any>>;
 	ui: Partial<Record<TarsUiSaveDataKey, any>>;
@@ -88,6 +106,11 @@ export enum TarsUiSaveDataKey {
 	ActivePanelId,
 	AcquireItemDropdown,
 	BuildDoodadDropdown,
+	MoveToIslandDropdown,
+	MoveToTerrainDropdown,
+	MoveToDoodadDropdown,
+	MoveToPlayerDropdown,
+	MoveToNPCDropdown,
 }
 
 // list of options. ideally most of them would be boolean's
@@ -214,7 +237,7 @@ export interface IBaseInfo {
 	openAreaRadius?: number;
 	canAdd?(base: IBase, target: Doodad): boolean;
 	onAdd?(base: IBase, target: Doodad): void;
-	findTargets?(base: IBase): Doodad[];
+	findTargets?(context: { island: Island, base: IBase }): Doodad[];
 }
 
 export type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "availableUnlimitedWellLocation">;
@@ -247,16 +270,16 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 		litType: DoodadTypeGroup.LitFurnace,
 	},
 	intermediateChest: {
-		findTargets: (base: IBase) => {
-			const sortedChests = base.chest
+		findTargets: (context: { island: Island; base: IBase }) => {
+			const sortedChests = context.base.chest
 				.map(chest =>
 				({
 					chest: chest,
-					weight: itemManager.computeContainerWeight(chest as IContainer),
+					weight: context.island.items.computeContainerWeight(chest as IContainer),
 				}))
 				.sort((a, b) => a.weight - b.weight);
 			if (sortedChests.length > 0) {
-				return [base.chest.splice(base.chest.indexOf(sortedChests[0].chest), 1)[0]];
+				return [context.base.chest.splice(context.base.chest.indexOf(sortedChests[0].chest), 1)[0]];
 			}
 
 			return [];
@@ -287,7 +310,7 @@ export interface IInventoryItems {
 	bandage?: Item;
 	bed?: Item;
 	campfire?: Item;
-	carve?: Item;
+	butcher?: Item;
 	chest?: Item;
 	equipBack?: Item;
 	equipBelt?: Item;
@@ -320,7 +343,7 @@ export interface IInventoryItems {
 }
 
 export interface IInventoryItemInfo {
-	itemTypes?: Array<ItemType | ItemTypeGroup>;
+	itemTypes?: Array<ItemType | ItemTypeGroup> | (() => Array<ItemType | ItemTypeGroup>);
 	actionTypes?: ActionType[];
 	equipType?: EquipType;
 	flags?: InventoryItemFlags;
@@ -382,7 +405,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		],
 		flags: {
 			flag: InventoryItemFlag.PreferHigherActionBonus,
-			option: ActionType.Gather,
+			option: ActionType.Chop,
 		},
 	},
 	bandage: {
@@ -396,16 +419,20 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	bed: {
 		itemTypes: [ItemTypeGroup.Bedding],
 		requiredMinDur: 1,
+		flags: {
+			flag: InventoryItemFlag.PreferHigherActionBonus,
+			option: ActionType.Sleep,
+		},
 	},
 	campfire: {
 		itemTypes: [ItemTypeGroup.Campfire],
 		requiredMinDur: 1,
 	},
-	carve: {
-		actionTypes: [ActionType.Carve],
+	butcher: {
+		actionTypes: [ActionType.Butcher],
 		flags: {
 			flag: InventoryItemFlag.PreferHigherActionBonus,
-			option: ActionType.Carve,
+			option: ActionType.Butcher,
 		},
 	},
 	chest: {
@@ -474,7 +501,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		flags: InventoryItemFlag.PreferLowerWeight,
 	},
 	food: {
-		itemTypes: Array.from(itemUtilities.foodItemTypes),
+		itemTypes: () => Array.from(itemUtilities.foodItemTypes),
 		flags: InventoryItemFlag.PreferHigherDecay,
 		allowMultiple: 5,
 	},
@@ -520,7 +547,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		],
 		flags: {
 			flag: InventoryItemFlag.PreferHigherActionBonus,
-			option: ActionType.Carve,
+			option: ActionType.Butcher,
 		},
 	},
 	tongs: {
@@ -539,7 +566,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		],
 		flags: {
 			flag: InventoryItemFlag.PreferHigherActionBonus,
-			option: ActionType.Gather,
+			option: ActionType.Mine,
 		},
 	},
 	sailBoat: {
@@ -555,7 +582,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		},
 	},
 	waterContainer: {
-		actionTypes: [ActionType.GatherWater],
+		actionTypes: [ActionType.GatherLiquid],
 		itemTypes: [
 			ItemTypeGroup.ContainerOfDesalinatedWater,
 			ItemTypeGroup.ContainerOfMedicinalWater,
@@ -627,6 +654,8 @@ export enum TarsMode {
 	Survival,
 	TidyUp,
 	Gardener,
+	Terminator,
+	Quest,
 }
 
 export enum ReserveType {

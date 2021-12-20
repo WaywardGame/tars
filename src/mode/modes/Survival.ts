@@ -35,8 +35,8 @@ import UpgradeInventoryItem from "../../objectives/other/UpgradeInventoryItem";
 import RecoverHealth from "../../objectives/recover/RecoverHealth";
 import RecoverHunger from "../../objectives/recover/RecoverHunger";
 import DrainSwamp from "../../objectives/utility/DrainSwamp";
-import MoveToLand from "../../objectives/utility/MoveToLand";
-import MoveToNewIsland from "../../objectives/utility/MoveToNewIsland";
+import MoveToLand from "../../objectives/utility/moveTo/MoveToLand";
+import MoveToNewIsland from "../../objectives/utility/moveTo/MoveToNewIsland";
 import OrganizeBase from "../../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
 import { log } from "../../utilities/Logger";
@@ -56,9 +56,9 @@ import CheckSpecialItems from "../../objectives/other/item/CheckSpecialItems";
  */
 export class SurvivalMode implements ITarsMode {
 
-	private finished: () => void;
+	private finished: (success: boolean) => void;
 
-	public async initialize(context: Context, finished: () => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void) {
 		this.finished = finished;
 	}
 
@@ -81,7 +81,7 @@ export class SurvivalMode implements ITarsMode {
 			return objectives;
 		}
 
-		if (context.inventory.sailBoat && itemManager.isContainableInContainer(context.inventory.sailBoat, context.player.inventory)) {
+		if (context.inventory.sailBoat && context.player.island.items.isContainableInContainer(context.inventory.sailBoat, context.player.inventory)) {
 			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
 			objectives.push([
 				new MoveToLand(),
@@ -95,8 +95,8 @@ export class SurvivalMode implements ITarsMode {
 
 		objectives.push(new CheckSpecialItems());
 
-		const nonMiningItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
-		if (nonMiningItem === undefined) {
+		const gatherItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
+		if (gatherItem === undefined) {
 			objectives.push([new AcquireItemForAction(ActionType.Gather)]);
 		}
 
@@ -140,15 +140,19 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
 		}
 
+		if (context.inventory.bed === undefined) {
+			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Bedding), new AnalyzeInventory()]);
+		}
+
 		if (context.inventory.equipSword === undefined) {
 			objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
 		}
 
-		if (chest === undefined || chest.type === ItemType.TatteredShirt) {
+		if (chest === undefined || chest.type === ItemType.TatteredClothShirt) {
 			objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
 		}
 
-		if (legs === undefined || legs.type === ItemType.TatteredPants) {
+		if (legs === undefined || legs.type === ItemType.TatteredClothTrousers) {
 			objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
 		}
 
@@ -168,7 +172,7 @@ export class SurvivalMode implements ITarsMode {
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
-				if ((itemManager.computeContainerWeight(c as IContainer) / itemManager.getWeightCapacity(c)!) < 0.9) {
+				if ((context.player.island.items.computeContainerWeight(c as IContainer) / context.player.island.items.getWeightCapacity(c)!) < 0.9) {
 					acquireChest = false;
 					break;
 				}
@@ -349,7 +353,7 @@ export class SurvivalMode implements ITarsMode {
 
 		// go on a killing spree once you have a good sword and shield
 		if (baseUtilities.isNearBase(context)) {
-			const creatures = baseUtilities.getCreaturesNearBase(context)
+			const creatures = baseUtilities.getNonTamedCreaturesNearBase(context)
 				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
 				objectives.push(new HuntCreatures(creatures));
@@ -521,7 +525,7 @@ export class SurvivalMode implements ITarsMode {
 		if (!multiplayer.isConnected()) {
 			if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
 				objectives.push(new Lambda(async () => {
-					this.finished();
+					this.finished(true);
 					return ObjectiveResult.Complete;
 				}).setStatus("Finish"));
 
@@ -545,7 +549,7 @@ export class SurvivalMode implements ITarsMode {
 
 		const upgradeItemKey = `UpgradeItem:${inventoryItemKey}`;
 
-		const islandSaveData = getTarsSaveData("island")[island.id];
+		const islandSaveData = getTarsSaveData("island")[context.player.island.id];
 
 		if ((item as Item).type !== fromItemType) {
 			return;

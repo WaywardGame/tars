@@ -4,7 +4,6 @@ import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
-
 import { ContextDataType, MovingToNewIslandState } from "../..//IContext";
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
@@ -17,6 +16,7 @@ import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 import MoveItem from "../other/item/MoveItem";
+
 
 const maxChestDistance = 128;
 
@@ -49,11 +49,11 @@ export default class OrganizeInventory extends Objective {
 		return "Organizing inventory";
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return true;
 	}
 
@@ -78,7 +78,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (this.options.items) {
 			const validItems = this.options.items
-				.filter(item => itemManager.getPlayerWithItemInInventory(item) === context.player)
+				.filter(item => context.island.items.getPlayerWithItemInInventory(item) === context.player)
 				.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 			if (validItems.length === 0) {
 				return ObjectiveResult.Ignore;
@@ -132,7 +132,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (this.options.allowChests && context.base.chest.length > 0) {
 			// pick the chest with the most room available
-			const chests = context.base.chest.slice().sort((a, b) => itemManager.computeContainerWeight(a as IContainer) - itemManager.computeContainerWeight(b as IContainer));
+			const chests = context.base.chest.slice().sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
 			for (const chest of chests) {
 				if (!this.options.disableDrop && Vector2.distance(context.player, chest) > maxChestDistance) {
 					continue;
@@ -149,7 +149,7 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = TileHelpers.findMatchingTile(context.player, (point, tile) => tileUtilities.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
+		const target = TileHelpers.findMatchingTile(context.island, context.player, (_, point, tile) => tileUtilities.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}
@@ -184,8 +184,8 @@ export default class OrganizeInventory extends Objective {
 		const objectives: IObjective[] = [];
 
 		const targetContainer = chest as IContainer;
-		let chestWeight = itemManager.computeContainerWeight(targetContainer);
-		const chestWeightCapacity = itemManager.getWeightCapacity(targetContainer);
+		let chestWeight = context.island.items.computeContainerWeight(targetContainer);
+		const chestWeightCapacity = context.island.items.getWeightCapacity(targetContainer);
 		if (chestWeightCapacity !== undefined && chestWeight + itemsToMove[0].getTotalWeight() <= chestWeightCapacity) {
 			// at least 1 item fits in the chest. move to it and start moving items
 			objectives.push(new MoveToTarget(chest, true));

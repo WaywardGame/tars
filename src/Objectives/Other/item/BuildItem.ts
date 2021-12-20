@@ -1,5 +1,6 @@
 import { BiomeType } from "game/biome/IBiome";
 import Doodad from "game/doodad/Doodad";
+import DoodadManager from "game/doodad/DoodadManager";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
@@ -7,7 +8,6 @@ import { TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
@@ -21,8 +21,9 @@ import AnalyzeBase from "../../analyze/AnalyzeBase";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
-
 import UseItem from "./UseItem";
+
+
 
 const recalculateMovements = 40;
 
@@ -56,12 +57,12 @@ export default class BuildItem extends Objective {
 
 		const description = item.description();
 		if (!description || !description.use || !description.use.includes(ActionType.Build)) {
-			this.log.error("Invalid build item", item);
+			this.log.error(`Invalid build item. ${item}`);
 			return ObjectiveResult.Impossible;
 		}
 
 		if (!description.onUse || !description.onUse[ActionType.Build] === undefined) {
-			this.log.error("Invalid build item", item);
+			this.log.error(`Invalid build item. ${item}`);
 			return ObjectiveResult.Impossible;
 		}
 
@@ -69,7 +70,7 @@ export default class BuildItem extends Objective {
 
 		const baseInfo = this.getBaseInfo(buildDoodadType);
 
-		const isWell = doodadManager.isInGroup(buildDoodadType, DoodadTypeGroup.Well);
+		const isWell = DoodadManager.isInGroup(buildDoodadType, DoodadTypeGroup.Well);
 		if (isWell) {
 			this.log.info("Going build a well");
 		}
@@ -80,7 +81,7 @@ export default class BuildItem extends Objective {
 				const possiblePoints = AnalyzeBase.getNearPoints(nearDoodads);
 
 				for (const point of possiblePoints) {
-					if (baseUtilities.isOpenArea(context, point, game.getTileFromPoint(point), 0)) {
+					if (baseUtilities.isOpenArea(context, point, context.island.getTileFromPoint(point), 0)) {
 						this.target = point;
 						break;
 					}
@@ -93,14 +94,14 @@ export default class BuildItem extends Objective {
 				for (const baseDoodad of baseDoodads) {
 					if (isWell) {
 						// look for unlimited wells first
-						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 						if (this.target === undefined) {
 							this.log.info("Couldn't find unlimited well tile");
-							this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 						}
 
 					} else {
-						this.target = TileHelpers.findMatchingTile(baseDoodad, (point, tile) => baseUtilities.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
+						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
 					}
 
 					if (this.target !== undefined) {
@@ -135,7 +136,7 @@ export default class BuildItem extends Objective {
 		];
 	}
 
-	public async onMove(context: Context) {
+	public override async onMove(context: Context) {
 		this.movements++;
 
 		if (this.movements >= recalculateMovements) {
@@ -172,7 +173,7 @@ export default class BuildItem extends Objective {
 			return facingPoint;
 		}
 
-		const sortedObjects = objectUtilities.getSortedObjects(context, FindObjectType.Doodad, island.doodads as Doodad[]);
+		const sortedObjects = objectUtilities.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[]);
 
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.player.z) {
@@ -190,7 +191,7 @@ export default class BuildItem extends Objective {
 								z: doodad.z,
 							};
 
-							const tile = game.getTileFromPoint(point);
+							const tile = context.island.getTileFromPoint(point);
 
 							if (baseUtilities.isGoodBuildTile(context, point, tile)) {
 								return point;
@@ -213,7 +214,7 @@ export default class BuildItem extends Objective {
 		let waterType: TerrainType;
 		let treeRequirementCount = 6;
 
-		switch (island.biomeType) {
+		switch (context.island.biomeType) {
 			case BiomeType.Coastal:
 				commonTerrainType = TerrainType.Grass;
 				rockType = TerrainType.Rocks;
@@ -252,7 +253,7 @@ export default class BuildItem extends Objective {
 					z: origin.z,
 				};
 
-				const tile = game.getTileFromPoint(point);
+				const tile = context.island.getTileFromPoint(point);
 				if (tile.doodad) {
 					const description = tile.doodad.description();
 					if (description && description.isTree) {

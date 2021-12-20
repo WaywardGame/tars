@@ -2,9 +2,8 @@ import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { EquipType } from "game/entity/IHuman";
 import { ItemType } from "game/item/IItem";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { CreatureSearch } from "../../ITars";
@@ -19,6 +18,7 @@ import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionFo
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import EquipItem from "../other/item/EquipItem";
+
 
 export default class GatherFromCreature extends Objective {
 
@@ -37,7 +37,7 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasCarveItem = itemUtilities.hasInventoryItemForAction(context, ActionType.Carve);
+		const hasTool = itemUtilities.hasInventoryItemForAction(context, ActionType.Butcher);
 
 		return objectUtilities.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
 			.map(creature => {
@@ -56,8 +56,8 @@ export default class GatherFromCreature extends Objective {
 					objectives.push(new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand));
 				}
 
-				if (!hasCarveItem) {
-					objectives.push(new AcquireItemForAction(ActionType.Carve));
+				if (!hasTool) {
+					objectives.push(new AcquireItemForAction(ActionType.Butcher));
 				}
 
 				objectives.push((new MoveToTarget(creature, false)).trackCreature(creature));
@@ -79,7 +79,7 @@ export default class GatherFromCreature extends Objective {
 			});
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		return 150;
 	}
 

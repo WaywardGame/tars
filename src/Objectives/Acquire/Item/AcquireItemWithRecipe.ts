@@ -3,9 +3,8 @@ import { IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
 import { IRequirementInfo, RequirementStatus, WeightType } from "game/item/IItemManager";
 import Item from "game/item/Item";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../../Context";
 import { ContextDataType } from "../../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
@@ -17,11 +16,12 @@ import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
 import MoveItem from "../../other/item/MoveItem";
 import CompleteRequirements from "../../utility/CompleteRequirements";
-import MoveToLand from "../../utility/MoveToLand";
-
+import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+
+
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
@@ -37,11 +37,11 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} with a recipe`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(): boolean {
+	public override shouldIncludeContextHashCode(): boolean {
 		// we care about the context's reserved items
 		return true;
 	}
@@ -49,13 +49,13 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const canCraftFromIntermediateChest = !this.recipe.requiresFire && !this.recipe.requiredDoodads;
 
-		const requirementInfo = itemManager.hasAdditionalRequirements(context.player, this.itemType);
+		const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, this.itemType);
 
 		const checker = itemUtilities.processRecipe(context, this.recipe, false, this.allowInventoryItems);
 		const checkerWithIntermediateChest = itemUtilities.processRecipe(context, this.recipe, true, this.allowInventoryItems);
 
 		const availableInventoryWeight = itemUtilities.getAvailableInventoryWeight(context);
-		const estimatedItemWeight = itemManager.getWeight(this.itemType, WeightType.Static);
+		const estimatedItemWeight = context.island.items.getWeight(this.itemType, WeightType.Static);
 
 		const mustUseIntermediateChest = availableInventoryWeight < estimatedItemWeight;
 		if (mustUseIntermediateChest) {
@@ -108,9 +108,9 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		if (!requirementsMet) {
 			if (this.recipe.baseComponent !== undefined && !itemBase) {
-				this.log.info(`Missing base component ${itemManager.isGroup(this.recipe.baseComponent) ? ItemTypeGroup[this.recipe.baseComponent] : ItemType[this.recipe.baseComponent]}`);
+				this.log.info(`Missing base component ${context.island.items.isGroup(this.recipe.baseComponent) ? ItemTypeGroup[this.recipe.baseComponent] : ItemType[this.recipe.baseComponent]}`);
 
-				if (itemManager.isGroup(this.recipe.baseComponent)) {
+				if (context.island.items.isGroup(this.recipe.baseComponent)) {
 					objectives.push(new AcquireItemByGroup(this.recipe.baseComponent).passAcquireData(this, ReserveType.Hard));
 
 				} else {
@@ -126,10 +126,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 					const componentType = recipeComponent.type;
 					const reserveType = recipeComponent.consumedAmount === 0 ? ReserveType.Soft : ReserveType.Hard;
 
-					this.log.info(`Missing component ${itemManager.isGroup(componentType) ? ItemTypeGroup[componentType] : ItemType[componentType]} x${missingAmount}`);
+					this.log.info(`Missing component ${context.island.items.isGroup(componentType) ? ItemTypeGroup[componentType] : ItemType[componentType]} x${missingAmount}`);
 
 					for (let j = 0; j < missingAmount; j++) {
-						if (itemManager.isGroup(componentType)) {
+						if (context.island.items.isGroup(componentType)) {
 							objectives.push(new AcquireItemByGroup(componentType).passAcquireData(this, reserveType));
 
 						} else {
@@ -154,7 +154,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item) {
-							if (itemManager.isContainableInContainer(item, intermediateChest)) {
+							if (context.island.items.isContainableInContainer(item, intermediateChest)) {
 								objectives.push(new MoveItem(item, context.player.inventory, intermediateChest));
 							}
 						}

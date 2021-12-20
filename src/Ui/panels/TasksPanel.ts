@@ -6,6 +6,7 @@ import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import Divider from "ui/component/Divider";
 import { DoodadType } from "game/doodad/IDoodad";
+import { Bound } from "utilities/Decorators";
 
 import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITars";
 import { AcquireItemMode } from "../../mode/modes/AcquireItem";
@@ -39,7 +40,6 @@ export default class TasksPanel extends TarsPanel {
             .appendTo(this);
 
         new Divider().appendTo(this);
-
 
         new LabelledRow()
             .classes.add("dropdown-label")

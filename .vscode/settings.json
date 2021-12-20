@@ -1,9 +1,0 @@
-{
-	"files.exclude": {
-		"mod-reference": true,
-		"out": true
-	},
-	"typescript.preferences.importModuleSpecifier": "relative",
-	"typescript.format.insertSpaceBeforeFunctionParenthesis": false,
-	"javascript.format.insertSpaceBeforeFunctionParenthesis": false
-}

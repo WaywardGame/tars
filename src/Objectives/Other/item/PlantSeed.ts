@@ -61,33 +61,49 @@ export default class PlantSeed extends Objective {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hoe));
 		}
 
-		const emptyTilledTile = TileHelpers.findMatchingTile(baseUtilities.getBasePosition(context), (point, tile) => {
-			const tileContainer = tile as ITileContainer;
-			return game.isTileEmpty(tile) &&
-				TileHelpers.isOpenTile(point, tile) &&
-				TileHelpers.isTilled(tile) &&
-				allowedTiles.includes(TileHelpers.getType(tile)) &&
-				(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
-		}, { maxTilesChecked: gardenMaxTilesChecked });
+		const emptyTilledTile = TileHelpers.findMatchingTile(
+			context.island,
+			baseUtilities.getBasePosition(context),
+			(island, point, tile) => {
+				const tileContainer = tile as ITileContainer;
+				return island.isTileEmpty(tile) &&
+					TileHelpers.isOpenTile(island, point, tile) &&
+					TileHelpers.isTilled(tile) &&
+					allowedTiles.includes(TileHelpers.getType(tile)) &&
+					(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
+			}, { maxTilesChecked: gardenMaxTilesChecked });
 		if (emptyTilledTile !== undefined) {
 			objectives.push(new MoveToTarget(emptyTilledTile, true));
 
 		} else {
 			const nearbyTillableTile = TileHelpers.findMatchingTiles(
+				context.island,
 				baseUtilities.getBasePosition(context),
-				(point, tile) => {
+				(_, point, tile) => {
+					if (tile.creature || tile.npc) {
+						return false;
+					}
+
 					const tileType = TileHelpers.getType(tile);
-					if (tileType === TerrainType.Grass && !tileUtilities.canDig(tile)) {
-						return false;
-					}
+					if (tileType === TerrainType.Grass) {
+						if (!tileUtilities.canDig(context, tile)) {
+							return false;
+						}
 
-					if (!allowedTilesSet.has(tileType)) {
-						return false;
-					}
+						// digging grass will reveal dirt
+						if (!allowedTilesSet.has(TerrainType.Dirt)) {
+							return false;
+						}
 
-					const terrainDescription = terrainDescriptions[tileType];
-					if (!terrainDescription?.tillable) {
-						return false;
+					} else {
+						if (!allowedTilesSet.has(tileType)) {
+							return false;
+						}
+
+						const terrainDescription = terrainDescriptions[tileType];
+						if (!terrainDescription?.tillable) {
+							return false;
+						}
 					}
 
 					return baseUtilities.isOpenArea(context, point, tile);

@@ -22,13 +22,21 @@ import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import { inventoryItemInfo } from "../../../ITars";
 import EmptyWaterContainer from "../EmptyWaterContainer";
 
+export interface IStartWaterStillDesalinationOptions {
+	disableAttaching: boolean;
+	disablePouring: boolean;
+	disableStarting: boolean;
+	forceStarting: boolean;
+	forceStoke: boolean;
+}
+
 /**
  * It will ensure the water still is desalinating as long as we're near the base
  * It will pour water into the still, attach containers, gather water, start & stoke fires.
  */
 export default class StartWaterStillDesalination extends Objective {
 
-	constructor(private readonly waterStill: Doodad) {
+	constructor(private readonly waterStill: Doodad, private readonly options: Partial<IStartWaterStillDesalinationOptions> = {}) {
 		super();
 	}
 
@@ -41,7 +49,7 @@ export default class StartWaterStillDesalination extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (doodadUtilities.isWaterStillDrinkable(this.waterStill)) {
+		if (!this.options.forceStoke && doodadUtilities.isWaterStillDrinkable(this.waterStill)) {
 			// water is ready
 			return ObjectiveResult.Ignore;
 		}
@@ -57,7 +65,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !itemUtilities.isSafeToDrinkItem(waterContainer));
 
-		if (this.waterStill.gatherReady === undefined) {
+		if (!this.options.disablePouring && this.waterStill.gatherReady === undefined) {
 			// water still cannot be desalinated yet
 			let isWaterInContainer = false;
 
@@ -100,7 +108,7 @@ export default class StartWaterStillDesalination extends Objective {
 			objectives.push(new UseItem(ActionType.Pour, availableWaterContainer));
 		}
 
-		if (!this.waterStill.stillContainer) {
+		if (!this.options.disableAttaching && !this.waterStill.stillContainer) {
 			this.log.info("No still container");
 
 			if (availableWaterContainer === undefined) {
@@ -123,29 +131,34 @@ export default class StartWaterStillDesalination extends Objective {
 			objectives.push(new UseItem(ActionType.AttachContainer, availableWaterContainer));
 		}
 
-		if (!waterStillDescription.providesFire) {
-			// only start the fire if we are near the base or if we have an emergency
-			if (baseUtilities.isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
-				// we need to start the fire. stoke fire will do it for us
+		if (!this.options.disableStarting) {
+			if (this.options.forceStoke) {
 				objectives.push(new StokeFire(this.waterStill));
-				objectives.push(new Restart());
 
-			} else {
-				this.log.info("Too far away from water still");
-				return ObjectiveResult.Ignore;
-			}
+			} else if (!waterStillDescription.providesFire) {
+				// only start the fire if we are near the base or if we have an emergency
+				if (this.options.forceStarting || baseUtilities.isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
+					// we need to start the fire. stoke fire will do it for us
+					objectives.push(new StokeFire(this.waterStill));
+					objectives.push(new Restart());
 
-		} else if (this.waterStill.decay !== undefined && this.waterStill.gatherReady !== undefined) {
-			// water still is lit and desalinating
-			if (this.waterStill.decay <= this.waterStill.gatherReady) {
-				this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}`);
+				} else {
+					this.log.info("Too far away from water still");
+					return ObjectiveResult.Ignore;
+				}
 
-				objectives.push(new StokeFire(this.waterStill));
-				objectives.push(new Restart());
+			} else if (this.waterStill.decay !== undefined && this.waterStill.gatherReady !== undefined) {
+				// water still is lit and desalinating
+				if (this.waterStill.decay <= this.waterStill.gatherReady) {
+					this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}`);
 
-			} else {
-				// water still is desalinating and the decay is enough for the process to finish
-				return ObjectiveResult.Ignore;
+					objectives.push(new StokeFire(this.waterStill));
+					objectives.push(new Restart());
+
+				} else {
+					// water still is desalinating and the decay is enough for the process to finish
+					return ObjectiveResult.Ignore;
+				}
 			}
 		}
 

@@ -39,7 +39,7 @@ export default class DigTile extends Objective {
 		const digUntilTypeIsNot = this.options.digUntilTypeIsNot;
 		if (digUntilTypeIsNot !== undefined) {
 			objectives.push(new Lambda(async () => {
-				if (digUntilTypeIsNot === TileHelpers.getType(game.getTileFromPoint(this.target))) {
+				if (digUntilTypeIsNot === TileHelpers.getType(context.island.getTileFromPoint(this.target))) {
 					return ObjectiveResult.Restart;
 				}
 

@@ -16,7 +16,7 @@ export default class AddDifficulty extends Objective {
 		return undefined;
 	}
 
-	public isDynamic(): boolean {
+	public override isDynamic(): boolean {
 		return true;
 	}
 

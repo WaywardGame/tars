@@ -2,9 +2,8 @@ import { ActionType } from "game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { ITerrainSearch } from "../../ITars";
@@ -13,6 +12,7 @@ import { itemUtilities } from "../../utilities/Item";
 import { tileUtilities } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
+
 
 export default class GatherFromTerrain extends Objective {
 
@@ -23,14 +23,14 @@ export default class GatherFromTerrain extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]}:${itemManager.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
+		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]}:${localIsland.items.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
 		return "Gathering items from terrain";
 	}
 
-	public canGroupTogether(): boolean {
+	public override canGroupTogether(): boolean {
 		return true;
 	}
 
@@ -48,14 +48,14 @@ export default class GatherFromTerrain extends Objective {
 			const tileLocations = await tileUtilities.getNearestTileLocation(context, terrainSearch.type);
 
 			for (const tileLocation of tileLocations) {
-				if (!tileUtilities.canGather(tileLocation.tile)) {
+				if (!tileUtilities.canGather(context, tileLocation.tile)) {
 					continue;
 				}
 
 				let step = 0;
 
 				const point = tileLocation.point;
-				const tileData = game.getTileData(point.x, point.y, point.z);
+				const tileData = context.island.getTileData(point.x, point.y, point.z);
 				if (tileData && tileData.length > 0) {
 					const tileDataStep = tileData[0].step;
 					if (tileDataStep !== undefined) {
@@ -124,7 +124,7 @@ export default class GatherFromTerrain extends Objective {
 		return objectivePipelines;
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		return 10;
 	}
 

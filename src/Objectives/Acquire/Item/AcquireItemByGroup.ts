@@ -1,10 +1,10 @@
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
-
 import Context from "../../../Context";
 import { ObjectiveExecutionResult } from "../../../IObjective";
-
 import AcquireBase, { IAcquireItemOptions } from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
+
+
 
 export default class AcquireItemByGroup extends AcquireBase {
 
@@ -18,20 +18,20 @@ export default class AcquireItemByGroup extends AcquireBase {
 		return `AcquireItemByGroup:${ItemTypeGroup[this.itemTypeGroup]}`;
 	}
 
-	public getStatus(): string | undefined {
-		return `Acquiring ${itemManager.getItemTypeGroupName(this.itemTypeGroup)}`;
+	public getStatus(context: Context): string | undefined {
+		return `Acquiring ${context.island.items.getItemTypeGroupName(this.itemTypeGroup)}`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
-		return this.getItemTypes().some(itemType => context.isReservedItemType(itemType));
+	public override shouldIncludeContextHashCode(context: Context): boolean {
+		return this.getItemTypes(context).some(itemType => context.isReservedItemType(itemType));
 	}
 
-	public async execute(): Promise<ObjectiveExecutionResult> {
-		let itemTypes = this.getItemTypes();
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		let itemTypes = this.getItemTypes(context);
 		if (this.options.excludeItemTypes) {
 			itemTypes = itemTypes.filter(itemType => !this.options.excludeItemTypes!.has(itemType));
 		}
@@ -39,10 +39,10 @@ export default class AcquireItemByGroup extends AcquireBase {
 		return itemTypes.map(itemType => [new AcquireItem(itemType, this.options).passAcquireData(this)]);
 	}
 
-	private getItemTypes(): ItemType[] {
+	private getItemTypes(context: Context): ItemType[] {
 		let result = AcquireItemByGroup.cache.get(this.itemTypeGroup);
 		if (result === undefined) {
-			result = Array.from(itemManager.getGroupItems(this.itemTypeGroup));
+			result = Array.from(context.island.items.getGroupItems(this.itemTypeGroup));
 			AcquireItemByGroup.cache.set(this.itemTypeGroup, result);
 		}
 

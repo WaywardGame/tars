@@ -55,7 +55,7 @@ export default class GatherWaterFromStill extends Objective {
 		}
 
 		objectives.push(new MoveToTarget(this.waterStill, true));
-		objectives.push(new UseItem(ActionType.GatherWater, this.item)
+		objectives.push(new UseItem(ActionType.GatherLiquid, this.item)
 			.setStatus(() => `Gathering water from ${this.waterStill.getName()}`));
 
 		return objectives;

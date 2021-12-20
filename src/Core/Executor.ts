@@ -56,6 +56,8 @@ class Executor {
 		this.interrupted = false;
 		this.weightChanged = false;
 		this.lastPlan = undefined;
+		
+		planner.reset();
 	}
 
 	public interrupt() {

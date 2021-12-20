@@ -11,12 +11,12 @@ import { ITarsMode } from "../IMode";
 
 export class AcquireItemMode implements ITarsMode {
 
-	private finished: () => void;
+	private finished: (success: boolean) => void;
 
 	constructor(private readonly itemType: ItemType) {
 	}
 
-	public async initialize(_: Context, finished: () => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void) {
 		this.finished = finished;
 	}
 
@@ -29,7 +29,7 @@ export class AcquireItemMode implements ITarsMode {
 	public onInventoryItemAddOrUpdate(_: Player, item: Item) {
 		// todo: compare player with context.player?
 		if (item.type === this.itemType) {
-			this.finished();
+			this.finished(true);
 		}
 		// todo: analyze inventory?
 	}

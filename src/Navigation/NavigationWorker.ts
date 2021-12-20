@@ -81,7 +81,7 @@ let gatherableTypes: Set<TerrainType>;
 /////////////////////////////
 
 interface INavigationInfo {
-	tileLocations: { [index: number]: IKDTree };
+	tileLocations: { [index: number]: any /* IKDTree */ };
 	kdTreeTileTypes: Uint8Array;
 }
 

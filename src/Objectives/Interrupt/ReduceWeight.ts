@@ -1,9 +1,9 @@
 import { WeightStatus } from "game/entity/player/IPlayer";
-
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 import OrganizeInventory, { IOriganizeInventoryOptions } from "../utility/OrganizeInventory";
+
 
 export default class ReduceWeight extends Objective {
 
@@ -19,15 +19,15 @@ export default class ReduceWeight extends Objective {
 		return "Reducing weight";
 	}
 
-	public canSaveChildObjectives(): boolean {
+	public override canSaveChildObjectives(): boolean {
 		return false;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return true;
 	}
 

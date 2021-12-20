@@ -1,13 +1,15 @@
+import Stream from "@wayward/goodstream/Stream";
+import { SkillType } from "game/entity/IHuman";
 import ActionExecutor from "game/entity/action/ActionExecutor";
 import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { ListEnder } from "language/Translation";
+import Dictionary from "language/Dictionary";
+import { ListEnder } from "language/ITranslation";
+import Translation from "language/Translation";
 import TileHelpers from "utilities/game/TileHelpers";
-
 import Context from "../../Context";
 import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import { ReserveType } from "../../ITars";
@@ -15,6 +17,7 @@ import Objective from "../../Objective";
 import { actionUtilities } from "../../utilities/Action";
 import { itemUtilities } from "../../utilities/Item";
 import { tileUtilities } from "../../utilities/Tile";
+
 
 export enum ExecuteActionType {
 	Generic,
@@ -50,13 +53,14 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemTypes[0]).getString()}`;
 	}
 
-	public isDynamic(): boolean {
+	public override isDynamic(): boolean {
 		return true;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		// settings this here screws up AcquireWaterContainer
 		// only set this once we get the item
-		context.setData(this.contextDataKey, undefined);
+		// context.setData(this.contextDataKey, undefined);
 
 		if (context.calculatingDifficulty) {
 			return 0;
@@ -93,7 +97,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					return ObjectiveResult.Restart;
 				}
 
-				if (!tileUtilities.canGather(tile, true)) {
+				if (!tileUtilities.canGather(context, tile, true)) {
 					return ObjectiveResult.Restart;
 				}
 
@@ -102,7 +106,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					actionType = ActionType.Harvest;
 
 				} else {
-					actionType = ActionType.Gather;
+					actionType = description.gatherSkillUse === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Gather;
 				}
 
 				actionArguments.push(itemUtilities.getBestToolForDoodadGather(context, doodad));
@@ -110,9 +114,9 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				break;
 
 			case ExecuteActionType.Terrain:
-				actionType = terrainDescription.gather ? ActionType.Gather : ActionType.Dig;
+				actionType = terrainDescription.gather ? ActionType.Mine : ActionType.Dig;
 
-				if (actionType === ActionType.Dig && !tileUtilities.canDig(tile)) {
+				if (actionType === ActionType.Dig && !tileUtilities.canDig(context, tile)) {
 					return ObjectiveResult.Restart;
 				}
 
@@ -121,14 +125,14 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				break;
 
 			case ExecuteActionType.Corpse:
-				const carveTool = itemUtilities.getBestTool(context, ActionType.Carve);
+				const tool = itemUtilities.getBestTool(context, ActionType.Butcher);
 
-				if (carveTool === undefined || !tileUtilities.canCarveCorpse(tile)) {
+				if (tool === undefined || !tileUtilities.canButcherCorpse(context, tile)) {
 					return ObjectiveResult.Restart;
 				}
 
-				actionType = ActionType.Carve;
-				actionArguments.push(carveTool);
+				actionType = ActionType.Butcher;
+				actionArguments.push(tool);
 
 				break;
 
@@ -163,7 +167,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		return result;
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		return 1;
 	}
 
@@ -209,6 +213,8 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				return ObjectiveResult.Complete;
 			}
 		}
+
+		context.setData(this.contextDataKey, undefined);
 
 		return ObjectiveResult.Pending;
 	}

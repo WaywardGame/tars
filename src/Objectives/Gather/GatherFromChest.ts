@@ -1,8 +1,7 @@
 import Doodad from "game/doodad/Doodad";
 import { IContainer, ItemType } from "game/item/IItem";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { ContextDataType } from "../../IContext";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
@@ -11,6 +10,7 @@ import { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import ReserveItems from "../core/ReserveItems";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+
 
 export default class GatherFromChest extends Objective {
 
@@ -29,7 +29,7 @@ export default class GatherFromChest extends Objective {
 		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a chest`;
 	}
 
-	public canIncludeContextHashCode(): boolean {
+	public override canIncludeContextHashCode(): boolean {
 		return true;
 	}
 
@@ -40,7 +40,7 @@ export default class GatherFromChest extends Objective {
 
 	// todo: add getWeightChange(): number and take that into account when grouping together?
 
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public override shouldIncludeContextHashCode(context: Context): boolean {
 		return context.isReservedItemType(this.itemType);
 	}
 
@@ -57,7 +57,7 @@ export default class GatherFromChest extends Objective {
 
 		return chests
 			.map(chest => {
-				const items = itemManager.getItemsInContainerByType(chest as IContainer, this.itemType, true)
+				const items = context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, true)
 					.filter(item =>
 						!context.isHardReservedItem(item) &&
 						(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur)));

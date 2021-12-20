@@ -18,14 +18,16 @@ class CreatureUtilities {
 		return context.player.getWeightStatus() !== WeightStatus.Overburdened && ((health.value / health.max) <= 0.15 || stamina.value <= 2);
 	}
 
-	public getNearbyCreatures(point: IVector3): Creature[] {
+	public getNearbyCreatures(context: Context): Creature[] {
+		const point = context.player;
+
 		const creatures: Creature[] = [];
 
 		for (let x = -this.nearbyCreatureRadius; x <= this.nearbyCreatureRadius; x++) {
 			for (let y = -this.nearbyCreatureRadius; y <= this.nearbyCreatureRadius; y++) {
-				const validPoint = game.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
+				const validPoint = context.island.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
 				if (validPoint) {
-					const tile = game.getTileFromPoint(validPoint);
+					const tile = context.island.getTileFromPoint(validPoint);
 					if (tile.creature && !tile.creature.isTamed()) {
 						creatures.push(tile.creature);
 					}

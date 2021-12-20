@@ -26,7 +26,7 @@ class BaseUtilities {
 	}
 
 	public shouldBuildWaterStills(context: Context) {
-		return island.biomeType !== BiomeType.IceCap;
+		return context.island.biomeType !== BiomeType.IceCap;
 	}
 
 	public isGoodBuildTile(context: Context, point: IVector3, tile: ITile, openAreaRadius?: number): boolean {
@@ -55,7 +55,7 @@ class BaseUtilities {
 		const x = point.x;
 		const y = point.y;
 
-		const caveTerrain = Terrains[TileHelpers.getType(game.getTile(x, y, WorldZ.Cave))];
+		const caveTerrain = Terrains[TileHelpers.getType(context.island.getTile(x, y, WorldZ.Cave))];
 		if (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater)) {
 			// unlimited fresh water
 			return true;
@@ -72,9 +72,9 @@ class BaseUtilities {
 
 		for (let x2 = x - 6; x2 <= x + 6; x2++) {
 			for (let y2 = y - 6; y2 <= y + 6; y2++) {
-				const validPoint = game.ensureValidPoint({ x: x2, y: y2, z: point.z });
+				const validPoint = context.island.ensureValidPoint({ x: x2, y: y2, z: point.z });
 				if (validPoint) {
-					const tileDescription = Terrains[TileHelpers.getType(game.getTileFromPoint(validPoint))];
+					const tileDescription = Terrains[TileHelpers.getType(context.island.getTileFromPoint(validPoint))];
 					if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
 						// seawater
 						return true;
@@ -100,13 +100,8 @@ class BaseUtilities {
 						z: point.z,
 					};
 
-					if (!game.ensureValidPoint(nearbyPoint)) {
+					if (!context.island.ensureValidPoint(nearbyPoint)) {
 						continue;
-					}
-
-					const nearbyTile = game.getTileFromPoint(nearbyPoint);
-					if (nearbyTile.doodad) {
-						return false;
 					}
 
 					const container = tile as IContainer;
@@ -114,7 +109,8 @@ class BaseUtilities {
 						return false;
 					}
 
-					if (!tileUtilities.isOpenTile(context, nearbyPoint, nearbyTile) || game.isTileFull(nearbyTile)) {
+					const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
+					if (!tileUtilities.isOpenTile(context, nearbyPoint, nearbyTile)) {
 						return false;
 					}
 				}
@@ -173,10 +169,11 @@ class BaseUtilities {
 		const basePosition = this.getBasePosition(context);
 
 		this.tilesNearBaseCache ??= TileHelpers.findMatchingTiles(
+			context.island,
 			basePosition,
 			() => true,
 			{
-				canVisitTile: (point) => this.isNearBase(context, point),
+				canVisitTile: (island, point) => this.isNearBase(context, point),
 			},
 		);
 
@@ -229,7 +226,7 @@ class BaseUtilities {
 		return result;
 	}
 
-	public getCreaturesNearBase(context: Context): Creature[] {
+	public getNonTamedCreaturesNearBase(context: Context): Creature[] {
 		const result: Creature[] = [];
 
 		for (const { tile } of this.getTilesNearBase(context)) {

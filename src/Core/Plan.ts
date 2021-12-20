@@ -86,7 +86,7 @@ export default class Plan implements IPlan {
 		const objectiveStack: IObjectiveInfo[] = [...this.objectives];
 
 		if (objectiveStack.length > 1) {
-			this.log.info("Executing plan", Objective.getPipelineString(objectiveStack.map(objectiveInfo => objectiveInfo.objective)));
+			this.log.info("Executing plan", Objective.getPipelineString(this.context, objectiveStack.map(objectiveInfo => objectiveInfo.objective)));
 
 			if (this.objectiveInfo.objective !== objectiveStack[0].objective) {
 				// print logs for the planned objective if it's not in the stack
@@ -117,7 +117,7 @@ export default class Plan implements IPlan {
 			}
 
 			// queue this messsage to be logged if another message occurs
-			let message = `Executing ${objectiveInfo.objective.getHashCode()} [${objectiveInfo.objective.getStatusMessage()}]`;
+			let message = `Executing ${objectiveInfo.objective.getHashCode()} [${objectiveInfo.objective.getStatusMessage(this.context)}]`;
 
 			const contextHashCode = this.context.getHashCode();
 			if (contextHashCode.length > 0) {
@@ -185,7 +185,7 @@ export default class Plan implements IPlan {
 							resultObjectives = objectivePipeline.objectives;
 
 						} else {
-							this.log.error("Invalid return value", objectiveInfo.objective.getHashCode(), objectivePipeline);
+							this.log.warn(`Invalid return value for ${objectiveInfo.objective.getHashCode()}. status: ${objectivePipeline.status}`);
 							break;
 						}
 
@@ -221,9 +221,10 @@ export default class Plan implements IPlan {
 				}
 			}*/
 		}
-		if (objectiveStack.length > 0) {
-			console.warn("maybe a bug - Ignoreobjective stack", objectiveStack);
-		}
+
+		// if (objectiveStack.length > 0) {
+		// 	console.warn("maybe a bug - Ignoreobjective stack", objectiveStack);
+		// }
 
 		// return Ignored if at least one was ignored
 		return {
@@ -573,7 +574,7 @@ export default class Plan implements IPlan {
 
 		// move gather objectives to the front with sorting
 		if (gatherObjectiveTrees.length > 0) {
-			// travelling salesman problem with the first vertex being the players location
+			// traveling salesman problem with the first vertex being the players location
 			const unvisited: Array<ITreeVertex> = [];
 			const visited: Array<ITreeVertex> = [];
 

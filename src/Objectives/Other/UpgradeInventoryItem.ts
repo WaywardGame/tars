@@ -81,10 +81,11 @@ export default class UpgradeInventoryItem extends Objective {
 		};
 
 		if (itemInfo.itemTypes) {
-			for (const itemTypeOrGroup of itemInfo.itemTypes) {
+			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes() : itemInfo.itemTypes;
+			for (const itemTypeOrGroup of itemTypes) {
 				if (itemTypeOrGroup !== item.type) {
-					if (itemManager.isGroup(itemTypeOrGroup)) {
-						const groupItems = itemManager.getGroupItems(itemTypeOrGroup);
+					if (context.island.items.isGroup(itemTypeOrGroup)) {
+						const groupItems = context.island.items.getGroupItems(itemTypeOrGroup);
 						for (const groupItemType of groupItems) {
 							this.addUpgradeObjectives(objectivePipelines, groupItemType, isUpgrade);
 						}
@@ -107,7 +108,7 @@ export default class UpgradeInventoryItem extends Objective {
 
 		if (itemInfo.actionTypes) {
 			for (const actionType of itemInfo.actionTypes) {
-				for (const itemType of AcquireItemForAction.getItems(actionType)) {
+				for (const itemType of AcquireItemForAction.getItems(context, actionType)) {
 					this.addUpgradeObjectives(objectivePipelines, itemType, isUpgrade);
 				}
 			}

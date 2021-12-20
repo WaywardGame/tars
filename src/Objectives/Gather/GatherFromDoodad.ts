@@ -1,8 +1,7 @@
 import Doodad from "game/doodad/Doodad";
 import { ItemType } from "game/item/IItem";
-import { Dictionary } from "language/Dictionaries";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-
 import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
 import { DoodadSearchMap } from "../../ITars";
@@ -11,6 +10,7 @@ import { objectUtilities } from "../../utilities/Object";
 import { tileUtilities } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
+
 
 export default class GatherFromDoodad extends Objective {
 
@@ -28,7 +28,7 @@ export default class GatherFromDoodad extends Objective {
 		return "Gathering items from doodads";
 	}
 
-	public canGroupTogether(): boolean {
+	public override canGroupTogether(): boolean {
 		return true;
 	}
 
@@ -56,7 +56,7 @@ export default class GatherFromDoodad extends Objective {
 
 			// todo: use difficulty
 
-			return tileUtilities.canGather(doodad.getTile(), true);
+			return tileUtilities.canGather(context, doodad.getTile(), true);
 		}, 5)
 			.map(target => {
 				const objectives: IObjective[] = [];
@@ -71,7 +71,7 @@ export default class GatherFromDoodad extends Objective {
 			});
 	}
 
-	protected getBaseDifficulty(context: Context): number {
+	protected override getBaseDifficulty(context: Context): number {
 		return 20;
 	}
 

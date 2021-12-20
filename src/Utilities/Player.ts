@@ -1,6 +1,6 @@
 import { IStatMax, Stat } from "game/entity/IStats";
-
 import Context from "../Context";
+
 
 class PlayerUtilities {
 
@@ -13,12 +13,11 @@ class PlayerUtilities {
 	}
 
 	public isUsingVehicle(context: Context) {
-		return context.player.vehicleItemId !== undefined;
+		return !!context.player.vehicleItemReference;
 	}
 
 	public isHealthy(context: Context) {
-		return context.player.stat.get<IStatMax>(Stat.Health).value > 8
-			&& context.player.stat.get<IStatMax>(Stat.Hunger).value > 8;
+		return context.player.stat.get<IStatMax>(Stat.Health).value > 8 && context.player.stat.get<IStatMax>(Stat.Hunger).value > 8;
 	}
 
 	public getRecoverThreshold(context: Context, stat: Stat) {

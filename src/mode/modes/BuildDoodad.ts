@@ -20,7 +20,7 @@ import { itemUtilities } from "../../utilities/Item";
 
 export class BuildDoodadMode implements ITarsMode {
 
-	private finished: () => void;
+	private finished: (success: boolean) => void;
 
 	private doodad: number | undefined;
 
@@ -30,7 +30,7 @@ export class BuildDoodadMode implements ITarsMode {
 		this.doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
 	}
 
-	public async initialize(_: Context, finished: () => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void) {
 		this.finished = finished;
 	}
 
@@ -39,7 +39,7 @@ export class BuildDoodadMode implements ITarsMode {
 		// return [new AcquireBuildMoveToDoodad(this.doodadTypeOrGroup)];
 
 		// const doodad = findDoodad(context, "BuildDoodad", (d: Doodad) => this.doodadTypes.has(d.type));
-		const doodad = this.doodad ? island.doodads[this.doodad] : undefined;
+		const doodad = this.doodad ? context.player.island.doodads.get(this.doodad) : undefined;
 		if (doodad && !doodad.isValid()) {
 			this.doodad = undefined;
 		}
@@ -49,9 +49,9 @@ export class BuildDoodadMode implements ITarsMode {
 		if (doodad) {
 			const description = doodad.description();
 			if (description && description.lit !== undefined) {
-				if (doodadManager.isGroup(this.doodadTypeOrGroup)) {
+				if (context.player.island.doodads.isGroup(this.doodadTypeOrGroup)) {
 					const litDescription = Doodads[description.lit];
-					if (litDescription && doodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {
+					if (litDescription && context.player.island.doodads.isInGroup(description.lit, this.doodadTypeOrGroup)) {
 						requiresFire = true;
 					}
 
@@ -71,7 +71,7 @@ export class BuildDoodadMode implements ITarsMode {
 			} else {
 				objectives.push(new MoveToTarget(doodad, true));
 				objectives.push(new Lambda(async () => {
-					this.finished();
+					this.finished(true);
 					return ObjectiveResult.Complete;
 				}));
 			}

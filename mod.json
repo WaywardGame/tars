@@ -4,7 +4,7 @@
 	"version": "2.2",
 	"author": "Spacetech",
 	"github": "https://github.com/WaywardGame/tars",
-	"waywardVersion": "2.10.0-beta",
+	"waywardVersion": "2.11.0-beta",
 	"multiplayer": "clientside",
 	"file": "out/Tars",
 	"allowUnlockingMilestones": true,

@@ -10,7 +10,7 @@ import { playerUtilities } from "../../utilities/Player";
 import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
 import ReduceWeight from "../interrupt/ReduceWeight";
-import MoveToLand from "../utility/MoveToLand";
+import MoveToLand from "../utility/moveTo/MoveToLand";
 
 import Idle from "./Idle";
 import RunAwayFromTarget from "./RunAwayFromTarget";
@@ -34,7 +34,7 @@ export default class Rest extends Objective {
 			return new MoveToLand();
 		}
 
-		const nearbyCreatures = creatureUtilities.getNearbyCreatures(context.player);
+		const nearbyCreatures = creatureUtilities.getNearbyCreatures(context);
 		if (nearbyCreatures.length > 0) {
 			const nearbyCreature = nearbyCreatures[0];
 
@@ -57,18 +57,32 @@ export default class Rest extends Objective {
 			return objectivePipelines;
 		}
 
-		const item = itemUtilities.getInventoryItemsWithUse(context, ActionType.Rest)[0];
-		if (item) {
-			return new ExecuteAction(ActionType.Sleep, (context, action) => {
-				action.execute(context.player, item);
+		const objectivePipeline: IObjective[] = [];
+
+		const extinguishableItem = itemUtilities.getInventoryItemsWithUse(context, ActionType.Extinguish)[0];
+		if (extinguishableItem) {
+			// don't set yourself on fire while sleeping
+			objectivePipeline.push(new ExecuteAction(ActionType.Extinguish, (context, action) => {
+				action.execute(context.player, extinguishableItem);
 				return ObjectiveResult.Complete;
-			}).setStatus(this);
+			}));
 		}
 
-		return new ExecuteAction(ActionType.Rest, (context, action) => {
-			action.execute(context.player);
-			return ObjectiveResult.Complete;
-		}).setStatus(this);
+		const bed = context.inventory.bed;
+		if (bed) {
+			objectivePipeline.push(new ExecuteAction(ActionType.Sleep, (context, action) => {
+				action.execute(context.player, bed);
+				return ObjectiveResult.Complete;
+			}).setStatus(this));
+
+		} else {
+			objectivePipeline.push(new ExecuteAction(ActionType.Rest, (context, action) => {
+				action.execute(context.player);
+				return ObjectiveResult.Complete;
+			}).setStatus(this));
+		}
+
+		return objectivePipeline;
 	}
 
 }

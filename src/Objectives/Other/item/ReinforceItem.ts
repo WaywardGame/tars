@@ -49,7 +49,7 @@ export default class ReinforceItem extends Objective {
 		}
 
 		if (this.options.targetDurabilityMultipler !== undefined) {
-			const defaultDurability = itemManager.getDefaultDurability(context.player, this.item.weight, this.item.type, true);
+			const defaultDurability = context.island.items.getDefaultDurability(context.player, this.item.weight, this.item.type, true);
 			if (maxDur / defaultDurability >= this.options.targetDurabilityMultipler) {
 				return ObjectiveResult.Ignore;
 			}

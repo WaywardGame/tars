@@ -39,16 +39,16 @@ class TileUtilities {
 	}
 
 	public isSwimmingOrOverWater(context: Context) {
-		return context.player.isSwimming() || Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.water === true;
+		return context.player.isSwimming() || Terrains[TileHelpers.getType(context.player.island.getTileFromPoint(context.getPosition()))]?.water === true;
 	}
 
 	public isOverDeepSeaWater(context: Context) {
-		return TileHelpers.getType(game.getTileFromPoint(context.getPosition())) === TerrainType.DeepSeawater;
+		return TileHelpers.getType(context.player.island.getTileFromPoint(context.getPosition())) === TerrainType.DeepSeawater;
 		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
 	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {
-		if (game.isTileFull(tile)) {
+		if (context.player.island.isTileFull(tile)) {
 			return false;
 		}
 
@@ -57,6 +57,10 @@ class TileUtilities {
 		}
 
 		const terrainType = TileHelpers.getType(tile);
+		if (terrainType === TerrainType.CaveEntrance || terrainType === TerrainType.Lava || terrainType === TerrainType.CoolingLava) {
+			return false;
+		}
+
 		const terrainInfo = Terrains[terrainType];
 		if (terrainInfo) {
 			if (!terrainInfo.passable && !terrainInfo.water) {
@@ -72,7 +76,7 @@ class TileUtilities {
 	}
 
 	public isFreeOfOtherPlayers(context: Context, point: IVector3) {
-		const players = game.getPlayersAtPosition(point.x, point.y, point.z, false, true);
+		const players = context.player.island.getPlayersAtPosition(point.x, point.y, point.z, false, true);
 		if (players.length > 0) {
 			for (const player of players) {
 				if (player !== context.player) {
@@ -84,21 +88,21 @@ class TileUtilities {
 		return true;
 	}
 
-	public canGather(tile: ITile, skipDoodadCheck?: boolean) {
+	public canGather(context: Context, tile: ITile, skipDoodadCheck?: boolean) {
 		if (!skipDoodadCheck && !Terrains[TileHelpers.getType(tile)]?.gather && (tile.doodad || this.hasItems(tile))) {
 			return false;
 		}
 
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !game.isPlayerAtTile(tile, false, true);
+		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !context.player.island.isPlayerAtTile(tile, false, true);
 	}
 
-	public canDig(tile: ITile) {
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !this.hasItems(tile) && !game.isPlayerAtTile(tile, false, true);
+	public canDig(context: Context, tile: ITile) {
+		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !this.hasItems(tile) && !context.player.island.isPlayerAtTile(tile, false, true);
 	}
 
-	public canCarveCorpse(tile: ITile, skipCorpseCheck?: boolean) {
+	public canButcherCorpse(context: Context, tile: ITile, skipCorpseCheck?: boolean) {
 		return (skipCorpseCheck || this.hasCorpses(tile))
-			&& !tile.creature && !tile.npc && !this.hasItems(tile) && !game.isPlayerAtTile(tile, false, true) && !tileEventManager.blocksTile(tile);
+			&& !tile.creature && !tile.npc && !this.hasItems(tile) && !context.player.island.isPlayerAtTile(tile, false, true) && !context.player.island.tileEvents.blocksTile(tile);
 	}
 
 	public hasCorpses(tile: ITile) {

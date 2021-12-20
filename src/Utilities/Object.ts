@@ -3,7 +3,9 @@ import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import NPC from "game/entity/npc/NPC";
 import Item from "game/item/Item";
+import { AiType } from "game/entity/IEntity";
 
 import Context from "../Context";
 import { tileUtilities } from "./Tile";
@@ -13,6 +15,7 @@ export enum FindObjectType {
 	Doodad,
 	Corpse,
 	Item,
+	NPC,
 }
 
 class ObjectUtilities {
@@ -74,25 +77,30 @@ class ObjectUtilities {
 	}
 
 	public findDoodad(context: Context, id: string, isTarget: (doodad: Doodad) => boolean): Doodad | undefined {
-		return this.findObject(context, FindObjectType.Doodad, id, island.doodads as Doodad[], isTarget);
+		return this.findObject(context, FindObjectType.Doodad, id, context.player.island.doodads.getObjects() as Doodad[], isTarget);
 	}
 
 	public findDoodads(context: Context, id: string, isTarget: (doodad: Doodad) => boolean, top?: number): Doodad[] {
-		return this.findObjects(context, FindObjectType.Doodad, id, island.doodads as Doodad[], isTarget, top);
+		return this.findObjects(context, FindObjectType.Doodad, id, context.player.island.doodads.getObjects() as Doodad[], isTarget, top);
 	}
 
 	public findCreatures(context: Context, id: string, isTarget: (creature: Creature) => boolean, top?: number): Creature[] {
-		return this.findObjects(context, FindObjectType.Creature, id, island.creatures as Creature[], isTarget, top);
+		return this.findObjects(context, FindObjectType.Creature, id, context.player.island.creatures.getObjects() as Creature[], isTarget, top);
+	}
+
+	public findNPCS(context: Context, id: string, isTarget: (npc: NPC) => boolean, top?: number): NPC[] {
+		return this.findObjects(context, FindObjectType.NPC, id, context.player.island.npcs.getObjects() as NPC[], isTarget, top);
 	}
 
 	public findItem(context: Context, id: string, isTarget: (item: Item) => boolean, top?: number): Item[] {
-		return this.findObjects(context, FindObjectType.Item, id, island.items, isTarget, top, (object) => object.getPoint()!);
+		return this.findObjects(context, FindObjectType.Item, id, context.player.island.items.getObjects(), isTarget, top, (object) => object.getPoint()!);
 	}
 
 	public findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {
-		return this.findObjects(context, FindObjectType.Corpse, id, island.corpses as Corpse[], corpse => {
+		const island = context.player.island;
+		return this.findObjects(context, FindObjectType.Corpse, id, island.corpses.getObjects() as Corpse[], corpse => {
 			if (isTarget(corpse)) {
-				const tile = game.getTileFromPoint(corpse);
+				const tile = island.getTileFromPoint(corpse);
 				return tile.creature === undefined &&
 					tile.npc === undefined &&
 					tile.events === undefined &&
@@ -101,6 +109,10 @@ class ObjectUtilities {
 
 			return false;
 		});
+	}
+
+	public findHuntableCreatures(context: Context, id: string, onlyHostile?: boolean, top?: number) {
+		return objectUtilities.findCreatures(context, id, creature => !creature.isTamed() && (!onlyHostile || creature.hasAi(AiType.Hostile)), top);
 	}
 
 }

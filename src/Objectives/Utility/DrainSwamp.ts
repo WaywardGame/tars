@@ -34,8 +34,8 @@ export default class DrainSwamp extends Objective {
         for (const target of this.tiles) {
             const objectives: IObjective[] = [];
 
-            const tile = game.getTileFromPoint(target);
-            if (!tileUtilities.canDig(tile)) {
+            const tile = context.island.getTileFromPoint(target);
+            if (!tileUtilities.canDig(context, tile)) {
                 if (!tileUtilities.hasItems(tile)) {
                     continue;
                 }

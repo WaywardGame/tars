@@ -17,7 +17,7 @@ export default class Lambda extends Objective {
 		return "Miscellaneous processing";
 	}
 
-	public isDynamic(): boolean {
+	public override isDynamic(): boolean {
 		return true;
 	}
 
