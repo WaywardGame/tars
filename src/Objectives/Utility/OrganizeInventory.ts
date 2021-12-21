@@ -21,23 +21,23 @@ import MoveItem from "../other/item/MoveItem";
 const maxChestDistance = 128;
 
 export interface IOriganizeInventoryOptions {
-	allowChests?: boolean;
+	allowChests: boolean;
 
-	disableDrop?: boolean;
+	disableDrop: boolean;
 
-	onlyIfNearBase?: boolean;
+	onlyIfNearBase: boolean;
 
-	allowReservedItems?: boolean;
-	onlyOrganizeReservedItems?: boolean;
+	allowReservedItems: boolean;
+	onlyOrganizeReservedItems: boolean;
 
-	onlyAllowIntermediateChest?: boolean;
+	onlyAllowIntermediateChest: boolean;
 
-	items?: Item[];
+	items: Item[];
 }
 
 export default class OrganizeInventory extends Objective {
 
-	constructor(private readonly options: IOriganizeInventoryOptions = { allowChests: true }) {
+	constructor(private readonly options: Partial<IOriganizeInventoryOptions> = { allowChests: true }) {
 		super();
 	}
 

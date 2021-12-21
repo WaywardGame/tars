@@ -26,6 +26,7 @@ declare class ObjectUtilities {
     findItem(context: Context, id: string, isTarget: (item: Item) => boolean, top?: number): Item[];
     findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[];
     findHuntableCreatures(context: Context, id: string, onlyHostile?: boolean, top?: number): Creature[];
+    findTamableCreatures(context: Context, id: string, onlyHostile: boolean, top?: number): Creature[];
 }
 export declare const objectUtilities: ObjectUtilities;
 export {};

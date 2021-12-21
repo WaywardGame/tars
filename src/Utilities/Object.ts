@@ -115,6 +115,19 @@ class ObjectUtilities {
 		return objectUtilities.findCreatures(context, id, creature => !creature.isTamed() && (!onlyHostile || creature.hasAi(AiType.Hostile)), top);
 	}
 
+	public findTamableCreatures(context: Context, id: string, onlyHostile: boolean, top?: number) {
+		return objectUtilities.findCreatures(context, id, creature => {
+			if (creature.isTamed()) {
+				return false;
+			}
+
+			if (creature.hasAi(AiType.Hostile)) {
+				return onlyHostile;
+			}
+
+			return !onlyHostile;
+		}, top);
+	}
 }
 
 export const objectUtilities = new ObjectUtilities();

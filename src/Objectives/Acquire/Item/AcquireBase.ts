@@ -19,6 +19,7 @@ export interface IAcquireItemOptions extends IGatherItemOptions {
 
 export interface IGatherItemOptions {
 	requiredMinDur: number;
+	requirePlayerCreatedIfCraftable: boolean;
 }
 
 export interface IObjectivePriority {

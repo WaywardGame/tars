@@ -8,8 +8,6 @@ import { itemUtilities } from "../../../utilities/Item";
 import IgniteItem from "../../other/item/IgniteItem";
 import AcquireItem from "./AcquireItem";
 
-
-
 /**
  * Acquires an item for the specified type and ignites it
  */

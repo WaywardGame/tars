@@ -8,7 +8,8 @@ export declare enum ContextDataType {
     CanCraftFromIntermediateChest = "CanCraftFromIntermediateChest",
     PrioritizeBaseChests = "PrioritizeBaseChests",
     MovingToNewIsland = "MovingToNewIsland",
-    DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization"
+    DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
+    TamingCreature = "TamingCreature"
 }
 export declare enum MovingToNewIslandState {
     None = 0,

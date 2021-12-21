@@ -20,7 +20,7 @@ declare class ItemUtilities {
     getBaseItems(context: Context): Item[];
     getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[];
     processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker;
-    getItemsInInventory(context: Context): Item[];
+    getItemsInInventory(context: Context, allowProtectedItems?: boolean): Item[];
     getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined;
     private getItemInContainer;
     isInventoryItem(context: Context, item: Item): boolean;

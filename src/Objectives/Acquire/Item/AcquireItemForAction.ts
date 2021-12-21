@@ -10,8 +10,6 @@ import { ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import AcquireItem from "./AcquireItem";
 
-
-
 export default class AcquireItemForAction extends Objective {
 
 	private static readonly cache: Map<ActionType, ItemType[]> = new Map();

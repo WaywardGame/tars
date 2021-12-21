@@ -88,8 +88,25 @@ export default class GatherFromGround extends Objective {
 	}
 
 	private itemMatches(context: Context, item: Item, fromLambda?: boolean): boolean {
-		return item.type === this.itemType &&
-			(fromLambda || (context.island.items.isTileContainer(item.containedWithin) && !context.isHardReservedItem(item))) &&
-			(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur));
+		if (item.type !== this.itemType) {
+			return false;
+		}
+
+		if (!fromLambda && (context.isHardReservedItem(item) || !context.island.items.isTileContainer(item.containedWithin))) {
+			return false;
+		}
+
+		if (this.options.requiredMinDur !== undefined && (item.minDur === undefined || item.minDur < this.options.requiredMinDur)) {
+			return false;
+		}
+
+		if (this.options.requirePlayerCreatedIfCraftable) {
+			const canCraft = item.description()?.recipe;
+			if (canCraft && !item.ownerIdentifier) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

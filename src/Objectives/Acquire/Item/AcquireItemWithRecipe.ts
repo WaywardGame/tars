@@ -21,8 +21,6 @@ import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
 
-
-
 export default class AcquireItemWithRecipe extends AcquireBase {
 
 	constructor(private readonly itemType: ItemType, private readonly recipe: IRecipe, private readonly allowInventoryItems?: boolean) {

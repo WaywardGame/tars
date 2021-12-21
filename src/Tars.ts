@@ -1533,6 +1533,12 @@ export default class Tars extends Mod {
 		for (const facingDirecton of Direction.CARDINALS_AND_NONE) {
 			const creature = this.checkNearbyCreature(context, facingDirecton);
 			if (creature !== undefined) {
+				const tamingCreature = context.getData<Creature>(ContextDataType.TamingCreature);
+				if (tamingCreature && tamingCreature === creature) {
+					log.info(`Not defending against ${creature.getName().getString()} because we're trying to tame it`);
+					continue;
+				}
+
 				log.info(`Defend against ${creature.getName().getString()}`);
 				return new DefendAgainstCreature(creature, shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature));
 			}
