@@ -663,6 +663,13 @@ export enum ReserveType {
 	Hard
 }
 
+export interface IResetOptions {
+	delete: boolean;
+	resetContext: boolean;
+	resetBase: boolean;
+	resetInventory: boolean;
+}
+
 let tars: Tars | undefined;
 
 export function getTarsInstance() {

@@ -251,6 +251,12 @@ export declare enum ReserveType {
     Soft = 0,
     Hard = 1
 }
+export interface IResetOptions {
+    delete: boolean;
+    resetContext: boolean;
+    resetBase: boolean;
+    resetInventory: boolean;
+}
 export declare function getTarsInstance(): Tars;
 export declare function setTarsInstance(instance: Tars | undefined): void;
 export declare function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation;

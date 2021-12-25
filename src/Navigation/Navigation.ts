@@ -175,9 +175,11 @@ export default class Navigation {
 	}
 
 	public deleteOverlay() {
-		for (const [key, overlay] of this.overlay.entries()) {
-			const [x, y, z] = key.split(",");
-			TileHelpers.Overlay.remove(localIsland.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)), overlay);
+		if (localIsland) {
+			for (const [key, overlay] of this.overlay.entries()) {
+				const [x, y, z] = key.split(",");
+				TileHelpers.Overlay.remove(localIsland.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)), overlay);
+			}
 		}
 
 		this.overlay.clear();

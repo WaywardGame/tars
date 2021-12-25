@@ -84,6 +84,7 @@ export default class Tars extends Mod {
     onWalkPathChange(player: Player, walkPath: IVector2[] | undefined): void;
     preMove(player: Player, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile): void;
     onStatChange(player: Player, stat: IStat): void;
+    onMoveToIsland(): Promise<void>;
     getContext(): IContext;
     getTranslation(translation: TarsTranslation | string | Translation): Translation;
     isEnabled(): boolean;

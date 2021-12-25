@@ -2,7 +2,7 @@ import { IslandId, IslandPosition } from "game/island/IIsland";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
 import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
+import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
 import Objective from "../../../Objective";
 import MoveToIsland from "./MoveToIsland";
 
@@ -34,8 +34,18 @@ export default class MoveToNewIsland extends Objective {
 		}
 
 		if (unvisitedIslands.length === 0) {
-			this.log.info("No unvisited islands");
-			return ObjectiveResult.Impossible;
+			this.log.info("No unvisited islands. Going to visit a previous one");
+
+			for (const direction of Direction.CARDINALS) {
+				const movement = Vector2.DIRECTIONS[direction];
+
+				const position = {
+					x: context.island.position.x + movement.x,
+					y: context.island.position.y + movement.y,
+				};
+
+				unvisitedIslands.push(IslandPosition.toId(position));
+			}
 		}
 
 		const objectivePipelines: IObjective[][] = [];
