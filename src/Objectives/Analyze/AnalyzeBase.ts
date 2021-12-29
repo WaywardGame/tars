@@ -13,7 +13,7 @@ import Objective from "../../Objective";
 import { baseUtilities } from "../../utilities/Base";
 import { objectUtilities } from "../../utilities/Object";
 
-const baseDoodadDistanceSq = Math.pow(150, 2);
+const baseDoodadDistanceSq = Math.pow(50, 2);
 
 export default class AnalyzeBase extends Objective {
 

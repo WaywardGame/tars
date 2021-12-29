@@ -236,8 +236,7 @@ export default class Tars extends Mod {
 	}
 
 	////////////////////////////////////////////////
-	// Hooks
-	////////////////////////////////////////////////
+	// Event Handlers
 
 	@EventHandler(EventBus.Game, "play")
 	public onGameStart(): void {

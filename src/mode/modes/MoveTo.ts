@@ -137,6 +137,15 @@ export class MoveToMode implements ITarsMode {
                 const player = playerManager.getByIdentifier(this.target.playerIdentifier);
 
                 if (player) {
+                    if (player === context.player) {
+                        return [
+                            new Lambda(async () => {
+                                this.finished(true);
+                                return ObjectiveResult.Complete;
+                            }),
+                        ];
+                    }
+
                     return [
                         new MoveToTarget(player, true),
                         new Lambda(async () => {
