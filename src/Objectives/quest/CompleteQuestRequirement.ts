@@ -25,6 +25,7 @@ import StokeFire from "../other/doodad/StokeFire";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import GatherWaterFromStill from "../gather/GatherWaterFromStill";
 import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
+import TameCreatures from "../other/creature/TameCreatures";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -152,7 +153,11 @@ export default class CompleteQuestRequirement extends Objective {
 
                     } else {
                         for (const waterStill of context.base.waterStill) {
-                            objectivePipelines.push([new GatherWaterFromStill(waterStill, context.inventory.waterContainer[0], true, true)]);
+                            objectivePipelines.push([new GatherWaterFromStill(waterStill, context.inventory.waterContainer[0], {
+                                allowStartingWaterStill: true,
+                                allowWaitingForWaterStill: true,
+                                onlyIdleWhenWaitingForWaterStill: true,
+                            })]);
                         }
                     }
 
@@ -257,6 +262,16 @@ export default class CompleteQuestRequirement extends Objective {
                     break;
 
                 case QuestRequirementType.TameCreatures: {
+                    // look for non-hostile creatures first
+                    let creatures = objectUtilities.findTamableCreatures(context, "Tame1", false, 10);
+                    if (creatures.length === 0) {
+                        creatures = objectUtilities.findTamableCreatures(context, "Tame2", true, 10);
+                        if (creatures.length === 0) {
+                            return ObjectiveResult.Impossible;
+                        }
+                    }
+
+                    objectivePipelines.push([new TameCreatures(creatures)]);
 
                     break;
                 }

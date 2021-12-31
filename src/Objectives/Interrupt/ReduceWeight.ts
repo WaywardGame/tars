@@ -7,7 +7,7 @@ import OrganizeInventory, { IOriganizeInventoryOptions } from "../utility/Organi
 
 export default class ReduceWeight extends Objective {
 
-	constructor(private readonly options: IOriganizeInventoryOptions = {}) {
+	constructor(private readonly options: Partial<IOriganizeInventoryOptions> = {}) {
 		super();
 	}
 

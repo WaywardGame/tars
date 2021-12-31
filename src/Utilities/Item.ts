@@ -131,8 +131,8 @@ class ItemUtilities {
 		return checker;
 	}
 
-	public getItemsInInventory(context: Context) {
-		return context.island.items.getItemsInContainer(context.player.inventory, true, true);
+	public getItemsInInventory(context: Context, allowProtectedItems: boolean = true) {
+		return context.island.items.getItemsInContainer(context.player.inventory, true, allowProtectedItems);
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {

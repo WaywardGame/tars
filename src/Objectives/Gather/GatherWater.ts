@@ -4,26 +4,25 @@ import Context from "../../Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
 import Objective from "../../Objective";
 
-import GatherWaterFromStill from "./GatherWaterFromStill";
+import GatherWaterFromStill, { IGatherWaterFromStillOptions } from "./GatherWaterFromStill";
 import GatherWaterFromTerrain from "./GatherWaterFromTerrain";
 import GatherWaterFromWell from "./GatherWaterFromWell";
 import GatherWaterWithRecipe from "./GatherWaterWithRecipe";
 
-export interface IGatherWaterOptions {
-	allowStartingWaterStill?: boolean;
-	allowWaitingForWaterStill?: boolean;
-	disallowRecipe?: boolean;
-	disallowTerrain?: boolean;
-	disallowWaterStill?: boolean;
-	disallowWell?: boolean;
+export interface IGatherWaterOptions extends IGatherWaterFromStillOptions {
+	disallowRecipe: boolean;
+	disallowTerrain: boolean;
+	disallowWaterStill: boolean;
+	disallowWell: boolean;
 }
+
 /**
  * Gathers water into the container
  * The water may be unpurified
  */
 export default class GatherWater extends Objective {
 
-	constructor(private readonly waterContainer?: Item, private readonly options?: IGatherWaterOptions) {
+	constructor(private readonly waterContainer?: Item, private readonly options?: Partial<IGatherWaterOptions>) {
 		super();
 	}
 
@@ -48,7 +47,10 @@ export default class GatherWater extends Objective {
 
 		if (!this.options?.disallowWaterStill) {
 			for (const waterStill of context.base.waterStill) {
-				objectivePipelines.push([new GatherWaterFromStill(waterStill, this.waterContainer, this.options?.allowStartingWaterStill, this.options?.allowWaitingForWaterStill)]);
+				objectivePipelines.push([new GatherWaterFromStill(waterStill, this.waterContainer, {
+					allowStartingWaterStill: this.options?.allowStartingWaterStill,
+					allowWaitingForWaterStill: this.options?.allowWaitingForWaterStill,
+				})]);
 			}
 		}
 

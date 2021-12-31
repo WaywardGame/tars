@@ -4,18 +4,18 @@ import Context from "../../Context";
 import { ObjectiveExecutionResult } from "../../IObjective";
 import Objective from "../../Objective";
 export interface IMoveToTargetOptions {
-    range?: number;
-    disableStaminaCheck?: boolean;
-    skipZCheck?: boolean;
-    allowBoat?: boolean;
+    range: number;
+    disableStaminaCheck: boolean;
+    skipZCheck: boolean;
+    allowBoat: boolean;
 }
 export default class MoveToTarget extends Objective {
     protected target: IVector3;
     protected readonly moveAdjacentToTarget: boolean;
-    protected readonly options?: IMoveToTargetOptions | undefined;
+    protected readonly options?: Partial<IMoveToTargetOptions> | undefined;
     private trackedCreature;
     private trackedPosition;
-    constructor(target: IVector3, moveAdjacentToTarget: boolean, options?: IMoveToTargetOptions | undefined);
+    constructor(target: IVector3, moveAdjacentToTarget: boolean, options?: Partial<IMoveToTargetOptions> | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     getPosition(): IVector3;

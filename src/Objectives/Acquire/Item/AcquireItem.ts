@@ -27,8 +27,6 @@ import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 
-
-
 export default class AcquireItem extends AcquireBase {
 
 	private static readonly terrainSearchCache: Map<ItemType, ITerrainSearch[]> = new Map();

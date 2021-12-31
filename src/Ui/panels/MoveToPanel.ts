@@ -23,7 +23,7 @@ export default class MoveToPanel extends TarsPanel {
     private readonly dropdownTerrainType: TerrainDropdown<string>;
     private readonly dropdownDoodad: DoodadDropdown<string>;
     private readonly dropdownNPC: NPCDropdown<string>;
-    private readonly dropdownPlayer: PlayerDropdown<string>;
+    private readonly dropdownPlayer: PlayerDropdown;
 
     constructor() {
         super();
@@ -63,7 +63,6 @@ export default class MoveToPanel extends TarsPanel {
         new Divider().appendTo(this);
 
         this.dropdownPlayer = new PlayerDropdown("");
-        this.dropdownPlayer.options.get(localPlayer.identifier)?.setDisabled(true);
 
         new LabelledRow()
             .classes.add("dropdown-label")
@@ -154,9 +153,14 @@ export default class MoveToPanel extends TarsPanel {
     }
 
     protected onSwitchTo() {
+        const events = playerManager.event.until(this, "switchAway", "remove");
+        events.subscribe("join", this.refresh);
+        events.subscribe("leave", this.refresh);
     }
 
     @Bound
     protected refresh() {
+        this.dropdownPlayer.refresh();
+        this.dropdownPlayer.options.get(localPlayer.identifier)?.setDisabled(true);
     }
 }

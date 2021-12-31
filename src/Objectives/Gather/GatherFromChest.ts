@@ -58,9 +58,24 @@ export default class GatherFromChest extends Objective {
 		return chests
 			.map(chest => {
 				const items = context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, true)
-					.filter(item =>
-						!context.isHardReservedItem(item) &&
-						(this.options.requiredMinDur === undefined || (item.minDur !== undefined && item.minDur >= this.options.requiredMinDur)));
+					.filter(item => {
+						if (context.isHardReservedItem(item)) {
+							return false;
+						}
+
+						if (this.options.requiredMinDur !== undefined && (item.minDur === undefined || item.minDur < this.options.requiredMinDur)) {
+							return false;
+						}
+
+						if (this.options.requirePlayerCreatedIfCraftable) {
+							const canCraft = item.description()?.recipe;
+							if (canCraft && !item.ownerIdentifier) {
+								return false;
+							}
+						}
+
+						return true;
+					});
 				if (items.length > 0) {
 					const item = items[0];
 					return [

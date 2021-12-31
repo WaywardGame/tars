@@ -4,7 +4,7 @@ import Objective from "../../Objective";
 import { IOriganizeInventoryOptions } from "../utility/OrganizeInventory";
 export default class ReduceWeight extends Objective {
     private readonly options;
-    constructor(options?: IOriganizeInventoryOptions);
+    constructor(options?: Partial<IOriganizeInventoryOptions>);
     getIdentifier(): string;
     getStatus(): string | undefined;
     canSaveChildObjectives(): boolean;

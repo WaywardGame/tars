@@ -8,6 +8,7 @@ import ReturnToBase from "../../objectives/other/ReturnToBase";
 import { ITarsMode } from "../IMode";
 import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
 import CompleteQuests from "../../objectives/quest/CompleteQuests";
+import { getCommonInitialObjectives } from "./CommonInitialObjectives";
 
 export class QuestMode implements ITarsMode {
 
@@ -19,6 +20,8 @@ export class QuestMode implements ITarsMode {
 
     public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
         const objectives: Array<IObjective | IObjective[]> = [];
+
+        objectives.push(...await getCommonInitialObjectives(context));
 
         objectives.push(new CompleteQuests());
 

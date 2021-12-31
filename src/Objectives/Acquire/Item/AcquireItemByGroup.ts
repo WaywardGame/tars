@@ -4,8 +4,6 @@ import { ObjectiveExecutionResult } from "../../../IObjective";
 import AcquireBase, { IAcquireItemOptions } from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 
-
-
 export default class AcquireItemByGroup extends AcquireBase {
 
 	private static readonly cache: Map<ItemTypeGroup, ItemType[]> = new Map();

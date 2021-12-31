@@ -7,8 +7,6 @@ import { ObjectiveExecutionResult } from "../../../IObjective";
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 
-
-
 export default class AcquireItemByTypes extends AcquireBase {
 
 	constructor(private readonly itemTypes: ItemType[]) {

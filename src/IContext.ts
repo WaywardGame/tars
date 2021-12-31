@@ -34,6 +34,11 @@ export enum ContextDataType {
 	 * Disables moving items into intermediate chests when moving far away from the base
 	 */
 	DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
+
+	/**
+	 * Disables attacking a creature when taming
+	 */
+	TamingCreature = "TamingCreature",
 }
 
 export enum MovingToNewIslandState {

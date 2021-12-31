@@ -22,10 +22,10 @@ import Rest from "../other/Rest";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
 export interface IMoveToTargetOptions {
-	range?: number;
-	disableStaminaCheck?: boolean;
-	skipZCheck?: boolean;
-	allowBoat?: boolean;
+	range: number;
+	disableStaminaCheck: boolean;
+	skipZCheck: boolean;
+	allowBoat: boolean;
 }
 
 export default class MoveToTarget extends Objective {
@@ -36,7 +36,7 @@ export default class MoveToTarget extends Objective {
 	constructor(
 		protected target: IVector3,
 		protected readonly moveAdjacentToTarget: boolean,
-		protected readonly options?: IMoveToTargetOptions) {
+		protected readonly options?: Partial<IMoveToTargetOptions>) {
 		super();
 	}
 

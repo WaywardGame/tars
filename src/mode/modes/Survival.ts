@@ -1,6 +1,6 @@
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import { AiType, DamageType } from "game/entity/IEntity";
+import { AiType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import { IStat, IStatMax, Stat } from "game/entity/IStats";
 import { TurnMode } from "game/IGame";
@@ -39,7 +39,6 @@ import MoveToLand from "../../objectives/utility/moveTo/MoveToLand";
 import MoveToNewIsland from "../../objectives/utility/moveTo/MoveToNewIsland";
 import OrganizeBase from "../../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../../objectives/utility/OrganizeInventory";
-import { log } from "../../utilities/Logger";
 import { ITarsMode } from "../IMode";
 import { baseUtilities } from "../../utilities/Base";
 import { playerUtilities } from "../../utilities/Player";
@@ -50,6 +49,7 @@ import HuntCreatures from "../../objectives/other/creature/HuntCreatures";
 import PlantSeeds from "../../objectives/utility/PlantSeeds";
 import GatherWaters from "../../objectives/gather/GatherWaters";
 import CheckSpecialItems from "../../objectives/other/item/CheckSpecialItems";
+import { getCommonInitialObjectives } from "./CommonInitialObjectives";
 
 /**
  * Survival mode
@@ -95,70 +95,7 @@ export class SurvivalMode implements ITarsMode {
 
 		objectives.push(new CheckSpecialItems());
 
-		const gatherItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
-		if (gatherItem === undefined) {
-			objectives.push([new AcquireItemForAction(ActionType.Gather)]);
-		}
-
-		if (context.inventory.axe === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);
-		}
-
-		if (context.inventory.pickAxe === undefined) {
-			objectives.push([new AcquireItem(ItemType.StonePickaxe), new AnalyzeInventory()]);
-		}
-
-		if (context.base.campfire.length === 0 && context.inventory.campfire === undefined) {
-			log.info("Need campfire");
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitCampfire), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (context.inventory.fireStarter === undefined) {
-			log.info("Need fire starter");
-			objectives.push([new AcquireItemForAction(ActionType.StartFire), new AnalyzeInventory()]);
-		}
-
-		if (context.inventory.fireKindling === undefined || context.inventory.fireKindling.length === 0) {
-			log.info("Need fire kindling");
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Kindling), new AnalyzeInventory()]);
-		}
-
-		if (context.inventory.fireTinder === undefined) {
-			log.info("Need fire tinder");
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tinder), new AnalyzeInventory()]);
-		}
-
-		// if (context.inventory.fireStoker === undefined || context.inventory.fireStoker.length < 4) {
-		// 	objectives.push([new AcquireItemForAction(ActionType.StokeFire), new AnalyzeInventory()]);
-		// }
-
-		if (context.inventory.shovel === undefined) {
-			objectives.push([new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory()]);
-		}
-
-		if (context.inventory.knife === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
-		}
-
-		if (context.inventory.bed === undefined) {
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Bedding), new AnalyzeInventory()]);
-		}
-
-		if (context.inventory.equipSword === undefined) {
-			objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
-		}
-
-		if (chest === undefined || chest.type === ItemType.TatteredClothShirt) {
-			objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
-		}
-
-		if (legs === undefined || legs.type === ItemType.TatteredClothTrousers) {
-			objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
-		}
-
-		if (context.inventory.equipShield === undefined) {
-			objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
-		}
+		objectives.push(...await getCommonInitialObjectives(context));
 
 		if (baseUtilities.shouldBuildWaterStills(context) && context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
 			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);

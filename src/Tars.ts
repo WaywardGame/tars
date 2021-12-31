@@ -45,7 +45,7 @@ import executor, { ExecuteObjectivesResultType } from "./core/Executor";
 import planner from "./core/Planner";
 import { ContextDataType, MovingToNewIslandState } from "./IContext";
 import { IObjective, ObjectiveResult } from "./IObjective";
-import { IBase, IContext, IInventoryItems, ISaveData, ITarsEvents, ITarsOptions, setTarsInstance, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
+import { IBase, IContext, IInventoryItems, IResetOptions, ISaveData, ITarsEvents, ITarsOptions, setTarsInstance, TarsMode, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "./ITars";
 import { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
@@ -236,8 +236,7 @@ export default class Tars extends Mod {
 	}
 
 	////////////////////////////////////////////////
-	// Hooks
-	////////////////////////////////////////////////
+	// Event Handlers
 
 	@EventHandler(EventBus.Game, "play")
 	public onGameStart(): void {
@@ -490,6 +489,25 @@ export default class Tars extends Mod {
 		}
 	}
 
+	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
+	public async onMoveToIsland() {
+		if (this.isEnabled()) {
+			this.disable(true);
+		}
+
+		this.delete();
+
+		this.navigation = Navigation.get();
+
+		if (!this.isEnabled()) {
+			return;
+		}
+
+		// this.fullInterrupt();
+
+		this.toggle(true);
+	}
+
 	////////////////////////////////////////////////
 
 	public getContext(): IContext {
@@ -533,7 +551,7 @@ export default class Tars extends Mod {
 
 		await this.ensureNavigation(!!this.context.player.vehicleItemReference);
 
-		await this.reset();
+		this.reset();
 
 		if (this.saveData.enabled) {
 			if (this.navigation) {
@@ -777,7 +795,7 @@ export default class Tars extends Mod {
 	private async initializeMode(context: Context, mode: TarsMode, modeInstance: ITarsMode) {
 		log.info(`Initializing ${TarsMode[mode]}`);
 
-		await this.disposeMode(context, mode);
+		this.disposeMode(context, mode);
 
 		EventManager.registerEventBusSubscriber(modeInstance);
 		await modeInstance.initialize?.(context, (success: boolean) => {
@@ -794,21 +812,21 @@ export default class Tars extends Mod {
 		this.modeCache.set(mode, modeInstance);
 	}
 
-	private async disposeMode(context: Context, mode: TarsMode) {
+	private disposeMode(context: Context, mode: TarsMode) {
 		const modeInstance = this.modeCache.get(TarsMode.Manual);
 		if (modeInstance) {
-			await modeInstance.dispose?.(this.context);
+			modeInstance.dispose?.(this.context);
 			EventManager.deregisterEventBusSubscriber(modeInstance);
 			this.modeCache.delete(mode);
 		}
 	}
 
-	private async reset(deleting: boolean = false) {
+	private reset(options?: Partial<IResetOptions>) {
 		executor.reset();
 
 		for (const mode of Array.from(this.modeCache.keys())) {
-			if (deleting || mode !== TarsMode.Manual) {
-				await this.disposeMode(this.context, mode);
+			if (options?.delete || mode !== TarsMode.Manual) {
+				this.disposeMode(this.context, mode);
 			}
 		}
 
@@ -820,6 +838,34 @@ export default class Tars extends Mod {
 		this.interruptContexts.clear();
 
 		this.clearCaches();
+
+		if (options?.delete || options?.resetInventory) {
+			this.inventory = {};
+		}
+
+		if (options?.delete || options?.resetBase) {
+			this.base = {
+				anvil: [],
+				campfire: [],
+				chest: [],
+				furnace: [],
+				intermediateChest: [],
+				kiln: [],
+				waterStill: [],
+				well: [],
+				buildAnotherChest: false,
+				availableUnlimitedWellLocation: undefined,
+			};
+
+			baseUtilities.clearCache();
+		}
+
+		if (options?.delete) {
+			this.context = undefined as any;
+
+		} else if (options?.resetContext) {
+			this.context = new Context(localPlayer, this.base, this.inventory, this.saveData.options);
+		}
 	}
 
 	private clearCaches(): void {
@@ -830,26 +876,9 @@ export default class Tars extends Mod {
 	}
 
 	private delete() {
-		this.base = {
-			anvil: [],
-			campfire: [],
-			chest: [],
-			furnace: [],
-			intermediateChest: [],
-			kiln: [],
-			waterStill: [],
-			well: [],
-			buildAnotherChest: false,
-			availableUnlimitedWellLocation: undefined,
-		};
-
-		this.inventory = {};
-
-		this.context = undefined as any;
-
-		baseUtilities.clearCache();
-
-		this.reset(true);
+		this.reset({
+			delete: true,
+		});
 
 		this.navigationSystemState = NavigationSystemState.NotInitialized;
 		this.navigationQueuedUpdates = [];
@@ -1533,6 +1562,12 @@ export default class Tars extends Mod {
 		for (const facingDirecton of Direction.CARDINALS_AND_NONE) {
 			const creature = this.checkNearbyCreature(context, facingDirecton);
 			if (creature !== undefined) {
+				const tamingCreature = context.getData<Creature>(ContextDataType.TamingCreature);
+				if (tamingCreature && tamingCreature === creature) {
+					log.info(`Not defending against ${creature.getName().getString()} because we're trying to tame it`);
+					continue;
+				}
+
 				log.info(`Defend against ${creature.getName().getString()}`);
 				return new DefendAgainstCreature(creature, shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature));
 			}

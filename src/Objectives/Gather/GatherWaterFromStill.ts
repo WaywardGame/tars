@@ -13,14 +13,20 @@ import UseItem from "../other/item/UseItem";
 import { itemUtilities } from "../../utilities/Item";
 import EmptyWaterContainer from "../other/EmptyWaterContainer";
 
+export interface IGatherWaterFromStillOptions {
+	allowStartingWaterStill: boolean;
+	allowWaitingForWaterStill?: boolean;
+	onlyIdleWhenWaitingForWaterStill?: boolean;
+}
+
 export default class GatherWaterFromStill extends Objective {
 
-	constructor(private readonly waterStill: Doodad, private readonly item: Item, private readonly allowStartingWaterStill?: boolean, private readonly allowWaitingForWaterStill?: boolean) {
+	constructor(private readonly waterStill: Doodad, private readonly item: Item, private readonly options?: Partial<IGatherWaterFromStillOptions>) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `GatherWaterFromStill:${this.waterStill}:${this.item}:${this.allowStartingWaterStill}`;
+		return `GatherWaterFromStill:${this.waterStill}:${this.item}:${this.options?.allowStartingWaterStill}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -29,14 +35,16 @@ export default class GatherWaterFromStill extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (!doodadUtilities.isWaterStillDrinkable(this.waterStill)) {
-			if (this.allowStartingWaterStill) {
+			if (this.options?.allowStartingWaterStill) {
 				// start desalination and run back to the waterstill and wait
 				const objectives: IObjective[] = [
 					new StartWaterStillDesalination(this.waterStill),
 				];
 
-				if (this.allowWaitingForWaterStill) {
-					objectives.push(new MoveToTarget(this.waterStill, true, { range: 5 }));
+				if (this.options?.allowWaitingForWaterStill) {
+					if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
+						objectives.push(new MoveToTarget(this.waterStill, true, { range: 5 }));
+					}
 
 					// add difficulty to show that we don't want to idle
 					objectives.push(new Idle().addDifficulty(100));

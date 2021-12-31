@@ -12,8 +12,6 @@ import Objective from "../../../Objective";
 import { doodadUtilities } from "../../../utilities/Doodad";
 import AcquireItem from "./AcquireItem";
 
-
-
 export default class AcquireItemForDoodad extends Objective {
 
 	private static readonly cache: Map<DoodadType | DoodadTypeGroup, ItemType[]> = new Map();

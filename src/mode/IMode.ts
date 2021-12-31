@@ -4,7 +4,7 @@ import { IObjective } from "../IObjective";
 export interface ITarsMode {
 	initialize?(context: Context, finished: (success: boolean) => void): Promise<void>;
 
-	dispose?(context: Context): Promise<void>;
+	dispose?(context: Context): void;
 
 	determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>>;
 

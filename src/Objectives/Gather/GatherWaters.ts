@@ -14,7 +14,7 @@ import GatherWater, { IGatherWaterOptions } from "./GatherWater";
  */
 export default class GatherWaters extends Objective {
 
-	constructor(private readonly waterContainers: Item[], private readonly options?: IGatherWaterOptions) {
+	constructor(private readonly waterContainers: Item[], private readonly options?: Partial<IGatherWaterOptions>) {
 		super();
 	}
 

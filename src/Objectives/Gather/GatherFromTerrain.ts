@@ -48,6 +48,7 @@ export default class GatherFromTerrain extends Objective {
 			const tileLocations = await tileUtilities.getNearestTileLocation(context, terrainSearch.type);
 
 			for (const tileLocation of tileLocations) {
+				// todo: debug solar still blocking wateR?
 				if (!tileUtilities.canGather(context, tileLocation.tile)) {
 					continue;
 				}
