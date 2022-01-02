@@ -56,7 +56,7 @@ class Executor {
 		this.interrupted = false;
 		this.weightChanged = false;
 		this.lastPlan = undefined;
-		
+
 		planner.reset();
 	}
 
@@ -82,7 +82,7 @@ class Executor {
 			&& !context.player.isMovingClientside
 			&& !context.player.hasDelay()
 			&& !context.player.isGhost()
-			&& !game.paused
+			&& !game.isPaused
 			&& (!checkForInterrupts || !this.interrupted);
 	}
 
