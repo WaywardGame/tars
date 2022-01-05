@@ -1,5 +1,5 @@
 import Creature from "game/entity/creature/Creature";
-import Context from "../Context";
+import Context from "../core/context/Context";
 declare class CreatureUtilities {
     private readonly nearbyCreatureRadius;
     shouldRunAwayFromAllCreatures(context: Context): boolean;

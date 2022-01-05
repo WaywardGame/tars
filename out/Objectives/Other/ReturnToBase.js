@@ -1,4 +1,4 @@
-define(["require", "exports", "utilities/math/Vector2", "../../IObjective", "../../Objective", "../../utilities/Base", "../core/MoveToTarget"], function (require, exports, Vector2_1, IObjective_1, Objective_1, Base_1, MoveToTarget_1) {
+define(["require", "exports", "utilities/math/Vector2", "../../core/objective/IObjective", "../../core/objective/Objective", "../../utilities/Base", "../core/MoveToTarget"], function (require, exports, Vector2_1, IObjective_1, Objective_1, Base_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const returnToBaseDistance = 20;

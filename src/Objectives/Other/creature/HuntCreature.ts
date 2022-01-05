@@ -2,10 +2,10 @@ import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 import { IStat, Stat } from "game/entity/IStats";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
-import Context from "../../../Context";
+import Context from "../../../core/context/Context";
 
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";

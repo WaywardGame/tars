@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/IItem", "language/Dictionary", "language/Translation", "../../IObjective", "../../Objective"], function (require, exports, IItem_1, Dictionary_1, Translation_1, IObjective_1, Objective_1) {
+define(["require", "exports", "game/item/IItem", "language/Dictionary", "language/Translation", "../../core/objective/IObjective", "../../core/objective/Objective"], function (require, exports, IItem_1, Dictionary_1, Translation_1, IObjective_1, Objective_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class UseProvidedItem extends Objective_1.default {

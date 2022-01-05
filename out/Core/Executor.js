@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/player/IPlayer", "../IContext", "../utilities/Logger", "./IPlan", "./Planner"], function (require, exports, IPlayer_1, IContext_1, Logger_1, IPlan_1, Planner_1) {
+define(["require", "exports", "game/entity/player/IPlayer", "./context/IContext", "../utilities/Logger", "./planning/IPlan", "./planning/Planner"], function (require, exports, IPlayer_1, IContext_1, Logger_1, IPlan_1, Planner_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ExecuteObjectivesResultType = void 0;

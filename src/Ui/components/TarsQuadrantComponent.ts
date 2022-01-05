@@ -15,14 +15,13 @@ import { Quadrant } from "ui/screen/screens/game/component/IQuadrantComponent";
 import QuadrantComponent from "ui/screen/screens/game/component/QuadrantComponent";
 import { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import { Bound } from "utilities/Decorators";
-import { getTarsTranslation, TarsTranslation, TARS_ID } from "../../ITars";
-import Tars from "../../Tars";
-
+import TarsMod from "../../TarsMod";
+import { TarsTranslation, getTarsTranslation, TARS_ID } from "../../ITarsMod";
 
 export default class TarsQuadrantComponent extends QuadrantComponent {
 
-    @Mod.instance<Tars>(TARS_ID)
-    public readonly TARS: Tars;
+    @Mod.instance<TarsMod>(TARS_ID)
+    public readonly TARS: TarsMod;
 
     public static preferredQuadrant = Quadrant.BottomRight;
 
@@ -45,7 +44,7 @@ export default class TarsQuadrantComponent extends QuadrantComponent {
         }
 
         this.statusText = new Text()
-            .setText(Tars.INSTANCE.getTranslation(TarsTranslation.DialogTitleMain))
+            .setText(TarsMod.INSTANCE.getTranslation(TarsTranslation.DialogTitleMain))
             .appendTo(this);
 
         this.TARS.event.until(this, "remove").subscribe("statusChange", this.refresh);

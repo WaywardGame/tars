@@ -1,4 +1,4 @@
-define(["require", "exports", "../../../Objective", "./AcquireItem"], function (require, exports, Objective_1, AcquireItem_1) {
+define(["require", "exports", "../../../core/objective/Objective", "./AcquireItem"], function (require, exports, Objective_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireItemForTaming extends Objective_1.default {

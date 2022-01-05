@@ -1,4 +1,4 @@
-define(["require", "exports", "../../IContext", "../../IObjective", "../../Objective"], function (require, exports, IContext_1, IObjective_1, Objective_1) {
+define(["require", "exports", "../../core/context/IContext", "../../core/objective/IObjective", "../../core/objective/Objective"], function (require, exports, IContext_1, IObjective_1, Objective_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CopyContextData extends Objective_1.default {

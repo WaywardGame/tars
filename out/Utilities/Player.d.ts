@@ -1,5 +1,5 @@
 import { Stat } from "game/entity/IStats";
-import Context from "../Context";
+import Context from "../core/context/Context";
 declare class PlayerUtilities {
     getWeight(context: Context): number;
     getMaxWeight(context: Context): number;

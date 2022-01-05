@@ -6,10 +6,10 @@ import { ITileContainer, TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 import terrainDescriptions from "game/tile/Terrains";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import { baseUtilities } from "../../../utilities/Base";
 import { tileUtilities } from "../../../utilities/Tile";
 import AcquireItem from "../../acquire/item/AcquireItem";

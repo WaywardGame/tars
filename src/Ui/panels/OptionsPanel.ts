@@ -8,8 +8,8 @@ import { Heading } from "ui/component/Text";
 import { TooltipLocation } from "ui/component/IComponent";
 import { Bound } from "utilities/Decorators";
 
-import { getTarsTranslation, TarsTranslation, uiConfigurableOptions } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
+import { uiConfigurableOptions, getTarsTranslation, TarsTranslation } from "../../ITarsMod";
 
 export default class OptionsPanel extends TarsPanel {
 

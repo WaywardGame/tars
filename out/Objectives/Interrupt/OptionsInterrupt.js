@@ -1,4 +1,4 @@
-define(["require", "exports", "save/data/ISaveDataGlobal", "utilities/object/Objects", "../../IObjective", "../../Objective"], function (require, exports, ISaveDataGlobal_1, Objects_1, IObjective_1, Objective_1) {
+define(["require", "exports", "save/data/ISaveDataGlobal", "utilities/object/Objects", "../../core/objective/IObjective", "../../core/objective/Objective"], function (require, exports, ISaveDataGlobal_1, Objects_1, IObjective_1, Objective_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class OptionsInterrupt extends Objective_1.default {

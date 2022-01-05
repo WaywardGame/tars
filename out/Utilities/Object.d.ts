@@ -4,7 +4,7 @@ import Creature from "game/entity/creature/Creature";
 import { IVector3 } from "utilities/math/IVector";
 import NPC from "game/entity/npc/NPC";
 import Item from "game/item/Item";
-import Context from "../Context";
+import Context from "../core/context/Context";
 export declare enum FindObjectType {
     Creature = 0,
     Doodad = 1,

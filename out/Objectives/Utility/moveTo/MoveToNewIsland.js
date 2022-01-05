@@ -1,4 +1,4 @@
-define(["require", "exports", "game/island/IIsland", "utilities/math/Direction", "utilities/math/Vector2", "../../../Objective", "./MoveToIsland"], function (require, exports, IIsland_1, Direction_1, Vector2_1, Objective_1, MoveToIsland_1) {
+define(["require", "exports", "game/island/IIsland", "utilities/math/Direction", "utilities/math/Vector2", "../../../core/objective/Objective", "./MoveToIsland"], function (require, exports, IIsland_1, Direction_1, Vector2_1, Objective_1, MoveToIsland_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class MoveToNewIsland extends Objective_1.default {

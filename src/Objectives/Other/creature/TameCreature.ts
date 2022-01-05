@@ -1,14 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
 
-import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
 import { itemUtilities } from "../../../utilities/Item";
-import { ContextDataType } from "../../../IContext";
+import { ContextDataType } from "../../../core/context/IContext";
 import SetContextData from "../../contextData/SetContextData";
 import AcquireItemForTaming from "../../acquire/item/AcquireItemForTaming";
 import CopyContextData from "../../contextData/CopyContextData";

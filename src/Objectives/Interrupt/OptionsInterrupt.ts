@@ -2,9 +2,9 @@ import Player from "game/entity/player/Player";
 import { DropLocation, IOptions } from "save/data/ISaveDataGlobal";
 import Objects from "utilities/object/Objects";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 
 export default class OptionsInterrupt extends Objective {
 

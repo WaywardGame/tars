@@ -1,4 +1,4 @@
-define(["require", "exports", "@wayward/goodstream/Stream", "language/ITranslation", "language/Translation", "../../Objective", "./GatherWater"], function (require, exports, Stream_1, ITranslation_1, Translation_1, Objective_1, GatherWater_1) {
+define(["require", "exports", "@wayward/goodstream/Stream", "language/ITranslation", "language/Translation", "../../core/objective/Objective", "./GatherWater"], function (require, exports, Stream_1, ITranslation_1, Translation_1, Objective_1, GatherWater_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherWaters extends Objective_1.default {

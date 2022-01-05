@@ -1,9 +1,9 @@
 import ActionExecutor from "game/entity/action/ActionExecutor";
 import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 export default class ExecuteAction<T extends ActionType> extends Objective {
     private readonly actionType;
     private readonly executor;

@@ -2,10 +2,10 @@ import { ActionType } from "game/entity/action/IAction";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { ItemTypeGroup } from "game/item/IItem";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { freshWaterTileLocation } from "../../navigation//INavigation";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import { freshWaterTileLocation } from "../../core/navigation/INavigation";
+import Objective from "../../core/objective/Objective";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
 import ExecuteAction from "../core/ExecuteAction";

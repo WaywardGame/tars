@@ -3,13 +3,13 @@ import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { OwnEventHandler } from "event/EventManager";
 
-import { TarsTranslation, TARS_ID } from "../../ITars";
-import Tars from "../../Tars";
+import TarsMod from "../../TarsMod";
+import { TARS_ID, TarsTranslation } from "../../ITarsMod";
 
 export default abstract class TarsPanel extends TabDialogPanel {
 
-    @Mod.instance<Tars>(TARS_ID)
-    public readonly TARS: Tars;
+    @Mod.instance<TarsMod>(TARS_ID)
+    public readonly TARS: TarsMod;
 
     public abstract getTranslation(): TarsTranslation | Translation;
 

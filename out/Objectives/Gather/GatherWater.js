@@ -1,4 +1,4 @@
-define(["require", "exports", "../../IObjective", "../../Objective", "./GatherWaterFromStill", "./GatherWaterFromTerrain", "./GatherWaterFromWell", "./GatherWaterWithRecipe"], function (require, exports, IObjective_1, Objective_1, GatherWaterFromStill_1, GatherWaterFromTerrain_1, GatherWaterFromWell_1, GatherWaterWithRecipe_1) {
+define(["require", "exports", "../../core/objective/IObjective", "../../core/objective/Objective", "./GatherWaterFromStill", "./GatherWaterFromTerrain", "./GatherWaterFromWell", "./GatherWaterWithRecipe"], function (require, exports, IObjective_1, Objective_1, GatherWaterFromStill_1, GatherWaterFromTerrain_1, GatherWaterFromWell_1, GatherWaterWithRecipe_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherWater extends Objective_1.default {

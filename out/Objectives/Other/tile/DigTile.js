@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "utilities/game/TileHelpers", "../../../IObjective", "../../../Objective", "../../acquire/item/AcquireItemForAction", "../../analyze/AnalyzeInventory", "../../core/Lambda", "../../core/MoveToTarget", "../item/UseItem"], function (require, exports, IAction_1, TileHelpers_1, IObjective_1, Objective_1, AcquireItemForAction_1, AnalyzeInventory_1, Lambda_1, MoveToTarget_1, UseItem_1) {
+define(["require", "exports", "game/entity/action/IAction", "utilities/game/TileHelpers", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../acquire/item/AcquireItemForAction", "../../analyze/AnalyzeInventory", "../../core/Lambda", "../../core/MoveToTarget", "../item/UseItem"], function (require, exports, IAction_1, TileHelpers_1, IObjective_1, Objective_1, AcquireItemForAction_1, AnalyzeInventory_1, Lambda_1, MoveToTarget_1, UseItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class DigTile extends Objective_1.default {

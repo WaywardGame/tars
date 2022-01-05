@@ -11,9 +11,9 @@
 import { Quadrant } from "ui/screen/screens/game/component/IQuadrantComponent";
 import QuadrantComponent from "ui/screen/screens/game/component/QuadrantComponent";
 import { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
-import Tars from "../../Tars";
+import TarsMod from "../../TarsMod";
 export default class TarsQuadrantComponent extends QuadrantComponent {
-    readonly TARS: Tars;
+    readonly TARS: TarsMod;
     static preferredQuadrant: Quadrant;
     private statusText;
     get preferredQuadrant(): Quadrant;

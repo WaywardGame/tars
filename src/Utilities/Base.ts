@@ -10,9 +10,9 @@ import Creature from "game/entity/creature/Creature";
 import Item from "game/item/Item";
 import { BiomeType } from "game/biome/IBiome";
 
-import Context from "../Context";
-import { baseInfo, BaseInfoKey } from "../ITars";
+import Context from "../core/context/Context";
 import { tileUtilities } from "./Tile";
+import { baseInfo, BaseInfoKey } from "../core/ITars";
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);

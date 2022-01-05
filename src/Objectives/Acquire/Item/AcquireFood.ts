@@ -2,10 +2,10 @@ import { ActionType } from "game/entity/action/IAction";
 import { IContainer } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import SetContextData from "../../../objectives/contextData/SetContextData";
 import { itemUtilities } from "../../../utilities/Item";
 import UseItem from "../../other/item/UseItem";

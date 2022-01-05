@@ -2,9 +2,9 @@ import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import { IStat, Stat } from "game/entity/IStats";
 
-import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireWaterContainer from "../../acquire/item/specific/AcquireWaterContainer";
 import ExecuteAction from "../../core/ExecuteAction";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -19,8 +19,8 @@ import { doodadUtilities } from "../../../utilities/Doodad";
 import { itemUtilities } from "../../../utilities/Item";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
-import { inventoryItemInfo } from "../../../ITars";
 import EmptyWaterContainer from "../EmptyWaterContainer";
+import { inventoryItemInfo } from "../../../core/ITars";
 
 export interface IStartWaterStillDesalinationOptions {
 	disableAttaching: boolean;

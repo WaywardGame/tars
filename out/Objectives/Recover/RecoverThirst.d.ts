@@ -1,6 +1,6 @@
-import Context from "../../Context";
-import { ObjectiveExecutionResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 export interface IRecoverThirstOptions {
     onlyUseAvailableItems: boolean;
     exceededThreshold: boolean;

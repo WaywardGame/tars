@@ -5,8 +5,9 @@ import Divider from "ui/component/Divider";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Decorators";
 
-import { getTarsTranslation, TarsMode, TarsTranslation } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
+import { TarsMode } from "../../core/ITars";
+import { getTarsTranslation, TarsTranslation } from "../../ITarsMod";
 
 export default class GeneralPanel extends TarsPanel {
 

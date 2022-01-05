@@ -2,8 +2,8 @@ import ActionExecutor from "game/entity/action/ActionExecutor";
 import actionDescriptions from "game/entity/action/Actions";
 import { ActionType, IActionDescription } from "game/entity/action/IAction";
 
-import Context from "../Context";
-import { ObjectiveResult } from "../IObjective";
+import Context from "../core/context/Context";
+import { ObjectiveResult } from "../core/objective/IObjective";
 
 class ActionUtilities {
 

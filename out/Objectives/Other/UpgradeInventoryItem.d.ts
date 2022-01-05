@@ -1,7 +1,7 @@
-import Context from "../../Context";
-import { ObjectiveExecutionResult } from "../../IObjective";
-import { IInventoryItems } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { IInventoryItems } from "../../core/ITars";
+import Objective from "../../core/objective/Objective";
 export default class UpgradeInventoryItem extends Objective {
     private readonly upgrade;
     constructor(upgrade: keyof IInventoryItems);

@@ -1,7 +1,7 @@
 import Item from "game/item/Item";
-import Context from "../../Context";
-import { ObjectiveExecutionResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { IGatherWaterFromStillOptions } from "./GatherWaterFromStill";
 export interface IGatherWaterOptions extends IGatherWaterFromStillOptions {
     disallowRecipe: boolean;

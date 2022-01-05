@@ -4,10 +4,10 @@ import { EquipType } from "game/entity/IHuman";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { CreatureSearch } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { CreatureSearch } from "../../core/ITars";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { itemUtilities } from "../../utilities/Item";
 import { objectUtilities } from "../../utilities/Object";
 import AcquireItem from "../acquire/item/AcquireItem";
@@ -18,7 +18,6 @@ import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionFo
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import EquipItem from "../other/item/EquipItem";
-
 
 export default class GatherFromCreature extends Objective {
 

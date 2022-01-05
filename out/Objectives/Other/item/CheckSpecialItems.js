@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/IItem", "game/entity/action/IAction", "../../../IObjective", "../../../Objective", "../../../utilities/Item", "../../core/ExecuteActionForItem", "../../core/ReserveItems", "./MoveItemIntoInventory", "../../core/ExecuteAction"], function (require, exports, IItem_1, IAction_1, IObjective_1, Objective_1, Item_1, ExecuteActionForItem_1, ReserveItems_1, MoveItemIntoInventory_1, ExecuteAction_1) {
+define(["require", "exports", "game/item/IItem", "game/entity/action/IAction", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../../utilities/Item", "../../core/ExecuteActionForItem", "../../core/ReserveItems", "./MoveItemIntoInventory", "../../core/ExecuteAction"], function (require, exports, IItem_1, IAction_1, IObjective_1, Objective_1, Item_1, ExecuteActionForItem_1, ReserveItems_1, MoveItemIntoInventory_1, ExecuteAction_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CheckSpecialItems extends Objective_1.default {

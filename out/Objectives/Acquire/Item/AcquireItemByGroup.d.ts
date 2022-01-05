@@ -1,6 +1,6 @@
 import { ItemTypeGroup } from "game/item/IItem";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
+import Context from "../../../core/context/Context";
+import { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import AcquireBase, { IAcquireItemOptions } from "./AcquireBase";
 export default class AcquireItemByGroup extends AcquireBase {
     private readonly itemTypeGroup;

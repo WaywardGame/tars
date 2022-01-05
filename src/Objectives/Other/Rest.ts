@@ -1,9 +1,9 @@
 import { ActionType } from "game/entity/action/IAction";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { creatureUtilities } from "../../utilities/Creature";
 import { itemUtilities } from "../../utilities/Item";
 import { playerUtilities } from "../../utilities/Player";

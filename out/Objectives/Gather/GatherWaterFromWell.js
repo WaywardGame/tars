@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "utilities/game/TilePosition", "../../IObjective", "../../Objective", "../core/MoveToTarget", "../other/item/UseItem"], function (require, exports, IAction_1, TilePosition_1, IObjective_1, Objective_1, MoveToTarget_1, UseItem_1) {
+define(["require", "exports", "game/entity/action/IAction", "utilities/game/TilePosition", "../../core/objective/IObjective", "../../core/objective/Objective", "../core/MoveToTarget", "../other/item/UseItem"], function (require, exports, IAction_1, TilePosition_1, IObjective_1, Objective_1, MoveToTarget_1, UseItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherWaterFromWell extends Objective_1.default {

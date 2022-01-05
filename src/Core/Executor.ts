@@ -1,12 +1,12 @@
 import { WeightStatus } from "game/entity/player/IPlayer";
 
-import Context from "../Context";
-import { MovingToNewIslandState, ContextDataType } from "../IContext";
-import { IObjective } from "../IObjective";
+import Context from "./context/Context";
+import { MovingToNewIslandState, ContextDataType } from "./context/IContext";
+import { IObjective } from "./objective/IObjective";
 import { log } from "../utilities/Logger";
 
-import { ExecuteResultType, IPlan } from "./IPlan";
-import planner from "./Planner";
+import { ExecuteResultType, IPlan } from "./planning/IPlan";
+import planner from "./planning/Planner";
 
 export enum ExecuteObjectivesResultType {
 	Completed,

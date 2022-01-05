@@ -10,14 +10,13 @@ import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
 import TileHelpers from "utilities/game/TileHelpers";
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { ReserveType } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { actionUtilities } from "../../utilities/Action";
 import { itemUtilities } from "../../utilities/Item";
 import { tileUtilities } from "../../utilities/Tile";
-
+import { ReserveType } from "../../core/ITars";
 
 export enum ExecuteActionType {
 	Generic,

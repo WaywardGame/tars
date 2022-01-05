@@ -1,10 +1,10 @@
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { anyWaterTileLocation } from "../../navigation//INavigation";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { anyWaterTileLocation } from "../../core/navigation/INavigation";
+import Objective from "../../core/objective/Objective";
 import { tileUtilities } from "../../utilities/Tile";
 import MoveToTarget from "../core/MoveToTarget";
 

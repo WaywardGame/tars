@@ -5,13 +5,13 @@ import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
-import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey, TARS_ID } from "../ITars";
-import Tars from "../Tars";
+import TarsMod from "../TarsMod";
 import TarsPanel from "./components/TarsPanel";
 import GeneralPanel from "./panels/GeneralPanel";
 import MoveToPanel from "./panels/MoveToPanel";
 import OptionsPanel from "./panels/OptionsPanel";
 import TasksPanel from "./panels/TasksPanel";
+import { TarsUiSaveDataKey, getTarsTranslation, TarsTranslation, TARS_ID } from "../ITarsMod";
 
 export type TabDialogPanelClass = new () => TarsPanel;
 
@@ -37,8 +37,8 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 		],
 	};
 
-	@Mod.instance<Tars>(TARS_ID)
-	public readonly TARS: Tars;
+	@Mod.instance<TarsMod>(TARS_ID)
+	public readonly TARS: TarsMod;
 
 	public constructor(id: DialogId) {
 		super(id);

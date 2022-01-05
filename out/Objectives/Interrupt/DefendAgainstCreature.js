@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/IStats", "../../IObjective", "../../Objective", "../other/creature/HuntCreature", "../other/RunAwayFromTarget"], function (require, exports, IStats_1, IObjective_1, Objective_1, HuntCreature_1, RunAwayFromTarget_1) {
+define(["require", "exports", "game/entity/IStats", "../../core/objective/IObjective", "../../core/objective/Objective", "../other/creature/HuntCreature", "../other/RunAwayFromTarget"], function (require, exports, IStats_1, IObjective_1, Objective_1, HuntCreature_1, RunAwayFromTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class DefendAgainstCreature extends Objective_1.default {

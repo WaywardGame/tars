@@ -1,10 +1,10 @@
 import ProtectItem from "game/entity/action/actions/ProtectItem";
 import Item from "game/item/Item";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { inventoryItemInfo, IInventoryItems, InventoryItemFlag, IInventoryItemInfo } from "../../core/ITars";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { itemUtilities } from "../../utilities/Item";
 
 export default class AnalyzeInventory extends Objective {

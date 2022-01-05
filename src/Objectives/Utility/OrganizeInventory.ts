@@ -4,11 +4,10 @@ import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
-import { ContextDataType, MovingToNewIslandState } from "../..//IContext";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { defaultMaxTilesChecked } from "../../ITars";
-import Objective from "../../Objective";
+import { ContextDataType, MovingToNewIslandState } from "../../core/context/IContext";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { baseUtilities } from "../../utilities/Base";
 import { itemUtilities } from "../../utilities/Item";
 import { tileUtilities } from "../../utilities/Tile";
@@ -16,6 +15,7 @@ import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 import MoveItem from "../other/item/MoveItem";
+import { defaultMaxTilesChecked } from "../../core/ITars";
 
 
 const maxChestDistance = 128;

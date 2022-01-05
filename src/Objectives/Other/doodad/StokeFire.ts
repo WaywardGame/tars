@@ -1,10 +1,10 @@
 import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import MoveToTarget from "../../core/MoveToTarget";
 

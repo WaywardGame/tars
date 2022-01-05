@@ -4,10 +4,10 @@ import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import Navigation from "../../navigation/Navigation";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Navigation from "../../core/navigation/Navigation";
+import Objective from "../../core/objective/Objective";
 import { movementUtilities } from "../../utilities/Movement";
 import MoveToTarget from "../core/MoveToTarget";
 

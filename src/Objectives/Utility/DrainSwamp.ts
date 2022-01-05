@@ -1,9 +1,9 @@
 import { IVector3 } from "utilities/math/IVector";
 import { TerrainType } from "game/tile/ITerrain";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import DigTile from "../other/tile/DigTile";
 import Restart from "../core/Restart";
 import { tileUtilities } from "../../utilities/Tile";

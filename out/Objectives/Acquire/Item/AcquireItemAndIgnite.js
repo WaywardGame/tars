@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/IItem", "language/Dictionary", "language/Translation", "../../../Objective", "../../../utilities/Item", "../../other/item/IgniteItem", "./AcquireItem"], function (require, exports, IItem_1, Dictionary_1, Translation_1, Objective_1, Item_1, IgniteItem_1, AcquireItem_1) {
+define(["require", "exports", "game/item/IItem", "language/Dictionary", "language/Translation", "../../../core/objective/Objective", "../../../utilities/Item", "../../other/item/IgniteItem", "./AcquireItem"], function (require, exports, IItem_1, Dictionary_1, Translation_1, Objective_1, Item_1, IgniteItem_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireItemAndIgnite extends Objective_1.default {

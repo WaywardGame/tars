@@ -1,4 +1,4 @@
-define(["require", "exports", "../../../../Objective", "../../../../utilities/Item", "../AcquireItem"], function (require, exports, Objective_1, Item_1, AcquireItem_1) {
+define(["require", "exports", "../../../../core/objective/Objective", "../../../../utilities/Item", "../AcquireItem"], function (require, exports, Objective_1, Item_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireSeed extends Objective_1.default {

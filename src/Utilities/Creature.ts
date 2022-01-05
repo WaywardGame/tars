@@ -5,7 +5,7 @@ import { ItemType } from "game/item/IItem";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
-import Context from "../Context";
+import Context from "../core/context/Context";
 
 class CreatureUtilities {
 

@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/Items", "../../IObjective", "../../Objective", "../acquire/item/AcquireItemWithRecipe"], function (require, exports, Items_1, IObjective_1, Objective_1, AcquireItemWithRecipe_1) {
+define(["require", "exports", "game/item/Items", "../../core/objective/IObjective", "../../core/objective/Objective", "../acquire/item/AcquireItemWithRecipe"], function (require, exports, Items_1, IObjective_1, Objective_1, AcquireItemWithRecipe_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class GatherWaterWithRecipe extends Objective_1.default {

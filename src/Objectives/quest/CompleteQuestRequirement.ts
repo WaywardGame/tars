@@ -7,9 +7,9 @@ import ItemManager from "game/item/ItemManager";
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import Lambda from "../core/Lambda";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";

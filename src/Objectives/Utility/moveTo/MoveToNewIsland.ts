@@ -1,9 +1,9 @@
 import { IslandId, IslandPosition } from "game/island/IIsland";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
-import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import MoveToIsland from "./MoveToIsland";
 
 export default class MoveToNewIsland extends Objective {

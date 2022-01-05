@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "game/doodad/Doodad", "../../../IContext", "../../../IObjective", "../../../Objective", "../../core/ExecuteAction", "../../core/Lambda"], function (require, exports, IAction_1, Doodad_1, IContext_1, IObjective_1, Objective_1, ExecuteAction_1, Lambda_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/doodad/Doodad", "../../../core/context/IContext", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../core/ExecuteAction", "../../core/Lambda"], function (require, exports, IAction_1, Doodad_1, IContext_1, IObjective_1, Objective_1, ExecuteAction_1, Lambda_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class MoveItem extends Objective_1.default {

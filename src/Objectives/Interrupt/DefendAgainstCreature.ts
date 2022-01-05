@@ -1,9 +1,9 @@
 import Creature from "game/entity/creature/Creature";
 import { IStat, Stat } from "game/entity/IStats";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import HuntCreature from "../other/creature/HuntCreature";
 import RunAwayFromTarget from "../other/RunAwayFromTarget";
 

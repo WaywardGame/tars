@@ -1,7 +1,7 @@
 import { ItemType } from "game/item/IItem";
-import Context from "../../../Context";
-import { IExecutionTree } from "../../../core/IPlan";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { IExecutionTree } from "../../../core/planning/IPlan";
+import Objective from "../../../core/objective/Objective";
 export interface IAcquireItemOptions extends IGatherItemOptions {
     disableCreatureSearch: boolean;
     disableDoodadSearch: boolean;

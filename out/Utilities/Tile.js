@@ -1,4 +1,4 @@
-define(["require", "exports", "game/tile/ITerrain", "game/tile/Terrains", "utilities/game/TileHelpers", "../Context", "../navigation/Navigation"], function (require, exports, ITerrain_1, Terrains_1, TileHelpers_1, Context_1, Navigation_1) {
+define(["require", "exports", "game/tile/ITerrain", "game/tile/Terrains", "utilities/game/TileHelpers", "../core/context/Context", "../core/navigation/Navigation"], function (require, exports, ITerrain_1, Terrains_1, TileHelpers_1, Context_1, Navigation_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.tileUtilities = void 0;

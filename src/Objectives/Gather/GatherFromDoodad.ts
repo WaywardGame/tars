@@ -2,15 +2,14 @@ import Doodad from "game/doodad/Doodad";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { DoodadSearchMap } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { DoodadSearchMap } from "../../core/ITars";
+import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { objectUtilities } from "../../utilities/Object";
 import { tileUtilities } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
-
 
 export default class GatherFromDoodad extends Objective {
 

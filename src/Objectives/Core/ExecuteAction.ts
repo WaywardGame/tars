@@ -4,11 +4,10 @@ import { ActionType, IActionDescription } from "game/entity/action/IAction";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { actionUtilities } from "../../utilities/Action";
-
 
 export default class ExecuteAction<T extends ActionType> extends Objective {
 

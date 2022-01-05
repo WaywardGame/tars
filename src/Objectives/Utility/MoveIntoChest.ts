@@ -5,16 +5,15 @@ import Item from "game/item/Item";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
 import Vector2 from "utilities/math/Vector2";
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ContextDataType } from "../../core/context/IContext";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import AcquireItemForDoodad from "../acquire/item/AcquireItemForDoodad";
 import AnalyzeBase from "../analyze/AnalyzeBase";
 import MoveToTarget from "../core/MoveToTarget";
 import BuildItem from "../other/item/BuildItem";
 import MoveItem from "../other/item/MoveItem";
-
 
 export default class MoveIntoChest extends Objective {
 

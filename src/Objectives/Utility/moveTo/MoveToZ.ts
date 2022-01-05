@@ -1,10 +1,10 @@
 import { TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import { tileUtilities } from "../../../utilities/Tile";
 import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";

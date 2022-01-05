@@ -7,7 +7,7 @@ import NPC from "game/entity/npc/NPC";
 import Item from "game/item/Item";
 import { AiType } from "game/entity/IEntity";
 
-import Context from "../Context";
+import Context from "../core/context/Context";
 import { tileUtilities } from "./Tile";
 
 export enum FindObjectType {

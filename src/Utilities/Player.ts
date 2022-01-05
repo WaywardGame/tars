@@ -1,5 +1,5 @@
 import { IStatMax, Stat } from "game/entity/IStats";
-import Context from "../Context";
+import Context from "../core/context/Context";
 
 
 class PlayerUtilities {

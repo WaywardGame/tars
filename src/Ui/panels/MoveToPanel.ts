@@ -12,10 +12,10 @@ import TerrainDropdown from "ui/component/dropdown/TerrainDropdown";
 import NPCDropdown from "ui/component/dropdown/NPCDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { Bound } from "utilities/Decorators";
-import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITars";
-import { MoveToMode, MoveToType } from "../../mode/modes/MoveTo";
-import TarsPanel from "../components/TarsPanel";
 
+import { MoveToMode, MoveToType } from "../../modes/MoveTo";
+import TarsPanel from "../components/TarsPanel";
+import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
 
 export default class MoveToPanel extends TarsPanel {
 

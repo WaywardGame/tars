@@ -3,7 +3,7 @@ import { ITile } from "game/tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
 import Creature from "game/entity/creature/Creature";
 import Item from "game/item/Item";
-import Context from "../Context";
+import Context from "../core/context/Context";
 declare class BaseUtilities {
     private tilesNearBaseCache;
     clearCache(): void;

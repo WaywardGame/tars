@@ -1,6 +1,6 @@
 import { IRecipe, ItemType } from "game/item/IItem";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
+import Context from "../../../core/context/Context";
+import { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import AcquireBase from "./AcquireBase";
 export default class AcquireItemWithRecipe extends AcquireBase {
     private readonly itemType;

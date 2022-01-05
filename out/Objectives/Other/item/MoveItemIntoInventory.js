@@ -1,4 +1,4 @@
-define(["require", "exports", "../../../IContext", "../../../IObjective", "../../../Objective", "../../core/MoveToTarget", "./MoveItem"], function (require, exports, IContext_1, IObjective_1, Objective_1, MoveToTarget_1, MoveItem_1) {
+define(["require", "exports", "../../../core/context/IContext", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../core/MoveToTarget", "./MoveItem"], function (require, exports, IContext_1, IObjective_1, Objective_1, MoveToTarget_1, MoveItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class MoveItemIntoInventory extends Objective_1.default {

@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/IItem", "game/item/Items", "../../../IObjective", "../../../Objective", "../../../utilities/Item", "../../acquire/item/AcquireItemWithRecipe"], function (require, exports, IItem_1, Items_1, IObjective_1, Objective_1, Item_1, AcquireItemWithRecipe_1) {
+define(["require", "exports", "game/item/IItem", "game/item/Items", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../../utilities/Item", "../../acquire/item/AcquireItemWithRecipe"], function (require, exports, IItem_1, Items_1, IObjective_1, Objective_1, Item_1, AcquireItemWithRecipe_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CheckDecayingItems extends Objective_1.default {

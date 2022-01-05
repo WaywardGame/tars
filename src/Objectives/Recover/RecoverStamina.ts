@@ -1,12 +1,11 @@
 import { IStat, Stat } from "game/entity/IStats";
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { playerUtilities } from "../../utilities/Player";
 import { tileUtilities } from "../../utilities/Tile";
 import Idle from "../other/Idle";
 import Rest from "../other/Rest";
-
 
 export default class RecoverStamina extends Objective {
 

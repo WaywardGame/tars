@@ -1,4 +1,4 @@
-define(["require", "exports", "game/doodad/Doodads", "utilities/game/TileHelpers", "utilities/math/Vector2", "game/doodad/DoodadManager", "../../IObjective", "../../ITars", "../../Objective", "../../utilities/Base", "../../utilities/Object"], function (require, exports, Doodads_1, TileHelpers_1, Vector2_1, DoodadManager_1, IObjective_1, ITars_1, Objective_1, Base_1, Object_1) {
+define(["require", "exports", "game/doodad/Doodads", "utilities/game/TileHelpers", "utilities/math/Vector2", "game/doodad/DoodadManager", "../../core/objective/IObjective", "../../core/objective/Objective", "../../utilities/Base", "../../utilities/Object", "../../core/ITars"], function (require, exports, Doodads_1, TileHelpers_1, Vector2_1, DoodadManager_1, IObjective_1, Objective_1, Base_1, Object_1, ITars_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const baseDoodadDistanceSq = Math.pow(50, 2);

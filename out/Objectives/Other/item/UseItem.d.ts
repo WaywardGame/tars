@@ -1,8 +1,8 @@
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 export default class UseItem extends Objective {
     private readonly actionType;
     private readonly item?;

@@ -1,4 +1,4 @@
-define(["require", "exports", "game/tile/ITerrain", "../../IObjective", "../../Objective", "../other/tile/DigTile", "../core/Restart", "../../utilities/Tile", "../other/tile/PickUpAllTileItems"], function (require, exports, ITerrain_1, IObjective_1, Objective_1, DigTile_1, Restart_1, Tile_1, PickUpAllTileItems_1) {
+define(["require", "exports", "game/tile/ITerrain", "../../core/objective/IObjective", "../../core/objective/Objective", "../other/tile/DigTile", "../core/Restart", "../../utilities/Tile", "../other/tile/PickUpAllTileItems"], function (require, exports, ITerrain_1, IObjective_1, Objective_1, DigTile_1, Restart_1, Tile_1, PickUpAllTileItems_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class DrainSwamp extends Objective_1.default {

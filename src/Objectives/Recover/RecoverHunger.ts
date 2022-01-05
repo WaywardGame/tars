@@ -2,9 +2,9 @@ import { ActionType } from "game/entity/action/IAction";
 import { IStatMax, Stat } from "game/entity/IStats";
 import Item from "game/item/Item";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { baseUtilities } from "../../utilities/Base";
 import { itemUtilities } from "../../utilities/Item";
 import AcquireFood from "../acquire/item/AcquireFood";

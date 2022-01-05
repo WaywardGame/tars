@@ -6,12 +6,12 @@ import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import DoodadManager from "game/doodad/DoodadManager";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { baseInfo, BaseInfoKey, IBaseInfo } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { baseUtilities } from "../../utilities/Base";
 import { objectUtilities } from "../../utilities/Object";
+import { baseInfo, BaseInfoKey, IBaseInfo } from "../../core/ITars";
 
 const baseDoodadDistanceSq = Math.pow(50, 2);
 

@@ -1,8 +1,8 @@
 import { IVector3 } from "utilities/math/IVector";
 
-import Context from "../../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 
 import MoveItem from "../item/MoveItem";
 

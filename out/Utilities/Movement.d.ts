@@ -1,6 +1,6 @@
 import { ITile } from "game/tile/ITerrain";
 import { IVector2, IVector3 } from "utilities/math/IVector";
-import Context from "../Context";
+import Context from "../core/context/Context";
 export interface IMovementPath {
     difficulty: number;
     path?: IVector2[];

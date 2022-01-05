@@ -2,10 +2,10 @@ import { ActionType } from "game/entity/action/IAction";
 import { EquipType } from "game/entity/IHuman";
 import Item from "game/item/Item";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 
 export default class EquipItem extends Objective {

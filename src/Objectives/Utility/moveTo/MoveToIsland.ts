@@ -1,15 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
 import { IslandId, IslandPosition } from "game/island/IIsland";
 import { ItemType } from "game/item/IItem";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItem from "../../acquire/item/AcquireItem";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import ExecuteAction from "../../core/ExecuteAction";
 import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
 import MoveToWater from "./MoveToWater";
-
 
 export default class MoveToIsland extends Objective {
 
@@ -58,7 +57,7 @@ export default class MoveToIsland extends Objective {
         //     z: context.player.z,
         // };
 
-        return [        
+        return [
             ...(context.inventory.sailBoat ? [new MoveItemIntoInventory(context.inventory.sailBoat)] : [new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]),
             new MoveToWater(true),
             // new Lambda(async () => canSailAwayFromPosition(context.player.island, context.player) ? ObjectiveResult.Complete : ObjectiveResult.Impossible),
@@ -67,7 +66,7 @@ export default class MoveToIsland extends Objective {
                 return ObjectiveResult.Complete;
             }).setStatus(this),
 
-            
+
             // ...(context.inventory.sailBoat ? [new MoveItemIntoInventory(context.inventory.sailBoat)] : [new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]),
             // new MoveToWater(true),
             // new MoveToTarget(edgePosition, true, { allowBoat: true, disableStaminaCheck: true }),

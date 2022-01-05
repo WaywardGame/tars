@@ -1,7 +1,7 @@
 import { ITile, TerrainType } from "game/tile/ITerrain";
 import { IVector3 } from "utilities/math/IVector";
-import Context from "../Context";
-import { ITileLocation } from "../ITars";
+import Context from "../core/context/Context";
+import { ITileLocation } from "../core/ITars";
 declare class TileUtilities {
     private cache;
     clearCache(): void;

@@ -14,10 +14,10 @@ import Doodad from "game/doodad/Doodad";
 import { TerrainType } from "game/tile/ITerrain";
 import doodadDescriptions from "game/doodad/Doodads";
 
-import Context from "../Context";
-import { IDisassemblySearch, IInventoryItems, inventoryItemInfo } from "../ITars";
+import Context from "../core/context/Context";
 import { doodadUtilities } from "./Doodad";
 import { baseUtilities } from "./Base";
+import { IDisassemblySearch, inventoryItemInfo, IInventoryItems } from "../core/ITars";
 
 class ItemUtilities {
 

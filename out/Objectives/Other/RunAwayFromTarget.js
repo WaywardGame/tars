@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/Entity", "game/entity/IStats", "game/tile/Terrains", "utilities/game/TileHelpers", "utilities/math/Vector2", "../../navigation/Navigation", "../../Objective", "../../utilities/Movement", "../core/MoveToTarget"], function (require, exports, Entity_1, IStats_1, Terrains_1, TileHelpers_1, Vector2_1, Navigation_1, Objective_1, Movement_1, MoveToTarget_1) {
+define(["require", "exports", "game/entity/Entity", "game/entity/IStats", "game/tile/Terrains", "utilities/game/TileHelpers", "utilities/math/Vector2", "../../core/navigation/Navigation", "../../core/objective/Objective", "../../utilities/Movement", "../core/MoveToTarget"], function (require, exports, Entity_1, IStats_1, Terrains_1, TileHelpers_1, Vector2_1, Navigation_1, Objective_1, Movement_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const safetyCheckDistance = 5;

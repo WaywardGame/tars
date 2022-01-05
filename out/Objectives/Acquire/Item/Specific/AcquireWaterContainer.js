@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "game/item/IItem", "../../../../IContext", "../../../../Objective", "../../../../utilities/Item", "../../../contextData/SetContextData", "../../../core/ExecuteActionForItem", "../AcquireItem"], function (require, exports, IAction_1, IItem_1, IContext_1, Objective_1, Item_1, SetContextData_1, ExecuteActionForItem_1, AcquireItem_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/item/IItem", "../../../../core/context/IContext", "../../../../core/objective/Objective", "../../../../utilities/Item", "../../../contextData/SetContextData", "../../../core/ExecuteActionForItem", "../AcquireItem"], function (require, exports, IAction_1, IItem_1, IContext_1, Objective_1, Item_1, SetContextData_1, ExecuteActionForItem_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireWaterContainer extends Objective_1.default {

@@ -1,9 +1,9 @@
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import { itemUtilities } from "../../../utilities/Item";
 import IgniteItem from "../../other/item/IgniteItem";
 import AcquireItem from "./AcquireItem";

@@ -1,7 +1,7 @@
 import Creature from "game/entity/creature/Creature";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 export default class HuntCreatures extends Objective {
     private readonly creatures;
     constructor(creatures: Creature[]);

@@ -3,9 +3,9 @@ import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
 
-import Context from "../Context";
-import { ITileLocation } from "../ITars";
-import Navigation from "../navigation/Navigation";
+import Context from "../core/context/Context";
+import { ITileLocation } from "../core/ITars";
+import Navigation from "../core/navigation/Navigation";
 
 class TileUtilities {
 

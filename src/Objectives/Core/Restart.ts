@@ -1,6 +1,5 @@
-import { ObjectiveResult } from "../../IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Lambda from "./Lambda";
-
 
 export default class Restart extends Lambda {
 

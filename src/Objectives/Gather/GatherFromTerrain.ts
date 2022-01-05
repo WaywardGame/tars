@@ -4,15 +4,14 @@ import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { ITerrainSearch } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { ITerrainSearch } from "../../core/ITars";
+import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { itemUtilities } from "../../utilities/Item";
 import { tileUtilities } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
-
 
 export default class GatherFromTerrain extends Objective {
 

@@ -8,10 +8,10 @@ import Divider from "ui/component/Divider";
 import { DoodadType } from "game/doodad/IDoodad";
 import { Bound } from "utilities/Decorators";
 
-import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITars";
-import { AcquireItemMode } from "../../mode/modes/AcquireItem";
+import { AcquireItemMode } from "../../modes/AcquireItem";
 import TarsPanel from "../components/TarsPanel";
-import { BuildDoodadMode } from "../../mode/modes/BuildDoodad";
+import { BuildDoodadMode } from "../../modes/BuildDoodad";
+import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
 
 export default class TasksPanel extends TarsPanel {
 

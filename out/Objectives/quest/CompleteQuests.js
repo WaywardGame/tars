@@ -1,4 +1,4 @@
-define(["require", "exports", "../../IObjective", "../../Objective", "../core/Restart", "./CompleteQuest"], function (require, exports, IObjective_1, Objective_1, Restart_1, CompleteQuest_1) {
+define(["require", "exports", "../../core/objective/IObjective", "../../core/objective/Objective", "../core/Restart", "./CompleteQuest"], function (require, exports, IObjective_1, Objective_1, Restart_1, CompleteQuest_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CompleteQuests extends Objective_1.default {

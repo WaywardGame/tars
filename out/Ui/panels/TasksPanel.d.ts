@@ -1,6 +1,6 @@
 import Translation from "language/Translation";
-import { TarsTranslation } from "../../ITars";
 import TarsPanel from "../components/TarsPanel";
+import { TarsTranslation } from "../../ITarsMod";
 export default class TasksPanel extends TarsPanel {
     private readonly dropdownItemType;
     private readonly dropdownDoodadType;

@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "game/entity/IStats", "../../IObjective", "../../Objective", "../../utilities/Base", "../../utilities/Item", "../acquire/item/AcquireFood", "../core/ReserveItems", "../other/item/MoveItemIntoInventory", "../other/item/UseItem"], function (require, exports, IAction_1, IStats_1, IObjective_1, Objective_1, Base_1, Item_1, AcquireFood_1, ReserveItems_1, MoveItemIntoInventory_1, UseItem_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/entity/IStats", "../../core/objective/IObjective", "../../core/objective/Objective", "../../utilities/Base", "../../utilities/Item", "../acquire/item/AcquireFood", "../core/ReserveItems", "../other/item/MoveItemIntoInventory", "../other/item/UseItem"], function (require, exports, IAction_1, IStats_1, IObjective_1, Objective_1, Base_1, Item_1, AcquireFood_1, ReserveItems_1, MoveItemIntoInventory_1, UseItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const decayingSoonThreshold = 50;

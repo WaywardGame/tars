@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "../../navigation//INavigation", "../../Objective", "../../utilities/Tile", "../core/MoveToTarget", "./item/UseItem"], function (require, exports, IAction_1, INavigation_1, Objective_1, Tile_1, MoveToTarget_1, UseItem_1) {
+define(["require", "exports", "game/entity/action/IAction", "../../core/navigation/INavigation", "../../core/objective/Objective", "../../utilities/Tile", "../core/MoveToTarget", "./item/UseItem"], function (require, exports, IAction_1, INavigation_1, Objective_1, Tile_1, MoveToTarget_1, UseItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class EmptyWaterContainer extends Objective_1.default {

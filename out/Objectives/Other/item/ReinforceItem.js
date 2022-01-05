@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "../../../IContext", "../../../IObjective", "../../../Objective", "../../../utilities/Item", "../../acquire/item/AcquireItemForAction", "../../contextData/SetContextData", "../../core/ExecuteAction", "../../core/Lambda"], function (require, exports, IAction_1, IContext_1, IObjective_1, Objective_1, Item_1, AcquireItemForAction_1, SetContextData_1, ExecuteAction_1, Lambda_1) {
+define(["require", "exports", "game/entity/action/IAction", "../../../core/context/IContext", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../../utilities/Item", "../../acquire/item/AcquireItemForAction", "../../contextData/SetContextData", "../../core/ExecuteAction", "../../core/Lambda"], function (require, exports, IAction_1, IContext_1, IObjective_1, Objective_1, Item_1, AcquireItemForAction_1, SetContextData_1, ExecuteAction_1, Lambda_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ReinforceItem extends Objective_1.default {

@@ -1,8 +1,8 @@
 import { ItemType } from "game/item/IItem";
 
-import Context from "../../../Context";
-import { IExecutionTree } from "../../../core/IPlan";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { IExecutionTree } from "../../../core/planning/IPlan";
+import Objective from "../../../core/objective/Objective";
 import { baseUtilities } from "../../../utilities/Base";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";

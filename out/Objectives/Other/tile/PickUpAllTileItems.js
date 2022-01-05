@@ -1,4 +1,4 @@
-define(["require", "exports", "../../../IObjective", "../../../Objective", "../item/MoveItem"], function (require, exports, IObjective_1, Objective_1, MoveItem_1) {
+define(["require", "exports", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../item/MoveItem"], function (require, exports, IObjective_1, Objective_1, MoveItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PickUpAllTileItems extends Objective_1.default {

@@ -1,8 +1,8 @@
 import { QuestInstance } from "game/entity/player/quest/QuestManager";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import Lambda from "../core/Lambda";
 import Restart from "../core/Restart";
 import CompleteQuestRequirement from "./CompleteQuestRequirement";

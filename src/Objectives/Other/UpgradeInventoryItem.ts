@@ -3,10 +3,10 @@ import { ItemType } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 import Enums from "utilities/enum/Enums";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import { IInventoryItems, inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
+import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 

@@ -2,17 +2,16 @@ import { ActionType } from "game/entity/action/IAction";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { CreatureSearch } from "../../ITars";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { CreatureSearch } from "../../core/ITars";
+import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { itemUtilities } from "../../utilities/Item";
 import { objectUtilities } from "../../utilities/Object";
 import { tileUtilities } from "../../utilities/Tile";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
-
 
 export default class GatherFromCorpse extends Objective {
 

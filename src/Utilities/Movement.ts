@@ -7,15 +7,15 @@ import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOver
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import { IVector2, IVector3 } from "utilities/math/IVector";
-import Context from "../Context";
-import { ObjectiveResult } from "../IObjective";
-import { getTarsInstance } from "../ITars";
-import { NavigationPath } from "../navigation//INavigation";
-import Navigation from "../navigation/Navigation";
+import Context from "../core/context/Context";
+import { ObjectiveResult } from "../core/objective/IObjective";
+import { NavigationPath } from "../core/navigation/INavigation";
+import Navigation from "../core/navigation/Navigation";
 import { actionUtilities } from "./Action";
 import { itemUtilities } from "./Item";
 import { log } from "./Logger";
 import { tileUtilities } from "./Tile";
+import { getTarsInstance } from "../ITarsMod";
 
 
 

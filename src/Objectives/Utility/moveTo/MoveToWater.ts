@@ -3,10 +3,10 @@ import { ITile, TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 
-import Context from "../../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Navigation from "../../../navigation/Navigation";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Navigation from "../../../core/navigation/Navigation";
+import Objective from "../../../core/objective/Objective";
 import { tileUtilities } from "../../../utilities/Tile";
 import MoveToTarget from "../../core/MoveToTarget";
 

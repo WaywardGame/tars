@@ -3,12 +3,11 @@ import Item from "game/item/Item";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import { ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
-
 
 export default class UseItem extends Objective {
 

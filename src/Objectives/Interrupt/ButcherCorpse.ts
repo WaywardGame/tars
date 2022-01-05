@@ -2,13 +2,12 @@ import { ActionType } from "game/entity/action/IAction";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { itemUtilities } from "../../utilities/Item";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
-
 
 export default class ButcherCorpse extends Objective {
 

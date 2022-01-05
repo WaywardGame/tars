@@ -2,9 +2,9 @@ import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import Item from "game/item/Item";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import Context from "../../core/context/Context";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";

@@ -8,8 +8,8 @@ import Item from "game/item/Item";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import Doodad from "game/doodad/Doodad";
 import { TerrainType } from "game/tile/ITerrain";
-import Context from "../Context";
-import { IDisassemblySearch } from "../ITars";
+import Context from "../core/context/Context";
+import { IDisassemblySearch } from "../core/ITars";
 declare class ItemUtilities {
     foodItemTypes: Set<ItemType>;
     seedItemTypes: Set<ItemType>;
