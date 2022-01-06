@@ -1,9 +1,9 @@
-import { ActionType } from "game/entity/action/IAction";
-import { DamageType } from "game/entity/IEntity";
-import { ILog, ILogLine } from "utilities/Log";
-import Context from "../context/Context";
-import ContextState from "../context/ContextState";
-import { IExecutionTree } from "../planning/IPlan";
+import type { ActionType } from "game/entity/action/IAction";
+import type { DamageType } from "game/entity/IEntity";
+import type { ILog, ILogLine } from "utilities/Log";
+import type Context from "../context/Context";
+import type ContextState from "../context/ContextState";
+import type { IExecutionTree } from "../planning/IPlan";
 export declare enum ObjectiveResult {
     Complete = -1,
     Pending = -2,

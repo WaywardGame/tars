@@ -1,16 +1,18 @@
-import Item from "game/item/Item";
-import Log, { ILogLine } from "utilities/Log";
+import type Item from "game/item/Item";
+import type { ILogLine } from "utilities/Log";
+import type Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 
-import Context from "../context/Context";
-import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectiveResult } from "../objective/IObjective";
-import Objective from "../objective/Objective";
+import type Context from "../context/Context";
+import type { IObjective, IObjectiveInfo } from "../objective/IObjective";
+import { CalculatedDifficultyStatus, ObjectiveResult } from "../objective/IObjective";
 import ReserveItems from "../../objectives/core/ReserveItems";
 import Restart from "../../objectives/core/Restart";
 import { loggerUtilities } from "../../utilities/Logger";
 
-import { ExecuteResult, ExecuteResultType, IExecutionTree, IPlan } from "./IPlan";
-import { IPlanner } from "./IPlanner";
+import type { ExecuteResult, IExecutionTree, IPlan } from "./IPlan";
+import { ExecuteResultType } from "./IPlan";
+import type { IPlanner } from "./IPlanner";
 
 interface ITreeVertex {
 	tree: IExecutionTree;
@@ -33,6 +35,13 @@ export default class Plan implements IPlan {
 	 * Flattened list of objectives to execute
 	 */
 	public readonly objectives: IObjectiveInfo[];
+
+	public static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string {
+		return objectives ?
+			objectives.map(objective =>
+				Array.isArray(objective) ? Plan.getPipelineString(context, objective) : `${objective.getHashCode()} (${objective.getStatusMessage(context)})`).join(" -> ") :
+			"Empty pipeline";
+	}
 
 	constructor(private readonly planner: IPlanner, private readonly context: Context, private readonly objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]) {
 		this.log = loggerUtilities.createLog("Plan", objectiveInfo.objective.getHashCode());
@@ -86,7 +95,7 @@ export default class Plan implements IPlan {
 		const objectiveStack: IObjectiveInfo[] = [...this.objectives];
 
 		if (objectiveStack.length > 1) {
-			this.log.info("Executing plan", Objective.getPipelineString(this.context, objectiveStack.map(objectiveInfo => objectiveInfo.objective)));
+			this.log.info("Executing plan", Plan.getPipelineString(this.context, objectiveStack.map(objectiveInfo => objectiveInfo.objective)));
 
 			if (this.objectiveInfo.objective !== objectiveStack[0].objective) {
 				// print logs for the planned objective if it's not in the stack
@@ -141,11 +150,11 @@ export default class Plan implements IPlan {
 
 			if (result === ObjectiveResult.Pending) {
 				const objectiveResults = this.getObjectiveResults(chain, objectiveStack, objectiveInfo);
-				// console.log("chain", Objective.getPipelineString(chain));
-				// // console.log("chain", Objective.getPipelineString(objectiveStack.map(objectiveInfo => objective));
+				// console.log("chain", Plan.getPipelineString(chain));
+				// // console.log("chain", Plan.getPipelineString(objectiveStack.map(objectiveInfo => objective));
 				// if (this.context.options.developerMode) {
 				// 	if (pendingop.length > 0 && !(pendingop[pendingop.length - 1] instanceof Restart)) {
-				// 		console.log("pendingfix missing restart", Objective.getPipelineString(pendingop));
+				// 		console.log("pendingfix missing restart", Plan.getPipelineString(pendingop));
 				// 		console.log("pendingfix stacks", `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`, `${objectiveStack.map(o => `(${objectiveInfo.depth}|${objectiveInfo.objective.getHashCode()})`).join(",")}`);
 				// 	}
 				// }
@@ -575,8 +584,8 @@ export default class Plan implements IPlan {
 		// move gather objectives to the front with sorting
 		if (gatherObjectiveTrees.length > 0) {
 			// traveling salesman problem with the first vertex being the players location
-			const unvisited: Array<ITreeVertex> = [];
-			const visited: Array<ITreeVertex> = [];
+			const unvisited: ITreeVertex[] = [];
+			const visited: ITreeVertex[] = [];
 
 			for (const gatherObjectiveTree of gatherObjectiveTrees) {
 				let position: IVector3 | undefined;

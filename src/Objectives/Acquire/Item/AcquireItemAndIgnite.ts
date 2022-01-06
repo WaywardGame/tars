@@ -1,10 +1,9 @@
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type Context from "../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { itemUtilities } from "../../../utilities/Item";
 import IgniteItem from "../../other/item/IgniteItem";
 import AcquireItem from "./AcquireItem";
 
@@ -36,9 +35,9 @@ export default class AcquireItemAndIgnite extends Objective {
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         const objectives: IObjective[] = [];
 
-        const itemToIgnite = itemUtilities.getItemInInventory(context, this.itemType);
+        const itemToIgnite = context.utilities.item.getItemInInventory(context, this.itemType);
         if (itemToIgnite === undefined) {
-            objectives.push(new AcquireItem(this.itemType).setContextDataKey(this.getHashCode()));
+            objectives.push(new AcquireItem(this.itemType).passAcquireData(this));
         }
 
         objectives.push(new IgniteItem(itemToIgnite));

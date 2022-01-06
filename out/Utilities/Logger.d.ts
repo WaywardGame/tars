@@ -1,4 +1,5 @@
-import Log, { ILog, LogLineType } from "utilities/Log";
+import type { ILog } from "utilities/Log";
+import Log, { LogLineType } from "utilities/Log";
 declare class LoggerUtilities {
     private queuedMessages;
     preConsoleCallback(): void;

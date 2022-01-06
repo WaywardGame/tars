@@ -1,10 +1,11 @@
-import Creature from "game/entity/creature/Creature";
-import { ILog } from "utilities/Log";
-import Context from "../context/Context";
-import { IObjective, ObjectiveExecutionResult } from "./IObjective";
+import type Creature from "game/entity/creature/Creature";
+import type { ILog } from "utilities/Log";
+import type Context from "../context/Context";
 import { ReserveType } from "../ITars";
+import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
 export default abstract class Objective implements IObjective {
     private static uuid;
+    static enableLogging: boolean;
     protected contextDataKey: string;
     protected reserveType: ReserveType | undefined;
     private _log;
@@ -12,7 +13,6 @@ export default abstract class Objective implements IObjective {
     private _additionalDifficulty;
     private _overrideDifficulty;
     private _status;
-    static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string;
     abstract getIdentifier(): string;
     abstract getStatus(context: Context): string | undefined;
     abstract execute(context: Context): Promise<ObjectiveExecutionResult>;

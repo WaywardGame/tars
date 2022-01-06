@@ -1,8 +1,8 @@
-import { IStatMax, Stat } from "game/entity/IStats";
-import Context from "../core/context/Context";
+import type { IStatMax } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
+import type Context from "../core/context/Context";
 
-
-class PlayerUtilities {
+export class PlayerUtilities {
 
 	public getWeight(context: Context) {
 		return context.player.stat.get<IStatMax>(Stat.Weight).value;
@@ -21,7 +21,7 @@ class PlayerUtilities {
 	}
 
 	public getRecoverThreshold(context: Context, stat: Stat) {
-		let recoverThreshold: number | Array<number>;
+		let recoverThreshold: number | number[];
 
 		switch (stat) {
 			case Stat.Health:
@@ -57,5 +57,3 @@ class PlayerUtilities {
 		return threshold > 0 ? threshold : context.player.stat.get<IStatMax>(stat).max + threshold;
 	}
 }
-
-export const playerUtilities = new PlayerUtilities();

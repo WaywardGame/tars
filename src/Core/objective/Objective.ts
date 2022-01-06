@@ -1,16 +1,18 @@
-import Creature from "game/entity/creature/Creature";
-import { ILog, nullLog } from "utilities/Log";
+import type Creature from "game/entity/creature/Creature";
+import type { ILog } from "utilities/Log";
+import { nullLog } from "utilities/Log";
 
-import Context from "../context/Context";
-import Planner from "../planning/Planner";
+import type Context from "../context/Context";
 import { ContextDataType } from "../context/IContext";
-import { IObjective, ObjectiveExecutionResult } from "./IObjective";
 import { loggerUtilities } from "../../utilities/Logger";
 import { ReserveType } from "../ITars";
+import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
 
 export default abstract class Objective implements IObjective {
 
 	private static uuid = 0;
+
+	public static enableLogging = false;
 
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
 	protected reserveType: ReserveType | undefined; // defaults to Hard
@@ -24,13 +26,6 @@ export default abstract class Objective implements IObjective {
 
 	private _status: IObjective | (() => string) | string | undefined;
 
-	public static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string {
-		return objectives ?
-			objectives.map(objective =>
-				Array.isArray(objective) ? Objective.getPipelineString(context, objective) : `${objective.getHashCode()} (${objective.getStatusMessage(context)})`).join(" -> ") :
-			"Empty pipeline";
-	}
-
 	public abstract getIdentifier(): string;
 
 	/**
@@ -41,15 +36,11 @@ export default abstract class Objective implements IObjective {
 	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
 
 	public get log(): ILog {
-		if (!Planner.isCreatingPlan) {
-			if (this._log === undefined) {
-				this._log = loggerUtilities.createLog(this.getName());
-			}
-
-			return this._log;
+		if (Objective.enableLogging) {
+			return this._log ??= loggerUtilities.createLog(this.getName());
 		}
 
-		return this._log || nullLog;
+		return this._log ?? nullLog;
 	}
 
 	public setLogger(log: ILog | undefined): void {

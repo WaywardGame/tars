@@ -1,8 +1,8 @@
-import Log from "utilities/Log";
-import Context from "../context/Context";
-import { IObjective, IObjectiveInfo } from "../objective/IObjective";
-import { ExecuteResult, IExecutionTree, IPlan } from "./IPlan";
-import { IPlanner } from "./IPlanner";
+import type Log from "utilities/Log";
+import type Context from "../context/Context";
+import type { IObjective, IObjectiveInfo } from "../objective/IObjective";
+import type { ExecuteResult, IExecutionTree, IPlan } from "./IPlan";
+import type { IPlanner } from "./IPlanner";
 export default class Plan implements IPlan {
     private readonly planner;
     private readonly context;
@@ -10,6 +10,7 @@ export default class Plan implements IPlan {
     readonly log: Log;
     readonly tree: IExecutionTree;
     readonly objectives: IObjectiveInfo[];
+    static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string;
     constructor(planner: IPlanner, context: Context, objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]);
     getTreeString(root?: IExecutionTree): string;
     execute(preExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined, postExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined): Promise<ExecuteResult>;

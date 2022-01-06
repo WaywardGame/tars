@@ -13,19 +13,19 @@ import Mod from "mod/Mod";
 import Text from "ui/component/Text";
 import { Quadrant } from "ui/screen/screens/game/component/IQuadrantComponent";
 import QuadrantComponent from "ui/screen/screens/game/component/QuadrantComponent";
-import { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
+import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import { Bound } from "utilities/Decorators";
-import TarsMod from "../../TarsMod";
+import type TarsMod from "../../TarsMod";
 import { TarsTranslation, getTarsTranslation, TARS_ID } from "../../ITarsMod";
 
 export default class TarsQuadrantComponent extends QuadrantComponent {
 
     @Mod.instance<TarsMod>(TARS_ID)
-    public readonly TARS: TarsMod;
+    public readonly TarsMod: TarsMod;
 
     public static preferredQuadrant = Quadrant.BottomRight;
 
-    private statusText: Text;
+    private readonly statusText: Text;
 
     public override get preferredQuadrant() {
         return TarsQuadrantComponent.preferredQuadrant;
@@ -44,17 +44,17 @@ export default class TarsQuadrantComponent extends QuadrantComponent {
         }
 
         this.statusText = new Text()
-            .setText(TarsMod.INSTANCE.getTranslation(TarsTranslation.DialogTitleMain))
+            .setText(this.TarsMod.getTranslation(TarsTranslation.DialogTitleMain))
             .appendTo(this);
 
-        this.TARS.event.until(this, "remove").subscribe("statusChange", this.refresh);
+        this.TarsMod.event.until(this, "remove").subscribe("statusChange", this.refresh);
 
         this.refresh();
     }
 
     @Bound
     private refresh() {
-        this.statusText.setText(getTarsTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TARS.getStatus));
+        this.statusText.setText(getTarsTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TarsMod.getStatus()));
     }
 
 }

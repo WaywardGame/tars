@@ -1,7 +1,7 @@
 import { ItemType } from "game/item/IItem";
-import Context from "../../core/context/Context";
-import { DoodadSearchMap } from "../../core/ITars";
-import { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { DoodadSearchMap } from "../../core/ITars";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 export default class GatherFromDoodad extends Objective {
     private readonly itemType;

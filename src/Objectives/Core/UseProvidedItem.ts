@@ -1,11 +1,10 @@
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../core/context/Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-
-
 /**
  * Trys to use a provided item
  */

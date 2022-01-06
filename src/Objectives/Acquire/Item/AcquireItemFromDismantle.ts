@@ -1,16 +1,15 @@
 import Stream from "@wayward/goodstream/Stream";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 import { itemDescriptions } from "game/item/Items";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
-import Context from "../../../core/context/Context";
+import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ReserveItems from "../../core/ReserveItems";
@@ -57,7 +56,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				continue;
 			}
 
-			const dismantleItem = itemUtilities.getItemInInventory(context, itemType);
+			const dismantleItem = context.utilities.item.getItemInInventory(context, itemType);
 			const hasRequirements = description.dismantle.required === undefined || context.island.items.getItemForHuman(context.player, description.dismantle.required, false) !== undefined;
 
 			const objectives: IObjective[] = [

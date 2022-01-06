@@ -1,9 +1,11 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
-import { IStat, Stat } from "game/entity/IStats";
+import type { IStat } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
 
-import Context from "../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type Context from "../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireWaterContainer from "../../acquire/item/specific/AcquireWaterContainer";
 import ExecuteAction from "../../core/ExecuteAction";
@@ -12,15 +14,12 @@ import Restart from "../../core/Restart";
 import GatherWater from "../../gather/GatherWater";
 import RepairItem from "../../interrupt/RepairItem";
 
-import StokeFire from "./StokeFire";
 import UseItem from "../item/UseItem";
-import { baseUtilities } from "../../../utilities/Base";
-import { doodadUtilities } from "../../../utilities/Doodad";
-import { itemUtilities } from "../../../utilities/Item";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import EmptyWaterContainer from "../EmptyWaterContainer";
 import { inventoryItemInfo } from "../../../core/ITars";
+import StokeFire from "./StokeFire";
 
 export interface IStartWaterStillDesalinationOptions {
 	disableAttaching: boolean;
@@ -49,7 +48,7 @@ export default class StartWaterStillDesalination extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!this.options.forceStoke && doodadUtilities.isWaterStillDrinkable(this.waterStill)) {
+		if (!this.options.forceStoke && context.utilities.doodad.isWaterStillDrinkable(this.waterStill)) {
 			// water is ready
 			return ObjectiveResult.Ignore;
 		}
@@ -63,7 +62,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
 
-		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !itemUtilities.isSafeToDrinkItem(waterContainer));
+		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(waterContainer));
 
 		if (!this.options.disablePouring && this.waterStill.gatherReady === undefined) {
 			// water still cannot be desalinated yet
@@ -71,7 +70,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 			// check if we need a water container
 			if (availableWaterContainer) {
-				isWaterInContainer = itemUtilities.isDrinkableItem(availableWaterContainer);
+				isWaterInContainer = context.utilities.item.isDrinkableItem(availableWaterContainer);
 
 				if (availableWaterContainer.minDur !== undefined &&
 					availableWaterContainer.maxDur !== undefined &&
@@ -115,7 +114,7 @@ export default class StartWaterStillDesalination extends Objective {
 				objectives.push(new AcquireWaterContainer());
 			}
 
-			if (availableWaterContainer && !itemUtilities.canGatherWater(availableWaterContainer)) {
+			if (availableWaterContainer && !context.utilities.item.canGatherWater(availableWaterContainer)) {
 				// theres water in the container - it's like seawater
 				// pour it out so we can attach it to the container
 				objectives.push(new EmptyWaterContainer(availableWaterContainer));
@@ -137,7 +136,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 			} else if (!waterStillDescription.providesFire) {
 				// only start the fire if we are near the base or if we have an emergency
-				if (this.options.forceStarting || baseUtilities.isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
+				if (this.options.forceStarting || context.utilities.base.isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
 					// we need to start the fire. stoke fire will do it for us
 					objectives.push(new StokeFire(this.waterStill));
 					objectives.push(new Restart());

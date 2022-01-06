@@ -3,9 +3,11 @@ import { ItemType } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 import Enums from "utilities/enum/Enums";
 
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
-import { IInventoryItems, inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import type { IInventoryItems } from "../../core/ITars";
+import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
 import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
@@ -78,10 +80,10 @@ export default class UpgradeInventoryItem extends Objective {
 				const worth = itemDescriptions[itemType]?.worth;
 				return worth !== undefined && currentWorth !== undefined && worth > currentWorth;
 			};
-		};
+		}
 
 		if (itemInfo.itemTypes) {
-			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes() : itemInfo.itemTypes;
+			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;
 			for (const itemTypeOrGroup of itemTypes) {
 				if (itemTypeOrGroup !== item.type) {
 					if (context.island.items.isGroup(itemTypeOrGroup)) {

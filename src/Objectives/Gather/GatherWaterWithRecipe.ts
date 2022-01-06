@@ -1,9 +1,10 @@
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 import itemDescriptions from "game/item/Items";
-import { ItemType } from "game/item/IItem";
+import type { ItemType } from "game/item/IItem";
 
-import Context from "../../core/context/Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 
 import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";

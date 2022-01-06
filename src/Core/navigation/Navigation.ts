@@ -1,24 +1,26 @@
-import { IDijkstraMap, IDijkstraMapFindPathResult } from "@cplusplus/index";
-import { IOverlayInfo, ITerrainDescription, ITile, OverlayType, TerrainType } from "game/tile/ITerrain";
+import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@cplusplus/index";
+import type { IOverlayInfo, ITerrainDescription, ITile } from "game/tile/ITerrain";
+import { OverlayType, TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
 import terrainDescriptions from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
 import Enums from "utilities/enum/Enums";
 import TileHelpers from "utilities/game/TileHelpers";
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import { sleep } from "utilities/promise/Async";
 import { TileUpdateType } from "game/IGame";
 
 import { log } from "../../utilities/Logger";
 
-import { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationMessageType, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
-import { ITileLocation } from "../ITars";
+import type { ITileLocation } from "../ITars";
+import type { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
+import { NavigationMessageType } from "./INavigation";
 
 interface INavigationWorker {
 	id: number;
 	worker: Worker;
 	busy: boolean;
-	pendingRequests: { [index: number]: Array<{ request: NavigationRequest; resolve(response: NavigationResponse): void }> };
+	pendingRequests: Record<number, Array<{ request: NavigationRequest; resolve(response: NavigationResponse): void }>>;
 }
 
 const workerCount = 1; // navigator.hardwareConcurrency;
@@ -28,8 +30,6 @@ export const tileUpdateRadius = 2;
 export const creaturePenaltyRadius = 2;
 
 export default class Navigation {
-
-	private static instance: Navigation | undefined;
 
 	private static modPath: string;
 
@@ -50,23 +50,6 @@ export default class Navigation {
 	private sailingMode = false;
 
 	private workerInitialized = false;
-
-	public static get(): Navigation {
-		if (!Navigation.instance) {
-			Navigation.instance = new Navigation();
-			log.info("Created navigation instance");
-		}
-
-		return Navigation.instance;
-	}
-
-	public static delete(): void {
-		if (Navigation.instance) {
-			Navigation.instance.delete();
-			Navigation.instance = undefined;
-			log.info("Deleted navigation instance");
-		}
-	}
 
 	public static setModPath(modPath: string) {
 		Navigation.modPath = modPath;
@@ -303,7 +286,7 @@ export default class Navigation {
 			node.disabled = isDisabled;
 		} catch (ex) {
 			log.error("invalid node", x, y, penalty, isDisabled);
-			// tslint:disable-next-line: no-console
+
 			console.trace();
 		}
 

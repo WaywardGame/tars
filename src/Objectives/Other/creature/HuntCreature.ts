@@ -1,10 +1,12 @@
 import { ActionType } from "game/entity/action/IAction";
-import Creature from "game/entity/creature/Creature";
-import { IStat, Stat } from "game/entity/IStats";
+import type Creature from "game/entity/creature/Creature";
+import type { IStat} from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
-import Context from "../../../core/context/Context";
+import type Context from "../../../core/context/Context";
 
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
@@ -52,7 +54,7 @@ export default class HuntCreature extends Objective {
 
                 // if (this.creature.description()?.passable) {
                 // face the creature and attack with a weapon
-                let objectives: IObjective[] = [];
+                const objectives: IObjective[] = [];
 
                 if (context.player.facingDirection !== direction) {
                     objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {

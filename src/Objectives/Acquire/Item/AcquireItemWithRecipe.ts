@@ -1,15 +1,16 @@
 import { ActionType } from "game/entity/action/IAction";
-import { IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
-import { IRequirementInfo, RequirementStatus, WeightType } from "game/item/IItemManager";
-import Item from "game/item/Item";
-import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
+import type { IRecipe } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import type { IRequirementInfo } from "game/item/IItemManager";
+import { RequirementStatus, WeightType } from "game/item/IItemManager";
+import type Item from "game/item/Item";
+import type ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../../core/context/Context";
+import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import { ReserveType } from "../../../core/ITars";
-import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
-import { itemUtilities } from "../../../utilities/Item";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -49,10 +50,10 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, this.itemType);
 
-		const checker = itemUtilities.processRecipe(context, this.recipe, false, this.allowInventoryItems);
-		const checkerWithIntermediateChest = itemUtilities.processRecipe(context, this.recipe, true, this.allowInventoryItems);
+		const checker = context.utilities.item.processRecipe(context, this.recipe, false, this.allowInventoryItems);
+		const checkerWithIntermediateChest = context.utilities.item.processRecipe(context, this.recipe, true, this.allowInventoryItems);
 
-		const availableInventoryWeight = itemUtilities.getAvailableInventoryWeight(context);
+		const availableInventoryWeight = context.utilities.item.getAvailableInventoryWeight(context);
 		const estimatedItemWeight = context.island.items.getWeight(this.itemType, WeightType.Static);
 
 		const mustUseIntermediateChest = availableInventoryWeight < estimatedItemWeight;

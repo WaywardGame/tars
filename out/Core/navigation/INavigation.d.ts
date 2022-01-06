@@ -1,4 +1,4 @@
-import { IVector2, IVector3 } from "utilities/math/IVector";
+import type { IVector2, IVector3 } from "utilities/math/IVector";
 export declare enum NavigationMessageType {
     UpdateAllTiles = 0,
     UpdateTile = 1,

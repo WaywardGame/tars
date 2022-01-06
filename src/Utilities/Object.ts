@@ -1,14 +1,13 @@
-import Doodad from "game/doodad/Doodad";
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Creature from "game/entity/creature/Creature";
-import { IVector3 } from "utilities/math/IVector";
+import type Doodad from "game/doodad/Doodad";
+import type Corpse from "game/entity/creature/corpse/Corpse";
+import type Creature from "game/entity/creature/Creature";
+import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import NPC from "game/entity/npc/NPC";
-import Item from "game/item/Item";
+import type NPC from "game/entity/npc/NPC";
+import type Item from "game/item/Item";
 import { AiType } from "game/entity/IEntity";
 
-import Context from "../core/context/Context";
-import { tileUtilities } from "./Tile";
+import type Context from "../core/context/Context";
 
 export enum FindObjectType {
 	Creature,
@@ -18,10 +17,10 @@ export enum FindObjectType {
 	NPC,
 }
 
-class ObjectUtilities {
+export class ObjectUtilities {
 
-	private cachedSorts: Map<string, any> = new Map();
-	private cachedObjects: Map<string, any> = new Map();
+	private readonly cachedSorts: Map<string, any> = new Map();
+	private readonly cachedObjects: Map<string, any> = new Map();
 
 	public clearCache() {
 		this.cachedSorts.clear();
@@ -104,7 +103,7 @@ class ObjectUtilities {
 				return tile.creature === undefined &&
 					tile.npc === undefined &&
 					tile.events === undefined &&
-					tileUtilities.isFreeOfOtherPlayers(context, corpse);
+					context.utilities.tile.isFreeOfOtherPlayers(context, corpse);
 			}
 
 			return false;
@@ -112,11 +111,11 @@ class ObjectUtilities {
 	}
 
 	public findHuntableCreatures(context: Context, id: string, onlyHostile?: boolean, top?: number) {
-		return objectUtilities.findCreatures(context, id, creature => !creature.isTamed() && (!onlyHostile || creature.hasAi(AiType.Hostile)), top);
+		return context.utilities.object.findCreatures(context, id, creature => !creature.isTamed() && (!onlyHostile || creature.hasAi(AiType.Hostile)), top);
 	}
 
 	public findTamableCreatures(context: Context, id: string, onlyHostile: boolean, top?: number) {
-		return objectUtilities.findCreatures(context, id, creature => {
+		return context.utilities.object.findCreatures(context, id, creature => {
 			if (creature.isTamed()) {
 				return false;
 			}
@@ -129,5 +128,3 @@ class ObjectUtilities {
 		}, top);
 	}
 }
-
-export const objectUtilities = new ObjectUtilities();

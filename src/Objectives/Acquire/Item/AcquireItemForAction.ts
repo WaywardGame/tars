@@ -5,8 +5,8 @@ import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-import Context from "../../../core/context/Context";
-import { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireItem from "./AcquireItem";
 

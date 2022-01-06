@@ -58,9 +58,7 @@ declare let freshWaterTypes: Set<TerrainType>;
 declare let seaWaterTypes: Set<TerrainType>;
 declare let gatherableTypes: Set<TerrainType>;
 interface INavigationInfo {
-    tileLocations: {
-        [index: number]: any;
-    };
+    tileLocations: Record<number, any>;
     kdTreeTileTypes: Uint8Array;
 }
 declare class Navigation {

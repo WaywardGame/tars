@@ -1,12 +1,12 @@
-import { ITile, TerrainType } from "game/tile/ITerrain";
-import { IVector3 } from "utilities/math/IVector";
+import type { ITile } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
+import type { IVector3 } from "utilities/math/IVector";
 import { TileUpdateType } from "game/IGame";
-import { NavigationPath } from "./INavigation";
-import { ITileLocation } from "../ITars";
+import type { ITileLocation } from "../ITars";
+import type { NavigationPath } from "./INavigation";
 export declare const tileUpdateRadius = 2;
 export declare const creaturePenaltyRadius = 2;
 export default class Navigation {
-    private static instance;
     private static modPath;
     totalTime: number;
     totalCount: number;
@@ -18,8 +18,6 @@ export default class Navigation {
     private originUpdateTimeout;
     private sailingMode;
     private workerInitialized;
-    static get(): Navigation;
-    static delete(): void;
     static setModPath(modPath: string): void;
     constructor();
     delete(): void;

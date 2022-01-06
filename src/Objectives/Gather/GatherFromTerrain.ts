@@ -1,15 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import ItemManager from "game/item/ItemManager";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../core/context/Context";
-import { ITerrainSearch } from "../../core/ITars";
-import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { ITerrainSearch } from "../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { itemUtilities } from "../../utilities/Item";
-import { tileUtilities } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -22,7 +21,7 @@ export default class GatherFromTerrain extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]}:${localIsland.items.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
+		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]}:${ItemManager.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -36,7 +35,7 @@ export default class GatherFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const hasDigTool = itemUtilities.hasInventoryItemForAction(context, ActionType.Dig);
+		const hasDigTool = context.utilities.item.hasInventoryItemForAction(context, ActionType.Dig);
 
 		for (const terrainSearch of this.search) {
 			const terrainDescription = Terrains[terrainSearch.type];
@@ -44,11 +43,11 @@ export default class GatherFromTerrain extends Objective {
 				continue;
 			}
 
-			const tileLocations = await tileUtilities.getNearestTileLocation(context, terrainSearch.type);
+			const tileLocations = await context.utilities.tile.getNearestTileLocation(context, terrainSearch.type);
 
 			for (const tileLocation of tileLocations) {
 				// todo: debug solar still blocking wateR?
-				if (!tileUtilities.canGather(context, tileLocation.tile)) {
+				if (!context.utilities.tile.canGather(context, tileLocation.tile)) {
 					continue;
 				}
 
@@ -92,7 +91,7 @@ export default class GatherFromTerrain extends Objective {
 
 				if (matches === 0) {
 					if (step === 0) {
-						// tslint:disable-next-line: no-console
+
 						console.error("GatherFromTerrain no matches", step, ItemType[terrainSearch.itemType], difficulty, JSON.stringify(terrainSearch));
 					}
 

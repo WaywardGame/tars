@@ -2,15 +2,14 @@ import Stream from "@wayward/goodstream/Stream";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { RequirementStatus } from "game/item/IItemManager";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
-import Context from "../../../core/context/Context";
-import { IDisassemblySearch } from "../../../core/ITars";
-import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type Context from "../../../core/context/Context";
+import type { IDisassemblySearch } from "../../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { itemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ProvideItems from "../../core/ProvideItems";
@@ -59,7 +58,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				continue;
 			}
 
-			if (itemUtilities.isInventoryItem(context, item)) {
+			if (context.utilities.item.isInventoryItem(context, item)) {
 				// allow diassembling a hoe when we're missing an axe or pick axe
 				if (item !== context.inventory.hoe || (context.inventory.axe && context.inventory.pickAxe)) {
 					continue;

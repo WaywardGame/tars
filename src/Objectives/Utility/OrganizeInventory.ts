@@ -1,23 +1,19 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
-import { IContainer } from "game/item/IItem";
-import Item from "game/item/Item";
+import type { IContainer } from "game/item/IItem";
+import type Item from "game/item/Item";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
 import { ContextDataType, MovingToNewIslandState } from "../../core/context/IContext";
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { baseUtilities } from "../../utilities/Base";
-import { itemUtilities } from "../../utilities/Item";
-import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 import MoveItem from "../other/item/MoveItem";
 import { defaultMaxTilesChecked } from "../../core/ITars";
-
-
 const maxChestDistance = 128;
 
 export interface IOriganizeInventoryOptions {
@@ -60,11 +56,11 @@ export default class OrganizeInventory extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
 
-		const reservedItems = itemUtilities.getReservedItems(context)
+		const reservedItems = context.utilities.item.getReservedItems(context)
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const reservedItemsWeight = reservedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		let unusedItems = itemUtilities.getUnusedItems(context, { allowSailboat: moveToNewIslandState === MovingToNewIslandState.None })
+		let unusedItems = context.utilities.item.getUnusedItems(context, { allowSailboat: moveToNewIslandState === MovingToNewIslandState.None })
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
@@ -72,7 +68,7 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (this.options.onlyIfNearBase && !baseUtilities.isNearBase(context)) {
+		if (this.options.onlyIfNearBase && !context.utilities.base.isNearBase(context)) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -116,7 +112,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (unusedItems.length === 0 && this.options.allowReservedItems) {
 			// ignore reserved items
-			unusedItems = itemUtilities.getUnusedItems(context, { allowReservedItems: true });
+			unusedItems = context.utilities.item.getUnusedItems(context, { allowReservedItems: true });
 		}
 
 		if (unusedItems.length === 0) {
@@ -149,7 +145,7 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = TileHelpers.findMatchingTile(context.island, context.player, (_, point, tile) => tileUtilities.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
+		const target = TileHelpers.findMatchingTile(context.island, context.player, (_, point, tile) => context.utilities.tile.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}

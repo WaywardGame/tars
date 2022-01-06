@@ -1,12 +1,12 @@
 import { ActionType } from "game/entity/action/IAction";
-import { IStatMax, Stat } from "game/entity/IStats";
-import Item from "game/item/Item";
+import type { IStatMax } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
+import type Item from "game/item/Item";
 
-import Context from "../../core/context/Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { baseUtilities } from "../../utilities/Base";
-import { itemUtilities } from "../../utilities/Item";
 import AcquireFood from "../acquire/item/AcquireFood";
 import ReserveItems from "../core/ReserveItems";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
@@ -41,7 +41,7 @@ export default class RecoverHunger extends Objective {
 			if ((hunger.value / hunger.max) < 0.9) {
 				let decayingSoonFoodItems: Item[] = [];
 
-				if (baseUtilities.isNearBase(context)) {
+				if (context.utilities.base.isNearBase(context)) {
 					// only make food if theres not enough
 					const foodItemsInBase = this.getFoodItemsInBase(context);
 
@@ -71,7 +71,7 @@ export default class RecoverHunger extends Objective {
 		let foodItems: Item[] = [];
 
 		// prefer eating food that was prepared ahead of time if we're near our base
-		if (baseUtilities.isNearBase(context)) {
+		if (context.utilities.base.isNearBase(context)) {
 			foodItems = this.getFoodItemsInBase(context);
 		}
 
@@ -79,7 +79,7 @@ export default class RecoverHunger extends Objective {
 			foodItems = this.getFoodItemsInInventory(context);
 
 			if (isEmergency && foodItems.length === 0) {
-				foodItems = itemUtilities.getInventoryItemsWithUse(context, ActionType.Eat);
+				foodItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Eat);
 			}
 		}
 
@@ -95,7 +95,7 @@ export default class RecoverHunger extends Objective {
 
 	private getFoodItemsInInventory(context: Context) {
 		// prioritize ones that will decay sooner
-		return Array.from(itemUtilities.foodItemTypes)
+		return Array.from(context.utilities.item.foodItemTypes)
 			.map(foodItemType => context.island.items.getItemsInContainerByType(context.player.inventory, foodItemType, true))
 			.flat()
 			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
@@ -105,7 +105,7 @@ export default class RecoverHunger extends Objective {
 		// prioritize ones that will decay sooner
 		return context.base.chest
 			.map(chest => context.island.items.getItemsInContainer(chest, true)
-				.filter(item => itemUtilities.foodItemTypes.has(item.type)))
+				.filter(item => context.utilities.item.foodItemTypes.has(item.type)))
 			.flat()
 			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
 	}

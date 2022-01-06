@@ -1,20 +1,21 @@
-import Player from "game/entity/player/Player";
-import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { IVector3 } from "utilities/math/IVector";
-import { IBase, IInventoryItems, ITarsOptions } from "../ITars";
+import type Player from "game/entity/player/Player";
+import type { ItemType } from "game/item/IItem";
+import type Item from "game/item/Item";
+import type { IVector3 } from "utilities/math/IVector";
+import type { IBase, IInventoryItems, ITarsOptions, IUtilities } from "../ITars";
 import ContextState from "./ContextState";
-import { IContext } from "./IContext";
+import type { IContext } from "./IContext";
 export default class Context implements IContext {
     readonly player: Player;
     readonly base: IBase;
     readonly inventory: IInventoryItems;
+    readonly utilities: IUtilities;
     readonly options: Readonly<ITarsOptions>;
     state: ContextState;
     readonly calculatingDifficulty: boolean;
     private initialState?;
     private changes;
-    constructor(player: Player, base: IBase, inventory: IInventoryItems, options: Readonly<ITarsOptions>, state?: ContextState, calculatingDifficulty?: boolean, initialState?: ContextState | undefined);
+    constructor(player: Player, base: IBase, inventory: IInventoryItems, utilities: IUtilities, options: Readonly<ITarsOptions>, state?: ContextState, calculatingDifficulty?: boolean, initialState?: ContextState | undefined);
     get island(): import("../../../node_modules/@wayward/types/definitions/game/game/island/Island").default;
     toString(): string;
     clone(calculatingDifficulty?: boolean, increaseDepth?: boolean): Context;

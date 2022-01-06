@@ -1,10 +1,10 @@
-import Doodad from "game/doodad/Doodad";
-import { ITile } from "game/tile/ITerrain";
-import { IVector3 } from "utilities/math/IVector";
-import Creature from "game/entity/creature/Creature";
-import Item from "game/item/Item";
-import Context from "../core/context/Context";
-declare class BaseUtilities {
+import type Doodad from "game/doodad/Doodad";
+import type { ITile } from "game/tile/ITerrain";
+import type { IVector3 } from "utilities/math/IVector";
+import type Creature from "game/entity/creature/Creature";
+import type Item from "game/item/Item";
+import type Context from "../core/context/Context";
+export declare class BaseUtilities {
     private tilesNearBaseCache;
     clearCache(): void;
     shouldBuildWaterStills(context: Context): boolean;
@@ -28,5 +28,3 @@ declare class BaseUtilities {
     getSwampTilesNearBase(context: Context): IVector3[];
     getNonTamedCreaturesNearBase(context: Context): Creature[];
 }
-export declare const baseUtilities: BaseUtilities;
-export {};

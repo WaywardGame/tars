@@ -1,12 +1,12 @@
 import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { ITileContainer } from "game/tile/ITerrain";
+import type Item from "game/item/Item";
+import type { ITileContainer } from "game/tile/ITerrain";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { IGatherItemOptions } from "../acquire/item/AcquireBase";
+import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";

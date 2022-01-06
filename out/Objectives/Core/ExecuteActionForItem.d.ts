@@ -1,9 +1,10 @@
-import ActionExecutor from "game/entity/action/ActionExecutor";
-import actionDescriptions from "game/entity/action/Actions";
-import { ActionType, IActionDescription } from "game/entity/action/IAction";
+import type ActionExecutor from "game/entity/action/ActionExecutor";
+import type actionDescriptions from "game/entity/action/Actions";
+import type { IActionDescription } from "game/entity/action/IAction";
+import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import Context from "../../core/context/Context";
-import { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 export declare enum ExecuteActionType {
     Generic = 0,

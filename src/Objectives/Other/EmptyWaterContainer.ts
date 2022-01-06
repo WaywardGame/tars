@@ -1,11 +1,10 @@
 import { ActionType } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { anyWaterTileLocation } from "../../core/navigation/INavigation";
 import Objective from "../../core/objective/Objective";
-import { tileUtilities } from "../../utilities/Tile";
 import MoveToTarget from "../core/MoveToTarget";
 
 import UseItem from "./item/UseItem";
@@ -30,7 +29,7 @@ export default class EmptyWaterContainer extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const targets = await tileUtilities.getNearestTileLocation(context, anyWaterTileLocation);
+		const targets = await context.utilities.tile.getNearestTileLocation(context, anyWaterTileLocation);
 
 		for (const { point } of targets) {
 			const objectives: IObjective[] = [];

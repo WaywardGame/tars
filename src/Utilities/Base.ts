@@ -1,25 +1,26 @@
-import Doodad from "game/doodad/Doodad";
-import { IContainer } from "game/item/IItem";
-import { ITile, TerrainType } from "game/tile/ITerrain";
+import type Doodad from "game/doodad/Doodad";
+import type { IContainer } from "game/item/IItem";
+import type { ITile } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
 import TileHelpers from "utilities/game/TileHelpers";
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Creature from "game/entity/creature/Creature";
-import Item from "game/item/Item";
+import type Creature from "game/entity/creature/Creature";
+import type Item from "game/item/Item";
 import { BiomeType } from "game/biome/IBiome";
 
-import Context from "../core/context/Context";
-import { tileUtilities } from "./Tile";
-import { baseInfo, BaseInfoKey } from "../core/ITars";
+import type Context from "../core/context/Context";
+import type { BaseInfoKey } from "../core/ITars";
+import { baseInfo } from "../core/ITars";
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
 
-class BaseUtilities {
+export class BaseUtilities {
 
-	private tilesNearBaseCache: Array<{ point: IVector3; tile: ITile; }> | undefined;
+	private tilesNearBaseCache: Array<{ point: IVector3; tile: ITile }> | undefined;
 
 	public clearCache() {
 		this.tilesNearBaseCache = undefined;
@@ -87,7 +88,7 @@ class BaseUtilities {
 	}
 
 	public isOpenArea(context: Context, point: IVector3, tile: ITile, radius: number = 1): boolean {
-		if (!tileUtilities.isOpenTile(context, point, tile, false) || tileUtilities.hasCorpses(tile)) {
+		if (!context.utilities.tile.isOpenTile(context, point, tile, false) || context.utilities.tile.hasCorpses(tile)) {
 			return false;
 		}
 
@@ -110,7 +111,7 @@ class BaseUtilities {
 					}
 
 					const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
-					if (!tileUtilities.isOpenTile(context, nearbyPoint, nearbyTile)) {
+					if (!context.utilities.tile.isOpenTile(context, nearbyPoint, nearbyTile)) {
 						return false;
 					}
 				}
@@ -238,6 +239,3 @@ class BaseUtilities {
 		return result;
 	}
 }
-
-export const baseUtilities = new BaseUtilities();
-

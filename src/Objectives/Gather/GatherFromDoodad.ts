@@ -1,13 +1,11 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../core/context/Context";
-import { DoodadSearchMap } from "../../core/ITars";
-import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { DoodadSearchMap } from "../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { objectUtilities } from "../../utilities/Object";
-import { tileUtilities } from "../../utilities/Tile";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -32,7 +30,7 @@ export default class GatherFromDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		return objectUtilities.findDoodads(context, `${this.getIdentifier()}|1`, (doodad: Doodad) => {
+		return context.utilities.object.findDoodads(context, `${this.getIdentifier()}|1`, (doodad: Doodad) => {
 			const searchMap = this.doodadSearchMap.get(doodad.type);
 			if (!searchMap) {
 				return false;
@@ -55,7 +53,7 @@ export default class GatherFromDoodad extends Objective {
 
 			// todo: use difficulty
 
-			return tileUtilities.canGather(context, doodad.getTile(), true);
+			return context.utilities.tile.canGather(context, doodad.getTile(), true);
 		}, 5)
 			.map(target => {
 				const objectives: IObjective[] = [];

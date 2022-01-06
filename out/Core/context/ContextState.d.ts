@@ -1,4 +1,4 @@
-import { ItemType } from "game/item/IItem";
+import type { ItemType } from "game/item/IItem";
 export default class ContextState {
     depth: number;
     includeHashCode: boolean;

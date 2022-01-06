@@ -1,5 +1,5 @@
-import Context from "../context/Context";
-import { IObjective } from "../objective/IObjective";
+import type Context from "../context/Context";
+import type { IObjective } from "../objective/IObjective";
 
 export interface ITarsMode {
 	initialize?(context: Context, finished: (success: boolean) => void): Promise<void>;

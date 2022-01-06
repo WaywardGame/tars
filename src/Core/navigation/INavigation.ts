@@ -1,4 +1,4 @@
-import { IVector2, IVector3 } from "utilities/math/IVector";
+import type { IVector2, IVector3 } from "utilities/math/IVector";
 
 export enum NavigationMessageType {
 	UpdateAllTiles,
@@ -48,7 +48,7 @@ export type NavigationRequest = IUpdateAllTilesRequest | IGetTileLocationsReques
 
 export type NavigationResponse = IUpdateAllTilesResponse | IGetTileLocationsResponse;
 
-export interface NavigationPath { path: IVector3[]; score: number; }
+export interface NavigationPath { path: IVector3[]; score: number }
 
 export const freshWaterTileLocation = -1;
 

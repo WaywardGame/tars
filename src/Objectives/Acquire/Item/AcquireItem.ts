@@ -10,10 +10,9 @@ import terrainDescriptions from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-import Context from "../../../core/context/Context";
-import { ITerrainSearch, DoodadSearchMap, CreatureSearch } from "../../../core/ITars";
-import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
-import { itemUtilities } from "../../../utilities/Item";
+import type Context from "../../../core/context/Context";
+import type { ITerrainSearch, DoodadSearchMap, CreatureSearch } from "../../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import UseProvidedItem from "../../core/UseProvidedItem";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";
@@ -21,7 +20,8 @@ import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrain from "../../gather/GatherFromTerrain";
-import AcquireBase, { IAcquireItemOptions } from "./AcquireBase";
+import type { IAcquireItemOptions } from "./AcquireBase";
+import AcquireBase from "./AcquireBase";
 import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
@@ -91,7 +91,7 @@ export default class AcquireItem extends AcquireBase {
 			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passAcquireData(this)]);
 		}
 
-		const disassembleSearch = itemUtilities.getDisassembleSearch(context, this.itemType);
+		const disassembleSearch = context.utilities.item.getDisassembleSearch(context, this.itemType);
 		if (disassembleSearch.length > 0) {
 			objectivePipelines.push([new AcquireItemFromDisassemble(this.itemType, disassembleSearch).passAcquireData(this)]);
 		}

@@ -1,16 +1,18 @@
-import Player from "game/entity/player/Player";
-import { DropLocation, IOptions } from "save/data/ISaveDataGlobal";
+import type Player from "game/entity/player/Player";
+import type { IOptions } from "save/data/ISaveDataGlobal";
+import { DropLocation } from "save/data/ISaveDataGlobal";
 import Objects from "utilities/object/Objects";
 
-import Context from "../../core/context/Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 
 export default class OptionsInterrupt extends Objective {
 
 	public static previousOptions: IOptions | undefined;
 
-	private static desiredOptions: Partial<IOptions> = {
+	private static readonly desiredOptions: Partial<IOptions> = {
 		autoAttack: true, // todo: I think this should be false
 		autoGatherHarvest: false,
 		autoPickup: false,

@@ -1,36 +1,37 @@
-import { Events } from "event/EventEmitter";
-import { IStatMax, Stat } from "game/entity/IStats";
-import Translation from "language/Translation";
-import Mod from "mod/Mod";
-import { IContext } from "./core/context/IContext";
-import { ITarsOptions } from "./core/ITars";
-import TarsMod from "./TarsMod";
-
-let tars: TarsMod | undefined;
+import type { Events } from "event/EventEmitter";
+import type { IStatMax } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
+import type Translation from "language/Translation";
+import type Mod from "mod/Mod";
+import type { IContext } from "./core/context/IContext";
+import type { ITarsOptions } from "./core/ITars";
+import type TarsMod from "./TarsMod";
 
 export const TARS_ID = "TARS";
 
-export function getTarsInstance() {
-    if (!tars) {
+let tarsMod: TarsMod | undefined;
+
+export function getTarsMod(): TarsMod {
+    if (!tarsMod) {
         throw new Error("Invalid Tars instance");
     }
 
-    return tars;
+    return tarsMod;
 }
 
-export function setTarsInstance(instance: TarsMod | undefined) {
-    tars = instance;
+export function setTarsMod(instance: TarsMod | undefined) {
+    tarsMod = instance;
 }
 
 export function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation {
-    return getTarsInstance().getTranslation(translation);
+    return getTarsMod().getTranslation(translation);
 }
 
 export function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T] {
-    return getTarsInstance().saveData[key];
+    return getTarsMod().saveData[key];
 }
 
-export interface ITarsEvents extends Events<Mod> {
+export interface ITarsModEvents extends Events<Mod> {
     /**
      * Emitted when TARS is enabled or disabled
      */
@@ -44,7 +45,7 @@ export interface ITarsEvents extends Events<Mod> {
     /**
      * Emitted when TARS status is changed
      */
-    statusChange(status: Translation | string): any;
+    statusChange(status: TarsTranslation | string): any;
 }
 
 export interface ISaveData {
@@ -140,7 +141,7 @@ export interface ITarsOptionSection {
     isDisabled?: () => boolean;
     slider?: {
         min: number | ((context: IContext) => number);
-        max: number | ((context: IContext) => number)
+        max: number | ((context: IContext) => number);
     };
 }
 

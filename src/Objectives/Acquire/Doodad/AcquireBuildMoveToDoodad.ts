@@ -1,16 +1,12 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import DoodadManager from "game/doodad/DoodadManager";
 import Doodads from "game/doodad/Doodads";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type Context from "../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { baseUtilities } from "../../../utilities/Base";
-import { doodadUtilities } from "../../../utilities/Doodad";
-import { itemUtilities } from "../../../utilities/Item";
-import { objectUtilities } from "../../../utilities/Object";
 import MoveToTarget from "../../core/MoveToTarget";
 import StartFire from "../../other/doodad/StartFire";
 import BuildItem from "../../other/item/BuildItem";
@@ -47,10 +43,10 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
+		const doodadTypes = context.utilities.doodad.getDoodadTypes(this.doodadTypeOrGroup);
 
 		const doodad = !this.options.ignoreExistingDoodads ?
-			objectUtilities.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && baseUtilities.isBaseDoodad(context, d)) :
+			context.utilities.object.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && context.utilities.base.isBaseDoodad(context, d)) :
 			undefined;
 
 		let requiresFire = false;
@@ -73,7 +69,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 		const objectives: IObjective[] = [];
 
 		if (!doodad) {
-			const inventoryItem = itemUtilities.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
+			const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 			if (inventoryItem === undefined) {
 				objectives.push(new AcquireItemForDoodad(this.doodadTypeOrGroup));
 			}

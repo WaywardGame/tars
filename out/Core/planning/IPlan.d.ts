@@ -1,5 +1,5 @@
-import { ILogLine } from "utilities/Log";
-import { IObjective, IObjectiveInfo } from "../objective/IObjective";
+import type { ILogLine } from "utilities/Log";
+import type { IObjective, IObjectiveInfo } from "../objective/IObjective";
 export interface IPlan {
     readonly tree: IExecutionTree;
     readonly objectives: IObjectiveInfo[];

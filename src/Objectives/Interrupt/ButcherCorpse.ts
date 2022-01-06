@@ -1,11 +1,11 @@
 import { ActionType } from "game/entity/action/IAction";
-import Corpse from "game/entity/creature/corpse/Corpse";
+import type Corpse from "game/entity/creature/corpse/Corpse";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { itemUtilities } from "../../utilities/Item";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -24,7 +24,7 @@ export default class ButcherCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const tool = itemUtilities.getBestTool(context, ActionType.Butcher);
+		const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
 		if (tool === undefined) {
 			this.log.info("Missing butcher tool for corpse");
 			return ObjectiveResult.Impossible;

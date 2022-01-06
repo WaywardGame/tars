@@ -2,16 +2,12 @@ import Entity from "game/entity/Entity";
 import { Stat } from "game/entity/IStats";
 import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
-import Navigation from "../../core/navigation/Navigation";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { movementUtilities } from "../../utilities/Movement";
 import MoveToTarget from "../core/MoveToTarget";
-
-
 const safetyCheckDistance = 5;
 const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
 
@@ -37,7 +33,7 @@ export default class RunAwayFromTarget extends Objective {
 		const nearbyTilesDistance = this.maxRunAwayDistance;
 		const nearbyTilesDistanceSq = Math.pow(nearbyTilesDistance, 2);
 
-		const navigation = Navigation.get();
+		const navigation = context.utilities.navigation;
 
 		// get a list of all nearby tiles that are open
 		const nearbyOpenTiles = TileHelpers.findMatchingTiles(
@@ -68,7 +64,7 @@ export default class RunAwayFromTarget extends Objective {
 		const scoreCache = new Map<string, number>();
 
 		for (const nearbyOpenTile of nearbyOpenTiles) {
-			const movementPath = await movementUtilities.getMovementPath(context, nearbyOpenTile.point, false);
+			const movementPath = await context.utilities.movement.getMovementPath(context, nearbyOpenTile.point, false);
 			if (!movementPath.path) {
 				continue;
 			}
@@ -93,14 +89,14 @@ export default class RunAwayFromTarget extends Objective {
 					// try to avoid paths that has blocking things
 					const tile = context.island.getTileFromPoint(pointZ);
 					if (tile.doodad?.blocksMove()) {
-						pointScore! += 2000;
+						pointScore += 2000;
 					}
 
 					const terrainType = TileHelpers.getType(tile);
 					const terrainDescription = terrainDescriptions[terrainType];
 					if (terrainDescription) {
 						if (!terrainDescription.passable && !terrainDescription.water) {
-							pointScore! += 2000;
+							pointScore += 2000;
 						}
 					}
 

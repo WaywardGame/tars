@@ -1,6 +1,6 @@
-import { ILogLine } from "utilities/Log";
+import type { ILogLine } from "utilities/Log";
 
-import { IObjective, IObjectiveInfo } from "../objective/IObjective";
+import type { IObjective, IObjectiveInfo } from "../objective/IObjective";
 
 export interface IPlan {
 

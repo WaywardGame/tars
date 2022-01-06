@@ -2,8 +2,9 @@ import { TurnMode } from "game/IGame";
 import { ItemType } from "game/item/IItem";
 import { EquipType } from "game/entity/IHuman";
 
-import Context from "../core/context/Context";
-import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
+import type Context from "../core/context/Context";
+import type { IObjective } from "../core/objective/IObjective";
+import { ObjectiveResult } from "../core/objective/IObjective";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import Lambda from "../objectives/core/Lambda";
@@ -12,8 +13,7 @@ import ReturnToBase from "../objectives/other/ReturnToBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import EquipItem from "../objectives/other/item/EquipItem";
 import HuntCreatures from "../objectives/other/creature/HuntCreatures";
-import { objectUtilities } from "../utilities/Object";
-import { ITarsMode } from "../core/mode/IMode";
+import type { ITarsMode } from "../core/mode/IMode";
 
 /**
  * DUNDUN DUN DUNDUN
@@ -41,7 +41,7 @@ export class TerminatorMode implements ITarsMode {
             objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
         }
 
-        const creatures = objectUtilities.findHuntableCreatures(context, "Terminator", true, 10);
+        const creatures = context.utilities.object.findHuntableCreatures(context, "Terminator", true, 10);
         if (creatures.length > 0) {
             objectives.push(new HuntCreatures(creatures));
         }

@@ -1,10 +1,11 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import Doodads from "game/doodad/Doodads";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import type { DoodadTypeGroup } from "game/doodad/IDoodad";
+import { DoodadType } from "game/doodad/IDoodad";
 import Enums from "utilities/enum/Enums";
 import DoodadManager from "game/doodad/DoodadManager";
 
-class DoodadUtilities {
+export class DoodadUtilities {
 
 	public getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup, includeLitAndRevert?: boolean): Set<DoodadType> {
 		const doodadTypes: Set<DoodadType> = new Set();
@@ -77,5 +78,3 @@ class DoodadUtilities {
 	}
 
 }
-
-export const doodadUtilities = new DoodadUtilities();

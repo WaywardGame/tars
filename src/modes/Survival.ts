@@ -2,15 +2,19 @@ import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { AiType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
-import { IStat, IStatMax, Stat } from "game/entity/IStats";
+import type { IStat, IStatMax } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
 import { TurnMode } from "game/IGame";
-import { IContainer, ItemType, ItemTypeGroup } from "game/item/IItem";
-import Item from "game/item/Item";
+import type { IContainer } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import type Item from "game/item/Item";
+import { CreatureType } from "game/entity/creature/ICreature";
 
-import Context from "../core/context/Context";
+import type Context from "../core/context/Context";
 import ContextState from "../core/context/ContextState";
 import { ContextDataType, MovingToNewIslandState } from "../core/context/IContext";
-import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
+import type { IObjective } from "../core/objective/IObjective";
+import { ObjectiveResult } from "../core/objective/IObjective";
 import AcquireFood from "../objectives/acquire/item/AcquireFood";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
 import AcquireItemByGroup from "../objectives/acquire/item/AcquireItemByGroup";
@@ -38,19 +42,17 @@ import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
 import MoveToNewIsland from "../objectives/utility/moveTo/MoveToNewIsland";
 import OrganizeBase from "../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import { baseUtilities } from "../utilities/Base";
-import { playerUtilities } from "../utilities/Player";
-import { itemUtilities } from "../utilities/Item";
 import AcquireUseOrbOfInfluence from "../objectives/acquire/item/specific/AcquireUseOrbOfInfluence";
 import CheckDecayingItems from "../objectives/other/item/CheckDecayingItems";
 import HuntCreatures from "../objectives/other/creature/HuntCreatures";
 import PlantSeeds from "../objectives/utility/PlantSeeds";
 import GatherWaters from "../objectives/gather/GatherWaters";
 import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
-import { getCommonInitialObjectives } from "./CommonInitialObjectives";
-import { ITarsMode } from "../core/mode/IMode";
-import { inventoryItemInfo, IInventoryItems } from "../core/ITars";
+import type { ITarsMode } from "../core/mode/IMode";
+import type { IInventoryItems } from "../core/ITars";
+import { inventoryItemInfo } from "../core/ITars";
 import { getTarsSaveData } from "../ITarsMod";
+import { getCommonInitialObjectives } from "./CommonInitialObjectives";
 
 /**
  * Survival mode
@@ -98,7 +100,7 @@ export class SurvivalMode implements ITarsMode {
 
 		objectives.push(...await getCommonInitialObjectives(context));
 
-		if (baseUtilities.shouldBuildWaterStills(context) && context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
+		if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
 			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);
 		}
 
@@ -106,7 +108,7 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.base.buildAnotherChest) {
 			// build another chest if we're near the base
-			acquireChest = baseUtilities.isNearBase(context);
+			acquireChest = context.utilities.base.isNearBase(context);
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
@@ -136,7 +138,7 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tongs), new AnalyzeInventory()]);
 		}
 
-		if (baseUtilities.isNearBase(context)) {
+		if (context.utilities.base.isNearBase(context)) {
 			// ensure water stills are water stilling
 			for (const waterStill of context.base.waterStill) {
 				objectives.push(new StartWaterStillDesalination(waterStill));
@@ -155,7 +157,7 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItemForAction(ActionType.Heal), new AnalyzeInventory()]);
 		}
 
-		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= playerUtilities.getRecoverThreshold(context, Stat.Thirst) &&
+		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;
 
 		const shouldUpgradeToLeather = !waitingForWater;
@@ -224,9 +226,9 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		// run a few extra things before running upgrade objectives if we're near a base 
-		if (baseUtilities.isNearBase(context)) {
+		if (context.utilities.base.isNearBase(context)) {
 			// build a second water still
-			if (baseUtilities.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
+			if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
 				objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);
 			}
 
@@ -246,7 +248,7 @@ export class SurvivalMode implements ITarsMode {
 
 			if (context.inventory.waterContainer !== undefined) {
 				for (const waterContainer of context.inventory.waterContainer) {
-					if (itemUtilities.isSafeToDrinkItem(waterContainer)) {
+					if (context.utilities.item.isSafeToDrinkItem(waterContainer)) {
 						drinkableWaterContainers.push(waterContainer);
 					} else {
 						availableWaterContainers.push(waterContainer);
@@ -262,13 +264,19 @@ export class SurvivalMode implements ITarsMode {
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
 				// remove swamp tiles near the base
-				const swampTiles = baseUtilities.getSwampTilesNearBase(context);
+				const swampTiles = context.utilities.base.getSwampTilesNearBase(context);
 				if (swampTiles.length > 0) {
+					const boglings = context.utilities.base.getNonTamedCreaturesNearBase(context)
+						.filter(creature => creature.type === CreatureType.Bogling);
+					if (boglings.length > 0) {
+						objectives.push(new HuntCreatures(boglings));
+					}
+
 					objectives.push(new DrainSwamp(swampTiles));
 				}
 
 				// cleanup base if theres items laying around everywhere
-				const tiles = baseUtilities.getTilesWithItemsNearBase(context);
+				const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
 				if (tiles.totalCount > 20) {
 					objectives.push(new OrganizeBase(tiles.tiles));
 				}
@@ -290,8 +298,8 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		// go on a killing spree once you have a good sword and shield
-		if (baseUtilities.isNearBase(context)) {
-			const creatures = baseUtilities.getNonTamedCreaturesNearBase(context)
+		if (context.utilities.base.isNearBase(context)) {
+			const creatures = context.utilities.base.getNonTamedCreaturesNearBase(context)
 				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
 				objectives.push(new HuntCreatures(creatures));
@@ -371,7 +379,7 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.options.exploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
-			const needWaterItems = context.inventory.waterContainer === undefined || context.inventory.waterContainer.filter(item => itemUtilities.isSafeToDrinkItem(item)).length < 2;
+			const needWaterItems = context.inventory.waterContainer === undefined || context.inventory.waterContainer.filter(item => context.utilities.item.isSafeToDrinkItem(item)).length < 2;
 			const needFoodItems = context.inventory.food === undefined || context.inventory.food.length < 2;
 
 			const health = context.player.stat.get<IStatMax>(Stat.Health);
@@ -413,7 +421,7 @@ export class SurvivalMode implements ITarsMode {
 
 					// stock up on water
 					if (needWaterItems) {
-						const availableWaterContainers = context.inventory.waterContainer?.filter(item => !itemUtilities.isSafeToDrinkItem(item));
+						const availableWaterContainers = context.inventory.waterContainer?.filter(item => !context.utilities.item.isSafeToDrinkItem(item));
 						if (availableWaterContainers && availableWaterContainers.length > 0) {
 							// we are looking for something drinkable
 							// if there is a well, starting the water still will use it
@@ -455,7 +463,7 @@ export class SurvivalMode implements ITarsMode {
 
 			objectives.push(new ReturnToBase());
 
-			objectives.push(new OrganizeBase(baseUtilities.getTilesWithItemsNearBase(context).tiles));
+			objectives.push(new OrganizeBase(context.utilities.base.getTilesWithItemsNearBase(context).tiles));
 
 			objectives.push(new OrganizeInventory());
 		}

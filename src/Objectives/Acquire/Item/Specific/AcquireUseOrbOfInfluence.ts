@@ -2,15 +2,15 @@ import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { Stat } from "game/entity/IStats";
 
-import Context from "../../../../core/context/Context";
+import type Context from "../../../../core/context/Context";
 import { ContextDataType } from "../../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
 import AcquireItem from "../AcquireItem";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteAction from "../../../core/ExecuteAction";
 import Lambda from "../../../core/Lambda";
-import { itemUtilities } from "../../../../utilities/Item";
 
 export default class AcquireUseOrbOfInfluence extends Objective {
 
@@ -32,7 +32,7 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const orbOfInfluenceItem = itemUtilities.getItemInInventory(context, ItemType.OrbOfInfluence);
+		const orbOfInfluenceItem = context.utilities.item.getItemInInventory(context, ItemType.OrbOfInfluence);
 		if (!orbOfInfluenceItem) {
 			objectives.push(new AcquireItem(ItemType.OrbOfInfluence));
 

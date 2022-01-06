@@ -1,9 +1,9 @@
 
-import Context from "../../core/context/Context";
+import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { itemUtilities } from "../../utilities/Item";
 import SetContextData from "../contextData/SetContextData";
 import ReserveItems from "../core/ReserveItems";
 import Restart from "../core/Restart";
@@ -21,7 +21,7 @@ export default class PlantSeeds extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const seeds = itemUtilities.getSeeds(context);
+        const seeds = context.utilities.item.getSeeds(context);
         if (seeds.length === 0) {
             return ObjectiveResult.Ignore;
         }

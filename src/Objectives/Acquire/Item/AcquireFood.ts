@@ -1,13 +1,12 @@
 import { ActionType } from "game/entity/action/IAction";
-import { IContainer } from "game/item/IItem";
+import type { IContainer } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 
-import Context from "../../../core/context/Context";
+import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import SetContextData from "../../../objectives/contextData/SetContextData";
-import { itemUtilities } from "../../../utilities/Item";
 import UseItem from "../../other/item/UseItem";
 
 import AcquireItem from "./AcquireItem";
@@ -34,7 +33,7 @@ export default class AcquireFood extends Objective {
 		// check if we can craft food based on our current items
 		objectivePipelines.push(...AcquireFood.getFoodRecipeObjectivePipelines(context, false));
 
-		for (const itemType of itemUtilities.foodItemTypes) {
+		for (const itemType of context.utilities.item.foodItemTypes) {
 			objectivePipelines.push([
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
 				new AcquireItem(itemType).passAcquireData(this),
@@ -55,7 +54,7 @@ export default class AcquireFood extends Objective {
 	public static getFoodRecipeObjectivePipelines(context: Context, eatFood: boolean) {
 		const objectivePipelines: IObjective[][] = [];
 
-		for (const itemType of itemUtilities.foodItemTypes) {
+		for (const itemType of context.utilities.item.foodItemTypes) {
 			const description = itemDescriptions[itemType];
 			if (!description || description.craftable === false) {
 				continue;
@@ -66,7 +65,7 @@ export default class AcquireFood extends Objective {
 				continue;
 			}
 
-			const checker = itemUtilities.processRecipe(context, recipe, true);
+			const checker = context.utilities.item.processRecipe(context, recipe, true);
 
 			for (const chest of context.base.chest) {
 				checker.processContainer(chest as IContainer);

@@ -2,10 +2,12 @@ import { DoodadType } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { DamageType } from "game/entity/IEntity";
 import { TurnMode } from "game/IGame";
-import { IContainer, ItemType } from "game/item/IItem";
+import type { IContainer } from "game/item/IItem";
+import { ItemType } from "game/item/IItem";
 
-import Context from "../core/context/Context";
-import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
+import type Context from "../core/context/Context";
+import type { IObjective } from "../core/objective/IObjective";
+import { ObjectiveResult } from "../core/objective/IObjective";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
 import AcquireItemForAction from "../objectives/acquire/item/AcquireItemForAction";
 import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
@@ -16,10 +18,8 @@ import BuildItem from "../objectives/other/item/BuildItem";
 import Idle from "../objectives/other/Idle";
 import ReturnToBase from "../objectives/other/ReturnToBase";
 import OrganizeBase from "../objectives/utility/OrganizeBase";
-import { baseUtilities } from "../utilities/Base";
-import { itemUtilities } from "../utilities/Item";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import { ITarsMode } from "../core/mode/IMode";
+import type { ITarsMode } from "../core/mode/IMode";
 
 /**
  * Marie Kondo mode
@@ -39,7 +39,7 @@ export class TidyUpMode implements ITarsMode {
 
 		if (context.base.buildAnotherChest) {
 			// build another chest if we're near the base
-			acquireChest = baseUtilities.isNearBase(context);
+			acquireChest = context.utilities.base.isNearBase(context);
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
@@ -58,7 +58,7 @@ export class TidyUpMode implements ITarsMode {
 			// this is reset to false in baseInfo.onAdd
 			context.base.buildAnotherChest = true;
 
-			const chopItem = itemUtilities.getBestTool(context, ActionType.Chop, DamageType.Slashing);
+			const chopItem = context.utilities.item.getBestTool(context, ActionType.Chop, DamageType.Slashing);
 			if (chopItem === undefined) {
 				objectives.push([new AcquireItemForAction(ActionType.Chop)]);
 			}
@@ -78,7 +78,7 @@ export class TidyUpMode implements ITarsMode {
 			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		const tiles = baseUtilities.getTilesWithItemsNearBase(context);
+		const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
 		if (tiles.totalCount > 0) {
 			objectives.push(new OrganizeBase(tiles.tiles));
 		}

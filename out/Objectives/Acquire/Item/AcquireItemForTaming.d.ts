@@ -1,7 +1,7 @@
-import { ItemType } from "game/item/IItem";
-import Creature from "game/entity/creature/Creature";
-import Context from "../../../core/context/Context";
-import { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type { ItemType } from "game/item/IItem";
+import type Creature from "game/entity/creature/Creature";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 export default class AcquireItemForTaming extends Objective {
     private readonly creature;

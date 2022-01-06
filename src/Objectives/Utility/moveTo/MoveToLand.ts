@@ -1,11 +1,10 @@
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 
-import Context from "../../../core/context/Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
-import Navigation from "../../../core/navigation/Navigation";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { tileUtilities } from "../../../utilities/Tile";
 import MoveToTarget from "../../core/MoveToTarget";
 import { defaultMaxTilesChecked } from "../../../core/ITars";
 
@@ -20,11 +19,11 @@ export default class MoveToLand extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!tileUtilities.isSwimmingOrOverWater(context)) {
+		if (!context.utilities.tile.isSwimmingOrOverWater(context)) {
 			return ObjectiveResult.Complete;
 		}
 
-		const navigation = Navigation.get();
+		const navigation = context.utilities.navigation;
 
 		const target = TileHelpers.findMatchingTile(context.island, context.getPosition(), (_, point, tile) => {
 			const tileType = TileHelpers.getType(tile);

@@ -1,12 +1,15 @@
-import Log, { MemoryLog, nullLog } from "utilities/Log";
+import type Log from "utilities/Log";
+import { MemoryLog, nullLog } from "utilities/Log";
 
-import Context from "../context/Context";
+import type Context from "../context/Context";
 import ContextState from "../context/ContextState";
-import { CalculatedDifficultyStatus, IObjective, IObjectiveInfo, ObjectivePipeline, ObjectiveResult, PossibleObjectivePipeline } from "../objective/IObjective";
+import type { IObjective, IObjectiveInfo, ObjectivePipeline, PossibleObjectivePipeline } from "../objective/IObjective";
+import { CalculatedDifficultyStatus, ObjectiveResult } from "../objective/IObjective";
 import { loggerUtilities } from "../../utilities/Logger";
 
-import { IPlanner } from "./IPlanner";
+import type { IPlanner } from "./IPlanner";
 import Plan from "./Plan";
+import Objective from "../objective/Objective";
 
 /**
  * Creates plans for executing objectives
@@ -136,7 +139,7 @@ class Planner implements IPlanner {
 					case CalculatedDifficultyStatus.Impossible:
 						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
-						if (objectivePipeline.changes && objectivePipeline.changes.includeHashCode) {
+						if (objectivePipeline.changes?.includeHashCode) {
 							// this pipeline was impossible because one or more required items were reserved
 							// mark that the hash code should be included in the parent objectives
 							includeHashCode = true;
@@ -416,7 +419,9 @@ class Planner implements IPlanner {
 			}
 		}
 
-		this.calculatingDifficultyDepth++;
+		if (++this.calculatingDifficultyDepth === 1) {
+			Objective.enableLogging = true;
+		}
 
 		const waitingHashCodes = new Set<string>();
 
@@ -650,7 +655,9 @@ class Planner implements IPlanner {
 			}
 		}
 
-		this.calculatingDifficultyDepth--;
+		if (--this.calculatingDifficultyDepth === 0) {
+			Objective.enableLogging = false;
+		}
 
 		if (this.debug) {
 			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}. Difficulty is ${difficulty}`);

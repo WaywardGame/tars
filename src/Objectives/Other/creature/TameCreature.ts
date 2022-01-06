@@ -1,13 +1,13 @@
 import { ActionType } from "game/entity/action/IAction";
-import Creature from "game/entity/creature/Creature";
+import type Creature from "game/entity/creature/Creature";
 
-import Context from "../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type Context from "../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
-import { itemUtilities } from "../../../utilities/Item";
 import { ContextDataType } from "../../../core/context/IContext";
 import SetContextData from "../../contextData/SetContextData";
 import AcquireItemForTaming from "../../acquire/item/AcquireItemForTaming";
@@ -43,7 +43,7 @@ export default class TameCreature extends Objective {
 
         const objectives: IObjective[] = [];
 
-        const items = itemUtilities.getItemsInInventory(context, false);
+        const items = context.utilities.item.getItemsInInventory(context, false);
 
         const offerItem = this.creature.offer(items);
         if (offerItem) {

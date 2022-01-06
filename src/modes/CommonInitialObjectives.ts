@@ -4,8 +4,8 @@ import { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 
-import Context from "../core/context/Context";
-import { IObjective } from "../core/objective/IObjective";
+import type Context from "../core/context/Context";
+import type { IObjective } from "../core/objective/IObjective";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
 import AcquireItemByGroup from "../objectives/acquire/item/AcquireItemByGroup";
 import AcquireItemForAction from "../objectives/acquire/item/AcquireItemForAction";
@@ -15,12 +15,11 @@ import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import BuildItem from "../objectives/other/item/BuildItem";
 import EquipItem from "../objectives/other/item/EquipItem";
 import { log } from "../utilities/Logger";
-import { itemUtilities } from "../utilities/Item";
 
 export async function getCommonInitialObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
     const objectives: Array<IObjective | IObjective[]> = [];
 
-    const gatherItem = itemUtilities.getBestTool(context, ActionType.Gather, DamageType.Slashing);
+    const gatherItem = context.utilities.item.getBestTool(context, ActionType.Gather, DamageType.Slashing);
     if (gatherItem === undefined) {
         objectives.push([new AcquireItemForAction(ActionType.Gather)]);
     }

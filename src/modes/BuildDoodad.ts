@@ -1,38 +1,36 @@
 import { EventBus } from "event/EventBuses";
 import { EventHandler } from "event/EventManager";
-import Doodad from "game/doodad/Doodad";
-import DoodadManager from "game/doodad/DoodadManager";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import Human from "game/entity/Human";
+import type Doodad from "game/doodad/Doodad";
+import type DoodadManager from "game/doodad/DoodadManager";
+import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import type Human from "game/entity/Human";
 import Doodads from "game/doodad/Doodads";
 
-import Context from "../core/context/Context";
-import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
+import type Context from "../core/context/Context";
+import type { IObjective } from "../core/objective/IObjective";
+import { ObjectiveResult } from "../core/objective/IObjective";
 import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
 import BuildItem from "../objectives/other/item/BuildItem";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import StartFire from "../objectives/other/doodad/StartFire";
 import Lambda from "../objectives/core/Lambda";
-import { doodadUtilities } from "../utilities/Doodad";
-import { itemUtilities } from "../utilities/Item";
-import { ITarsMode } from "../core/mode/IMode";
+import type { ITarsMode } from "../core/mode/IMode";
 
 // import AcquireBuildMoveToDoodad from "../../objectives/acquire/doodad/AcquireBuildMoveToDoodad";
 
 export class BuildDoodadMode implements ITarsMode {
 
 	private finished: (success: boolean) => void;
+	private doodadTypes: Set<DoodadType>;
 
 	private doodad: number | undefined;
 
-	private doodadTypes: Set<DoodadType>;
-
 	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
-		this.doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
 	}
 
-	public async initialize(_: Context, finished: (success: boolean) => void) {
+	public async initialize(context: Context, finished: (success: boolean) => void) {
 		this.finished = finished;
+		this.doodadTypes = context.utilities.doodad.getDoodadTypes(this.doodadTypeOrGroup);
 	}
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
@@ -78,7 +76,7 @@ export class BuildDoodadMode implements ITarsMode {
 			}
 		}
 		else {
-			const inventoryItem = itemUtilities.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
+			const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 			if (inventoryItem) {
 				objectives.push(new BuildItem(inventoryItem));
 

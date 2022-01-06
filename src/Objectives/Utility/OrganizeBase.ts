@@ -1,10 +1,11 @@
-import { IContainer, ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { IVector3 } from "utilities/math/IVector";
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type { IContainer } from "game/item/IItem";
+import { ItemType } from "game/item/IItem";
+import type Item from "game/item/Item";
+import type { IVector3 } from "utilities/math/IVector";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { playerUtilities } from "../../utilities/Player";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 import MoveItem from "../other/item/MoveItem";
@@ -47,8 +48,8 @@ export default class OrganizeBase extends Objective {
 		for (const position of this.tiles) {
 			const tile = context.island.getTileFromPoint(position);
 			if (tile.containedItems && tile.containedItems.length > 0) {
-				let weight = playerUtilities.getWeight(context);
-				const maxWeight = playerUtilities.getMaxWeight(context);
+				let weight = context.utilities.player.getWeight(context);
+				const maxWeight = context.utilities.player.getMaxWeight(context);
 				const itemsToMove: Item[] = [];
 
 				for (const item of tile.containedItems) {

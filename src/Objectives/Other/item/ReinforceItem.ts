@@ -1,11 +1,11 @@
 import { ActionType } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../../core/context/Context";
+import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { itemUtilities } from "../../../utilities/Item";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteAction from "../../core/ExecuteAction";
@@ -18,7 +18,7 @@ import Lambda from "../../core/Lambda";
  */
 export default class ReinforceItem extends Objective {
 
-	constructor(private readonly item: Item, private readonly options: Partial<{ minWorth: number; targetDurabilityMultipler: number; }> = {}) {
+	constructor(private readonly item: Item, private readonly options: Partial<{ minWorth: number; targetDurabilityMultipler: number }> = {}) {
 		super();
 	}
 
@@ -59,7 +59,7 @@ export default class ReinforceItem extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const reinforceItems = itemUtilities.getInventoryItemsWithUse(context, ActionType.Reinforce);
+		const reinforceItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Reinforce);
 		if (reinforceItems.length === 0) {
 			objectives.push(new AcquireItemForAction(ActionType.Reinforce));
 

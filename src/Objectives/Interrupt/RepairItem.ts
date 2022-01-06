@@ -1,11 +1,12 @@
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { RequirementStatus } from "game/item/IItemManager";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../core/context/Context";
+import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import CopyContextData from "../contextData/CopyContextData";

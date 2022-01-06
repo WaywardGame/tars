@@ -1,23 +1,18 @@
 import { ActionType } from "game/entity/action/IAction";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
-import { IOverlayInfo, ITile, TerrainType } from "game/tile/ITerrain";
+import type { IOverlayInfo, ITile } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import { RenderSource } from "renderer/IRenderer";
 import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOverlayFootPrints";
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
-import { IVector2, IVector3 } from "utilities/math/IVector";
-import Context from "../core/context/Context";
+import type { IVector2, IVector3 } from "utilities/math/IVector";
+
+import type Context from "../core/context/Context";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import { NavigationPath } from "../core/navigation/INavigation";
-import Navigation from "../core/navigation/Navigation";
-import { actionUtilities } from "./Action";
-import { itemUtilities } from "./Item";
+import type { NavigationPath } from "../core/navigation/INavigation";
 import { log } from "./Logger";
-import { tileUtilities } from "./Tile";
-import { getTarsInstance } from "../ITarsMod";
-
-
 
 export interface IMovementPath {
     difficulty: number;
@@ -36,11 +31,11 @@ interface ITrackedOverlay {
     overlay: IOverlayInfo;
 }
 
-class MovementUtilities {
+export class MovementUtilities {
 
     private movementOverlays: ITrackedOverlay[] = [];
 
-    private cachedPaths: Map<string, NavigationPath | undefined> = new Map();
+    private readonly cachedPaths: Map<string, NavigationPath | undefined> = new Map();
 
     public clearCache() {
         this.cachedPaths.clear();
@@ -101,10 +96,10 @@ class MovementUtilities {
             movementPath = this.cachedPaths.get(pathId);
 
         } else {
-            const navigation = Navigation.get();
+            const navigation = context.utilities.navigation;
 
             // ensure sailing mode is up to date
-            await getTarsInstance().ensureSailingMode(!!context.player.vehicleItemReference);
+            await context.utilities.ensureSailingMode(!!context.player.vehicleItemReference);
 
             const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
             if (ends.length === 0) {
@@ -128,7 +123,7 @@ class MovementUtilities {
             }
 
             // pick the easiest path
-            let results = (await Promise.all(ends.map(end => navigation.findPath(end))))
+            let results = (await Promise.all(ends.map(async end => navigation.findPath(end))))
                 .filter(result => result !== undefined) as NavigationPath[];
 
             for (const result of results) {
@@ -193,7 +188,7 @@ class MovementUtilities {
                 if (nextPosition) {
                     const direction = getDirectionFromMovement(nextPosition.x - context.player.x, nextPosition.y - context.player.y);
 
-                    const nextTile = localIsland.getTile(nextPosition.x, nextPosition.y, target.z);
+                    const nextTile = context.player.island.getTile(nextPosition.x, nextPosition.y, target.z);
                     const doodad = nextTile.doodad;
                     const tileType = TileHelpers.getType(nextTile);
                     const terrainDescription = Terrains[tileType];
@@ -202,7 +197,7 @@ class MovementUtilities {
                         // some terrain is blocking our path
                         if (terrainDescription.gather) {
                             if (direction !== context.player.facingDirection) {
-                                await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
+                                await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                                     action.execute(context.player, direction, undefined);
                                     return ObjectiveResult.Complete;
                                 });
@@ -210,8 +205,8 @@ class MovementUtilities {
 
                             const actionType = terrainDescription.gather ? ActionType.Mine : ActionType.Dig;
 
-                            await actionUtilities.executeAction(context, actionType, (context, action) => {
-                                action.execute(context.player, itemUtilities.getBestToolForTerrainGather(context, tileType));
+                            await context.utilities.action.executeAction(context, actionType, (context, action) => {
+                                action.execute(context.player, context.utilities.item.getBestToolForTerrainGather(context, tileType));
                                 return ObjectiveResult.Complete;
                             });
 
@@ -226,7 +221,7 @@ class MovementUtilities {
 
                         // face it
                         if (direction !== context.player.facingDirection) {
-                            await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
+                            await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                                 action.execute(context.player, direction, undefined);
                                 return ObjectiveResult.Complete;
                             });
@@ -237,7 +232,7 @@ class MovementUtilities {
                             if (doodadDescription && (doodadDescription.isDoor || doodadDescription.isGate) && doodadDescription.isClosed) {
                                 log.info("Opening doodad blocking the path", Direction[direction]);
 
-                                await actionUtilities.executeAction(context, ActionType.OpenDoor, (context, action) => {
+                                await context.utilities.action.executeAction(context, ActionType.OpenDoor, (context, action) => {
                                     action.execute(context.player);
                                     return ObjectiveResult.Complete;
                                 });
@@ -245,22 +240,22 @@ class MovementUtilities {
                             } else {
                                 log.info("Picking up doodad blocking the path", Direction[direction]);
 
-                                await actionUtilities.executeAction(context, ActionType.Pickup, (context, action) => {
+                                await context.utilities.action.executeAction(context, ActionType.Pickup, (context, action) => {
                                     action.execute(context.player);
                                     return ObjectiveResult.Complete;
                                 });
                             }
 
-                        } else if (tileUtilities.hasCorpses(nextTile)) {
+                        } else if (context.utilities.tile.hasCorpses(nextTile)) {
                             log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);
 
-                            const tool = itemUtilities.getBestTool(context, ActionType.Butcher);
+                            const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
                             if (!tool) {
                                 log.info("Missing butchering tool");
                                 return MoveResult.NoPath;
                             }
 
-                            await actionUtilities.executeAction(context, ActionType.Butcher, (context, action) => {
+                            await context.utilities.action.executeAction(context, ActionType.Butcher, (context, action) => {
                                 action.execute(context.player, tool);
                                 return ObjectiveResult.Complete;
                             });
@@ -268,8 +263,8 @@ class MovementUtilities {
                         } else {
                             log.info("Gathering from doodad blocking the path", Direction[direction]);
 
-                            await actionUtilities.executeAction(context, ActionType.Chop, (context, action) => {
-                                action.execute(context.player, itemUtilities.getBestToolForDoodadGather(context, doodad));
+                            await context.utilities.action.executeAction(context, ActionType.Chop, (context, action) => {
+                                action.execute(context.player, context.utilities.item.getBestToolForDoodadGather(context, doodad));
                                 return ObjectiveResult.Complete;
                             });
                         }
@@ -278,7 +273,7 @@ class MovementUtilities {
 
                     } else if (nextTile.creature) {
                         // walking into a creature
-                        await actionUtilities.executeAction(context, ActionType.Move, (context, action) => {
+                        await context.utilities.action.executeAction(context, ActionType.Move, (context, action) => {
                             action.execute(context.player, direction);
                             return ObjectiveResult.Complete;
                         });
@@ -298,7 +293,7 @@ class MovementUtilities {
                     let path = movementPath.path;
                     for (let i = 2; i < path.length; i++) {
                         const position = path[i];
-                        const tile = localIsland.getTile(position.x, position.y, target.z);
+                        const tile = context.player.island.getTile(position.x, position.y, target.z);
                         const tileType = TileHelpers.getType(tile);
                         const terrainDescription = Terrains[tileType];
 
@@ -328,7 +323,7 @@ class MovementUtilities {
         if (moveAdjacentToTarget) {
             const direction = getDirectionFromMovement(target.x - context.player.x, target.y - context.player.y);
             if (direction !== context.player.facingDirection) {
-                await actionUtilities.executeAction(context, ActionType.UpdateDirection, (context, action) => {
+                await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
                     action.execute(context.player, direction, undefined);
                     return ObjectiveResult.Complete;
                 });
@@ -339,5 +334,3 @@ class MovementUtilities {
     }
 
 }
-
-export const movementUtilities = new MovementUtilities();

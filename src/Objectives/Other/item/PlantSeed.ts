@@ -1,17 +1,17 @@
 import doodadDescriptions from "game/doodad/Doodads";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { ITileContainer, TerrainType } from "game/tile/ITerrain";
+import type Item from "game/item/Item";
+import type { ITileContainer } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 import terrainDescriptions from "game/tile/Terrains";
 
-import Context from "../../../core/context/Context";
+import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { baseUtilities } from "../../../utilities/Base";
-import { tileUtilities } from "../../../utilities/Tile";
 import AcquireItem from "../../acquire/item/AcquireItem";
 import CopyContextData from "../../contextData/CopyContextData";
 import SetContextData from "../../contextData/SetContextData";
@@ -63,7 +63,7 @@ export default class PlantSeed extends Objective {
 
 		const emptyTilledTile = TileHelpers.findMatchingTile(
 			context.island,
-			baseUtilities.getBasePosition(context),
+			context.utilities.base.getBasePosition(context),
 			(island, point, tile) => {
 				const tileContainer = tile as ITileContainer;
 				return island.isTileEmpty(tile) &&
@@ -78,7 +78,7 @@ export default class PlantSeed extends Objective {
 		} else {
 			const nearbyTillableTile = TileHelpers.findMatchingTiles(
 				context.island,
-				baseUtilities.getBasePosition(context),
+				context.utilities.base.getBasePosition(context),
 				(_, point, tile) => {
 					if (tile.creature || tile.npc) {
 						return false;
@@ -86,7 +86,7 @@ export default class PlantSeed extends Objective {
 
 					const tileType = TileHelpers.getType(tile);
 					if (tileType === TerrainType.Grass) {
-						if (!tileUtilities.canDig(context, tile)) {
+						if (!context.utilities.tile.canDig(context, tile)) {
 							return false;
 						}
 
@@ -106,7 +106,7 @@ export default class PlantSeed extends Objective {
 						}
 					}
 
-					return baseUtilities.isOpenArea(context, point, tile);
+					return context.utilities.base.isOpenArea(context, point, tile);
 				},
 				{
 					maxTilesChecked: gardenMaxTilesChecked,

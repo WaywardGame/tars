@@ -1,29 +1,27 @@
 import { BiomeType } from "game/biome/IBiome";
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import DoodadManager from "game/doodad/DoodadManager";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import type { DoodadType } from "game/doodad/IDoodad";
+import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 import { TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Context from "../../../core/context/Context";
+import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { defaultMaxTilesChecked, IBaseInfo, baseInfo, BaseInfoKey } from "../../../core/ITars";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IBaseInfo, BaseInfoKey } from "../../../core/ITars";
+import { defaultMaxTilesChecked, baseInfo } from "../../../core/ITars";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { baseUtilities } from "../../../utilities/Base";
-import { movementUtilities } from "../../../utilities/Movement";
-import { FindObjectType, objectUtilities } from "../../../utilities/Object";
-import { tileUtilities } from "../../../utilities/Tile";
+import { FindObjectType } from "../../../utilities/Object";
 import AnalyzeBase from "../../analyze/AnalyzeBase";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import UseItem from "./UseItem";
-
-
 
 const recalculateMovements = 40;
 
@@ -75,13 +73,13 @@ export default class BuildItem extends Objective {
 			this.log.info("Going build a well");
 		}
 
-		if (baseUtilities.hasBase(context)) {
+		if (context.utilities.base.hasBase(context)) {
 			if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
 				const nearDoodads = context.base[baseInfo.tryPlaceNear];
 				const possiblePoints = AnalyzeBase.getNearPoints(nearDoodads);
 
 				for (const point of possiblePoints) {
-					if (baseUtilities.isOpenArea(context, point, context.island.getTileFromPoint(point), 0)) {
+					if (context.utilities.base.isOpenArea(context, point, context.island.getTileFromPoint(point), 0)) {
 						this.target = point;
 						break;
 					}
@@ -89,19 +87,19 @@ export default class BuildItem extends Objective {
 			}
 
 			if (!this.target) {
-				const baseDoodads = baseUtilities.getBaseDoodads(context);
+				const baseDoodads = context.utilities.base.getBaseDoodads(context);
 
 				for (const baseDoodad of baseDoodads) {
 					if (isWell) {
 						// look for unlimited wells first
-						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 						if (this.target === undefined) {
 							this.log.info("Couldn't find unlimited well tile");
-							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 						}
 
 					} else {
-						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
+						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
 					}
 
 					if (this.target !== undefined) {
@@ -146,7 +144,7 @@ export default class BuildItem extends Objective {
 			this.movements = 0;
 			this.target = undefined;
 
-			movementUtilities.resetMovementOverlays();
+			context.utilities.movement.resetMovementOverlays();
 			context.player.walkAlongPath(undefined);
 		}
 
@@ -169,11 +167,11 @@ export default class BuildItem extends Objective {
 		const facingPoint = context.player.getFacingPoint();
 		const facingTile = context.player.getFacingTile();
 
-		if (await this.isGoodTargetOrigin(context, facingPoint) && baseUtilities.isGoodBuildTile(context, facingPoint, facingTile)) {
+		if (await this.isGoodTargetOrigin(context, facingPoint) && context.utilities.base.isGoodBuildTile(context, facingPoint, facingTile)) {
 			return facingPoint;
 		}
 
-		const sortedObjects = objectUtilities.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[]);
+		const sortedObjects = context.utilities.object.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[]);
 
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.player.z) {
@@ -193,7 +191,7 @@ export default class BuildItem extends Objective {
 
 							const tile = context.island.getTileFromPoint(point);
 
-							if (baseUtilities.isGoodBuildTile(context, point, tile)) {
+							if (context.utilities.base.isGoodBuildTile(context, point, tile)) {
 								return point;
 							}
 						}
@@ -260,7 +258,7 @@ export default class BuildItem extends Objective {
 						nearbyTrees++;
 					}
 
-				} else if (baseUtilities.isGoodBuildTile(context, point, tile)) {
+				} else if (context.utilities.base.isGoodBuildTile(context, point, tile)) {
 					if (TileHelpers.getType(tile) === commonTerrainType) {
 						nearbyCommonTiles++;
 					}
@@ -273,13 +271,13 @@ export default class BuildItem extends Objective {
 		}
 
 		// build close to rocks
-		const rockTileLocations = await tileUtilities.getNearestTileLocation(origin, rockType);
+		const rockTileLocations = await context.utilities.tile.getNearestTileLocation(context, rockType, origin);
 		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance)) {
 			return false;
 		}
 
 		// buiuld close to a water source
-		const shallowSeawaterTileLocations = await tileUtilities.getNearestTileLocation(origin, waterType);
+		const shallowSeawaterTileLocations = await context.utilities.tile.getNearestTileLocation(context, waterType, origin);
 		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearWaterDistance)) {
 			return false;
 		}

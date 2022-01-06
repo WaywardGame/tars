@@ -1,10 +1,10 @@
-import { NPCType } from "game/entity/npc/INPCs";
-import { DoodadType } from "game/doodad/IDoodad";
-import { IslandId } from "game/island/IIsland";
-import { TerrainType } from "game/tile/ITerrain";
-import Context from "../core/context/Context";
-import { IObjective } from "../core/objective/IObjective";
-import { ITarsMode } from "../core/mode/IMode";
+import type { NPCType } from "game/entity/npc/INPCs";
+import type { DoodadType } from "game/doodad/IDoodad";
+import type { IslandId } from "game/island/IIsland";
+import type { TerrainType } from "game/tile/ITerrain";
+import type Context from "../core/context/Context";
+import type { IObjective } from "../core/objective/IObjective";
+import type { ITarsMode } from "../core/mode/IMode";
 export declare enum MoveToType {
     Island = 0,
     Terrain = 1,

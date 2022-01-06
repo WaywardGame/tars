@@ -1,19 +1,17 @@
-import { NPCType } from "game/entity/npc/INPCs";
-import NPC from "game/entity/npc/NPC";
-import Doodad from "game/doodad/Doodad";
-import { DoodadType } from "game/doodad/IDoodad";
-import { IslandId } from "game/island/IIsland";
-import { TerrainType } from "game/tile/ITerrain";
-import Context from "../core/context/Context";
-import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
+import type { NPCType } from "game/entity/npc/INPCs";
+import type NPC from "game/entity/npc/NPC";
+import type Doodad from "game/doodad/Doodad";
+import type { DoodadType } from "game/doodad/IDoodad";
+import type { IslandId } from "game/island/IIsland";
+import type { TerrainType } from "game/tile/ITerrain";
+import type Context from "../core/context/Context";
+import type { IObjective } from "../core/objective/IObjective";
+import { ObjectiveResult } from "../core/objective/IObjective";
 import Lambda from "../objectives/core/Lambda";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import ReturnToBase from "../objectives/other/ReturnToBase";
 import MoveToIsland from "../objectives/utility/moveTo/MoveToIsland";
-import { doodadUtilities } from "../utilities/Doodad";
-import { objectUtilities } from "../utilities/Object";
-import { tileUtilities } from "../utilities/Tile";
-import { ITarsMode } from "../core/mode/IMode";
+import type { ITarsMode } from "../core/mode/IMode";
 
 export enum MoveToType {
     Island,
@@ -39,7 +37,7 @@ export interface IMoveToTerrain extends IMoveTo {
 }
 
 export interface IMoveToDoodad extends IMoveTo {
-    type: MoveToType.Doodad,
+    type: MoveToType.Doodad;
     doodadType: DoodadType;
 }
 
@@ -82,7 +80,7 @@ export class MoveToMode implements ITarsMode {
                 ];
 
             case MoveToType.Terrain:
-                const tileLocations = await tileUtilities.getNearestTileLocation(context, this.target.terrainType);
+                const tileLocations = await context.utilities.tile.getNearestTileLocation(context, this.target.terrainType);
 
                 if (tileLocations.length > 0) {
                     return tileLocations.map(tileLocation => ([
@@ -97,9 +95,9 @@ export class MoveToMode implements ITarsMode {
                 break;
 
             case MoveToType.Doodad:
-                const doodadTypes = doodadUtilities.getDoodadTypes(this.target.doodadType, true);
+                const doodadTypes = context.utilities.doodad.getDoodadTypes(this.target.doodadType, true);
 
-                const doodadObjectives = objectUtilities.findDoodads(context, "MoveToDoodad", (doodad: Doodad) => doodadTypes.has(doodad.type), 5)
+                const doodadObjectives = context.utilities.object.findDoodads(context, "MoveToDoodad", (doodad: Doodad) => doodadTypes.has(doodad.type), 5)
                     .map(doodad => ([
                         new MoveToTarget(doodad, true),
                         new Lambda(async () => {
@@ -117,7 +115,7 @@ export class MoveToMode implements ITarsMode {
             case MoveToType.NPC:
                 const npcType = this.target.npcType;
 
-                const npcObjectives = objectUtilities.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcType, 5)
+                const npcObjectives = context.utilities.object.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcType, 5)
                     .map(doodad => ([
                         new MoveToTarget(doodad, true),
                         new Lambda(async () => {

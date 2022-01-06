@@ -1,11 +1,10 @@
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 
-import Context from "../../../../core/context/Context";
+import type Context from "../../../../core/context/Context";
 import { ContextDataType } from "../../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
-import { itemUtilities } from "../../../../utilities/Item";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../../core/ExecuteActionForItem";
 import AcquireItem from "../AcquireItem";
@@ -23,7 +22,7 @@ export default class AcquireWaterContainer extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const messageInABottleObjectives: IObjective[] = [];
 
-		const messageInABottleItem = itemUtilities.getItemInInventory(context, ItemType.MessageInABottle);
+		const messageInABottleItem = context.utilities.item.getItemInInventory(context, ItemType.MessageInABottle);
 		if (!messageInABottleItem) {
 			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle));
 

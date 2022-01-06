@@ -1,7 +1,7 @@
-import Context from "../context/Context";
-import { IObjective, ObjectivePipeline } from "../objective/IObjective";
+import type Context from "../context/Context";
+import type { IObjective, ObjectivePipeline } from "../objective/IObjective";
 
-import { IPlan } from "./IPlan";
+import type { IPlan } from "./IPlan";
 
 /**
  * Creates plans for executing objectives

@@ -1,16 +1,56 @@
-import Doodad from "game/doodad/Doodad";
-import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
+import type Doodad from "game/doodad/Doodad";
+import type { GrowingStage } from "game/doodad/IDoodad";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import { CreatureType } from "game/entity/creature/ICreature";
+import type { CreatureType } from "game/entity/creature/ICreature";
 import { EquipType } from "game/entity/IHuman";
-import Island from "game/island/Island";
-import { IContainer, ItemType, ItemTypeGroup, IItemDisassembly } from "game/item/IItem";
-import Item from "game/item/Item";
-import { ITile } from "game/tile/ITerrain";
-import { ITerrainLoot } from "game/tile/TerrainResources";
-import { itemUtilities } from "../utilities/Item";
+import type Island from "game/island/Island";
+import type { IContainer, IItemDisassembly } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import type Item from "game/item/Item";
+import type { ITile } from "game/tile/ITerrain";
+import type { ITerrainLoot } from "game/tile/TerrainResources";
+
+import type { TarsTranslation } from "../ITarsMod";
+import { ActionUtilities } from "../utilities/Action";
+import { BaseUtilities } from "../utilities/Base";
+import { DoodadUtilities } from "../utilities/Doodad";
+import { ItemUtilities } from "../utilities/Item";
+import { MovementUtilities } from "../utilities/Movement";
+import { ObjectUtilities } from "../utilities/Object";
+import { PlayerUtilities } from "../utilities/Player";
+import { TileUtilities } from "../utilities/Tile";
+import { IContext } from "./context/IContext";
+import Navigation from "./navigation/Navigation";
+
+export const tickSpeed = 333;
 
 export const defaultMaxTilesChecked = 3000;
+
+export interface ITarsEvents {
+    /**
+     * Emitted when TARS is enabled or disabled
+     */
+    enableChange(enabled: boolean): void;
+
+    /**
+     * Emitted when TARS options change
+     */
+    optionsChange(options: ITarsOptions): void;
+
+    /**
+     * Emitted when TARS status is changed
+     */
+    statusChange(status: TarsTranslation | string): void;
+
+    modeFinished(mode: TarsMode, success: boolean): void;
+
+    navigationChange(status: NavigationSystemState): void;
+
+    quantumBurstChange(status: QuantumBurstStatus): void;
+
+    delete(): void;
+}
 
 /**
  * List of options
@@ -32,6 +72,31 @@ export interface ITarsOptions {
     developerMode: boolean;
 }
 
+export enum NavigationSystemState {
+    NotInitialized,
+    Initializing,
+    Initialized,
+}
+
+export enum QuantumBurstStatus {
+    Start,
+    CooldownStart,
+    CooldownEnd,
+}
+
+export interface IUtilities {
+    action: ActionUtilities;
+    base: BaseUtilities;
+    doodad: DoodadUtilities;
+    item: ItemUtilities;
+    movement: MovementUtilities;
+    navigation: Navigation;
+    object: ObjectUtilities;
+    player: PlayerUtilities;
+    tile: TileUtilities;
+
+    ensureSailingMode(sailingMode: boolean): Promise<void>;
+}
 
 export interface IBase {
     anvil: Doodad[];
@@ -54,7 +119,7 @@ export interface IBaseInfo {
     openAreaRadius?: number;
     canAdd?(base: IBase, target: Doodad): boolean;
     onAdd?(base: IBase, target: Doodad): void;
-    findTargets?(context: { island: Island, base: IBase }): Doodad[];
+    findTargets?(context: { island: Island; base: IBase }): Doodad[];
 }
 
 export type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "availableUnlimitedWellLocation">;
@@ -77,7 +142,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
             DoodadType.WroughtIronChest,
         ],
         allowMultiple: true,
-        canAdd: (base: IBase, target: Doodad) => base.intermediateChest.indexOf(target) === -1,
+        canAdd: (base: IBase, target: Doodad) => !base.intermediateChest.includes(target),
         onAdd: (base: IBase) => {
             base.buildAnotherChest = false;
         },
@@ -160,7 +225,7 @@ export interface IInventoryItems {
 }
 
 export interface IInventoryItemInfo {
-    itemTypes?: Array<ItemType | ItemTypeGroup> | (() => Array<ItemType | ItemTypeGroup>);
+    itemTypes?: Array<ItemType | ItemTypeGroup> | ((context: IContext) => Array<ItemType | ItemTypeGroup>);
     actionTypes?: ActionType[];
     equipType?: EquipType;
     flags?: InventoryItemFlags;
@@ -171,7 +236,7 @@ export interface IInventoryItemInfo {
     requiredMinDur?: number;
 }
 
-export type InventoryItemFlags = InventoryItemFlag | { flag: InventoryItemFlag; option: any; };
+export type InventoryItemFlags = InventoryItemFlag | { flag: InventoryItemFlag; option: any };
 
 export enum InventoryItemFlag {
     /**
@@ -318,7 +383,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         flags: InventoryItemFlag.PreferLowerWeight,
     },
     food: {
-        itemTypes: () => Array.from(itemUtilities.foodItemTypes),
+        itemTypes: (context) => Array.from(context.utilities.item.foodItemTypes),
         flags: InventoryItemFlag.PreferHigherDecay,
         allowMultiple: 5,
     },
@@ -441,7 +506,7 @@ export interface CreatureSearch {
     map: Map<CreatureType, ItemType[]>;
 }
 
-export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot; };
+export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot };
 
 export interface IDisassemblySearch {
     item: Item;

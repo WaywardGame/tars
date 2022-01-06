@@ -1,17 +1,19 @@
 import { OwnEventHandler } from "event/EventManager";
-import Translation from "language/Translation";
+import type Translation from "language/Translation";
 import Mod from "mod/Mod";
-import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
+import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
+import TabDialog from "ui/screen/screens/game/component/TabDialog";
+import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
+import { Edge } from "ui/screen/screens/game/Dialogs";
 import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
-import TarsMod from "../TarsMod";
-import TarsPanel from "./components/TarsPanel";
+import type TarsMod from "../TarsMod";
+import { TarsUiSaveDataKey, getTarsTranslation, TarsTranslation, TARS_ID } from "../ITarsMod";
+import type TarsPanel from "./components/TarsPanel";
 import GeneralPanel from "./panels/GeneralPanel";
 import MoveToPanel from "./panels/MoveToPanel";
 import OptionsPanel from "./panels/OptionsPanel";
 import TasksPanel from "./panels/TasksPanel";
-import { TarsUiSaveDataKey, getTarsTranslation, TarsTranslation, TARS_ID } from "../ITarsMod";
 
 export type TabDialogPanelClass = new () => TarsPanel;
 
@@ -38,16 +40,16 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	};
 
 	@Mod.instance<TarsMod>(TARS_ID)
-	public readonly TARS: TarsMod;
+	public readonly TarsMod: TarsMod;
 
 	public constructor(id: DialogId) {
 		super(id);
-		this.TARS.event.until(this, "remove").subscribe("statusChange", this.header.refresh);
+		this.TarsMod.event.until(this, "remove").subscribe("statusChange", this.header.refresh);
 	}
 
 	protected override getDefaultSubpanelInformation(): SubpanelInformation {
 		for (const subpanelInformation of this.subpanelInformations) {
-			if (subpanelInformation[0] === this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
+			if (subpanelInformation[0] === this.TarsMod.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
 				return subpanelInformation;
 			}
 		}
@@ -57,11 +59,11 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 
 	@OwnEventHandler(TarsDialog, "changeSubpanel")
 	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
-		this.TARS.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
+		this.TarsMod.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
 	}
 
 	public override getName(): Translation {
-		return getTarsTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TARS.getStatus);
+		return getTarsTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TarsMod.getStatus());
 	}
 
 	/**

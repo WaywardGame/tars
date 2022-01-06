@@ -81,13 +81,13 @@ let gatherableTypes: Set<TerrainType>;
 /////////////////////////////
 
 interface INavigationInfo {
-	tileLocations: { [index: number]: any /* IKDTree */ };
+	tileLocations: Record<number, any>;
 	kdTreeTileTypes: Uint8Array;
 }
 
 class Navigation {
 
-	private readonly navigationInfo: { [index: number]: INavigationInfo } = {};
+	private readonly navigationInfo: Record<number, INavigationInfo> = {};
 
 	constructor() {
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
@@ -271,7 +271,7 @@ webWorkerSelf.onmessage = (event: MessageEvent) => {
 		return;
 	}
 
-	// tslint:disable-next-line: no-console
+
 	console.log("[TARS] Navigation worker initial data", data);
 
 	queuedMessages = [];

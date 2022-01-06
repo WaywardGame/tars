@@ -1,21 +1,22 @@
-import { IQuestRequirement, QuestRequirementType } from "game/entity/player/quest/requirement/IRequirement";
-import { QuestInstance } from "game/entity/player/quest/QuestManager";
+import type { IQuestRequirement } from "game/entity/player/quest/requirement/IRequirement";
+import { QuestRequirementType } from "game/entity/player/quest/requirement/IRequirement";
+import type { QuestInstance } from "game/entity/player/quest/QuestManager";
 import Enums from "utilities/enum/Enums";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import type { ItemType, ItemTypeGroup } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 import ItemManager from "game/item/ItemManager";
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 
-import Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import Lambda from "../core/Lambda";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
 import AcquireItemFromDismantle from "../acquire/item/AcquireItemFromDismantle";
 import HuntCreatures from "../other/creature/HuntCreatures";
-import { objectUtilities } from "../../utilities/Object";
 import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
 import Restart from "../core/Restart";
 import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
@@ -237,7 +238,7 @@ export default class CompleteQuestRequirement extends Objective {
                 case QuestRequirementType.KillCreatures: {
                     const [_amount] = this.requirement.options as [number];
 
-                    const creatures = objectUtilities.findHuntableCreatures(context, "KillCreatures", false, 10);
+                    const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreatures", false, 10);
 
                     objectivePipelines.push([new HuntCreatures(creatures)]);
 
@@ -263,9 +264,9 @@ export default class CompleteQuestRequirement extends Objective {
 
                 case QuestRequirementType.TameCreatures: {
                     // look for non-hostile creatures first
-                    let creatures = objectUtilities.findTamableCreatures(context, "Tame1", false, 10);
+                    let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", false, 10);
                     if (creatures.length === 0) {
-                        creatures = objectUtilities.findTamableCreatures(context, "Tame2", true, 10);
+                        creatures = context.utilities.object.findTamableCreatures(context, "Tame2", true, 10);
                         if (creatures.length === 0) {
                             return ObjectiveResult.Impossible;
                         }

@@ -1,6 +1,6 @@
-import Context from "../../core/context/Context";
-import { CreatureSearch } from "../../core/ITars";
-import { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type Context from "../../core/context/Context";
+import type { CreatureSearch } from "../../core/ITars";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 export default class GatherFromCorpse extends Objective {
     private readonly search;

@@ -1,18 +1,18 @@
-import { Events } from "event/EventEmitter";
-import Translation from "language/Translation";
-import Mod from "mod/Mod";
-import { IContext } from "./core/context/IContext";
-import { ITarsOptions } from "./core/ITars";
-import TarsMod from "./TarsMod";
+import type { Events } from "event/EventEmitter";
+import type Translation from "language/Translation";
+import type Mod from "mod/Mod";
+import type { IContext } from "./core/context/IContext";
+import type { ITarsOptions } from "./core/ITars";
+import type TarsMod from "./TarsMod";
 export declare const TARS_ID = "TARS";
-export declare function getTarsInstance(): TarsMod;
-export declare function setTarsInstance(instance: TarsMod | undefined): void;
+export declare function getTarsMod(): TarsMod;
+export declare function setTarsMod(instance: TarsMod | undefined): void;
 export declare function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation;
 export declare function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T];
-export interface ITarsEvents extends Events<Mod> {
+export interface ITarsModEvents extends Events<Mod> {
     enableChange(enabled: boolean): any;
     optionsChange(options: ITarsOptions): any;
-    statusChange(status: Translation | string): any;
+    statusChange(status: TarsTranslation | string): any;
 }
 export interface ISaveData {
     enabled: boolean;

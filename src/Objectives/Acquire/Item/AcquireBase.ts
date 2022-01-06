@@ -1,9 +1,8 @@
-import { ItemType } from "game/item/IItem";
+import type { ItemType } from "game/item/IItem";
 
-import Context from "../../../core/context/Context";
-import { IExecutionTree } from "../../../core/planning/IPlan";
+import type Context from "../../../core/context/Context";
+import type { IExecutionTree } from "../../../core/planning/IPlan";
 import Objective from "../../../core/objective/Objective";
-import { baseUtilities } from "../../../utilities/Base";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";
 import GatherFromCreature from "../../gather/GatherFromCreature";
@@ -97,7 +96,7 @@ export default abstract class AcquireBase extends Objective {
 				// this recipe does not require any gathering
 
 				if (result.regroupedChildrenCount === 0 && (result.emptyAcquireObjectiveCount === 0 || (result.gatherWithoutChestObjectiveCount === 0 && result.gatherObjectiveCount > 0))) {
-					if (baseUtilities.isNearBase(context)) {
+					if (context.utilities.base.isNearBase(context)) {
 						// todo: replace isNearBase with something that checks for CompleteRequirements?
 
 						// prioritize acquire item objectives that require no gathering

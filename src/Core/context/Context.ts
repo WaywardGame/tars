@@ -1,10 +1,12 @@
-import Player from "game/entity/player/Player";
-import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { IVector3 } from "utilities/math/IVector";
-import { IBase, IInventoryItems, ITarsOptions } from "../ITars";
+import type Player from "game/entity/player/Player";
+import type { ItemType } from "game/item/IItem";
+import type Item from "game/item/Item";
+import type { IVector3 } from "utilities/math/IVector";
+
+import type { IBase, IInventoryItems, ITarsOptions, IUtilities } from "../ITars";
 import ContextState from "./ContextState";
-import { ContextDataType, IContext } from "./IContext";
+import type { IContext } from "./IContext";
+import { ContextDataType } from "./IContext";
 
 export default class Context implements IContext {
 
@@ -14,6 +16,7 @@ export default class Context implements IContext {
 		public readonly player: Player /*| NPC*/,
 		public readonly base: IBase,
 		public readonly inventory: IInventoryItems,
+		public readonly utilities: IUtilities,
 		public readonly options: Readonly<ITarsOptions>,
 		public state = new ContextState(),
 		public readonly calculatingDifficulty: boolean = false,
@@ -29,7 +32,7 @@ export default class Context implements IContext {
 	}
 
 	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false): Context {
-		return new Context(this.player, this.base, this.inventory, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
+		return new Context(this.player, this.base, this.inventory, this.utilities, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
 	}
 
 	public merge(state: ContextState): void {
@@ -211,9 +214,9 @@ export default class Context implements IContext {
 	public getPosition(): IVector3 {
 		const position = this.getData(ContextDataType.Position);
 		if (position && (position.x === undefined || position.y === undefined || position.z === undefined)) {
-			// tslint:disable-next-line: no-console
+
 			console.error("invalid value", position);
-			// tslint:disable-next-line: no-console
+
 			console.trace("lastKnownPosition get");
 		}
 

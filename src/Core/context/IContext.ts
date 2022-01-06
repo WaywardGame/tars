@@ -1,10 +1,11 @@
-import Player from "game/entity/player/Player";
-import { IBase, IInventoryItems } from "../ITars";
+import type Player from "game/entity/player/Player";
+import type { IBase, IInventoryItems, IUtilities } from "../ITars";
 
 export interface IContext {
 	readonly player: Player;
 	readonly base: IBase;
 	readonly inventory: IInventoryItems;
+	readonly utilities: IUtilities;
 }
 
 export enum ContextDataType {

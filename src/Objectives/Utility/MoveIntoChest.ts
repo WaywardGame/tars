@@ -1,13 +1,14 @@
 import Stream from "@wayward/goodstream/Stream";
 import { DoodadType } from "game/doodad/IDoodad";
-import { IContainer } from "game/item/IItem";
-import Item from "game/item/Item";
+import type { IContainer } from "game/item/IItem";
+import type Item from "game/item/Item";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
 import Vector2 from "utilities/math/Vector2";
-import Context from "../../core/context/Context";
+import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireItemForDoodad from "../acquire/item/AcquireItemForDoodad";
 import AnalyzeBase from "../analyze/AnalyzeBase";
