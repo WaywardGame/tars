@@ -13,14 +13,16 @@ import type { ITile } from "game/tile/ITerrain";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import type { ISaveData } from "../ITarsMod";
 import { TarsTranslation } from "../ITarsMod";
-import type { IContext } from "./context/IContext";
+import Context from "./context/Context";
 import { ITarsEvents, ITarsOptions } from "./ITars";
 import type { ITarsMode } from "./mode/IMode";
+import { TarsOverlay } from "../ui/TarsOverlay";
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private readonly saveData;
+    private readonly overlay;
     private base;
     private inventory;
-    private utilities;
+    private readonly utilities;
     private readonly statThresholdExceeded;
     private quantumBurstCooldown;
     private weightStatus;
@@ -38,7 +40,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private navigationQueuedUpdates;
     private readonly modeCache;
     private loaded;
-    constructor(saveData: ISaveData);
+    constructor(saveData: ISaveData, overlay: TarsOverlay);
     delete(): void;
     load(): void;
     unload(): void;
@@ -58,7 +60,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     preMove(player: Player, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile): void;
     onStatChange(player: Player, stat: IStat): void;
     onMoveToIsland(): Promise<void>;
-    getContext(): IContext;
+    getContext(): Context;
     isEnabled(): boolean;
     isRunning(): boolean;
     isQuantumBurstEnabled(): boolean;

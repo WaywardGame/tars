@@ -39,6 +39,9 @@ export default class AnalyzeBase extends Objective {
 					if (!doodad.isValid()) {
 						changed = true;
 						this.log.info(`"${key}" was removed`);
+
+						context.utilities.navigation.refreshOverlay(doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+
 						return false;
 					}
 
@@ -71,7 +74,7 @@ export default class AnalyzeBase extends Objective {
 				}
 
 				for (const target of targets) {
-					if (!info.canAdd || info.canAdd(context.base, target)) {
+					if (!info.canAdd || info.canAdd(context, target)) {
 						const distance = Vector2.squaredDistance(context.getPosition(), target);
 						if (distance < baseDoodadDistanceSq && !context.base[key].includes(target)) {
 							changed = true;
@@ -80,9 +83,9 @@ export default class AnalyzeBase extends Objective {
 
 							this.log.info(`Found "${key}" - ${target} (distance: ${Math.round(distance)})`);
 
-							if (info.onAdd) {
-								info.onAdd(context.base, target);
-							}
+							info.onAdd?.(context, target);
+
+							context.utilities.navigation.refreshOverlay(target.getTile(), target.x, target.y, target.z, true);
 
 							if (!info.allowMultiple) {
 								break;

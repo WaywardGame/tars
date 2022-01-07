@@ -34,6 +34,7 @@ export default class TarsMod extends Mod {
     readonly menuBarButton: MenuBarButtonType;
     readonly quadrantComponent: QuadrantComponentId;
     private tars;
+    private readonly tarsOverlay;
     private gamePlaying;
     get tarsInstance(): Tars | undefined;
     onInitialize(): void;

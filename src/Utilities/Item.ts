@@ -20,6 +20,7 @@ import doodadDescriptions from "game/doodad/Doodads";
 import type Context from "../core/context/Context";
 import type { IDisassemblySearch, IInventoryItems } from "../core/ITars";
 import { inventoryItemInfo } from "../core/ITars";
+import ItemManager from "game/item/ItemManager";
 
 export class ItemUtilities {
 
@@ -30,8 +31,8 @@ export class ItemUtilities {
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
 
 	public initialize(context: Context) {
-		this.foodItemTypes = this.getFoodItemTypes(context);
-		this.seedItemTypes = this.getSeedItemTypes(context);
+		this.foodItemTypes = this.getFoodItemTypes();
+		this.seedItemTypes = this.getSeedItemTypes();
 	}
 
 	public clearCache() {
@@ -484,13 +485,13 @@ export class ItemUtilities {
 	/**
 	 * Get a list of item types that are healthy to eat
 	 */
-	private getFoodItemTypes(context: Context): Set<ItemType> {
+	private getFoodItemTypes(): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
 
 		const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
 
 		for (const itemTypeOrGroup of goodFoodItems) {
-			const itemTypes = context.island.items.isGroup(itemTypeOrGroup) ? context.island.items.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
+			const itemTypes = ItemManager.isGroup(itemTypeOrGroup) ? ItemManager.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
 			for (const itemType of itemTypes) {
 				if (this.isHealthyToEat(itemType)) {
 					result.add(itemType);
@@ -504,7 +505,7 @@ export class ItemUtilities {
 	/**
 	 * Get a list of item types that are plantable and produce doodads with items that are healthy to eat
 	 */
-	private getSeedItemTypes(context: Context): Set<ItemType> {
+	private getSeedItemTypes(): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
 
 		const growingStages = Enums.values(GrowingStage);

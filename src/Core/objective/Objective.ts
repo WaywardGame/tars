@@ -12,7 +12,7 @@ export default abstract class Objective implements IObjective {
 
 	private static uuid = 0;
 
-	public static enableLogging = false;
+	public static enableLogging = true;
 
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
 	protected reserveType: ReserveType | undefined; // defaults to Hard

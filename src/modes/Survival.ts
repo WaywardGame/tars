@@ -358,20 +358,28 @@ export class SurvivalMode implements ITarsMode {
 			Upgrade objectives
 		*/
 
-		this.addUpgradeItemObjectives(context, objectives, "equipSword", ItemType.WoodenSword);
-		this.addUpgradeItemObjectives(context, objectives, "equipShield", ItemType.WoodenShield);
-		this.addUpgradeItemObjectives(context, objectives, "equipBelt", ItemType.LeatherBelt);
-		this.addUpgradeItemObjectives(context, objectives, "equipNeck", ItemType.LeatherGorget);
-		this.addUpgradeItemObjectives(context, objectives, "equipHead", ItemType.LeatherCap);
-		this.addUpgradeItemObjectives(context, objectives, "equipFeet", ItemType.LeatherBoots);
-		this.addUpgradeItemObjectives(context, objectives, "equipHands", ItemType.LeatherGloves);
-		this.addUpgradeItemObjectives(context, objectives, "equipLegs", ItemType.LeatherPants);
-		this.addUpgradeItemObjectives(context, objectives, "equipChest", ItemType.LeatherTunic);
-		this.addUpgradeItemObjectives(context, objectives, "axe", ItemType.StoneAxe);
-		this.addUpgradeItemObjectives(context, objectives, "pickAxe", ItemType.StonePickaxe);
-		this.addUpgradeItemObjectives(context, objectives, "shovel", ItemType.StoneShovel);
-		this.addUpgradeItemObjectives(context, objectives, "hammer", ItemType.StoneHammer);
-		this.addUpgradeItemObjectives(context, objectives, "hoe", ItemType.StoneHoe);
+		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenSword, ItemType.TinSword]));
+		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.TinShield]));
+		this.addUpgradeItemObjectives(context, objectives, "equipBelt", new Set([ItemType.LeatherBelt]));
+		this.addUpgradeItemObjectives(context, objectives, "equipNeck", new Set([ItemType.LeatherGorget, ItemType.TinBevor]));
+		this.addUpgradeItemObjectives(context, objectives, "equipHead", new Set([ItemType.LeatherCap, ItemType.TinHelmet, ItemType.PirateHat]));
+		this.addUpgradeItemObjectives(context, objectives, "equipFeet", new Set([ItemType.LeatherBoots, ItemType.TinFootgear]));
+		this.addUpgradeItemObjectives(context, objectives, "equipHands", new Set([ItemType.LeatherGloves, ItemType.TinGloves]));
+		this.addUpgradeItemObjectives(context, objectives, "equipLegs", new Set([ItemType.LeatherPants, ItemType.TinChausses]));
+		this.addUpgradeItemObjectives(context, objectives, "equipChest", new Set([ItemType.LeatherTunic, ItemType.TinChest]));
+		this.addUpgradeItemObjectives(context, objectives, "axe", new Set([ItemType.StoneAxe, ItemType.TinAxe]));
+		this.addUpgradeItemObjectives(context, objectives, "pickAxe", new Set([ItemType.StonePickaxe, ItemType.TinPickaxe]));
+		this.addUpgradeItemObjectives(context, objectives, "shovel", new Set([ItemType.StoneShovel, ItemType.TinShovel]));
+		this.addUpgradeItemObjectives(context, objectives, "hammer", new Set([ItemType.StoneHammer, ItemType.TinHammer]));
+		this.addUpgradeItemObjectives(context, objectives, "hoe", new Set([ItemType.StoneHoe, ItemType.TinHoe]));
+
+		// extra upgrades
+		// this.addUpgradeItemObjectives(context, objectives, "equipHead", ItemType.PirateHat);
+
+		// this.addUpgradeItemObjectives(context, objectives, "equipBelt", ItemType.ScaleBelt);
+		// this.addUpgradeItemObjectives(context, objectives, "equipNeck", ItemType.ScaleBevor);
+		// this.addUpgradeItemObjectives(context, objectives, "equipFeet", ItemType.ScaleBoots);
+		// this.addUpgradeItemObjectives(context, objectives, "equipHands", ItemType.ScaleGloves);
 
 		/*
 			End game objectives
@@ -486,7 +494,7 @@ export class SurvivalMode implements ITarsMode {
 	/**
 	 * Upgrades items if we haven't already upgraded them while on this island
 	 */
-	private addUpgradeItemObjectives(context: Context, objectives: Array<IObjective | IObjective[]>, inventoryItemKey: keyof IInventoryItems, fromItemType: ItemType) {
+	private addUpgradeItemObjectives(context: Context, objectives: Array<IObjective | IObjective[]>, inventoryItemKey: keyof IInventoryItems, fromItemTypes: Set<ItemType>) {
 		const item = context.inventory[inventoryItemKey];
 		if (!item) {
 			// no existing item
@@ -495,19 +503,19 @@ export class SurvivalMode implements ITarsMode {
 
 		const upgradeItemKey = `UpgradeItem:${inventoryItemKey}`;
 
-		const islandSaveData = getTarsSaveData("island")[context.player.island.id];
-
-		if ((item as Item).type !== fromItemType) {
+		if (!fromItemTypes.has((item as Item).type)) {
+			// already upgraded
 			return;
 		}
 
+		const islandSaveData = getTarsSaveData("island")[context.player.island.id];
 		// if (islandSaveData[upgradeItemKey]) {
 		// 	// already upgraded
 		// 	return;
 		// }
 
 		objectives.push([
-			new UpgradeInventoryItem(inventoryItemKey),
+			new UpgradeInventoryItem(inventoryItemKey, fromItemTypes),
 			new Lambda(async () => {
 				islandSaveData[upgradeItemKey] = true;
 				return ObjectiveResult.Complete;

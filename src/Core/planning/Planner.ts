@@ -420,7 +420,7 @@ class Planner implements IPlanner {
 		}
 
 		if (++this.calculatingDifficultyDepth === 1) {
-			Objective.enableLogging = true;
+			Objective.enableLogging = false;
 		}
 
 		const waitingHashCodes = new Set<string>();
@@ -656,7 +656,7 @@ class Planner implements IPlanner {
 		}
 
 		if (--this.calculatingDifficultyDepth === 0) {
-			Objective.enableLogging = false;
+			Objective.enableLogging = true;
 		}
 
 		if (this.debug) {

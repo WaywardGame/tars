@@ -1,6 +1,6 @@
 import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@cplusplus/index";
-import type { IOverlayInfo, ITerrainDescription, ITile } from "game/tile/ITerrain";
-import { OverlayType, TerrainType } from "game/tile/ITerrain";
+import type { ITerrainDescription, ITile } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
 import terrainDescriptions from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
@@ -15,6 +15,7 @@ import { log } from "../../utilities/Logger";
 import type { ITileLocation } from "../ITars";
 import type { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
 import { NavigationMessageType } from "./INavigation";
+import { TarsOverlay } from "../../ui/TarsOverlay";
 
 interface INavigationWorker {
 	id: number;
@@ -35,13 +36,10 @@ export default class Navigation {
 
 	public totalTime = 0;
 	public totalCount = 0;
-	public overlayAlpha = 0;
 
 	private readonly dijkstraMaps: Map<number, IDijkstraMap> = new Map();
 
 	private readonly navigationWorkers: INavigationWorker[] = [];
-
-	private readonly overlay: Map<string, IOverlayInfo> = new Map();
 
 	private origin: IVector3;
 
@@ -55,7 +53,7 @@ export default class Navigation {
 		Navigation.modPath = modPath;
 	}
 
-	constructor() {
+	constructor(private readonly overlay: TarsOverlay) {
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			try {
 				this.dijkstraMaps.set(z, new Module.DijkstraMap());
@@ -147,34 +145,7 @@ export default class Navigation {
 
 		this.navigationWorkers.length = 0;
 
-		this.deleteOverlay();
-	}
-
-	public showOverlay() {
-		this.updateOverlayAlpha(150);
-	}
-
-	public hideOverlay() {
-		this.updateOverlayAlpha(0);
-	}
-
-	public deleteOverlay() {
-		if (localIsland) {
-			for (const [key, overlay] of this.overlay.entries()) {
-				const [x, y, z] = key.split(",");
-				TileHelpers.Overlay.remove(localIsland.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)), overlay);
-			}
-		}
-
 		this.overlay.clear();
-	}
-
-	public updateOverlayAlpha(alpha: number) {
-		this.overlayAlpha = alpha;
-
-		for (const [, overlay] of this.overlay.entries()) {
-			overlay.alpha = this.overlayAlpha;
-		}
 	}
 
 	public shouldUpdateSailingMode(sailingMode: boolean) {
@@ -196,7 +167,7 @@ export default class Navigation {
 			for (let x = 0; x < game.mapSize; x++) {
 				for (let y = 0; y < game.mapSize; y++) {
 					const tile = localIsland.getTile(x, y, z);
-					this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z, array, undefined, skipWorkerUpdate);
+					this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z, false, array, undefined, skipWorkerUpdate);
 				}
 			}
 		}
@@ -264,7 +235,25 @@ export default class Navigation {
 		// }
 	}
 
-	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void {
+	public refreshOverlay(tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {
+		tileType ??= TileHelpers.getType(tile);
+		terrainDescription ??= terrainDescriptions[tileType];
+
+		if (!terrainDescription) {
+			return;
+		}
+
+		this.overlay.addOrUpdate(
+			tile,
+			x,
+			y,
+			z,
+			isBaseTile,
+			isDisabled ?? this.isDisabled(tile, x, y, z, tileType),
+			penalty ?? this.getPenalty(tile, x, y, z, tileType, terrainDescription, tileUpdateType));
+	}
+
+	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile?: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void {
 		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return;
@@ -278,7 +267,7 @@ export default class Navigation {
 		const isDisabled = this.isDisabled(tile, x, y, z, tileType);
 		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription, tileUpdateType);
 
-		this.addOrUpdateOverlay(tile, x, y, z, isDisabled, penalty);
+		this.refreshOverlay(tile, x, y, z, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
 		try {
 			const node = dijkstraMapInstance.getNode(x, y);
@@ -638,32 +627,4 @@ export default class Navigation {
 		return Math.min(penalty, 255);
 	}
 
-	private addOrUpdateOverlay(tile: ITile, tileX: number, tileY: number, tileZ: number, isDisabled: boolean, penalty: number) {
-		const key = `${tileX},${tileY},${tileZ}`;
-
-		let overlay = this.overlay.get(key);
-		if (overlay) {
-			TileHelpers.Overlay.remove(tile, overlay);
-		}
-
-		if (isDisabled || penalty !== 0) {
-			overlay = {
-				type: OverlayType.Arrows,
-				size: 16,
-				offsetX: 0,
-				offsetY: 48,
-				red: isDisabled ? 0 : Math.min(penalty, 255),
-				green: isDisabled ? 0 : 255,
-				blue: 0,
-				alpha: this.overlayAlpha,
-			};
-
-			this.overlay.set(key, overlay);
-
-			TileHelpers.Overlay.add(tile, overlay);
-
-		} else if (overlay) {
-			this.overlay.delete(key);
-		}
-	}
 }

@@ -31,6 +31,7 @@ import Tars from "./core/Tars";
 import type { ITarsOptions } from "./core/ITars";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITars";
 import planner from "./core/planning/Planner";
+import { TarsOverlay } from "./ui/TarsOverlay";
 
 export default class TarsMod extends Mod {
 
@@ -108,6 +109,8 @@ export default class TarsMod extends Mod {
 
 	private tars: Tars | undefined;
 
+	private readonly tarsOverlay: TarsOverlay = new TarsOverlay();
+
 	private gamePlaying = false;
 
 	public get tarsInstance(): Tars | undefined {
@@ -133,7 +136,7 @@ export default class TarsMod extends Mod {
 	public override onLoad(): void {
 		this.ensureSaveData();
 
-		this.tars = new Tars(this.saveData);
+		this.tars = new Tars(this.saveData, this.tarsOverlay);
 		this.tars?.load();
 
 		const tarsEvents = this.tars.event.until(this.tars, "delete");
@@ -217,6 +220,8 @@ export default class TarsMod extends Mod {
 		this.tars?.unload();
 		this.tars = undefined;
 
+		this.tarsOverlay.clear();
+
 		Log.removePreConsoleCallback(loggerUtilities.preConsoleCallback);
 
 		(window as any).TARS = undefined;
@@ -297,6 +302,7 @@ export default class TarsMod extends Mod {
 			mode: TarsMode.Survival,
 			exploreIslands: true,
 			useOrbsOfInfluence: true,
+			goodCitizen: true,
 			stayHealthy: true,
 			recoverThresholdHealth: 30,
 			recoverThresholdStamina: 20,

@@ -61,7 +61,6 @@ import { ObjectUtilities } from "../utilities/Object";
 import { PlayerUtilities } from "../utilities/Player";
 import { TileUtilities } from "../utilities/Tile";
 import Context from "./context/Context";
-import type { IContext } from "./context/IContext";
 import { ContextDataType, MovingToNewIslandState } from "./context/IContext";
 import executor, { ExecuteObjectivesResultType } from "./Executor";
 import { IBase, IInventoryItems, IResetOptions, ITarsEvents, ITarsOptions, IUtilities, tickSpeed } from "./ITars";
@@ -75,24 +74,13 @@ import { ObjectiveResult } from "./objective/IObjective";
 import planner from "./planning/Planner";
 import Plan from "./planning/Plan";
 import { DoodadUtilities } from "../utilities/Doodad";
+import { TarsOverlay } from "../ui/TarsOverlay";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private base: IBase;
     private inventory: IInventoryItems;
-    private utilities: IUtilities = {
-        action: new ActionUtilities(),
-        base: new BaseUtilities(),
-        doodad: new DoodadUtilities(),
-        item: new ItemUtilities(),
-        movement: new MovementUtilities(),
-        navigation: new Navigation(),
-        object: new ObjectUtilities(),
-        player: new PlayerUtilities(),
-        tile: new TileUtilities(),
-
-        ensureSailingMode: (sailingMode) => this.ensureSailingMode(sailingMode),
-    };
+    private readonly utilities: IUtilities;
 
     private readonly statThresholdExceeded: Record<number, boolean> = {};
     private quantumBurstCooldown = 0;
@@ -117,13 +105,26 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private loaded = false;
 
-    constructor(private readonly saveData: ISaveData) {
+    constructor(private readonly saveData: ISaveData, private readonly overlay: TarsOverlay) {
         super();
 
+        this.utilities = {
+            action: new ActionUtilities(),
+            base: new BaseUtilities(),
+            doodad: new DoodadUtilities(),
+            item: new ItemUtilities(),
+            movement: new MovementUtilities(),
+            navigation: new Navigation(overlay),
+            object: new ObjectUtilities(),
+            overlay: this.overlay,
+            player: new PlayerUtilities(),
+            tile: new TileUtilities(),
+
+            ensureSailingMode: (sailingMode) => this.ensureSailingMode(sailingMode),
+        };
 
         log.info("Created TARS instance");
     }
-
 
     public delete() {
         this.reset({
@@ -149,7 +150,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.delete();
 
-        this.utilities.navigation = new Navigation();
+        this.utilities.navigation = new Navigation(this.overlay);
 
         EventManager.registerEventBusSubscriber(this);
 
@@ -171,12 +172,12 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     public disable(gameIsEnding: boolean = false) {
-        if (!gameIsEnding) {
+        if (!gameIsEnding && this.saveData.enabled) {
             this.saveData.enabled = false;
             this.event.emit("enableChange", false);
         }
 
-        this.utilities.navigation.hideOverlay();
+        this.overlay.hide();
 
         if (this.tickTimeoutId !== undefined) {
             clearTimeout(this.tickTimeoutId);
@@ -316,7 +317,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             });
 
         } else if (this.navigationSystemState === NavigationSystemState.Initialized) {
-            this.utilities.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ, undefined, tileUpdateType);
+            const isBaseDoodad = tile.doodad ? this.utilities.base.isBaseDoodad(this.getContext(), tile.doodad) : false;
+
+            this.utilities.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ, isBaseDoodad, undefined, tileUpdateType);
 
             const updateNeighbors = tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn;
             if (updateNeighbors) {
@@ -326,7 +329,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                             const point = island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
                             if (point) {
                                 const otherTile = island.getTileFromPoint(point);
-                                this.utilities.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ, undefined, tileUpdateType);
+                                const isBaseDoodad = otherTile.doodad ? this.utilities.base.isBaseDoodad(this.getContext(), otherTile.doodad) : false;
+                                this.utilities.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ, isBaseDoodad, undefined, tileUpdateType);
                             }
                         }
                     }
@@ -448,7 +452,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.delete();
 
-        this.utilities.navigation = new Navigation();
+        this.utilities.navigation = new Navigation(this.overlay);
 
         if (!this.isEnabled()) {
             return;
@@ -461,7 +465,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     ////////////////////////////////////////////////
 
-    public getContext(): IContext {
+    public getContext(): Context {
         return this.context ?? new Context(localPlayer, this.base, this.inventory, this.utilities, this.saveData.options);
     }
 
@@ -496,8 +500,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.reset();
 
         if (this.saveData.enabled) {
+            this.overlay.show();
+
             if (this.utilities.navigation) {
-                this.utilities.navigation.showOverlay();
                 this.utilities.navigation.queueUpdateOrigin(localPlayer);
             }
 
@@ -530,6 +535,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 switch (changedOption) {
                     case "exploreIslands":
                         this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+                        break;
+
+                    case "goodCitizen":
+                        this.reset({
+                            resetBase: true,
+                            resetContext: true,
+                        });
                         break;
 
                     case "quantumBurst":
@@ -742,6 +754,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         if (options?.delete || options?.resetBase) {
+            if (this.base) {
+                const baseDoodads = this.utilities.base.getBaseDoodads(this.getContext());
+                for (const doodad of baseDoodads) {
+                    this.utilities.navigation.refreshOverlay(doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+                }
+            }
+
             this.base = {
                 anvil: [],
                 campfire: [],

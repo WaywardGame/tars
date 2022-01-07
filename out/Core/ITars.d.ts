@@ -10,6 +10,7 @@ import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { ITile } from "game/tile/ITerrain";
 import type { ITerrainLoot } from "game/tile/TerrainResources";
+import { TarsOverlay } from "src/ui/TarsOverlay";
 import type { TarsTranslation } from "../ITarsMod";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
@@ -19,6 +20,7 @@ import { MovementUtilities } from "../utilities/Movement";
 import { ObjectUtilities } from "../utilities/Object";
 import { PlayerUtilities } from "../utilities/Player";
 import { TileUtilities } from "../utilities/Tile";
+import Context from "./context/Context";
 import { IContext } from "./context/IContext";
 import Navigation from "./navigation/Navigation";
 export declare const tickSpeed = 333;
@@ -36,6 +38,7 @@ export interface ITarsOptions {
     mode: TarsMode;
     exploreIslands: boolean;
     useOrbsOfInfluence: boolean;
+    goodCitizen: boolean;
     stayHealthy: boolean;
     recoverThresholdHealth: number;
     recoverThresholdStamina: number;
@@ -63,6 +66,7 @@ export interface IUtilities {
     movement: MovementUtilities;
     navigation: Navigation;
     object: ObjectUtilities;
+    overlay: TarsOverlay;
     player: PlayerUtilities;
     tile: TileUtilities;
     ensureSailingMode(sailingMode: boolean): Promise<void>;
@@ -85,8 +89,8 @@ export interface IBaseInfo {
     tryPlaceNear?: BaseInfoKey;
     allowMultiple?: boolean;
     openAreaRadius?: number;
-    canAdd?(base: IBase, target: Doodad): boolean;
-    onAdd?(base: IBase, target: Doodad): void;
+    canAdd?(context: Context, target: Doodad): boolean;
+    onAdd?(context: Context, target: Doodad): void;
     findTargets?(context: {
         island: Island;
         base: IBase;
