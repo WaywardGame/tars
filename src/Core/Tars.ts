@@ -99,7 +99,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private navigationSystemState: NavigationSystemState;
     private navigationUpdatePromise: ResolvablePromise | undefined;
-    private navigationQueuedUpdates: Array<() => void>;
+    private readonly navigationQueuedUpdates: Array<() => void> = [];
 
     private readonly modeCache: Map<TarsMode, ITarsMode> = new Map();
 
@@ -132,7 +132,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         });
 
         this.navigationSystemState = NavigationSystemState.NotInitialized;
-        this.navigationQueuedUpdates = [];
+        this.navigationQueuedUpdates.length = 0;
 
         this.utilities.navigation.delete();
 
@@ -317,24 +317,30 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             });
 
         } else if (this.navigationSystemState === NavigationSystemState.Initialized) {
-            const isBaseDoodad = tile.doodad ? this.utilities.base.isBaseDoodad(this.getContext(), tile.doodad) : false;
-
-            this.utilities.navigation.onTileUpdate(tile, TileHelpers.getType(tile), tileX, tileY, tileZ, isBaseDoodad, undefined, tileUpdateType);
-
             const updateNeighbors = tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn;
             if (updateNeighbors) {
                 for (let x = -tileUpdateRadius; x <= tileUpdateRadius; x++) {
                     for (let y = -tileUpdateRadius; y <= tileUpdateRadius; y++) {
-                        if (x !== 0 || y !== 0) {
-                            const point = island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
-                            if (point) {
-                                const otherTile = island.getTileFromPoint(point);
-                                const isBaseDoodad = otherTile.doodad ? this.utilities.base.isBaseDoodad(this.getContext(), otherTile.doodad) : false;
-                                this.utilities.navigation.onTileUpdate(otherTile, TileHelpers.getType(otherTile), tileX + x, tileY + y, tileZ, isBaseDoodad, undefined, tileUpdateType);
-                            }
+                        const point = island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+                        if (point) {
+                            const otherTile = island.getTileFromPoint(point);
+                            this.utilities.navigation.onTileUpdate(
+                                otherTile,
+                                TileHelpers.getType(otherTile),
+                                tileX + x, tileY + y, tileZ,
+                                this.utilities.base.isBaseTile(this.getContext(), otherTile),
+                                undefined, tileUpdateType);
                         }
                     }
                 }
+
+            } else {
+                this.utilities.navigation.onTileUpdate(
+                    tile,
+                    TileHelpers.getType(tile),
+                    tileX, tileY, tileZ,
+                    this.utilities.base.isBaseTile(this.getContext(), tile),
+                    undefined, tileUpdateType);
             }
         }
     }
@@ -1635,7 +1641,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             queuedUpdate();
         }
 
-        this.navigationQueuedUpdates = [];
+        this.navigationQueuedUpdates.length = 0;
     }
 
     private processQuantumBurst() {

@@ -138,6 +138,10 @@ export class BaseUtilities {
 		return doodads;
 	}
 
+	public isBaseTile(context: Context, tile: ITile): boolean {
+		return tile.doodad ? this.isBaseDoodad(context, tile.doodad) : false;
+	}
+
 	public isBaseDoodad(context: Context, doodad: Doodad): boolean {
 		return this.getBaseDoodads(context).includes(doodad);
 	}

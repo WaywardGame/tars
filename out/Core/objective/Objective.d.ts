@@ -5,7 +5,7 @@ import { ReserveType } from "../ITars";
 import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
 export default abstract class Objective implements IObjective {
     private static uuid;
-    static enableLogging: boolean;
+    enableLogging: boolean;
     protected contextDataKey: string;
     protected reserveType: ReserveType | undefined;
     private _log;

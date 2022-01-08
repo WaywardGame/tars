@@ -49,6 +49,8 @@ export interface IObjective {
 
 	readonly gatherObjectivePriority?: number;
 
+	enableLogging: boolean;
+
 	setLogger(log: ILog | undefined): void;
 
 	execute(context: Context): Promise<ObjectiveExecutionResult>;

@@ -22,6 +22,7 @@ export interface IObjective {
     readonly log: ILog;
     readonly ignoreInvalidPlans?: boolean;
     readonly gatherObjectivePriority?: number;
+    enableLogging: boolean;
     setLogger(log: ILog | undefined): void;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     getHashCode(addUniqueIdentifier?: boolean): string;

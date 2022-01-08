@@ -12,6 +12,7 @@ export declare class BaseUtilities {
     isGoodWellBuildTile(context: Context, point: IVector3, tile: ITile, onlyUnlimited: boolean): boolean;
     isOpenArea(context: Context, point: IVector3, tile: ITile, radius?: number): boolean;
     getBaseDoodads(context: Context): Doodad[];
+    isBaseTile(context: Context, tile: ITile): boolean;
     isBaseDoodad(context: Context, doodad: Doodad): boolean;
     getBasePosition(context: Context): IVector3;
     hasBase(context: Context): boolean;

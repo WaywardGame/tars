@@ -9,7 +9,6 @@ import { loggerUtilities } from "../../utilities/Logger";
 
 import type { IPlanner } from "./IPlanner";
 import Plan from "./Plan";
-import Objective from "../objective/Objective";
 
 /**
  * Creates plans for executing objectives
@@ -419,9 +418,8 @@ class Planner implements IPlanner {
 			}
 		}
 
-		if (++this.calculatingDifficultyDepth === 1) {
-			Objective.enableLogging = false;
-		}
+		this.calculatingDifficultyDepth++;
+		// objective.enableLogging = false;
 
 		const waitingHashCodes = new Set<string>();
 
@@ -650,14 +648,11 @@ class Planner implements IPlanner {
 				if (this.calculatingDifficultyDepth === 1) {
 					// this is the root level
 					// one of the multiple objective pipelines was likely incalculable due to the loop
-
 				}
 			}
 		}
 
-		if (--this.calculatingDifficultyDepth === 0) {
-			Objective.enableLogging = true;
-		}
+		this.calculatingDifficultyDepth--;
 
 		if (this.debug) {
 			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}. Difficulty is ${difficulty}`);

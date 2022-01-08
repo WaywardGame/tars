@@ -253,14 +253,14 @@ export default class Navigation {
 			penalty ?? this.getPenalty(tile, x, y, z, tileType, terrainDescription, tileUpdateType));
 	}
 
-	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile?: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void {
-		const terrainDescription = terrainDescriptions[tileType];
-		if (!terrainDescription) {
+	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void {
+		const dijkstraMapInstance = this.dijkstraMaps.get(z);
+		if (!dijkstraMapInstance) {
 			return;
 		}
 
-		const dijkstraMapInstance = this.dijkstraMaps.get(z);
-		if (!dijkstraMapInstance) {
+		const terrainDescription = terrainDescriptions[tileType];
+		if (!terrainDescription) {
 			return;
 		}
 
@@ -274,9 +274,7 @@ export default class Navigation {
 			node.penalty = penalty;
 			node.disabled = isDisabled;
 		} catch (ex) {
-			log.error("invalid node", x, y, penalty, isDisabled);
-
-			console.trace();
+			log.trace("invalid node", x, y, penalty, isDisabled);
 		}
 
 		if (array) {

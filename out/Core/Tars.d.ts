@@ -37,7 +37,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private tickTimeoutId;
     private navigationSystemState;
     private navigationUpdatePromise;
-    private navigationQueuedUpdates;
+    private readonly navigationQueuedUpdates;
     private readonly modeCache;
     private loaded;
     constructor(saveData: ISaveData, overlay: TarsOverlay);

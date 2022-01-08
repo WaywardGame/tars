@@ -27,7 +27,7 @@ export default class Navigation {
     queueUpdateOrigin(origin?: IVector3): void;
     updateOrigin(origin?: IVector3): void;
     refreshOverlay(tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;
-    onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile?: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void;
+    onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void;
     getNearestTileLocation(tileType: TerrainType, point: IVector3): Promise<ITileLocation[]>;
     isDisabledFromPoint(point: IVector3): boolean;
     getPenaltyFromPoint(point: IVector3, tile?: ITile): number;

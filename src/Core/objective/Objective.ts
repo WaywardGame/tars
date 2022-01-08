@@ -12,7 +12,7 @@ export default abstract class Objective implements IObjective {
 
 	private static uuid = 0;
 
-	public static enableLogging = true;
+	public enableLogging = true;
 
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
 	protected reserveType: ReserveType | undefined; // defaults to Hard
@@ -36,7 +36,7 @@ export default abstract class Objective implements IObjective {
 	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
 
 	public get log(): ILog {
-		if (Objective.enableLogging) {
+		if (this.enableLogging) {
 			return this._log ??= loggerUtilities.createLog(this.getName());
 		}
 
