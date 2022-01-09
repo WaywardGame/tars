@@ -4,11 +4,12 @@ import type Item from "game/item/Item";
 import { getTileId } from "utilities/game/TilePosition";
 
 import type Context from "../../core/context/Context";
-import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import UseItem from "../other/item/UseItem";
+import ReserveItems from "../core/ReserveItems";
 
 export default class GatherWaterFromWell extends Objective {
 
@@ -33,6 +34,7 @@ export default class GatherWaterFromWell extends Objective {
 		}
 
 		return [
+			new ReserveItems(this.item),
 			new MoveToTarget(this.well, true),
 			new UseItem(ActionType.GatherLiquid, this.item)
 				.setStatus(() => `Gathering water from ${this.well.getName()}`),

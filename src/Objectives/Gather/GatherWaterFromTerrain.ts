@@ -8,6 +8,7 @@ import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import UseItem from "../other/item/UseItem";
 import PickUpAllTileItems from "../other/tile/PickUpAllTileItems";
+import ReserveItems from "../core/ReserveItems";
 
 export default class GatherWaterFromTerrain extends Objective {
 
@@ -34,6 +35,7 @@ export default class GatherWaterFromTerrain extends Objective {
 			}
 
 			objectivePipelines.push([
+				new ReserveItems(this.item),
 				new MoveToTarget(point, true),
 				new PickUpAllTileItems(point),
 				new UseItem(ActionType.GatherLiquid, this.item)

@@ -11,6 +11,7 @@ import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import UseItem from "../other/item/UseItem";
 import EmptyWaterContainer from "../other/EmptyWaterContainer";
+import ReserveItems from "../core/ReserveItems";
 
 export interface IGatherWaterFromStillOptions {
 	allowStartingWaterStill: boolean;
@@ -37,6 +38,7 @@ export default class GatherWaterFromStill extends Objective {
 			if (this.options?.allowStartingWaterStill) {
 				// start desalination and run back to the waterstill and wait
 				const objectives: IObjective[] = [
+					new ReserveItems(this.item),
 					new StartWaterStillDesalination(this.waterStill),
 				];
 
@@ -55,7 +57,9 @@ export default class GatherWaterFromStill extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const objectives: IObjective[] = [];
+		const objectives: IObjective[] = [
+			new ReserveItems(this.item),
+		];
 
 		if (!context.utilities.item.canGatherWater(this.item)) {
 			objectives.push(new EmptyWaterContainer(this.item));

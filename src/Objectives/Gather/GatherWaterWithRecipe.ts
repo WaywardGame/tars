@@ -3,11 +3,12 @@ import itemDescriptions from "game/item/Items";
 import type { ItemType } from "game/item/IItem";
 
 import type Context from "../../core/context/Context";
-import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 
 import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
+import ReserveItems from "../core/ReserveItems";
 
 /**
  * Gathers unpurified water into a container with a recipe
@@ -56,7 +57,10 @@ export default class GatherWaterWithRecipe extends Objective {
                 if (targetItemType !== undefined) {
                     const targetItemDescription = itemDescriptions[targetItemType];
                     if (targetItemDescription?.recipe !== undefined) {
-                        return new AcquireItemWithRecipe(targetItemType, targetItemDescription.recipe, true);
+                        return [
+                            new ReserveItems(this.item),
+                            new AcquireItemWithRecipe(targetItemType, targetItemDescription.recipe, true),
+                        ];
                     }
                 }
             }

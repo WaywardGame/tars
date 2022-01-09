@@ -60,7 +60,9 @@ export default class StartWaterStillDesalination extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const objectives: IObjective[] = [];
+		const objectives: IObjective[] = [
+			new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
+		];
 
 		const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
 
@@ -83,7 +85,6 @@ export default class StartWaterStillDesalination extends Objective {
 
 			} else if (this.waterStill.stillContainer === undefined) {
 				// todo: add a way to set this only for a specific item?
-				objectives.push(new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false));
 				objectives.push(new AcquireWaterContainer());
 
 			} else {
@@ -116,7 +117,6 @@ export default class StartWaterStillDesalination extends Objective {
 
 			if (availableWaterContainer === undefined) {
 				// todo: add a way to set this only for a specific item?
-				objectives.push(new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false));
 				objectives.push(new AcquireWaterContainer());
 			}
 
