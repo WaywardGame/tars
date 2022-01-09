@@ -19,6 +19,7 @@ export declare class ItemUtilities {
     initialize(context: Context): void;
     clearCache(): void;
     getBaseItems(context: Context): Item[];
+    getBaseItemsByType(context: Context, itemType: ItemType): Item[];
     getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[];
     processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker;
     getItemsInInventory(context: Context, allowProtectedItems?: boolean): Item[];

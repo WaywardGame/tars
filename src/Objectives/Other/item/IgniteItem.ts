@@ -3,8 +3,7 @@ import type Item from "game/item/Item";
 import { EquipType } from "game/entity/IHuman";
 
 import type Context from "../../../core/context/Context";
-import { ContextDataType } from "../../../core/context/IContext";
-import type { ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireBuildMoveToFire from "../../acquire/doodad/AcquireBuildMoveToFire";
@@ -27,7 +26,7 @@ export default class IgniteItem extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
+        const item = this.item ?? this.getAcquiredItem(context);
         if (!item) {
             this.log.error("Invalid ignite item");
             return ObjectiveResult.Restart;

@@ -33,16 +33,17 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 		const objectives: IObjective[] = [];
 
 		const orbOfInfluenceItem = context.utilities.item.getItemInInventory(context, ItemType.OrbOfInfluence);
-		if (!orbOfInfluenceItem) {
-			objectives.push(new AcquireItem(ItemType.OrbOfInfluence));
+		if (orbOfInfluenceItem) {
+			objectives.push(new SetContextData(ContextDataType.Item1, orbOfInfluenceItem));
 
 		} else {
-			objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, orbOfInfluenceItem));
+			objectives.push(new AcquireItem(ItemType.OrbOfInfluence).setContextDataKey(ContextDataType.Item1));
 		}
 
 		objectives.push(new Lambda(async context => {
-			const item = context.getData(ContextDataType.LastAcquiredItem);
+			const item = context.getData(ContextDataType.Item1);
 			if (!item) {
+				this.log.error("Invalid orb of influence");
 				return ObjectiveResult.Restart;
 			}
 

@@ -3,8 +3,7 @@ import type { EquipType } from "game/entity/IHuman";
 import type Item from "game/item/Item";
 
 import type Context from "../../../core/context/Context";
-import { ContextDataType } from "../../../core/context/IContext";
-import type { ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
@@ -24,7 +23,7 @@ export default class EquipItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
+		const item = this.item ?? this.getAcquiredItem(context);
 		if (!item) {
 			this.log.error("Invalid equip item");
 			return ObjectiveResult.Restart;

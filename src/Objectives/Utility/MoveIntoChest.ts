@@ -5,9 +5,9 @@ import type Item from "game/item/Item";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
 import Vector2 from "utilities/math/Vector2";
+
 import type Context from "../../core/context/Context";
-import { ContextDataType } from "../../core/context/IContext";
-import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireItemForDoodad from "../acquire/item/AcquireItemForDoodad";
@@ -38,10 +38,10 @@ export default class MoveIntoChest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const itemsToMove = this.itemsToMove || [context.getData(ContextDataType.LastAcquiredItem)];
+		const itemsToMove = this.itemsToMove ?? [this.getAcquiredItem(context)];
 		const firstItem = itemsToMove[0];
 		if (!firstItem) {
-			this.log.error("Invalid item to move");
+			this.log.warn("Invalid item to move");
 			return ObjectiveResult.Restart;
 		}
 

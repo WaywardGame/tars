@@ -10,4 +10,6 @@ export default class CompleteQuestRequirement extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
+    private getObjectivesForQuestRequirement;
+    private getObjectivesForModdedQuestRequirement;
 }

@@ -54,6 +54,10 @@ export class ItemUtilities {
 		return this.itemCache;
 	}
 
+	public getBaseItemsByType(context: Context, itemType: ItemType): Item[] {
+		return this.getBaseItems(context).filter(item => item.type === itemType);
+	}
+
 	public getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[] {
 		let search = this.disassembleSearchCache.get(itemType);
 		if (search === undefined) {

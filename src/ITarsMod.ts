@@ -95,6 +95,8 @@ export enum TarsTranslation {
     DialogButtonStayHealthyTooltip,
     DialogButtonUseOrbsOfInfluence,
     DialogButtonUseOrbsOfInfluenceTooltip,
+    DialogButtonSailToCivilization,
+    DialogButtonSailToCivilizationTooltip,
 
     DialogButtonMoveToBase,
     DialogButtonMoveToDoodad,

@@ -13,7 +13,6 @@ import type { IObjective, ObjectiveExecutionResult } from "../../../core/objecti
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireItem from "../../acquire/item/AcquireItem";
-import CopyContextData from "../../contextData/CopyContextData";
 import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";
 import Restart from "../../core/Restart";
@@ -38,7 +37,7 @@ export default class PlantSeed extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const seed = this.seed ?? context.getData(ContextDataType.LastAcquiredItem);
+		const seed = this.seed ?? this.getAcquiredItem(context);
 		if (!seed) {
 			this.log.error("Invalid seed item");
 			return ObjectiveResult.Restart;
@@ -53,12 +52,11 @@ export default class PlantSeed extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		if (context.inventory.hoe === undefined) {
-			objectives.push(new AcquireItem(ItemType.StoneHoe));
-			objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
+		if (context.inventory.hoe) {
+			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hoe));
 
 		} else {
-			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hoe));
+			objectives.push(new AcquireItem(ItemType.StoneHoe).setContextDataKey(ContextDataType.Item1));
 		}
 
 		const emptyTilledTile = TileHelpers.findMatchingTile(
@@ -125,8 +123,8 @@ export default class PlantSeed extends Objective {
 			}
 
 			objectives.push(new MoveToTarget(point, true));
-			objectives.push(new CopyContextData(ContextDataType.Item1, ContextDataType.LastAcquiredItem));
-			objectives.push(new UseItem(ActionType.Till));
+
+			objectives.push(new UseItem(ActionType.Till).setContextDataKey(ContextDataType.Item1));
 
 			// it's possible tilling failed. restart after tilling to recalculate
 			objectives.push(new Restart());

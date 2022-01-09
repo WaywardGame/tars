@@ -20,6 +20,8 @@ import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import EmptyWaterContainer from "../EmptyWaterContainer";
 import { inventoryItemInfo } from "../../../core/ITars";
 import StokeFire from "./StokeFire";
+import { ContextDataType } from "../../../core/context/IContext";
+import SetContextData from "../../contextData/SetContextData";
 
 export interface IStartWaterStillDesalinationOptions {
 	disableAttaching: boolean;
@@ -80,6 +82,8 @@ export default class StartWaterStillDesalination extends Objective {
 				}
 
 			} else if (this.waterStill.stillContainer === undefined) {
+				// todo: add a way to set this only for a specific item?
+				objectives.push(new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false));
 				objectives.push(new AcquireWaterContainer());
 
 			} else {
@@ -111,6 +115,8 @@ export default class StartWaterStillDesalination extends Objective {
 			this.log.info("No still container");
 
 			if (availableWaterContainer === undefined) {
+				// todo: add a way to set this only for a specific item?
+				objectives.push(new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false));
 				objectives.push(new AcquireWaterContainer());
 			}
 

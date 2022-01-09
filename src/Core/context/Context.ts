@@ -211,12 +211,13 @@ export default class Context implements IContext {
 		return this.state.minimumAcceptedDifficulty === undefined || this.state.minimumAcceptedDifficulty >= difficulty;
 	}
 
+	///////////////////////////
+	// Helper methods
+
 	public getPosition(): IVector3 {
 		const position = this.getData(ContextDataType.Position);
 		if (position && (position.x === undefined || position.y === undefined || position.z === undefined)) {
-
 			console.error("invalid value", position);
-
 			console.trace("lastKnownPosition get");
 		}
 

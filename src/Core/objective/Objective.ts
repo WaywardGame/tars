@@ -7,6 +7,7 @@ import { ContextDataType } from "../context/IContext";
 import { loggerUtilities } from "../../utilities/Logger";
 import { ReserveType } from "../ITars";
 import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
+import type Item from "game/item/Item";
 
 export default abstract class Objective implements IObjective {
 
@@ -203,6 +204,7 @@ export default abstract class Objective implements IObjective {
 
 	/**
 	 * For AcquireItem objectives, the key will be set to the item once it's acquired
+	 * For objectives that are going to use an item, this will change how context.getAcquiredItem() works
 	 */
 	public setContextDataKey(contextDataKey: string) {
 		this.contextDataKey = contextDataKey;
@@ -221,6 +223,13 @@ export default abstract class Objective implements IObjective {
 		this.contextDataKey = objective.contextDataKey;
 		this.reserveType = reserveType ?? objective.reserveType;
 		return this;
+	}
+
+	/**
+	 * Returns the last acquired item based on the context data key
+	 */
+	protected getAcquiredItem(context: Context): Item | undefined {
+		return context.getData(this.contextDataKey);
 	}
 
 	protected getBaseDifficulty(_context: Context): number {

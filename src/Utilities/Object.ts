@@ -8,6 +8,7 @@ import type Item from "game/item/Item";
 import { AiType } from "game/entity/IEntity";
 
 import type Context from "../core/context/Context";
+import { CreatureType } from "game/entity/creature/ICreature";
 
 export enum FindObjectType {
 	Creature,
@@ -110,21 +111,39 @@ export class ObjectUtilities {
 		});
 	}
 
-	public findHuntableCreatures(context: Context, id: string, onlyHostile?: boolean, top?: number) {
-		return context.utilities.object.findCreatures(context, id, creature => !creature.isTamed() && (!onlyHostile || creature.hasAi(AiType.Hostile)), top);
-	}
-
-	public findTamableCreatures(context: Context, id: string, onlyHostile: boolean, top?: number) {
+	public findHuntableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; onlyHostile: boolean; top: number }>) {
 		return context.utilities.object.findCreatures(context, id, creature => {
 			if (creature.isTamed()) {
 				return false;
 			}
 
-			if (creature.hasAi(AiType.Hostile)) {
-				return onlyHostile;
+			if (options?.type !== undefined && creature.type !== options.type) {
+				return false;
 			}
 
-			return !onlyHostile;
-		}, top);
+			if (options?.onlyHostile && !creature.hasAi(AiType.Hostile)) {
+				return false;
+			}
+
+			return true;
+		}, options?.top);
+	}
+
+	public findTamableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; hostile: boolean; top: number }>) {
+		return context.utilities.object.findCreatures(context, id, creature => {
+			if (creature.isTamed()) {
+				return false;
+			}
+
+			if (options?.type !== undefined && creature.type !== options.type) {
+				return false;
+			}
+
+			if (options?.hostile !== undefined) {
+				return options.hostile === creature.hasAi(AiType.Hostile);
+			}
+
+			return true;
+		}, options?.top);
 	}
 }

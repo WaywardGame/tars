@@ -5,7 +5,7 @@ import { TileEventType } from "game/tile/ITileEvent";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import type { IObjective, ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireItemByGroup from "../../acquire/item/AcquireItemByGroup";
@@ -29,7 +29,7 @@ export default class StartFire extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const doodad = this.doodad || context.getData(ContextDataType.LastBuiltDoodad);
+		const doodad = this.doodad ?? context.getData(ContextDataType.LastBuiltDoodad);
 		if (!doodad) {
 			this.log.error("Invalid doodad");
 			return ObjectiveResult.Restart;

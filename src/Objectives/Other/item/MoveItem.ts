@@ -4,8 +4,7 @@ import type { IContainer } from "game/item/IItem";
 import Doodad from "game/doodad/Doodad";
 
 import type Context from "../../../core/context/Context";
-import { ContextDataType } from "../../../core/context/IContext";
-import type { ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
@@ -30,7 +29,7 @@ export default class MoveItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
+		const item = this.item ?? this.getAcquiredItem(context);
 		if (!item) {
 			this.log.error("Invalid move item");
 			return ObjectiveResult.Restart;

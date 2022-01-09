@@ -12,6 +12,8 @@ import { AcquireItemMode } from "../../modes/AcquireItem";
 import TarsPanel from "../components/TarsPanel";
 import { BuildDoodadMode } from "../../modes/BuildDoodad";
 import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
+import { ExecuteObjectivesMode } from "../../modes/ExecuteObjectives";
+import SailToCivilization from "../../objectives/utility/SailToCivilization";
 
 export default class TasksPanel extends TarsPanel {
 
@@ -55,6 +57,17 @@ export default class TasksPanel extends TarsPanel {
             .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodadTooltip))))
             .event.subscribe("activate", async () => {
                 await this.TarsMod.tarsInstance?.activateManualMode(new BuildDoodadMode(this.dropdownDoodadType.selection as DoodadType));
+                return true;
+            })
+            .appendTo(this);
+
+        new Divider().appendTo(this);
+
+        new Button()
+            .setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilization))
+            .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilizationTooltip))))
+            .event.subscribe("activate", async () => {
+                await this.TarsMod.tarsInstance?.activateManualMode(new ExecuteObjectivesMode([new SailToCivilization()]));
                 return true;
             })
             .appendTo(this);

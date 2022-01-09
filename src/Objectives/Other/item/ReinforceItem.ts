@@ -9,7 +9,6 @@ import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteAction from "../../core/ExecuteAction";
-import Lambda from "../../core/Lambda";
 
 /**
  * Reinforces an item if
@@ -60,25 +59,23 @@ export default class ReinforceItem extends Objective {
 		const objectives: IObjective[] = [];
 
 		const reinforceItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Reinforce);
-		if (reinforceItems.length === 0) {
-			objectives.push(new AcquireItemForAction(ActionType.Reinforce));
+		if (reinforceItems.length > 0) {
+			objectives.push(new SetContextData(ContextDataType.Item1, reinforceItems[0]));
 
 		} else {
-			objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, reinforceItems[0]));
+			objectives.push(new AcquireItemForAction(ActionType.Reinforce).setContextDataKey(ContextDataType.Item1));
 		}
 
-		objectives.push(new Lambda(async context => {
-			const reinforceItem = context.getData(ContextDataType.LastAcquiredItem);
+		objectives.push(new ExecuteAction(ActionType.Reinforce, (context, action) => {
+			const reinforceItem = context.getData(ContextDataType.Item1);
 			if (!reinforceItem) {
 				this.log.error("Invalid reinforce item");
 				return ObjectiveResult.Restart;
 			}
 
-			return (new ExecuteAction(ActionType.Reinforce, (context, action) => {
-				action.execute(context.player, reinforceItem, this.item);
-				return ObjectiveResult.Complete;
-			}).setStatus(this));
-		}));
+			action.execute(context.player, reinforceItem, this.item);
+			return ObjectiveResult.Complete;
+		}).setStatus(this));
 
 		return objectives;
 	}

@@ -12,6 +12,10 @@ export enum ContextDataType {
 	Position = "Position",
 	LastAcquiredItem = "LastAcquiredItem",
 	LastBuiltDoodad = "LastBuiltDoodad",
+
+	/**
+	 * Spot to store an item across the objective pipeline
+	 */
 	Item1 = "Item1",
 
 	/**

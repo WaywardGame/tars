@@ -3,6 +3,7 @@ import type { ILog } from "utilities/Log";
 import type Context from "../context/Context";
 import { ReserveType } from "../ITars";
 import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
+import type Item from "game/item/Item";
 export default abstract class Objective implements IObjective {
     private static uuid;
     enableLogging: boolean;
@@ -36,6 +37,7 @@ export default abstract class Objective implements IObjective {
     setContextDataKey(contextDataKey: string): this;
     setReserveType(reserveType: ReserveType | undefined): this;
     passAcquireData(objective: Objective, reserveType?: ReserveType): this;
+    protected getAcquiredItem(context: Context): Item | undefined;
     protected getBaseDifficulty(_context: Context): number;
     protected addUniqueIdentifier(): void;
 }

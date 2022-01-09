@@ -24,16 +24,16 @@ export default class AcquireWaterContainer extends Objective {
 
 		const messageInABottleItem = context.utilities.item.getItemInInventory(context, ItemType.MessageInABottle);
 		if (!messageInABottleItem) {
-			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle));
+			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle).setContextDataKey(ContextDataType.Item1));
 
 		} else {
-			messageInABottleObjectives.push(new SetContextData(ContextDataType.LastAcquiredItem, messageInABottleItem));
+			messageInABottleObjectives.push(new SetContextData(ContextDataType.Item1, messageInABottleItem));
 		}
 
 		messageInABottleObjectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [ItemType.GlassBottle], ActionType.OpenBottle, (context, action) => {
-			const item = context.getData(ContextDataType.LastAcquiredItem);
+			const item = context.getData(ContextDataType.Item1);
 			if (!item) {
-				this.log.error("Invalid item");
+				this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
 				return;
 			}
 

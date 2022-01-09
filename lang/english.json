@@ -32,6 +32,8 @@
 			"dialogButtonAquireItemTooltip": "Instruct TARS to acquire the selected item.",
 			"dialogButtonBuildDoodad": "Build Doodad",
 			"dialogButtonBuildDoodadTooltip": "Instruct TARS to acquire the item for the selected doodad and build it.",
+			"dialogButtonSailToCivilization": "Sail to Civilization",
+			"dialogButtonSailToCivilizationTooltip": "Instruct TARS to sail to civilization. It will acquire the necessary items to do so.",
 			"dialogButtonDeveloperMode": "Enable Developer Mode",
 			"dialogButtonDeveloperModeTooltip": "Enables extra debug logging to the console\nWarning: This may significally decrease performance.",
 			"dialogButtonEnable": "Enable TARS {#--text-secondary:({Bindings:ModTARSToggleTars})}",

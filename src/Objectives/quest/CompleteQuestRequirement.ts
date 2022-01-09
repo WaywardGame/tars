@@ -7,6 +7,8 @@ import itemDescriptions from "game/item/Items";
 import ItemManager from "game/item/ItemManager";
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { EquipType } from "game/entity/IHuman";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -27,6 +29,9 @@ import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalina
 import GatherWaterFromStill from "../gather/GatherWaterFromStill";
 import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
 import TameCreatures from "../other/creature/TameCreatures";
+import EquipItem from "../other/item/EquipItem";
+import UnequipItem from "../other/item/UnequipItem";
+import SailToCivilization from "../utility/SailToCivilization";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -43,247 +48,322 @@ export default class CompleteQuestRequirement extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const objectivePipelines: IObjective[][] = [];
-
         if (Enums.isModded(QuestRequirementType, this.requirement.type)) {
-            switch (QuestRequirementType[this.requirement.type]) {
+            return this.getObjectivesForModdedQuestRequirement(context, QuestRequirementType[this.requirement.type]);
 
-                case "ModStarterQuestQuickslot":
-                    objectivePipelines.push([new Lambda(async () => {
-                        let itemId: number | undefined;
+        }
 
-                        for (const item of context.player.inventory.containedItems) {
-                            if (item.quickSlot === undefined) {
-                                itemId = item.id;
-                                break;
-                            }
-                        }
+        return this.getObjectivesForQuestRequirement(context, this.requirement.type);
+    }
 
-                        if (itemId === undefined) {
-                            return ObjectiveResult.Impossible;
-                        }
+    private getObjectivesForQuestRequirement(context: Context, requirementType: QuestRequirementType): ObjectiveExecutionResult {
+        switch (requirementType) {
 
-                        return oldui.screenInGame?.addItemToFreeQuickSlot(itemId) ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
-                    })]);
+            case QuestRequirementType.SailToCivilization:
+                return new SailToCivilization();
 
-                    break;
+            case QuestRequirementType.CollectItem: {
+                const objectivePipelines: IObjective[][] = [];
 
-                case "ModStarterQuestChangeHand":
-                    objectivePipelines.push([new Lambda(async (context) => {
-                        game.updateOption(context.player, "leftHand", !context.player.options.leftHand);
-                        return ObjectiveResult.Complete;
-                    })]);
+                const [itemTypesOrGroups, amount] = this.requirement.options as [Array<ItemType | ItemTypeGroup>, number];
 
-                    break;
+                for (const itemTypeOrGroup of itemTypesOrGroups) {
+                    const pipelines: IObjective[] = [];
 
-                case "ModStarterQuestLightCampfire":
-                    const objectives: IObjective[] = [
-                        new AcquireBuildMoveToDoodad(DoodadTypeGroup.LitCampfire),
-                    ];
-
-                    if (context.inventory.fireStarter === undefined) {
-                        objectives.push(new AcquireItemForAction(ActionType.StartFire));
+                    for (let i = 0; i < amount; i++) {
+                        pipelines.push(ItemManager.isGroup(itemTypeOrGroup) ? new AcquireItemByGroup(itemTypeOrGroup) : new AcquireItem(itemTypeOrGroup));
                     }
 
-                    objectives.push(new UseItem(ActionType.StartFire, context.inventory.fireStarter));
+                    objectivePipelines.push(pipelines);
+                }
 
-                    objectivePipelines.push(objectives);
-
-                    break;
-
-                case "ModStarterQuestStokeCampfire":
-                    objectivePipelines.push([
-                        new AcquireBuildMoveToDoodad(DoodadTypeGroup.LitCampfire),
-                        new StokeFire(context.base.campfire[0]),
-                    ]);
-
-                    break;
-
-                case "ModStarterQuestFillStill":
-                    for (const waterStill of context.base.waterStill) {
-                        if (waterStill.gatherReady === undefined) {
-                            objectivePipelines.push([
-                                new StartWaterStillDesalination(waterStill, {
-                                    disableAttaching: true,
-                                    disableStarting: true,
-                                }),
-                            ]);
-                        }
-                    }
-
-                    break;
-
-                case "ModStarterQuestAttachContainer":
-                    for (const waterStill of context.base.waterStill) {
-                        if (waterStill.stillContainer === undefined) {
-                            objectivePipelines.push([
-                                new StartWaterStillDesalination(waterStill, {
-                                    disableStarting: true,
-                                }),
-                            ]);
-                        }
-                    }
-
-                    break;
-
-                case "ModStarterQuestLightWaterStill":
-                    for (const waterStill of context.base.waterStill) {
-                        if (!waterStill.description()?.providesFire) {
-                            objectivePipelines.push([
-                                new StartWaterStillDesalination(waterStill, { forceStoke: true }),
-                            ]);
-                        }
-                    }
-
-                    break;
-
-                case "ModStarterQuestStokeWaterStill":
-                    for (const waterStill of context.base.waterStill) {
-                        if (waterStill.description()?.providesFire) {
-                            objectivePipelines.push([
-                                new StartWaterStillDesalination(waterStill, { forceStoke: true }),
-                            ]);
-                        }
-                    }
-
-                    break;
-
-                case "ModStarterQuestGatherFromWaterStill":
-                    if (context.inventory.waterContainer === undefined) {
-                        objectivePipelines.push([new AcquireWaterContainer(), new Restart()]);
-
-                    } else {
-                        for (const waterStill of context.base.waterStill) {
-                            objectivePipelines.push([new GatherWaterFromStill(waterStill, context.inventory.waterContainer[0], {
-                                allowStartingWaterStill: true,
-                                allowWaitingForWaterStill: true,
-                                onlyIdleWhenWaitingForWaterStill: true,
-                            })]);
-                        }
-                    }
-
-                    break;
-
-                default:
-                    this.log.warn(`Unknown modded quest requirement: ${this.quest.getTitle()}, ${QuestRequirementType[this.requirement.type]}`);
-                    return ObjectiveResult.Restart;
+                return objectivePipelines;
             }
 
-        } else {
-            switch (this.requirement.type) {
+            case QuestRequirementType.KillCreature: {
+                const [creatureType, _amount] = this.requirement.options as [CreatureType, number];
 
-                case QuestRequirementType.CollectItem: {
-                    const [itemTypesOrGroups, amount] = this.requirement.options as [Array<ItemType | ItemTypeGroup>, number];
+                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreature", { type: creatureType, top: 10 });
 
-                    for (const itemTypeOrGroup of itemTypesOrGroups) {
-                        const pipelines: IObjective[] = [];
+                return new HuntCreatures(creatures);
+            }
 
-                        for (let i = 0; i < amount; i++) {
-                            pipelines.push(ItemManager.isGroup(itemTypeOrGroup) ? new AcquireItemByGroup(itemTypeOrGroup) : new AcquireItem(itemTypeOrGroup));
+            case QuestRequirementType.KillCreatures: {
+                const [_amount] = this.requirement.options as [number];
+
+                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreatures", { top: 10 });
+
+                return new HuntCreatures(creatures);
+            }
+
+            case QuestRequirementType.LearnSkill:
+                return ObjectiveResult.Impossible;
+
+            case QuestRequirementType.LearnSkills:
+                return ObjectiveResult.Impossible;
+
+            case QuestRequirementType.LearnAnySkill:
+                return ObjectiveResult.Impossible;
+
+            case QuestRequirementType.Equip: {
+                const objectivePipelines: IObjective[][] = [];
+
+                const [matchingEquipTypes, matchingItemTypeGroups] = this.requirement.options as [EquipType[], ItemTypeGroup[]];
+
+                for (const itemTypeGroup of matchingItemTypeGroups) {
+                    const itemTypes = context.island.items.getGroupItems(itemTypeGroup);
+                    for (const itemType of itemTypes) {
+                        const equipType = itemDescriptions[itemType]?.equip;
+                        if (equipType === undefined || !matchingEquipTypes.includes(equipType)) {
+                            continue;
                         }
 
-                        objectivePipelines.push(pipelines);
-                    }
-
-                    break;
-                }
-
-                case QuestRequirementType.Craft: {
-                    const [itemTypesOrGroups, _amount] = this.requirement.options as [Array<ItemType | ItemTypeGroup>, number];
-
-                    for (const itemTypeOrGroup of itemTypesOrGroups) {
-                        let itemTypes: Set<ItemType>;
-
-                        if (ItemManager.isGroup(itemTypeOrGroup)) {
-                            itemTypes = context.island.items.getGroupItems(itemTypeOrGroup);
+                        const matchingItem = context.utilities.item.getItemInInventory(context, itemType);
+                        if (matchingItem !== undefined) {
+                            objectivePipelines.push(matchingItem.isEquipped() ?
+                                [new UnequipItem(matchingItem), new EquipItem(equipType, matchingItem)] :
+                                [new EquipItem(equipType, matchingItem)]);
 
                         } else {
-                            itemTypes = new Set([itemTypeOrGroup]);
-                        }
-
-                        for (const itemType of itemTypes) {
-                            const recipe = itemDescriptions[itemType]?.recipe;
-                            if (recipe === undefined) {
-                                continue;
-                            }
-
-                            objectivePipelines.push([new AcquireItemWithRecipe(itemType, recipe), new Restart()]);
+                            objectivePipelines.push([new AcquireItem(itemType), new EquipItem(equipType)]);
                         }
                     }
-
-                    break;
                 }
 
-                case QuestRequirementType.Dismantle: {
-                    const [itemTypes, amount] = this.requirement.options as [ItemType[], number];
+                return ObjectiveResult.Restart;
+            }
+
+            case QuestRequirementType.Craft: {
+                const objectivePipelines: IObjective[][] = [];
+
+                const [itemTypesOrGroups, _amount] = this.requirement.options as [Array<ItemType | ItemTypeGroup>, number];
+
+                for (const itemTypeOrGroup of itemTypesOrGroups) {
+                    let itemTypes: Set<ItemType>;
+
+                    if (ItemManager.isGroup(itemTypeOrGroup)) {
+                        itemTypes = context.island.items.getGroupItems(itemTypeOrGroup);
+
+                    } else {
+                        itemTypes = new Set([itemTypeOrGroup]);
+                    }
 
                     for (const itemType of itemTypes) {
-                        const dismantle = itemDescriptions[itemType]?.dismantle;
-                        if (dismantle === undefined) {
-                            return ObjectiveResult.Impossible;
+                        const recipe = itemDescriptions[itemType]?.recipe;
+                        if (recipe === undefined) {
+                            continue;
                         }
 
-                        const pipelines: IObjective[] = [];
-
-                        for (let i = 0; i < amount; i++) {
-                            pipelines.push(new AcquireItemFromDismantle(dismantle.items[0].type, [itemType]));
-                        }
-
-                        objectivePipelines.push(pipelines);
+                        objectivePipelines.push([new AcquireItemWithRecipe(itemType, recipe), new Restart()]);
                     }
-
-                    break;
                 }
 
-                case QuestRequirementType.KillCreatures: {
-                    const [_amount] = this.requirement.options as [number];
+                return objectivePipelines;
+            }
 
-                    const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreatures", false, 10);
+            case QuestRequirementType.Dismantle: {
+                const objectivePipelines: IObjective[][] = [];
 
-                    objectivePipelines.push([new HuntCreatures(creatures)]);
+                const [itemTypes, amount] = this.requirement.options as [ItemType[], number];
 
-                    break;
-                }
-
-                case QuestRequirementType.Build:
-                    const [itemType] = this.requirement.options as [ItemType];
-
-                    const doodadType = itemDescriptions[itemType]?.onUse?.[ActionType.Build];
-                    if (doodadType === undefined) {
+                for (const itemType of itemTypes) {
+                    const dismantle = itemDescriptions[itemType]?.dismantle;
+                    if (dismantle === undefined) {
                         return ObjectiveResult.Impossible;
                     }
 
-                    objectivePipelines.push([
-                        new AcquireBuildMoveToDoodad(typeof (doodadType) === "object" ? doodadType[0] : doodadType, {
-                            ignoreExistingDoodads: true,
-                            disableMoveTo: true,
-                        })
-                    ]);
+                    const pipelines: IObjective[] = [];
 
-                    break;
+                    for (let i = 0; i < amount; i++) {
+                        pipelines.push(new AcquireItemFromDismantle(dismantle.items[0].type, [itemType]));
+                    }
 
-                case QuestRequirementType.TameCreatures: {
-                    // look for non-hostile creatures first
-                    let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", false, 10);
+                    objectivePipelines.push(pipelines);
+                }
+
+                return objectivePipelines;
+            }
+
+            case QuestRequirementType.Build:
+                const [itemType] = this.requirement.options as [ItemType];
+
+                const doodadType = itemDescriptions[itemType]?.onUse?.[ActionType.Build];
+                if (doodadType === undefined) {
+                    return ObjectiveResult.Impossible;
+                }
+
+                return new AcquireBuildMoveToDoodad(typeof (doodadType) === "object" ? doodadType[0] : doodadType, {
+                    ignoreExistingDoodads: true,
+                    disableMoveTo: true,
+                });
+
+            case QuestRequirementType.TameCreature: {
+                const [creatureType, _amount] = this.requirement.options as [CreatureType, number];
+
+                // look for non-hostile creatures first
+                let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", { type: creatureType, hostile: false, top: 10 });
+                if (creatures.length === 0) {
+                    creatures = context.utilities.object.findTamableCreatures(context, "Tame2", { type: creatureType, hostile: true, top: 10 });
                     if (creatures.length === 0) {
-                        creatures = context.utilities.object.findTamableCreatures(context, "Tame2", true, 10);
-                        if (creatures.length === 0) {
-                            return ObjectiveResult.Impossible;
+                        return ObjectiveResult.Impossible;
+                    }
+                }
+
+                return new TameCreatures(creatures);
+            }
+
+            case QuestRequirementType.TameCreatures: {
+                // look for non-hostile creatures first
+                let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", { hostile: false, top: 10 });
+                if (creatures.length === 0) {
+                    creatures = context.utilities.object.findTamableCreatures(context, "Tame2", { hostile: true, top: 10 });
+                    if (creatures.length === 0) {
+                        return ObjectiveResult.Impossible;
+                    }
+                }
+
+                return new TameCreatures(creatures);
+            }
+
+            case QuestRequirementType.DiscoverTreasure:
+                return ObjectiveResult.Impossible;
+
+            // commented out so that typescript errors when TARS is missing a requirement
+            // default:
+            //     this.log.warn(`Unknown quest requirement: ${this.quest.getTitle()}, ${QuestRequirementType[this.requirement.type]} (${this.requirement.type})`);
+            //     return ObjectiveResult.Restart;
+        }
+    }
+
+    private getObjectivesForModdedQuestRequirement(context: Context, requirementTypeString: string): ObjectiveExecutionResult {
+        switch (requirementTypeString) {
+
+            case "ModStarterQuestQuickslot":
+                return new Lambda(async () => {
+                    let itemId: number | undefined;
+
+                    for (const item of context.player.inventory.containedItems) {
+                        if (item.quickSlot === undefined) {
+                            itemId = item.id;
+                            break;
                         }
                     }
 
-                    objectivePipelines.push([new TameCreatures(creatures)]);
+                    if (itemId === undefined) {
+                        return ObjectiveResult.Impossible;
+                    }
 
-                    break;
+                    return oldui.screenInGame?.addItemToFreeQuickSlot(itemId) ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
+                });
+
+            case "ModStarterQuestChangeHand":
+                return new Lambda(async (context) => {
+                    game.updateOption(context.player, "leftHand", !context.player.options.leftHand);
+                    return ObjectiveResult.Complete;
+                });
+
+            case "ModStarterQuestLightCampfire":
+                const objectives: IObjective[] = [
+                    new AcquireBuildMoveToDoodad(DoodadTypeGroup.LitCampfire),
+                ];
+
+                if (context.inventory.fireStarter === undefined) {
+                    objectives.push(new AcquireItemForAction(ActionType.StartFire));
                 }
 
-                default:
-                    this.log.warn(`Unknown quest requirement: ${this.quest.getTitle()}, ${QuestRequirementType[this.requirement.type]} (${this.requirement.type})`);
-                    return ObjectiveResult.Restart;
+                objectives.push(new UseItem(ActionType.StartFire, context.inventory.fireStarter));
+
+                return objectives;
+
+            case "ModStarterQuestStokeCampfire":
+                return [
+                    new AcquireBuildMoveToDoodad(DoodadTypeGroup.LitCampfire),
+                    new StokeFire(context.base.campfire[0]),
+                ];
+
+            case "ModStarterQuestFillStill": {
+                const objectivePipelines: IObjective[][] = [];
+
+                for (const waterStill of context.base.waterStill) {
+                    if (waterStill.gatherReady === undefined) {
+                        objectivePipelines.push([
+                            new StartWaterStillDesalination(waterStill, {
+                                disableAttaching: true,
+                                disableStarting: true,
+                            }),
+                        ]);
+                    }
+                }
+
+                return objectivePipelines;
             }
+
+            case "ModStarterQuestAttachContainer": {
+                const objectivePipelines: IObjective[][] = [];
+
+                for (const waterStill of context.base.waterStill) {
+                    if (waterStill.stillContainer === undefined) {
+                        objectivePipelines.push([
+                            new StartWaterStillDesalination(waterStill, {
+                                disableStarting: true,
+                            }),
+                        ]);
+                    }
+                }
+
+                return objectivePipelines;
+            }
+
+            case "ModStarterQuestLightWaterStill": {
+                const objectivePipelines: IObjective[][] = [];
+
+                for (const waterStill of context.base.waterStill) {
+                    if (!waterStill.description()?.providesFire) {
+                        objectivePipelines.push([
+                            new StartWaterStillDesalination(waterStill, { forceStoke: true }),
+                        ]);
+                    }
+                }
+
+                return objectivePipelines;
+            }
+
+            case "ModStarterQuestStokeWaterStill": {
+                const objectivePipelines: IObjective[][] = [];
+
+                for (const waterStill of context.base.waterStill) {
+                    if (waterStill.description()?.providesFire) {
+                        objectivePipelines.push([
+                            new StartWaterStillDesalination(waterStill, { forceStoke: true }),
+                        ]);
+                    }
+                }
+
+                return objectivePipelines;
+            }
+
+            case "ModStarterQuestGatherFromWaterStill": {
+                const objectivePipelines: IObjective[][] = [];
+
+                if (context.inventory.waterContainer === undefined) {
+                    objectivePipelines.push([new AcquireWaterContainer(), new Restart()]);
+
+                } else {
+                    for (const waterStill of context.base.waterStill) {
+                        objectivePipelines.push([new GatherWaterFromStill(waterStill, context.inventory.waterContainer[0], {
+                            allowStartingWaterStill: true,
+                            allowWaitingForWaterStill: true,
+                            onlyIdleWhenWaitingForWaterStill: true,
+                        })]);
+                    }
+                }
+
+                return objectivePipelines;
+            }
+
+            default:
+                this.log.warn(`Unknown modded quest requirement: ${this.quest.getTitle()}, ${QuestRequirementType[this.requirement.type]}`);
+                return ObjectiveResult.Restart;
         }
-
-        return objectivePipelines;
     }
-
 }

@@ -11,7 +11,6 @@ import MoveToTarget from "../../core/MoveToTarget";
 import { ContextDataType } from "../../../core/context/IContext";
 import SetContextData from "../../contextData/SetContextData";
 import AcquireItemForTaming from "../../acquire/item/AcquireItemForTaming";
-import CopyContextData from "../../contextData/CopyContextData";
 
 export default class TameCreature extends Objective {
 
@@ -50,10 +49,7 @@ export default class TameCreature extends Objective {
             objectives.push(new SetContextData(ContextDataType.Item1, offerItem));
 
         } else {
-            objectives.push(new AcquireItemForTaming(this.creature));
-
-            // LastAcquiredItem could change between now and when we need it. copy it in Item1
-            objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
+            objectives.push(new AcquireItemForTaming(this.creature).setContextDataKey(ContextDataType.Item1));
         }
 
         objectives.push(new SetContextData(ContextDataType.TamingCreature, this.creature));
