@@ -1,11 +1,13 @@
-import Doodad from "game/doodad/Doodad";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import type Doodad from "game/doodad/Doodad";
+import type { DoodadType} from "game/doodad/IDoodad";
+import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import Vector2 from "utilities/math/Vector2";
 
-import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import { baseInfo, BaseInfoKey } from "../../../ITars";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { BaseInfoKey} from "../../../core/ITars";
+import { baseInfo } from "../../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import StartFire from "../../other/doodad/StartFire";
 
 import AcquireBuildMoveToDoodad from "./AcquireBuildMoveToDoodad";

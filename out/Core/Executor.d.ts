@@ -1,6 +1,6 @@
-import Context from "../Context";
-import { IObjective } from "../IObjective";
-import { IPlan } from "./IPlan";
+import type Context from "./context/Context";
+import type { IObjective } from "./objective/IObjective";
+import type { IPlan } from "./planning/IPlan";
 export declare enum ExecuteObjectivesResultType {
     Completed = 0,
     Pending = 1,

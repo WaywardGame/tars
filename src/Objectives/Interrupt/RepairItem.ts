@@ -1,14 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { RequirementStatus } from "game/item/IItemManager";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import { ContextDataType } from "../../core/context/IContext";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
-import CopyContextData from "../contextData/CopyContextData";
 import SetContextData from "../contextData/SetContextData";
 import ExecuteAction from "../core/ExecuteAction";
 import CompleteRequirements from "../utility/CompleteRequirements";
@@ -49,14 +49,11 @@ export default class RepairItem extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		if (context.inventory.hammer === undefined) {
-			objectives.push(new AcquireItem(ItemType.StoneHammer));
-
-			// LastAcquiredItem could change between now and when we need it. copy it in Item1
-			objectives.push(new CopyContextData(ContextDataType.LastAcquiredItem, ContextDataType.Item1));
+		if (context.inventory.hammer) {
+			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hammer));
 
 		} else {
-			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hammer));
+			objectives.push(new AcquireItem(ItemType.StoneHammer).setContextDataKey(ContextDataType.Item1));
 		}
 
 		const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);

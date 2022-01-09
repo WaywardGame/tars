@@ -1,15 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
-import Creature from "game/entity/creature/Creature";
+import type Creature from "game/entity/creature/Creature";
 import { EquipType } from "game/entity/IHuman";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { CreatureSearch } from "../../ITars";
-import Objective from "../../Objective";
-import { itemUtilities } from "../../utilities/Item";
-import { objectUtilities } from "../../utilities/Object";
+import type Context from "../../core/context/Context";
+import type { CreatureSearch } from "../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import AnalyzeInventory from "../analyze/AnalyzeInventory";
@@ -18,7 +17,6 @@ import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionFo
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import EquipItem from "../other/item/EquipItem";
-
 
 export default class GatherFromCreature extends Objective {
 
@@ -37,9 +35,9 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasTool = itemUtilities.hasInventoryItemForAction(context, ActionType.Butcher);
+		const hasTool = context.utilities.item.hasInventoryItemForAction(context, ActionType.Butcher);
 
-		return objectUtilities.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
+		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
 			.map(creature => {
 				const objectives: IObjective[] = [];
 

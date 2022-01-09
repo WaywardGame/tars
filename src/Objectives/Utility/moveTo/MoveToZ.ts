@@ -1,11 +1,11 @@
 import { TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
-import { tileUtilities } from "../../../utilities/Tile";
+import type Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";
 
@@ -30,7 +30,7 @@ export default class MoveToZ extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
-		const tileLocations = await tileUtilities.getNearestTileLocation(context, TerrainType.CaveEntrance);
+		const tileLocations = await context.utilities.tile.getNearestTileLocation(context, TerrainType.CaveEntrance);
 
 		for (const tileLocation of tileLocations) {
 			objectivePipelines.push([

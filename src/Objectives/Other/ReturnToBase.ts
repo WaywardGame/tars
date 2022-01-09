@@ -1,9 +1,9 @@
 import Vector2 from "utilities/math/Vector2";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
-import { baseUtilities } from "../../utilities/Base";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 
 const returnToBaseDistance = 20;
@@ -21,7 +21,7 @@ export default class ReturnToBase extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const position = context.getPosition();
-		const basePosition = baseUtilities.getBasePosition(context);
+		const basePosition = context.utilities.base.getBasePosition(context);
 		if (position.z === basePosition.z && Vector2.squaredDistance(position, basePosition) <= returnToBaseDistanceSq) {
 			return ObjectiveResult.Ignore;
 		}

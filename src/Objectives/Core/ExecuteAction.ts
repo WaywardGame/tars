@@ -1,14 +1,13 @@
-import ActionExecutor from "game/entity/action/ActionExecutor";
-import actionDescriptions from "game/entity/action/Actions";
-import { ActionType, IActionDescription } from "game/entity/action/IAction";
+import type ActionExecutor from "game/entity/action/ActionExecutor";
+import type actionDescriptions from "game/entity/action/Actions";
+import type { IActionDescription } from "game/entity/action/IAction";
+import { ActionType } from "game/entity/action/IAction";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
-import { actionUtilities } from "../../utilities/Action";
-
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 
 export default class ExecuteAction<T extends ActionType> extends Objective {
 
@@ -35,7 +34,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 			return 0;
 		}
 
-		return actionUtilities.executeAction(context, this.actionType, this.executor as any);
+		return context.utilities.action.executeAction(context, this.actionType, this.executor as any);
 	}
 
 	protected override getBaseDifficulty(context: Context): number {

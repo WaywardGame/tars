@@ -1,4 +1,4 @@
-import Translation from "language/Translation";
+import type Translation from "language/Translation";
 import { ItemType } from "game/item/IItem";
 import Button from "ui/component/Button";
 import ItemDropdown from "ui/component/dropdown/ItemDropdown";
@@ -8,10 +8,12 @@ import Divider from "ui/component/Divider";
 import { DoodadType } from "game/doodad/IDoodad";
 import { Bound } from "utilities/Decorators";
 
-import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITars";
-import { AcquireItemMode } from "../../mode/modes/AcquireItem";
+import { AcquireItemMode } from "../../modes/AcquireItem";
 import TarsPanel from "../components/TarsPanel";
-import { BuildDoodadMode } from "../../mode/modes/BuildDoodad";
+import { BuildDoodadMode } from "../../modes/BuildDoodad";
+import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
+import { ExecuteObjectivesMode } from "../../modes/ExecuteObjectives";
+import SailToCivilization from "../../objectives/utility/SailToCivilization";
 
 export default class TasksPanel extends TarsPanel {
 
@@ -24,9 +26,9 @@ export default class TasksPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelItem)))
-            .append(this.dropdownItemType = new ItemDropdown(this.TARS.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] ?? ItemType.Branch)
+            .append(this.dropdownItemType = new ItemDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] ?? ItemType.Branch)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TARS.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] = selection;
+                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] = selection;
                 }))
             .appendTo(this);
 
@@ -34,7 +36,7 @@ export default class TasksPanel extends TarsPanel {
             .setText(getTarsTranslation(TarsTranslation.DialogButtonAquireItem))
             .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonAquireItemTooltip))))
             .event.subscribe("activate", async () => {
-                await this.TARS.activateManualMode(new AcquireItemMode(this.dropdownItemType.selection as ItemType));
+                await this.TarsMod.tarsInstance?.activateManualMode(new AcquireItemMode(this.dropdownItemType.selection as ItemType));
                 return true;
             })
             .appendTo(this);
@@ -44,9 +46,9 @@ export default class TasksPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelDoodad)))
-            .append(this.dropdownDoodadType = new DoodadDropdown(this.TARS.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] ?? DoodadType.StoneCampfire)
+            .append(this.dropdownDoodadType = new DoodadDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] ?? DoodadType.StoneCampfire)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TARS.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] = selection;
+                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] = selection;
                 }))
             .appendTo(this);
 
@@ -54,7 +56,18 @@ export default class TasksPanel extends TarsPanel {
             .setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodad))
             .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodadTooltip))))
             .event.subscribe("activate", async () => {
-                await this.TARS.activateManualMode(new BuildDoodadMode(this.dropdownDoodadType.selection as DoodadType));
+                await this.TarsMod.tarsInstance?.activateManualMode(new BuildDoodadMode(this.dropdownDoodadType.selection as DoodadType));
+                return true;
+            })
+            .appendTo(this);
+
+        new Divider().appendTo(this);
+
+        new Button()
+            .setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilization))
+            .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilizationTooltip))))
+            .event.subscribe("activate", async () => {
+                await this.TarsMod.tarsInstance?.activateManualMode(new ExecuteObjectivesMode([new SailToCivilization()]));
                 return true;
             })
             .appendTo(this);

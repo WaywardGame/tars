@@ -1,9 +1,10 @@
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { ReserveType } from "../../ITars";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import { ReserveType } from "../../core/ITars";
+import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 
 /**
  * Marks items that will be used to complete the objective

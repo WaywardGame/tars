@@ -5,9 +5,9 @@ import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForAction extends Objective {

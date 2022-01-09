@@ -1,15 +1,16 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import MoveToTarget from "../../core/MoveToTarget";
 
-import StartFire from "./StartFire";
 import UseItem from "../item/UseItem";
+import StartFire from "./StartFire";
 
 export default class StokeFire extends Objective {
 
@@ -26,7 +27,7 @@ export default class StokeFire extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const doodad = this.doodad || context.getData(ContextDataType.LastBuiltDoodad);
+		const doodad = this.doodad ?? context.getData(ContextDataType.LastBuiltDoodad);
 		if (!doodad) {
 			this.log.error("Invalid doodad");
 			return ObjectiveResult.Restart;

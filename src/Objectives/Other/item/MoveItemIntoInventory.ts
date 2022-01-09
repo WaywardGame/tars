@@ -1,9 +1,9 @@
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import MoveToTarget from "../../core/MoveToTarget";
 import MoveItem from "./MoveItem";
 
@@ -22,7 +22,7 @@ export default class MoveItemIntoInventory extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
+        const item = this.item ?? this.getAcquiredItem(context);
         if (!item) {
             this.log.error("Invalid move item");
             return ObjectiveResult.Restart;

@@ -1,13 +1,13 @@
 import { canSailAwayFromPosition } from "game/entity/action/actions/SailToIsland";
-import { ITile, TerrainType } from "game/tile/ITerrain";
+import type { ITile } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 
-import Context from "../../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Navigation from "../../../navigation/Navigation";
-import Objective from "../../../Objective";
-import { tileUtilities } from "../../../utilities/Tile";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import MoveToTarget from "../../core/MoveToTarget";
 
 export default class MoveToWater extends Objective {
@@ -30,11 +30,11 @@ export default class MoveToWater extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		if (this.ocean ? tileUtilities.isOverDeepSeaWater(context) : tileUtilities.isSwimmingOrOverWater(context)) {
+		if (this.ocean ? context.utilities.tile.isOverDeepSeaWater(context) : context.utilities.tile.isSwimmingOrOverWater(context)) {
 			return ObjectiveResult.Complete;
 		}
 
-		const navigation = Navigation.get();
+		const navigation = context.utilities.navigation;
 
 		const disabledTiles: Set<ITile> = new Set();
 

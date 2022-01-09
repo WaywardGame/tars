@@ -1,8 +1,8 @@
-import Creature from "game/entity/creature/Creature";
+import type Creature from "game/entity/creature/Creature";
 
-import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import HuntCreature from "./HuntCreature";
 
 export default class HuntCreatures extends Objective {

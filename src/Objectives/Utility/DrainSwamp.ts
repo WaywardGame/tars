@@ -1,12 +1,12 @@
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import { TerrainType } from "game/tile/ITerrain";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import DigTile from "../other/tile/DigTile";
 import Restart from "../core/Restart";
-import { tileUtilities } from "../../utilities/Tile";
 import PickUpAllTileItems from "../other/tile/PickUpAllTileItems";
 
 export default class DrainSwamp extends Objective {
@@ -35,8 +35,8 @@ export default class DrainSwamp extends Objective {
             const objectives: IObjective[] = [];
 
             const tile = context.island.getTileFromPoint(target);
-            if (!tileUtilities.canDig(context, tile)) {
-                if (!tileUtilities.hasItems(tile)) {
+            if (!context.utilities.tile.canDig(context, tile)) {
+                if (!context.utilities.tile.hasItems(tile)) {
                     continue;
                 }
 

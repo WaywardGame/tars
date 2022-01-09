@@ -6,10 +6,9 @@ import { itemDescriptions as Items } from "game/item/Items";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
-import { doodadUtilities } from "../../../utilities/Doodad";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForDoodad extends Objective {
@@ -33,21 +32,21 @@ export default class AcquireItemForDoodad extends Objective {
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {
-		return this.getItems().some(itemType => context.isReservedItemType(itemType));
+		return this.getItems(context).some(itemType => context.isReservedItemType(itemType));
 	}
 
-	public async execute(): Promise<ObjectiveExecutionResult> {
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		// min dur of 1 is required to build doodads
-		return this.getItems()
+		return this.getItems(context)
 			.map(item => [new AcquireItem(item, { requiredMinDur: 1 }).passAcquireData(this)]);
 	}
 
-	private getItems(): ItemType[] {
+	private getItems(context: Context): ItemType[] {
 		let result = AcquireItemForDoodad.cache.get(this.doodadTypeOrGroup);
 		if (result === undefined) {
 			result = [];
 
-			const doodadTypes = doodadUtilities.getDoodadTypes(this.doodadTypeOrGroup);
+			const doodadTypes = context.utilities.doodad.getDoodadTypes(this.doodadTypeOrGroup);
 			for (const doodadType of doodadTypes) {
 				for (const itemType of Enums.values(ItemType)) {
 					const itemDescription = Items[itemType];

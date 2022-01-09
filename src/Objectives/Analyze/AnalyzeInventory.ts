@@ -1,11 +1,12 @@
 import ProtectItem from "game/entity/action/actions/ProtectItem";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
-import Objective from "../../Objective";
-import { itemUtilities } from "../../utilities/Item";
+import type Context from "../../core/context/Context";
+import type { IInventoryItems, IInventoryItemInfo } from "../../core/ITars";
+import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 
 export default class AnalyzeInventory extends Objective {
 
@@ -143,7 +144,7 @@ export default class AnalyzeInventory extends Objective {
 		const items: Set<Item> = new Set();
 
 		if (itemInfo.itemTypes) {
-			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes() : itemInfo.itemTypes;
+			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;
 
 			for (const itemTypeOrGroup of itemTypes) {
 				if (context.island.items.isGroup(itemTypeOrGroup)) {
@@ -157,12 +158,12 @@ export default class AnalyzeInventory extends Objective {
 
 		if (itemInfo.actionTypes) {
 			for (const useType of itemInfo.actionTypes) {
-				items.addFrom(itemUtilities.getInventoryItemsWithUse(context, useType));
+				items.addFrom(context.utilities.item.getInventoryItemsWithUse(context, useType));
 			}
 		}
 
 		if (itemInfo.equipType) {
-			items.addFrom(itemUtilities.getInventoryItemsWithEquipType(context, itemInfo.equipType));
+			items.addFrom(context.utilities.item.getInventoryItemsWithEquipType(context, itemInfo.equipType));
 		}
 
 		if (itemInfo.requiredMinDur !== undefined) {

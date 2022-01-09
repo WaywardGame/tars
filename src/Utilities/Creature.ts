@@ -1,13 +1,14 @@
-import Creature from "game/entity/creature/Creature";
+import type Creature from "game/entity/creature/Creature";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { EquipType } from "game/entity/IHuman";
 import { ItemType } from "game/item/IItem";
-import { IStatMax, Stat } from "game/entity/IStats";
+import type { IStatMax } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
-import Context from "../Context";
+import type Context from "../core/context/Context";
 
-class CreatureUtilities {
+export class CreatureUtilities {
 
 	private readonly nearbyCreatureRadius = 5;
 

@@ -1,10 +1,12 @@
-import Context from "../../Context";
-import { ObjectiveExecutionResult } from "../../IObjective";
-import { IInventoryItems } from "../../ITars";
-import Objective from "../../Objective";
+import { ItemType } from "game/item/IItem";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { IInventoryItems } from "../../core/ITars";
+import Objective from "../../core/objective/Objective";
 export default class UpgradeInventoryItem extends Objective {
     private readonly upgrade;
-    constructor(upgrade: keyof IInventoryItems);
+    private readonly fromItemTypes;
+    constructor(upgrade: keyof IInventoryItems, fromItemTypes?: Set<ItemType>);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;

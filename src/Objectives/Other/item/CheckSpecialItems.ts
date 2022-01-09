@@ -1,14 +1,14 @@
 import { BookType, ItemType } from "game/item/IItem";
 import { ActionType } from "game/entity/action/IAction";
 
-import Context from "../../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
-import { itemUtilities } from "../../../utilities/Item";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ReserveItems from "../../core/ReserveItems";
-import MoveItemIntoInventory from "./MoveItemIntoInventory";
 import ExecuteAction from "../../core/ExecuteAction";
+import MoveItemIntoInventory from "./MoveItemIntoInventory";
 
 /**
  * Looks for items that are special and try to use them
@@ -24,7 +24,7 @@ export default class CheckSpecialItems extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const baseItems = itemUtilities.getBaseItems(context);
+        const baseItems = context.utilities.item.getBaseItems(context);
 
         const messageInABottles = baseItems
             .filter(item => item.type === ItemType.MessageInABottle);

@@ -1,16 +1,17 @@
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import Creature from "game/entity/creature/Creature";
+import type Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
-import { IRecipe, ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
+import type { IRecipe } from "game/item/IItem";
+import { ItemType } from "game/item/IItem";
+import type Item from "game/item/Item";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
-import Doodad from "game/doodad/Doodad";
-import { TerrainType } from "game/tile/ITerrain";
-import Context from "../Context";
-import { IDisassemblySearch } from "../ITars";
-declare class ItemUtilities {
+import type Doodad from "game/doodad/Doodad";
+import type { TerrainType } from "game/tile/ITerrain";
+import type Context from "../core/context/Context";
+import type { IDisassemblySearch } from "../core/ITars";
+export declare class ItemUtilities {
     foodItemTypes: Set<ItemType>;
     seedItemTypes: Set<ItemType>;
     private itemCache;
@@ -18,6 +19,7 @@ declare class ItemUtilities {
     initialize(context: Context): void;
     clearCache(): void;
     getBaseItems(context: Context): Item[];
+    getBaseItemsByType(context: Context, itemType: ItemType): Item[];
     getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[];
     processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker;
     getItemsInInventory(context: Context, allowProtectedItems?: boolean): Item[];
@@ -51,5 +53,3 @@ declare class ItemUtilities {
     private getSeedItemTypes;
     private isHealthyToEat;
 }
-export declare const itemUtilities: ItemUtilities;
-export {};

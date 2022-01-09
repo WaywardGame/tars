@@ -1,6 +1,6 @@
-import Creature from "game/entity/creature/Creature";
-import Context from "../Context";
-declare class CreatureUtilities {
+import type Creature from "game/entity/creature/Creature";
+import type Context from "../core/context/Context";
+export declare class CreatureUtilities {
     private readonly nearbyCreatureRadius;
     shouldRunAwayFromAllCreatures(context: Context): boolean;
     getNearbyCreatures(context: Context): Creature[];
@@ -8,4 +8,3 @@ declare class CreatureUtilities {
     private hasDecentEquipment;
 }
 export declare const creatureUtilities: CreatureUtilities;
-export {};

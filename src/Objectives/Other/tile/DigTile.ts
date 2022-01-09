@@ -1,10 +1,11 @@
 import { ActionType } from "game/entity/action/IAction";
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import TileHelpers from "utilities/game/TileHelpers";
 
-import Context from "../../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import Lambda from "../../core/Lambda";
@@ -14,7 +15,7 @@ import UseItem from "../item/UseItem";
 
 export default class DigTile extends Objective {
 
-	constructor(private readonly target: IVector3, private options: Partial<{ digUntilTypeIsNot: TerrainType }> = {}) {
+	constructor(private readonly target: IVector3, private readonly options: Partial<{ digUntilTypeIsNot: TerrainType }> = {}) {
 		super();
 	}
 

@@ -1,25 +1,28 @@
-import { DoodadType, DoodadTypeGroup, GrowingStage } from "game/doodad/IDoodad";
+import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import Creature from "game/entity/creature/Creature";
+import type Creature from "game/entity/creature/Creature";
 import { DamageType } from "game/entity/IEntity";
 import { EquipType, SkillType } from "game/entity/IHuman";
-import { IStatMax, Stat } from "game/entity/IStats";
-import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
-import Item from "game/item/Item";
+import type { IStatMax } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
+import type { IContainer, IRecipe } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import type Item from "game/item/Item";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import Items, { itemDescriptions } from "game/item/Items";
 import Enums from "utilities/enum/Enums";
 import terrainDescriptions from "game/tile/Terrains";
-import Doodad from "game/doodad/Doodad";
-import { TerrainType } from "game/tile/ITerrain";
+import type Doodad from "game/doodad/Doodad";
+import type { TerrainType } from "game/tile/ITerrain";
 import doodadDescriptions from "game/doodad/Doodads";
 
-import Context from "../Context";
-import { IDisassemblySearch, IInventoryItems, inventoryItemInfo } from "../ITars";
-import { doodadUtilities } from "./Doodad";
-import { baseUtilities } from "./Base";
+import type Context from "../core/context/Context";
+import type { IDisassemblySearch, IInventoryItems } from "../core/ITars";
+import { inventoryItemInfo } from "../core/ITars";
+import ItemManager from "game/item/ItemManager";
 
-class ItemUtilities {
+export class ItemUtilities {
 
 	public foodItemTypes: Set<ItemType>;
 	public seedItemTypes: Set<ItemType>;
@@ -28,8 +31,8 @@ class ItemUtilities {
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
 
 	public initialize(context: Context) {
-		this.foodItemTypes = this.getFoodItemTypes(context);
-		this.seedItemTypes = this.getSeedItemTypes(context);
+		this.foodItemTypes = this.getFoodItemTypes();
+		this.seedItemTypes = this.getSeedItemTypes();
 	}
 
 	public clearCache() {
@@ -39,7 +42,7 @@ class ItemUtilities {
 
 	public getBaseItems(context: Context): Item[] {
 		if (this.itemCache === undefined) {
-			const baseTileItems = baseUtilities.getTileItemsNearBase(context);
+			const baseTileItems = context.utilities.base.getTileItemsNearBase(context);
 			const baseChestItems = context.base.chest
 				.map(chest => context.island.items.getItemsInContainer(chest, true))
 				.flat();
@@ -49,6 +52,10 @@ class ItemUtilities {
 		}
 
 		return this.itemCache;
+	}
+
+	public getBaseItemsByType(context: Context, itemType: ItemType): Item[] {
+		return this.getBaseItems(context).filter(item => item.type === itemType);
 	}
 
 	public getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[] {
@@ -464,7 +471,7 @@ class ItemUtilities {
 	public getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: DoodadType | DoodadTypeGroup): Item | undefined {
 		const itemTypes: ItemType[] = [];
 
-		const doodadTypes = doodadUtilities.getDoodadTypes(doodadTypeOrGroup);
+		const doodadTypes = context.utilities.doodad.getDoodadTypes(doodadTypeOrGroup);
 		for (const dt of doodadTypes) {
 			for (const it of Enums.values(ItemType)) {
 				const itemDescription = Items[it];
@@ -482,13 +489,13 @@ class ItemUtilities {
 	/**
 	 * Get a list of item types that are healthy to eat
 	 */
-	private getFoodItemTypes(context: Context): Set<ItemType> {
+	private getFoodItemTypes(): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
 
 		const goodFoodItems = [ItemTypeGroup.Vegetable, ItemTypeGroup.Fruit, ItemTypeGroup.Bait, ItemTypeGroup.CookedFood, ItemTypeGroup.CookedMeat, ItemTypeGroup.Seed];
 
 		for (const itemTypeOrGroup of goodFoodItems) {
-			const itemTypes = context.island.items.isGroup(itemTypeOrGroup) ? context.island.items.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
+			const itemTypes = ItemManager.isGroup(itemTypeOrGroup) ? ItemManager.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
 			for (const itemType of itemTypes) {
 				if (this.isHealthyToEat(itemType)) {
 					result.add(itemType);
@@ -502,7 +509,7 @@ class ItemUtilities {
 	/**
 	 * Get a list of item types that are plantable and produce doodads with items that are healthy to eat
 	 */
-	private getSeedItemTypes(context: Context): Set<ItemType> {
+	private getSeedItemTypes(): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
 
 		const growingStages = Enums.values(GrowingStage);
@@ -541,5 +548,3 @@ class ItemUtilities {
 		return onEat !== undefined && onEat[0] > 1;
 	}
 }
-
-export const itemUtilities = new ItemUtilities();

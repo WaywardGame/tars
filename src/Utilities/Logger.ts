@@ -1,4 +1,5 @@
-import Log, { ILog, LogLineType, LogSource } from "utilities/Log";
+import type { ILog, LogSource } from "utilities/Log";
+import Log, { LogLineType } from "utilities/Log";
 import { Bound } from "utilities/Decorators";
 
 class LoggerUtilities {

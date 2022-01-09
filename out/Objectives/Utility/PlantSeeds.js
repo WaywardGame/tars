@@ -1,4 +1,4 @@
-define(["require", "exports", "../../IContext", "../../IObjective", "../../Objective", "../../utilities/Item", "../contextData/SetContextData", "../core/ReserveItems", "../core/Restart", "../other/item/MoveItemIntoInventory", "../other/item/PlantSeed"], function (require, exports, IContext_1, IObjective_1, Objective_1, Item_1, SetContextData_1, ReserveItems_1, Restart_1, MoveItemIntoInventory_1, PlantSeed_1) {
+define(["require", "exports", "../../core/context/IContext", "../../core/objective/IObjective", "../../core/objective/Objective", "../contextData/SetContextData", "../core/ReserveItems", "../core/Restart", "../other/item/MoveItemIntoInventory", "../other/item/PlantSeed"], function (require, exports, IContext_1, IObjective_1, Objective_1, SetContextData_1, ReserveItems_1, Restart_1, MoveItemIntoInventory_1, PlantSeed_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PlantSeeds extends Objective_1.default {
@@ -9,7 +9,7 @@ define(["require", "exports", "../../IContext", "../../IObjective", "../../Objec
             return "Planting seeds";
         }
         async execute(context) {
-            const seeds = Item_1.itemUtilities.getSeeds(context);
+            const seeds = context.utilities.item.getSeeds(context);
             if (seeds.length === 0) {
                 return IObjective_1.ObjectiveResult.Ignore;
             }
@@ -28,4 +28,4 @@ define(["require", "exports", "../../IContext", "../../IObjective", "../../Objec
     }
     exports.default = PlantSeeds;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUGxhbnRTZWVkcy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9vYmplY3RpdmVzL3V0aWxpdHkvUGxhbnRTZWVkcy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFZQSxNQUFxQixVQUFXLFNBQVEsbUJBQVM7UUFFdEMsYUFBYTtZQUNoQixPQUFPLFlBQVksQ0FBQztRQUN4QixDQUFDO1FBRU0sU0FBUztZQUNaLE9BQU8sZ0JBQWdCLENBQUM7UUFDNUIsQ0FBQztRQUVNLEtBQUssQ0FBQyxPQUFPLENBQUMsT0FBZ0I7WUFDakMsTUFBTSxLQUFLLEdBQUcsb0JBQWEsQ0FBQyxRQUFRLENBQUMsT0FBTyxDQUFDLENBQUM7WUFDOUMsSUFBSSxLQUFLLENBQUMsTUFBTSxLQUFLLENBQUMsRUFBRTtnQkFDcEIsT0FBTyw0QkFBZSxDQUFDLE1BQU0sQ0FBQzthQUNqQztZQUVELE1BQU0sa0JBQWtCLEdBQW1CLEVBQUUsQ0FBQztZQUU5QyxLQUFLLE1BQU0sSUFBSSxJQUFJLEtBQUssRUFBRTtnQkFDdEIsa0JBQWtCLENBQUMsSUFBSSxDQUFDO29CQUVwQixJQUFJLHdCQUFjLENBQUMsMEJBQWUsQ0FBQyx1Q0FBdUMsRUFBRSxJQUFJLENBQUM7b0JBQ2pGLElBQUksc0JBQVksQ0FBQyxJQUFJLENBQUM7b0JBQ3RCLElBQUksK0JBQXFCLENBQUMsSUFBSSxDQUFDO29CQUMvQixJQUFJLG1CQUFTLENBQUMsSUFBSSxDQUFDO29CQUNuQixJQUFJLGlCQUFPLEVBQUU7aUJBQ2hCLENBQUMsQ0FBQzthQUNOO1lBRUQsT0FBTyxrQkFBa0IsQ0FBQztRQUM5QixDQUFDO0tBRUo7SUFoQ0QsNkJBZ0NDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUGxhbnRTZWVkcy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9vYmplY3RpdmVzL3V0aWxpdHkvUGxhbnRTZWVkcy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFZQSxNQUFxQixVQUFXLFNBQVEsbUJBQVM7UUFFdEMsYUFBYTtZQUNoQixPQUFPLFlBQVksQ0FBQztRQUN4QixDQUFDO1FBRU0sU0FBUztZQUNaLE9BQU8sZ0JBQWdCLENBQUM7UUFDNUIsQ0FBQztRQUVNLEtBQUssQ0FBQyxPQUFPLENBQUMsT0FBZ0I7WUFDakMsTUFBTSxLQUFLLEdBQUcsT0FBTyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBQ3ZELElBQUksS0FBSyxDQUFDLE1BQU0sS0FBSyxDQUFDLEVBQUU7Z0JBQ3BCLE9BQU8sNEJBQWUsQ0FBQyxNQUFNLENBQUM7YUFDakM7WUFFRCxNQUFNLGtCQUFrQixHQUFtQixFQUFFLENBQUM7WUFFOUMsS0FBSyxNQUFNLElBQUksSUFBSSxLQUFLLEVBQUU7Z0JBQ3RCLGtCQUFrQixDQUFDLElBQUksQ0FBQztvQkFFcEIsSUFBSSx3QkFBYyxDQUFDLDBCQUFlLENBQUMsdUNBQXVDLEVBQUUsSUFBSSxDQUFDO29CQUNqRixJQUFJLHNCQUFZLENBQUMsSUFBSSxDQUFDO29CQUN0QixJQUFJLCtCQUFxQixDQUFDLElBQUksQ0FBQztvQkFDL0IsSUFBSSxtQkFBUyxDQUFDLElBQUksQ0FBQztvQkFDbkIsSUFBSSxpQkFBTyxFQUFFO2lCQUNoQixDQUFDLENBQUM7YUFDTjtZQUVELE9BQU8sa0JBQWtCLENBQUM7UUFDOUIsQ0FBQztLQUVKO0lBaENELDZCQWdDQyJ9

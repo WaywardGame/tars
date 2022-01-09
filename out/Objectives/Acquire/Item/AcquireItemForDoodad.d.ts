@@ -1,7 +1,7 @@
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 export default class AcquireItemForDoodad extends Objective {
     private readonly doodadTypeOrGroup;
     private static readonly cache;
@@ -10,6 +10,6 @@ export default class AcquireItemForDoodad extends Objective {
     getStatus(): string | undefined;
     canIncludeContextHashCode(): boolean;
     shouldIncludeContextHashCode(context: Context): boolean;
-    execute(): Promise<ObjectiveExecutionResult>;
+    execute(context: Context): Promise<ObjectiveExecutionResult>;
     private getItems;
 }

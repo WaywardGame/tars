@@ -1,6 +1,6 @@
-import Context from "../../Context";
-import { ObjectiveExecutionResult } from "../../IObjective";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 export default class SetContextData extends Objective {
     private readonly type;
     private readonly value;

@@ -3,22 +3,22 @@ import Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
-import { IStatMax, Stat } from "game/entity/IStats";
+import type { IStatMax } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
 import terrainDescriptions from "game/tile/Terrains";
 import TileEvent from "game/tile/TileEvent";
 import TileHelpers from "utilities/game/TileHelpers";
-import { IVector2, IVector3 } from "utilities/math/IVector";
+import type { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import { ContextDataType } from "../../core/context/IContext";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { log } from "../../utilities/Logger";
-import { movementUtilities, MoveResult } from "../../utilities/Movement";
+import { MoveResult } from "../../utilities/Movement";
 import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
-
-
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
 export interface IMoveToTargetOptions {
@@ -80,7 +80,7 @@ export default class MoveToTarget extends Objective {
 		// 	];
 		// }
 
-		const movementPath = await movementUtilities.getMovementPath(context, this.target, this.moveAdjacentToTarget);
+		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget);
 
 		if (context.calculatingDifficulty) {
 			context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
@@ -162,7 +162,7 @@ export default class MoveToTarget extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		const moveResult = await movementUtilities.move(context, this.target, this.moveAdjacentToTarget);
+		const moveResult = await context.utilities.movement.move(context, this.target, this.moveAdjacentToTarget);
 
 		switch (moveResult) {
 			case MoveResult.NoTarget:
@@ -220,7 +220,7 @@ export default class MoveToTarget extends Objective {
 				this.trackedPosition = trackedCreaturePosition;
 
 				// move to it's latest location
-				const moveResult = await movementUtilities.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);
+				const moveResult = await context.utilities.movement.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);
 
 				switch (moveResult) {
 					case MoveResult.NoTarget:

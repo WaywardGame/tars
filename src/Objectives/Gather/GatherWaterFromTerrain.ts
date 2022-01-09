@@ -1,14 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { anyWaterTileLocation } from "../../navigation//INavigation";
-import Objective from "../../Objective";
-import { tileUtilities } from "../../utilities/Tile";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { anyWaterTileLocation } from "../../core/navigation/INavigation";
+import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import UseItem from "../other/item/UseItem";
 import PickUpAllTileItems from "../other/tile/PickUpAllTileItems";
+import ReserveItems from "../core/ReserveItems";
 
 export default class GatherWaterFromTerrain extends Objective {
 
@@ -27,7 +27,7 @@ export default class GatherWaterFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const targets = await tileUtilities.getNearestTileLocation(context, anyWaterTileLocation);
+		const targets = await context.utilities.tile.getNearestTileLocation(context, anyWaterTileLocation);
 
 		for (const { tile, point } of targets) {
 			if (tile.creature || tile.npc || context.island.isPlayerAtTile(tile)) {
@@ -35,6 +35,7 @@ export default class GatherWaterFromTerrain extends Objective {
 			}
 
 			objectivePipelines.push([
+				new ReserveItems(this.item),
 				new MoveToTarget(point, true),
 				new PickUpAllTileItems(point),
 				new UseItem(ActionType.GatherLiquid, this.item)

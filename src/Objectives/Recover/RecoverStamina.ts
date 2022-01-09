@@ -1,12 +1,11 @@
-import { IStat, Stat } from "game/entity/IStats";
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
-import { playerUtilities } from "../../utilities/Player";
-import { tileUtilities } from "../../utilities/Tile";
+import type { IStat } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import Idle from "../other/Idle";
 import Rest from "../other/Rest";
-
 
 export default class RecoverStamina extends Objective {
 
@@ -33,7 +32,7 @@ export default class RecoverStamina extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		if (tileUtilities.isSwimmingOrOverWater(context) && playerUtilities.isUsingVehicle(context)) {
+		if (context.utilities.tile.isSwimmingOrOverWater(context) && context.utilities.player.isUsingVehicle(context)) {
 			this.log.info("Idling to recover stamina");
 			return new Idle(false);
 		}

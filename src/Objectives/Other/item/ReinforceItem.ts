@@ -1,15 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
-import { itemUtilities } from "../../../utilities/Item";
+import type Context from "../../../core/context/Context";
+import { ContextDataType } from "../../../core/context/IContext";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteAction from "../../core/ExecuteAction";
-import Lambda from "../../core/Lambda";
 
 /**
  * Reinforces an item if
@@ -18,7 +17,7 @@ import Lambda from "../../core/Lambda";
  */
 export default class ReinforceItem extends Objective {
 
-	constructor(private readonly item: Item, private readonly options: Partial<{ minWorth: number; targetDurabilityMultipler: number; }> = {}) {
+	constructor(private readonly item: Item, private readonly options: Partial<{ minWorth: number; targetDurabilityMultipler: number }> = {}) {
 		super();
 	}
 
@@ -59,26 +58,24 @@ export default class ReinforceItem extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const reinforceItems = itemUtilities.getInventoryItemsWithUse(context, ActionType.Reinforce);
-		if (reinforceItems.length === 0) {
-			objectives.push(new AcquireItemForAction(ActionType.Reinforce));
+		const reinforceItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Reinforce);
+		if (reinforceItems.length > 0) {
+			objectives.push(new SetContextData(ContextDataType.Item1, reinforceItems[0]));
 
 		} else {
-			objectives.push(new SetContextData(ContextDataType.LastAcquiredItem, reinforceItems[0]));
+			objectives.push(new AcquireItemForAction(ActionType.Reinforce).setContextDataKey(ContextDataType.Item1));
 		}
 
-		objectives.push(new Lambda(async context => {
-			const reinforceItem = context.getData(ContextDataType.LastAcquiredItem);
+		objectives.push(new ExecuteAction(ActionType.Reinforce, (context, action) => {
+			const reinforceItem = context.getData(ContextDataType.Item1);
 			if (!reinforceItem) {
 				this.log.error("Invalid reinforce item");
 				return ObjectiveResult.Restart;
 			}
 
-			return (new ExecuteAction(ActionType.Reinforce, (context, action) => {
-				action.execute(context.player, reinforceItem, this.item);
-				return ObjectiveResult.Complete;
-			}).setStatus(this));
-		}));
+			action.execute(context.player, reinforceItem, this.item);
+			return ObjectiveResult.Complete;
+		}).setStatus(this));
 
 		return objectives;
 	}

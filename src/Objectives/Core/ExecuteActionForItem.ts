@@ -1,23 +1,21 @@
 import Stream from "@wayward/goodstream/Stream";
 import { SkillType } from "game/entity/IHuman";
-import ActionExecutor from "game/entity/action/ActionExecutor";
-import actionDescriptions from "game/entity/action/Actions";
-import { ActionType, IActionDescription } from "game/entity/action/IAction";
+import type ActionExecutor from "game/entity/action/ActionExecutor";
+import type actionDescriptions from "game/entity/action/Actions";
+import type { IActionDescription } from "game/entity/action/IAction";
+import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import { TerrainType } from "game/tile/ITerrain";
+import type { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
 import TileHelpers from "utilities/game/TileHelpers";
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { ReserveType } from "../../ITars";
-import Objective from "../../Objective";
-import { actionUtilities } from "../../utilities/Action";
-import { itemUtilities } from "../../utilities/Item";
-import { tileUtilities } from "../../utilities/Tile";
-
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
+import { ReserveType } from "../../core/ITars";
 
 export enum ExecuteActionType {
 	Generic,
@@ -60,7 +58,12 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		// settings this here screws up AcquireWaterContainer
 		// only set this once we get the item
-		// context.setData(this.contextDataKey, undefined);
+
+		// ! updated comment: this must be there !
+		// example: AcquireItemWithRecipe -> IgniteItem 
+		// it should set LastAcquiredItem to undefined, then IgnoreItem will return .Restart
+		// without this, LastAcquiredItem might be some other item before the AcquireItemWithRecipe craft, which would break Ignite
+		context.setData(this.contextDataKey, undefined);
 
 		if (context.calculatingDifficulty) {
 			return 0;
@@ -97,7 +100,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					return ObjectiveResult.Restart;
 				}
 
-				if (!tileUtilities.canGather(context, tile, true)) {
+				if (!context.utilities.tile.canGather(context, tile, true)) {
 					return ObjectiveResult.Restart;
 				}
 
@@ -109,25 +112,25 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					actionType = description.gatherSkillUse === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Gather;
 				}
 
-				actionArguments.push(itemUtilities.getBestToolForDoodadGather(context, doodad));
+				actionArguments.push(context.utilities.item.getBestToolForDoodadGather(context, doodad));
 
 				break;
 
 			case ExecuteActionType.Terrain:
 				actionType = terrainDescription.gather ? ActionType.Mine : ActionType.Dig;
 
-				if (actionType === ActionType.Dig && !tileUtilities.canDig(context, tile)) {
+				if (actionType === ActionType.Dig && !context.utilities.tile.canDig(context, tile)) {
 					return ObjectiveResult.Restart;
 				}
 
-				actionArguments.push(itemUtilities.getBestToolForTerrainGather(context, tileType));
+				actionArguments.push(context.utilities.item.getBestToolForTerrainGather(context, tileType));
 
 				break;
 
 			case ExecuteActionType.Corpse:
-				const tool = itemUtilities.getBestTool(context, ActionType.Butcher);
+				const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
 
-				if (tool === undefined || !tileUtilities.canButcherCorpse(context, tile)) {
+				if (tool === undefined || !context.utilities.tile.canButcherCorpse(context, tile)) {
 					return ObjectiveResult.Restart;
 				}
 
@@ -226,9 +229,9 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) {
 		const itemsBefore = context.player.inventory.containedItems.slice();
 
-		await actionUtilities.executeAction(context, actionType, executor as any);
+		await context.utilities.action.executeAction(context, actionType, executor as any);
 
-		const newItems = context.player.inventory.containedItems.filter(item => itemsBefore.indexOf(item) === -1);
+		const newItems = context.player.inventory.containedItems.filter(item => !itemsBefore.includes(item));
 
 		return newItems.find(item => itemTypes.includes(item.type));
 	}

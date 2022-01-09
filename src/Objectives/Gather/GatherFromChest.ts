@@ -1,16 +1,16 @@
-import Doodad from "game/doodad/Doodad";
-import { IContainer, ItemType } from "game/item/IItem";
+import type Doodad from "game/doodad/Doodad";
+import type { IContainer} from "game/item/IItem";
+import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import Objective from "../../Objective";
-import { IGatherItemOptions } from "../acquire/item/AcquireBase";
+import type Context from "../../core/context/Context";
+import { ContextDataType } from "../../core/context/IContext";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
+import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import ReserveItems from "../core/ReserveItems";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
-
 
 export default class GatherFromChest extends Objective {
 

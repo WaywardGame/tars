@@ -1,8 +1,8 @@
 import { ItemType } from "game/item/IItem";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
-import { IDisassemblySearch } from "../../../ITars";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { IDisassemblySearch } from "../../../core/ITars";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 export default class AcquireItemFromDisassemble extends Objective {
     private readonly itemType;
     private readonly searches;

@@ -14,7 +14,7 @@ export default class Context implements IContext {
     private initialState?;
     private changes;
     constructor(player: Player, base: IBase, inventory: IInventoryItems, options: Readonly<ITarsOptions>, state?: ContextState, calculatingDifficulty?: boolean, initialState?: ContextState | undefined);
-    get island(): import("@wayward/types/definitions/game/game/island/Island").default;
+    get island(): import("../node_modules/@wayward/types/definitions/game/game/island/Island").default;
     toString(): string;
     clone(calculatingDifficulty?: boolean, increaseDepth?: boolean): Context;
     merge(state: ContextState): void;

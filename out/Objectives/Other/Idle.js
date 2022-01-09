@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "game/IGame", "utilities/game/TileHelpers", "../../IObjective", "../../ITars", "../../Objective", "../core/ExecuteAction", "../core/Lambda", "../core/MoveToTarget", "../core/Restart"], function (require, exports, IAction_1, IGame_1, TileHelpers_1, IObjective_1, ITars_1, Objective_1, ExecuteAction_1, Lambda_1, MoveToTarget_1, Restart_1) {
+define(["require", "exports", "game/entity/action/IAction", "game/IGame", "utilities/game/TileHelpers", "../../core/ITars", "../../core/objective/IObjective", "../../core/objective/Objective", "../core/ExecuteAction", "../core/Lambda", "../core/MoveToTarget", "../core/Restart"], function (require, exports, IAction_1, IGame_1, TileHelpers_1, ITars_1, IObjective_1, Objective_1, ExecuteAction_1, Lambda_1, MoveToTarget_1, Restart_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Idle extends Objective_1.default {

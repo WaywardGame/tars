@@ -1,23 +1,22 @@
-import { ITile, ITileContainer, TerrainType } from "game/tile/ITerrain";
+import type { ITile, ITileContainer } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 
-import Context from "../Context";
-import { ITileLocation } from "../ITars";
-import Navigation from "../navigation/Navigation";
+import Context from "../core/context/Context";
+import type { ITileLocation } from "../core/ITars";
 
-class TileUtilities {
+export class TileUtilities {
 
-	private cache: Map<string, ITileLocation[]> = new Map();
+	private readonly cache: Map<string, ITileLocation[]> = new Map();
 
 	public clearCache() {
 		this.cache.clear();
 	}
 
-	public async getNearestTileLocation(contextOrPosition: Context | IVector3, tileType: TerrainType): Promise<ITileLocation[]> {
-		// const position = contextOrPosition instanceof Context ? contextOrPosition.getPosition() : contextOrPosition;
-		const position = contextOrPosition instanceof Context ? contextOrPosition.player : contextOrPosition;
+	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
+		const position = positionOverride ?? context.player;
 
 		const results: ITileLocation[][] = [];
 
@@ -28,7 +27,7 @@ class TileUtilities {
 
 		let result = this.cache.get(cacheId);
 		if (!result) {
-			result = await Navigation.get().getNearestTileLocation(tileType, { x: position.x, y: position.y, z: z });
+			result = await context.utilities.navigation.getNearestTileLocation(tileType, { x: position.x, y: position.y, z: z });
 			this.cache.set(cacheId, result);
 		}
 
@@ -115,5 +114,3 @@ class TileUtilities {
 	}
 
 }
-
-export const tileUtilities = new TileUtilities();

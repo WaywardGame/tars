@@ -1,15 +1,15 @@
 import { ActionType } from "game/entity/action/IAction";
 import { TurnMode } from "game/IGame";
 import TileHelpers from "utilities/game/TileHelpers";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { defaultMaxTilesChecked } from "../../ITars";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import { defaultMaxTilesChecked } from "../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import ExecuteAction from "../core/ExecuteAction";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
-
 
 export default class Idle extends Objective {
 

@@ -1,17 +1,17 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import type Item from "game/item/Item";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
-import { doodadUtilities } from "../../utilities/Doodad";
 import UseItem from "../other/item/UseItem";
-import { itemUtilities } from "../../utilities/Item";
 import EmptyWaterContainer from "../other/EmptyWaterContainer";
+import ReserveItems from "../core/ReserveItems";
 
 export interface IGatherWaterFromStillOptions {
 	allowStartingWaterStill: boolean;
@@ -34,10 +34,11 @@ export default class GatherWaterFromStill extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!doodadUtilities.isWaterStillDrinkable(this.waterStill)) {
+		if (!context.utilities.doodad.isWaterStillDrinkable(this.waterStill)) {
 			if (this.options?.allowStartingWaterStill) {
 				// start desalination and run back to the waterstill and wait
 				const objectives: IObjective[] = [
+					new ReserveItems(this.item),
 					new StartWaterStillDesalination(this.waterStill),
 				];
 
@@ -56,9 +57,11 @@ export default class GatherWaterFromStill extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const objectives: IObjective[] = [];
+		const objectives: IObjective[] = [
+			new ReserveItems(this.item),
+		];
 
-		if (!itemUtilities.canGatherWater(this.item)) {
+		if (!context.utilities.item.canGatherWater(this.item)) {
 			objectives.push(new EmptyWaterContainer(this.item));
 		}
 

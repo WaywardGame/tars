@@ -1,18 +1,14 @@
 import { ActionType } from "game/entity/action/IAction";
-import Corpse from "game/entity/creature/corpse/Corpse";
+import type Corpse from "game/entity/creature/corpse/Corpse";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import { CreatureSearch } from "../../ITars";
-import Objective from "../../Objective";
-import { itemUtilities } from "../../utilities/Item";
-import { objectUtilities } from "../../utilities/Object";
-import { tileUtilities } from "../../utilities/Tile";
+import type Context from "../../core/context/Context";
+import type { CreatureSearch } from "../../core/ITars";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
-
 
 export default class GatherFromCorpse extends Objective {
 
@@ -31,9 +27,9 @@ export default class GatherFromCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasTool = itemUtilities.hasInventoryItemForAction(context, ActionType.Butcher);
+		const hasTool = context.utilities.item.hasInventoryItemForAction(context, ActionType.Butcher);
 
-		return objectUtilities.findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
+		return context.utilities.object.findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
 			const itemTypes = this.search.map.get(corpse.type);
 			if (itemTypes) {
 				const resources = corpse.getResources(true);
@@ -47,7 +43,7 @@ export default class GatherFromCorpse extends Objective {
 
 				for (const itemType of itemTypes) {
 					if (possibleItems.includes(itemType)) {
-						return tileUtilities.canButcherCorpse(context, context.island.getTileFromPoint(corpse), true);
+						return context.utilities.tile.canButcherCorpse(context, context.island.getTileFromPoint(corpse), true);
 					}
 				}
 			}

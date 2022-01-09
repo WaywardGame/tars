@@ -1,11 +1,12 @@
-import { ITile, TerrainType } from "game/tile/ITerrain";
-import { IVector3 } from "utilities/math/IVector";
-import Context from "../Context";
-import { ITileLocation } from "../ITars";
-declare class TileUtilities {
-    private cache;
+import type { ITile } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
+import type { IVector3 } from "utilities/math/IVector";
+import Context from "../core/context/Context";
+import type { ITileLocation } from "../core/ITars";
+export declare class TileUtilities {
+    private readonly cache;
     clearCache(): void;
-    getNearestTileLocation(contextOrPosition: Context | IVector3, tileType: TerrainType): Promise<ITileLocation[]>;
+    getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]>;
     isSwimmingOrOverWater(context: Context): boolean;
     isOverDeepSeaWater(context: Context): boolean;
     isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater?: boolean): boolean;
@@ -16,5 +17,3 @@ declare class TileUtilities {
     hasCorpses(tile: ITile): boolean;
     hasItems(tile: ITile): boolean;
 }
-export declare const tileUtilities: TileUtilities;
-export {};

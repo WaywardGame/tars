@@ -1,7 +1,7 @@
-import Context from "../../Context";
-import { ContextDataType } from "../../IContext";
-import { ObjectiveExecutionResult } from "../../IObjective";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import { ContextDataType } from "../../core/context/IContext";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 export default class CopyContextData<T extends ContextDataType, T2 extends ContextDataType> extends Objective {
     private readonly source;
     private readonly destination;

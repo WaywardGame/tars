@@ -1,18 +1,16 @@
 import ActionExecutor from "game/entity/action/ActionExecutor";
 import actionDescriptions from "game/entity/action/Actions";
-import { ActionType, IActionDescription } from "game/entity/action/IAction";
+import type { ActionType, IActionDescription } from "game/entity/action/IAction";
 
-import Context from "../Context";
-import { ObjectiveResult } from "../IObjective";
+import type Context from "../core/context/Context";
+import type { ObjectiveResult } from "../core/objective/IObjective";
 
-class ActionUtilities {
+export class ActionUtilities {
 
-    private pendingActions: {
-        [index: number]: {
-            rejectorTimeoutId: number;
-            resolve(success: boolean): void;
-        };
-    } = {};
+    private pendingActions: Record<number, {
+        rejectorTimeoutId: number;
+        resolve(success: boolean): void;
+    }> = {};
 
     public async executeAction<T extends ActionType>(
         context: Context,
@@ -73,5 +71,3 @@ class ActionUtilities {
     }
 
 }
-
-export const actionUtilities = new ActionUtilities();

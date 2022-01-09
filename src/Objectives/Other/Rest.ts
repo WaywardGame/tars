@@ -1,13 +1,11 @@
 import { ActionType } from "game/entity/action/IAction";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
 import { creatureUtilities } from "../../utilities/Creature";
-import { itemUtilities } from "../../utilities/Item";
-import { playerUtilities } from "../../utilities/Player";
-import { tileUtilities } from "../../utilities/Tile";
 import ExecuteAction from "../core/ExecuteAction";
 import ReduceWeight from "../interrupt/ReduceWeight";
 import MoveToLand from "../utility/moveTo/MoveToLand";
@@ -30,7 +28,7 @@ export default class Rest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (tileUtilities.isSwimmingOrOverWater(context) && !playerUtilities.isUsingVehicle(context)) {
+		if (context.utilities.tile.isSwimmingOrOverWater(context) && !context.utilities.player.isUsingVehicle(context)) {
 			return new MoveToLand();
 		}
 
@@ -59,7 +57,7 @@ export default class Rest extends Objective {
 
 		const objectivePipeline: IObjective[] = [];
 
-		const extinguishableItem = itemUtilities.getInventoryItemsWithUse(context, ActionType.Extinguish)[0];
+		const extinguishableItem = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Extinguish)[0];
 		if (extinguishableItem) {
 			// don't set yourself on fire while sleeping
 			objectivePipeline.push(new ExecuteAction(ActionType.Extinguish, (context, action) => {

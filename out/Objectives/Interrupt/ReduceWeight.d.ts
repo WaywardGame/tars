@@ -1,7 +1,7 @@
-import Context from "../../Context";
-import { ObjectiveExecutionResult } from "../../IObjective";
-import Objective from "../../Objective";
-import { IOriganizeInventoryOptions } from "../utility/OrganizeInventory";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
+import type { IOriganizeInventoryOptions } from "../utility/OrganizeInventory";
 export default class ReduceWeight extends Objective {
     private readonly options;
     constructor(options?: Partial<IOriganizeInventoryOptions>);

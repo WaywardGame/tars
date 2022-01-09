@@ -1,4 +1,4 @@
-define(["require", "exports", "../../Objective"], function (require, exports, Objective_1) {
+define(["require", "exports", "../../core/objective/Objective"], function (require, exports, Objective_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Lambda extends Objective_1.default {

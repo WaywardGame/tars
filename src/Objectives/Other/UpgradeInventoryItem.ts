@@ -3,16 +3,19 @@ import { ItemType } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 import Enums from "utilities/enum/Enums";
 
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../ITars";
-import Objective from "../../Objective";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import type { IInventoryItems } from "../../core/ITars";
+import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
+import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import Item from "game/item/Item";
 
 export default class UpgradeInventoryItem extends Objective {
 
-	constructor(private readonly upgrade: keyof IInventoryItems) {
+	constructor(private readonly upgrade: keyof IInventoryItems, private readonly fromItemTypes: Set<ItemType> = new Set()) {
 		super();
 	}
 
@@ -78,21 +81,19 @@ export default class UpgradeInventoryItem extends Objective {
 				const worth = itemDescriptions[itemType]?.worth;
 				return worth !== undefined && currentWorth !== undefined && worth > currentWorth;
 			};
-		};
+		}
 
 		if (itemInfo.itemTypes) {
-			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes() : itemInfo.itemTypes;
+			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;
 			for (const itemTypeOrGroup of itemTypes) {
-				if (itemTypeOrGroup !== item.type) {
-					if (context.island.items.isGroup(itemTypeOrGroup)) {
-						const groupItems = context.island.items.getGroupItems(itemTypeOrGroup);
-						for (const groupItemType of groupItems) {
-							this.addUpgradeObjectives(objectivePipelines, groupItemType, isUpgrade);
-						}
-
-					} else {
-						this.addUpgradeObjectives(objectivePipelines, itemTypeOrGroup, isUpgrade);
+				if (context.island.items.isGroup(itemTypeOrGroup)) {
+					const groupItems = context.island.items.getGroupItems(itemTypeOrGroup);
+					for (const groupItemType of groupItems) {
+						this.addUpgradeObjectives(objectivePipelines, groupItemType, item, isUpgrade);
 					}
+
+				} else {
+					this.addUpgradeObjectives(objectivePipelines, itemTypeOrGroup, item, isUpgrade);
 				}
 			}
 		}
@@ -101,7 +102,7 @@ export default class UpgradeInventoryItem extends Objective {
 			for (const itemType of Enums.values(ItemType)) {
 				const description = itemDescriptions[itemType];
 				if (description && description.equip === itemInfo.equipType) {
-					this.addUpgradeObjectives(objectivePipelines, itemType, isUpgrade);
+					this.addUpgradeObjectives(objectivePipelines, itemType, item, isUpgrade);
 				}
 			}
 		}
@@ -109,7 +110,7 @@ export default class UpgradeInventoryItem extends Objective {
 		if (itemInfo.actionTypes) {
 			for (const actionType of itemInfo.actionTypes) {
 				for (const itemType of AcquireItemForAction.getItems(context, actionType)) {
-					this.addUpgradeObjectives(objectivePipelines, itemType, isUpgrade);
+					this.addUpgradeObjectives(objectivePipelines, itemType, item, isUpgrade);
 				}
 			}
 		}
@@ -117,8 +118,8 @@ export default class UpgradeInventoryItem extends Objective {
 		return objectivePipelines;
 	}
 
-	private addUpgradeObjectives(objectives: IObjective[][], itemType: ItemType, isUpgrade: (itemType: ItemType) => boolean) {
-		if (isUpgrade(itemType)) {
+	private addUpgradeObjectives(objectives: IObjective[][], itemType: ItemType, currentItem: Item, isUpgrade: (itemType: ItemType) => boolean) {
+		if (currentItem.type !== itemType && !this.fromItemTypes.has(itemType) && isUpgrade(itemType)) {
 			objectives.push([new AcquireItem(itemType)]);
 		}
 	}

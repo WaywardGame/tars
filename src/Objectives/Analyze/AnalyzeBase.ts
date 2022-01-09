@@ -1,17 +1,17 @@
-import Doodad from "game/doodad/Doodad";
+import type Doodad from "game/doodad/Doodad";
 import doodadDescriptions from "game/doodad/Doodads";
-import { DoodadType } from "game/doodad/IDoodad";
+import type { DoodadType } from "game/doodad/IDoodad";
 import TileHelpers from "utilities/game/TileHelpers";
-import { IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import DoodadManager from "game/doodad/DoodadManager";
 
-import Context from "../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../IObjective";
-import { baseInfo, BaseInfoKey, IBaseInfo } from "../../ITars";
-import Objective from "../../Objective";
-import { baseUtilities } from "../../utilities/Base";
-import { objectUtilities } from "../../utilities/Object";
+import type Context from "../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
+import type { BaseInfoKey, IBaseInfo } from "../../core/ITars";
+import { baseInfo } from "../../core/ITars";
 
 const baseDoodadDistanceSq = Math.pow(50, 2);
 
@@ -39,6 +39,9 @@ export default class AnalyzeBase extends Objective {
 					if (!doodad.isValid()) {
 						changed = true;
 						this.log.info(`"${key}" was removed`);
+
+						context.utilities.navigation.refreshOverlay(doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+
 						return false;
 					}
 
@@ -67,22 +70,22 @@ export default class AnalyzeBase extends Objective {
 				} else {
 					targets = info.findTargets ?
 						info.findTargets(context) :
-						objectUtilities.findDoodads(context, key, doodad => doodad.ownerIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(info, doodad.type));
+						context.utilities.object.findDoodads(context, key, doodad => doodad.ownerIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(info, doodad.type));
 				}
 
 				for (const target of targets) {
-					if (!info.canAdd || info.canAdd(context.base, target)) {
+					if (!info.canAdd || info.canAdd(context, target)) {
 						const distance = Vector2.squaredDistance(context.getPosition(), target);
-						if (distance < baseDoodadDistanceSq && context.base[key].indexOf(target) === -1) {
+						if (distance < baseDoodadDistanceSq && !context.base[key].includes(target)) {
 							changed = true;
 
 							context.base[key].push(target);
 
 							this.log.info(`Found "${key}" - ${target} (distance: ${Math.round(distance)})`);
 
-							if (info.onAdd) {
-								info.onAdd(context.base, target);
-							}
+							info.onAdd?.(context, target);
+
+							context.utilities.navigation.refreshOverlay(target.getTile(), target.x, target.y, target.z, true);
 
 							if (!info.allowMultiple) {
 								break;
@@ -96,9 +99,9 @@ export default class AnalyzeBase extends Objective {
 		if (changed) {
 			let availableUnlimitedWellLocation: IVector3 | undefined;
 
-			const baseDoodads = baseUtilities.getBaseDoodads(context);
+			const baseDoodads = context.utilities.base.getBaseDoodads(context);
 			for (const baseDoodad of baseDoodads) {
-				const unlimitedWellTile = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => baseUtilities.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: 50 });
+				const unlimitedWellTile = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: 50 });
 				if (unlimitedWellTile) {
 					availableUnlimitedWellLocation = unlimitedWellTile;
 					break;
@@ -119,7 +122,7 @@ export default class AnalyzeBase extends Objective {
 				this.log.info("Lost unlimited well location");
 			}
 
-			baseUtilities.clearCache();
+			context.utilities.base.clearCache();
 
 			// execute it again.
 			// one of the doodads might need to be near another - but depending on the ordering it might be get set yet

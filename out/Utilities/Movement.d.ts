@@ -1,6 +1,6 @@
-import { ITile } from "game/tile/ITerrain";
-import { IVector2, IVector3 } from "utilities/math/IVector";
-import Context from "../Context";
+import type { ITile } from "game/tile/ITerrain";
+import type { IVector2, IVector3 } from "utilities/math/IVector";
+import type Context from "../core/context/Context";
 export interface IMovementPath {
     difficulty: number;
     path?: IVector2[];
@@ -11,9 +11,9 @@ export declare enum MoveResult {
     Moving = 2,
     Complete = 3
 }
-declare class MovementUtilities {
+export declare class MovementUtilities {
     private movementOverlays;
-    private cachedPaths;
+    private readonly cachedPaths;
     clearCache(): void;
     resetMovementOverlays(): void;
     clearOverlay(tile: ITile): void;
@@ -23,5 +23,3 @@ declare class MovementUtilities {
     moveToTarget(context: Context, target: IVector3): Promise<MoveResult>;
     move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean, walkOnce?: boolean): Promise<MoveResult>;
 }
-export declare const movementUtilities: MovementUtilities;
-export {};

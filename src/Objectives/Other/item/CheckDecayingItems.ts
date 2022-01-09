@@ -1,10 +1,10 @@
 import { ItemType } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 
-import Context from "../../../Context";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
-import { itemUtilities } from "../../../utilities/Item";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItemWithRecipe from "../../acquire/item/AcquireItemWithRecipe";
 
 /**
@@ -22,7 +22,7 @@ export default class CheckDecayingItems extends Objective {
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         // it's very important to include items in inventory, so if this objective is restarted after grabing the item from the chest, it will continue to work
-        const baseItemsWithDecay = itemUtilities.getBaseItems(context)
+        const baseItemsWithDecay = context.utilities.item.getBaseItems(context)
             .filter(item => item.decay !== undefined)
 
         const animalFatItemsDecayingSoon = baseItemsWithDecay

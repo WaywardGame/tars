@@ -6,7 +6,7 @@
 	"github": "https://github.com/WaywardGame/tars",
 	"waywardVersion": "2.11.0-beta",
 	"multiplayer": "clientside",
-	"file": "out/Tars",
+	"file": "out/TarsMod",
 	"allowUnlockingMilestones": true,
 	"languages": [
 		"lang/english"

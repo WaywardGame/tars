@@ -1,12 +1,12 @@
 import { ActionType } from "game/entity/action/IAction";
-import Item from "game/item/Item";
-import { IContainer } from "game/item/IItem";
+import type Item from "game/item/Item";
+import type { IContainer } from "game/item/IItem";
 import Doodad from "game/doodad/Doodad";
 
-import Context from "../../../Context";
-import { ContextDataType } from "../../../IContext";
-import { ObjectiveExecutionResult, ObjectiveResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
 
@@ -29,7 +29,7 @@ export default class MoveItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = this.item ?? context.getData(ContextDataType.LastAcquiredItem);
+		const item = this.item ?? this.getAcquiredItem(context);
 		if (!item) {
 			this.log.error("Invalid move item");
 			return ObjectiveResult.Restart;

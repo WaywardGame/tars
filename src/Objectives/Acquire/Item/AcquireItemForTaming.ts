@@ -1,10 +1,10 @@
-import { CreatureType } from "game/entity/creature/ICreature";
-import { ItemType } from "game/item/IItem";
-import Creature from "game/entity/creature/Creature";
+import type { CreatureType } from "game/entity/creature/ICreature";
+import type { ItemType } from "game/item/IItem";
+import type Creature from "game/entity/creature/Creature";
 
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
-import Objective from "../../../Objective";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import Objective from "../../../core/objective/Objective";
 import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForTaming extends Objective {

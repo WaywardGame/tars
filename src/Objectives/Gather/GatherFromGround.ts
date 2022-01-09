@@ -1,18 +1,17 @@
 import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { ITileContainer } from "game/tile/ITerrain";
+import type Item from "game/item/Item";
+import type { ITileContainer } from "game/tile/ITerrain";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import Context from "../../Context";
-import { IObjective, ObjectiveExecutionResult } from "../../IObjective";
-import Objective from "../../Objective";
-import { IGatherItemOptions } from "../acquire/item/AcquireBase";
+import type Context from "../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import Objective from "../../core/objective/Objective";
+import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
 import MoveItem from "../other/item/MoveItem";
-
 
 export default class GatherFromGround extends Objective {
 

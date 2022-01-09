@@ -2,8 +2,8 @@ import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
-import Context from "../../../Context";
-import { ObjectiveExecutionResult } from "../../../IObjective";
+import type Context from "../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 

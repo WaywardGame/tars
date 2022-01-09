@@ -1,4 +1,4 @@
-define(["require", "exports", "../../../Objective", "./HuntCreature"], function (require, exports, Objective_1, HuntCreature_1) {
+define(["require", "exports", "../../../core/objective/Objective", "./HuntCreature"], function (require, exports, Objective_1, HuntCreature_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class HuntCreatures extends Objective_1.default {
