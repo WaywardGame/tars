@@ -24,7 +24,7 @@ export default class AcquireWaterContainer extends Objective {
 
 		const messageInABottleItem = context.utilities.item.getItemInInventory(context, ItemType.MessageInABottle);
 		if (!messageInABottleItem) {
-			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle).setContextDataKey(ContextDataType.Item1));
+			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle).passAcquireData(this).setContextDataKey(ContextDataType.Item1));
 
 		} else {
 			messageInABottleObjectives.push(new SetContextData(ContextDataType.Item1, messageInABottleItem));
@@ -32,7 +32,7 @@ export default class AcquireWaterContainer extends Objective {
 
 		messageInABottleObjectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [ItemType.GlassBottle], ActionType.OpenBottle, (context, action) => {
 			const item = context.getData(ContextDataType.Item1);
-			if (!item) {
+			if (!item?.isValid()) {
 				this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
 				return;
 			}
@@ -41,9 +41,9 @@ export default class AcquireWaterContainer extends Objective {
 		}).setStatus("Opening glass bottle"));
 
 		return [
-			[new AcquireItem(ItemType.Waterskin)],
-			[new AcquireItem(ItemType.ClayJug)],
-			[new AcquireItem(ItemType.GlassBottle)],
+			[new AcquireItem(ItemType.Waterskin).passAcquireData(this)],
+			[new AcquireItem(ItemType.ClayJug).passAcquireData(this)],
+			[new AcquireItem(ItemType.GlassBottle).passAcquireData(this)],
 			messageInABottleObjectives,
 		];
 	}

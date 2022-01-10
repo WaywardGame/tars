@@ -8,6 +8,7 @@ export default abstract class Objective implements IObjective {
     private static uuid;
     enableLogging: boolean;
     protected contextDataKey: string;
+    protected _shouldKeepInInventory: boolean | undefined;
     protected reserveType: ReserveType | undefined;
     private _log;
     private _uniqueIdentifier;
@@ -35,6 +36,8 @@ export default abstract class Objective implements IObjective {
     getDifficulty(context: Context): number;
     onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean>;
     setContextDataKey(contextDataKey: string): this;
+    shouldKeepInInventory(): boolean;
+    keepInInventory(): this;
     setReserveType(reserveType: ReserveType | undefined): this;
     passAcquireData(objective: Objective, reserveType?: ReserveType): this;
     protected getAcquiredItem(context: Context): Item | undefined;

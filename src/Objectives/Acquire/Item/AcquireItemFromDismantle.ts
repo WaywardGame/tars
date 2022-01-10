@@ -86,8 +86,8 @@ export default class AcquireItemFromDismantle extends Objective {
 
 			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Dismantle, (context, action) => {
 				const item = context.getData<Item>(hashCode);
-				if (!item) {
-					this.log.warn("Missing dismantle item. Bug in TARS pipeline, will fix itself", item, hashCode);
+				if (!item?.isValid()) {
+					this.log.warn(`Missing dismantle item ${item}. Bug in TARS pipeline, will fix itself`, hashCode);
 					return;
 				}
 

@@ -509,17 +509,19 @@ export default class Plan implements IPlan {
 
 		const gatherObjectiveTrees: IExecutionTree[] = [];
 		const reserveItemObjectives: Map<string, Item[]> = new Map();
+		const keepInInventoryReserveItemObjectives: Map<string, Item[]> = new Map();
 
 		for (const { depth, objective, difficulty, logs } of objectives) {
 			const hashCode = objective.getHashCode();
 
 			if (objective instanceof ReserveItems) {
-				if (!reserveItemObjectives.has(hashCode)) {
-					reserveItemObjectives.set(hashCode, objective.items);
+				const map = objective.shouldKeepInInventory() ? keepInInventoryReserveItemObjectives : reserveItemObjectives;
+				if (!map.has(hashCode)) {
+					map.set(hashCode, objective.items);
 				}
 
 				// leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
-				continue;
+				// continue;
 			}
 
 			let parent = depthMap.get(depth - 1);
@@ -654,6 +656,9 @@ export default class Plan implements IPlan {
 
 		// move all reserve item objectives to the top of the tree so they are executed first
 		// this will prevent interrupt objectives from messing with these items
+		// todo: split up soft / hard reserve too?
+		let objectivesToInsertAtFront: IExecutionTree[] = [];
+
 		if (reserveItemObjectives.size > 0) {
 			const reserveItemObjective = new ReserveItems();
 			reserveItemObjective.items = Array.from(reserveItemObjectives)
@@ -661,7 +666,7 @@ export default class Plan implements IPlan {
 				.map(a => a[1])
 				.flat();
 
-			const reserveItemObjectiveTree: IExecutionTree = {
+			objectivesToInsertAtFront.push({
 				id: id++,
 				depth: 1,
 				objective: reserveItemObjective,
@@ -669,10 +674,29 @@ export default class Plan implements IPlan {
 				difficulty: 0,
 				logs: [],
 				children: [],
-				parent: rootTree,
-			};
+			});
+		}
 
-			rootTree.children = [reserveItemObjectiveTree].concat(rootTree.children);
+		if (keepInInventoryReserveItemObjectives.size > 0) {
+			const reserveItemObjective = new ReserveItems().keepInInventory();
+			reserveItemObjective.items = Array.from(keepInInventoryReserveItemObjectives)
+				.sort(([a], [b]) => a.localeCompare(b, navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
+				.map(a => a[1])
+				.flat();
+
+			objectivesToInsertAtFront.push({
+				id: id++,
+				depth: 1,
+				objective: reserveItemObjective,
+				hashCode: reserveItemObjective.getHashCode(),
+				difficulty: 0,
+				logs: [],
+				children: [],
+			});
+		}
+
+		if (objectivesToInsertAtFront.length > 0) {
+			rootTree.children = objectivesToInsertAtFront.concat(rootTree.children);
 		}
 
 		return rootTree;

@@ -6,6 +6,7 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
+import ReserveItems from "../../core/ReserveItems";
 
 export default class UnequipItem extends Objective {
 
@@ -23,7 +24,7 @@ export default class UnequipItem extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? this.getAcquiredItem(context);
-		if (!item) {
+		if (!item?.isValid()) {
 			this.log.error("Invalid unequip item");
 			return ObjectiveResult.Restart;
 		}
@@ -32,10 +33,13 @@ export default class UnequipItem extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		return new ExecuteAction(ActionType.Unequip, (context, action) => {
-			action.execute(context.player, item);
-			return ObjectiveResult.Complete;
-		}).setStatus(this);
+		return [
+			new ReserveItems(item).keepInInventory(),
+			new ExecuteAction(ActionType.Unequip, (context, action) => {
+				action.execute(context.player, item);
+				return ObjectiveResult.Complete;
+			}).setStatus(this),
+		];
 	}
 
 }

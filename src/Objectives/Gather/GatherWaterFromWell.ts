@@ -9,7 +9,6 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import UseItem from "../other/item/UseItem";
-import ReserveItems from "../core/ReserveItems";
 
 export default class GatherWaterFromWell extends Objective {
 
@@ -34,7 +33,6 @@ export default class GatherWaterFromWell extends Objective {
 		}
 
 		return [
-			new ReserveItems(this.item),
 			new MoveToTarget(this.well, true),
 			new UseItem(ActionType.GatherLiquid, this.item)
 				.setStatus(() => `Gathering water from ${this.well.getName()}`),

@@ -4,8 +4,8 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import Objective from "../../../core/objective/Objective";
 export declare const gardenMaxTilesChecked = 1536;
 export default class PlantSeed extends Objective {
-    private readonly seed?;
-    constructor(seed?: Item | undefined);
+    private readonly item?;
+    constructor(item?: Item | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;

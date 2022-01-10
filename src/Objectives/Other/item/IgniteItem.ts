@@ -27,7 +27,7 @@ export default class IgniteItem extends Objective {
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         const item = this.item ?? this.getAcquiredItem(context);
-        if (!item) {
+        if (!item?.isValid()) {
             this.log.error("Invalid ignite item");
             return ObjectiveResult.Restart;
         }

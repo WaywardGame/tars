@@ -30,7 +30,7 @@ export default class CheckSpecialItems extends Objective {
             .filter(item => item.type === ItemType.MessageInABottle);
         if (messageInABottles.length > 0) {
             return messageInABottles.map(item => ([
-                new ReserveItems(item),
+                new ReserveItems(item).keepInInventory(),
                 new MoveItemIntoInventory(item),
                 new ExecuteActionForItem(ExecuteActionType.Generic, [ItemType.GlassBottle], ActionType.OpenBottle, (context, action) => {
                     action.execute(context.player, item);
@@ -42,7 +42,7 @@ export default class CheckSpecialItems extends Objective {
             .filter(item => item.book === BookType.RandomEvent);
         if (books.length > 0) {
             return books.map(item => ([
-                new ReserveItems(item),
+                new ReserveItems(item).keepInInventory(),
                 new MoveItemIntoInventory(item),
                 new ExecuteAction(ActionType.Read, (context, action) => {
                     action.execute(context.player, item);

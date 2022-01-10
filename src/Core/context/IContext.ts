@@ -52,6 +52,11 @@ export enum ContextDataType {
 	 * Disables attacking a creature when taming
 	 */
 	TamingCreature = "TamingCreature",
+
+	/**
+	 * Array of items that will not be moved into chests when overweight
+	 */
+	KeepInInventoryItems = "KeepInInventoryItems",
 }
 
 export enum MovingToNewIslandState {

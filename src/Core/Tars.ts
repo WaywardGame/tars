@@ -276,7 +276,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             if (objective !== undefined && !Array.isArray(objective[0])) {
                 const result = await objective[0].onMove(this.context);
                 if (result === true) {
-                    this.interrupt();
+                    this.fullInterrupt();
 
                 } else if (result) {
                     this.interrupt(result);

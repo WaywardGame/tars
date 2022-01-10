@@ -15,48 +15,57 @@ import Objective from "../../../core/objective/Objective";
 import AcquireItem from "../../acquire/item/AcquireItem";
 import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";
-import Restart from "../../core/Restart";
 import DigTile from "../tile/DigTile";
 
 import UseItem from "./UseItem";
+import ReserveItems from "../../core/ReserveItems";
+import MoveItemIntoInventory from "./MoveItemIntoInventory";
+import AnalyzeInventory from "../../analyze/AnalyzeInventory";
+import Lambda from "../../core/Lambda";
 
 export const gardenMaxTilesChecked = 1536;
 
 export default class PlantSeed extends Objective {
 
-	constructor(private readonly seed?: Item) {
+	constructor(private readonly item?: Item) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `PlantSeed:${this.seed}`;
+		return `PlantSeed:${this.item}`;
 	}
 
 	public getStatus(): string | undefined {
-		return `Planting ${this.seed?.getName()}`;
+		return `Planting ${this.item?.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const seed = this.seed ?? this.getAcquiredItem(context);
-		if (!seed) {
+		const item = this.item ?? this.getAcquiredItem(context);
+		if (!item?.isValid()) {
 			this.log.error("Invalid seed item");
 			return ObjectiveResult.Restart;
 		}
 
-		const allowedTiles = doodadDescriptions[seed.description()?.onUse?.[ActionType.Plant]!]?.allowedTiles;
+		const allowedTiles = doodadDescriptions[item.description()?.onUse?.[ActionType.Plant]!]?.allowedTiles;
 		if (!allowedTiles) {
 			return ObjectiveResult.Impossible;
 		}
 
 		const allowedTilesSet = new Set(allowedTiles);
 
-		const objectives: IObjective[] = [];
+		const objectives: IObjective[] = [
+			new ReserveItems(item).keepInInventory(),
+			new MoveItemIntoInventory(item),
+		];
 
 		if (context.inventory.hoe) {
 			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hoe));
 
 		} else {
-			objectives.push(new AcquireItem(ItemType.StoneHoe).setContextDataKey(ContextDataType.Item1));
+			objectives.push(
+				new AcquireItem(ItemType.StoneHoe).setContextDataKey(ContextDataType.Item1),
+				new AnalyzeInventory(),
+			);
 		}
 
 		const emptyTilledTile = TileHelpers.findMatchingTile(
@@ -66,7 +75,7 @@ export default class PlantSeed extends Objective {
 				const tileContainer = tile as ITileContainer;
 				return island.isTileEmpty(tile) &&
 					TileHelpers.isOpenTile(island, point, tile) &&
-					TileHelpers.isTilled(tile) &&
+					island.isTilled(point.x, point.y, point.z) &&
 					allowedTiles.includes(TileHelpers.getType(tile)) &&
 					(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
 			}, { maxTilesChecked: gardenMaxTilesChecked });
@@ -122,15 +131,24 @@ export default class PlantSeed extends Objective {
 				objectives.push(new DigTile(point, { digUntilTypeIsNot: TerrainType.Grass }));
 			}
 
-			objectives.push(new MoveToTarget(point, true));
+			objectives.push(
+				new MoveToTarget(point, true),
+				new UseItem(ActionType.Till).setContextDataKey(ContextDataType.Item1),
+				new Lambda(async context => {
+					const facingPoint = context.player.getFacingPoint();
 
-			objectives.push(new UseItem(ActionType.Till).setContextDataKey(ContextDataType.Item1));
+					if (context.player.island.isTilled(facingPoint.x, facingPoint.y, facingPoint.z)) {
+						return ObjectiveResult.Complete;
+					}
 
-			// it's possible tilling failed. restart after tilling to recalculate
-			objectives.push(new Restart());
+					this.log.warn("Not tilled yet");
+
+					return ObjectiveResult.Restart;
+				}),
+			);
 		}
 
-		objectives.push(new UseItem(ActionType.Plant, seed));
+		objectives.push(new UseItem(ActionType.Plant, item));
 
 		return objectives;
 	}

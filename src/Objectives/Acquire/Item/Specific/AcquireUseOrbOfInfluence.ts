@@ -37,12 +37,12 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 			objectives.push(new SetContextData(ContextDataType.Item1, orbOfInfluenceItem));
 
 		} else {
-			objectives.push(new AcquireItem(ItemType.OrbOfInfluence).setContextDataKey(ContextDataType.Item1));
+			objectives.push(new AcquireItem(ItemType.OrbOfInfluence).passAcquireData(this).setContextDataKey(ContextDataType.Item1));
 		}
 
 		objectives.push(new Lambda(async context => {
 			const item = context.getData(ContextDataType.Item1);
-			if (!item) {
+			if (!item?.isValid()) {
 				this.log.error("Invalid orb of influence");
 				return ObjectiveResult.Restart;
 			}

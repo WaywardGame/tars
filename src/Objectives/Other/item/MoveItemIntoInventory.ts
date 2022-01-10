@@ -23,7 +23,7 @@ export default class MoveItemIntoInventory extends Objective {
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         const item = this.item ?? this.getAcquiredItem(context);
-        if (!item) {
+        if (!item?.isValid()) {
             this.log.error("Invalid move item");
             return ObjectiveResult.Restart;
         }
