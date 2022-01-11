@@ -1,6 +1,5 @@
 import { DoodadType } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import { DamageType } from "game/entity/IEntity";
 import { TurnMode } from "game/IGame";
 import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
@@ -54,11 +53,6 @@ export class GardenerMode implements ITarsMode {
 			// the weight capacity could go back under the threshold. and then it wouldn't want to build another chest
 			// this is reset to false in baseInfo.onAdd
 			context.base.buildAnotherChest = true;
-
-			const gatherItem = context.utilities.item.getBestTool(context, ActionType.Gather, DamageType.Slashing);
-			if (gatherItem === undefined) {
-				objectives.push([new AcquireItemForAction(ActionType.Gather)]);
-			}
 
 			if (context.inventory.shovel === undefined) {
 				objectives.push([new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory()]);

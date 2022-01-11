@@ -21,6 +21,7 @@ import type Context from "../core/context/Context";
 import type { IDisassemblySearch, IInventoryItems } from "../core/ITars";
 import { inventoryItemInfo } from "../core/ITars";
 import ItemManager from "game/item/ItemManager";
+import { ContextDataType } from "../core/context/IContext";
 
 export class ItemUtilities {
 
@@ -246,7 +247,7 @@ export class ItemUtilities {
 		} else {
 			const skillType = description.gatherSkillUse ?? description.skillUse; // ?? SkillType.Mining;
 			// const prefersBlunt = skillType === SkillType.Mining;
-			tool = this.getBestTool(context, skillType === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Gather); // prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
+			tool = this.getBestTool(context, skillType === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Mine); // prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
 		}
 
 		return tool;
@@ -422,10 +423,21 @@ export class ItemUtilities {
 			});
 	}
 
-	// todo: make this and related methods return a Set?
-	public getReservedItems(context: Context) {
-		return this.getItemsInInventory(context)
+	/**
+	 * Returns reserved items (items that are marked as in use by objectives)
+	 * @param context Context
+	 * @param includeKeepInInventoryItems True to include items marked with KeepInInventoryItem in the result
+	 */
+	public getReservedItems(context: Context, includeKeepInInventoryItems: boolean) {
+		const keepInInventoryItems = context.getDataOrDefault<Set<Item>>(ContextDataType.KeepInInventoryItems, new Set());
+
+		let reservedItems = this.getItemsInInventory(context)
 			.filter(item => context.isHardReservedItem(item) && !this.isInventoryItem(context, item));
+		if (!includeKeepInInventoryItems) {
+			reservedItems = reservedItems.filter(item => !keepInInventoryItems.has(item));
+		}
+
+		return reservedItems;
 	}
 
 	/**

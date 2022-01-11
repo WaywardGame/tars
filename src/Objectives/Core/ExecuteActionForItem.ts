@@ -109,7 +109,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					actionType = ActionType.Harvest;
 
 				} else {
-					actionType = description.gatherSkillUse === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Gather;
+					actionType = description.gatherSkillUse === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Mine;
 				}
 
 				actionArguments.push(context.utilities.item.getBestToolForDoodadGather(context, doodad));

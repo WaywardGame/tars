@@ -1594,9 +1594,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         let objectives: IObjective[] = [];
 
-        const reservedItems = this.utilities.item.getReservedItems(context);
+        const reservedItems = this.utilities.item.getReservedItems(context, false);
 
-        const interruptReservedItems = interruptContext ? this.utilities.item.getReservedItems(interruptContext) : undefined;
+        const interruptReservedItems = interruptContext ? this.utilities.item.getReservedItems(interruptContext, false) : undefined;
         // if (interruptReservedItems) {
         // 	reservedItems = reservedItems.filter(item => !interruptReservedItems.includes(item));
         // }

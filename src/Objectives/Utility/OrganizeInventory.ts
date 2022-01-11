@@ -55,10 +55,8 @@ export default class OrganizeInventory extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
-		const keepInInventoryItems = context.getDataOrDefault<Set<Item>>(ContextDataType.KeepInInventoryItems, new Set());
 
-		const reservedItems = context.utilities.item.getReservedItems(context)
-			.filter(item => !keepInInventoryItems.has(item))
+		const reservedItems = context.utilities.item.getReservedItems(context, false)
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const reservedItemsWeight = reservedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
