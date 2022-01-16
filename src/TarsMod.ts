@@ -137,7 +137,7 @@ export default class TarsMod extends Mod {
 		this.ensureSaveData();
 
 		this.tars = new Tars(this.saveData, this.tarsOverlay);
-		this.tars?.load();
+		this.tars.load();
 
 		const tarsEvents = this.tars.event.until(this.tars, "delete");
 		tarsEvents.subscribe("enableChange", (_, enabled) => {

@@ -97,7 +97,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private tickTimeoutId: number | undefined;
 
-    private navigationSystemState: NavigationSystemState;
+    private navigationSystemState: NavigationSystemState = NavigationSystemState.NotInitialized;
     private navigationUpdatePromise: ResolvablePromise | undefined;
     private readonly navigationQueuedUpdates: Array<() => void> = [];
 
@@ -134,7 +134,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.navigationSystemState = NavigationSystemState.NotInitialized;
         this.navigationQueuedUpdates.length = 0;
 
-        this.utilities.navigation.delete();
+        this.utilities.navigation.unload();
 
         log.info("Deleted TARS instance");
 
@@ -148,13 +148,18 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.loaded = true;
 
-        this.delete();
+        this.reset({
+            resetInventory: true,
+            resetBase: true,
+        });
 
-        this.utilities.navigation = new Navigation(this.overlay);
+        // this.delete();
+
+        this.utilities.navigation.load();
 
         EventManager.registerEventBusSubscriber(this);
 
-        log.info("Loaded");
+        // log.info("Loaded");
     }
 
     public unload() {
@@ -168,11 +173,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         EventManager.deregisterEventBusSubscriber(this);
 
-        log.info("Unloaded");
+        // log.info("Unloaded");
     }
 
-    public disable(gameIsEnding: boolean = false) {
-        if (!gameIsEnding && this.saveData.enabled) {
+    public disable(gameIsTravelingOrEnding: boolean = false) {
+        if (!gameIsTravelingOrEnding && this.saveData.enabled) {
             this.saveData.enabled = false;
             this.event.emit("enableChange", false);
         }
@@ -191,7 +196,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             OptionsInterrupt.restore(localPlayer);
         }
 
-        if (!gameIsEnding && this.saveData.options.mode === TarsMode.Manual) {
+        if (!gameIsTravelingOrEnding && this.saveData.options.mode === TarsMode.Manual) {
             this.updateOptions({ mode: TarsMode.Survival });
         }
 
@@ -458,7 +463,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.delete();
 
-        this.utilities.navigation = new Navigation(this.overlay);
+        this.utilities.navigation.load();
 
         if (!this.isEnabled()) {
             return;
@@ -760,7 +765,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         if (options?.delete || options?.resetBase) {
-            if (this.base) {
+            if (this.base && typeof (localIsland) !== "undefined") {
                 const baseDoodads = this.utilities.base.getBaseDoodads(this.getContext());
                 for (const doodad of baseDoodads) {
                     this.utilities.navigation.refreshOverlay(doodad.getTile(), doodad.x, doodad.y, doodad.z, false);

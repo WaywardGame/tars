@@ -44,7 +44,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     delete(): void;
     load(): void;
     unload(): void;
-    disable(gameIsEnding?: boolean): void;
+    disable(gameIsTravelingOrEnding?: boolean): void;
     onPlayerSpawn(player: Player): void;
     onWriteNote(player: Player, note: INote): false | void;
     onPlayerDeath(): void;
