@@ -287,6 +287,7 @@ export default class Navigation {
 		this.refreshOverlay(tile, x, y, z, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
 		try {
+			// dijkstraMapInstance.updateNode(x, y, penalty, disabled);
 			const node = dijkstraMapInstance.getNode(x, y);
 			node.penalty = penalty;
 			node.disabled = isDisabled;
