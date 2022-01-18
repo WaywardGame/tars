@@ -287,10 +287,10 @@ export default class Navigation {
 		this.refreshOverlay(tile, x, y, z, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
 		try {
-			// dijkstraMapInstance.updateNode(x, y, penalty, disabled);
-			const node = dijkstraMapInstance.getNode(x, y);
-			node.penalty = penalty;
-			node.disabled = isDisabled;
+			dijkstraMapInstance.updateNode(x, y, penalty, isDisabled);
+			// const node = dijkstraMapInstance.getNode(x, y);
+			// node.penalty = penalty;
+			// node.disabled = isDisabled;
 		} catch (ex) {
 			log.trace("invalid node", x, y, penalty, isDisabled);
 		}

@@ -1,5 +1,4 @@
 import Stream from "@wayward/goodstream/Stream";
-import { SkillType } from "game/entity/IHuman";
 import type ActionExecutor from "game/entity/action/ActionExecutor";
 import type actionDescriptions from "game/entity/action/Actions";
 import type { IActionDescription } from "game/entity/action/IAction";
@@ -104,12 +103,14 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					return ObjectiveResult.Restart;
 				}
 
-				const stage = doodad.getGrowingStage();
-				if (stage !== undefined && description.harvest && description.harvest[stage]) {
+				if (doodad.canHarvest()) {
 					actionType = ActionType.Harvest;
 
+				} else if (doodad.isGatherable()) {
+					actionType = ActionType.Chop;
+
 				} else {
-					actionType = description.gatherSkillUse === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Mine;
+					return ObjectiveResult.Restart;
 				}
 
 				actionArguments.push(context.utilities.item.getBestToolForDoodadGather(context, doodad));
