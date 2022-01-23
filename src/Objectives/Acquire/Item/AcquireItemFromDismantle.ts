@@ -57,7 +57,7 @@ export default class AcquireItemFromDismantle extends Objective {
 			}
 
 			const dismantleItem = context.utilities.item.getItemInInventory(context, itemType);
-			const hasRequirements = description.dismantle.required === undefined || context.island.items.getItemForHuman(context.player, description.dismantle.required, false) !== undefined;
+			const hasRequirements = description.dismantle.required === undefined || context.island.items.getItemForHuman(context.player, description.dismantle.required, undefined, false) !== undefined;
 
 			const objectives: IObjective[] = [
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
