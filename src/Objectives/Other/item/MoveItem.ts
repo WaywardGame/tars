@@ -31,7 +31,7 @@ export default class MoveItem extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? this.getAcquiredItem(context);
 		if (!item?.isValid()) {
-			this.log.error("Invalid move item");
+			this.log.warn(`Invalid move item ${item}`);
 			return ObjectiveResult.Restart;
 		}
 
