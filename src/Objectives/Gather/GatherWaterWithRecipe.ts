@@ -58,7 +58,7 @@ export default class GatherWaterWithRecipe extends Objective {
                     const targetItemDescription = itemDescriptions[targetItemType];
                     if (targetItemDescription?.recipe !== undefined) {
                         return [
-                            new ReserveItems(this.item),
+                            new ReserveItems(this.item).keepInInventory(),
                             new AcquireItemWithRecipe(targetItemType, targetItemDescription.recipe, true),
                         ];
                     }

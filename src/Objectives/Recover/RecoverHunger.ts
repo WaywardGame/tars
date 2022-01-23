@@ -8,7 +8,6 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireFood from "../acquire/item/AcquireFood";
-import ReserveItems from "../core/ReserveItems";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 import UseItem from "../other/item/UseItem";
 
@@ -88,7 +87,7 @@ export default class RecoverHunger extends Objective {
 		}
 
 		return [
-			new AcquireFood(isEmergency),
+			new AcquireFood(isEmergency).keepInInventory(),
 			new UseItem(ActionType.Eat),
 		];
 	}
@@ -112,6 +111,9 @@ export default class RecoverHunger extends Objective {
 
 	private eatItem(context: Context, item: Item) {
 		this.log.info(`Eating ${item.getName().getString()}`);
-		return [new ReserveItems(item), new MoveItemIntoInventory(item), new UseItem(ActionType.Eat, item)];
+		return [
+			new MoveItemIntoInventory(item),
+			new UseItem(ActionType.Eat, item),
+		];
 	}
 }

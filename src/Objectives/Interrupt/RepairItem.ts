@@ -33,7 +33,7 @@ export default class RepairItem extends Objective {
 		}
 
 		if (this.item.minDur === undefined || this.item.maxDur === undefined) {
-			this.log.warn("Can't repair item, invalid durability", this.item);
+			this.log.warn(`Can't repair item ${this.item}, invalid durability`);
 			return ObjectiveResult.Ignore;
 		}
 

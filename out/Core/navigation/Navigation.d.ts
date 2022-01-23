@@ -10,8 +10,6 @@ export declare const creaturePenaltyRadius = 2;
 export default class Navigation {
     private readonly overlay;
     private static modPath;
-    totalTime: number;
-    totalCount: number;
     private readonly dijkstraMaps;
     private readonly navigationWorkers;
     private origin;
@@ -20,10 +18,11 @@ export default class Navigation {
     private workerInitialized;
     static setModPath(modPath: string): void;
     constructor(overlay: TarsOverlay);
-    delete(): void;
+    load(): void;
+    unload(): void;
     shouldUpdateSailingMode(sailingMode: boolean): boolean;
     updateAll(sailingMode: boolean): Promise<void>;
-    getOrigin(): IVector3;
+    getOrigin(): IVector3 | undefined;
     queueUpdateOrigin(origin?: IVector3): void;
     updateOrigin(origin?: IVector3): void;
     refreshOverlay(tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;

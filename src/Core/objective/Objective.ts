@@ -16,6 +16,7 @@ export default abstract class Objective implements IObjective {
 	public enableLogging = true;
 
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
+	protected _shouldKeepInInventory: boolean | undefined; // defaults to false
 	protected reserveType: ReserveType | undefined; // defaults to Hard
 
 	private _log: ILog | undefined;
@@ -211,6 +212,18 @@ export default abstract class Objective implements IObjective {
 		return this;
 	}
 
+	public shouldKeepInInventory() {
+		return this._shouldKeepInInventory ?? false;
+	}
+
+	/**
+	 * Marks that the acquired item should be kept in the inventory even when the player is overweight
+	 */
+	public keepInInventory() {
+		this._shouldKeepInInventory = true;
+		return this;
+	}
+
 	/**
 	 * Set the reserve type for the acquired item
 	 */
@@ -221,6 +234,7 @@ export default abstract class Objective implements IObjective {
 
 	public passAcquireData(objective: Objective, reserveType?: ReserveType) {
 		this.contextDataKey = objective.contextDataKey;
+		this._shouldKeepInInventory = objective._shouldKeepInInventory;
 		this.reserveType = reserveType ?? objective.reserveType;
 		return this;
 	}

@@ -3,10 +3,8 @@ import type { IContainer } from "game/item/IItem";
 import itemDescriptions from "game/item/Items";
 
 import type Context from "../../../core/context/Context";
-import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import SetContextData from "../../../objectives/contextData/SetContextData";
 import UseItem from "../../other/item/UseItem";
 
 import AcquireItem from "./AcquireItem";
@@ -35,7 +33,6 @@ export default class AcquireFood extends Objective {
 
 		for (const itemType of context.utilities.item.foodItemTypes) {
 			objectivePipelines.push([
-				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
 				new AcquireItem(itemType).passAcquireData(this),
 			]);
 		}
@@ -43,7 +40,6 @@ export default class AcquireFood extends Objective {
 		if (this.allowDangerousFoodItems) {
 			// make this harder since it could result in poison
 			objectivePipelines.push([
-				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
 				new AcquireItemForAction(ActionType.Eat).passAcquireData(this).addDifficulty(100),
 			]);
 		}
@@ -72,16 +68,17 @@ export default class AcquireFood extends Objective {
 			}
 
 			if (checker.requirementsMet()) {
-				const objectives: IObjective[] = [
-					new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
-					new AcquireItemWithRecipe(itemType, recipe),
-				];
-
 				if (eatFood) {
-					objectives.push(new UseItem(ActionType.Eat));
-				}
+					objectivePipelines.push([
+						new AcquireItemWithRecipe(itemType, recipe).keepInInventory(),
+						new UseItem(ActionType.Eat),
+					]);
 
-				objectivePipelines.push(objectives);
+				} else {
+					objectivePipelines.push([
+						new AcquireItemWithRecipe(itemType, recipe)
+					]);
+				}
 			}
 		}
 

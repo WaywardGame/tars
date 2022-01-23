@@ -133,9 +133,15 @@ class Executor {
 				return result;
 
 			} else if (result.type !== ExecuteObjectivesResultType.Completed) {
+				const remainingObjectives = objectives.slice(i + 1);
+
+				// log.debug(`Non-completed objective result: ${ExecuteObjectivesResultType[result.type]}`);
+				// log.debug(`Result objectives: ${Plan.getPipelineString(context, result.objectives)}`);
+				// log.debug(`Remaining objectives: ${Plan.getPipelineString(context, remainingObjectives)}`);
+
 				return {
 					type: ExecuteObjectivesResultType.Pending,
-					objectives: result.objectives.concat(objectives.slice(i + 1)),
+					objectives: result.objectives.concat(remainingObjectives),
 				};
 			}
 		}
@@ -198,9 +204,14 @@ class Executor {
 				};
 
 			} else if (result.type !== ExecuteResultType.Completed) {
+				const remainingObjectives = objectives.slice(i + 1);
+
+				// log.debug(`ContinuingNextTick objectives: ${Plan.getPipelineString(context, result.objectives)}`);
+				// log.debug(`Remaining objectives: ${Plan.getPipelineString(context, remainingObjectives)}`);
+
 				return {
 					type: ExecuteObjectivesResultType.ContinuingNextTick,
-					objectives: result.objectives.concat(objectives.slice(i + 1)),
+					objectives: result.objectives.concat(remainingObjectives),
 				};
 			}
 

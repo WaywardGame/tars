@@ -96,7 +96,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Disassemble, (context, action) => {
 				const item = context.getData<Item>(hashCode);
-				if (!item) {
+				if (!item?.isValid()) {
 					this.log.warn("Missing disassemble item. Bug in TARS pipeline, will fix itself", item, hashCode);
 					return;
 				}

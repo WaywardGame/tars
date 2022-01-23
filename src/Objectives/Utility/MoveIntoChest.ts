@@ -40,7 +40,7 @@ export default class MoveIntoChest extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const itemsToMove = this.itemsToMove ?? [this.getAcquiredItem(context)];
 		const firstItem = itemsToMove[0];
-		if (!firstItem) {
+		if (!firstItem?.isValid()) {
 			this.log.warn("Invalid item to move");
 			return ObjectiveResult.Restart;
 		}

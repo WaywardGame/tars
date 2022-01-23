@@ -58,7 +58,7 @@ export default class TameCreature extends Objective {
 
         objectives.push(new ExecuteAction(ActionType.Offer, (context, action) => {
             const item = context.getData(ContextDataType.Item1);
-            if (!item) {
+            if (!item?.isValid()) {
                 this.log.error("Invalid offer item");
                 return ObjectiveResult.Restart;
             }

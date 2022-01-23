@@ -8,6 +8,7 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
+import ReserveItems from "../../core/ReserveItems";
 
 export default class UseItem extends Objective {
 
@@ -25,7 +26,7 @@ export default class UseItem extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? this.getAcquiredItem(context);
-		if (!item || !item.isValid()) {
+		if (!item?.isValid()) {
 			this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}`);
 			return ObjectiveResult.Restart;
 		}
@@ -36,16 +37,25 @@ export default class UseItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		return new ExecuteAction(ActionType.UseItem, (context, action) => {
-			if (!item.isNearby(context.player, true)) {
-				this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is not nearby`, this.getStatus());
-				return ObjectiveResult.Restart;
-			}
+		return [
+			new ReserveItems(item).keepInInventory(),
+			new ExecuteAction(ActionType.UseItem, (context, action) => {
+				if (!item.isValid()) {
+					// item may have already been built?
+					// this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is not valid`, this.getStatus());
+					return ObjectiveResult.Restart;
+				}
 
-			action.execute(context.player, item, this.actionType);
+				if (!item.isNearby(context.player, true)) {
+					this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is not nearby`, this.getStatus());
+					return ObjectiveResult.Restart;
+				}
 
-			return ObjectiveResult.Complete;
-		}).setStatus(this);
+				action.execute(context.player, item, this.actionType);
+
+				return ObjectiveResult.Complete;
+			}).setStatus(this),
+		];
 	}
 
 }

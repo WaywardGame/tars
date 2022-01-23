@@ -1,8 +1,9 @@
 import type Item from "game/item/Item";
 
 import type Context from "../../core/context/Context";
+import { ContextDataType } from "../../core/context/IContext";
 import { ReserveType } from "../../core/ITars";
-import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 
@@ -20,7 +21,7 @@ export default class ReserveItems extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `ReserveItem:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.items.join(",")}`;
+		return `ReserveItem:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.shouldKeepInInventory() ? "KeepInInventory:" : ""}${this.items.join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -33,6 +34,18 @@ export default class ReserveItems extends Objective {
 
 		} else {
 			context.addHardReservedItems(...this.items);
+		}
+
+		if (this.shouldKeepInInventory()) {
+			let keepInInventoryItems = context.getData<Set<Item>>(ContextDataType.KeepInInventoryItems);
+			if (keepInInventoryItems) {
+				keepInInventoryItems.add(...this.items);
+
+			} else {
+				keepInInventoryItems = new Set(this.items);
+			}
+
+			context.setData(ContextDataType.KeepInInventoryItems, keepInInventoryItems);
 		}
 
 		return ObjectiveResult.Complete;

@@ -65,7 +65,7 @@ export default class SailToCivilization extends Objective {
             for (const itemType of requiredItems) {
                 const items = context.utilities.item.getBaseItemsByType(context, itemType);
                 if (items.length === 0) {
-                    objectives.push(new ReserveItems(items[0]), new MoveItemIntoInventory(items[0]));
+                    objectives.push(new ReserveItems(items[0]).keepInInventory(), new MoveItemIntoInventory(items[0]));
                 }
             }
         }

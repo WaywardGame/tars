@@ -164,7 +164,7 @@ export default class RecoverThirst extends Objective {
 					for (const waterStill of context.base.waterStill) {
 						objectivePipelines.push([
 							new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
-							new AcquireItemForAction(ActionType.Heal),
+							new AcquireItemForAction(ActionType.Heal).keepInInventory(),
 							new UseItem(ActionType.Heal),
 						]);
 					}

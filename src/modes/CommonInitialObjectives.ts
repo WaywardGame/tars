@@ -1,6 +1,5 @@
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 
@@ -18,11 +17,6 @@ import { log } from "../utilities/Logger";
 
 export async function getCommonInitialObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
     const objectives: Array<IObjective | IObjective[]> = [];
-
-    const gatherItem = context.utilities.item.getBestTool(context, ActionType.Gather, DamageType.Slashing);
-    if (gatherItem === undefined) {
-        objectives.push([new AcquireItemForAction(ActionType.Gather)]);
-    }
 
     if (context.inventory.axe === undefined) {
         objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);

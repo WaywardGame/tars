@@ -34,26 +34,34 @@ export default class Navigation {
 
 	private static modPath: string;
 
-	public totalTime = 0;
-	public totalCount = 0;
+	// public totalTime = 0;
+	// public totalCount = 0;
 
 	private readonly dijkstraMaps: Map<number, IDijkstraMap> = new Map();
 
 	private readonly navigationWorkers: INavigationWorker[] = [];
 
-	private origin: IVector3;
-
+	private origin: IVector3 | undefined;
 	private originUpdateTimeout: number | undefined;
 
-	private sailingMode = false;
-
-	private workerInitialized = false;
+	private sailingMode: boolean;
+	private workerInitialized: boolean;
 
 	public static setModPath(modPath: string) {
 		Navigation.modPath = modPath;
 	}
 
 	constructor(private readonly overlay: TarsOverlay) {
+	}
+
+	public load() {
+		this.unload();
+
+		this.origin = undefined;
+
+		this.sailingMode = false;
+		this.workerInitialized = false;
+
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			try {
 				this.dijkstraMaps.set(z, new Module.DijkstraMap());
@@ -100,8 +108,6 @@ export default class Navigation {
 			}
 		}
 
-		log.info(`Creating ${workerCount} navigation workers`);
-
 		for (let i = 0; i < workerCount; i++) {
 			const worker = new Worker(`${Navigation.modPath}\\out\\core\\navigation\\NavigationWorker.js`);
 
@@ -125,9 +131,11 @@ export default class Navigation {
 				gatherableTypes,
 			});
 		}
+
+		log.info(`Created ${workerCount} navigation workers`);
 	}
 
-	public delete() {
+	public unload() {
 		for (const dijkstraMap of this.dijkstraMaps.values()) {
 			try {
 				dijkstraMap.delete();
@@ -146,6 +154,11 @@ export default class Navigation {
 		this.navigationWorkers.length = 0;
 
 		this.overlay.clear();
+
+		if (this.originUpdateTimeout !== undefined) {
+			window.clearTimeout(this.originUpdateTimeout);
+			this.originUpdateTimeout = undefined;
+		}
 	}
 
 	public shouldUpdateSailingMode(sailingMode: boolean) {
@@ -218,6 +231,10 @@ export default class Navigation {
 			this.origin = { x: origin.x, y: origin.y, z: origin.z };
 		}
 
+		if (!this.origin) {
+			throw new Error("Invalid origin");
+		}
+
 		const dijkstraMapInstance = this.dijkstraMaps.get(this.origin.z);
 		if (!dijkstraMapInstance) {
 			return;
@@ -270,9 +287,10 @@ export default class Navigation {
 		this.refreshOverlay(tile, x, y, z, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
 		try {
-			const node = dijkstraMapInstance.getNode(x, y);
-			node.penalty = penalty;
-			node.disabled = isDisabled;
+			dijkstraMapInstance.updateNode(x, y, penalty, isDisabled);
+			// const node = dijkstraMapInstance.getNode(x, y);
+			// node.penalty = penalty;
+			// node.disabled = isDisabled;
 		} catch (ex) {
 			log.trace("invalid node", x, y, penalty, isDisabled);
 		}

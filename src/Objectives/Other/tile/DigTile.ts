@@ -3,7 +3,7 @@ import type { IVector3 } from "utilities/math/IVector";
 import TileHelpers from "utilities/game/TileHelpers";
 
 import type Context from "../../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
@@ -32,10 +32,16 @@ export default class DigTile extends Objective {
 
 		const shovel = context.inventory.shovel;
 		if (!shovel) {
-			objectives.push(new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory());
+			objectives.push(
+				new AcquireItemForAction(ActionType.Dig),
+				new AnalyzeInventory(),
+			);
 		}
 
-		objectives.push(new MoveToTarget(this.target, true), new UseItem(ActionType.Dig, shovel));
+		objectives.push(
+			new MoveToTarget(this.target, true),
+			new UseItem(ActionType.Dig, shovel),
+		);
 
 		const digUntilTypeIsNot = this.options.digUntilTypeIsNot;
 		if (digUntilTypeIsNot !== undefined) {

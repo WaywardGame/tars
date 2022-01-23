@@ -555,4 +555,3 @@ export interface IResetOptions {
     resetBase: boolean;
     resetInventory: boolean;
 }
-

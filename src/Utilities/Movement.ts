@@ -117,7 +117,7 @@ export class MovementUtilities {
             }
 
             const origin = navigation.getOrigin();
-            if (origin.x !== context.player.x || origin.y !== context.player.y || origin.z !== context.player.z) {
+            if (!origin || (origin.x !== context.player.x || origin.y !== context.player.y || origin.z !== context.player.z)) {
                 log.warn("Updating origin immediately due to mismatch", origin, context.player.getPoint());
                 navigation.updateOrigin(context.player);
             }

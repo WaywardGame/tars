@@ -19,6 +19,9 @@ export class CreatureUtilities {
 		return context.player.getWeightStatus() !== WeightStatus.Overburdened && ((health.value / health.max) <= 0.15 || stamina.value <= 2);
 	}
 
+	/**
+	 * Returns nearby untamed & unhitched creatures
+	 */
 	public getNearbyCreatures(context: Context): Creature[] {
 		const point = context.player;
 
@@ -29,7 +32,7 @@ export class CreatureUtilities {
 				const validPoint = context.island.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
 				if (validPoint) {
 					const tile = context.island.getTileFromPoint(validPoint);
-					if (tile.creature && !tile.creature.isTamed()) {
+					if (tile.creature && !tile.creature.isTamed() && tile.creature.hitchedTo === undefined) {
 						creatures.push(tile.creature);
 					}
 				}

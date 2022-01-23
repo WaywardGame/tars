@@ -57,7 +57,7 @@ export default class RecoverHealth extends Objective {
 		} else if (!isThirsty && !isHungry) {
 			this.log.info("Acquire a Health item");
 
-			objectives.push(new AcquireItemForAction(ActionType.Heal));
+			objectives.push(new AcquireItemForAction(ActionType.Heal).keepInInventory());
 			objectives.push(new UseItem(ActionType.Heal));
 		}
 
