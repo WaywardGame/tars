@@ -45,9 +45,9 @@ export class ItemUtilities {
 		if (this.itemCache === undefined) {
 			const baseTileItems = context.utilities.base.getTileItemsNearBase(context);
 			const baseChestItems = context.base.chest
-				.map(chest => context.island.items.getItemsInContainer(chest, true))
+				.map(chest => context.island.items.getItemsInContainer(chest, { includeSubContainers: true }))
 				.flat();
-			const inventoryItems = context.island.items.getItemsInContainer(context.player.inventory, true);
+			const inventoryItems = context.island.items.getItemsInContainer(context.player.inventory, { includeSubContainers: true });
 
 			this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
 		}
@@ -140,7 +140,7 @@ export class ItemUtilities {
 	}
 
 	public getItemsInInventory(context: Context, allowProtectedItems: boolean = true) {
-		return context.island.items.getItemsInContainer(context.player.inventory, true, allowProtectedItems);
+		return context.island.items.getItemsInContainer(context.player.inventory, { includeSubContainers: true, excludeProtectedItems: !allowProtectedItems });
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
@@ -493,7 +493,7 @@ export class ItemUtilities {
 			}
 		}
 
-		const matchingItems = context.island.items.getItemsInContainer(context.player.inventory, true).filter(item => itemTypes.includes(item.type));
+		const matchingItems = context.island.items.getItemsInContainer(context.player.inventory, { includeSubContainers: true }).filter(item => itemTypes.includes(item.type));
 
 		return matchingItems[0];
 	}

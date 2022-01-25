@@ -1,5 +1,5 @@
 import type Doodad from "game/doodad/Doodad";
-import type { IContainer} from "game/item/IItem";
+import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
@@ -57,7 +57,7 @@ export default class GatherFromChest extends Objective {
 
 		return chests
 			.map(chest => {
-				const items = context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, true)
+				const items = context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, { includeSubContainers: true })
 					.filter(item => {
 						if (context.isHardReservedItem(item)) {
 							return false;

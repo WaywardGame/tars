@@ -95,7 +95,7 @@ export default class RecoverHunger extends Objective {
 	private getFoodItemsInInventory(context: Context) {
 		// prioritize ones that will decay sooner
 		return Array.from(context.utilities.item.foodItemTypes)
-			.map(foodItemType => context.island.items.getItemsInContainerByType(context.player.inventory, foodItemType, true))
+			.map(foodItemType => context.island.items.getItemsInContainerByType(context.player.inventory, foodItemType, { includeSubContainers: true }))
 			.flat()
 			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
 	}
@@ -103,7 +103,7 @@ export default class RecoverHunger extends Objective {
 	private getFoodItemsInBase(context: Context): Item[] {
 		// prioritize ones that will decay sooner
 		return context.base.chest
-			.map(chest => context.island.items.getItemsInContainer(chest, true)
+			.map(chest => context.island.items.getItemsInContainer(chest, { includeSubContainers: true })
 				.filter(item => context.utilities.item.foodItemTypes.has(item.type)))
 			.flat()
 			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
