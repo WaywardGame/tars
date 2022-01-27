@@ -64,8 +64,10 @@ export enum TarsUiSaveDataKey {
     MoveToIslandDropdown,
     MoveToTerrainDropdown,
     MoveToDoodadDropdown,
+    MoveToCreatureDropdown,
     MoveToPlayerDropdown,
     MoveToNPCDropdown,
+    TameCreatureDropdown,
 }
 
 export enum TarsTranslation {
@@ -97,11 +99,14 @@ export enum TarsTranslation {
     DialogButtonUseOrbsOfInfluenceTooltip,
     DialogButtonSailToCivilization,
     DialogButtonSailToCivilizationTooltip,
+    DialogButtonTameCreature,
+    DialogButtonTameCreatureTooltip,
 
     DialogButtonMoveToBase,
     DialogButtonMoveToDoodad,
     DialogButtonMoveToIsland,
     DialogButtonMoveToNPC,
+    DialogButtonMoveToCreature,
     DialogButtonMoveToPlayer,
     DialogButtonMoveToTerrain,
 
@@ -125,6 +130,7 @@ export enum TarsTranslation {
     DialogLabelPlayer,
     DialogLabelRecoverThresholds,
     DialogLabelTerrain,
+    DialogLabelCreature,
 
     DialogModeSurvival,
     DialogModeSurvivalTooltip,

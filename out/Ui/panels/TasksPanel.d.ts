@@ -4,6 +4,7 @@ import { TarsTranslation } from "../../ITarsMod";
 export default class TasksPanel extends TarsPanel {
     private readonly dropdownItemType;
     private readonly dropdownDoodadType;
+    private readonly dropdownCreature;
     constructor();
     getTranslation(): TarsTranslation | Translation;
     protected onSwitchTo(): void;

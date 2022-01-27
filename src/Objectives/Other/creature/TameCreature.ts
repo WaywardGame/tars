@@ -11,6 +11,7 @@ import MoveToTarget from "../../core/MoveToTarget";
 import { ContextDataType } from "../../../core/context/IContext";
 import SetContextData from "../../contextData/SetContextData";
 import AcquireItemForTaming from "../../acquire/item/AcquireItemForTaming";
+import ReserveItems from "../../core/ReserveItems";
 
 export default class TameCreature extends Objective {
 
@@ -46,6 +47,7 @@ export default class TameCreature extends Objective {
 
         const offerItem = this.creature.offer(items);
         if (offerItem) {
+            objectives.push(new ReserveItems(offerItem).keepInInventory());
             objectives.push(new SetContextData(ContextDataType.Item1, offerItem));
 
         } else {
