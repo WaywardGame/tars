@@ -352,7 +352,7 @@ export default class CompleteQuestRequirement extends Objective {
                     for (const waterStill of context.base.waterStill) {
                         objectivePipelines.push([new GatherWaterFromStill(waterStill, context.inventory.waterContainer[0], {
                             allowStartingWaterStill: true,
-                            allowWaitingForWaterStill: true,
+                            allowWaitingForWater: true,
                             onlyIdleWhenWaitingForWaterStill: true,
                         })]);
                     }

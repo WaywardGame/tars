@@ -78,6 +78,7 @@ export interface IBase {
     furnace: Doodad[];
     intermediateChest: Doodad[];
     kiln: Doodad[];
+    solarStill: Doodad[];
     waterStill: Doodad[];
     well: Doodad[];
     buildAnotherChest: boolean;
@@ -87,7 +88,9 @@ export interface IBaseInfo {
     doodadTypes?: Array<DoodadType | DoodadTypeGroup>;
     litType?: DoodadType | DoodadTypeGroup;
     tryPlaceNear?: BaseInfoKey;
+    nearBaseDistanceSq?: number;
     allowMultiple?: boolean;
+    requireShallowWater?: boolean;
     openAreaRadius?: number;
     canAdd?(context: Context, target: Doodad): boolean;
     onAdd?(context: Context, target: Doodad): void;
@@ -103,8 +106,8 @@ export interface IInventoryItems {
     axe?: Item;
     bandage?: Item;
     bed?: Item;
-    campfire?: Item;
     butcher?: Item;
+    campfire?: Item;
     chest?: Item;
     equipBack?: Item;
     equipBelt?: Item;
@@ -130,6 +133,7 @@ export interface IInventoryItems {
     pickAxe?: Item;
     sailBoat?: Item;
     shovel?: Item;
+    solarStill?: Item;
     tongs?: Item;
     waterContainer?: Item[];
     waterStill?: Item;

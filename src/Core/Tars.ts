@@ -779,6 +779,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 furnace: [],
                 intermediateChest: [],
                 kiln: [],
+                solarStill: [],
                 waterStill: [],
                 well: [],
                 buildAnotherChest: false,
@@ -1513,6 +1514,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         if (this.inventory.anvil !== undefined) {
             objectives.push(new BuildItem(this.inventory.anvil));
+        }
+
+        if (this.inventory.solarStill !== undefined) {
+            objectives.push(new BuildItem(this.inventory.solarStill));
         }
 
         return objectives;

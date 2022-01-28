@@ -1,7 +1,7 @@
 import { BiomeType } from "game/biome/IBiome";
 import type Doodad from "game/doodad/Doodad";
 import DoodadManager from "game/doodad/DoodadManager";
-import type { DoodadType } from "game/doodad/IDoodad";
+import { DoodadType } from "game/doodad/IDoodad";
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
@@ -99,7 +99,7 @@ export default class BuildItem extends Objective {
 						}
 
 					} else {
-						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodBuildTile(context, point, tile, baseInfo?.openAreaRadius), { maxTilesChecked: defaultMaxTilesChecked });
+						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodBuildTile(context, point, tile, baseInfo), { maxTilesChecked: defaultMaxTilesChecked });
 					}
 
 					if (this.target !== undefined) {

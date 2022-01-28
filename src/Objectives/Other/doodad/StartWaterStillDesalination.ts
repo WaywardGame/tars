@@ -124,7 +124,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 			objectives.push(new PickUpAllTileItems(this.waterStill));
 
-			this.log.info("Moving to detach container");
+			this.log.info("Moving to attach container");
 
 			// attach the container to the water still
 			objectives.push(new UseItem(ActionType.AttachContainer, availableWaterContainer));

@@ -53,6 +53,7 @@ import type { IInventoryItems } from "../core/ITars";
 import { inventoryItemInfo } from "../core/ITars";
 import { getTarsSaveData } from "../ITarsMod";
 import { getCommonInitialObjectives } from "./CommonInitialObjectives";
+import StartSolarStill from "../objectives/other/doodad/StartSolarStill";
 
 /**
  * Survival mode
@@ -139,6 +140,11 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		if (context.utilities.base.isNearBase(context)) {
+			// ensure solar stills are solar stilling
+			for (const solarStill of context.base.solarStill) {
+				objectives.push(new StartSolarStill(solarStill));
+			}
+
 			// ensure water stills are water stilling
 			for (const waterStill of context.base.waterStill) {
 				objectives.push(new StartWaterStillDesalination(waterStill));
@@ -284,7 +290,7 @@ export class SurvivalMode implements ITarsMode {
 
 			if (drinkableWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+				objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 			}
 		}
 
@@ -433,12 +439,12 @@ export class SurvivalMode implements ITarsMode {
 						if (availableWaterContainers && availableWaterContainers.length > 0) {
 							// we are looking for something drinkable
 							// if there is a well, starting the water still will use it
-							objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+							objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 
 						} else {
 							// get a new water container
 							objectives.push(new AcquireWaterContainer());
-							objectives.push(new GatherWater(undefined, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+							objectives.push(new GatherWater(undefined, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 						}
 					}
 

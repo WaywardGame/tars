@@ -62,7 +62,7 @@ define(["require", "exports", "game/entity/action/IAction", "game/entity/IStats"
                 }
                 objectives.push(new MoveToTarget_1.default(this.waterStill, true));
                 objectives.push(new PickUpAllTileItems_1.default(this.waterStill));
-                this.log.info("Moving to detach container");
+                this.log.info("Moving to attach container");
                 objectives.push(new UseItem_1.default(IAction_1.ActionType.AttachContainer, availableWaterContainer));
             }
             if (!this.options.disableStarting) {

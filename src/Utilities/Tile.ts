@@ -1,3 +1,4 @@
+import { IContainer } from "game/item/IItem";
 import type { ITile, ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
@@ -46,8 +47,9 @@ export class TileUtilities {
 		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
-	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {
-		if (context.player.island.isTileFull(tile)) {
+	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true, requireShallowWater: boolean = false): boolean {
+		const container = tile as IContainer;
+		if (container.containedItems && container.containedItems.length > 0) {
 			return false;
 		}
 
@@ -66,7 +68,12 @@ export class TileUtilities {
 				return false;
 			}
 
-			if (!allowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
+			if (requireShallowWater) {
+				if (!terrainInfo.shallowWater) {
+					return false;
+				}
+
+			} else if (!allowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
 				return false;
 			}
 		}
