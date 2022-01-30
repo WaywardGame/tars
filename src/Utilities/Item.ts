@@ -47,7 +47,7 @@ export class ItemUtilities {
 			const baseChestItems = context.base.chest
 				.map(chest => context.island.items.getItemsInContainer(chest, { includeSubContainers: true }))
 				.flat();
-			const inventoryItems = context.island.items.getItemsInContainer(context.player.inventory, { includeSubContainers: true });
+			const inventoryItems = context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true });
 
 			this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
 		}
@@ -99,7 +99,7 @@ export class ItemUtilities {
 
 	// allow processing with inventory items assuming they wont be consumed
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
-		const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
+		const checker = new ItemRecipeRequirementChecker(context.human, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
 			if (isConsumed) {
 				if (context.isHardReservedItem(item)) {
 					return false;
@@ -140,11 +140,11 @@ export class ItemUtilities {
 	}
 
 	public getItemsInInventory(context: Context, allowProtectedItems: boolean = true) {
-		return context.island.items.getItemsInContainer(context.player.inventory, { includeSubContainers: true, excludeProtectedItems: !allowProtectedItems });
+		return context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true, excludeProtectedItems: !allowProtectedItems });
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
-		return this.getItemInContainer(context, context.player.inventory, itemTypeSearch);
+		return this.getItemInContainer(context, context.human.inventory, itemTypeSearch);
 	}
 
 	private getItemInContainer(
@@ -467,7 +467,7 @@ export class ItemUtilities {
 		const items = this.getItemsInInventory(context)
 			.filter(item => this.isInventoryItem(context, item));
 		const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
-		return context.player.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
+		return context.human.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
 	}
 
 	public getSeeds(context: Context): Item[] {
@@ -493,7 +493,7 @@ export class ItemUtilities {
 			}
 		}
 
-		const matchingItems = context.island.items.getItemsInContainer(context.player.inventory, { includeSubContainers: true }).filter(item => itemTypes.includes(item.type));
+		const matchingItems = context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true }).filter(item => itemTypes.includes(item.type));
 
 		return matchingItems[0];
 	}

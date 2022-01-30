@@ -78,17 +78,17 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 			if (requiredForDisassembly) {
 				for (const itemTypeOfGroup of requiredForDisassembly) {
-					if (!context.island.items.getItemForHuman(context.player, itemTypeOfGroup)) {
+					if (!context.island.items.getItemForHuman(context.human, itemTypeOfGroup)) {
 						objectives.push(context.island.items.isGroup(itemTypeOfGroup) ? new AcquireItemByGroup(itemTypeOfGroup) : new AcquireItem(itemTypeOfGroup));
 					}
 				}
 			}
 
-			if (context.player.isSwimming()) {
+			if (context.human.isSwimming()) {
 				objectives.push(new MoveToLand());
 			}
 
-			const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, item.type, undefined, undefined, true);
+			const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, item.type, undefined, undefined, true);
 			if (requirementInfo.requirements === RequirementStatus.Missing) {
 				this.log.info("Disassemble requirements not met");
 				objectives.push(new CompleteRequirements(requirementInfo));
@@ -101,7 +101,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 					return;
 				}
 
-				action.execute(context.player, item);
+				action.execute(context.actionExecutor, item);
 			}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
 
 			objectivePipelines.push(objectives);

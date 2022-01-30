@@ -1,9 +1,9 @@
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
-import type { IRequirementInfo} from "game/item/IItemManager";
+import type { IRequirementInfo } from "game/item/IItemManager";
 import { RequirementStatus } from "game/item/IItemManager";
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
@@ -70,7 +70,7 @@ export default class CompleteRequirements extends Objective {
 						// it was probably not placed correctly
 						// pick it up. the object will be then built in the correct spot
 						return new ExecuteAction(ActionType.Pickup, (context, action) => {
-							action.execute(context.player);
+							action.execute(context.actionExecutor);
 							return ObjectiveResult.Complete;
 						}).setStatus("Picking up anvil to place it next to the kiln");
 					}

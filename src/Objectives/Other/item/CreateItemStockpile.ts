@@ -33,7 +33,7 @@ export default class CreateItemStockpile extends Objective {
 			.map(chest => context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, { includeSubContainers: true }))
 			.flat();
 
-		const inventoryItems = context.island.items.getItemsInContainerByType(context.player.inventory, this.itemType, { includeSubContainers: true });
+		const inventoryItems = context.island.items.getItemsInContainerByType(context.human.inventory, this.itemType, { includeSubContainers: true });
 
 		const acquireCount = this.count - baseItems.length - inventoryItems.length;
 		if (acquireCount <= 0) {

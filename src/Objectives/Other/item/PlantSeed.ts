@@ -135,9 +135,9 @@ export default class PlantSeed extends Objective {
 				new MoveToTarget(point, true),
 				new UseItem(ActionType.Till).setContextDataKey(ContextDataType.Item1),
 				new Lambda(async context => {
-					const facingPoint = context.player.getFacingPoint();
+					const facingPoint = context.human.getFacingPoint();
 
-					if (context.player.island.isTilled(facingPoint.x, facingPoint.y, facingPoint.z)) {
+					if (context.human.island.isTilled(facingPoint.x, facingPoint.y, facingPoint.z)) {
 						return ObjectiveResult.Complete;
 					}
 

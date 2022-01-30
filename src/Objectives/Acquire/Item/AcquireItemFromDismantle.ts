@@ -57,7 +57,7 @@ export default class AcquireItemFromDismantle extends Objective {
 			}
 
 			const dismantleItem = context.utilities.item.getItemInInventory(context, itemType);
-			const hasRequirements = description.dismantle.required === undefined || context.island.items.getItemForHuman(context.player, description.dismantle.required, { excludeProtectedItems: true, includeProtectedItemsThatWillNotBreak: ActionType.Dismantle }) !== undefined;
+			const hasRequirements = description.dismantle.required === undefined || context.island.items.getItemForHuman(context.human, description.dismantle.required, { excludeProtectedItems: true, includeProtectedItemsThatWillNotBreak: ActionType.Dismantle }) !== undefined;
 
 			const objectives: IObjective[] = [
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
@@ -80,7 +80,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				objectives.push(new AcquireItemByGroup(description.dismantle.required!));
 			}
 
-			if (context.player.isSwimming()) {
+			if (context.human.isSwimming()) {
 				objectives.push(new MoveToLand());
 			}
 
@@ -91,7 +91,7 @@ export default class AcquireItemFromDismantle extends Objective {
 					return;
 				}
 
-				action.execute(context.player, item);
+				action.execute(context.actionExecutor, item);
 			}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);

@@ -197,7 +197,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverHealthThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Health).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Health).max,
         }
     },
     {
@@ -206,7 +206,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverStaminaThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Stamina).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Stamina).max,
         }
     },
     {
@@ -215,7 +215,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverHungerThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Hunger).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Hunger).max,
         }
     },
     {
@@ -224,7 +224,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverThirstThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Thirst).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Thirst).max,
         }
     },
 ];

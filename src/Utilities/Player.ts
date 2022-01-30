@@ -5,19 +5,19 @@ import type Context from "../core/context/Context";
 export class PlayerUtilities {
 
 	public getWeight(context: Context) {
-		return context.player.stat.get<IStatMax>(Stat.Weight).value;
+		return context.human.stat.get<IStatMax>(Stat.Weight).value;
 	}
 
 	public getMaxWeight(context: Context) {
-		return context.player.stat.get<IStatMax>(Stat.Weight).max;
+		return context.human.stat.get<IStatMax>(Stat.Weight).max;
 	}
 
 	public isUsingVehicle(context: Context) {
-		return !!context.player.vehicleItemReference;
+		return !!context.human.vehicleItemReference;
 	}
 
 	public isHealthy(context: Context) {
-		return context.player.stat.get<IStatMax>(Stat.Health).value > 8 && context.player.stat.get<IStatMax>(Stat.Hunger).value > 8;
+		return context.human.stat.get<IStatMax>(Stat.Health).value > 8 && context.human.stat.get<IStatMax>(Stat.Hunger).value > 8;
 	}
 
 	public getRecoverThreshold(context: Context, stat: Stat) {
@@ -54,6 +54,6 @@ export class PlayerUtilities {
 	}
 
 	private parseThreshold(context: Context, stat: Stat, threshold: number) {
-		return threshold > 0 ? threshold : context.player.stat.get<IStatMax>(stat).max + threshold;
+		return threshold > 0 ? threshold : context.human.stat.get<IStatMax>(stat).max + threshold;
 	}
 }

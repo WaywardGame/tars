@@ -25,7 +25,7 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const malign = context.player.stat.get(Stat.Malignity)!;
+		const malign = context.human.stat.get(Stat.Malignity)!;
 		if (malign.value < 5000) {
 			return ObjectiveResult.Ignore;
 		}
@@ -49,7 +49,7 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 
 			// reduce malignity
 			return (new ExecuteAction(ActionType.RubCounterclockwise, (context, action) => {
-				action.execute(context.player, item);
+				action.execute(context.actionExecutor, item);
 				return ObjectiveResult.Complete;
 			}).setStatus(this));
 		}));

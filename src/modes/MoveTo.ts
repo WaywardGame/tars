@@ -163,7 +163,7 @@ export class MoveToMode implements ITarsMode {
                 const player = playerManager.getByIdentifier(this.target.playerIdentifier);
 
                 if (player) {
-                    if (player === context.player) {
+                    if (player === context.human) {
                         return [
                             new Lambda(async () => {
                                 this.finished(true);

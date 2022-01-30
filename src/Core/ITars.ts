@@ -156,7 +156,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
                 return false;
             }
 
-            if (context.options.goodCitizen && multiplayer.isConnected() && target.getOwner() !== context.player) {
+            if (context.options.goodCitizen && multiplayer.isConnected() && target.getOwner() !== context.human) {
                 return false;
             }
 

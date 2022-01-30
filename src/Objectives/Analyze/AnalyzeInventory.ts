@@ -106,14 +106,14 @@ export default class AnalyzeInventory extends Objective {
 						if (existingItems) {
 							for (const item of existingItems) {
 								if (item.isValid() && item.protected && !newItems.includes(item)) {
-									ProtectItem.execute(context.player, item, false);
+									ProtectItem.execute(context.actionExecutor, item, false);
 								}
 							}
 						}
 
 						for (const item of newItems) {
 							if (item.isValid() && !item.protected) {
-								ProtectItem.execute(context.player, item, true);
+								ProtectItem.execute(context.actionExecutor, item, true);
 							}
 						}
 					}
@@ -123,14 +123,14 @@ export default class AnalyzeInventory extends Objective {
 					const item = sortedItems[0];
 					if (currentItem !== item) {
 						if (itemInfo.protect && currentItem && currentItem.isValid() && currentItem.protected) {
-							ProtectItem.execute(context.player, currentItem, false);
+							ProtectItem.execute(context.actionExecutor, currentItem, false);
 						}
 
 						context.inventory[key] = item as any;
 						this.log.info(`Found "${key}" - ${item}`);
 
 						if (itemInfo.protect) {
-							ProtectItem.execute(context.player, item, true);
+							ProtectItem.execute(context.actionExecutor, item, true);
 						}
 					}
 				}
@@ -148,10 +148,10 @@ export default class AnalyzeInventory extends Objective {
 
 			for (const itemTypeOrGroup of itemTypes) {
 				if (context.island.items.isGroup(itemTypeOrGroup)) {
-					items.addFrom(context.island.items.getItemsInContainerByGroup(context.player.inventory, itemTypeOrGroup));
+					items.addFrom(context.island.items.getItemsInContainerByGroup(context.human.inventory, itemTypeOrGroup));
 
 				} else {
-					items.addFrom(context.island.items.getItemsInContainerByType(context.player.inventory, itemTypeOrGroup));
+					items.addFrom(context.island.items.getItemsInContainerByType(context.human.inventory, itemTypeOrGroup));
 				}
 			}
 		}
@@ -186,7 +186,7 @@ export default class AnalyzeInventory extends Objective {
 			return false;
 		}
 
-		if (context.island.items.isContainableInContainer(item, context.player.inventory)) {
+		if (context.island.items.isContainableInContainer(item, context.human.inventory)) {
 			return true;
 		}
 

@@ -25,7 +25,7 @@ export default class MoveToWater extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (context.player.vehicleItemReference) {
+		if (context.human.vehicleItemReference) {
 			// todo: confirm this
 			return ObjectiveResult.Complete;
 		}
@@ -50,7 +50,7 @@ export default class MoveToWater extends Objective {
 				// find the safest point
 
 				if (this.ocean) {
-					const result = canSailAwayFromPosition(context.player.island, point);
+					const result = canSailAwayFromPosition(context.human.island, point);
 					if (result.canSailAway) {
 						return true;
 					}

@@ -1,6 +1,6 @@
 
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import Restart from "../core/Restart";
@@ -17,8 +17,8 @@ export default class CompleteQuests extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const quests = context.player.quests.getQuests().filter(quest => !quest.data.complete);
-        if (quests.length === 0) {
+        const quests = context.human.asPlayer?.quests.getQuests().filter(quest => !quest.data.complete);
+        if (!quests || quests.length === 0) {
             return ObjectiveResult.Complete;
         }
 

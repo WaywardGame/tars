@@ -36,7 +36,7 @@ export default class UnequipItem extends Objective {
 		return [
 			new ReserveItems(item).keepInInventory(),
 			new ExecuteAction(ActionType.Unequip, (context, action) => {
-				action.execute(context.player, item);
+				action.execute(context.actionExecutor, item);
 				return ObjectiveResult.Complete;
 			}).setStatus(this),
 		];

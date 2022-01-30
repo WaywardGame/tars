@@ -68,7 +68,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			return 0;
 		}
 
-		const tile = context.player.getFacingTile();
+		const tile = context.human.getFacingTile();
 		const tileType = TileHelpers.getType(tile);
 
 		const terrainDescription = Terrains[tileType];
@@ -158,7 +158,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				this.executor(context, action);
 
 			} else {
-				action.execute(context.player, ...actionArguments);
+				action.execute(context.actionExecutor, ...actionArguments);
 			}
 		}) as any);
 
@@ -196,10 +196,10 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			return ObjectiveResult.Complete;
 		}
 
-		const item = context.player.getTile().containedItems?.find(item => itemTypes.includes(item.type));
+		const item = context.human.getTile().containedItems?.find(item => itemTypes.includes(item.type));
 		if (item) {
 			matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, ActionType.MoveItem, ((context: Context, action: any) => {
-				action.execute(context.player, item, context.player.inventory);
+				action.execute(context.actionExecutor, item, context.human.inventory);
 			}));
 
 			if (matchingNewItem !== undefined) {
@@ -228,11 +228,11 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		itemTypes: ItemType[],
 		actionType: T,
 		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) {
-		const itemsBefore = context.player.inventory.containedItems.slice();
+		const itemsBefore = context.human.inventory.containedItems.slice();
 
 		await context.utilities.action.executeAction(context, actionType, executor as any);
 
-		const newItems = context.player.inventory.containedItems.filter(item => !itemsBefore.includes(item));
+		const newItems = context.human.inventory.containedItems.filter(item => !itemsBefore.includes(item));
 
 		return newItems.find(item => itemTypes.includes(item.type));
 	}

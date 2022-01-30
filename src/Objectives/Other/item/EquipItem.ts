@@ -37,7 +37,7 @@ export default class EquipItem extends Objective {
 		return [
 			new ReserveItems(item).keepInInventory(),
 			new ExecuteAction(ActionType.Equip, (context, action) => {
-				action.execute(context.player, item, this.equip);
+				action.execute(context.actionExecutor, item, this.equip);
 				return ObjectiveResult.Complete;
 			}).setStatus(this),
 		];

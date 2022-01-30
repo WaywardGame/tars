@@ -28,7 +28,7 @@ export default class RecoverHunger extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
+		const hunger = context.human.stat.get<IStatMax>(Stat.Hunger);
 
 		if (this.onlyUseAvailableItems) {
 			const foodItems = this.exceededThreshold ? this.getFoodItemsInInventory(context) : undefined;
@@ -95,7 +95,7 @@ export default class RecoverHunger extends Objective {
 	private getFoodItemsInInventory(context: Context) {
 		// prioritize ones that will decay sooner
 		return Array.from(context.utilities.item.foodItemTypes)
-			.map(foodItemType => context.island.items.getItemsInContainerByType(context.player.inventory, foodItemType, { includeSubContainers: true }))
+			.map(foodItemType => context.island.items.getItemsInContainerByType(context.human.inventory, foodItemType, { includeSubContainers: true }))
 			.flat()
 			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
 	}

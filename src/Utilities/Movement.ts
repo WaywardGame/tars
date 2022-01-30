@@ -82,7 +82,7 @@ export class MovementUtilities {
     }
 
     public async getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean): Promise<IMovementPath> {
-        if (context.player.x === target.x && context.player.y === target.y && context.player.z === target.z && !moveAdjacentToTarget) {
+        if (context.human.x === target.x && context.human.y === target.y && context.human.z === target.z && !moveAdjacentToTarget) {
             return {
                 difficulty: 0,
             };
@@ -99,7 +99,7 @@ export class MovementUtilities {
             const navigation = context.utilities.navigation;
 
             // ensure sailing mode is up to date
-            await context.utilities.ensureSailingMode(!!context.player.vehicleItemReference);
+            await context.utilities.ensureSailingMode(!!context.human.vehicleItemReference);
 
             const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
             if (ends.length === 0) {
@@ -109,7 +109,7 @@ export class MovementUtilities {
             }
 
             for (const end of ends) {
-                if (context.player.x === end.x && context.player.y === end.y && context.player.z === end.z) {
+                if (context.human.x === end.x && context.human.y === end.y && context.human.z === end.z) {
                     return {
                         difficulty: 0,
                     };
@@ -117,9 +117,9 @@ export class MovementUtilities {
             }
 
             const origin = navigation.getOrigin();
-            if (!origin || (origin.x !== context.player.x || origin.y !== context.player.y || origin.z !== context.player.z)) {
-                log.warn("Updating origin immediately due to mismatch", origin, context.player.getPoint());
-                navigation.updateOrigin(context.player);
+            if (!origin || (origin.x !== context.human.x || origin.y !== context.human.y || origin.z !== context.human.z)) {
+                log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
+                navigation.updateOrigin(context.human);
             }
 
             // pick the easiest path
@@ -178,17 +178,17 @@ export class MovementUtilities {
 
             const end = movementPath.path[pathLength - 1];
             if (!end) {
-                log.info("Broken path!", pathLength, movementPath.path, target.x, target.y, target.z, context.player.x, context.player.y, context.player.z);
+                log.info("Broken path!", pathLength, movementPath.path, target.x, target.y, target.z, context.human.x, context.human.y, context.human.z);
                 return MoveResult.NoPath;
             }
 
-            const atEnd = context.player.x === end.x && context.player.y === end.y;
+            const atEnd = context.human.x === end.x && context.human.y === end.y;
             if (!atEnd) {
                 const nextPosition: IVector2 | undefined = movementPath.path[1];
                 if (nextPosition) {
-                    const direction = getDirectionFromMovement(nextPosition.x - context.player.x, nextPosition.y - context.player.y);
+                    const direction = getDirectionFromMovement(nextPosition.x - context.human.x, nextPosition.y - context.human.y);
 
-                    const nextTile = context.player.island.getTile(nextPosition.x, nextPosition.y, target.z);
+                    const nextTile = context.human.island.getTile(nextPosition.x, nextPosition.y, target.z);
                     const doodad = nextTile.doodad;
                     const tileType = TileHelpers.getType(nextTile);
                     const terrainDescription = Terrains[tileType];
@@ -196,9 +196,9 @@ export class MovementUtilities {
                     if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
                         // some terrain is blocking our path
                         if (terrainDescription.gather) {
-                            if (direction !== context.player.facingDirection) {
+                            if (direction !== context.human.facingDirection) {
                                 await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
-                                    action.execute(context.player, direction, undefined);
+                                    action.execute(context.actionExecutor, direction, undefined);
                                     return ObjectiveResult.Complete;
                                 });
                             }
@@ -206,7 +206,7 @@ export class MovementUtilities {
                             const actionType = terrainDescription.gather ? ActionType.Mine : ActionType.Dig;
 
                             await context.utilities.action.executeAction(context, actionType, (context, action) => {
-                                action.execute(context.player, context.utilities.item.getBestToolForTerrainGather(context, tileType));
+                                action.execute(context.actionExecutor, context.utilities.item.getBestToolForTerrainGather(context, tileType));
                                 return ObjectiveResult.Complete;
                             });
 
@@ -220,20 +220,20 @@ export class MovementUtilities {
                         // doodad is blocking our path
 
                         // face it
-                        if (direction !== context.player.facingDirection) {
+                        if (direction !== context.human.facingDirection) {
                             await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
-                                action.execute(context.player, direction, undefined);
+                                action.execute(context.actionExecutor, direction, undefined);
                                 return ObjectiveResult.Complete;
                             });
                         }
 
-                        if (doodad.canPickup(context.player)) {
+                        if (doodad.canPickup(context.human)) {
                             const doodadDescription = doodad.description();
                             if (doodadDescription && (doodadDescription.isDoor || doodadDescription.isGate) && doodadDescription.isClosed) {
                                 log.info("Opening doodad blocking the path", Direction[direction]);
 
                                 await context.utilities.action.executeAction(context, ActionType.OpenDoor, (context, action) => {
-                                    action.execute(context.player);
+                                    action.execute(context.actionExecutor);
                                     return ObjectiveResult.Complete;
                                 });
 
@@ -241,7 +241,7 @@ export class MovementUtilities {
                                 log.info("Picking up doodad blocking the path", Direction[direction]);
 
                                 await context.utilities.action.executeAction(context, ActionType.Pickup, (context, action) => {
-                                    action.execute(context.player);
+                                    action.execute(context.actionExecutor);
                                     return ObjectiveResult.Complete;
                                 });
                             }
@@ -256,7 +256,7 @@ export class MovementUtilities {
                             }
 
                             await context.utilities.action.executeAction(context, ActionType.Butcher, (context, action) => {
-                                action.execute(context.player, tool);
+                                action.execute(context.actionExecutor, tool);
                                 return ObjectiveResult.Complete;
                             });
 
@@ -264,7 +264,7 @@ export class MovementUtilities {
                             log.info("Gathering from doodad blocking the path", Direction[direction]);
 
                             await context.utilities.action.executeAction(context, ActionType.Chop, (context, action) => {
-                                action.execute(context.player, context.utilities.item.getBestToolForDoodadGather(context, doodad));
+                                action.execute(context.actionExecutor, context.utilities.item.getBestToolForDoodadGather(context, doodad));
                                 return ObjectiveResult.Complete;
                             });
                         }
@@ -273,10 +273,13 @@ export class MovementUtilities {
 
                     } else if (nextTile.creature) {
                         // walking into a creature
-                        await context.utilities.action.executeAction(context, ActionType.Move, (context, action) => {
-                            action.execute(context.player, direction);
-                            return ObjectiveResult.Complete;
-                        });
+                        const player = context.human.asPlayer;
+                        if (player) {
+                            await context.utilities.action.executeAction(context, ActionType.Move, (context, action) => {
+                                action.execute(player, direction);
+                                return ObjectiveResult.Complete;
+                            });
+                        }
 
                         return MoveResult.Moving;
 
@@ -286,14 +289,14 @@ export class MovementUtilities {
                     }
                 }
 
-                if (force || !context.player.hasWalkPath()) {
+                if (force || !context.human.asPlayer?.hasWalkPath()) {
                     // walk along the path up to the first obstacle. we don't want to let the Move action automatically gather (it uses tools poorly)
                     this.updateOverlay(movementPath.path);
 
                     let path = movementPath.path;
                     for (let i = 2; i < path.length; i++) {
                         const position = path[i];
-                        const tile = context.player.island.getTile(position.x, position.y, target.z);
+                        const tile = context.human.island.getTile(position.x, position.y, target.z);
                         const tileType = TileHelpers.getType(tile);
                         const terrainDescription = Terrains[tileType];
 
@@ -309,11 +312,10 @@ export class MovementUtilities {
                             return MoveResult.NoPath;
                         }
 
-                        context.player.walkAlongPath([nextPosition], true);
-
-                    } else {
-                        context.player.walkAlongPath(path, true);
+                        path = [nextPosition];
                     }
+
+                    context.human.asPlayer?.walkAlongPath(path, true);
                 }
 
                 return MoveResult.Moving;
@@ -321,10 +323,10 @@ export class MovementUtilities {
         }
 
         if (moveAdjacentToTarget) {
-            const direction = getDirectionFromMovement(target.x - context.player.x, target.y - context.player.y);
-            if (direction !== context.player.facingDirection) {
+            const direction = getDirectionFromMovement(target.x - context.human.x, target.y - context.human.y);
+            if (direction !== context.human.facingDirection) {
                 await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
-                    action.execute(context.player, direction, undefined);
+                    action.execute(context.actionExecutor, direction, undefined);
                     return ObjectiveResult.Complete;
                 });
             }

@@ -79,10 +79,10 @@ class Executor {
 	}
 
 	public isReady(context: Context, checkForInterrupts: boolean) {
-		return !context.player.isResting()
-			&& !context.player.isMovingClientside
-			&& !context.player.hasDelay()
-			&& !context.player.isGhost()
+		return !context.human.isResting()
+			&& !context.human.isMovingClientside
+			&& !context.human.hasDelay()
+			&& !context.human.isGhost()
 			&& !game.isPaused
 			&& (!checkForInterrupts || !this.interrupted);
 	}
@@ -175,7 +175,7 @@ class Executor {
 					return undefined;
 				},
 				(getObjectiveResults: () => IObjective[]) => {
-					if (this.weightChanged && context.player.getWeightStatus() !== WeightStatus.None) {
+					if (this.weightChanged && context.human.getWeightStatus() !== WeightStatus.None) {
 						log.info("Weight changed. Stopping execution");
 						return {
 							type: ExecuteResultType.Restart,

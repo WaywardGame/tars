@@ -1,7 +1,7 @@
-import type Player from "game/entity/player/Player";
+import Human from "game/entity/Human";
 import type { IBase, IInventoryItems, IUtilities } from "../ITars";
 export interface IContext {
-    readonly player: Player;
+    readonly human: Human;
     readonly base: IBase;
     readonly inventory: IInventoryItems;
     readonly utilities: IUtilities;

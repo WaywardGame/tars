@@ -1,3 +1,5 @@
+import Human from "game/entity/Human";
+import NPC from "game/entity/npc/NPC";
 import type Player from "game/entity/player/Player";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
@@ -6,7 +8,7 @@ import type { IBase, IInventoryItems, ITarsOptions, IUtilities } from "../ITars"
 import ContextState from "./ContextState";
 import type { IContext } from "./IContext";
 export default class Context implements IContext {
-    readonly player: Player;
+    readonly human: Human;
     readonly base: IBase;
     readonly inventory: IInventoryItems;
     readonly utilities: IUtilities;
@@ -15,8 +17,9 @@ export default class Context implements IContext {
     readonly calculatingDifficulty: boolean;
     private initialState?;
     private changes;
-    constructor(player: Player, base: IBase, inventory: IInventoryItems, utilities: IUtilities, options: Readonly<ITarsOptions>, state?: ContextState, calculatingDifficulty?: boolean, initialState?: ContextState | undefined);
+    constructor(human: Human, base: IBase, inventory: IInventoryItems, utilities: IUtilities, options: Readonly<ITarsOptions>, state?: ContextState, calculatingDifficulty?: boolean, initialState?: ContextState | undefined);
     get island(): import("../../../node_modules/@wayward/types/definitions/game/game/island/Island").default;
+    get actionExecutor(): Player | NPC;
     toString(): string;
     clone(calculatingDifficulty?: boolean, increaseDepth?: boolean): Context;
     merge(state: ContextState): void;

@@ -89,7 +89,7 @@ export default class StartWaterStillDesalination extends Objective {
 				objectives.push(new MoveToTarget(this.waterStill, true));
 
 				objectives.push(new ExecuteAction(ActionType.DetachContainer, (context, action) => {
-					action.execute(context.player);
+					action.execute(context.actionExecutor);
 					return ObjectiveResult.Complete;
 				}).setStatus(() => `Detaching container from ${this.waterStill.getName()}`));
 			}
@@ -136,7 +136,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 			} else if (!waterStillDescription.providesFire) {
 				// only start the fire if we are near the base or if we have an emergency
-				if (this.options.forceStarting || context.utilities.base.isNearBase(context) || context.player.stat.get<IStat>(Stat.Thirst).value <= 3) {
+				if (this.options.forceStarting || context.utilities.base.isNearBase(context) || context.human.stat.get<IStat>(Stat.Thirst).value <= 3) {
 					// we need to start the fire. stoke fire will do it for us
 					objectives.push(new StokeFire(this.waterStill));
 					objectives.push(new Restart());

@@ -1,9 +1,9 @@
 import { ActionType } from "game/entity/action/IAction";
-import type { IslandId} from "game/island/IIsland";
+import type { IslandId } from "game/island/IIsland";
 import { IslandPosition } from "game/island/IIsland";
 import { ItemType } from "game/item/IItem";
 import type Context from "../../../core/context/Context";
-import type { ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireItem from "../../acquire/item/AcquireItem";
@@ -27,8 +27,13 @@ export default class MoveToIsland extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        if (context.player.islandId === this.islandId) {
+        if (context.human.islandId === this.islandId) {
             return ObjectiveResult.Complete;
+        }
+
+        const player = context.human.asPlayer;
+        if (!player) {
+            return ObjectiveResult.Impossible;
         }
 
         const islandPosition = IslandPosition.fromId(this.islandId);
@@ -36,35 +41,12 @@ export default class MoveToIsland extends Objective {
             return ObjectiveResult.Impossible;
         }
 
-        // let direction: Direction.Cardinal;
-
-        // if (islandPosition.x < context.player.island.position.x) {
-        //     direction = Direction.West;
-
-        // } else if (islandPosition.x > context.player.island.position.x) {
-        //     direction = Direction.East;
-
-        // } else if (islandPosition.y < context.player.island.position.y) {
-        //     direction = Direction.South;
-
-        // } else {
-        //     direction = Direction.North;
-        // }
-
-        // const movement = Vector2.DIRECTIONS[direction];
-
-        // const edgePosition: IVector3 = {
-        //     x: Math.min(Math.max(context.player.x + (movement.x * game.mapSize), 0), game.mapSize - 1),
-        //     y: Math.min(Math.max(context.player.y + (movement.y * game.mapSize), 0), game.mapSize - 1),
-        //     z: context.player.z,
-        // };
-
         return [
             ...(context.inventory.sailBoat ? [new MoveItemIntoInventory(context.inventory.sailBoat)] : [new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]),
             new MoveToWater(true),
             // new Lambda(async () => canSailAwayFromPosition(context.player.island, context.player) ? ObjectiveResult.Complete : ObjectiveResult.Impossible),
             new ExecuteAction(ActionType.SailToIsland, (context, action) => {
-                action.execute(context.player, islandPosition.x, islandPosition.y);
+                action.execute(player, islandPosition.x, islandPosition.y);
                 return ObjectiveResult.Complete;
             }).setStatus(this),
 
@@ -73,7 +55,7 @@ export default class MoveToIsland extends Objective {
             // new MoveToWater(true),
             // new MoveToTarget(edgePosition, true, { allowBoat: true, disableStaminaCheck: true }),
             // new ExecuteAction(ActionType.Move, (context, action) => {
-            //     action.execute(context.player, direction);
+            //     action.execute(context.actionExecutor, direction);
             //     return ObjectiveResult.Complete;
             // }).setStatus(this),
         ];

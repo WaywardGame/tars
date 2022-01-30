@@ -126,7 +126,7 @@ export default class RecoverThirst extends Objective {
 						stillObjectives.push(new MoveToTarget(solarOrWaterStill, true));
 
 						stillObjectives.push(new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-							action.execute(context.player);
+							action.execute(context.actionExecutor);
 							return ObjectiveResult.Complete;
 						}));
 
@@ -143,7 +143,7 @@ export default class RecoverThirst extends Objective {
 	}
 
 	private async getEmergencyObjectives(context: Context) {
-		const thirstStat = context.player.stat.get<IStatMax>(Stat.Thirst);
+		const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
 
 		const isEmergency = thirstStat.value <= 3 && context.base.waterStill.concat(context.base.solarStill).every(waterStill => !context.utilities.doodad.isWaterStillDrinkable(waterStill));
 		if (!isEmergency) {
@@ -152,7 +152,7 @@ export default class RecoverThirst extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
-		const health = context.player.stat.get<IStatMax>(Stat.Health);
+		const health = context.human.stat.get<IStatMax>(Stat.Health);
 		if ((isEmergency && health.value > 4) || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = await context.utilities.tile.getNearestTileLocation(context, freshWaterTileLocation);
@@ -163,7 +163,7 @@ export default class RecoverThirst extends Objective {
 				objectives.push(new MoveToTarget(point, true).addDifficulty(!isEmergency ? 500 : 0));
 
 				objectives.push(new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-					action.execute(context.player);
+					action.execute(context.actionExecutor);
 					return ObjectiveResult.Complete;
 				}));
 
@@ -206,7 +206,7 @@ export default class RecoverThirst extends Objective {
 
 					if (!context.utilities.doodad.isWaterStillDrinkable(waterStill)) {
 						if (isEmergency) {
-							const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
+							const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
 							if ((stamina.value / stamina.max) < 0.9) {
 								objectivePipelines.push([new RecoverStamina()]);
 
@@ -233,7 +233,7 @@ export default class RecoverThirst extends Objective {
 		if (!this.options.onlyUseAvailableItems) {
 			// todo: maybe remove this near base check?
 			if (context.utilities.base.isNearBase(context)) {
-				const thirstStat = context.player.stat.get<IStatMax>(Stat.Thirst);
+				const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
 
 				for (const waterStill of context.base.waterStill) {
 					// if we're near our base, the water still is ready, and we're thirsty, go drink
@@ -243,7 +243,7 @@ export default class RecoverThirst extends Objective {
 						objectivePipelines.push([
 							new MoveToTarget(waterStill, true),
 							new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-								action.execute(context.player);
+								action.execute(context.actionExecutor);
 								return ObjectiveResult.Complete;
 							}),
 						]);
@@ -258,7 +258,7 @@ export default class RecoverThirst extends Objective {
 						objectivePipelines.push([
 							new MoveToTarget(solarStill, true).addDifficulty(-100), // make this preferable over water still
 							new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-								action.execute(context.player);
+								action.execute(context.actionExecutor);
 								return ObjectiveResult.Complete;
 							}),
 						]);

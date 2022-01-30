@@ -37,7 +37,7 @@ export default class AcquireWaterContainer extends Objective {
 				return;
 			}
 
-			action.execute(context.player, item);
+			action.execute(context.actionExecutor, item);
 		}).setStatus("Opening glass bottle"));
 
 		return [

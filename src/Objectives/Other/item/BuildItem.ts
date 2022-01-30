@@ -124,7 +124,7 @@ export default class BuildItem extends Objective {
 			new PickUpAllTileItems(this.target),
 			new UseItem(ActionType.Build, item),
 			new Lambda(async context => {
-				const tile = context.player.getFacingTile();
+				const tile = context.human.getFacingTile();
 				if (tile.doodad) {
 					context.setData(ContextDataType.LastBuiltDoodad, tile.doodad);
 				}
@@ -145,7 +145,7 @@ export default class BuildItem extends Objective {
 			this.target = undefined;
 
 			context.utilities.movement.resetMovementOverlays();
-			context.player.walkAlongPath(undefined);
+			context.human.asPlayer?.walkAlongPath(undefined);
 		}
 
 		return super.onMove(context);
@@ -164,8 +164,8 @@ export default class BuildItem extends Objective {
 	}
 
 	private async findInitialBuildTile(context: Context): Promise<IVector3 | undefined> {
-		const facingPoint = context.player.getFacingPoint();
-		const facingTile = context.player.getFacingTile();
+		const facingPoint = context.human.getFacingPoint();
+		const facingTile = context.human.getFacingTile();
 
 		if (await this.isGoodTargetOrigin(context, facingPoint) && context.utilities.base.isGoodBuildTile(context, facingPoint, facingTile)) {
 			return facingPoint;
@@ -174,7 +174,7 @@ export default class BuildItem extends Objective {
 		const sortedObjects = context.utilities.object.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[]);
 
 		for (const doodad of sortedObjects) {
-			if (doodad !== undefined && doodad.z === context.player.z) {
+			if (doodad !== undefined && doodad.z === context.human.z) {
 				const description = doodad.description();
 				if (description && description.isTree && await this.isGoodTargetOrigin(context, doodad)) {
 					for (let x = -6; x <= 6; x++) {

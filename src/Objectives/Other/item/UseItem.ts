@@ -46,12 +46,12 @@ export default class UseItem extends Objective {
 					return ObjectiveResult.Restart;
 				}
 
-				if (!item.isNearby(context.player, true)) {
+				if (!item.isNearby(context.human, true)) {
 					this.log.warn(`Invalid use item for action ${ActionType[this.actionType]}. Item ${item} is not nearby`, this.getStatus());
 					return ObjectiveResult.Restart;
 				}
 
-				action.execute(context.player, item, this.actionType);
+				action.execute(context.actionExecutor, item, this.actionType);
 
 				return ObjectiveResult.Complete;
 			}).setStatus(this),

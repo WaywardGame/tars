@@ -158,14 +158,14 @@ export class BaseUtilities {
 	}
 
 	public getBasePosition(context: Context): IVector3 {
-		return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.player.getPoint();
+		return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.human.getPoint();
 	}
 
 	public hasBase(context: Context): boolean {
 		return context.base.campfire.length > 0 || context.base.waterStill.length > 0;
 	}
 
-	public isNearBase(context: Context, point: IVector3 = context.player, distanceSq: number = nearBaseDistanceSq): boolean {
+	public isNearBase(context: Context, point: IVector3 = context.human, distanceSq: number = nearBaseDistanceSq): boolean {
 		if (!this.hasBase(context)) {
 			return false;
 		}

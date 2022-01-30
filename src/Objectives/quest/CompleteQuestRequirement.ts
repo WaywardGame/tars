@@ -242,7 +242,7 @@ export default class CompleteQuestRequirement extends Objective {
                 return new Lambda(async () => {
                     let itemId: number | undefined;
 
-                    for (const item of context.player.inventory.containedItems) {
+                    for (const item of context.human.inventory.containedItems) {
                         if (item.quickSlot === undefined) {
                             itemId = item.id;
                             break;
@@ -258,7 +258,11 @@ export default class CompleteQuestRequirement extends Objective {
 
             case "ModStarterQuestChangeHand":
                 return new Lambda(async (context) => {
-                    game.updateOption(context.player, "leftHand", !context.player.options.leftHand);
+                    const player = context.human.asPlayer;
+                    if (player) {
+                        game.updateOption(player, "leftHand", !context.human.options.leftHand);
+                    }
+
                     return ObjectiveResult.Complete;
                 });
 

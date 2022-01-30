@@ -22,8 +22,8 @@ export default class RecoverStamina extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (context.player.status.Poisoned || context.player.status.Burned) {
-			if (context.player.stat.get<IStat>(Stat.Stamina).value <= 1) {
+		if (context.human.status.Poisoned || context.human.status.Burned) {
+			if (context.human.stat.get<IStat>(Stat.Stamina).value <= 1) {
 				// emergency. wait it out
 				this.log.info("Emergency idling");
 				return new Idle(false);
@@ -43,12 +43,12 @@ export default class RecoverStamina extends Objective {
 		// 	return ObjectiveResult.Complete;
 		// }
 
-		if (context.player.stat.get<IStat>(Stat.Thirst).value < 1) {
+		if (context.human.stat.get<IStat>(Stat.Thirst).value < 1) {
 			this.log.info("Can't rest now, too thirsty");
 			return ObjectiveResult.Complete;
 		}
 
-		if (context.player.stat.get<IStat>(Stat.Hunger).value < 1) {
+		if (context.human.stat.get<IStat>(Stat.Hunger).value < 1) {
 			this.log.info("Can't rest now, too hungry");
 			return ObjectiveResult.Complete;
 		}

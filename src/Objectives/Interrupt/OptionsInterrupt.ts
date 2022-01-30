@@ -4,7 +4,7 @@ import { DropLocation } from "save/data/ISaveDataGlobal";
 import Objects from "utilities/object/Objects";
 
 import type Context from "../../core/context/Context";
-import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 
@@ -54,16 +54,20 @@ export default class OptionsInterrupt extends Objective {
 	 * Updates options that helps TARS
 	 */
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		if (!context.human.asPlayer) {
+			return ObjectiveResult.Ignore;
+		}
+
 		if (!OptionsInterrupt.previousOptions) {
-			OptionsInterrupt.previousOptions = Objects.deepClone(context.player.options);
+			OptionsInterrupt.previousOptions = Objects.deepClone(context.human.options);
 		}
 
 		const updated: string[] = [];
 
 		for (const optionKey of Object.keys(OptionsInterrupt.desiredOptions) as Array<keyof IOptions>) {
-			if (context.player.options[optionKey] !== OptionsInterrupt.desiredOptions[optionKey]) {
+			if (context.human.options[optionKey] !== OptionsInterrupt.desiredOptions[optionKey]) {
 				updated.push(`Updating ${optionKey}`);
-				game.updateOption(context.player, optionKey, OptionsInterrupt.desiredOptions[optionKey] as any);
+				game.updateOption(context.human as Player, optionKey, OptionsInterrupt.desiredOptions[optionKey] as any);
 			}
 		}
 
