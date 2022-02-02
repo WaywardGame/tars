@@ -38,23 +38,29 @@ export default class OptionsPanel extends TarsPanel {
 
             const slider = uiOption.slider;
             if (slider) {
-                optionComponent = new RangeRow()
+                const range = new RangeRow()
                     .setLabel(label => label
                         .setText(getTarsTranslation(uiOption.title))
                     )
                     .setTooltip(tooltip => tooltip
                         .addText(text => text.setText(getTarsTranslation(uiOption.tooltip)))
                         .setLocation(TooltipLocation.TopRight))
-                    .editRange(range => range
-                        .setMin(typeof (slider.min) === "number" ? slider.min : slider.min(this.TarsMod.tarsInstance!.getContext()))
-                        .setMax(typeof (slider.max) === "number" ? slider.max : slider.max(this.TarsMod.tarsInstance!.getContext()))
-                        .setRefreshMethod(() => this.TarsMod.saveData.options[uiOption.option] as number))
-                    .setDisplayValue(() => getTarsTranslation(TarsTranslation.DialogRangeLabel)
-                        .get(this.TarsMod.saveData.options[uiOption.option] as number))
+                    .setDisplayValue(() => getTarsTranslation(TarsTranslation.DialogRangeLabel).get(this.TarsMod.saveData.options[uiOption.option] as number))
                     .event.subscribe("change", (_, value) => {
                         this.TarsMod.tarsInstance?.updateOptions({ [uiOption.option]: value });
                     })
                     .setDisabled(isDisabled);
+
+                range.editRange(range => range
+                    .setMin(typeof (slider.min) === "number" ? slider.min : this.TarsMod.tarsInstance ? slider.min(this.TarsMod.tarsInstance.getContext()) : 0)
+                    .setMax(typeof (slider.max) === "number" ? slider.max : this.TarsMod.tarsInstance ? slider.max(this.TarsMod.tarsInstance.getContext()) : 0)
+                    .setRefreshMethod(() => {
+                        range.setMin(typeof (slider.min) === "number" ? slider.min : this.TarsMod.tarsInstance ? slider.min(this.TarsMod.tarsInstance.getContext()) : 0)
+                        range.setMax(typeof (slider.max) === "number" ? slider.max : this.TarsMod.tarsInstance ? slider.max(this.TarsMod.tarsInstance.getContext()) : 0)
+                        return this.TarsMod.saveData.options[uiOption.option] as number;
+                    }));
+
+                optionComponent = range;
 
             } else {
                 optionComponent = new CheckButton()
@@ -85,8 +91,8 @@ export default class OptionsPanel extends TarsPanel {
 
     @Bound
     protected refresh() {
-        for (const button of this.refreshableComponents) {
-            button.refresh();
+        for (const component of this.refreshableComponents) {
+            component.refresh();
         }
     }
 }

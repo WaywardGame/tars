@@ -555,6 +555,7 @@ export enum TarsMode {
     Survival,
     TidyUp,
     Gardener,
+    Harvester,
     Terminator,
     Quest,
 }

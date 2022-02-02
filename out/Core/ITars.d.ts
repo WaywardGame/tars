@@ -194,8 +194,9 @@ export declare enum TarsMode {
     Survival = 1,
     TidyUp = 2,
     Gardener = 3,
-    Terminator = 4,
-    Quest = 5
+    Harvester = 4,
+    Terminator = 5,
+    Quest = 6
 }
 export declare enum ReserveType {
     Soft = 0,

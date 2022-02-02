@@ -283,13 +283,13 @@ export class MovementUtilities {
 
                         return MoveResult.Moving;
 
-                    } else if (nextTile.npc) {
-                        log.info("No path through npc");
+                    } else if (nextTile.npc && nextTile.npc !== context.human) {
+                        log.warn("No path through npc");
                         return MoveResult.NoPath;
                     }
                 }
 
-                if (force || !context.human.asPlayer?.hasWalkPath()) {
+                if (force || !context.human.hasWalkPath()) {
                     // walk along the path up to the first obstacle. we don't want to let the Move action automatically gather (it uses tools poorly)
                     this.updateOverlay(movementPath.path);
 
@@ -308,14 +308,14 @@ export class MovementUtilities {
 
                     if (walkOnce) {
                         if (!nextPosition) {
-                            log.info("No nextPosition");
+                            log.warn("No nextPosition");
                             return MoveResult.NoPath;
                         }
 
                         path = [nextPosition];
                     }
 
-                    context.human.asPlayer?.walkAlongPath(path, true);
+                    context.human.walkAlongPath(path, true);
                 }
 
                 return MoveResult.Moving;

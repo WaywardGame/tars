@@ -18,8 +18,11 @@ import { MenuBarButtonGroup } from "ui/screen/screens/game/static/menubar/IMenuB
 import Log from "utilities/Log";
 import { EventBus } from "event/EventBuses";
 import { EventHandler } from "event/EventManager";
-import type { PlayerState } from "game/entity/player/IPlayer";
 import TranslationImpl from "language/impl/TranslationImpl";
+import { NPCType } from "game/entity/npc/INPCs";
+import TileHelpers from "utilities/game/TileHelpers";
+import { RenderSource } from "renderer/IRenderer";
+import Human from "game/entity/Human";
 
 import Navigation from "./core/navigation/Navigation";
 import TarsDialog from "./ui/TarsDialog";
@@ -32,6 +35,7 @@ import type { ITarsOptions } from "./core/ITars";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITars";
 import planner from "./core/planning/Planner";
 import { TarsOverlay } from "./ui/TarsOverlay";
+import TarsNPC from "./npc/TarsNPC";
 
 export default class TarsMod extends Mod {
 
@@ -107,14 +111,25 @@ export default class TarsMod extends Mod {
 
 	////////////////////////////////////
 
-	private tars: Tars | undefined;
+	@Register.npc("TARS", TarsNPC)
+	public readonly npcType: NPCType;
+
+	////////////////////////////////////
+
+	private readonly tarsInstances: Set<Tars> = new Set();
 
 	private readonly tarsOverlay: TarsOverlay = new TarsOverlay();
+
+	////////////////////////////////////
+
+	private localPlayerTars: Tars | undefined;
+
+	////////////////////////////////////
 
 	private gamePlaying = false;
 
 	public get tarsInstance(): Tars | undefined {
-		return this.tars;
+		return this.localPlayerTars;
 	}
 
 	public override onInitialize(): void {
@@ -126,20 +141,70 @@ export default class TarsMod extends Mod {
 	}
 
 	public override onUninitialize(): void {
-		this.tars?.disable(true);
-		this.tars?.unload();
-		this.tars = undefined;
+		this.localPlayerTars?.disable(true);
+		this.localPlayerTars?.unload();
+		this.localPlayerTars = undefined;
 
 		setTarsMod(undefined);
 	}
 
 	public override onLoad(): void {
-		this.ensureSaveData();
+		this.initializeTarsSaveData(this.saveData);
+		planner.debug = this.saveData.options.developerMode;
 
-		this.tars = new Tars(this.saveData, this.tarsOverlay);
-		this.tars.load();
+		Log.addPreConsoleCallback(loggerUtilities.preConsoleCallback);
 
-		const tarsEvents = this.tars.event.until(this.tars, "delete");
+		(window as any).TARS = this;
+
+		// this is to support hot reloading while in game
+		if (this.saveData.ui[TarsUiSaveDataKey.DialogOpened]) {
+			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = undefined;
+			gameScreen?.dialogs.open(TarsMod.INSTANCE.dialogMain);
+		}
+	}
+
+	public override onUnload(): void {
+		this.localPlayerTars?.unload();
+		this.localPlayerTars = undefined;
+
+		this.tarsOverlay.clear();
+
+		Log.removePreConsoleCallback(loggerUtilities.preConsoleCallback);
+
+		(window as any).TARS = undefined;
+
+		// this is to support hot reloading while in game
+		if (this.gamePlaying && gameScreen?.dialogs.isVisible(TarsMod.INSTANCE.dialogMain)) {
+			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = true;
+			gameScreen?.dialogs.close(TarsMod.INSTANCE.dialogMain);
+		}
+	}
+
+	@Register.command("TARS")
+	public command(_: CommandManager, _player: Player, _args: string) {
+		this.localPlayerTars?.toggle();
+	}
+
+	@Bind.onDown(Registry<TarsMod>().get("bindableToggleTars"))
+	public onToggleTars() {
+		this.localPlayerTars?.toggle();
+		return true;
+	}
+
+	////////////////////////////////////////////////
+	// Event Handlers
+
+	@EventHandler(EventBus.Game, "play")
+	public onGameStart(): void {
+		this.gamePlaying = true;
+
+		if (!this.saveData.island[localIsland.id]) {
+			this.saveData.island[localIsland.id] = {};
+		}
+
+		this.localPlayerTars = this.createAndLoadTars(localPlayer, this.saveData);
+
+		const tarsEvents = this.localPlayerTars.event.until(this.localPlayerTars, "delete");
 		tarsEvents.subscribe("enableChange", (_, enabled) => {
 			localPlayer.messages
 				.source(this.messageSource)
@@ -205,75 +270,56 @@ export default class TarsMod extends Mod {
 				.send(message);
 		});
 
-		Log.addPreConsoleCallback(loggerUtilities.preConsoleCallback);
-
-		(window as any).TARS = this;
-
-		// this is to support hot reloading while in game
-		if (this.saveData.ui[TarsUiSaveDataKey.DialogOpened]) {
-			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = undefined;
-			gameScreen?.dialogs.open(TarsMod.INSTANCE.dialogMain);
-		}
-	}
-
-	public override onUnload(): void {
-		this.tars?.unload();
-		this.tars = undefined;
-
-		this.tarsOverlay.clear();
-
-		Log.removePreConsoleCallback(loggerUtilities.preConsoleCallback);
-
-		(window as any).TARS = undefined;
-
-		// this is to support hot reloading while in game
-		if (this.gamePlaying && gameScreen?.dialogs.isVisible(TarsMod.INSTANCE.dialogMain)) {
-			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = true;
-			gameScreen?.dialogs.close(TarsMod.INSTANCE.dialogMain);
-		}
-	}
-
-	@Register.command("TARS")
-	public command(_: CommandManager, _player: Player, _args: string) {
-		this.tars?.toggle();
-	}
-
-	@Bind.onDown(Registry<TarsMod>().get("bindableToggleTars"))
-	public onToggleTars() {
-		this.tars?.toggle();
-		return true;
-	}
-
-	////////////////////////////////////////////////
-	// Event Handlers
-
-	@EventHandler(EventBus.Game, "play")
-	public onGameStart(): void {
-		this.gamePlaying = true;
-
-		if (!this.saveData.island[localIsland.id]) {
-			this.saveData.island[localIsland.id] = {};
-		}
-
-		if (this.tars && !this.tars.isRunning() && (this.tars.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
-			this.tars.toggle(true);
+		if (!this.localPlayerTars.isRunning() && (this.localPlayerTars.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
+			this.localPlayerTars.toggle(true);
 		}
 	}
 
 	@EventHandler(EventBus.Game, "stoppingPlay")
-	public onGameEnd(state?: PlayerState): void {
+	public onGameEnd(): void {
 		this.gamePlaying = false;
 
-		if (!this.tars) {
+		const tarsInstances = Array.from(this.tarsInstances);
+		for (const tars of tarsInstances) {
+			tars.disable(true);
+			tars.unload();
+		}
+
+		this.tarsInstances.clear();
+
+		this.localPlayerTars = undefined;
+	}
+
+	@EventHandler(EventBus.Multiplayer, "connect")
+	public onMultiplayerConnect(): void {
+		if (!multiplayer.isServer()) {
 			return;
 		}
 
-		this.tars.disable(true);
-		this.tars.unload();
-		this.tars = undefined;
+		// remove all TARS npcs when starting a multiplayer server in order to prevent desyncs
+		for (const island of game.islands.active) {
+			for (const npc of island.npcs) {
+				if (npc?.getRegistrarId() === this.npcType) {
+					island.npcs.remove(npc);
+				}
+			}
+		}
 	}
 
 	////////////////////////////////////
+
+	public createAndLoadTars(human: Human, saveData: ISaveData): Tars {
+		const tars = new Tars(human, saveData, this.tarsOverlay);
+		tars.load();
+
+		this.tarsInstances.add(tars);
+
+		tars.event.waitFor("delete").then(() => {
+			this.tarsInstances.delete(tars);
+		});
+
+		return tars;
+	}
 
 	public getStatus(): string {
 		const status = this.tarsInstance?.getStatus() ?? "Unknown";
@@ -284,21 +330,16 @@ export default class TarsMod extends Mod {
 		return translation instanceof TranslationImpl ? translation : new TranslationImpl(this.dictionary, translation);
 	}
 
-	////////////////////////////////////
-
-	/**
-	 * Ensure save data is valid
-	 */
-	private ensureSaveData() {
-		if (this.saveData.island === undefined) {
-			this.saveData.island = {};
+	public initializeTarsSaveData(initial: Partial<ISaveData> = {}): ISaveData {
+		if (initial.island === undefined) {
+			initial.island = {};
 		}
 
-		if (this.saveData.ui === undefined) {
-			this.saveData.ui = {};
+		if (initial.ui === undefined) {
+			initial.ui = {};
 		}
 
-		this.saveData.options = {
+		initial.options = {
 			mode: TarsMode.Survival,
 			exploreIslands: true,
 			useOrbsOfInfluence: true,
@@ -311,13 +352,31 @@ export default class TarsMod extends Mod {
 			recoverThresholdThirstFromMax: -10,
 			quantumBurst: false,
 			developerMode: false,
-			...(this.saveData.options ?? {}) as Partial<ITarsOptions>,
+			...(initial.options ?? {}) as Partial<ITarsOptions>,
 		}
 
-		if (this.saveData.options.mode === TarsMode.Manual) {
-			this.saveData.options.mode = TarsMode.Survival;
+		if (initial.options.mode === TarsMode.Manual) {
+			initial.options.mode = TarsMode.Survival;
 		}
 
-		planner.debug = this.saveData.options.developerMode;
+		return initial as ISaveData;
+	}
+
+	public spawnNpc() {
+		if (multiplayer.isConnected()) {
+			throw new Error("TARS npcs are not supported in multiplayer");
+		}
+
+		const spawnPosition = TileHelpers.findMatchingTile(localIsland, localPlayer, TileHelpers.isSuitableSpawnPointTileForMultiplayer);
+		if (!spawnPosition) {
+			throw new Error("Invalid spawn position");
+		}
+
+		const npc = localIsland.npcs.spawn(this.npcType, spawnPosition.x, spawnPosition.y, spawnPosition.z);
+		if (!npc) {
+			throw new Error("Failed to spawn npc");
+		}
+
+		renderer?.updateView(RenderSource.Mod, true, true);
 	}
 }

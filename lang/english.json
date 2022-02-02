@@ -27,7 +27,11 @@
 		"quadrantComponent": {
 			"modTARSTARS": "TARS"
 		},
+		"npc": {
+			"modTARSTARS": "TARS"
+		},
 		"ModTARSTars": {
+			"name": "TARS",
 			"dialogButtonAquireItem": "Acquire Item",
 			"dialogButtonAquireItemTooltip": "Instruct TARS to acquire the selected item.",
 			"dialogButtonBuildDoodad": "Build Doodad",
@@ -69,6 +73,8 @@
 			"dialogLabelCreature": "{#--text-secondary:Creature}",
 			"dialogModeGardener": "Gardener Mode",
 			"dialogModeGardenerTooltip": "TARS will gather seeds and plant them to make a garden.",
+			"dialogModeHarvester": "Harvester Mode",
+			"dialogModeHarvesterTooltip": "TARS will go around harvesting materials from nature.\nNote: It will keep harvesting until there is nothing harvestable left in the world.",
 			"dialogModeSurvival": "Survival Mode",
 			"dialogModeSurvivalTooltip": "TARS will setup a camp, gather resources, build equipment, stay healthy, and survive.",
 			"dialogModeTidyUp": "Tidy Up Mode",

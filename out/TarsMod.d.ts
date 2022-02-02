@@ -10,7 +10,8 @@ import Mod from "mod/Mod";
 import type Bindable from "ui/input/Bindable";
 import type { DialogId } from "ui/screen/screens/game/Dialogs";
 import type { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import type { PlayerState } from "game/entity/player/IPlayer";
+import { NPCType } from "game/entity/npc/INPCs";
+import Human from "game/entity/Human";
 import type { ITarsModEvents, ISaveData } from "./ITarsMod";
 import { TarsTranslation } from "./ITarsMod";
 import Tars from "./core/Tars";
@@ -33,8 +34,10 @@ export default class TarsMod extends Mod {
     readonly dialogMain: DialogId;
     readonly menuBarButton: MenuBarButtonType;
     readonly quadrantComponent: QuadrantComponentId;
-    private tars;
+    readonly npcType: NPCType;
+    private readonly tarsInstances;
     private readonly tarsOverlay;
+    private localPlayerTars;
     private gamePlaying;
     get tarsInstance(): Tars | undefined;
     onInitialize(): void;
@@ -44,8 +47,11 @@ export default class TarsMod extends Mod {
     command(_: CommandManager, _player: Player, _args: string): void;
     onToggleTars(): boolean;
     onGameStart(): void;
-    onGameEnd(state?: PlayerState): void;
+    onGameEnd(): void;
+    onMultiplayerConnect(): void;
+    createAndLoadTars(human: Human, saveData: ISaveData): Tars;
     getStatus(): string;
     getTranslation(translation: TarsTranslation | string | Translation): Translation;
-    private ensureSaveData;
+    initializeTarsSaveData(initial?: Partial<ISaveData>): ISaveData;
+    spawnNpc(): void;
 }

@@ -1,6 +1,6 @@
 import { NPCType } from "game/entity/npc/INPCs";
 import { DoodadType } from "game/doodad/IDoodad";
-import type { IslandId } from "game/island/IIsland";
+import { DEFAULT_ISLAND_ID, IslandId } from "game/island/IIsland";
 import { TerrainType } from "game/tile/ITerrain";
 import type Translation from "language/Translation";
 import Button from "ui/component/Button";
@@ -46,7 +46,7 @@ export default class MoveToPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelIsland)))
-            .append(this.dropdownIsland = new IslandDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToIslandDropdown] ?? localIsland.id)
+            .append(this.dropdownIsland = new IslandDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToIslandDropdown] ?? localIsland?.id ?? DEFAULT_ISLAND_ID)
                 .event.subscribe("selection", async (_, selection) => {
                     this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToIslandDropdown] = selection;
                 }))

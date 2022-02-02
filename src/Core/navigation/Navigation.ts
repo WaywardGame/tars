@@ -16,6 +16,7 @@ import type { ITileLocation } from "../ITars";
 import type { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
 import { NavigationMessageType } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
+import Human from "game/entity/Human";
 
 interface INavigationWorker {
 	id: number;
@@ -51,7 +52,7 @@ export default class Navigation {
 		Navigation.modPath = modPath;
 	}
 
-	constructor(private readonly overlay: TarsOverlay) {
+	constructor(private readonly human: Human, private readonly overlay: TarsOverlay) {
 	}
 
 	public load() {
@@ -174,12 +175,14 @@ export default class Navigation {
 
 		const array = !skipWorkerUpdate ? new Uint8Array(game.mapSizeSq * this.dijkstraMaps.size * 3) : undefined;
 
+		const island = this.human.island;
+
 		const start = performance.now();
 
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			for (let x = 0; x < game.mapSize; x++) {
 				for (let y = 0; y < game.mapSize; y++) {
-					const tile = localIsland.getTile(x, y, z);
+					const tile = island.getTile(x, y, z);
 					this.onTileUpdate(tile, TileHelpers.getType(tile), x, y, z, false, array, undefined, skipWorkerUpdate);
 				}
 			}
@@ -342,7 +345,7 @@ export default class Navigation {
 				z: point.z,
 			};
 
-			const tile = localIsland.getTileFromPoint(nearestPoint);
+			const tile = this.human.island.getTileFromPoint(nearestPoint);
 			if (!tile) {
 				throw new Error(`Invalid point ${nearestPoint.x},${nearestPoint.y}`);
 			}
@@ -356,17 +359,17 @@ export default class Navigation {
 	}
 
 	public isDisabledFromPoint(point: IVector3): boolean {
-		if (!localIsland.ensureValidPoint(point)) {
+		if (!this.human.island.ensureValidPoint(point)) {
 			return true;
 		}
 
-		const tile = localIsland.getTileFromPoint(point);
+		const tile = this.human.island.getTileFromPoint(point);
 		const tileType = TileHelpers.getType(tile);
 
 		return this.isDisabled(tile, point.x, point.y, point.z, tileType);
 	}
 
-	public getPenaltyFromPoint(point: IVector3, tile: ITile = localIsland.getTileFromPoint(point)): number {
+	public getPenaltyFromPoint(point: IVector3, tile: ITile = this.human.island.getTileFromPoint(point)): number {
 		const tileType = TileHelpers.getType(tile);
 		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
@@ -435,7 +438,7 @@ export default class Navigation {
 		// log.info(`Find path time: ${time.toFixed(2)}ms`, end, response.path ? response.path.length : "failure");
 
 		if (response.path !== undefined && response.score !== undefined) {
-			// log.info(`Total length: ${response.path.length}. Score: ${response.score}. Distance from start: ${Math.round(Vector2.distance(localPlayer.getPoint(), response.path[response.path.length - 1]))}`);
+			// log.info(`Total length: ${response.path.length}. Score: ${response.score}. Distance from start: ${Math.round(Vector2.distance(this.human.getPoint(), response.path[response.path.length - 1]))}`);
 
 			// path has the end node at index 0 and the start node at (length - 1)
 			// normally we would reverse the array, but I path find from end to start instead of start to end
@@ -532,7 +535,7 @@ export default class Navigation {
 	}
 
 	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType): boolean {
-		if (tile.npc !== undefined) {
+		if (tile.npc !== undefined && tile.npc !== this.human) {
 			return true;
 		}
 
@@ -546,19 +549,19 @@ export default class Navigation {
 				!description.isGate &&
 				!description.isWall &&
 				!description.isTree &&
-				(tile.doodad.blocksMove() || tile.doodad.isDangerous(localPlayer))) {
+				(tile.doodad.blocksMove() || tile.doodad.isDangerous(this.human))) {
 				return true;
 			}
 		}
 
-		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(localPlayer, undefined)) {
+		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(this.human, undefined)) {
 			return true;
 		}
 
-		const players = localIsland.getPlayersAtPosition(x, y, z, false, true);
+		const players = this.human.island.getPlayersAtPosition(x, y, z, false, true);
 		if (players.length > 0) {
 			for (const player of players) {
-				if (!player.isLocalPlayer()) {
+				if (player !== this.human) {
 					return true;
 				}
 			}
@@ -582,9 +585,9 @@ export default class Navigation {
 			// penalty for creatures on or near the tile
 			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
 				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
-					const point = localIsland.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+					const point = this.human.island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
 					if (point) {
-						const creature = localIsland.getTileFromPoint(point).creature;
+						const creature = this.human.island.getTileFromPoint(point).creature;
 						if (creature && !creature.isTamed()) {
 							penalty += 20;
 

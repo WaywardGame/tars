@@ -71,6 +71,8 @@ export enum TarsUiSaveDataKey {
 }
 
 export enum TarsTranslation {
+    Name,
+
     DialogTitleMain,
 
     DialogStatusNavigatingInitializing,
@@ -132,16 +134,18 @@ export enum TarsTranslation {
     DialogLabelTerrain,
     DialogLabelCreature,
 
-    DialogModeSurvival,
-    DialogModeSurvivalTooltip,
-    DialogModeTidyUp,
-    DialogModeTidyUpTooltip,
     DialogModeGardener,
     DialogModeGardenerTooltip,
-    DialogModeTerminator,
-    DialogModeTerminatorTooltip,
+    DialogModeHarvester,
+    DialogModeHarvesterTooltip,
     DialogModeQuest,
     DialogModeQuestTooltip,
+    DialogModeSurvival,
+    DialogModeSurvivalTooltip,
+    DialogModeTerminator,
+    DialogModeTerminatorTooltip,
+    DialogModeTidyUp,
+    DialogModeTidyUpTooltip,
 }
 
 // options to show in the Options panel

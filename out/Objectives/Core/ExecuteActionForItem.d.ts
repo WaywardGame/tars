@@ -12,11 +12,15 @@ export declare enum ExecuteActionType {
     Terrain = 2,
     Corpse = 3
 }
+export interface IExecuteActionForItemOptions {
+    onlyAllowHarvesting: boolean;
+}
 export default class ExecuteActionForItem<T extends ActionType> extends Objective {
     private readonly type;
     private readonly itemTypes;
     private readonly actionType?;
     private readonly executor?;
+    private readonly options?;
     private terrainTileType;
     constructor(type: ExecuteActionType, itemTypes: ItemType[], actionType?: T | undefined, executor?: ((context: Context, action: {
         50: import("../../../node_modules/@wayward/types/definitions/game/game/entity/action/Action").Action<[import("game/entity/action/IAction").ActionArgument.ItemNearby, import("game/entity/action/IAction").ActionArgument.ItemInventory], import("../../../node_modules/@wayward/types/definitions/game/game/entity/player/Player").default | import("../../../node_modules/@wayward/types/definitions/game/game/entity/npc/NPC").default, void, [import("../../../node_modules/@wayward/types/definitions/game/game/item/Item").default, import("../../../node_modules/@wayward/types/definitions/game/game/item/Item").default]>;
@@ -124,7 +128,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
         104: import("../../../node_modules/@wayward/types/definitions/game/game/entity/action/Action").Action<[import("game/entity/action/IAction").ActionArgument.String, import("game/entity/action/IAction").ActionArgument.Object], import("../../../node_modules/@wayward/types/definitions/game/game/entity/player/Player").default, void, [string, any?]>;
         92: import("../../../node_modules/@wayward/types/definitions/game/game/entity/action/Action").Action<[import("game/entity/action/IAction").ActionArgument.ItemNearby, [import("game/entity/action/IAction").ActionArgument.ItemNearby, import("game/entity/action/IAction").ActionArgument.Undefined]], import("../../../node_modules/@wayward/types/definitions/game/game/entity/player/Player").default | import("../../../node_modules/@wayward/types/definitions/game/game/entity/npc/NPC").default, void, [import("../../../node_modules/@wayward/types/definitions/game/game/item/Item").default, (import("../../../node_modules/@wayward/types/definitions/game/game/item/Item").default | undefined)?]>;
         62: import("../../../node_modules/@wayward/types/definitions/game/game/entity/action/Action").Action<[import("game/entity/action/IAction").ActionArgument.ItemNearby, import("game/entity/action/IAction").ActionArgument.ActionType], import("../../../node_modules/@wayward/types/definitions/game/game/entity/player/Player").default | import("../../../node_modules/@wayward/types/definitions/game/game/entity/npc/NPC").default, void, [import("../../../node_modules/@wayward/types/definitions/game/game/item/Item").default, ActionType]>;
-    }[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) | undefined);
+    }[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) | undefined, options?: Partial<IExecuteActionForItemOptions> | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     isDynamic(): boolean;

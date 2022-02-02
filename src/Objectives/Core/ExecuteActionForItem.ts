@@ -23,6 +23,10 @@ export enum ExecuteActionType {
 	Corpse,
 }
 
+export interface IExecuteActionForItemOptions {
+	onlyAllowHarvesting: boolean;
+}
+
 export default class ExecuteActionForItem<T extends ActionType> extends Objective {
 
 	private terrainTileType: TerrainType | undefined;
@@ -31,7 +35,8 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		private readonly type: ExecuteActionType,
 		private readonly itemTypes: ItemType[],
 		private readonly actionType?: T,
-		private readonly executor?: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void) {
+		private readonly executor?: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void,
+		private readonly options?: Partial<IExecuteActionForItemOptions>) {
 		super();
 	}
 
@@ -110,6 +115,10 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					actionType = ActionType.Chop;
 
 				} else {
+					return ObjectiveResult.Restart;
+				}
+
+				if (this.options?.onlyAllowHarvesting && actionType !== ActionType.Harvest) {
 					return ObjectiveResult.Restart;
 				}
 

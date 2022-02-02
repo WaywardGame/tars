@@ -5,9 +5,11 @@ import { TileUpdateType } from "game/IGame";
 import type { ITileLocation } from "../ITars";
 import type { NavigationPath } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
+import Human from "game/entity/Human";
 export declare const tileUpdateRadius = 2;
 export declare const creaturePenaltyRadius = 2;
 export default class Navigation {
+    private readonly human;
     private readonly overlay;
     private static modPath;
     private readonly dijkstraMaps;
@@ -17,7 +19,7 @@ export default class Navigation {
     private sailingMode;
     private workerInitialized;
     static setModPath(modPath: string): void;
-    constructor(overlay: TarsOverlay);
+    constructor(human: Human, overlay: TarsOverlay);
     load(): void;
     unload(): void;
     shouldUpdateSailingMode(sailingMode: boolean): boolean;
