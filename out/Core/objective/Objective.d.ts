@@ -4,6 +4,7 @@ import type Context from "../context/Context";
 import { ReserveType } from "../ITars";
 import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
 import type Item from "game/item/Item";
+import { ItemType } from "game/item/IItem";
 export default abstract class Objective implements IObjective {
     private static uuid;
     enableLogging: boolean;
@@ -28,7 +29,7 @@ export default abstract class Objective implements IObjective {
     canSaveChildObjectives(): boolean;
     canGroupTogether(): boolean;
     isDynamic(): boolean;
-    canIncludeContextHashCode(context: Context): boolean;
+    canIncludeContextHashCode(context: Context): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     addDifficulty(difficulty: number): this;
     overrideDifficulty(difficulty: number | undefined): this;

@@ -1,5 +1,5 @@
 import type Doodad from "game/doodad/Doodad";
-import type { IContainer} from "game/item/IItem";
+import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
@@ -7,6 +7,7 @@ import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import { ItemUtilities } from "../../utilities/Item";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import ReserveItems from "../core/ReserveItems";
@@ -29,8 +30,12 @@ export default class GatherFromChest extends Objective {
 		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a chest`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode() {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
+	}
+
+	public override shouldIncludeContextHashCode(context: Context): boolean {
+		return context.isReservedItemType(this.itemType);
 	}
 
 	// we can't group this together because gatherfromchest objectives are prioritized to be ran last
@@ -39,10 +44,6 @@ export default class GatherFromChest extends Objective {
 	// }
 
 	// todo: add getWeightChange(): number and take that into account when grouping together?
-
-	public override shouldIncludeContextHashCode(context: Context): boolean {
-		return context.isReservedItemType(this.itemType);
-	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const prioritizeBaseChests = context.getData(ContextDataType.PrioritizeBaseChests);
@@ -57,7 +58,7 @@ export default class GatherFromChest extends Objective {
 
 		return chests
 			.map(chest => {
-				const items = context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, true)
+				const items = context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, { includeSubContainers: true })
 					.filter(item => {
 						if (context.isHardReservedItem(item)) {
 							return false;

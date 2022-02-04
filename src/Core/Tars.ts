@@ -75,6 +75,8 @@ import planner from "./planning/Planner";
 import Plan from "./planning/Plan";
 import { DoodadUtilities } from "../utilities/Doodad";
 import { TarsOverlay } from "../ui/TarsOverlay";
+import Human from "game/entity/Human";
+import NPC from "game/entity/npc/NPC";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -105,7 +107,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private loaded = false;
 
-    constructor(private readonly saveData: ISaveData, private readonly overlay: TarsOverlay) {
+    constructor(private readonly human: Human, private readonly saveData: ISaveData, private readonly overlay: TarsOverlay) {
         super();
 
         this.utilities = {
@@ -114,7 +116,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             doodad: new DoodadUtilities(),
             item: new ItemUtilities(),
             movement: new MovementUtilities(),
-            navigation: new Navigation(overlay),
+            navigation: new Navigation(human, overlay),
             object: new ObjectUtilities(),
             overlay: this.overlay,
             player: new PlayerUtilities(),
@@ -126,7 +128,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         log.info("Created TARS instance");
     }
 
-    public delete() {
+    private delete() {
         this.reset({
             delete: true,
         });
@@ -191,9 +193,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.utilities.movement.resetMovementOverlays();
 
-        if (localPlayer) {
-            localPlayer.walkAlongPath(undefined);
-            OptionsInterrupt.restore(localPlayer);
+        this.human.walkAlongPath(undefined);
+
+        const player = this.human.asPlayer;
+        if (player) {
+            OptionsInterrupt.restore(player);
         }
 
         if (!gameIsTravelingOrEnding && this.saveData.options.mode === TarsMode.Manual) {
@@ -205,27 +209,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     ////////////////////////////////////////////////
     // Event Handlers
-
-    // @EventHandler(EventBus.Game, "play")
-    // public onGameStart(): void {
-    //     this.gamePlaying = true;
-
-    //     if (!this.saveData.island[localIsland.id]) {
-    //         this.saveData.island[localIsland.id] = {};
-    //     }
-
-    //     if (!this.isRunning() && (this.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
-    //         this.toggle(true);
-    //     }
-    // }
-
-    // @EventHandler(EventBus.Game, "stoppingPlay")
-    // public onGameEnd(state?: PlayerState): void {
-    //     this.gamePlaying = false;
-
-    //     this.disable(true);
-    //     this.delete();
-    // }
 
     @EventHandler(EventBus.LocalPlayer, "spawn")
     public onPlayerSpawn(player: Player) {
@@ -242,14 +225,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    @EventHandler(EventBus.LocalPlayer, "writeNote")
+    @EventHandler(EventBus.Players, "writeNote")
     public onWriteNote(player: Player, note: INote): false | void {
-        if (this.isRunning()) {
-            // hide notes
-            return false;
+        if (this.human !== player || !this.isRunning()) {
+            return;
         }
 
-        return undefined;
+        // hide notes
+        return false;
     }
 
     @EventHandler(EventBus.LocalPlayer, "die")
@@ -264,41 +247,77 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.movement.resetMovementOverlays();
 
         if (this.navigationSystemState === NavigationSystemState.Initialized) {
-            this.utilities.navigation.queueUpdateOrigin(localPlayer);
+            this.utilities.navigation.queueUpdateOrigin(this.human);
         }
     }
 
     @EventHandler(EventBus.LocalPlayer, "processMovement")
     public async processMovement(player: Player): Promise<void> {
-        if (this.isRunning() && player.isLocalPlayer()) {
-            if (this.navigationSystemState === NavigationSystemState.Initialized) {
-                this.utilities.navigation.queueUpdateOrigin(player);
-            }
+        if (this.human !== player || !this.isRunning()) {
+            return;
+        }
 
-            this.processQuantumBurst();
+        if (this.navigationSystemState === NavigationSystemState.Initialized) {
+            this.utilities.navigation.queueUpdateOrigin(player);
+        }
 
-            const objective = this.interruptObjectivePipeline || this.objectivePipeline;
-            if (objective !== undefined && !Array.isArray(objective[0])) {
-                const result = await objective[0].onMove(this.context);
-                if (result === true) {
-                    this.fullInterrupt();
+        this.processQuantumBurst();
 
-                } else if (result) {
-                    this.interrupt(result);
-                }
+        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
+        if (objective !== undefined && !Array.isArray(objective[0])) {
+            const result = await objective[0].onMove(this.context);
+            if (result === true) {
+                this.fullInterrupt();
+
+            } else if (result) {
+                this.interrupt(result);
             }
         }
     }
 
-    @EventHandler(EventBus.LocalPlayer, "restEnd")
-    public restEnd() {
-        if (this.isRunning()) {
-            this.processQueuedNavigationUpdates();
+    @EventHandler(EventBus.Players, "restEnd")
+    public onRestEnd(player: Player) {
+        if (this.human !== player) {
+            return;
+        }
+
+        this.processQueuedNavigationUpdates();
+    }
+
+    @EventHandler(EventBus.NPCs, "postMove")
+    public async onPostMove(npc: NPC, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+        if (this.human !== npc) {
+            return;
+        }
+
+        this.utilities.movement.clearOverlay(toTile);
+
+        // todo: sync this up with regular player logic
+
+        if (this.navigationSystemState === NavigationSystemState.Initialized) {
+            this.utilities.navigation.queueUpdateOrigin(npc);
+        }
+
+        this.processQuantumBurst();
+
+        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
+        if (objective !== undefined && !Array.isArray(objective[0])) {
+            const result = await objective[0].onMove(this.context);
+            if (result === true) {
+                this.fullInterrupt();
+
+            } else if (result) {
+                this.interrupt(result);
+            }
         }
     }
 
-    @EventHandler(EventBus.LocalPlayer, "moveComplete")
+    @EventHandler(EventBus.Players, "moveComplete")
     public onMoveComplete(player: Player) {
+        if (this.human !== player) {
+            return;
+        }
+
         this.utilities.movement.clearOverlay(player.getTile());
     }
 
@@ -312,11 +331,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     @EventHandler(EventBus.Island, "tileUpdate")
     public onTileUpdate(island: Island, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
-        if (island !== localPlayer.island) {
+        if (island !== this.human.island) {
             return;
         }
 
-        if (this.navigationSystemState === NavigationSystemState.Initializing || localPlayer.isResting()) {
+        if (this.navigationSystemState === NavigationSystemState.Initializing || this.human.isResting()) {
             this.navigationQueuedUpdates.push(() => {
                 this.onTileUpdate(island, tile, tileX, tileY, tileZ, tileUpdateType);
             });
@@ -352,7 +371,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     @EventHandler(EventBus.Actions, "postExecuteAction")
     public postExecuteAction(_: any, actionType: ActionType, api: IActionApi, args: any[]): void {
-        if (api.executor !== localPlayer) {
+        if (this.human !== api.executor) {
             return;
         }
 
@@ -361,15 +380,20 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.action.postExecuteAction(api.type);
     }
 
-    @EventHandler(EventBus.LocalPlayer, "processInput")
+    @EventHandler(EventBus.Players, "processInput")
     public processInput(player: Player): boolean | undefined {
+        if (this.human !== player || !this.isRunning()) {
+            return;
+        }
+
         this.processQuantumBurst();
+
         return undefined;
     }
 
-    @EventHandler(EventBus.LocalPlayer, "walkPathChange")
-    public onWalkPathChange(player: Player, walkPath: IVector2[] | undefined) {
-        if (!walkPath || walkPath.length === 0 || !this.isRunning()) {
+    @EventHandler(EventBus.Humans, "walkPathChange")
+    public onWalkPathChange(human: Human, walkPath: IVector2[] | undefined) {
+        if (this.human !== human || !this.isRunning() || !walkPath || walkPath.length === 0) {
             return;
         }
 
@@ -379,34 +403,21 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    @EventHandler(EventBus.LocalPlayer, "preMove")
-    public preMove(player: Player, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
-        if (!this.isRunning() || !player.hasWalkPath()) {
+    @EventHandler(EventBus.Humans, "preMove")
+    public preMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
+        if (this.human !== human || !this.isRunning() || !human.hasWalkPath()) {
             return;
         }
 
-        if (nextTile.npc || (nextTile.doodad && nextTile.doodad.blocksMove()) || player.island.isPlayerAtTile(nextTile, false, true)) {
+        if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad && nextTile.doodad.blocksMove()) || human.island.isPlayerAtTile(nextTile, false, true)) {
             log.info("Interrupting due to blocked movement");
             this.interrupt();
         }
     }
 
-    /*
-    @EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")
-    @EventHandler(EventBus.LocalPlayer, "inventoryItemRemove")
-    @EventHandler(EventBus.LocalPlayer, "inventoryItemUpdate")
-    public onInventoryChange(player: Player, container: IContainer) {
-        if (!this.isEnabled()) {
-            return;
-        }
-
-        // todo: analyze inventory?
-    }
-    */
-
-    @EventHandler(EventBus.LocalPlayer, "statChanged")
-    public onStatChange(player: Player, stat: IStat) {
-        if (!this.isRunning()) {
+    @EventHandler(EventBus.Humans, "statChanged")
+    public onStatChange(human: Human, stat: IStat) {
+        if (this.human !== human || !this.isRunning()) {
             return;
         }
 
@@ -432,7 +443,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             case Stat.Weight:
                 executor.markWeightChanged();
 
-                const weightStatus = player.getWeightStatus();
+                const weightStatus = human.getWeightStatus();
                 if (this.weightStatus !== weightStatus) {
                     this.previousWeightStatus = this.weightStatus;
 
@@ -477,7 +488,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     ////////////////////////////////////////////////
 
     public getContext(): Context {
-        return this.context ?? new Context(localPlayer, this.base, this.inventory, this.utilities, this.saveData.options);
+        return this.context ?? new Context(this.human, this.base, this.inventory, this.utilities, this.saveData.options);
     }
 
     public isEnabled(): boolean {
@@ -502,11 +513,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         log.info(this.saveData.enabled ? "Enabled" : "Disabled");
 
-        this.context = new Context(localPlayer, this.base, this.inventory, this.utilities, this.saveData.options);
+        this.context = new Context(this.human, this.base, this.inventory, this.utilities, this.saveData.options);
 
         this.utilities.item.initialize(this.context);
 
-        await this.ensureNavigation(!!this.context.player.vehicleItemReference);
+        await this.ensureNavigation(!!this.context.human.vehicleItemReference);
 
         this.reset();
 
@@ -514,7 +525,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.overlay.show();
 
             if (this.utilities.navigation) {
-                this.utilities.navigation.queueUpdateOrigin(localPlayer);
+                this.utilities.navigation.queueUpdateOrigin(this.human);
             }
 
             this.tickTimeoutId = window.setTimeout(this.tick.bind(this), tickSpeed);
@@ -687,7 +698,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
             await this.utilities.navigation.updateAll(sailingMode);
 
-            this.utilities.navigation.queueUpdateOrigin(localPlayer);
+            this.utilities.navigation.queueUpdateOrigin(this.human);
 
             this.navigationSystemState = NavigationSystemState.Initialized;
 
@@ -779,6 +790,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 furnace: [],
                 intermediateChest: [],
                 kiln: [],
+                solarStill: [],
                 waterStill: [],
                 well: [],
                 buildAnotherChest: false,
@@ -793,7 +805,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.modeCache.clear();
 
         } else if (options?.resetContext) {
-            this.context = new Context(localPlayer, this.base, this.inventory, this.utilities, this.saveData.options);
+            this.context = new Context(this.human, this.base, this.inventory, this.utilities, this.saveData.options);
         }
     }
 
@@ -816,7 +828,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         this.utilities.movement.resetMovementOverlays();
-        localPlayer.walkAlongPath(undefined);
+        this.human.walkAlongPath(undefined);
     }
 
     private fullInterrupt() {
@@ -828,7 +840,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private async tick() {
         try {
-            if (this.context.player.hasDelay()) {
+            if (this.context.human.hasDelay()) {
                 this.processQuantumBurst();
             }
 
@@ -844,7 +856,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return;
         }
 
-        if (this.context.player.hasDelay()) {
+        if (this.context.human.hasDelay()) {
             this.processQuantumBurst();
         }
 
@@ -858,9 +870,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 this.event.emit("quantumBurstChange", QuantumBurstStatus.CooldownStart);
             }
 
-            if (game.playing && this.context.player.isGhost() && game.getGameOptions().respawn) {
+            if (game.playing && this.context.human.isGhost() && game.getGameOptions().respawn && this.context.human.asPlayer) {
                 await new ExecuteAction(ActionType.Respawn, (context, action) => {
-                    action.execute(context.player);
+                    action.execute(context.actionExecutor as Player);
                     return ObjectiveResult.Complete;
                 }).execute(this.context);
             }
@@ -1150,14 +1162,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         // focus on healing if our health is below 85% while poisoned
         const poisonHealthPercentThreshold = 0.85;
 
-        const health = context.player.stat.get<IStatMax>(Stat.Health);
+        const health = context.human.stat.get<IStatMax>(Stat.Health);
         const needsHealthRecovery = health.value <= this.utilities.player.getRecoverThreshold(context, Stat.Health) ||
-            context.player.status.Bleeding ||
-            (context.player.status.Poisoned && (health.value / health.max) <= poisonHealthPercentThreshold);
+            context.human.status.Bleeding ||
+            (context.human.status.Poisoned && (health.value / health.max) <= poisonHealthPercentThreshold);
 
-        const exceededThirstThreshold = context.player.stat.get<IStat>(Stat.Thirst).value <= this.utilities.player.getRecoverThreshold(context, Stat.Thirst);
-        const exceededHungerThreshold = context.player.stat.get<IStat>(Stat.Hunger).value <= this.utilities.player.getRecoverThreshold(context, Stat.Hunger);
-        const exceededStaminaThreshold = context.player.stat.get<IStat>(Stat.Stamina).value <= this.utilities.player.getRecoverThreshold(context, Stat.Stamina);
+        const exceededThirstThreshold = context.human.stat.get<IStat>(Stat.Thirst).value <= this.utilities.player.getRecoverThreshold(context, Stat.Thirst);
+        const exceededHungerThreshold = context.human.stat.get<IStat>(Stat.Hunger).value <= this.utilities.player.getRecoverThreshold(context, Stat.Hunger);
+        const exceededStaminaThreshold = context.human.stat.get<IStat>(Stat.Stamina).value <= this.utilities.player.getRecoverThreshold(context, Stat.Stamina);
 
         const objectives: IObjective[] = [];
 
@@ -1205,7 +1217,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private equipInterrupt(context: Context, equip: EquipType): IObjective | undefined {
-        const item = context.player.getEquippedItem(equip);
+        const item = context.human.getEquippedItem(equip);
         if (item && (item.type === ItemType.SlitherSucker || item.type === ItemType.AberrantSlitherSucker)) {
             // brain slugs are bad
             return new UnequipItem(item);
@@ -1236,8 +1248,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return new EquipItem(EquipType.RightHand, context.inventory.equipShield);
         }
 
-        const leftHandItem = context.player.getEquippedItem(EquipType.LeftHand);
-        const rightHandItem = context.player.getEquippedItem(EquipType.RightHand);
+        const leftHandItem = context.human.getEquippedItem(EquipType.LeftHand);
+        const rightHandItem = context.human.getEquippedItem(EquipType.RightHand);
 
         const leftHandDescription = leftHandItem ? leftHandItem.description() : undefined;
         const leftHandEquipped = leftHandDescription ? leftHandDescription.attack !== undefined : false;
@@ -1259,58 +1271,71 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             }
 
             if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
-                if (leftHandDamageTypeMatches !== context.player.options.leftHand) {
-                    oldui.changeEquipmentOption("leftHand");
+                if (leftHandDamageTypeMatches !== context.human.options.leftHand) {
+                    this.changeEquipmentOption("leftHand");
                 }
 
-                if (rightHandDamageTypeMatches !== context.player.options.rightHand) {
-                    oldui.changeEquipmentOption("rightHand");
+                if (rightHandDamageTypeMatches !== context.human.options.rightHand) {
+                    this.changeEquipmentOption("rightHand");
                 }
 
             } else if (leftHandEquipped || rightHandEquipped) {
-                if (leftHandEquipped && !context.player.options.leftHand) {
-                    oldui.changeEquipmentOption("leftHand");
+                if (leftHandEquipped && !context.human.options.leftHand) {
+                    this.changeEquipmentOption("leftHand");
                 }
 
-                if (rightHandEquipped && !context.player.options.rightHand) {
-                    oldui.changeEquipmentOption("rightHand");
+                if (rightHandEquipped && !context.human.options.rightHand) {
+                    this.changeEquipmentOption("rightHand");
                 }
 
             } else {
-                if (!context.player.options.leftHand) {
-                    oldui.changeEquipmentOption("leftHand");
+                if (!context.human.options.leftHand) {
+                    this.changeEquipmentOption("leftHand");
                 }
 
-                if (!context.player.options.rightHand) {
-                    oldui.changeEquipmentOption("rightHand");
+                if (!context.human.options.rightHand) {
+                    this.changeEquipmentOption("rightHand");
                 }
             }
 
         } else {
             if (!leftHandEquipped && !rightHandEquipped) {
                 // if we have nothing equipped in both hands, make sure the left hand is enabled
-                if (!context.player.options.leftHand) {
-                    oldui.changeEquipmentOption("leftHand");
+                if (!context.human.options.leftHand) {
+                    this.changeEquipmentOption("leftHand");
                 }
 
-            } else if (leftHandEquipped !== context.player.options.leftHand) {
-                oldui.changeEquipmentOption("leftHand");
+            } else if (leftHandEquipped !== context.human.options.leftHand) {
+                this.changeEquipmentOption("leftHand");
             }
 
             if (leftHandEquipped) {
                 // if we have the left hand equipped, disable right hand
-                if (context.player.options.rightHand) {
-                    oldui.changeEquipmentOption("rightHand");
+                if (context.human.options.rightHand) {
+                    this.changeEquipmentOption("rightHand");
                 }
 
-            } else if (rightHandEquipped !== context.player.options.rightHand) {
-                oldui.changeEquipmentOption("rightHand");
+            } else if (rightHandEquipped !== context.human.options.rightHand) {
+                this.changeEquipmentOption("rightHand");
             }
         }
     }
 
+    private changeEquipmentOption(id: "leftHand" | "rightHand") {
+        if (this.human.isLocalPlayer()) {
+            oldui.changeEquipmentOption(id);
+
+        } else if (!this.human.asPlayer) {
+            const isLeftHand = id === "leftHand";
+            const newValue = isLeftHand ? !this.human.options.leftHand : !this.human.options.rightHand;
+            (this.human.options as any)[id] = newValue;
+
+            // todo: mp somehow?
+        }
+    }
+
     private handEquipInterrupt(context: Context, equipType: EquipType, use?: ActionType, itemTypes?: Array<ItemType | ItemTypeGroup>, preferredDamageType?: DamageType): IObjective | undefined {
-        const equippedItem = context.player.getEquippedItem(equipType);
+        const equippedItem = context.human.getEquippedItem(equipType);
 
         let possibleEquips: Item[];
         if (use) {
@@ -1323,11 +1348,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                 for (let x = -2; x <= 2; x++) {
                     for (let y = -2; y <= 2; y++) {
-                        const point = context.player.island.ensureValidPoint({ x: context.player.x + x, y: context.player.y + y, z: context.player.z });
+                        const point = context.human.island.ensureValidPoint({ x: context.human.x + x, y: context.human.y + y, z: context.human.z });
                         if (point) {
                             const tile = context.island.getTileFromPoint(point);
                             if (tile.creature && !tile.creature.isTamed()) {
-                                const distance = Vector2.squaredDistance(context.player, tile.creature.getPoint());
+                                const distance = Vector2.squaredDistance(context.human, tile.creature.getPoint());
                                 if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
                                     closestCreatureDistance = distance;
                                     closestCreature = tile.creature;
@@ -1342,7 +1367,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     possibleEquips
                         .sort((a, b) => this.utilities.item.estimateDamageModifier(b, closestCreature!) - this.utilities.item.estimateDamageModifier(a, closestCreature!));
 
-                } else if (context.player.getEquippedItem(equipType) !== undefined) {
+                } else if (context.human.getEquippedItem(equipType) !== undefined) {
                     // don't switch until we're close to a creature
                     return undefined;
                 }
@@ -1358,10 +1383,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
             for (const itemType of itemTypes) {
                 if (context.island.items.isGroup(itemType)) {
-                    possibleEquips.push(...context.island.items.getItemsInContainerByGroup(context.player.inventory, itemType));
+                    possibleEquips.push(...context.island.items.getItemsInContainerByGroup(context.human.inventory, itemType));
 
                 } else {
-                    possibleEquips.push(...context.island.items.getItemsInContainerByType(context.player.inventory, itemType));
+                    possibleEquips.push(...context.island.items.getItemsInContainerByType(context.human.inventory, itemType));
                 }
             }
 
@@ -1390,16 +1415,16 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         const objectives = [
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.LeftHand)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.RightHand)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Chest)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Legs)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Head)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Belt)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Feet)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Neck)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Hands)),
-            this.repairInterrupt(context, context.player.getEquippedItem(EquipType.Back)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.LeftHand)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.RightHand)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Chest)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Legs)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Head)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Belt)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Feet)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Neck)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Hands)),
+            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Back)),
             this.repairInterrupt(context, this.inventory.knife),
             this.repairInterrupt(context, this.inventory.fireStarter),
             this.repairInterrupt(context, this.inventory.hoe),
@@ -1431,7 +1456,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return undefined;
         }
 
-        if (this.inventory.waterContainer?.includes(item) && context.player.stat.get<IStat>(Stat.Thirst).value < 2) {
+        if (this.inventory.waterContainer?.includes(item) && context.human.stat.get<IStat>(Stat.Thirst).value < 2) {
             // don't worry about repairing a water container if it's an emergency
             return undefined;
         }
@@ -1460,7 +1485,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         for (const creature of nearbyCreatures) {
             if (shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature)) {
                 // only run away if the creature can path to us
-                const path = creature.findPath(context.player, 16, context.player);
+                const path = creature.findPath(context.human, 16, context.human);
                 if (path) {
                     log.info(`Run away from ${creature.getName().getString()}`);
                     return new RunAwayFromTarget(creature);
@@ -1472,7 +1497,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private checkNearbyCreature(context: Context, direction: Direction.Cardinal | Direction.None): Creature | undefined {
         if (direction !== Direction.None) {
             const point = Vector2.DIRECTIONS[direction];
-            const validPoint = context.island.ensureValidPoint({ x: context.player.x + point.x, y: context.player.y + point.y, z: context.player.z });
+            const validPoint = context.island.ensureValidPoint({ x: context.human.x + point.x, y: context.human.y + point.y, z: context.human.z });
             if (validPoint) {
                 const tile = context.island.getTileFromPoint(validPoint);
                 if (tile && tile.creature && !tile.creature.isTamed()) {
@@ -1515,6 +1540,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             objectives.push(new BuildItem(this.inventory.anvil));
         }
 
+        if (this.inventory.solarStill !== undefined) {
+            objectives.push(new BuildItem(this.inventory.solarStill));
+        }
+
         return objectives;
     }
 
@@ -1523,7 +1552,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return undefined;
         }
 
-        const targets = this.utilities.object.findCarvableCorpses(context, "gatherFromCorpsesInterrupt", corpse => Vector2.distance(context.player, corpse) < 16);
+        const targets = this.utilities.object.findCarvableCorpses(context, "gatherFromCorpsesInterrupt", corpse => Vector2.distance(context.human, corpse) < 16);
         if (targets) {
             const objectives: IObjective[] = [];
 
@@ -1568,7 +1597,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private escapeCavesInterrupt(context: Context) {
-        if (context.player.z === WorldZ.Cave) {
+        if (context.human.z === WorldZ.Cave) {
             return new MoveToZ(WorldZ.Overworld);
         }
     }
@@ -1583,7 +1612,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return undefined;
         }
 
-        const walkPath = context.player.walkPath;
+        const walkPath = context.human.walkPath;
         if (walkPath === undefined || walkPath.path.length === 0) {
             return undefined;
         }
@@ -1593,7 +1622,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         const target = walkPath.path[walkPath.path.length - 1];
-        if (this.utilities.base.isNearBase(context, { x: target.x, y: target.y, z: context.player.z })) {
+        if (this.utilities.base.isNearBase(context, { x: target.x, y: target.y, z: context.human.z })) {
             return undefined;
         }
 
@@ -1654,11 +1683,16 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return;
         }
 
-        this.context.player.nextMoveTime = 0;
-        this.context.player.movementFinishTime = 0;
-        this.context.player.attackAnimationEndTime = 0;
+        const player = this.context.human.asPlayer;
+        if (!player) {
+            return;
+        }
 
-        while (this.context.player.hasDelay()) {
+        player.nextMoveTime = 0;
+        player.movementFinishTime = 0;
+        player.attackAnimationEndTime = 0;
+
+        while (this.context.human.hasDelay()) {
             game.absoluteTime += 100;
         }
     }

@@ -18,10 +18,10 @@ export class ActionUtilities {
         executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => ObjectiveResult): Promise<ObjectiveResult> {
         let waiter: Promise<boolean> | undefined;
 
-        if (context.player.hasDelay()) {
+        if (context.human.hasDelay()) {
             await new Promise<void>(resolve => {
                 const checker = () => {
-                    if (!context.player.hasDelay()) {
+                    if (!context.human.hasDelay()) {
                         resolve();
                         return;
                     }

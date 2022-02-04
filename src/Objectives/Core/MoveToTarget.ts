@@ -87,17 +87,17 @@ export default class MoveToTarget extends Objective {
 			return movementPath.difficulty;
 		}
 
-		if (!this.options?.disableStaminaCheck && !context.player.vehicleItemReference) {
+		if (!this.options?.disableStaminaCheck && !context.human.vehicleItemReference) {
 			const path = movementPath.path;
 			if (path) {
 				// check how our stamina is
-				const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
+				const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
 				if ((stamina.max - stamina.value) > 2) {
 					let swimTiles = 0;
 
 					for (let i = 4; i < path.length; i++) {
 						const point = path[i];
-						const tile = context.island.getTile(point.x, point.y, context.player.z);
+						const tile = context.island.getTile(point.x, point.y, context.human.z);
 						const tileType = TileHelpers.getType(tile);
 						const terrainDescription = terrainDescriptions[tileType];
 						if (terrainDescription && terrainDescription.water) {
@@ -120,8 +120,8 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailBoat && !context.player.vehicleItemReference) {
-			const tile = context.player.getTile();
+		if (this.options?.allowBoat && context.inventory.sailBoat && !context.human.vehicleItemReference) {
+			const tile = context.human.getTile();
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];
 			if (terrainDescription && terrainDescription.water) {
@@ -137,7 +137,7 @@ export default class MoveToTarget extends Objective {
 
 				for (let i = 0; i < path.length - 1; i++) {
 					const point = path[i];
-					const tile = context.island.getTile(point.x, point.y, context.player.z);
+					const tile = context.island.getTile(point.x, point.y, context.human.z);
 					const tileType = TileHelpers.getType(tile);
 					const terrainDescription = terrainDescriptions[tileType];
 					if (terrainDescription && terrainDescription.water) {
@@ -157,7 +157,7 @@ export default class MoveToTarget extends Objective {
 		}
 
 		const range = this.options?.range;
-		if (range !== undefined && Vector2.isDistanceWithin(context.player, this.target, range)) {
+		if (range !== undefined && Vector2.isDistanceWithin(context.human, this.target, range)) {
 			this.log.info("Within range of the target");
 			return ObjectiveResult.Complete;
 		}
@@ -205,7 +205,7 @@ export default class MoveToTarget extends Objective {
 				return true;
 			}
 
-			if (Vector2.distance(context.player, this.trackedCreature) > 5) {
+			if (Vector2.distance(context.human, this.trackedCreature) > 5) {
 				// track once it's closer
 				return false;
 			}
@@ -242,8 +242,8 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailBoat && !context.player.vehicleItemReference) {
-			const tile = context.player.getTile();
+		if (this.options?.allowBoat && context.inventory.sailBoat && !context.human.vehicleItemReference) {
+			const tile = context.human.getTile();
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];
 			if (terrainDescription && terrainDescription.water) {

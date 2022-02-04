@@ -1,3 +1,4 @@
+import type { ItemType } from "game/item/IItem";
 import { ItemTypeGroup } from "game/item/IItem";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -10,7 +11,7 @@ export default class AcquireItemByGroup extends AcquireBase {
     constructor(itemTypeGroup: ItemTypeGroup, options?: Partial<IAcquireItemOptions>);
     getIdentifier(): string;
     getStatus(context: Context): string | undefined;
-    canIncludeContextHashCode(): boolean;
+    canIncludeContextHashCode(): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     private getItemTypes;

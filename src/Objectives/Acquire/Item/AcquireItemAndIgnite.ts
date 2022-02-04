@@ -4,6 +4,7 @@ import Translation from "language/Translation";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
+import { ItemUtilities } from "../../../utilities/Item";
 import IgniteItem from "../../other/item/IgniteItem";
 import AcquireItem from "./AcquireItem";
 
@@ -24,8 +25,8 @@ export default class AcquireItemAndIgnite extends Objective {
         return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} and igniting it`;
     }
 
-    public override canIncludeContextHashCode(): boolean {
-        return true;
+    public override canIncludeContextHashCode(): boolean | Set<ItemType> {
+        return ItemUtilities.getRelatedItemTypes(this.itemType);
     }
 
     public override shouldIncludeContextHashCode(context: Context): boolean {

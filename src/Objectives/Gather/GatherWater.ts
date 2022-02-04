@@ -1,7 +1,7 @@
 import type Item from "game/item/Item";
 
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 
@@ -29,7 +29,7 @@ export default class GatherWater extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `GatherWater:${this.waterContainer}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.disallowRecipe}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWaterStill}`;
+		return `GatherWater:${this.waterContainer}:${this.options?.disallowTerrain}:${this.options?.disallowWaterStill}:${this.options?.disallowWell}:${this.options?.disallowRecipe}:${this.options?.allowStartingWaterStill}:${this.options?.allowWaitingForWater}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -51,7 +51,13 @@ export default class GatherWater extends Objective {
 			for (const waterStill of context.base.waterStill) {
 				objectivePipelines.push([new GatherWaterFromStill(waterStill, this.waterContainer, {
 					allowStartingWaterStill: this.options?.allowStartingWaterStill,
-					allowWaitingForWaterStill: this.options?.allowWaitingForWaterStill,
+					allowWaitingForWater: this.options?.allowWaitingForWater,
+				})]);
+			}
+
+			for (const solarStill of context.base.solarStill) {
+				objectivePipelines.push([new GatherWaterFromStill(solarStill, this.waterContainer, {
+					allowWaitingForWater: this.options?.allowWaitingForWater,
 				})]);
 			}
 		}

@@ -16,4 +16,5 @@ export default class ContextState {
     set<T = any>(type: string, value: T | undefined): void;
     clone(increaseDepth: boolean): ContextState;
     getHashCode(): string;
+    getFilteredHashCode(allowedItemTypes: Set<ItemType>): string;
 }

@@ -61,7 +61,7 @@ export default class GatherFromCreature extends Objective {
 				objectives.push((new MoveToTarget(creature, false)).trackCreature(creature));
 
 				objectives.push(new Lambda(async context => {
-					const corpses = context.player.getFacingTile().corpses;
+					const corpses = context.human.getFacingTile().corpses;
 					if (corpses && corpses.length > 0) {
 						this.log.info("Carving corpse");
 						return new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(creature.type)!)

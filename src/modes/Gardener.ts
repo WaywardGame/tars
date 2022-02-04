@@ -39,7 +39,7 @@ export class GardenerMode implements ITarsMode {
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
-				if ((context.player.island.items.computeContainerWeight(c as IContainer) / context.player.island.items.getWeightCapacity(c)!) < 0.9) {
+				if ((context.human.island.items.computeContainerWeight(c as IContainer) / context.human.island.items.getWeightCapacity(c)!) < 0.9) {
 					acquireChest = false;
 					break;
 				}

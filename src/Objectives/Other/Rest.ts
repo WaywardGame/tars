@@ -28,6 +28,11 @@ export default class Rest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const player = context.human.asPlayer;
+		if (!player) {
+			return ObjectiveResult.Impossible;
+		}
+
 		if (context.utilities.tile.isSwimmingOrOverWater(context) && !context.utilities.player.isUsingVehicle(context)) {
 			return new MoveToLand();
 		}
@@ -42,7 +47,7 @@ export default class Rest extends Objective {
 				[new Idle(false)],
 			];
 
-			if (context.player.getWeightStatus() === WeightStatus.Overburdened) {
+			if (context.human.getWeightStatus() === WeightStatus.Overburdened) {
 				if (this.force) {
 					objectivePipelines.push([new ReduceWeight({ allowReservedItems: true }), new RunAwayFromTarget(nearbyCreature)]);
 				}
@@ -61,7 +66,7 @@ export default class Rest extends Objective {
 		if (extinguishableItem) {
 			// don't set yourself on fire while sleeping
 			objectivePipeline.push(new ExecuteAction(ActionType.Extinguish, (context, action) => {
-				action.execute(context.player, extinguishableItem);
+				action.execute(context.actionExecutor, extinguishableItem);
 				return ObjectiveResult.Complete;
 			}));
 		}
@@ -69,13 +74,13 @@ export default class Rest extends Objective {
 		const bed = context.inventory.bed;
 		if (bed) {
 			objectivePipeline.push(new ExecuteAction(ActionType.Sleep, (context, action) => {
-				action.execute(context.player, bed);
+				action.execute(player, bed);
 				return ObjectiveResult.Complete;
 			}).setStatus(this));
 
 		} else {
 			objectivePipeline.push(new ExecuteAction(ActionType.Rest, (context, action) => {
-				action.execute(context.player);
+				action.execute(player);
 				return ObjectiveResult.Complete;
 			}).setStatus(this));
 		}

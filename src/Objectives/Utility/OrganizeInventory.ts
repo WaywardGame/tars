@@ -74,7 +74,7 @@ export default class OrganizeInventory extends Objective {
 
 		if (this.options.items) {
 			const validItems = this.options.items
-				.filter(item => context.island.items.getPlayerWithItemInInventory(item) === context.player)
+				.filter(item => context.island.items.getPlayerWithItemInInventory(item) === context.human)
 				.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 			if (validItems.length === 0) {
 				return ObjectiveResult.Ignore;
@@ -130,7 +130,7 @@ export default class OrganizeInventory extends Objective {
 			// pick the chest with the most room available
 			const chests = context.base.chest.slice().sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
 			for (const chest of chests) {
-				if (!this.options.disableDrop && Vector2.distance(context.player, chest) > maxChestDistance) {
+				if (!this.options.disableDrop && Vector2.distance(context.human, chest) > maxChestDistance) {
 					continue;
 				}
 
@@ -145,7 +145,7 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = TileHelpers.findMatchingTile(context.island, context.player, (_, point, tile) => context.utilities.tile.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
+		const target = TileHelpers.findMatchingTile(context.island, context.human, (_, point, tile) => context.utilities.tile.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}
@@ -157,7 +157,7 @@ export default class OrganizeInventory extends Objective {
 		return [
 			new MoveToTarget(target, false),
 			new ExecuteAction(ActionType.Drop, (context, action) => {
-				action.execute(context.player, itemToDrop);
+				action.execute(context.actionExecutor, itemToDrop);
 				return ObjectiveResult.Complete;
 			}).setStatus(`Dropping ${itemToDrop.getName()}`),
 		];

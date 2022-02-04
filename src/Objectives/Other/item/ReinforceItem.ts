@@ -48,7 +48,7 @@ export default class ReinforceItem extends Objective {
 		}
 
 		if (this.options.targetDurabilityMultipler !== undefined) {
-			const defaultDurability = context.island.items.getDefaultDurability(context.player, this.item.weight, this.item.type, true);
+			const defaultDurability = context.island.items.getDefaultDurability(context.human, this.item.weight, this.item.type, true);
 			if (maxDur / defaultDurability >= this.options.targetDurabilityMultipler) {
 				return ObjectiveResult.Ignore;
 			}
@@ -73,7 +73,7 @@ export default class ReinforceItem extends Objective {
 				return ObjectiveResult.Restart;
 			}
 
-			action.execute(context.player, reinforceItem, this.item);
+			action.execute(context.actionExecutor, reinforceItem, this.item);
 			return ObjectiveResult.Complete;
 		}).setStatus(this));
 

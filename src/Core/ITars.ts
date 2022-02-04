@@ -110,8 +110,10 @@ export interface IBase {
     furnace: Doodad[];
     intermediateChest: Doodad[];
     kiln: Doodad[];
+    solarStill: Doodad[];
     waterStill: Doodad[];
     well: Doodad[];
+
     buildAnotherChest: boolean;
     availableUnlimitedWellLocation: IVector3 | undefined;
 }
@@ -120,7 +122,9 @@ export interface IBaseInfo {
     doodadTypes?: Array<DoodadType | DoodadTypeGroup>;
     litType?: DoodadType | DoodadTypeGroup;
     tryPlaceNear?: BaseInfoKey;
+    nearBaseDistanceSq?: number;
     allowMultiple?: boolean;
+    requireShallowWater?: boolean;
     openAreaRadius?: number;
     canAdd?(context: Context, target: Doodad): boolean;
     onAdd?(context: Context, target: Doodad): void;
@@ -152,7 +156,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
                 return false;
             }
 
-            if (context.options.goodCitizen && multiplayer.isConnected() && target.getOwner() !== context.player) {
+            if (context.options.goodCitizen && multiplayer.isConnected() && target.getOwner() !== context.human) {
                 return false;
             }
 
@@ -187,6 +191,12 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
         litType: DoodadTypeGroup.LitKiln,
         tryPlaceNear: "anvil",
     },
+    solarStill: {
+        doodadTypes: [DoodadType.SolarStill],
+        allowMultiple: true,
+        requireShallowWater: true,
+        nearBaseDistanceSq: Math.pow(28, 2),
+    },
     waterStill: {
         doodadTypes: [DoodadTypeGroup.LitWaterStill],
         litType: DoodadTypeGroup.LitWaterStill,
@@ -206,8 +216,8 @@ export interface IInventoryItems {
     axe?: Item;
     bandage?: Item;
     bed?: Item;
-    campfire?: Item;
     butcher?: Item;
+    campfire?: Item;
     chest?: Item;
     equipBack?: Item;
     equipBelt?: Item;
@@ -233,6 +243,7 @@ export interface IInventoryItems {
     pickAxe?: Item;
     sailBoat?: Item;
     shovel?: Item;
+    solarStill?: Item;
     tongs?: Item;
     waterContainer?: Item[];
     waterStill?: Item;
@@ -478,6 +489,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             option: ActionType.Dig,
         },
     },
+    solarStill: {
+        itemTypes: [ItemType.SolarStill],
+        requiredMinDur: 1,
+    },
     waterContainer: {
         actionTypes: [ActionType.GatherLiquid],
         itemTypes: [
@@ -540,6 +555,7 @@ export enum TarsMode {
     Survival,
     TidyUp,
     Gardener,
+    Harvester,
     Terminator,
     Quest,
 }

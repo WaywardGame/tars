@@ -25,11 +25,92 @@ import { ContextDataType } from "../core/context/IContext";
 
 export class ItemUtilities {
 
+	private static readonly relatedItemsCache: Map<ItemType, Set<ItemType>> = new Map();
+	private static readonly relatedItemsByGroupCache: Map<ItemTypeGroup, Set<ItemType>> = new Map();
+
 	public foodItemTypes: Set<ItemType>;
 	public seedItemTypes: Set<ItemType>;
 
+	private availableInventoryWeightCache: number | undefined;
 	private itemCache: Item[] | undefined;
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
+
+	/**
+	 * All item types related to the current one
+	 */
+	public static getRelatedItemTypes(itemType: ItemType): Set<ItemType> {
+		let result = this.relatedItemsCache.get(itemType);
+		if (result === undefined) {
+			result = new Set();
+
+			let queue: ItemType[] = [itemType];
+
+			while (queue.length > 0) {
+				const itemType = queue.shift()!;
+
+				if (result.has(itemType)) {
+					continue;
+				}
+
+				result.add(itemType);
+
+				const description = itemDescriptions[itemType];
+				if (!description) {
+					continue;
+				}
+
+				const dismantleItems = description.dismantle?.items;
+				if (dismantleItems) {
+					queue.push(...dismantleItems.map(dismantleItem => dismantleItem.type));
+				}
+
+				const recipe = description.recipe;
+				if (recipe) {
+					if (recipe.baseComponent) {
+						if (ItemManager.isGroup(recipe.baseComponent)) {
+							queue.push(...Array.from(ItemManager.getGroupItems(recipe.baseComponent)));
+
+						} else {
+							queue.push(recipe.baseComponent);
+						}
+					}
+
+					for (const component of recipe.components) {
+						if (ItemManager.isGroup(component.type)) {
+							queue.push(...Array.from(ItemManager.getGroupItems(component.type)));
+
+						} else {
+							queue.push(component.type);
+						}
+					}
+				}
+			}
+
+			this.relatedItemsCache.set(itemType, result);
+		}
+
+		return result;
+	}
+
+	/**
+	 * All item types related to the current one
+	 */
+	public static getRelatedItemTypesByGroup(itemTypeGroup: ItemTypeGroup): Set<ItemType> {
+		let result = this.relatedItemsByGroupCache.get(itemTypeGroup);
+		if (result === undefined) {
+			result = new Set();
+
+			for (const itemTypeForGroup of ItemManager.getGroupItems(itemTypeGroup)) {
+				for (const itemType of this.getRelatedItemTypes(itemTypeForGroup)) {
+					result.add(itemType);
+				}
+			}
+
+			this.relatedItemsByGroupCache.set(itemTypeGroup, result);
+		}
+
+		return result;
+	}
 
 	public initialize(context: Context) {
 		this.foodItemTypes = this.getFoodItemTypes();
@@ -37,6 +118,8 @@ export class ItemUtilities {
 	}
 
 	public clearCache() {
+		this.availableInventoryWeightCache = undefined;
+
 		this.itemCache = undefined;
 		this.disassembleSearchCache.clear();
 	}
@@ -45,9 +128,9 @@ export class ItemUtilities {
 		if (this.itemCache === undefined) {
 			const baseTileItems = context.utilities.base.getTileItemsNearBase(context);
 			const baseChestItems = context.base.chest
-				.map(chest => context.island.items.getItemsInContainer(chest, true))
+				.map(chest => context.island.items.getItemsInContainer(chest, { includeSubContainers: true }))
 				.flat();
-			const inventoryItems = context.island.items.getItemsInContainer(context.player.inventory, true);
+			const inventoryItems = context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true });
 
 			this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
 		}
@@ -99,7 +182,7 @@ export class ItemUtilities {
 
 	// allow processing with inventory items assuming they wont be consumed
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
-		const checker = new ItemRecipeRequirementChecker(context.player, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
+		const checker = new ItemRecipeRequirementChecker(context.human, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
 			if (isConsumed) {
 				if (context.isHardReservedItem(item)) {
 					return false;
@@ -140,11 +223,11 @@ export class ItemUtilities {
 	}
 
 	public getItemsInInventory(context: Context, allowProtectedItems: boolean = true) {
-		return context.island.items.getItemsInContainer(context.player.inventory, true, allowProtectedItems);
+		return context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true, excludeProtectedItems: !allowProtectedItems });
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
-		return this.getItemInContainer(context, context.player.inventory, itemTypeSearch);
+		return this.getItemInContainer(context, context.human.inventory, itemTypeSearch);
 	}
 
 	private getItemInContainer(
@@ -464,10 +547,14 @@ export class ItemUtilities {
 	}
 
 	public getAvailableInventoryWeight(context: Context) {
-		const items = this.getItemsInInventory(context)
-			.filter(item => this.isInventoryItem(context, item));
-		const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
-		return context.player.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
+		if (this.availableInventoryWeightCache === undefined) {
+			const items = this.getItemsInInventory(context)
+				.filter(item => this.isInventoryItem(context, item));
+			const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
+			this.availableInventoryWeightCache = context.human.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
+		}
+
+		return this.availableInventoryWeightCache;
 	}
 
 	public getSeeds(context: Context): Item[] {
@@ -493,7 +580,7 @@ export class ItemUtilities {
 			}
 		}
 
-		const matchingItems = context.island.items.getItemsInContainer(context.player.inventory, true).filter(item => itemTypes.includes(item.type));
+		const matchingItems = context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true }).filter(item => itemTypes.includes(item.type));
 
 		return matchingItems[0];
 	}

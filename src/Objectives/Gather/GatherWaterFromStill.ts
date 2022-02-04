@@ -11,38 +11,40 @@ import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import UseItem from "../other/item/UseItem";
 import EmptyWaterContainer from "../other/EmptyWaterContainer";
+import { DoodadType } from "game/doodad/IDoodad";
+import StartSolarStill from "../other/doodad/StartSolarStill";
 
 export interface IGatherWaterFromStillOptions {
 	allowStartingWaterStill: boolean;
-	allowWaitingForWaterStill?: boolean;
+	allowWaitingForWater?: boolean;
 	onlyIdleWhenWaitingForWaterStill?: boolean;
 }
 
 export default class GatherWaterFromStill extends Objective {
 
-	constructor(private readonly waterStill: Doodad, private readonly item: Item, private readonly options?: Partial<IGatherWaterFromStillOptions>) {
+	constructor(private readonly waterOrSolarStill: Doodad, private readonly item: Item, private readonly options?: Partial<IGatherWaterFromStillOptions>) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `GatherWaterFromStill:${this.waterStill}:${this.item}:${this.options?.allowStartingWaterStill}`;
+		return `GatherWaterFromStill:${this.waterOrSolarStill}:${this.item}:${this.options?.allowStartingWaterStill}`;
 	}
 
 	public getStatus(): string | undefined {
-		return `Gathering water from ${this.waterStill.getName()}`;
+		return `Gathering water from ${this.waterOrSolarStill.getName()}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!context.utilities.doodad.isWaterStillDrinkable(this.waterStill)) {
+		if (!context.utilities.doodad.isWaterStillDrinkable(this.waterOrSolarStill)) {
 			if (this.options?.allowStartingWaterStill) {
 				// start desalination and run back to the waterstill and wait
 				const objectives: IObjective[] = [
-					new StartWaterStillDesalination(this.waterStill),
+					this.waterOrSolarStill.type === DoodadType.SolarStill ? new StartSolarStill(this.waterOrSolarStill) : new StartWaterStillDesalination(this.waterOrSolarStill),
 				];
 
-				if (this.options?.allowWaitingForWaterStill) {
+				if (this.options?.allowWaitingForWater) {
 					if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
-						objectives.push(new MoveToTarget(this.waterStill, true, { range: 5 }));
+						objectives.push(new MoveToTarget(this.waterOrSolarStill, true, { range: 5 }));
 					}
 
 					// add difficulty to show that we don't want to idle
@@ -61,9 +63,9 @@ export default class GatherWaterFromStill extends Objective {
 			objectives.push(new EmptyWaterContainer(this.item));
 		}
 
-		objectives.push(new MoveToTarget(this.waterStill, true));
+		objectives.push(new MoveToTarget(this.waterOrSolarStill, true));
 		objectives.push(new UseItem(ActionType.GatherLiquid, this.item)
-			.setStatus(() => `Gathering water from ${this.waterStill.getName()}`));
+			.setStatus(() => `Gathering water from ${this.waterOrSolarStill.getName()}`));
 
 		return objectives;
 	}

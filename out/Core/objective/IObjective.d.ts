@@ -1,5 +1,6 @@
 import type { ActionType } from "game/entity/action/IAction";
 import type { DamageType } from "game/entity/IEntity";
+import { ItemType } from "game/item/IItem";
 import type { ILog, ILogLine } from "utilities/Log";
 import type Context from "../context/Context";
 import type ContextState from "../context/ContextState";
@@ -18,6 +19,16 @@ export declare enum CalculatedDifficultyStatus {
     NotPlausible = -7,
     Possible = -26
 }
+export interface IObjectivePriority {
+    priority: number;
+    objectiveCount: number;
+    acquireObjectiveCount: number;
+    emptyAcquireObjectiveCount: number;
+    gatherObjectiveCount: number;
+    gatherWithoutChestObjectiveCount: number;
+    craftsRequiringNoGatheringCount: number;
+    regroupedChildrenCount: number;
+}
 export interface IObjective {
     readonly log: ILog;
     readonly ignoreInvalidPlans?: boolean;
@@ -29,14 +40,14 @@ export interface IObjective {
     getIdentifier(): string;
     getName(): string;
     getStatusMessage(context: Context): string | undefined;
-    sort?(context: Context, executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number;
+    getExecutionPriority?(context: Context, tree: IExecutionTree): IObjectivePriority;
     getPosition?(): IVector3;
     isDynamic(): boolean;
     addDifficulty(difficulty: number): IObjective;
     getDifficulty(context: Context): number;
     isDifficultyOverridden(): boolean;
     onMove(context: Context): Promise<IObjective | boolean>;
-    canIncludeContextHashCode(context: Context): boolean;
+    canIncludeContextHashCode(context: Context): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     canSaveChildObjectives(): boolean;
     canGroupTogether(): boolean;

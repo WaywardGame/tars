@@ -7,7 +7,7 @@ export default class AcquireItemAndIgnite extends Objective {
     constructor(itemType: ItemType);
     getIdentifier(): string;
     getStatus(): string | undefined;
-    canIncludeContextHashCode(): boolean;
+    canIncludeContextHashCode(): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
 }

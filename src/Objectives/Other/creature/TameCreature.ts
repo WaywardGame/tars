@@ -11,6 +11,7 @@ import MoveToTarget from "../../core/MoveToTarget";
 import { ContextDataType } from "../../../core/context/IContext";
 import SetContextData from "../../contextData/SetContextData";
 import AcquireItemForTaming from "../../acquire/item/AcquireItemForTaming";
+import ReserveItems from "../../core/ReserveItems";
 
 export default class TameCreature extends Objective {
 
@@ -27,11 +28,16 @@ export default class TameCreature extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+        const player = context.human.asPlayer;
+        if (!player) {
+            return ObjectiveResult.Impossible;
+        }
+
         if (!this.creature.isValid()) {
             return ObjectiveResult.Restart;
         }
 
-        if (this.creature.isTamed() && this.creature.getOwner() === context.player) {
+        if (this.creature.isTamed() && this.creature.getOwner() === context.human) {
             return ObjectiveResult.Complete;
         }
 
@@ -46,6 +52,7 @@ export default class TameCreature extends Objective {
 
         const offerItem = this.creature.offer(items);
         if (offerItem) {
+            objectives.push(new ReserveItems(offerItem).keepInInventory());
             objectives.push(new SetContextData(ContextDataType.Item1, offerItem));
 
         } else {
@@ -63,7 +70,7 @@ export default class TameCreature extends Objective {
                 return ObjectiveResult.Restart;
             }
 
-            action.execute(context.player, item);
+            action.execute(player, item);
 
             return ObjectiveResult.Complete;
         }).setStatus(this));
@@ -71,7 +78,7 @@ export default class TameCreature extends Objective {
         objectives.push(new SetContextData(ContextDataType.TamingCreature, undefined));
 
         objectives.push(new Lambda(async context => {
-            return this.creature.isValid() && this.creature.isTamed() && this.creature.getOwner() === context.player ? ObjectiveResult.Complete : ObjectiveResult.Restart;
+            return this.creature.isValid() && this.creature.isTamed() && this.creature.getOwner() === context.human ? ObjectiveResult.Complete : ObjectiveResult.Restart;
         }).setStatus(this));
 
         return objectives;

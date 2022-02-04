@@ -5,6 +5,8 @@ import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import { ItemUtilities } from "../../utilities/Item";
+
 /**
  * Trys to use a provided item
  */
@@ -22,8 +24,8 @@ export default class UseProvidedItem extends Objective {
         return `Using ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
     }
 
-    public override canIncludeContextHashCode(): boolean {
-        return true;
+    public override canIncludeContextHashCode() {
+        return ItemUtilities.getRelatedItemTypes(this.itemType);
     }
 
     public override shouldIncludeContextHashCode(context: Context): boolean {

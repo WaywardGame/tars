@@ -1,3 +1,5 @@
+import Human from "game/entity/Human";
+import NPC from "game/entity/npc/NPC";
 import type Player from "game/entity/player/Player";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
@@ -13,7 +15,7 @@ export default class Context implements IContext {
 	private changes: ContextState | undefined;
 
 	constructor(
-		public readonly player: Player /*| NPC*/,
+		public readonly human: Human,
 		public readonly base: IBase,
 		public readonly inventory: IInventoryItems,
 		public readonly utilities: IUtilities,
@@ -24,7 +26,16 @@ export default class Context implements IContext {
 	}
 
 	public get island() {
-		return this.player.island;
+		return this.human.island;
+	}
+
+	public get actionExecutor(): Player | NPC {
+		const executor = this.human.asPlayer ?? this.human.asNPC;
+		if (!executor) {
+			throw new Error("Invalid human");
+		}
+
+		return executor;
 	}
 
 	public toString() {
@@ -32,7 +43,7 @@ export default class Context implements IContext {
 	}
 
 	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false): Context {
-		return new Context(this.player, this.base, this.inventory, this.utilities, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
+		return new Context(this.human, this.base, this.inventory, this.utilities, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState?.clone(increaseDepth));
 	}
 
 	public merge(state: ContextState): void {
@@ -180,11 +191,15 @@ export default class Context implements IContext {
 			this.state.reset();
 		}
 
-		this.setData(ContextDataType.Position, this.player.getPoint());
+		this.setData(ContextDataType.Position, this.human.getPoint());
 	}
 
 	public getHashCode(): string {
 		return this.state.getHashCode();
+	}
+
+	public getFilteredHashCode(allowedItemTypes: Set<ItemType>): string {
+		return this.state.getFilteredHashCode(allowedItemTypes);
 	}
 
 	/**
@@ -221,6 +236,6 @@ export default class Context implements IContext {
 			console.trace("lastKnownPosition get");
 		}
 
-		return position || this.player.getPoint();
+		return position || this.human.getPoint();
 	}
 }

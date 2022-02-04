@@ -11,6 +11,7 @@ import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import { ReserveType } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -36,19 +37,18 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} with a recipe`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
 	}
 
 	public override shouldIncludeContextHashCode(): boolean {
-		// we care about the context's reserved items
 		return true;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const canCraftFromIntermediateChest = !this.recipe.requiresFire && !this.recipe.requiredDoodads;
 
-		const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, this.itemType);
+		const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, this.itemType);
 
 		const checker = context.utilities.item.processRecipe(context, this.recipe, false, this.allowInventoryItems);
 		const checkerWithIntermediateChest = context.utilities.item.processRecipe(context, this.recipe, true, this.allowInventoryItems);
@@ -154,7 +154,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item) {
 							if (context.island.items.isContainableInContainer(item, intermediateChest)) {
-								objectives.push(new MoveItem(item, context.player.inventory, intermediateChest));
+								objectives.push(new MoveItem(item, context.human.inventory, intermediateChest));
 							}
 						}
 					};
@@ -180,7 +180,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		}
 
 		objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Craft, (context, action) => {
-			action.execute(context.player, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
+			action.execute(context.actionExecutor, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
 		}).passAcquireData(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 		return objectives;

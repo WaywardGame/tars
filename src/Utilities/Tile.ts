@@ -1,3 +1,4 @@
+import { IContainer } from "game/item/IItem";
 import type { ITile, ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
@@ -16,7 +17,7 @@ export class TileUtilities {
 	}
 
 	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
-		const position = positionOverride ?? context.player;
+		const position = positionOverride ?? context.human;
 
 		const results: ITileLocation[][] = [];
 
@@ -38,16 +39,17 @@ export class TileUtilities {
 	}
 
 	public isSwimmingOrOverWater(context: Context) {
-		return context.player.isSwimming() || Terrains[TileHelpers.getType(context.player.island.getTileFromPoint(context.getPosition()))]?.water === true;
+		return context.human.isSwimming() || Terrains[TileHelpers.getType(context.human.island.getTileFromPoint(context.getPosition()))]?.water === true;
 	}
 
 	public isOverDeepSeaWater(context: Context) {
-		return TileHelpers.getType(context.player.island.getTileFromPoint(context.getPosition())) === TerrainType.DeepSeawater;
+		return TileHelpers.getType(context.human.island.getTileFromPoint(context.getPosition())) === TerrainType.DeepSeawater;
 		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
-	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true): boolean {
-		if (context.player.island.isTileFull(tile)) {
+	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true, requireShallowWater: boolean = false): boolean {
+		const container = tile as IContainer;
+		if (container.containedItems && container.containedItems.length > 0) {
 			return false;
 		}
 
@@ -66,7 +68,12 @@ export class TileUtilities {
 				return false;
 			}
 
-			if (!allowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
+			if (requireShallowWater) {
+				if (!terrainInfo.shallowWater) {
+					return false;
+				}
+
+			} else if (!allowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
 				return false;
 			}
 		}
@@ -75,10 +82,10 @@ export class TileUtilities {
 	}
 
 	public isFreeOfOtherPlayers(context: Context, point: IVector3) {
-		const players = context.player.island.getPlayersAtPosition(point.x, point.y, point.z, false, true);
+		const players = context.human.island.getPlayersAtPosition(point.x, point.y, point.z, false, true);
 		if (players.length > 0) {
 			for (const player of players) {
-				if (player !== context.player) {
+				if (player !== context.human) {
 					return false;
 				}
 			}
@@ -92,16 +99,16 @@ export class TileUtilities {
 			return false;
 		}
 
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !context.player.island.isPlayerAtTile(tile, false, true);
+		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !context.human.island.isPlayerAtTile(tile, false, true);
 	}
 
 	public canDig(context: Context, tile: ITile) {
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !this.hasItems(tile) && !context.player.island.isPlayerAtTile(tile, false, true);
+		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !this.hasItems(tile) && !context.human.island.isPlayerAtTile(tile, false, true);
 	}
 
 	public canButcherCorpse(context: Context, tile: ITile, skipCorpseCheck?: boolean) {
 		return (skipCorpseCheck || this.hasCorpses(tile))
-			&& !tile.creature && !tile.npc && !this.hasItems(tile) && !context.player.island.isPlayerAtTile(tile, false, true) && !context.player.island.tileEvents.blocksTile(tile);
+			&& !tile.creature && !tile.npc && !this.hasItems(tile) && !context.human.island.isPlayerAtTile(tile, false, true) && !context.human.island.tileEvents.blocksTile(tile);
 	}
 
 	public hasCorpses(tile: ITile) {

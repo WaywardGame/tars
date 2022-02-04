@@ -36,11 +36,15 @@ export default class SailToCivilization extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+        const player = context.human.asPlayer;
+        if (!player) {
+            return ObjectiveResult.Impossible;
+        }
+
         const objectives: IObjective[] = [];
 
         if (game.isChallenge) {
-            const quests = context.player.quests.getQuests(QuestType.Challenge);
-            const quest = quests[0];
+            const quest = player.quests.getQuests(QuestType.Challenge)?.[0];
             if (quest) {
                 objectives.push(new CompleteQuest(quest));
             }
@@ -74,7 +78,7 @@ export default class SailToCivilization extends Objective {
             new MoveItemIntoInventory(context.inventory.sailBoat),
             new MoveToWater(true),
             new ExecuteAction(ActionType.SailToCivilization, (context, action) => {
-                action.execute(context.player, context.inventory.sailBoat, true);
+                action.execute(player, context.inventory.sailBoat, true);
                 return ObjectiveResult.Complete;
             }).setStatus(this)
         );

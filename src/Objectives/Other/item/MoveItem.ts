@@ -41,7 +41,7 @@ export default class MoveItem extends Objective {
 			}
 
 			return new ExecuteAction(ActionType.MoveItem, (context, action) => {
-				action.execute(context.player, item, this.targetContainer);
+				action.execute(context.actionExecutor, item, this.targetContainer);
 				return ObjectiveResult.Complete;
 			}).setStatus(this);
 		}).setStatus(this);

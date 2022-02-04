@@ -51,7 +51,7 @@ export default class MoveIntoChest extends Objective {
 			.slice()
 			.sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
 		for (const chest of chests) {
-			if (this.maxChestDistance !== undefined && Vector2.distance(context.player, chest) > this.maxChestDistance) {
+			if (this.maxChestDistance !== undefined && Vector2.distance(context.human, chest) > this.maxChestDistance) {
 				continue;
 			}
 

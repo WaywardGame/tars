@@ -3,7 +3,7 @@ import { TurnMode } from "game/IGame";
 import TileHelpers from "utilities/game/TileHelpers";
 import type Context from "../../core/context/Context";
 import { defaultMaxTilesChecked } from "../../core/ITars";
-import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import ExecuteAction from "../core/ExecuteAction";
@@ -39,7 +39,7 @@ export default class Idle extends Objective {
 
 		} else {
 			if (this.canMoveToIdle) {
-				const target = TileHelpers.findMatchingTile(context.island, context.player, (island, _2, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !island.isTileFull(tile) && !tile.doodad, { maxTilesChecked: defaultMaxTilesChecked });
+				const target = TileHelpers.findMatchingTile(context.island, context.human, (island, _2, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !island.isTileFull(tile) && !tile.doodad, { maxTilesChecked: defaultMaxTilesChecked });
 				if (target) {
 					this.log.info("Moving to idle position");
 
@@ -48,7 +48,7 @@ export default class Idle extends Objective {
 			}
 
 			objectivePipelines.push(new ExecuteAction(ActionType.Idle, (context, action) => {
-				action.execute(context.player);
+				action.execute(context.actionExecutor);
 				return ObjectiveResult.Complete;
 			}).setStatus(this));
 		}

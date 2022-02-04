@@ -10,6 +10,7 @@ import type Context from "../../../core/context/Context";
 import type { IDisassemblySearch } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
+import { ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ProvideItems from "../../core/ProvideItems";
@@ -42,8 +43,8 @@ export default class AcquireItemFromDisassemble extends Objective {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by disassembling ${translation.getString()}`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {
@@ -78,17 +79,17 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 			if (requiredForDisassembly) {
 				for (const itemTypeOfGroup of requiredForDisassembly) {
-					if (!context.island.items.getItemForHuman(context.player, itemTypeOfGroup)) {
+					if (!context.island.items.getItemForHuman(context.human, itemTypeOfGroup)) {
 						objectives.push(context.island.items.isGroup(itemTypeOfGroup) ? new AcquireItemByGroup(itemTypeOfGroup) : new AcquireItem(itemTypeOfGroup));
 					}
 				}
 			}
 
-			if (context.player.isSwimming()) {
+			if (context.human.isSwimming()) {
 				objectives.push(new MoveToLand());
 			}
 
-			const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, item.type, undefined, undefined, true);
+			const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, item.type, undefined, undefined, true);
 			if (requirementInfo.requirements === RequirementStatus.Missing) {
 				this.log.info("Disassemble requirements not met");
 				objectives.push(new CompleteRequirements(requirementInfo));
@@ -97,11 +98,11 @@ export default class AcquireItemFromDisassemble extends Objective {
 			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Disassemble, (context, action) => {
 				const item = context.getData<Item>(hashCode);
 				if (!item?.isValid()) {
-					this.log.warn("Missing disassemble item. Bug in TARS pipeline, will fix itself", item, hashCode);
+					this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
 					return;
 				}
 
-				action.execute(context.player, item);
+				action.execute(context.actionExecutor, item);
 			}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
 
 			objectivePipelines.push(objectives);

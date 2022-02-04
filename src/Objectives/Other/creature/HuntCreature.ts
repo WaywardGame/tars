@@ -1,11 +1,11 @@
 import { ActionType } from "game/entity/action/IAction";
 import type Creature from "game/entity/creature/Creature";
-import type { IStat} from "game/entity/IStats";
+import type { IStat } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
 import type Context from "../../../core/context/Context";
 
-import type { IObjective, ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
@@ -34,7 +34,7 @@ export default class HuntCreature extends Objective {
         }
 
         const isPassable = this.creature.description()?.passable ?? false;
-        if (isPassable && context.player.x === this.creature.x && context.player.y === this.creature.y && context.player.z === this.creature.z) {
+        if (isPassable && context.human.x === this.creature.x && context.human.y === this.creature.y && context.human.z === this.creature.z) {
             // we're ontop of the creature
             // instead of trying to move next to it, idle and let it move
             return [
@@ -50,15 +50,15 @@ export default class HuntCreature extends Objective {
                     return ObjectiveResult.Complete;
                 }
 
-                const direction = getDirectionFromMovement(this.creature.x - context.player.x, this.creature.y - context.player.y);
+                const direction = getDirectionFromMovement(this.creature.x - context.human.x, this.creature.y - context.human.y);
 
                 // if (this.creature.description()?.passable) {
                 // face the creature and attack with a weapon
                 const objectives: IObjective[] = [];
 
-                if (context.player.facingDirection !== direction) {
+                if (context.human.facingDirection !== direction) {
                     objectives.push(new ExecuteAction(ActionType.UpdateDirection, (context, action) => {
-                        action.execute(context.player, direction, undefined);
+                        action.execute(context.actionExecutor, direction, undefined);
                         return ObjectiveResult.Complete;
                     }).setStatus(this));
                 }
@@ -69,12 +69,12 @@ export default class HuntCreature extends Objective {
                 // const weapon = leftHandItem ?? rightHandItem;
                 // if (weapon) {
                 //     objectives.push(new ExecuteAction(ActionType.Melee, (context, action) => {
-                //         action.execute(context.player, weapon);
+                //         action.execute(context.actionExecutor, weapon);
                 //     }));
 
                 // } else {
                 objectives.push(new ExecuteAction(ActionType.Attack, (context, action) => {
-                    action.execute(context.player);
+                    action.execute(context.actionExecutor);
                     return ObjectiveResult.Complete;
                 }).setStatus(this));
                 // }
@@ -84,7 +84,7 @@ export default class HuntCreature extends Objective {
                 // } else {
                 //     // move into the creature
                 //     return new ExecuteAction(ActionType.Move, (context, action) => {
-                //         action.execute(context.player, direction);
+                //         action.execute(context.actionExecutor, direction);
                 //     });
                 // }
             }),

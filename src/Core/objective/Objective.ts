@@ -8,6 +8,7 @@ import { loggerUtilities } from "../../utilities/Logger";
 import { ReserveType } from "../ITars";
 import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
 import type Item from "game/item/Item";
+import { ItemType } from "game/item/IItem";
 
 export default abstract class Objective implements IObjective {
 
@@ -142,7 +143,7 @@ export default abstract class Objective implements IObjective {
 	 * Checks if the context could effect the execution of the objective
 	 * @param context The context
 	 */
-	public canIncludeContextHashCode(context: Context): boolean {
+	public canIncludeContextHashCode(context: Context): boolean | Set<ItemType> {
 		return false;
 	}
 
@@ -187,13 +188,13 @@ export default abstract class Objective implements IObjective {
 	 * Called when the player moves while this objective is running
 	 */
 	public async onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean> {
-		const walkPath = context.player.walkPath;
+		const walkPath = context.human.walkPath;
 		if (walkPath) {
 			// interrupt if an npc or creature moved along our walk path (only close point)
 			for (let i = 0; i < Math.min(20, walkPath.path.length); i++) {
 				const point = walkPath.path[i];
-				const tile = context.island.getTile(point.x, point.y, context.player.z);
-				if (tile.npc !== undefined || (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature)) {
+				const tile = context.island.getTile(point.x, point.y, context.human.z);
+				if ((tile.npc !== undefined && tile.npc !== context.human) || (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature)) {
 					this.log.info("NPC or creature moved along walk path, recalculating");
 					return true;
 				}

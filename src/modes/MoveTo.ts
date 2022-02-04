@@ -4,6 +4,8 @@ import type Doodad from "game/doodad/Doodad";
 import type { DoodadType } from "game/doodad/IDoodad";
 import type { IslandId } from "game/island/IIsland";
 import type { TerrainType } from "game/tile/ITerrain";
+import type { ITarsMode } from "../core/mode/IMode";
+
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
@@ -11,12 +13,15 @@ import Lambda from "../objectives/core/Lambda";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import ReturnToBase from "../objectives/other/ReturnToBase";
 import MoveToIsland from "../objectives/utility/moveTo/MoveToIsland";
-import type { ITarsMode } from "../core/mode/IMode";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { ContextDataType } from "../core/context/IContext";
+import SetContextData from "../objectives/contextData/SetContextData";
 
 export enum MoveToType {
     Island,
     Terrain,
     Doodad,
+    Creature,
     Player,
     Base,
     NPC,
@@ -51,11 +56,16 @@ export interface IMoveToNPC extends IMoveTo {
     npcType: NPCType;
 }
 
+export interface IMoveToCreature extends IMoveTo {
+    type: MoveToType.Creature;
+    creatureType: CreatureType;
+}
+
 export interface IMoveToBase extends IMoveTo {
     type: MoveToType.Base;
 }
 
-export type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToNPC | IMoveToBase;
+export type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToCreature | IMoveToNPC | IMoveToBase;
 
 export class MoveToMode implements ITarsMode {
 
@@ -116,8 +126,8 @@ export class MoveToMode implements ITarsMode {
                 const npcType = this.target.npcType;
 
                 const npcObjectives = context.utilities.object.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcType, 5)
-                    .map(doodad => ([
-                        new MoveToTarget(doodad, true),
+                    .map(npc => ([
+                        new MoveToTarget(npc, true),
                         new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;
@@ -130,11 +140,30 @@ export class MoveToMode implements ITarsMode {
 
                 break;
 
+            case MoveToType.Creature:
+                const creatureType = this.target.creatureType;
+
+                const creatureObjectives = context.utilities.object.findCreatures(context, "MoveToCreature", creature => creature.type === creatureType, 5)
+                    .map(creature => ([
+                        new SetContextData(ContextDataType.TamingCreature, creature),
+                        new MoveToTarget(creature, true).trackCreature(creature),
+                        new Lambda(async () => {
+                            this.finished(true);
+                            return ObjectiveResult.Complete;
+                        }),
+                    ]));
+
+                if (creatureObjectives.length > 0) {
+                    return creatureObjectives;
+                }
+
+                break;
+
             case MoveToType.Player:
                 const player = playerManager.getByIdentifier(this.target.playerIdentifier);
 
                 if (player) {
-                    if (player === context.player) {
+                    if (player === context.human) {
                         return [
                             new Lambda(async () => {
                                 this.finished(true);

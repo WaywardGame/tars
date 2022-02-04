@@ -10,7 +10,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
     constructor(itemType: ItemType, recipe: IRecipe, allowInventoryItems?: boolean | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
-    canIncludeContextHashCode(): boolean;
+    canIncludeContextHashCode(): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     private getObjectives;

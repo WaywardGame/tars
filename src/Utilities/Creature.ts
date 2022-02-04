@@ -13,17 +13,17 @@ export class CreatureUtilities {
 	private readonly nearbyCreatureRadius = 5;
 
 	public shouldRunAwayFromAllCreatures(context: Context) {
-		const health = context.player.stat.get<IStatMax>(Stat.Health);
-		const stamina = context.player.stat.get<IStatMax>(Stat.Stamina);
+		const health = context.human.stat.get<IStatMax>(Stat.Health);
+		const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
 
-		return context.player.getWeightStatus() !== WeightStatus.Overburdened && ((health.value / health.max) <= 0.15 || stamina.value <= 2);
+		return context.human.getWeightStatus() !== WeightStatus.Overburdened && ((health.value / health.max) <= 0.15 || stamina.value <= 2);
 	}
 
 	/**
 	 * Returns nearby untamed & unhitched creatures
 	 */
 	public getNearbyCreatures(context: Context): Creature[] {
-		const point = context.player;
+		const point = context.human;
 
 		const creatures: Creature[] = [];
 
@@ -50,8 +50,8 @@ export class CreatureUtilities {
 
 			case CreatureType.Kraken:
 				return !this.hasDecentEquipment(context) ||
-					context.player.getEquippedItem(EquipType.Legs)!.type === ItemType.BarkLeggings ||
-					context.player.getEquippedItem(EquipType.Chest)!.type === ItemType.BarkTunic;
+					context.human.getEquippedItem(EquipType.Legs)!.type === ItemType.BarkLeggings ||
+					context.human.getEquippedItem(EquipType.Chest)!.type === ItemType.BarkTunic;
 
 			default:
 				return creature.aberrant ? !this.hasDecentEquipment(context) : false;
@@ -59,13 +59,13 @@ export class CreatureUtilities {
 	}
 
 	private hasDecentEquipment(context: Context): boolean {
-		const chest = context.player.getEquippedItem(EquipType.Chest);
-		const legs = context.player.getEquippedItem(EquipType.Legs);
-		const belt = context.player.getEquippedItem(EquipType.Belt);
-		const neck = context.player.getEquippedItem(EquipType.Neck);
-		const head = context.player.getEquippedItem(EquipType.Head);
-		const feet = context.player.getEquippedItem(EquipType.Feet);
-		const hands = context.player.getEquippedItem(EquipType.Hands);
+		const chest = context.human.getEquippedItem(EquipType.Chest);
+		const legs = context.human.getEquippedItem(EquipType.Legs);
+		const belt = context.human.getEquippedItem(EquipType.Belt);
+		const neck = context.human.getEquippedItem(EquipType.Neck);
+		const head = context.human.getEquippedItem(EquipType.Head);
+		const feet = context.human.getEquippedItem(EquipType.Feet);
+		const hands = context.human.getEquippedItem(EquipType.Hands);
 		return (chest && legs && belt && neck && head && feet && hands) ? true : false;
 	}
 }

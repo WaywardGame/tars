@@ -9,7 +9,7 @@ export declare class TileUtilities {
     getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]>;
     isSwimmingOrOverWater(context: Context): boolean;
     isOverDeepSeaWater(context: Context): boolean;
-    isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater?: boolean): boolean;
+    isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater?: boolean, requireShallowWater?: boolean): boolean;
     isFreeOfOtherPlayers(context: Context, point: IVector3): boolean;
     canGather(context: Context, tile: ITile, skipDoodadCheck?: boolean): boolean;
     canDig(context: Context, tile: ITile): boolean;

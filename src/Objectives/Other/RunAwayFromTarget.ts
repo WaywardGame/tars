@@ -38,12 +38,12 @@ export default class RunAwayFromTarget extends Objective {
 		// get a list of all nearby tiles that are open
 		const nearbyOpenTiles = TileHelpers.findMatchingTiles(
 			context.island,
-			context.player,
+			context.human,
 			(_, point, tile) => {
 				const terrainType = TileHelpers.getType(tile);
 				const terrainDescription = terrainDescriptions[terrainType];
 				if (terrainDescription &&
-					((!terrainDescription.passable && !terrainDescription.water) || (terrainDescription.water && context.player.stat.get(Stat.Stamina)!.value <= 1))) {
+					((!terrainDescription.passable && !terrainDescription.water) || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
 					return false;
 				}
 
@@ -54,7 +54,7 @@ export default class RunAwayFromTarget extends Objective {
 				return true;
 			},
 			{
-				canVisitTile: (_, nextPoint) => Vector2.squaredDistance(context.player, nextPoint) <= nearbyTilesDistanceSq,
+				canVisitTile: (_, nextPoint) => Vector2.squaredDistance(context.human, nextPoint) <= nearbyTilesDistanceSq,
 			},
 		);
 
@@ -72,7 +72,7 @@ export default class RunAwayFromTarget extends Objective {
 			let score = 0;
 
 			// farther end point is generally better
-			const distance = Vector2.squaredDistance(context.player, nearbyOpenTile.point);
+			const distance = Vector2.squaredDistance(context.human, nearbyOpenTile.point);
 			score -= distance * 200;
 
 			for (const point of movementPath.path) {
@@ -82,7 +82,7 @@ export default class RunAwayFromTarget extends Objective {
 				if (pointScore === undefined) {
 					pointScore = 0;
 
-					const pointZ = { ...point, z: context.player.z };
+					const pointZ = { ...point, z: context.human.z };
 
 					pointScore += navigation.getPenaltyFromPoint(pointZ) * 10;
 

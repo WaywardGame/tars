@@ -64,11 +64,15 @@ export enum TarsUiSaveDataKey {
     MoveToIslandDropdown,
     MoveToTerrainDropdown,
     MoveToDoodadDropdown,
+    MoveToCreatureDropdown,
     MoveToPlayerDropdown,
     MoveToNPCDropdown,
+    TameCreatureDropdown,
 }
 
 export enum TarsTranslation {
+    Name,
+
     DialogTitleMain,
 
     DialogStatusNavigatingInitializing,
@@ -97,11 +101,14 @@ export enum TarsTranslation {
     DialogButtonUseOrbsOfInfluenceTooltip,
     DialogButtonSailToCivilization,
     DialogButtonSailToCivilizationTooltip,
+    DialogButtonTameCreature,
+    DialogButtonTameCreatureTooltip,
 
     DialogButtonMoveToBase,
     DialogButtonMoveToDoodad,
     DialogButtonMoveToIsland,
     DialogButtonMoveToNPC,
+    DialogButtonMoveToCreature,
     DialogButtonMoveToPlayer,
     DialogButtonMoveToTerrain,
 
@@ -125,17 +132,20 @@ export enum TarsTranslation {
     DialogLabelPlayer,
     DialogLabelRecoverThresholds,
     DialogLabelTerrain,
+    DialogLabelCreature,
 
-    DialogModeSurvival,
-    DialogModeSurvivalTooltip,
-    DialogModeTidyUp,
-    DialogModeTidyUpTooltip,
     DialogModeGardener,
     DialogModeGardenerTooltip,
-    DialogModeTerminator,
-    DialogModeTerminatorTooltip,
+    DialogModeHarvester,
+    DialogModeHarvesterTooltip,
     DialogModeQuest,
     DialogModeQuestTooltip,
+    DialogModeSurvival,
+    DialogModeSurvivalTooltip,
+    DialogModeTerminator,
+    DialogModeTerminatorTooltip,
+    DialogModeTidyUp,
+    DialogModeTidyUpTooltip,
 }
 
 // options to show in the Options panel
@@ -191,7 +201,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverHealthThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Health).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Health).max,
         }
     },
     {
@@ -200,7 +210,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverStaminaThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Stamina).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Stamina).max,
         }
     },
     {
@@ -209,7 +219,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverHungerThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Hunger).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Hunger).max,
         }
     },
     {
@@ -218,7 +228,7 @@ export const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation |
         tooltip: TarsTranslation.DialogRangeRecoverThirstThresholdTooltip,
         slider: {
             min: 0,
-            max: (context) => context.player.stat.get<IStatMax>(Stat.Thirst).max,
+            max: (context) => context.human.stat.get<IStatMax>(Stat.Thirst).max,
         }
     },
 ];

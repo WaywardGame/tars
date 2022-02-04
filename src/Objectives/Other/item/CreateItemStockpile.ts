@@ -1,8 +1,8 @@
-import type { IContainer} from "game/item/IItem";
+import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 
 import type Context from "../../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireItem from "../../acquire/item/AcquireItem";
@@ -30,10 +30,10 @@ export default class CreateItemStockpile extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const baseItems = [...context.base.chest, ...context.base.intermediateChest]
-			.map(chest => context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, true))
+			.map(chest => context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, { includeSubContainers: true }))
 			.flat();
 
-		const inventoryItems = context.island.items.getItemsInContainerByType(context.player.inventory, this.itemType, true);
+		const inventoryItems = context.island.items.getItemsInContainerByType(context.human.inventory, this.itemType, { includeSubContainers: true });
 
 		const acquireCount = this.count - baseItems.length - inventoryItems.length;
 		if (acquireCount <= 0) {

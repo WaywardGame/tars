@@ -24,7 +24,7 @@ export default class MoveToZ extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (context.player.z === this.z) {
+		if (context.human.z === this.z) {
 			return ObjectiveResult.Complete;
 		}
 

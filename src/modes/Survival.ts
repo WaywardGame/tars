@@ -53,6 +53,7 @@ import type { IInventoryItems } from "../core/ITars";
 import { inventoryItemInfo } from "../core/ITars";
 import { getTarsSaveData } from "../ITarsMod";
 import { getCommonInitialObjectives } from "./CommonInitialObjectives";
+import StartSolarStill from "../objectives/other/doodad/StartSolarStill";
 
 /**
  * Survival mode
@@ -66,14 +67,14 @@ export class SurvivalMode implements ITarsMode {
 	}
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
-		const chest = context.player.getEquippedItem(EquipType.Chest);
-		const legs = context.player.getEquippedItem(EquipType.Legs);
-		const belt = context.player.getEquippedItem(EquipType.Belt);
-		const neck = context.player.getEquippedItem(EquipType.Neck);
-		const back = context.player.getEquippedItem(EquipType.Back);
-		const head = context.player.getEquippedItem(EquipType.Head);
-		const feet = context.player.getEquippedItem(EquipType.Feet);
-		const hands = context.player.getEquippedItem(EquipType.Hands);
+		const chest = context.human.getEquippedItem(EquipType.Chest);
+		const legs = context.human.getEquippedItem(EquipType.Legs);
+		const belt = context.human.getEquippedItem(EquipType.Belt);
+		const neck = context.human.getEquippedItem(EquipType.Neck);
+		const back = context.human.getEquippedItem(EquipType.Back);
+		const head = context.human.getEquippedItem(EquipType.Head);
+		const feet = context.human.getEquippedItem(EquipType.Feet);
+		const hands = context.human.getEquippedItem(EquipType.Hands);
 
 		const objectives: Array<IObjective | IObjective[]> = [];
 
@@ -84,12 +85,12 @@ export class SurvivalMode implements ITarsMode {
 			return objectives;
 		}
 
-		if (context.inventory.sailBoat && context.player.island.items.isContainableInContainer(context.inventory.sailBoat, context.player.inventory)) {
+		if (context.inventory.sailBoat && context.human.island.items.isContainableInContainer(context.inventory.sailBoat, context.human.inventory)) {
 			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
 			objectives.push([
 				new MoveToLand(),
 				new ExecuteAction(ActionType.Drop, (context, action) => {
-					action.execute(context.player, context.inventory.sailBoat!);
+					action.execute(context.actionExecutor, context.inventory.sailBoat!);
 					return ObjectiveResult.Complete;
 				}).setStatus("Dropping sailboat"),
 				new AnalyzeInventory(),
@@ -112,7 +113,7 @@ export class SurvivalMode implements ITarsMode {
 
 		} else if (context.base.chest.length > 0) {
 			for (const c of context.base.chest) {
-				if ((context.player.island.items.computeContainerWeight(c as IContainer) / context.player.island.items.getWeightCapacity(c)!) < 0.9) {
+				if ((context.human.island.items.computeContainerWeight(c as IContainer) / context.human.island.items.getWeightCapacity(c)!) < 0.9) {
 					acquireChest = false;
 					break;
 				}
@@ -139,6 +140,11 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		if (context.utilities.base.isNearBase(context)) {
+			// ensure solar stills are solar stilling
+			for (const solarStill of context.base.solarStill) {
+				objectives.push(new StartSolarStill(solarStill));
+			}
+
 			// ensure water stills are water stilling
 			for (const waterStill of context.base.waterStill) {
 				objectives.push(new StartWaterStillDesalination(waterStill));
@@ -157,7 +163,7 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItemForAction(ActionType.Heal), new AnalyzeInventory()]);
 		}
 
-		const waitingForWater = context.player.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
+		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;
 
 		const shouldUpgradeToLeather = !waitingForWater;
@@ -284,7 +290,7 @@ export class SurvivalMode implements ITarsMode {
 
 			if (drinkableWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+				objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 			}
 		}
 
@@ -390,8 +396,8 @@ export class SurvivalMode implements ITarsMode {
 			const needWaterItems = context.inventory.waterContainer === undefined || context.inventory.waterContainer.filter(item => context.utilities.item.isSafeToDrinkItem(item)).length < 2;
 			const needFoodItems = context.inventory.food === undefined || context.inventory.food.length < 2;
 
-			const health = context.player.stat.get<IStatMax>(Stat.Health);
-			const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
+			const health = context.human.stat.get<IStatMax>(Stat.Health);
+			const hunger = context.human.stat.get<IStatMax>(Stat.Hunger);
 			const needHealthRecovery = health.value / health.max < 0.9;
 			const needHungerRecovery = hunger.value / hunger.max < 0.7;
 
@@ -433,12 +439,12 @@ export class SurvivalMode implements ITarsMode {
 						if (availableWaterContainers && availableWaterContainers.length > 0) {
 							// we are looking for something drinkable
 							// if there is a well, starting the water still will use it
-							objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+							objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 
 						} else {
 							// get a new water container
 							objectives.push(new AcquireWaterContainer());
-							objectives.push(new GatherWater(undefined, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWaterStill: true }));
+							objectives.push(new GatherWater(undefined, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 						}
 					}
 
@@ -459,12 +465,12 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push(new Restart());
 
 		} else {
-			const health = context.player.stat.get<IStatMax>(Stat.Health);
+			const health = context.human.stat.get<IStatMax>(Stat.Health);
 			if (health.value / health.max < 0.9) {
 				objectives.push(new RecoverHealth(false));
 			}
 
-			const hunger = context.player.stat.get<IStatMax>(Stat.Hunger);
+			const hunger = context.human.stat.get<IStatMax>(Stat.Hunger);
 			if (hunger.value / hunger.max < 0.7) {
 				objectives.push(new RecoverHunger(false, true));
 			}
@@ -508,7 +514,7 @@ export class SurvivalMode implements ITarsMode {
 			return;
 		}
 
-		const islandSaveData = getTarsSaveData("island")[context.player.island.id];
+		const islandSaveData = getTarsSaveData("island")[context.human.island.id];
 		// if (islandSaveData[upgradeItemKey]) {
 		// 	// already upgraded
 		// 	return;

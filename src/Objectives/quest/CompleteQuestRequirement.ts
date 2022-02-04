@@ -175,7 +175,7 @@ export default class CompleteQuestRequirement extends Objective {
                     const pipelines: IObjective[] = [];
 
                     for (let i = 0; i < amount; i++) {
-                        pipelines.push(new AcquireItemFromDismantle(dismantle.items[0].type, [itemType]));
+                        pipelines.push(new AcquireItemFromDismantle(dismantle.items[0].type, new Set([itemType])));
                     }
 
                     objectivePipelines.push(pipelines);
@@ -242,7 +242,7 @@ export default class CompleteQuestRequirement extends Objective {
                 return new Lambda(async () => {
                     let itemId: number | undefined;
 
-                    for (const item of context.player.inventory.containedItems) {
+                    for (const item of context.human.inventory.containedItems) {
                         if (item.quickSlot === undefined) {
                             itemId = item.id;
                             break;
@@ -258,7 +258,11 @@ export default class CompleteQuestRequirement extends Objective {
 
             case "ModStarterQuestChangeHand":
                 return new Lambda(async (context) => {
-                    game.updateOption(context.player, "leftHand", !context.player.options.leftHand);
+                    const player = context.human.asPlayer;
+                    if (player) {
+                        game.updateOption(player, "leftHand", !context.human.options.leftHand);
+                    }
+
                     return ObjectiveResult.Complete;
                 });
 
@@ -352,7 +356,7 @@ export default class CompleteQuestRequirement extends Objective {
                     for (const waterStill of context.base.waterStill) {
                         objectivePipelines.push([new GatherWaterFromStill(waterStill, context.inventory.waterContainer[0], {
                             allowStartingWaterStill: true,
-                            allowWaitingForWaterStill: true,
+                            allowWaitingForWater: true,
                             onlyIdleWhenWaitingForWaterStill: true,
                         })]);
                     }

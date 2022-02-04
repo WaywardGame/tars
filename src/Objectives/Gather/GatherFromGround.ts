@@ -6,6 +6,7 @@ import Translation from "language/Translation";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import { ItemUtilities } from "../../utilities/Item";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import Lambda from "../core/Lambda";
@@ -33,8 +34,8 @@ export default class GatherFromGround extends Objective {
 		return true;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode() {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {
@@ -42,14 +43,14 @@ export default class GatherFromGround extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const point = context.player.getPoint();
+		const point = context.human.getPoint();
 		const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
 		if (item) {
 			return [
 				new ReserveItems(item).passAcquireData(this),
 				new MoveToTarget(item.containedWithin as ITileContainer, false), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
-				new MoveItem(item, context.player.inventory, point),
+				new MoveItem(item, context.human.inventory, point),
 			];
 		}
 
@@ -64,12 +65,12 @@ export default class GatherFromGround extends Objective {
 							const objectives: IObjective[] = [];
 
 							// itemMatches must not check that the item is not reserved (because it is)
-							const point = context.player.getFacingPoint();
+							const point = context.human.getFacingPoint();
 							const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item, true));
 							if (item) {
 								objectives.push(new ReserveItems(item).passAcquireData(this));
 								objectives.push(new SetContextData(this.contextDataKey, item));
-								objectives.push(new MoveItem(item, context.player.inventory, point));
+								objectives.push(new MoveItem(item, context.human.inventory, point));
 							}
 
 							return objectives;

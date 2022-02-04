@@ -27,11 +27,17 @@
 		"quadrantComponent": {
 			"modTARSTARS": "TARS"
 		},
+		"npc": {
+			"modTARSTARS": "TARS"
+		},
 		"ModTARSTars": {
+			"name": "TARS",
 			"dialogButtonAquireItem": "Acquire Item",
 			"dialogButtonAquireItemTooltip": "Instruct TARS to acquire the selected item.",
 			"dialogButtonBuildDoodad": "Build Doodad",
 			"dialogButtonBuildDoodadTooltip": "Instruct TARS to acquire the item for the selected doodad and build it.",
+			"dialogButtonTameCreature": "Tame Creature",
+			"dialogButtonTameCreatureTooltip": "Instruct TARS to tame the selected creature.",
 			"dialogButtonSailToCivilization": "Sail to Civilization",
 			"dialogButtonSailToCivilizationTooltip": "Instruct TARS to sail to civilization. It will acquire the necessary items to do so.",
 			"dialogButtonDeveloperMode": "Enable Developer Mode",
@@ -43,6 +49,7 @@
 			"dialogButtonMoveToDoodad": "Move to Doodad",
 			"dialogButtonMoveToIsland": "Move to Island",
 			"dialogButtonMoveToNPC": "Move to NPC",
+			"dialogButtonMoveToCreature": "Move to Creature",
 			"dialogButtonMoveToPlayer": "Move to Player",
 			"dialogButtonMoveToTerrain": "Move to Terrain",
 			"dialogButtonQuantumBurst": "Enable Quantum Burst",
@@ -63,8 +70,11 @@
 			"dialogLabelPlayer": "{#--text-secondary:Player}",
 			"dialogLabelRecoverThresholds": "Recover Thresholds",
 			"dialogLabelTerrain": "{#--text-secondary:Terrain}",
+			"dialogLabelCreature": "{#--text-secondary:Creature}",
 			"dialogModeGardener": "Gardener Mode",
 			"dialogModeGardenerTooltip": "TARS will gather seeds and plant them to make a garden.",
+			"dialogModeHarvester": "Harvester Mode",
+			"dialogModeHarvesterTooltip": "TARS will go around harvesting materials from nature.\nNote: It will keep harvesting until there is nothing harvestable left in the world.",
 			"dialogModeSurvival": "Survival Mode",
 			"dialogModeSurvivalTooltip": "TARS will setup a camp, gather resources, build equipment, stay healthy, and survive.",
 			"dialogModeTidyUp": "Tidy Up Mode",

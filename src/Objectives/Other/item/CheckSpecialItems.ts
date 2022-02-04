@@ -33,7 +33,7 @@ export default class CheckSpecialItems extends Objective {
                 new ReserveItems(item).keepInInventory(),
                 new MoveItemIntoInventory(item),
                 new ExecuteActionForItem(ExecuteActionType.Generic, [ItemType.GlassBottle], ActionType.OpenBottle, (context, action) => {
-                    action.execute(context.player, item);
+                    action.execute(context.actionExecutor, item);
                 }).setStatus("Opening glass bottle")
             ]));
         }
@@ -45,7 +45,7 @@ export default class CheckSpecialItems extends Objective {
                 new ReserveItems(item).keepInInventory(),
                 new MoveItemIntoInventory(item),
                 new ExecuteAction(ActionType.Read, (context, action) => {
-                    action.execute(context.player, item);
+                    action.execute(context.actionExecutor, item);
                     return ObjectiveResult.Complete;
                 }).setStatus(`Reading ${item.getName()}`),
             ]));

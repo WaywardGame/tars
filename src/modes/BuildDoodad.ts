@@ -38,7 +38,7 @@ export class BuildDoodadMode implements ITarsMode {
 		// return [new AcquireBuildMoveToDoodad(this.doodadTypeOrGroup)];
 
 		// const doodad = findDoodad(context, "BuildDoodad", (d: Doodad) => this.doodadTypes.has(d.type));
-		const doodad = this.doodad ? context.player.island.doodads.get(this.doodad) : undefined;
+		const doodad = this.doodad ? context.human.island.doodads.get(this.doodad) : undefined;
 		if (doodad && !doodad.isValid()) {
 			this.doodad = undefined;
 		}
@@ -48,9 +48,9 @@ export class BuildDoodadMode implements ITarsMode {
 		if (doodad) {
 			const description = doodad.description();
 			if (description && description.lit !== undefined) {
-				if (context.player.island.doodads.isGroup(this.doodadTypeOrGroup)) {
+				if (context.human.island.doodads.isGroup(this.doodadTypeOrGroup)) {
 					const litDescription = Doodads[description.lit];
-					if (litDescription && context.player.island.doodads.isInGroup(description.lit, this.doodadTypeOrGroup)) {
+					if (litDescription && context.human.island.doodads.isInGroup(description.lit, this.doodadTypeOrGroup)) {
 						requiresFire = true;
 					}
 

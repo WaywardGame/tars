@@ -43,7 +43,7 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (context.player.isSwimming()) {
+		if (context.human.isSwimming()) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -56,7 +56,7 @@ export default class RepairItem extends Objective {
 			objectives.push(new AcquireItem(ItemType.StoneHammer).setContextDataKey(ContextDataType.Item1));
 		}
 
-		const requirementInfo = context.island.items.hasAdditionalRequirements(context.player, this.item.type, undefined, undefined, true);
+		const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, this.item.type, undefined, undefined, true);
 		if (requirementInfo.requirements === RequirementStatus.Missing) {
 			this.log.info("Repair requirements not met");
 			objectives.push(new CompleteRequirements(requirementInfo));
@@ -69,7 +69,7 @@ export default class RepairItem extends Objective {
 				return ObjectiveResult.Restart;
 			}
 
-			action.execute(context.player, hammer, this.item);
+			action.execute(context.actionExecutor, hammer, this.item);
 			return ObjectiveResult.Complete;
 		}).setStatus(this));
 

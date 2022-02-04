@@ -1,7 +1,7 @@
 import type { IVector3 } from "utilities/math/IVector";
 
 import type Context from "../../../core/context/Context";
-import type { ObjectiveExecutionResult} from "../../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 
@@ -27,7 +27,7 @@ export default class PickUpAllTileItems extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        return targetTile.containedItems.map(item => new MoveItem(item, context.player.inventory, this.target));
+        return targetTile.containedItems.map(item => new MoveItem(item, context.human.inventory, this.target));
     }
 
 }

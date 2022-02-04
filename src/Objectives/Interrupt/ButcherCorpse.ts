@@ -41,7 +41,7 @@ export default class ButcherCorpse extends Objective {
 		objectives.push(new MoveToTarget(this.corpse, true));
 
 		objectives.push(new ExecuteAction(ActionType.Butcher, (context, action) => {
-			action.execute(context.player, tool);
+			action.execute(context.actionExecutor, tool);
 			return ObjectiveResult.Complete;
 		}).setStatus(this));
 

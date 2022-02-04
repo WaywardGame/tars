@@ -75,7 +75,7 @@ export default class OrganizeBase extends Objective {
 				objectives.push(new MoveToTarget(position, true));
 
 				for (const item of itemsToMove) {
-					objectives.push(new MoveItem(item, context.player.inventory, position));
+					objectives.push(new MoveItem(item, context.human.inventory, position));
 				}
 
 				// restart now
@@ -90,7 +90,7 @@ export default class OrganizeBase extends Objective {
 
 				// for (const item of tile.containedItems) {
 				// 	objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
-				// 		action.execute(context.player, item, chests[0] as IContainer);
+				// 		action.execute(context.actionExecutor, item, chests[0] as IContainer);
 				// 	}));
 				// }
 			}

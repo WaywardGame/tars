@@ -1,6 +1,6 @@
 import { WeightStatus } from "game/entity/player/IPlayer";
 import type Context from "../../core/context/Context";
-import type { ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { IOriganizeInventoryOptions } from "../utility/OrganizeInventory";
@@ -33,7 +33,7 @@ export default class ReduceWeight extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const weightStatus = context.player.getWeightStatus();
+		const weightStatus = context.human.getWeightStatus();
 		if (weightStatus === WeightStatus.None) {
 			return ObjectiveResult.Ignore;
 		}
