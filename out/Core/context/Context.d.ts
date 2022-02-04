@@ -39,6 +39,7 @@ export default class Context implements IContext {
     setInitialState(state?: ContextState): void;
     reset(): void;
     getHashCode(): string;
+    getFilteredHashCode(allowedItemTypes: Set<ItemType>): string;
     markShouldIncludeHashCode(): void;
     isPlausible(difficulty: number, requireMinimumAcceptedDifficulty?: boolean): boolean;
     getPosition(): IVector3;

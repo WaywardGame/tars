@@ -254,11 +254,13 @@ class Planner implements IPlanner {
 
 		const objectiveChain: IObjectiveInfo[] = [];
 
-		const changes = new ContextState(clonedContext.state.depth);
+		const changesToMerge: ContextState[] = [];
 
 		// this.log.info(`Objective pipeline ${objectives.map(o => o.getHashCode()).join(" -> ")}`);
 
 		// console.log("\t".repeat(this.calculatingDifficulty), `Objective pipeline ${objectives.map(o => o.getHashCode()).join(" -> ")}`);
+
+		// note: looping through objectives and trying to fast fail based on cached calculated difficulties does not make these faster
 
 		for (const objective of objectives) {
 			let calculatedDifficulty = await this.calculateDifficulty(clonedContext, objective);
@@ -306,8 +308,6 @@ class Planner implements IPlanner {
 
 			difficulty += calculatedDifficulty.difficulty;
 
-			changes.merge(calculatedDifficulty.changes);
-
 			if (!clonedContext.isPlausible(difficulty)) {
 				if (this.debug) {
 					this.writeCalculationLog(`Not plausible. ${difficulty} > minimumAcceptedDifficulty (${clonedContext.state.minimumAcceptedDifficulty})`);
@@ -320,6 +320,8 @@ class Planner implements IPlanner {
 				};
 			}
 
+			changesToMerge.push(calculatedDifficulty.changes);
+
 			// the first index should be this objective
 			// if the difficulty was cached, the first index is the cached objective
 			// we should make sure it's this objective
@@ -331,13 +333,19 @@ class Planner implements IPlanner {
 			})));
 		}
 
+		const changes = new ContextState(clonedContext.state.depth);
+
+		for (const contextState of changesToMerge) {
+			changes.merge(contextState);
+		}
+
 		return {
 			status: CalculatedDifficultyStatus.Possible,
 			depth: this.calculatingDifficultyDepth,
-			changes: changes,
-			objectives: objectives,
-			objectiveChain: objectiveChain,
-			difficulty: difficulty,
+			changes,
+			objectives,
+			objectiveChain,
+			difficulty,
 		};
 	}
 
@@ -403,8 +411,9 @@ class Planner implements IPlanner {
 		let includedContextHashCode = false;
 
 		// check if the context could effect the execution of the objective
-		if (objective.canIncludeContextHashCode(context)) {
-			contextHashCode = context.getHashCode();
+		const canIncludeContextHashCode = objective.canIncludeContextHashCode(context);
+		if (canIncludeContextHashCode !== false) {
+			contextHashCode = canIncludeContextHashCode !== true ? context.getFilteredHashCode(canIncludeContextHashCode) : context.getHashCode();
 
 			cachedDifficulty = this.checkAndMergeDifficultyCache(context, `${cacheHashCode}|${contextHashCode}`);
 			if (cachedDifficulty !== undefined) {

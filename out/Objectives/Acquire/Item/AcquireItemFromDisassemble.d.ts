@@ -9,7 +9,7 @@ export default class AcquireItemFromDisassemble extends Objective {
     constructor(itemType: ItemType, searches: IDisassemblySearch[]);
     getIdentifier(): string;
     getStatus(): string | undefined;
-    canIncludeContextHashCode(): boolean;
+    canIncludeContextHashCode(): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     protected getBaseDifficulty(context: Context): number;

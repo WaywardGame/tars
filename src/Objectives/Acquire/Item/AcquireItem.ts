@@ -13,6 +13,7 @@ import Enums from "utilities/enum/Enums";
 import type Context from "../../../core/context/Context";
 import type { ITerrainSearch, DoodadSearchMap, CreatureSearch } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ItemUtilities } from "../../../utilities/Item";
 import UseProvidedItem from "../../core/UseProvidedItem";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";
@@ -32,7 +33,7 @@ export default class AcquireItem extends AcquireBase {
 	private static readonly terrainSearchCache: Map<ItemType, ITerrainSearch[]> = new Map();
 	private static readonly doodadSearchCache: Map<ItemType, DoodadSearchMap> = new Map();
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
-	private static readonly dismantleSearchCache: Map<ItemType, ItemType[]> = new Map();
+	private static readonly dismantleSearchCache: Map<ItemType, Set<ItemType>> = new Map();
 
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();
@@ -46,8 +47,8 @@ export default class AcquireItem extends AcquireBase {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {
@@ -86,8 +87,8 @@ export default class AcquireItem extends AcquireBase {
 			}
 		}
 
-		const dismantleSearch: ItemType[] = this.getDismantleSearch();
-		if (dismantleSearch.length > 0) {
+		const dismantleSearch = this.getDismantleSearch();
+		if (dismantleSearch.size > 0) {
 			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passAcquireData(this)]);
 		}
 
@@ -328,17 +329,17 @@ export default class AcquireItem extends AcquireBase {
 		return search;
 	}
 
-	private getDismantleSearch(): ItemType[] {
+	private getDismantleSearch(): Set<ItemType> {
 		let search = AcquireItem.dismantleSearchCache.get(this.itemType);
 		if (search === undefined) {
-			search = [];
+			search = new Set();
 
 			for (const it of Enums.values(ItemType)) {
 				const description = itemDescriptions[it];
 				if (description && description.dismantle) {
 					for (const di of description.dismantle.items) {
 						if (di.type === this.itemType) {
-							search.push(it);
+							search.add(it);
 							break;
 						}
 					}

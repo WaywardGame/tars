@@ -8,6 +8,7 @@ import { loggerUtilities } from "../../utilities/Logger";
 import { ReserveType } from "../ITars";
 import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
 import type Item from "game/item/Item";
+import { ItemType } from "game/item/IItem";
 
 export default abstract class Objective implements IObjective {
 
@@ -142,7 +143,7 @@ export default abstract class Objective implements IObjective {
 	 * Checks if the context could effect the execution of the objective
 	 * @param context The context
 	 */
-	public canIncludeContextHashCode(context: Context): boolean {
+	public canIncludeContextHashCode(context: Context): boolean | Set<ItemType> {
 		return false;
 	}
 

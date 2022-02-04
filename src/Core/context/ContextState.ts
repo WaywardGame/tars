@@ -66,7 +66,7 @@ export default class ContextState {
 	}
 
 	public get<T = any>(type: string): T | undefined {
-		return this.data ? this.data.get(type) : undefined;
+		return this.data?.get(type);
 	}
 
 	public set<T = any>(type: string, value: T | undefined) {
@@ -93,15 +93,42 @@ export default class ContextState {
 		let hashCode = "";
 
 		if (this.softReservedItems.size > 0) {
-			hashCode += `Soft Reserved: ${Array.from(this.softReservedItems).map(id => id).join(",")}`;
+			hashCode += `Soft Reserved: ${Array.from(this.softReservedItems).join(",")}`;
 		}
 
 		if (this.hardReservedItems.size > 0) {
-			hashCode += `Hard Reserved: ${Array.from(this.hardReservedItems).map(id => id).join(",")}`;
+			hashCode += `Hard Reserved: ${Array.from(this.hardReservedItems).join(",")}`;
 		}
 
 		if (this.providedItems.size > 0) {
 			hashCode += `Provided: ${Array.from(this.providedItems).map(itemType => `${itemType[0]}:${itemType[1]}`).join(",")}`;
+		}
+
+		return hashCode;
+	}
+
+	public getFilteredHashCode(allowedItemTypes: Set<ItemType>): string {
+		let hashCode = "";
+
+		if (this.softReservedItems.size > 0) {
+			const filteredSoftReservedItems = Array.from(this.softReservedItems).filter(itemType => allowedItemTypes.has(itemType));
+			if (filteredSoftReservedItems.length > 0) {
+				hashCode += `Soft Reserved: ${filteredSoftReservedItems.join(",")}`;
+			}
+		}
+
+		if (this.hardReservedItems.size > 0) {
+			const filteredHardReservedItems = Array.from(this.hardReservedItems).filter(itemType => allowedItemTypes.has(itemType));
+			if (filteredHardReservedItems.length > 0) {
+				hashCode += `Hard Reserved: ${filteredHardReservedItems.join(",")}`;
+			}
+		}
+
+		if (this.providedItems.size > 0) {
+			const filteredProvidedItems = Array.from(this.providedItems).filter(itemType => allowedItemTypes.has(itemType[0]));
+			if (filteredProvidedItems.length > 0) {
+				hashCode += `Provided: ${filteredProvidedItems.map(itemType => `${itemType[0]}:${itemType[1]}`).join(",")}`;
+			}
 		}
 
 		return hashCode;

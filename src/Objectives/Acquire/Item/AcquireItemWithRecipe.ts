@@ -11,6 +11,7 @@ import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import { ReserveType } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -36,12 +37,11 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} with a recipe`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
 	}
 
 	public override shouldIncludeContextHashCode(): boolean {
-		// we care about the context's reserved items
 		return true;
 	}
 

@@ -175,7 +175,7 @@ export default class CompleteQuestRequirement extends Objective {
                     const pipelines: IObjective[] = [];
 
                     for (let i = 0; i < amount; i++) {
-                        pipelines.push(new AcquireItemFromDismantle(dismantle.items[0].type, [itemType]));
+                        pipelines.push(new AcquireItemFromDismantle(dismantle.items[0].type, new Set([itemType])));
                     }
 
                     objectivePipelines.push(pipelines);

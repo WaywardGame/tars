@@ -10,6 +10,7 @@ import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
+import { ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ReserveItems from "../../core/ReserveItems";
@@ -24,27 +25,33 @@ import AcquireItemByGroup from "./AcquireItemByGroup";
  */
 export default class AcquireItemFromDismantle extends Objective {
 
-	constructor(private readonly itemType: ItemType, private readonly dismantleItemTypes: ItemType[]) {
+	constructor(private readonly itemType: ItemType, private readonly dismantleItemTypes: Set<ItemType>) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `AcquireItemFromDismantle:${ItemType[this.itemType]}:${this.dismantleItemTypes.map((itemType: ItemType) => ItemType[itemType]).join(",")}`;
+		return `AcquireItemFromDismantle:${ItemType[this.itemType]}:${Array.from(this.dismantleItemTypes).map((itemType: ItemType) => ItemType[itemType]).join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
-		const translation = Stream.values(Array.from(new Set(this.dismantleItemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+		const translation = Stream.values(Array.from(this.dismantleItemTypes).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
 			.collect(Translation.formatList, ListEnder.Or);
 
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode() {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {
-		return this.dismantleItemTypes.some(itemType => context.isReservedItemType(itemType));
+		for (const itemType of this.dismantleItemTypes) {
+			if (context.isReservedItemType(itemType)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

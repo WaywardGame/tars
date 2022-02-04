@@ -1,7 +1,8 @@
-import type { ItemType} from "game/item/IItem";
+import type { ItemType } from "game/item/IItem";
 import { ItemTypeGroup } from "game/item/IItem";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ItemUtilities } from "../../../utilities/Item";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
@@ -22,8 +23,8 @@ export default class AcquireItemByGroup extends AcquireBase {
 		return `Acquiring ${context.island.items.getItemTypeGroupName(this.itemTypeGroup)}`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
+		return ItemUtilities.getRelatedItemTypesByGroup(this.itemTypeGroup);
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {

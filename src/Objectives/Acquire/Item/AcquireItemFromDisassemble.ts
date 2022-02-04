@@ -10,6 +10,7 @@ import type Context from "../../../core/context/Context";
 import type { IDisassemblySearch } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
+import { ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ProvideItems from "../../core/ProvideItems";
@@ -42,8 +43,8 @@ export default class AcquireItemFromDisassemble extends Objective {
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by disassembling ${translation.getString()}`;
 	}
 
-	public override canIncludeContextHashCode(): boolean {
-		return true;
+	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
+		return ItemUtilities.getRelatedItemTypes(this.itemType);
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {

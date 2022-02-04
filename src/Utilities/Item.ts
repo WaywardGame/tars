@@ -25,11 +25,92 @@ import { ContextDataType } from "../core/context/IContext";
 
 export class ItemUtilities {
 
+	private static readonly relatedItemsCache: Map<ItemType, Set<ItemType>> = new Map();
+	private static readonly relatedItemsByGroupCache: Map<ItemTypeGroup, Set<ItemType>> = new Map();
+
 	public foodItemTypes: Set<ItemType>;
 	public seedItemTypes: Set<ItemType>;
 
+	private availableInventoryWeightCache: number | undefined;
 	private itemCache: Item[] | undefined;
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
+
+	/**
+	 * All item types related to the current one
+	 */
+	public static getRelatedItemTypes(itemType: ItemType): Set<ItemType> {
+		let result = this.relatedItemsCache.get(itemType);
+		if (result === undefined) {
+			result = new Set();
+
+			let queue: ItemType[] = [itemType];
+
+			while (queue.length > 0) {
+				const itemType = queue.shift()!;
+
+				if (result.has(itemType)) {
+					continue;
+				}
+
+				result.add(itemType);
+
+				const description = itemDescriptions[itemType];
+				if (!description) {
+					continue;
+				}
+
+				const dismantleItems = description.dismantle?.items;
+				if (dismantleItems) {
+					queue.push(...dismantleItems.map(dismantleItem => dismantleItem.type));
+				}
+
+				const recipe = description.recipe;
+				if (recipe) {
+					if (recipe.baseComponent) {
+						if (ItemManager.isGroup(recipe.baseComponent)) {
+							queue.push(...Array.from(ItemManager.getGroupItems(recipe.baseComponent)));
+
+						} else {
+							queue.push(recipe.baseComponent);
+						}
+					}
+
+					for (const component of recipe.components) {
+						if (ItemManager.isGroup(component.type)) {
+							queue.push(...Array.from(ItemManager.getGroupItems(component.type)));
+
+						} else {
+							queue.push(component.type);
+						}
+					}
+				}
+			}
+
+			this.relatedItemsCache.set(itemType, result);
+		}
+
+		return result;
+	}
+
+	/**
+	 * All item types related to the current one
+	 */
+	public static getRelatedItemTypesByGroup(itemTypeGroup: ItemTypeGroup): Set<ItemType> {
+		let result = this.relatedItemsByGroupCache.get(itemTypeGroup);
+		if (result === undefined) {
+			result = new Set();
+
+			for (const itemTypeForGroup of ItemManager.getGroupItems(itemTypeGroup)) {
+				for (const itemType of this.getRelatedItemTypes(itemTypeForGroup)) {
+					result.add(itemType);
+				}
+			}
+
+			this.relatedItemsByGroupCache.set(itemTypeGroup, result);
+		}
+
+		return result;
+	}
 
 	public initialize(context: Context) {
 		this.foodItemTypes = this.getFoodItemTypes();
@@ -37,6 +118,8 @@ export class ItemUtilities {
 	}
 
 	public clearCache() {
+		this.availableInventoryWeightCache = undefined;
+
 		this.itemCache = undefined;
 		this.disassembleSearchCache.clear();
 	}
@@ -464,10 +547,14 @@ export class ItemUtilities {
 	}
 
 	public getAvailableInventoryWeight(context: Context) {
-		const items = this.getItemsInInventory(context)
-			.filter(item => this.isInventoryItem(context, item));
-		const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
-		return context.human.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
+		if (this.availableInventoryWeightCache === undefined) {
+			const items = this.getItemsInInventory(context)
+				.filter(item => this.isInventoryItem(context, item));
+			const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
+			this.availableInventoryWeightCache = context.human.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
+		}
+
+		return this.availableInventoryWeightCache;
 	}
 
 	public getSeeds(context: Context): Item[] {

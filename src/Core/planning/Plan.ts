@@ -37,9 +37,10 @@ export default class Plan implements IPlan {
 	public readonly objectives: IObjectiveInfo[];
 
 	public static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string {
+		// not including objective.getStatusMessage(context) because translations are expensive/slow
 		return objectives ?
 			objectives.map(objective =>
-				Array.isArray(objective) ? Plan.getPipelineString(context, objective) : `${objective.getHashCode()} (${objective.getStatusMessage(context)})`).join(" -> ") :
+				Array.isArray(objective) ? Plan.getPipelineString(context, objective) : objective.getHashCode()).join(" -> ") :
 			"Empty pipeline";
 	}
 
@@ -91,6 +92,13 @@ export default class Plan implements IPlan {
 	public async execute(
 		preExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined,
 		postExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined): Promise<ExecuteResult> {
+		// uncomment for perf testing - it will only cause plan creation and not execution
+		// if (globalThis) {
+		// 	return {
+		// 		type: ExecuteResultType.Completed,
+		// 	};
+		// }
+
 		const chain: IObjective[] = [];
 		const objectiveStack: IObjectiveInfo[] = [...this.objectives];
 
@@ -446,11 +454,11 @@ export default class Plan implements IPlan {
 
 		const walkAndSortTree = (tree: IExecutionTree) => {
 			tree.children = tree.children.sort((treeA, treeB) => {
-				if (//treeA.objective.constructor === treeB.objective.constructor &&
-					// treeA.objective.getName() === treeB.objective.getName() &&
-					treeA.objective.sort && treeB.objective.sort) {
-					return treeA.objective.sort(this.context, treeA, treeB);
-				}
+				// if (//treeA.objective.constructor === treeB.objective.constructor &&
+				// 	// treeA.objective.getName() === treeB.objective.getName() &&
+				// 	treeA.objective.sort && treeB.objective.sort) {
+				// 	return treeA.objective.sort(this.context, treeA, treeB);
+				// }
 
 				return 0;
 			});
@@ -567,10 +575,35 @@ export default class Plan implements IPlan {
 			}
 		}
 
+		const cachedExecutionPriorities: Map<string, Map<IExecutionTree, number>> = new Map();
+
+		const getExecutionPriority = (objective: IObjective, tree: IExecutionTree) => {
+			const hashCode = objective.getHashCode();
+
+			let objectivePriorities = cachedExecutionPriorities.get(hashCode);
+			if (!objectivePriorities) {
+				objectivePriorities = new Map();
+				cachedExecutionPriorities.set(hashCode, objectivePriorities);
+			}
+
+			let priority = objectivePriorities.get(tree);
+			if (priority === undefined) {
+				priority = objective.getExecutionPriority!(this.context, tree).priority;
+				objectivePriorities.set(tree, priority);
+			}
+
+			return priority;
+		}
+
 		const walkAndSortTree = (tree: IExecutionTree) => {
 			tree.children = tree.children.sort((treeA, treeB) => {
-				if (treeA.objective.sort && treeB.objective.sort) {
-					return treeA.objective.sort(this.context, treeA, treeB);
+				const objectiveA = treeA.objective;
+				const objectiveB = treeB.objective;
+				if (objectiveA.getExecutionPriority && objectiveB.getExecutionPriority) {
+					const priorityA = getExecutionPriority(objectiveA, treeA);
+					const priorityB = getExecutionPriority(objectiveB, treeB);
+
+					return priorityA === priorityB ? 0 : priorityA < priorityB ? 1 : -1;
 				}
 
 				return 0;

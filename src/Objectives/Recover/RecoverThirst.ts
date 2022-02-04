@@ -22,6 +22,7 @@ import AnalyzeBase from "../analyze/AnalyzeBase";
 import RecoverStamina from "./RecoverStamina";
 import AcquireItem from "../acquire/item/AcquireItem";
 import StartSolarStill from "../other/doodad/StartSolarStill";
+import { DoodadType } from "game/doodad/IDoodad";
 
 export interface IRecoverThirstOptions {
 	onlyUseAvailableItems: boolean;
@@ -131,7 +132,7 @@ export default class RecoverThirst extends Objective {
 						}));
 
 					} else {
-						stillObjectives.push(solarOrWaterStill ? new StartSolarStill(solarOrWaterStill) : new StartWaterStillDesalination(solarOrWaterStill));
+						stillObjectives.push(solarOrWaterStill.type === DoodadType.SolarStill ? new StartSolarStill(solarOrWaterStill) : new StartWaterStillDesalination(solarOrWaterStill));
 					}
 
 					objectivePipelines.push(stillObjectives);

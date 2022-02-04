@@ -9,6 +9,7 @@ import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrain from "../../gather/GatherFromTerrain";
+import { IObjectivePriority } from "../../../core/objective/IObjective";
 
 export interface IAcquireItemOptions extends IGatherItemOptions {
 	disableCreatureSearch: boolean;
@@ -21,17 +22,6 @@ export interface IGatherItemOptions {
 	requirePlayerCreatedIfCraftable: boolean;
 }
 
-export interface IObjectivePriority {
-	priority: number;
-	objectiveCount: number;
-	acquireObjectiveCount: number;
-	emptyAcquireObjectiveCount: number;
-	gatherObjectiveCount: number;
-	gatherWithoutChestObjectiveCount: number;
-	craftsRequiringNoGatheringCount: number;
-	regroupedChildrenCount: number;
-}
-
 export default abstract class AcquireBase extends Objective {
 
 	/**
@@ -39,20 +29,23 @@ export default abstract class AcquireBase extends Objective {
 	 * This prevents TARS from obtaining one iron ore, then going back to base to smelt it, then going back to rocks to obtain a second (and this repeats)
 	 * TARS should objective all the ore at the same time, then go back and smelt.
 	 */
-	public sort(context: Context, executionTreeA: IExecutionTree<any>, executionTreeB: IExecutionTree<any>): number {
-		const priorityA = this.calculatePriority(context, executionTreeA);
-		const priorityB = this.calculatePriority(context, executionTreeB);
+	// public sort(context: Context, executionTreeA: IExecutionTree, executionTreeB: IExecutionTree): number {
+	// 	const priorityA = this.calculatePriority(context, executionTreeA);
+	// 	const priorityB = this.calculatePriority(context, executionTreeB);
 
-		// console.log(`Priority for A is ${priorityA.priority} (crafts: ${priorityA.craftsRequiringNoGatheringCount})`, executionTreeA, priorityA);
-		// console.log(`Priority for B is ${priorityB.priority} (crafts: ${priorityB.craftsRequiringNoGatheringCount})`, executionTreeB, priorityB);
+	// 	// console.log(`Priority for A is ${priorityA.priority} (crafts: ${priorityA.craftsRequiringNoGatheringCount})`, executionTreeA, priorityA);
+	// 	// console.log(`Priority for B is ${priorityB.priority} (crafts: ${priorityB.craftsRequiringNoGatheringCount})`, executionTreeB, priorityB);
 
-		return priorityA.priority === priorityB.priority ? 0 : priorityA.priority < priorityB.priority ? 1 : -1;
-	}
+	// 	return priorityA.priority === priorityB.priority ? 0 : priorityA.priority < priorityB.priority ? 1 : -1;
+	// }
 
 	/**
+	 * Sort AcquireItem objectives so that objectives with multiple gather objectives will be executed first
+	 * This prevents TARS from obtaining one iron ore, then going back to base to smelt it, then going back to rocks to obtain a second (and this repeats)
+	 * TARS should objective all the ore at the same time, then go back and smelt.
 	 * Higher number = higher priority = it will be executed first
 	 */
-	public calculatePriority(context: Context, tree: IExecutionTree): IObjectivePriority {
+	public getExecutionPriority(context: Context, tree: IExecutionTree): IObjectivePriority {
 		const result: IObjectivePriority = {
 			priority: 0,
 			objectiveCount: 0,
@@ -81,7 +74,7 @@ export default abstract class AcquireBase extends Objective {
 		for (const child of tree.children) {
 			result.objectiveCount++;
 
-			const childResult = this.calculatePriority(context, child);
+			const childResult = this.getExecutionPriority(context, child);
 			this.addResult(childResult, result);
 		}
 
@@ -121,7 +114,7 @@ export default abstract class AcquireBase extends Objective {
 		return result;
 	}
 
-	public addResult(source: IObjectivePriority, destination: IObjectivePriority) {
+	private addResult(source: IObjectivePriority, destination: IObjectivePriority) {
 		for (const key of Object.keys(source) as Array<keyof IObjectivePriority>) {
 			destination[key] += source[key];
 		}

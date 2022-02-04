@@ -43,7 +43,7 @@ export default class Context implements IContext {
 	}
 
 	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false): Context {
-		return new Context(this.human, this.base, this.inventory, this.utilities, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState ? this.initialState.clone(increaseDepth) : undefined);
+		return new Context(this.human, this.base, this.inventory, this.utilities, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState?.clone(increaseDepth));
 	}
 
 	public merge(state: ContextState): void {
@@ -196,6 +196,10 @@ export default class Context implements IContext {
 
 	public getHashCode(): string {
 		return this.state.getHashCode();
+	}
+
+	public getFilteredHashCode(allowedItemTypes: Set<ItemType>): string {
+		return this.state.getFilteredHashCode(allowedItemTypes);
 	}
 
 	/**

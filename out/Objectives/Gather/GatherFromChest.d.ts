@@ -9,7 +9,7 @@ export default class GatherFromChest extends Objective {
     constructor(itemType: ItemType, options?: Partial<IGatherItemOptions>);
     getIdentifier(context?: Context): string;
     getStatus(): string | undefined;
-    canIncludeContextHashCode(): boolean;
+    canIncludeContextHashCode(): Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
 }

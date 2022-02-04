@@ -13,7 +13,7 @@ export default class AcquireItem extends AcquireBase {
     constructor(itemType: ItemType, options?: Partial<IAcquireItemOptions>);
     getIdentifier(): string;
     getStatus(): string | undefined;
-    canIncludeContextHashCode(): boolean;
+    canIncludeContextHashCode(): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     private getTerrainSearch;
