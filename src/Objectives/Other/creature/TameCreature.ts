@@ -48,7 +48,7 @@ export default class TameCreature extends Objective {
 
         const objectives: IObjective[] = [];
 
-        const items = context.utilities.item.getItemsInInventory(context, false);
+        const items = context.utilities.item.getItemsInInventory(context);
 
         const offerItem = this.creature.offer(items);
         if (offerItem) {

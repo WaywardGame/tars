@@ -82,7 +82,7 @@ export default class RecoverThirst extends Objective {
 			}
 
 			if (context.inventory.waterContainer === undefined) {
-				waterStillObjectives.push(new AcquireWaterContainer());
+				waterStillObjectives.push(new AcquireWaterContainer().keepInInventory());
 			}
 
 			objectivePipelines.push(waterStillObjectives);

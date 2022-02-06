@@ -18,8 +18,7 @@ import type { TerrainType } from "game/tile/ITerrain";
 import doodadDescriptions from "game/doodad/Doodads";
 
 import type Context from "../core/context/Context";
-import type { IDisassemblySearch, IInventoryItems } from "../core/ITars";
-import { inventoryItemInfo } from "../core/ITars";
+import { IDisassemblySearch, TarsUseProtectedItems } from "../core/ITars";
 import ItemManager from "game/item/ItemManager";
 import { ContextDataType } from "../core/context/IContext";
 
@@ -27,6 +26,7 @@ export class ItemUtilities {
 
 	private static readonly relatedItemsCache: Map<ItemType, Set<ItemType>> = new Map();
 	private static readonly relatedItemsByGroupCache: Map<ItemTypeGroup, Set<ItemType>> = new Map();
+	private static readonly dismantleSearchCache: Map<ItemType, Set<ItemType>> = new Map();
 
 	public foodItemTypes: Set<ItemType>;
 	public seedItemTypes: Set<ItemType>;
@@ -36,9 +36,9 @@ export class ItemUtilities {
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
 
 	/**
-	 * All item types related to the current one
+	 * All item types related to the provided one
 	 */
-	public static getRelatedItemTypes(itemType: ItemType): Set<ItemType> {
+	public static getRelatedItemTypes(itemType: ItemType): Set<ItemType> | boolean {
 		let result = this.relatedItemsCache.get(itemType);
 		if (result === undefined) {
 			result = new Set();
@@ -46,15 +46,15 @@ export class ItemUtilities {
 			let queue: ItemType[] = [itemType];
 
 			while (queue.length > 0) {
-				const itemType = queue.shift()!;
+				const relatedItemType = queue.shift()!;
 
-				if (result.has(itemType)) {
+				if (result.has(relatedItemType)) {
 					continue;
 				}
 
-				result.add(itemType);
+				result.add(relatedItemType);
 
-				const description = itemDescriptions[itemType];
+				const description = itemDescriptions[relatedItemType];
 				if (!description) {
 					continue;
 				}
@@ -84,6 +84,8 @@ export class ItemUtilities {
 						}
 					}
 				}
+
+				queue.push(...Array.from(this.getDismantleSearch(relatedItemType)));
 			}
 
 			this.relatedItemsCache.set(itemType, result);
@@ -93,16 +95,19 @@ export class ItemUtilities {
 	}
 
 	/**
-	 * All item types related to the current one
+	 * All item types related to the provided one
 	 */
-	public static getRelatedItemTypesByGroup(itemTypeGroup: ItemTypeGroup): Set<ItemType> {
+	public static getRelatedItemTypesByGroup(itemTypeGroup: ItemTypeGroup): Set<ItemType> | boolean {
 		let result = this.relatedItemsByGroupCache.get(itemTypeGroup);
 		if (result === undefined) {
 			result = new Set();
 
 			for (const itemTypeForGroup of ItemManager.getGroupItems(itemTypeGroup)) {
-				for (const itemType of this.getRelatedItemTypes(itemTypeForGroup)) {
-					result.add(itemType);
+				const relatedItemTypes = this.getRelatedItemTypes(itemTypeForGroup);
+				if (relatedItemTypes instanceof Set) {
+					for (const itemType of relatedItemTypes) {
+						result.add(itemType);
+					}
 				}
 			}
 
@@ -112,6 +117,32 @@ export class ItemUtilities {
 		return result;
 	}
 
+	/**
+	 * Items that can be dismantled to get the provided one
+	 */
+	public static getDismantleSearch(itemType: ItemType): Set<ItemType> {
+		let search = this.dismantleSearchCache.get(itemType);
+		if (search === undefined) {
+			search = new Set();
+
+			for (const it of Enums.values(ItemType)) {
+				const description = itemDescriptions[it];
+				if (description && description.dismantle) {
+					for (const di of description.dismantle.items) {
+						if (di.type === itemType) {
+							search.add(it);
+							break;
+						}
+					}
+				}
+			}
+
+			this.dismantleSearchCache.set(itemType, search);
+		}
+
+		return search;
+	}
+
 	public initialize(context: Context) {
 		this.foodItemTypes = this.getFoodItemTypes();
 		this.seedItemTypes = this.getSeedItemTypes();
@@ -119,7 +150,6 @@ export class ItemUtilities {
 
 	public clearCache() {
 		this.availableInventoryWeightCache = undefined;
-
 		this.itemCache = undefined;
 		this.disassembleSearchCache.clear();
 	}
@@ -128,9 +158,9 @@ export class ItemUtilities {
 		if (this.itemCache === undefined) {
 			const baseTileItems = context.utilities.base.getTileItemsNearBase(context);
 			const baseChestItems = context.base.chest
-				.map(chest => context.island.items.getItemsInContainer(chest, { includeSubContainers: true }))
+				.map(chest => this.getItemsInContainer(context, chest))
 				.flat();
-			const inventoryItems = context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true });
+			const inventoryItems = this.getItemsInInventory(context);
 
 			this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
 		}
@@ -180,6 +210,24 @@ export class ItemUtilities {
 		return search;
 	}
 
+	public isAllowedToUseItem(context: Context, item: Item, allowInventoryItems = true) {
+		if (context.options.useProtectedItems !== TarsUseProtectedItems.Yes && item.isProtected()) {
+			if (allowInventoryItems && this.isInventoryItem(context, item)) {
+				return true;
+			}
+
+			if (context.options.useProtectedItems === TarsUseProtectedItems.No) {
+				return false;
+			}
+
+			if (item.minDur !== undefined && item.minDur < 5) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	// allow processing with inventory items assuming they wont be consumed
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.human, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
@@ -222,26 +270,37 @@ export class ItemUtilities {
 		return checker;
 	}
 
-	public getItemsInInventory(context: Context, allowProtectedItems: boolean = true) {
-		return context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true, excludeProtectedItems: !allowProtectedItems });
+	public getItemsInContainer(context: Context, container: IContainer) {
+		return context.island.items.getItemsInContainer(container, { includeSubContainers: true })
+			.filter(item => this.isAllowedToUseItem(context, item));
+	}
+
+	public getItemsInContainerByType(context: Context, container: IContainer, itemType: ItemType) {
+		return context.island.items.getItemsInContainerByType(container, itemType, { includeSubContainers: true })
+			.filter(item => this.isAllowedToUseItem(context, item));
+	}
+
+	public getItemsInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup) {
+		return context.island.items.getItemsInContainerByGroup(container, itemTypeGroup, { includeSubContainers: true })
+			.filter(item => this.isAllowedToUseItem(context, item));
+	}
+
+	public getItemsInInventory(context: Context) {
+		return this.getItemsInContainer(context, context.human.inventory);
 	}
 
 	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
 		return this.getItemInContainer(context, context.human.inventory, itemTypeSearch);
 	}
 
-	private getItemInContainer(
-		context: Context,
-		container: IContainer,
-		itemTypeSearch: ItemType,
-		allowInventoryItems?: boolean): Item | undefined {
+	private getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType): Item | undefined {
 		const orderedItems = context.island.items.getOrderedContainerItems(container);
 		for (const item of orderedItems) {
-			if (!allowInventoryItems && this.isInventoryItem(context, item)) {
+			if (this.isInventoryItem(context, item)) {
 				continue;
 			}
 
-			if (item.isProtected()) {
+			if (!this.isAllowedToUseItem(context, item, false)) {
 				continue;
 			}
 
@@ -255,7 +314,38 @@ export class ItemUtilities {
 
 			const description = Items[item.type];
 			if (description && description.weightCapacity !== undefined) {
-				const item2 = this.getItemInContainer(context, item as IContainer, itemTypeSearch, allowInventoryItems);
+				const item2 = this.getItemInContainer(context, item as IContainer, itemTypeSearch);
+				if (item2) {
+					return item2;
+				}
+			}
+		}
+
+		return undefined;
+	}
+
+	public getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup): Item | undefined {
+		const orderedItems = context.island.items.getOrderedContainerItems(container);
+		for (const item of orderedItems) {
+			if (this.isInventoryItem(context, item)) {
+				continue;
+			}
+
+			if (!this.isAllowedToUseItem(context, item, false)) {
+				continue;
+			}
+
+			if (item.island.items.isInGroup(item.type, itemTypeGroup)) {
+				if (context.isHardReservedItem(item)) {
+					continue;
+				}
+
+				return item;
+			}
+
+			const description = Items[item.type];
+			if (description && description.weightCapacity !== undefined) {
+				const item2 = this.getItemInContainerByGroup(context, item as IContainer, itemTypeGroup);
 				if (item2) {
 					return item2;
 				}
@@ -266,10 +356,7 @@ export class ItemUtilities {
 	}
 
 	public isInventoryItem(context: Context, item: Item) {
-		const keys = Object.keys(inventoryItemInfo) as Array<keyof IInventoryItems>;
-
-		for (const key of keys) {
-			const inventoryItem = context.inventory[key];
+		for (const [, inventoryItem] of Object.entries(context.inventory)) {
 			if (Array.isArray(inventoryItem) ? inventoryItem.includes(item) : inventoryItem === item) {
 				return true;
 			}
@@ -580,7 +667,7 @@ export class ItemUtilities {
 			}
 		}
 
-		const matchingItems = context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true }).filter(item => itemTypes.includes(item.type));
+		const matchingItems = this.getItemsInInventory(context).filter(item => itemTypes.includes(item.type));
 
 		return matchingItems[0];
 	}

@@ -2,7 +2,7 @@ import ProtectItem from "game/entity/action/actions/ProtectItem";
 import type Item from "game/item/Item";
 
 import type Context from "../../core/context/Context";
-import type { IInventoryItems, IInventoryItemInfo } from "../../core/ITars";
+import { IInventoryItems, IInventoryItemInfo } from "../../core/ITars";
 import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -174,6 +174,14 @@ export default class AnalyzeInventory extends Objective {
 			}
 		}
 
+		if (!itemInfo.protect) {
+			for (const item of Array.from(items)) {
+				if (!context.utilities.item.isAllowedToUseItem(context, item, false)) {
+					items.delete(item);
+				}
+			}
+		}
+
 		return items;
 	}
 
@@ -183,6 +191,10 @@ export default class AnalyzeInventory extends Objective {
 		}
 
 		if (itemInfo.requiredMinDur !== undefined && item.minDur !== undefined && item.minDur < itemInfo.requiredMinDur) {
+			return false;
+		}
+
+		if (!itemInfo.protect && !context.utilities.item.isAllowedToUseItem(context, item, false)) {
 			return false;
 		}
 
@@ -200,4 +212,5 @@ export default class AnalyzeInventory extends Objective {
 
 		return false;
 	}
+
 }

@@ -122,6 +122,14 @@ export class MovementUtilities {
                 navigation.updateOrigin(context.human);
             }
 
+            // const position = context.getPosition();
+            // if (position.z !== target.z) {
+            //     // return [
+            //     // 	new MoveToZ(this.target.z),
+            //     // 	new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }), // todo: replace with this?
+            //     // ];
+            // }
+
             // pick the easiest path
             let results = (await Promise.all(ends.map(async end => navigation.findPath(end))))
                 .filter(result => result !== undefined) as NavigationPath[];
@@ -315,7 +323,9 @@ export class MovementUtilities {
                         path = [nextPosition];
                     }
 
-                    context.human.walkAlongPath(path, true);
+                    if (!context.options.freeze) {
+                        context.human.walkAlongPath(path, true);
+                    }
                 }
 
                 return MoveResult.Moving;

@@ -43,5 +43,6 @@ export default abstract class Objective implements IObjective {
     passAcquireData(objective: Objective, reserveType?: ReserveType): this;
     protected getAcquiredItem(context: Context): Item | undefined;
     protected getBaseDifficulty(_context: Context): number;
+    protected getUniqueIdentifier(): number;
     protected addUniqueIdentifier(): void;
 }

@@ -61,7 +61,9 @@ export interface ITarsOptions {
     mode: TarsMode;
 
     exploreIslands: boolean;
+    readBooks: boolean;
     useOrbsOfInfluence: boolean;
+    useProtectedItems: TarsUseProtectedItems;
 
     goodCitizen: boolean;
 
@@ -73,7 +75,14 @@ export interface ITarsOptions {
     recoverThresholdThirstFromMax: number;
 
     quantumBurst: boolean;
-    developerMode: boolean;
+    debugLogging: boolean;
+    freeze: boolean;
+}
+
+export enum TarsUseProtectedItems {
+    No,
+    Yes,
+    YesWithBreakCheck,
 }
 
 export enum NavigationSystemState {

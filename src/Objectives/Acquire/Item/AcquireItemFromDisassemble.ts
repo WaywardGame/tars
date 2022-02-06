@@ -70,6 +70,9 @@ export default class AcquireItemFromDisassemble extends Objective {
 			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
 			const hashCode = this.getHashCode(true);
 
+			// probably doesn't fix a bug
+			// const hashCode = `${this.getHashCode()}:${this.getUniqueIdentifier()}`
+
 			const objectives: IObjective[] = [
 				new ReserveItems(item),
 				new ProvideItems(...disassemblyItems.map(item => item.type)),
@@ -78,9 +81,11 @@ export default class AcquireItemFromDisassemble extends Objective {
 			];
 
 			if (requiredForDisassembly) {
-				for (const itemTypeOfGroup of requiredForDisassembly) {
-					if (!context.island.items.getItemForHuman(context.human, itemTypeOfGroup)) {
-						objectives.push(context.island.items.isGroup(itemTypeOfGroup) ? new AcquireItemByGroup(itemTypeOfGroup) : new AcquireItem(itemTypeOfGroup));
+				for (const itemTypeOrGroup of requiredForDisassembly) {
+					if (context.island.items.isGroup(itemTypeOrGroup) ?
+						!context.utilities.item.getItemInContainerByGroup(context, context.human.inventory, itemTypeOrGroup) :
+						!context.utilities.item.getItemsInContainerByType(context, context.human.inventory, itemTypeOrGroup)) {
+						objectives.push(context.island.items.isGroup(itemTypeOrGroup) ? new AcquireItemByGroup(itemTypeOrGroup) : new AcquireItem(itemTypeOrGroup));
 					}
 				}
 			}

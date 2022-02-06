@@ -72,7 +72,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective
 	 */
 	public isReservedItem(item: Item) {
-		if (this.state.softReservedItems.has(item.id) || this.state.hardReservedItems.has(item.id)) {
+		if (this.state.softReservedItems.has(item) || this.state.hardReservedItems.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -84,7 +84,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective and is not going to be consumed
 	 */
 	public isSoftReservedItem(item: Item) {
-		if (this.state.softReservedItems.has(item.id)) {
+		if (this.state.softReservedItems.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -96,7 +96,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective and is going to be consumed
 	 */
 	public isHardReservedItem(item: Item) {
-		if (this.state.hardReservedItems.has(item.id)) {
+		if (this.state.hardReservedItems.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -129,11 +129,11 @@ export default class Context implements IContext {
 
 	public addSoftReservedItems(...items: Item[]) {
 		for (const item of items) {
-			this.state.softReservedItems.add(item.id);
+			this.state.softReservedItems.add(item);
 			this.state.reservedItemTypes.add(item.type);
 
 			if (this.changes) {
-				this.changes.softReservedItems.add(item.id);
+				this.changes.softReservedItems.add(item);
 				this.changes.reservedItemTypes.add(item.type);
 			}
 		}
@@ -141,11 +141,11 @@ export default class Context implements IContext {
 
 	public addHardReservedItems(...items: Item[]) {
 		for (const item of items) {
-			this.state.hardReservedItems.add(item.id);
+			this.state.hardReservedItems.add(item);
 			this.state.reservedItemTypes.add(item.type);
 
 			if (this.changes) {
-				this.changes.hardReservedItems.add(item.id);
+				this.changes.hardReservedItems.add(item);
 				this.changes.reservedItemTypes.add(item.type);
 			}
 		}

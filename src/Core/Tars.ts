@@ -555,6 +555,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
             for (const changedOption of changedOptions) {
                 switch (changedOption) {
+                    case "mode":
+                        shouldInterrupt = true;
+                        break;
+
                     case "exploreIslands":
                         this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
                         break;
@@ -578,9 +582,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                         break;
 
-                    case "developerMode":
+                    case "debugLogging":
                         shouldInterrupt = false;
-                        planner.debug = this.saveData.options.developerMode;
+                        planner.debug = this.saveData.options.debugLogging;
                         break;
                 }
             }
@@ -1383,10 +1387,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
             for (const itemType of itemTypes) {
                 if (context.island.items.isGroup(itemType)) {
-                    possibleEquips.push(...context.island.items.getItemsInContainerByGroup(context.human.inventory, itemType));
+                    possibleEquips.push(...context.utilities.item.getItemsInContainerByGroup(context, context.human.inventory, itemType));
 
                 } else {
-                    possibleEquips.push(...context.island.items.getItemsInContainerByType(context.human.inventory, itemType));
+                    possibleEquips.push(...context.utilities.item.getItemsInContainerByType(context, context.human.inventory, itemType));
                 }
             }
 
@@ -1661,10 +1665,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             objectives.length > 0 ? "Going to organize inventory space" : "Will not organize inventory space",
             `Reserved items: ${reservedItems.join(",")}`,
             `Unused items: ${unusedItems.join(",")}`,
-            `Context soft reserved items: ${Array.from(context.state.softReservedItems).join(",")}`,
-            `Context hard reserved items: ${Array.from(context.state.hardReservedItems).join(",")}`,
-            `Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).join(",")}`,
-            `Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).join(",")}`,
+            `Context soft reserved items: ${Array.from(context.state.softReservedItems).map(item => item.id).join(",")}`,
+            `Context hard reserved items: ${Array.from(context.state.hardReservedItems).map(item => item.id).join(",")}`,
+            `Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).map(item => item.id).join(",")}`,
+            `Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).map(item => item.id).join(",")}`,
             `Objectives: ${Plan.getPipelineString(this.context, objectives)}`);
 
         return objectives;

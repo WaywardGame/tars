@@ -38,17 +38,19 @@ export default class CheckSpecialItems extends Objective {
             ]));
         }
 
-        const books = baseItems
-            .filter(item => item.book === BookType.RandomEvent);
-        if (books.length > 0) {
-            return books.map(item => ([
-                new ReserveItems(item).keepInInventory(),
-                new MoveItemIntoInventory(item),
-                new ExecuteAction(ActionType.Read, (context, action) => {
-                    action.execute(context.actionExecutor, item);
-                    return ObjectiveResult.Complete;
-                }).setStatus(`Reading ${item.getName()}`),
-            ]));
+        if (context.options.readBooks) {
+            const books = baseItems
+                .filter(item => item.book === BookType.RandomEvent);
+            if (books.length > 0) {
+                return books.map(item => ([
+                    new ReserveItems(item).keepInInventory(),
+                    new MoveItemIntoInventory(item),
+                    new ExecuteAction(ActionType.Read, (context, action) => {
+                        action.execute(context.actionExecutor, item);
+                        return ObjectiveResult.Complete;
+                    }).setStatus(`Reading ${item.getName()}`),
+                ]));
+            }
         }
 
         return ObjectiveResult.Ignore;

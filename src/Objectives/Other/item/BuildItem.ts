@@ -11,7 +11,7 @@ import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import type { IBaseInfo, BaseInfoKey } from "../../../core/ITars";
+import type { IBaseInfo } from "../../../core/ITars";
 import { defaultMaxTilesChecked, baseInfo } from "../../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
@@ -152,9 +152,7 @@ export default class BuildItem extends Objective {
 	}
 
 	private getBaseInfo(buildDoodadType: DoodadType): IBaseInfo | undefined {
-		const keys = Object.keys(baseInfo) as BaseInfoKey[];
-		for (const key of keys) {
-			const info = baseInfo[key];
+		for (const [, info] of Object.entries(baseInfo)) {
 			if (AnalyzeBase.matchesBaseInfo(info, buildDoodadType)) {
 				return info;
 			}

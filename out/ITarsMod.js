@@ -1,7 +1,7 @@
-define(["require", "exports", "game/entity/IStats"], function (require, exports, IStats_1) {
+define(["require", "exports", "game/entity/IStats", "./core/ITars"], function (require, exports, IStats_1, ITars_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.uiConfigurableOptions = exports.TarsTranslation = exports.TarsUiSaveDataKey = exports.getTarsSaveData = exports.getTarsTranslation = exports.setTarsMod = exports.getTarsMod = exports.TARS_ID = void 0;
+    exports.uiConfigurableOptions = exports.TarsOptionSectionType = exports.TarsTranslation = exports.TarsUiSaveDataKey = exports.getTarsSaveData = exports.getTarsTranslation = exports.setTarsMod = exports.getTarsMod = exports.TARS_ID = void 0;
     exports.TARS_ID = "TARS";
     let tarsMod;
     function getTarsMod() {
@@ -50,100 +50,146 @@ define(["require", "exports", "game/entity/IStats"], function (require, exports,
         TarsTranslation[TarsTranslation["DialogButtonAquireItemTooltip"] = 8] = "DialogButtonAquireItemTooltip";
         TarsTranslation[TarsTranslation["DialogButtonBuildDoodad"] = 9] = "DialogButtonBuildDoodad";
         TarsTranslation[TarsTranslation["DialogButtonBuildDoodadTooltip"] = 10] = "DialogButtonBuildDoodadTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonDeveloperMode"] = 11] = "DialogButtonDeveloperMode";
-        TarsTranslation[TarsTranslation["DialogButtonDeveloperModeTooltip"] = 12] = "DialogButtonDeveloperModeTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonEnable"] = 13] = "DialogButtonEnable";
-        TarsTranslation[TarsTranslation["DialogButtonExploreIslands"] = 14] = "DialogButtonExploreIslands";
-        TarsTranslation[TarsTranslation["DialogButtonExploreIslandsTooltip"] = 15] = "DialogButtonExploreIslandsTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonGoodCitizen"] = 16] = "DialogButtonGoodCitizen";
-        TarsTranslation[TarsTranslation["DialogButtonGoodCitizenTooltip"] = 17] = "DialogButtonGoodCitizenTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonQuantumBurst"] = 18] = "DialogButtonQuantumBurst";
-        TarsTranslation[TarsTranslation["DialogButtonQuantumBurstTooltip"] = 19] = "DialogButtonQuantumBurstTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonStayHealthy"] = 20] = "DialogButtonStayHealthy";
-        TarsTranslation[TarsTranslation["DialogButtonStayHealthyTooltip"] = 21] = "DialogButtonStayHealthyTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonUseOrbsOfInfluence"] = 22] = "DialogButtonUseOrbsOfInfluence";
-        TarsTranslation[TarsTranslation["DialogButtonUseOrbsOfInfluenceTooltip"] = 23] = "DialogButtonUseOrbsOfInfluenceTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonSailToCivilization"] = 24] = "DialogButtonSailToCivilization";
-        TarsTranslation[TarsTranslation["DialogButtonSailToCivilizationTooltip"] = 25] = "DialogButtonSailToCivilizationTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonTameCreature"] = 26] = "DialogButtonTameCreature";
-        TarsTranslation[TarsTranslation["DialogButtonTameCreatureTooltip"] = 27] = "DialogButtonTameCreatureTooltip";
-        TarsTranslation[TarsTranslation["DialogButtonMoveToBase"] = 28] = "DialogButtonMoveToBase";
-        TarsTranslation[TarsTranslation["DialogButtonMoveToDoodad"] = 29] = "DialogButtonMoveToDoodad";
-        TarsTranslation[TarsTranslation["DialogButtonMoveToIsland"] = 30] = "DialogButtonMoveToIsland";
-        TarsTranslation[TarsTranslation["DialogButtonMoveToNPC"] = 31] = "DialogButtonMoveToNPC";
-        TarsTranslation[TarsTranslation["DialogButtonMoveToCreature"] = 32] = "DialogButtonMoveToCreature";
-        TarsTranslation[TarsTranslation["DialogButtonMoveToPlayer"] = 33] = "DialogButtonMoveToPlayer";
-        TarsTranslation[TarsTranslation["DialogButtonMoveToTerrain"] = 34] = "DialogButtonMoveToTerrain";
-        TarsTranslation[TarsTranslation["DialogRangeLabel"] = 35] = "DialogRangeLabel";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverHealthThreshold"] = 36] = "DialogRangeRecoverHealthThreshold";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverHealthThresholdTooltip"] = 37] = "DialogRangeRecoverHealthThresholdTooltip";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverStaminaThreshold"] = 38] = "DialogRangeRecoverStaminaThreshold";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverStaminaThresholdTooltip"] = 39] = "DialogRangeRecoverStaminaThresholdTooltip";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverHungerThreshold"] = 40] = "DialogRangeRecoverHungerThreshold";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverHungerThresholdTooltip"] = 41] = "DialogRangeRecoverHungerThresholdTooltip";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverThirstThreshold"] = 42] = "DialogRangeRecoverThirstThreshold";
-        TarsTranslation[TarsTranslation["DialogRangeRecoverThirstThresholdTooltip"] = 43] = "DialogRangeRecoverThirstThresholdTooltip";
-        TarsTranslation[TarsTranslation["DialogLabelAdvanced"] = 44] = "DialogLabelAdvanced";
-        TarsTranslation[TarsTranslation["DialogLabelDoodad"] = 45] = "DialogLabelDoodad";
-        TarsTranslation[TarsTranslation["DialogLabelGeneral"] = 46] = "DialogLabelGeneral";
-        TarsTranslation[TarsTranslation["DialogLabelIsland"] = 47] = "DialogLabelIsland";
-        TarsTranslation[TarsTranslation["DialogLabelItem"] = 48] = "DialogLabelItem";
-        TarsTranslation[TarsTranslation["DialogLabelMultiplayer"] = 49] = "DialogLabelMultiplayer";
-        TarsTranslation[TarsTranslation["DialogLabelNPC"] = 50] = "DialogLabelNPC";
-        TarsTranslation[TarsTranslation["DialogLabelPlayer"] = 51] = "DialogLabelPlayer";
-        TarsTranslation[TarsTranslation["DialogLabelRecoverThresholds"] = 52] = "DialogLabelRecoverThresholds";
-        TarsTranslation[TarsTranslation["DialogLabelTerrain"] = 53] = "DialogLabelTerrain";
-        TarsTranslation[TarsTranslation["DialogLabelCreature"] = 54] = "DialogLabelCreature";
-        TarsTranslation[TarsTranslation["DialogModeGardener"] = 55] = "DialogModeGardener";
-        TarsTranslation[TarsTranslation["DialogModeGardenerTooltip"] = 56] = "DialogModeGardenerTooltip";
-        TarsTranslation[TarsTranslation["DialogModeHarvester"] = 57] = "DialogModeHarvester";
-        TarsTranslation[TarsTranslation["DialogModeHarvesterTooltip"] = 58] = "DialogModeHarvesterTooltip";
-        TarsTranslation[TarsTranslation["DialogModeQuest"] = 59] = "DialogModeQuest";
-        TarsTranslation[TarsTranslation["DialogModeQuestTooltip"] = 60] = "DialogModeQuestTooltip";
-        TarsTranslation[TarsTranslation["DialogModeSurvival"] = 61] = "DialogModeSurvival";
-        TarsTranslation[TarsTranslation["DialogModeSurvivalTooltip"] = 62] = "DialogModeSurvivalTooltip";
-        TarsTranslation[TarsTranslation["DialogModeTerminator"] = 63] = "DialogModeTerminator";
-        TarsTranslation[TarsTranslation["DialogModeTerminatorTooltip"] = 64] = "DialogModeTerminatorTooltip";
-        TarsTranslation[TarsTranslation["DialogModeTidyUp"] = 65] = "DialogModeTidyUp";
-        TarsTranslation[TarsTranslation["DialogModeTidyUpTooltip"] = 66] = "DialogModeTidyUpTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonDebugLogging"] = 11] = "DialogButtonDebugLogging";
+        TarsTranslation[TarsTranslation["DialogButtonDebugLoggingTooltip"] = 12] = "DialogButtonDebugLoggingTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonFreeze"] = 13] = "DialogButtonFreeze";
+        TarsTranslation[TarsTranslation["DialogButtonFreezeTooltip"] = 14] = "DialogButtonFreezeTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonEnable"] = 15] = "DialogButtonEnable";
+        TarsTranslation[TarsTranslation["DialogButtonExploreIslands"] = 16] = "DialogButtonExploreIslands";
+        TarsTranslation[TarsTranslation["DialogButtonExploreIslandsTooltip"] = 17] = "DialogButtonExploreIslandsTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonGoodCitizen"] = 18] = "DialogButtonGoodCitizen";
+        TarsTranslation[TarsTranslation["DialogButtonGoodCitizenTooltip"] = 19] = "DialogButtonGoodCitizenTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonQuantumBurst"] = 20] = "DialogButtonQuantumBurst";
+        TarsTranslation[TarsTranslation["DialogButtonQuantumBurstTooltip"] = 21] = "DialogButtonQuantumBurstTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonStayHealthy"] = 22] = "DialogButtonStayHealthy";
+        TarsTranslation[TarsTranslation["DialogButtonStayHealthyTooltip"] = 23] = "DialogButtonStayHealthyTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonDisallowProtectedItems"] = 24] = "DialogButtonDisallowProtectedItems";
+        TarsTranslation[TarsTranslation["DialogButtonDisallowProtectedItemsTooltip"] = 25] = "DialogButtonDisallowProtectedItemsTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonAllowProtectedItems"] = 26] = "DialogButtonAllowProtectedItems";
+        TarsTranslation[TarsTranslation["DialogButtonAllowProtectedItemsTooltip"] = 27] = "DialogButtonAllowProtectedItemsTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonAllowProtectedItemsWithBreakCheck"] = 28] = "DialogButtonAllowProtectedItemsWithBreakCheck";
+        TarsTranslation[TarsTranslation["DialogButtonAllowProtectedItemsWithBreakCheckTooltip"] = 29] = "DialogButtonAllowProtectedItemsWithBreakCheckTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonUseOrbsOfInfluence"] = 30] = "DialogButtonUseOrbsOfInfluence";
+        TarsTranslation[TarsTranslation["DialogButtonUseOrbsOfInfluenceTooltip"] = 31] = "DialogButtonUseOrbsOfInfluenceTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonReadBooks"] = 32] = "DialogButtonReadBooks";
+        TarsTranslation[TarsTranslation["DialogButtonReadBooksTooltip"] = 33] = "DialogButtonReadBooksTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonSailToCivilization"] = 34] = "DialogButtonSailToCivilization";
+        TarsTranslation[TarsTranslation["DialogButtonSailToCivilizationTooltip"] = 35] = "DialogButtonSailToCivilizationTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonTameCreature"] = 36] = "DialogButtonTameCreature";
+        TarsTranslation[TarsTranslation["DialogButtonTameCreatureTooltip"] = 37] = "DialogButtonTameCreatureTooltip";
+        TarsTranslation[TarsTranslation["DialogButtonMoveToBase"] = 38] = "DialogButtonMoveToBase";
+        TarsTranslation[TarsTranslation["DialogButtonMoveToDoodad"] = 39] = "DialogButtonMoveToDoodad";
+        TarsTranslation[TarsTranslation["DialogButtonMoveToIsland"] = 40] = "DialogButtonMoveToIsland";
+        TarsTranslation[TarsTranslation["DialogButtonMoveToNPC"] = 41] = "DialogButtonMoveToNPC";
+        TarsTranslation[TarsTranslation["DialogButtonMoveToCreature"] = 42] = "DialogButtonMoveToCreature";
+        TarsTranslation[TarsTranslation["DialogButtonMoveToPlayer"] = 43] = "DialogButtonMoveToPlayer";
+        TarsTranslation[TarsTranslation["DialogButtonMoveToTerrain"] = 44] = "DialogButtonMoveToTerrain";
+        TarsTranslation[TarsTranslation["DialogRangeLabel"] = 45] = "DialogRangeLabel";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverHealthThreshold"] = 46] = "DialogRangeRecoverHealthThreshold";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverHealthThresholdTooltip"] = 47] = "DialogRangeRecoverHealthThresholdTooltip";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverStaminaThreshold"] = 48] = "DialogRangeRecoverStaminaThreshold";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverStaminaThresholdTooltip"] = 49] = "DialogRangeRecoverStaminaThresholdTooltip";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverHungerThreshold"] = 50] = "DialogRangeRecoverHungerThreshold";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverHungerThresholdTooltip"] = 51] = "DialogRangeRecoverHungerThresholdTooltip";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverThirstThreshold"] = 52] = "DialogRangeRecoverThirstThreshold";
+        TarsTranslation[TarsTranslation["DialogRangeRecoverThirstThresholdTooltip"] = 53] = "DialogRangeRecoverThirstThresholdTooltip";
+        TarsTranslation[TarsTranslation["DialogLabelAdvanced"] = 54] = "DialogLabelAdvanced";
+        TarsTranslation[TarsTranslation["DialogLabelCreature"] = 55] = "DialogLabelCreature";
+        TarsTranslation[TarsTranslation["DialogLabelDeveloper"] = 56] = "DialogLabelDeveloper";
+        TarsTranslation[TarsTranslation["DialogLabelDoodad"] = 57] = "DialogLabelDoodad";
+        TarsTranslation[TarsTranslation["DialogLabelGeneral"] = 58] = "DialogLabelGeneral";
+        TarsTranslation[TarsTranslation["DialogLabelIsland"] = 59] = "DialogLabelIsland";
+        TarsTranslation[TarsTranslation["DialogLabelItem"] = 60] = "DialogLabelItem";
+        TarsTranslation[TarsTranslation["DialogLabelMultiplayer"] = 61] = "DialogLabelMultiplayer";
+        TarsTranslation[TarsTranslation["DialogLabelNPC"] = 62] = "DialogLabelNPC";
+        TarsTranslation[TarsTranslation["DialogLabelPlayer"] = 63] = "DialogLabelPlayer";
+        TarsTranslation[TarsTranslation["DialogLabelRecoverThresholds"] = 64] = "DialogLabelRecoverThresholds";
+        TarsTranslation[TarsTranslation["DialogLabelTerrain"] = 65] = "DialogLabelTerrain";
+        TarsTranslation[TarsTranslation["DialogModeGardener"] = 66] = "DialogModeGardener";
+        TarsTranslation[TarsTranslation["DialogModeGardenerTooltip"] = 67] = "DialogModeGardenerTooltip";
+        TarsTranslation[TarsTranslation["DialogModeHarvester"] = 68] = "DialogModeHarvester";
+        TarsTranslation[TarsTranslation["DialogModeHarvesterTooltip"] = 69] = "DialogModeHarvesterTooltip";
+        TarsTranslation[TarsTranslation["DialogModeQuest"] = 70] = "DialogModeQuest";
+        TarsTranslation[TarsTranslation["DialogModeQuestTooltip"] = 71] = "DialogModeQuestTooltip";
+        TarsTranslation[TarsTranslation["DialogModeSurvival"] = 72] = "DialogModeSurvival";
+        TarsTranslation[TarsTranslation["DialogModeSurvivalTooltip"] = 73] = "DialogModeSurvivalTooltip";
+        TarsTranslation[TarsTranslation["DialogModeTerminator"] = 74] = "DialogModeTerminator";
+        TarsTranslation[TarsTranslation["DialogModeTerminatorTooltip"] = 75] = "DialogModeTerminatorTooltip";
+        TarsTranslation[TarsTranslation["DialogModeTidyUp"] = 76] = "DialogModeTidyUp";
+        TarsTranslation[TarsTranslation["DialogModeTidyUpTooltip"] = 77] = "DialogModeTidyUpTooltip";
     })(TarsTranslation = exports.TarsTranslation || (exports.TarsTranslation = {}));
+    var TarsOptionSectionType;
+    (function (TarsOptionSectionType) {
+        TarsOptionSectionType[TarsOptionSectionType["Checkbox"] = 0] = "Checkbox";
+        TarsOptionSectionType[TarsOptionSectionType["Choice"] = 1] = "Choice";
+        TarsOptionSectionType[TarsOptionSectionType["Slider"] = 2] = "Slider";
+    })(TarsOptionSectionType = exports.TarsOptionSectionType || (exports.TarsOptionSectionType = {}));
     exports.uiConfigurableOptions = [
         TarsTranslation.DialogLabelGeneral,
         {
             option: "exploreIslands",
+            type: TarsOptionSectionType.Checkbox,
             title: TarsTranslation.DialogButtonExploreIslands,
             tooltip: TarsTranslation.DialogButtonExploreIslandsTooltip,
         },
         {
+            option: "stayHealthy",
+            type: TarsOptionSectionType.Checkbox,
+            title: TarsTranslation.DialogButtonStayHealthy,
+            tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
+        },
+        {
             option: "useOrbsOfInfluence",
+            type: TarsOptionSectionType.Checkbox,
             title: TarsTranslation.DialogButtonUseOrbsOfInfluence,
             tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
         },
         {
-            option: "stayHealthy",
-            title: TarsTranslation.DialogButtonStayHealthy,
-            tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
+            option: "readBooks",
+            type: TarsOptionSectionType.Checkbox,
+            title: TarsTranslation.DialogButtonReadBooks,
+            tooltip: TarsTranslation.DialogButtonReadBooksTooltip,
+        },
+        {
+            option: "useProtectedItems",
+            type: TarsOptionSectionType.Choice,
+            choices: [
+                [TarsTranslation.DialogButtonDisallowProtectedItems, TarsTranslation.DialogButtonDisallowProtectedItemsTooltip, ITars_1.TarsUseProtectedItems.No],
+                [TarsTranslation.DialogButtonAllowProtectedItems, TarsTranslation.DialogButtonAllowProtectedItemsTooltip, ITars_1.TarsUseProtectedItems.Yes],
+                [TarsTranslation.DialogButtonAllowProtectedItemsWithBreakCheck, TarsTranslation.DialogButtonAllowProtectedItemsWithBreakCheckTooltip, ITars_1.TarsUseProtectedItems.YesWithBreakCheck],
+            ],
         },
         TarsTranslation.DialogLabelMultiplayer,
         {
             option: "goodCitizen",
+            type: TarsOptionSectionType.Checkbox,
             title: TarsTranslation.DialogButtonGoodCitizen,
             tooltip: TarsTranslation.DialogButtonGoodCitizenTooltip,
         },
         TarsTranslation.DialogLabelAdvanced,
         {
             option: "quantumBurst",
+            type: TarsOptionSectionType.Checkbox,
             title: TarsTranslation.DialogButtonQuantumBurst,
             tooltip: TarsTranslation.DialogButtonQuantumBurstTooltip,
         },
+        TarsTranslation.DialogLabelDeveloper,
         {
-            option: "developerMode",
-            title: TarsTranslation.DialogButtonDeveloperMode,
-            tooltip: TarsTranslation.DialogButtonDeveloperModeTooltip,
+            option: "debugLogging",
+            type: TarsOptionSectionType.Checkbox,
+            title: TarsTranslation.DialogButtonDebugLogging,
+            tooltip: TarsTranslation.DialogButtonDebugLoggingTooltip,
+        },
+        {
+            option: "freeze",
+            type: TarsOptionSectionType.Checkbox,
+            title: TarsTranslation.DialogButtonFreeze,
+            tooltip: TarsTranslation.DialogButtonFreezeTooltip,
         },
         TarsTranslation.DialogLabelRecoverThresholds,
         {
             option: "recoverThresholdHealth",
+            type: TarsOptionSectionType.Slider,
             title: TarsTranslation.DialogRangeRecoverHealthThreshold,
             tooltip: TarsTranslation.DialogRangeRecoverHealthThresholdTooltip,
             slider: {
@@ -153,6 +199,7 @@ define(["require", "exports", "game/entity/IStats"], function (require, exports,
         },
         {
             option: "recoverThresholdStamina",
+            type: TarsOptionSectionType.Slider,
             title: TarsTranslation.DialogRangeRecoverStaminaThreshold,
             tooltip: TarsTranslation.DialogRangeRecoverStaminaThresholdTooltip,
             slider: {
@@ -162,6 +209,7 @@ define(["require", "exports", "game/entity/IStats"], function (require, exports,
         },
         {
             option: "recoverThresholdHunger",
+            type: TarsOptionSectionType.Slider,
             title: TarsTranslation.DialogRangeRecoverHungerThreshold,
             tooltip: TarsTranslation.DialogRangeRecoverHungerThresholdTooltip,
             slider: {
@@ -171,6 +219,7 @@ define(["require", "exports", "game/entity/IStats"], function (require, exports,
         },
         {
             option: "recoverThresholdThirst",
+            type: TarsOptionSectionType.Slider,
             title: TarsTranslation.DialogRangeRecoverThirstThreshold,
             tooltip: TarsTranslation.DialogRangeRecoverThirstThresholdTooltip,
             slider: {
@@ -180,4 +229,4 @@ define(["require", "exports", "game/entity/IStats"], function (require, exports,
         },
     ];
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSVRhcnNNb2QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvSVRhcnNNb2QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztJQVNhLFFBQUEsT0FBTyxHQUFHLE1BQU0sQ0FBQztJQUU5QixJQUFJLE9BQTRCLENBQUM7SUFFakMsU0FBZ0IsVUFBVTtRQUN0QixJQUFJLENBQUMsT0FBTyxFQUFFO1lBQ1YsTUFBTSxJQUFJLEtBQUssQ0FBQyx1QkFBdUIsQ0FBQyxDQUFDO1NBQzVDO1FBRUQsT0FBTyxPQUFPLENBQUM7SUFDbkIsQ0FBQztJQU5ELGdDQU1DO0lBRUQsU0FBZ0IsVUFBVSxDQUFDLFFBQTZCO1FBQ3BELE9BQU8sR0FBRyxRQUFRLENBQUM7SUFDdkIsQ0FBQztJQUZELGdDQUVDO0lBRUQsU0FBZ0Isa0JBQWtCLENBQUMsV0FBbUQ7UUFDbEYsT0FBTyxVQUFVLEVBQUUsQ0FBQyxjQUFjLENBQUMsV0FBVyxDQUFDLENBQUM7SUFDcEQsQ0FBQztJQUZELGdEQUVDO0lBRUQsU0FBZ0IsZUFBZSxDQUE0QixHQUFNO1FBQzdELE9BQU8sVUFBVSxFQUFFLENBQUMsUUFBUSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQ3RDLENBQUM7SUFGRCwwQ0FFQztJQTJCRCxJQUFZLGlCQVlYO0lBWkQsV0FBWSxpQkFBaUI7UUFDekIseUVBQVksQ0FBQTtRQUNaLDJFQUFhLENBQUE7UUFDYix1RkFBbUIsQ0FBQTtRQUNuQix1RkFBbUIsQ0FBQTtRQUNuQix5RkFBb0IsQ0FBQTtRQUNwQiwyRkFBcUIsQ0FBQTtRQUNyQix5RkFBb0IsQ0FBQTtRQUNwQiw2RkFBc0IsQ0FBQTtRQUN0Qix5RkFBb0IsQ0FBQTtRQUNwQixtRkFBaUIsQ0FBQTtRQUNqQiwwRkFBb0IsQ0FBQTtJQUN4QixDQUFDLEVBWlcsaUJBQWlCLEdBQWpCLHlCQUFpQixLQUFqQix5QkFBaUIsUUFZNUI7SUFFRCxJQUFZLGVBNEVYO0lBNUVELFdBQVksZUFBZTtRQUN2QixxREFBSSxD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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSVRhcnNNb2QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvSVRhcnNNb2QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztJQVNhLFFBQUEsT0FBTyxHQUFHLE1BQU0sQ0FBQztJQUU5QixJQUFJLE9BQTRCLENBQUM7SUFFakMsU0FBZ0IsVUFBVTtRQUN0QixJQUFJLENBQUMsT0FBTyxFQUFFO1lBQ1YsTUFBTSxJQUFJLEtBQUssQ0FBQyx1QkFBdUIsQ0FBQyxDQUFDO1NBQzVDO1FBRUQsT0FBTyxPQUFPLENBQUM7SUFDbkIsQ0FBQztJQU5ELGdDQU1DO0lBRUQsU0FBZ0IsVUFBVSxDQUFDLFFBQTZCO1FBQ3BELE9BQU8sR0FBRyxRQUFRLENBQUM7SUFDdkIsQ0FBQztJQUZELGdDQUVDO0lBRUQsU0FBZ0Isa0JBQWtCLENBQUMsV0FBbUQ7UUFDbEYsT0FBTyxVQUFVLEVBQUUsQ0FBQyxjQUFjLENBQUMsV0FBVyxDQUFDLENBQUM7SUFDcEQsQ0FBQztJQUZELGdEQUVDO0lBRUQsU0FBZ0IsZUFBZSxDQUE0QixHQUFNO1FBQzdELE9BQU8sVUFBVSxFQUFFLENBQUMsUUFBUSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQ3RDLENBQUM7SUFGRCwwQ0FFQztJQTJCRCxJQUFZLGlCQVlYO0lBWkQsV0FBWSxpQkFBaUI7UUFDekIseUVBQVksQ0FBQTtRQUNaLDJFQUFhLENBQUE7UUFDYix1RkFBbUIsQ0FBQTtRQUNuQix1RkFBbUIsQ0FBQTtRQUNuQix5RkFBb0IsQ0FBQTtRQUNwQiwyRkFBcUIsQ0FBQTtRQUNyQix5RkFBb0IsQ0FBQTtRQUNwQiw2RkFBc0IsQ0FBQTtRQUN0Qix5RkFBb0IsQ0FBQTtRQUNwQixtRkFBaUIsQ0FBQTtRQUNqQiwwRkFBb0IsQ0FBQTtJQUN4QixDQUFDLEVBWlcsaUJBQWlCLEdBQWpCLHlCQUFpQixLQUFqQix5QkFBaUIsUUFZNUI7SUFFRCxJQUFZLGVBdUZYO0lBdkZELFdBQVksZUFBZTtRQUN2QixxREFBSSxD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

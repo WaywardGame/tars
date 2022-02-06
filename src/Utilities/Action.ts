@@ -3,7 +3,7 @@ import actionDescriptions from "game/entity/action/Actions";
 import type { ActionType, IActionDescription } from "game/entity/action/IAction";
 
 import type Context from "../core/context/Context";
-import type { ObjectiveResult } from "../core/objective/IObjective";
+import { ObjectiveResult } from "../core/objective/IObjective";
 
 export class ActionUtilities {
 
@@ -16,6 +16,10 @@ export class ActionUtilities {
         context: Context,
         actionType: T,
         executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => ObjectiveResult): Promise<ObjectiveResult> {
+        if (context.options.freeze) {
+            return ObjectiveResult.Pending;
+        }
+
         let waiter: Promise<boolean> | undefined;
 
         if (context.human.hasDelay()) {

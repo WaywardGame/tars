@@ -31,7 +31,7 @@ import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
 import type { ITarsModEvents, ISaveData } from "./ITarsMod";
 import { TarsTranslation, setTarsMod, TarsUiSaveDataKey, TARS_ID } from "./ITarsMod";
 import Tars from "./core/Tars";
-import type { ITarsOptions } from "./core/ITars";
+import { ITarsOptions, TarsUseProtectedItems } from "./core/ITars";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITars";
 import planner from "./core/planning/Planner";
 import { TarsOverlay } from "./ui/TarsOverlay";
@@ -150,7 +150,7 @@ export default class TarsMod extends Mod {
 
 	public override onLoad(): void {
 		this.initializeTarsSaveData(this.saveData);
-		planner.debug = this.saveData.options.developerMode;
+		planner.debug = this.saveData.options.debugLogging;
 
 		Log.addPreConsoleCallback(loggerUtilities.preConsoleCallback);
 
@@ -343,6 +343,8 @@ export default class TarsMod extends Mod {
 			mode: TarsMode.Survival,
 			exploreIslands: true,
 			useOrbsOfInfluence: true,
+			readBooks: true,
+			useProtectedItems: TarsUseProtectedItems.No,
 			goodCitizen: true,
 			stayHealthy: true,
 			recoverThresholdHealth: 30,
@@ -351,7 +353,8 @@ export default class TarsMod extends Mod {
 			recoverThresholdThirst: 10,
 			recoverThresholdThirstFromMax: -10,
 			quantumBurst: false,
-			developerMode: false,
+			debugLogging: false,
+			freeze: false,
 			...(initial.options ?? {}) as Partial<ITarsOptions>,
 		}
 

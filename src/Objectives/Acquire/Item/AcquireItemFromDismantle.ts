@@ -4,7 +4,7 @@ import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import { itemDescriptions } from "game/item/Items";
 import Dictionary from "language/Dictionary";
-import { ListEnder } from "language/ITranslation";
+import { ListEnder, TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -99,7 +99,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				}
 
 				action.execute(context.actionExecutor, item);
-			}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+			}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, itemType).inContext(TextContext.Lowercase).getString()} for ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

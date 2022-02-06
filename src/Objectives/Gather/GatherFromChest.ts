@@ -58,7 +58,7 @@ export default class GatherFromChest extends Objective {
 
 		return chests
 			.map(chest => {
-				const items = context.island.items.getItemsInContainerByType(chest as IContainer, this.itemType, { includeSubContainers: true })
+				const items = context.utilities.item.getItemsInContainerByType(context, chest as IContainer, this.itemType)
 					.filter(item => {
 						if (context.isHardReservedItem(item)) {
 							return false;

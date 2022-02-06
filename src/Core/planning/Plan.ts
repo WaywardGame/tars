@@ -36,11 +36,25 @@ export default class Plan implements IPlan {
 	 */
 	public readonly objectives: IObjectiveInfo[];
 
-	public static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string {
+	public static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined, cacheHashcodes: boolean = true): string {
 		// not including objective.getStatusMessage(context) because translations are expensive/slow
+		// allowing hash code caching because an interrupt hash code will always always change after execution since the hash code might include item id, which become undefined when the item is no longer valid
 		return objectives ?
-			objectives.map(objective =>
-				Array.isArray(objective) ? Plan.getPipelineString(context, objective) : objective.getHashCode()).join(" -> ") :
+			objectives.map(objective => {
+				if (Array.isArray(objective)) {
+					return Plan.getPipelineString(context, objective, cacheHashcodes);
+				}
+
+				if (cacheHashcodes) {
+					if (!(objective as any).cachedHashCode) {
+						(objective as any).cachedHashCode = objective.getHashCode();
+					}
+
+					return (objective as any).cachedHashCode;
+				}
+
+				return objective.getHashCode();
+			}).join(" -> ") :
 			"Empty pipeline";
 	}
 
@@ -92,13 +106,6 @@ export default class Plan implements IPlan {
 	public async execute(
 		preExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined,
 		postExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined): Promise<ExecuteResult> {
-		// uncomment for perf testing - it will only cause plan creation and not execution
-		// if (globalThis) {
-		// 	return {
-		// 		type: ExecuteResultType.Completed,
-		// 	};
-		// }
-
 		const chain: IObjective[] = [];
 		const objectiveStack: IObjectiveInfo[] = [...this.objectives];
 

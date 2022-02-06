@@ -252,15 +252,24 @@ export default abstract class Objective implements IObjective {
 	}
 
 	/**
+	 * Get a unique identifier for a objective
+	 */
+	protected getUniqueIdentifier(): number {
+		const uniqueIdentifier = Objective.uuid++;
+		if (Objective.uuid >= Number.MAX_SAFE_INTEGER) {
+			Objective.uuid = 0;
+		}
+
+		return uniqueIdentifier;
+	}
+
+	/**
 	 * Adds a unique identifier to this objective
 	 * Prevents some caching logic related to hash codes
 	 */
 	protected addUniqueIdentifier() {
 		if (this._uniqueIdentifier === undefined) {
-			this._uniqueIdentifier = Objective.uuid++;
-			if (Objective.uuid >= Number.MAX_SAFE_INTEGER) {
-				Objective.uuid = 0;
-			}
+			this._uniqueIdentifier = this.getUniqueIdentifier();
 		}
 	}
 }

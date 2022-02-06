@@ -2,7 +2,7 @@ import type { Events } from "event/EventEmitter";
 import type Translation from "language/Translation";
 import type Mod from "mod/Mod";
 import type { IContext } from "./core/context/IContext";
-import type { ITarsOptions } from "./core/ITars";
+import { ITarsOptions } from "./core/ITars";
 import type TarsMod from "./TarsMod";
 export declare const TARS_ID = "TARS";
 export declare function getTarsMod(): TarsMod;
@@ -46,71 +46,102 @@ export declare enum TarsTranslation {
     DialogButtonAquireItemTooltip = 8,
     DialogButtonBuildDoodad = 9,
     DialogButtonBuildDoodadTooltip = 10,
-    DialogButtonDeveloperMode = 11,
-    DialogButtonDeveloperModeTooltip = 12,
-    DialogButtonEnable = 13,
-    DialogButtonExploreIslands = 14,
-    DialogButtonExploreIslandsTooltip = 15,
-    DialogButtonGoodCitizen = 16,
-    DialogButtonGoodCitizenTooltip = 17,
-    DialogButtonQuantumBurst = 18,
-    DialogButtonQuantumBurstTooltip = 19,
-    DialogButtonStayHealthy = 20,
-    DialogButtonStayHealthyTooltip = 21,
-    DialogButtonUseOrbsOfInfluence = 22,
-    DialogButtonUseOrbsOfInfluenceTooltip = 23,
-    DialogButtonSailToCivilization = 24,
-    DialogButtonSailToCivilizationTooltip = 25,
-    DialogButtonTameCreature = 26,
-    DialogButtonTameCreatureTooltip = 27,
-    DialogButtonMoveToBase = 28,
-    DialogButtonMoveToDoodad = 29,
-    DialogButtonMoveToIsland = 30,
-    DialogButtonMoveToNPC = 31,
-    DialogButtonMoveToCreature = 32,
-    DialogButtonMoveToPlayer = 33,
-    DialogButtonMoveToTerrain = 34,
-    DialogRangeLabel = 35,
-    DialogRangeRecoverHealthThreshold = 36,
-    DialogRangeRecoverHealthThresholdTooltip = 37,
-    DialogRangeRecoverStaminaThreshold = 38,
-    DialogRangeRecoverStaminaThresholdTooltip = 39,
-    DialogRangeRecoverHungerThreshold = 40,
-    DialogRangeRecoverHungerThresholdTooltip = 41,
-    DialogRangeRecoverThirstThreshold = 42,
-    DialogRangeRecoverThirstThresholdTooltip = 43,
-    DialogLabelAdvanced = 44,
-    DialogLabelDoodad = 45,
-    DialogLabelGeneral = 46,
-    DialogLabelIsland = 47,
-    DialogLabelItem = 48,
-    DialogLabelMultiplayer = 49,
-    DialogLabelNPC = 50,
-    DialogLabelPlayer = 51,
-    DialogLabelRecoverThresholds = 52,
-    DialogLabelTerrain = 53,
-    DialogLabelCreature = 54,
-    DialogModeGardener = 55,
-    DialogModeGardenerTooltip = 56,
-    DialogModeHarvester = 57,
-    DialogModeHarvesterTooltip = 58,
-    DialogModeQuest = 59,
-    DialogModeQuestTooltip = 60,
-    DialogModeSurvival = 61,
-    DialogModeSurvivalTooltip = 62,
-    DialogModeTerminator = 63,
-    DialogModeTerminatorTooltip = 64,
-    DialogModeTidyUp = 65,
-    DialogModeTidyUpTooltip = 66
+    DialogButtonDebugLogging = 11,
+    DialogButtonDebugLoggingTooltip = 12,
+    DialogButtonFreeze = 13,
+    DialogButtonFreezeTooltip = 14,
+    DialogButtonEnable = 15,
+    DialogButtonExploreIslands = 16,
+    DialogButtonExploreIslandsTooltip = 17,
+    DialogButtonGoodCitizen = 18,
+    DialogButtonGoodCitizenTooltip = 19,
+    DialogButtonQuantumBurst = 20,
+    DialogButtonQuantumBurstTooltip = 21,
+    DialogButtonStayHealthy = 22,
+    DialogButtonStayHealthyTooltip = 23,
+    DialogButtonDisallowProtectedItems = 24,
+    DialogButtonDisallowProtectedItemsTooltip = 25,
+    DialogButtonAllowProtectedItems = 26,
+    DialogButtonAllowProtectedItemsTooltip = 27,
+    DialogButtonAllowProtectedItemsWithBreakCheck = 28,
+    DialogButtonAllowProtectedItemsWithBreakCheckTooltip = 29,
+    DialogButtonUseOrbsOfInfluence = 30,
+    DialogButtonUseOrbsOfInfluenceTooltip = 31,
+    DialogButtonReadBooks = 32,
+    DialogButtonReadBooksTooltip = 33,
+    DialogButtonSailToCivilization = 34,
+    DialogButtonSailToCivilizationTooltip = 35,
+    DialogButtonTameCreature = 36,
+    DialogButtonTameCreatureTooltip = 37,
+    DialogButtonMoveToBase = 38,
+    DialogButtonMoveToDoodad = 39,
+    DialogButtonMoveToIsland = 40,
+    DialogButtonMoveToNPC = 41,
+    DialogButtonMoveToCreature = 42,
+    DialogButtonMoveToPlayer = 43,
+    DialogButtonMoveToTerrain = 44,
+    DialogRangeLabel = 45,
+    DialogRangeRecoverHealthThreshold = 46,
+    DialogRangeRecoverHealthThresholdTooltip = 47,
+    DialogRangeRecoverStaminaThreshold = 48,
+    DialogRangeRecoverStaminaThresholdTooltip = 49,
+    DialogRangeRecoverHungerThreshold = 50,
+    DialogRangeRecoverHungerThresholdTooltip = 51,
+    DialogRangeRecoverThirstThreshold = 52,
+    DialogRangeRecoverThirstThresholdTooltip = 53,
+    DialogLabelAdvanced = 54,
+    DialogLabelCreature = 55,
+    DialogLabelDeveloper = 56,
+    DialogLabelDoodad = 57,
+    DialogLabelGeneral = 58,
+    DialogLabelIsland = 59,
+    DialogLabelItem = 60,
+    DialogLabelMultiplayer = 61,
+    DialogLabelNPC = 62,
+    DialogLabelPlayer = 63,
+    DialogLabelRecoverThresholds = 64,
+    DialogLabelTerrain = 65,
+    DialogModeGardener = 66,
+    DialogModeGardenerTooltip = 67,
+    DialogModeHarvester = 68,
+    DialogModeHarvesterTooltip = 69,
+    DialogModeQuest = 70,
+    DialogModeQuestTooltip = 71,
+    DialogModeSurvival = 72,
+    DialogModeSurvivalTooltip = 73,
+    DialogModeTerminator = 74,
+    DialogModeTerminatorTooltip = 75,
+    DialogModeTidyUp = 76,
+    DialogModeTidyUpTooltip = 77
 }
-export interface ITarsOptionSection {
+export declare enum TarsOptionSectionType {
+    Checkbox = 0,
+    Choice = 1,
+    Slider = 2
+}
+interface ITarsOptionSection {
+    type: TarsOptionSectionType;
     option: keyof Omit<ITarsOptions, "mode">;
+    isDisabled?: () => boolean;
+}
+export interface ITarsCheckboxOptionSection extends ITarsOptionSection {
+    type: TarsOptionSectionType.Checkbox;
     title: TarsTranslation;
     tooltip: TarsTranslation;
-    isDisabled?: () => boolean;
-    slider?: {
+}
+export interface ITarsChoiceOptionSection extends ITarsOptionSection {
+    type: TarsOptionSectionType.Choice;
+    choices: Array<[TarsTranslation, TarsTranslation, any]>;
+}
+export interface ITarsSliderOptionSection extends ITarsOptionSection {
+    type: TarsOptionSectionType.Slider;
+    title: TarsTranslation;
+    tooltip: TarsTranslation;
+    slider: {
         min: number | ((context: IContext) => number);
         max: number | ((context: IContext) => number);
     };
 }
-export declare const uiConfigurableOptions: Array<ITarsOptionSection | TarsTranslation | undefined>;
+export declare type TarsOptionSection = ITarsCheckboxOptionSection | ITarsChoiceOptionSection | ITarsSliderOptionSection;
+export declare const uiConfigurableOptions: Array<TarsOptionSection | TarsTranslation | undefined>;
+export {};
