@@ -5,6 +5,7 @@ import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
+import Item from "game/item/Item";
 import terrainDescriptions from "game/tile/Terrains";
 import TileEvent from "game/tile/TileEvent";
 import TileHelpers from "utilities/game/TileHelpers";
@@ -24,6 +25,7 @@ import Rest from "../other/Rest";
 export interface IMoveToTargetOptions {
 	range: number;
 	disableStaminaCheck: boolean;
+	disableTracking: boolean;
 	skipZCheck: boolean;
 	allowBoat: boolean;
 }
@@ -31,6 +33,9 @@ export interface IMoveToTargetOptions {
 export default class MoveToTarget extends Objective {
 
 	private trackedCreature: Creature | undefined;
+	private trackedCorpse: Corpse | undefined;
+	private trackedItem: Item | undefined;
+
 	private trackedPosition: IVector3 | undefined;
 
 	constructor(
@@ -38,6 +43,16 @@ export default class MoveToTarget extends Objective {
 		protected readonly moveAdjacentToTarget: boolean,
 		protected readonly options?: Partial<IMoveToTargetOptions>) {
 		super();
+
+		if (!options?.disableTracking) {
+			if (target instanceof Creature) {
+				this.trackedCreature = target;
+				this.trackedPosition = target.getPoint();
+
+			} else if (target instanceof Corpse) {
+				this.trackedCorpse = target;
+			}
+		}
 	}
 
 	public getIdentifier(): string {
@@ -83,7 +98,18 @@ export default class MoveToTarget extends Objective {
 		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget);
 
 		if (context.calculatingDifficulty) {
-			context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
+			if (movementPath.difficulty !== ObjectiveResult.Impossible) {
+				if (movementPath.path && (this.trackedCorpse || this.trackedItem)) {
+					const decay = this.trackedCorpse?.decay ?? this.trackedItem?.decay;
+					if (decay !== undefined && decay <= movementPath.path?.length) {
+						// assuming manual turn mode, the corpse / item will decay by the time we arrive
+						return ObjectiveResult.Impossible;
+					}
+				}
+
+				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
+			}
+
 			return movementPath.difficulty;
 		}
 
@@ -186,13 +212,26 @@ export default class MoveToTarget extends Objective {
 		}
 	}
 
-	public trackCreature(creature: Creature | undefined) {
-		this.trackedCreature = creature;
-		this.trackedPosition = creature?.getPoint();
+	/**
+	 * Causes an interrupt if the item decays before we arrive.
+	 */
+	public trackItem(item: Item | undefined) {
+		this.trackedItem = item;
 
 		return this;
 	}
 
+	public onItemRemoved(context: Context, item: Item) {
+		return this.trackedItem === item;
+	}
+
+	public onCorpseRemoved(context: Context, corpse: Corpse) {
+		return this.trackedCorpse === corpse;
+	}
+
+	/**
+	 * Called when the context human moves
+	 */
 	public override async onMove(context: Context) {
 		if (this.trackedCreature && this.trackedPosition) {
 			if (!this.trackedCreature.isValid()) {

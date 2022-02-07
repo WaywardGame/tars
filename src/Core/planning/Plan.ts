@@ -327,182 +327,182 @@ export default class Plan implements IPlan {
 	}
 
 	// @ts-ignore
-	private createOptimizedExecutionTree(objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
-		let id = 0;
+	// private createOptimizedExecutionTree(objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
+	// 	let id = 0;
 
-		const tree: IExecutionTree = {
-			id: id++,
-			depth: 0,
-			objective: objective,
-			hashCode: objective.getHashCode(),
-			difficulty: 0,
-			logs: [],
-			children: [],
-		};
+	// 	const tree: IExecutionTree = {
+	// 		id: id++,
+	// 		depth: 0,
+	// 		objective: objective,
+	// 		hashCode: objective.getHashCode(),
+	// 		difficulty: 0,
+	// 		logs: [],
+	// 		children: [],
+	// 	};
 
-		const objectiveGroups = new Map<string, IExecutionTree>();
+	// 	const objectiveGroups = new Map<string, IExecutionTree>();
 
-		const depthMap = new Map<number, IExecutionTree>();
-		depthMap.set(1, tree);
+	// 	const depthMap = new Map<number, IExecutionTree>();
+	// 	depthMap.set(1, tree);
 
-		const reserveItemObjectives: Map<string, Item[]> = new Map();
+	// 	const reserveItemObjectives: Map<string, Item[]> = new Map();
 
-		for (const { depth, objective, difficulty, logs } of objectives) {
-			const hashCode = objective.getHashCode();
+	// 	for (const { depth, objective, difficulty, logs } of objectives) {
+	// 		const hashCode = objective.getHashCode();
 
-			if (objective instanceof ReserveItems) {
-				if (!reserveItemObjectives.has(hashCode)) {
-					reserveItemObjectives.set(hashCode, objective.items);
-				}
+	// 		if (objective instanceof ReserveItems) {
+	// 			if (!reserveItemObjectives.has(hashCode)) {
+	// 				reserveItemObjectives.set(hashCode, objective.items);
+	// 			}
 
-				// leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
-				continue;
-			}
+	// 			// leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
+	// 			continue;
+	// 		}
 
-			let parent = depthMap.get(depth - 1);
-			if (!parent) {
-				this.log.error(`Root objective: ${objective}`);
-				this.log.error("Objectives", objectives);
+	// 		let parent = depthMap.get(depth - 1);
+	// 		if (!parent) {
+	// 			this.log.error(`Root objective: ${objective}`);
+	// 			this.log.error("Objectives", objectives);
 
-				throw new Error(`Invalid parent tree ${depth - 1}. Objective: ${hashCode}`);
-			}
+	// 			throw new Error(`Invalid parent tree ${depth - 1}. Objective: ${hashCode}`);
+	// 		}
 
-			if (objective.canGroupTogether()) {
-				// group objectives with the same hash codes together under the same parent
-				const objectiveGroupId = `${depth},${hashCode}`;
-				const objectiveGroupParent = objectiveGroups.get(objectiveGroupId);
-				if (objectiveGroupParent) {
-					// we are changing the parent for this objective
-					// flag the original parent as being changed
-					parent.groupedAway = true;
-					parent = objectiveGroupParent;
+	// 		if (objective.canGroupTogether()) {
+	// 			// group objectives with the same hash codes together under the same parent
+	// 			const objectiveGroupId = `${depth},${hashCode}`;
+	// 			const objectiveGroupParent = objectiveGroups.get(objectiveGroupId);
+	// 			if (objectiveGroupParent) {
+	// 				// we are changing the parent for this objective
+	// 				// flag the original parent as being changed
+	// 				parent.groupedAway = true;
+	// 				parent = objectiveGroupParent;
 
-				} else {
-					objectiveGroups.set(objectiveGroupId, parent);
-				}
-			}
+	// 			} else {
+	// 				objectiveGroups.set(objectiveGroupId, parent);
+	// 			}
+	// 		}
 
-			const childTree: IExecutionTree = {
-				id: id++,
-				depth,
-				objective,
-				hashCode,
-				difficulty,
-				logs,
-				parent,
-				children: [],
-			};
+	// 		const childTree: IExecutionTree = {
+	// 			id: id++,
+	// 			depth,
+	// 			objective,
+	// 			hashCode,
+	// 			difficulty,
+	// 			logs,
+	// 			parent,
+	// 			children: [],
+	// 		};
 
-			parent.children.push(childTree);
+	// 		parent.children.push(childTree);
 
-			depthMap.set(depth, childTree);
-		}
+	// 		depthMap.set(depth, childTree);
+	// 	}
 
-		/*
-		let acquireItemGroup: IExecutionTree | undefined;
-		let acquireItemGroupIndex: number | undefined;
-		let checked: Set<number> = new Set();
+	// 	/*
+	// 	let acquireItemGroup: IExecutionTree | undefined;
+	// 	let acquireItemGroupIndex: number | undefined;
+	// 	let checked: Set<number> = new Set();
 
-		// console.log(this.getTreeString(tree));
+	// 	// console.log(this.getTreeString(tree));
 
-		const walkAndReorganizeTree = (index: number, tree: IExecutionTree) => {
-			if ((tree.objective as any).calculatePriority) {
-				const objectivePriority: any = {
-					priority: 0,
-					numberOfObjectives: 0,
-					numberOfAcquire: 0,
-					numberOfGather: 0,
-					nubmerofGatherWithoutChest: 0,
-				};
+	// 	const walkAndReorganizeTree = (index: number, tree: IExecutionTree) => {
+	// 		if ((tree.objective as any).calculatePriority) {
+	// 			const objectivePriority: any = {
+	// 				priority: 0,
+	// 				numberOfObjectives: 0,
+	// 				numberOfAcquire: 0,
+	// 				numberOfGather: 0,
+	// 				nubmerofGatherWithoutChest: 0,
+	// 			};
 
-				(tree.objective as any).calculatePriority(objectivePriority, tree, true);
-				// console.log("check", tree, objectivePriority.numberOfObjectives, objectivePriority.numberOfGather, objectivePriority.numberOfAcquire);
-				if (objectivePriority.numberOfObjectives <= objectivePriority.numberOfAcquire + objectivePriority.numberOfGather) {
-					if (acquireItemGroup === undefined) {
-						acquireItemGroup = tree.parent;
-						acquireItemGroupIndex = index;
-						// console.log("setting parent", acquireItemGroup, acquireItemGroupIndex);
+	// 			(tree.objective as any).calculatePriority(objectivePriority, tree, true);
+	// 			// console.log("check", tree, objectivePriority.numberOfObjectives, objectivePriority.numberOfGather, objectivePriority.numberOfAcquire);
+	// 			if (objectivePriority.numberOfObjectives <= objectivePriority.numberOfAcquire + objectivePriority.numberOfGather) {
+	// 				if (acquireItemGroup === undefined) {
+	// 					acquireItemGroup = tree.parent;
+	// 					acquireItemGroupIndex = index;
+	// 					// console.log("setting parent", acquireItemGroup, acquireItemGroupIndex);
 
-					} else {
-						// console.log("moving to new parent", tree);
-						// move to the acquire item group
-						if (tree.parent) {
-							// remove from current parent
-							tree.parent.children.splice(index, 1);
-						}
+	// 				} else {
+	// 					// console.log("moving to new parent", tree);
+	// 					// move to the acquire item group
+	// 					if (tree.parent) {
+	// 						// remove from current parent
+	// 						tree.parent.children.splice(index, 1);
+	// 					}
 
-						// add to new parent
-						acquireItemGroup.children.splice(acquireItemGroupIndex! + 1, 0, tree);
-					}
-				}
-			}
+	// 					// add to new parent
+	// 					acquireItemGroup.children.splice(acquireItemGroupIndex! + 1, 0, tree);
+	// 				}
+	// 			}
+	// 		}
 
-			// tree.children = tree.children.sort((treeA, treeB) => {
-			// 	if (//treeA.objective.constructor === treeB.objective.constructor &&
-			// 		// treeA.objective.getName() === treeB.objective.getName() &&
-			// 		treeA.objective.sort && treeB.objective.sort) {
-			// 		return treeA.objective.sort(this.context, treeA, treeB);
-			// 	}
+	// 		// tree.children = tree.children.sort((treeA, treeB) => {
+	// 		// 	if (//treeA.objective.constructor === treeB.objective.constructor &&
+	// 		// 		// treeA.objective.getName() === treeB.objective.getName() &&
+	// 		// 		treeA.objective.sort && treeB.objective.sort) {
+	// 		// 		return treeA.objective.sort(this.context, treeA, treeB);
+	// 		// 	}
 
-			// 	return 0;
-			// });
+	// 		// 	return 0;
+	// 		// });
 
-			for (let i = 0; i < tree.children.length; i++) {
-				const child = tree.children[i];
-				if (!checked.has(child.id)) {
-					checked.add(child.id);
-					walkAndReorganizeTree(i, child);
-				}
-			}
-		};
+	// 		for (let i = 0; i < tree.children.length; i++) {
+	// 			const child = tree.children[i];
+	// 			if (!checked.has(child.id)) {
+	// 				checked.add(child.id);
+	// 				walkAndReorganizeTree(i, child);
+	// 			}
+	// 		}
+	// 	};
 
-		// walkAndReorganizeTree(-1, tree);
-		*/
+	// 	// walkAndReorganizeTree(-1, tree);
+	// 	*/
 
-		const walkAndSortTree = (tree: IExecutionTree) => {
-			tree.children = tree.children.sort((treeA, treeB) => {
-				// if (//treeA.objective.constructor === treeB.objective.constructor &&
-				// 	// treeA.objective.getName() === treeB.objective.getName() &&
-				// 	treeA.objective.sort && treeB.objective.sort) {
-				// 	return treeA.objective.sort(this.context, treeA, treeB);
-				// }
+	// 	const walkAndSortTree = (tree: IExecutionTree) => {
+	// 		tree.children = tree.children.sort((treeA, treeB) => {
+	// 			// if (//treeA.objective.constructor === treeB.objective.constructor &&
+	// 			// 	// treeA.objective.getName() === treeB.objective.getName() &&
+	// 			// 	treeA.objective.sort && treeB.objective.sort) {
+	// 			// 	return treeA.objective.sort(this.context, treeA, treeB);
+	// 			// }
 
-				return 0;
-			});
+	// 			return 0;
+	// 		});
 
-			for (const child of tree.children) {
-				walkAndSortTree(child);
-			}
-		};
+	// 		for (const child of tree.children) {
+	// 			walkAndSortTree(child);
+	// 		}
+	// 	};
 
-		walkAndSortTree(tree);
+	// 	walkAndSortTree(tree);
 
-		// move all reserve item objectives to the top of the tree so they are executed first
-		// this will prevent interrupt objectives from messing with these items
-		if (reserveItemObjectives.size > 0) {
-			const reserveItemObjective = new ReserveItems();
-			reserveItemObjective.items = Array.from(reserveItemObjectives)
-				.sort(([a], [b]) => a.localeCompare(b, navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
-				.map(a => a[1])
-				.flat();
+	// 	// move all reserve item objectives to the top of the tree so they are executed first
+	// 	// this will prevent interrupt objectives from messing with these items
+	// 	if (reserveItemObjectives.size > 0) {
+	// 		const reserveItemObjective = new ReserveItems();
+	// 		reserveItemObjective.items = Array.from(reserveItemObjectives)
+	// 			.sort(([a], [b]) => a.localeCompare(b, navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
+	// 			.map(a => a[1])
+	// 			.flat();
 
-			const reserveItemObjectiveTree: IExecutionTree = {
-				id: id++,
-				depth: 1,
-				objective: reserveItemObjective,
-				hashCode: reserveItemObjective.getHashCode(),
-				difficulty: 0,
-				logs: [],
-				children: [],
-			};
+	// 		const reserveItemObjectiveTree: IExecutionTree = {
+	// 			id: id++,
+	// 			depth: 1,
+	// 			objective: reserveItemObjective,
+	// 			hashCode: reserveItemObjective.getHashCode(),
+	// 			difficulty: 0,
+	// 			logs: [],
+	// 			children: [],
+	// 		};
 
-			const children = [reserveItemObjectiveTree].concat(tree.children);
+	// 		const children = [reserveItemObjectiveTree].concat(tree.children);
 
-			tree.children = children;
-		}
+	// 		tree.children = children;
+	// 	}
 
-		return tree;
-	}
+	// 	return tree;
+	// }
 
 	private createOptimizedExecutionTreeV2(context: Context, objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
 		let id = 0;
@@ -523,16 +523,17 @@ export default class Plan implements IPlan {
 		depthMap.set(1, rootTree);
 
 		const gatherObjectiveTrees: IExecutionTree[] = [];
-		const reserveItemObjectives: Map<string, Item[]> = new Map();
-		const keepInInventoryReserveItemObjectives: Map<string, Item[]> = new Map();
+		const reserveItemObjectives: Map<Item, number> = new Map();
+		const keepInInventoryReserveItemObjectives: Map<Item, number> = new Map();
 
 		for (const { depth, objective, difficulty, logs } of objectives) {
 			const hashCode = objective.getHashCode();
 
 			if (objective instanceof ReserveItems) {
 				const map = objective.shouldKeepInInventory() ? keepInInventoryReserveItemObjectives : reserveItemObjectives;
-				if (!map.has(hashCode)) {
-					map.set(hashCode, objective.items);
+
+				for (const item of objective.items) {
+					map.set(item, (map.get(item) ?? 0) + 1);
 				}
 
 				// leave the reserve items objectives where they are just so we can see what's causing them to be reserved when viewing the tree
@@ -702,8 +703,8 @@ export default class Plan implements IPlan {
 		if (reserveItemObjectives.size > 0) {
 			const reserveItemObjective = new ReserveItems();
 			reserveItemObjective.items = Array.from(reserveItemObjectives)
-				.sort(([a], [b]) => a.localeCompare(b, navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
-				.map(a => a[1])
+				.sort(([a], [b]) => a.toString().localeCompare(b.toString(), navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
+				.map(a => a[0])
 				.flat();
 
 			objectivesToInsertAtFront.push({
@@ -720,8 +721,8 @@ export default class Plan implements IPlan {
 		if (keepInInventoryReserveItemObjectives.size > 0) {
 			const reserveItemObjective = new ReserveItems().keepInInventory();
 			reserveItemObjective.items = Array.from(keepInInventoryReserveItemObjectives)
-				.sort(([a], [b]) => a.localeCompare(b, navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
-				.map(a => a[1])
+				.sort(([a], [b]) => a.toString().localeCompare(b.toString(), navigator?.languages?.[0] ?? navigator.language, { numeric: true, ignorePunctuation: true }))
+				.map(a => a[0])
 				.flat();
 
 			objectivesToInsertAtFront.push({

@@ -95,7 +95,7 @@ export class BaseUtilities {
 	}
 
 	public isOpenArea(context: Context, point: IVector3, tile: ITile, radius: number = 1, allowWater: boolean = false, requireShallowWater: boolean = false): boolean {
-		if (!context.utilities.tile.isOpenTile(context, point, tile, allowWater, requireShallowWater) || context.utilities.tile.hasCorpses(tile)) {
+		if (!context.utilities.tile.isOpenTile(context, point, tile, { disallowWater: !allowWater, requireNoItemsOnTile: true, requireShallowWater }) || context.utilities.tile.hasCorpses(tile)) {
 			return false;
 		}
 
@@ -122,7 +122,7 @@ export class BaseUtilities {
 					}
 
 					const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
-					if (!context.utilities.tile.isOpenTile(context, nearbyPoint, nearbyTile, requireShallowWater)) {
+					if (!context.utilities.tile.isOpenTile(context, nearbyPoint, nearbyTile, { disallowWater: !requireShallowWater, requireNoItemsOnTile: true })) {
 						return false;
 					}
 				}

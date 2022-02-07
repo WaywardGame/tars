@@ -77,6 +77,10 @@ import { DoodadUtilities } from "../utilities/Doodad";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Human from "game/entity/Human";
 import NPC from "game/entity/npc/NPC";
+import ItemManager from "game/item/ItemManager";
+import MoveToTarget from "../objectives/core/MoveToTarget";
+import CorpseManager from "game/entity/creature/corpse/CorpseManager";
+import Corpse from "game/entity/creature/corpse/Corpse";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -237,13 +241,21 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     @EventHandler(EventBus.LocalPlayer, "die")
     public onPlayerDeath() {
-        this.fullInterrupt();
+        if (this.human !== localPlayer) {
+            return;
+        }
+
+        this.fullInterrupt("Human died");
         this.utilities.movement.resetMovementOverlays();
     }
 
     @EventHandler(EventBus.LocalPlayer, "respawn")
     public onPlayerRespawn() {
-        this.fullInterrupt();
+        if (this.human !== localPlayer) {
+            return;
+        }
+
+        this.fullInterrupt("Human respawned");
         this.utilities.movement.resetMovementOverlays();
 
         if (this.navigationSystemState === NavigationSystemState.Initialized) {
@@ -263,14 +275,48 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.processQuantumBurst();
 
-        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
-        if (objective !== undefined && !Array.isArray(objective[0])) {
-            const result = await objective[0].onMove(this.context);
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined) {
+            const result = await objective.onMove(this.context);
             if (result === true) {
-                this.fullInterrupt();
+                this.fullInterrupt("Target moved");
 
             } else if (result) {
-                this.interrupt(result);
+                this.interrupt("Target moved", result);
+            }
+        }
+    }
+
+    @EventHandler(EventBus.ItemManager, "remove")
+    public onItemRemove(_: ItemManager, item: Item) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined && objective instanceof MoveToTarget) {
+            const result = objective.onItemRemoved(this.context, item);
+            if (result === true) {
+                this.fullInterrupt(`${item} was removed`);
+            }
+        }
+
+        // if (this.context.isSoftReservedItem(item)) {
+        //     // we have a problem if the is still needed in more of the pipeline..
+        // }
+    }
+
+    @EventHandler(EventBus.CorpseManager, "remove")
+    public onCorpseRemove(_: CorpseManager, corpse: Corpse) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined && objective instanceof MoveToTarget) {
+            const result = objective.onCorpseRemoved(this.context, corpse);
+            if (result === true) {
+                this.fullInterrupt(`${corpse} was removed`);
             }
         }
     }
@@ -300,14 +346,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.processQuantumBurst();
 
-        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
-        if (objective !== undefined && !Array.isArray(objective[0])) {
-            const result = await objective[0].onMove(this.context);
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined) {
+            const result = await objective.onMove(this.context);
             if (result === true) {
-                this.fullInterrupt();
+                this.fullInterrupt("Target moved");
 
             } else if (result) {
-                this.interrupt(result);
+                this.interrupt("Target moved", result);
             }
         }
     }
@@ -399,7 +445,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext);
         if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
-            this.interrupt(...organizeInventoryInterrupts);
+            this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
         }
     }
 
@@ -410,8 +456,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad && nextTile.doodad.blocksMove()) || human.island.isPlayerAtTile(nextTile, false, true)) {
-            log.info("Interrupting due to blocked movement");
-            this.interrupt();
+            this.interrupt("Interrupting due to blocked movement");
         }
     }
 
@@ -428,9 +473,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     this.statThresholdExceeded[stat.type] = true;
 
                     if (this.isRunning()) {
-                        log.info(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
-
-                        this.interrupt();
+                        this.interrupt(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
                     }
                 }
 
@@ -456,9 +499,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     if (this.isRunning()) {
                         // players weight status changed
                         // reset objectives so we'll handle this immediately
-                        log.info(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
-
-                        this.interrupt();
+                        this.interrupt(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
                     }
                 }
 
@@ -590,7 +631,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             }
 
             if (shouldInterrupt) {
-                this.fullInterrupt();
+                this.fullInterrupt("Option changed");
             }
         }
     }
@@ -820,8 +861,17 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.movement.clearCache();
     }
 
-    private interrupt(...interruptObjectives: IObjective[]) {
-        log.info("Interrupt", Plan.getPipelineString(this.context, interruptObjectives));
+    private getCurrentObjective(): IObjective | undefined {
+        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
+        if (objective !== undefined && !Array.isArray(objective[0])) {
+            return objective[0];
+        }
+
+        return undefined;
+    }
+
+    private interrupt(reason: string, ...interruptObjectives: IObjective[]) {
+        log.info(`Interrupt: ${reason}`, Plan.getPipelineString(this.context, interruptObjectives));
 
         executor.interrupt();
 
@@ -835,8 +885,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.human.walkAlongPath(undefined);
     }
 
-    private fullInterrupt() {
-        this.interrupt();
+    private fullInterrupt(reason: string) {
+        this.interrupt(reason);
 
         this.interruptObjectivePipeline = undefined;
         this.interruptIds = undefined;

@@ -6,6 +6,7 @@ import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
 import type Island from "game/island/Island";
+import type Item from "game/item/Item";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import type { IPrompt } from "game/meta/prompt/Prompts";
 import type Prompts from "game/meta/prompt/Prompts";
@@ -19,6 +20,9 @@ import type { ITarsMode } from "./mode/IMode";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Human from "game/entity/Human";
 import NPC from "game/entity/npc/NPC";
+import ItemManager from "game/item/ItemManager";
+import CorpseManager from "game/entity/creature/corpse/CorpseManager";
+import Corpse from "game/entity/creature/corpse/Corpse";
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private readonly human;
     private readonly saveData;
@@ -53,6 +57,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     onPlayerDeath(): void;
     onPlayerRespawn(): void;
     processMovement(player: Player): Promise<void>;
+    onItemRemove(_: ItemManager, item: Item): void;
+    onCorpseRemove(_: CorpseManager, corpse: Corpse): void;
     onRestEnd(player: Player): void;
     onPostMove(npc: NPC, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile): Promise<void>;
     onMoveComplete(player: Player): void;
@@ -80,6 +86,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private disposeMode;
     private reset;
     private clearCaches;
+    private getCurrentObjective;
     private interrupt;
     private fullInterrupt;
     private tick;

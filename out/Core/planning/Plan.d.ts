@@ -16,7 +16,6 @@ export default class Plan implements IPlan {
     execute(preExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined, postExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined): Promise<ExecuteResult>;
     private flattenTree;
     private createExecutionTree;
-    private createOptimizedExecutionTree;
     private createOptimizedExecutionTreeV2;
     private getObjectiveResults;
 }

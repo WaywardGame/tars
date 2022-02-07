@@ -58,7 +58,7 @@ export default class GatherFromCreature extends Objective {
 					objectives.push(new AcquireItemForAction(ActionType.Butcher));
 				}
 
-				objectives.push((new MoveToTarget(creature, false)).trackCreature(creature));
+				objectives.push((new MoveToTarget(creature, false)));
 
 				objectives.push(new Lambda(async context => {
 					const corpses = context.human.getFacingTile().corpses;

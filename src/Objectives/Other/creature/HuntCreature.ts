@@ -44,7 +44,7 @@ export default class HuntCreature extends Objective {
         }
 
         return [
-            new MoveToTarget(this.creature, true).trackCreature(this.track ? this.creature : undefined),
+            new MoveToTarget(this.creature, true, this.track ? undefined : { disableTracking: true }),
             new Lambda(async context => {
                 if (!this.creature.isValid()) {
                     return ObjectiveResult.Complete;

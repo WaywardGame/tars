@@ -8,6 +8,12 @@ import type { IVector3 } from "utilities/math/IVector";
 import Context from "../core/context/Context";
 import type { ITileLocation } from "../core/ITars";
 
+export interface IOpenTileOptions {
+	requireNoItemsOnTile: boolean;
+	disallowWater: boolean;
+	requireShallowWater: boolean;
+}
+
 export class TileUtilities {
 
 	private readonly cache: Map<string, ITileLocation[]> = new Map();
@@ -47,9 +53,14 @@ export class TileUtilities {
 		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
-	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true, requireShallowWater: boolean = false): boolean {
-		const container = tile as IContainer;
-		if (container.containedItems && container.containedItems.length > 0) {
+	public isOpenTile(context: Context, point: IVector3, tile: ITile, options?: Partial<IOpenTileOptions>): boolean {
+		if (options?.requireNoItemsOnTile) {
+			const container = tile as IContainer;
+			if (container.containedItems && container.containedItems.length > 0) {
+				return false;
+			}
+
+		} else if (context.human.island.isTileFull(tile)) {
 			return false;
 		}
 
@@ -68,12 +79,12 @@ export class TileUtilities {
 				return false;
 			}
 
-			if (requireShallowWater) {
+			if (options?.requireShallowWater) {
 				if (!terrainInfo.shallowWater) {
 					return false;
 				}
 
-			} else if (!allowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
+			} else if (options?.disallowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
 				return false;
 			}
 		}

@@ -61,7 +61,7 @@ export default class TameCreature extends Objective {
 
         objectives.push(new SetContextData(ContextDataType.TamingCreature, this.creature));
 
-        objectives.push(new MoveToTarget(this.creature, true).trackCreature(this.creature));
+        objectives.push(new MoveToTarget(this.creature, true));
 
         objectives.push(new ExecuteAction(ActionType.Offer, (context, action) => {
             const item = context.getData(ContextDataType.Item1);

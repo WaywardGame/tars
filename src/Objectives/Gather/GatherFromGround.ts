@@ -48,7 +48,7 @@ export default class GatherFromGround extends Objective {
 		if (item) {
 			return [
 				new ReserveItems(item).passAcquireData(this),
-				new MoveToTarget(item.containedWithin as ITileContainer, false), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
+				new MoveToTarget(item.containedWithin as ITileContainer, false).trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
 				new MoveItem(item, context.human.inventory, point),
 			];
@@ -59,7 +59,7 @@ export default class GatherFromGround extends Objective {
 				if (item && this.itemMatches(context, item)) {
 					return [
 						new ReserveItems(item).passAcquireData(this),
-						new MoveToTarget(item.containedWithin as ITileContainer, true),
+						new MoveToTarget(item.containedWithin as ITileContainer, true).trackItem(item),
 						new SetContextData(this.contextDataKey, item), // todo: this might be wrong
 						new Lambda(async context => {
 							const objectives: IObjective[] = [];
