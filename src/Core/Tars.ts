@@ -600,7 +600,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         shouldInterrupt = true;
                         break;
 
-                    case "exploreIslands":
+                    case "survivalExploreIslands":
                         this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
                         break;
 

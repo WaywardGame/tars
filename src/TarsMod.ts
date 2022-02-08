@@ -36,6 +36,7 @@ import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITar
 import planner from "./core/planning/Planner";
 import { TarsOverlay } from "./ui/TarsOverlay";
 import TarsNPC from "./npc/TarsNPC";
+import { TreasureHunterType } from "./modes/TreasureHunter";
 
 export default class TarsMod extends Mod {
 
@@ -341,17 +342,24 @@ export default class TarsMod extends Mod {
 
 		initial.options = {
 			mode: TarsMode.Survival,
-			exploreIslands: true,
-			useOrbsOfInfluence: true,
-			readBooks: true,
+
 			useProtectedItems: TarsUseProtectedItems.No,
 			goodCitizen: true,
 			stayHealthy: true,
+
 			recoverThresholdHealth: 30,
 			recoverThresholdStamina: 20,
 			recoverThresholdHunger: 8,
 			recoverThresholdThirst: 10,
 			recoverThresholdThirstFromMax: -10,
+
+			survivalExploreIslands: true,
+			survivalUseOrbsOfInfluence: true,
+			survivalReadBooks: true,
+
+			treasureHunterPrecognition: false,
+			treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
+
 			quantumBurst: false,
 			debugLogging: false,
 			freeze: false,

@@ -5,6 +5,7 @@ import type Translation from "language/Translation";
 import type Mod from "mod/Mod";
 import type { IContext } from "./core/context/IContext";
 import { ITarsOptions, TarsUseProtectedItems } from "./core/ITars";
+import { TreasureHunterType } from "./modes/TreasureHunter";
 import type TarsMod from "./TarsMod";
 
 export const TARS_ID = "TARS";
@@ -70,6 +71,69 @@ export enum TarsUiSaveDataKey {
     TameCreatureDropdown,
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export enum TarsTranslation {
     Name,
 
@@ -80,39 +144,48 @@ export enum TarsTranslation {
     DialogPanelGeneral,
     DialogPanelTasks,
     DialogPanelMoveTo,
-    DialogPanelOptions,
+    DialogPanelGlobalOptions,
+    DialogPanelModeOptions,
 
+    DialogButtonAllowProtectedItems,
+    DialogButtonAllowProtectedItemsTooltip,
+    DialogButtonAllowProtectedItemsWithBreakCheck,
+    DialogButtonAllowProtectedItemsWithBreakCheckTooltip,
     DialogButtonAquireItem,
     DialogButtonAquireItemTooltip,
     DialogButtonBuildDoodad,
     DialogButtonBuildDoodadTooltip,
     DialogButtonDebugLogging,
     DialogButtonDebugLoggingTooltip,
-    DialogButtonFreeze,
-    DialogButtonFreezeTooltip,
+    DialogButtonDisallowProtectedItems,
+    DialogButtonDisallowProtectedItemsTooltip,
+    DialogButtonDiscoverAndUnlockTreasure,
+    DialogButtonDiscoverAndUnlockTreasureTooltip,
     DialogButtonEnable,
     DialogButtonExploreIslands,
     DialogButtonExploreIslandsTooltip,
+    DialogButtonFreeze,
+    DialogButtonFreezeTooltip,
     DialogButtonGoodCitizen,
     DialogButtonGoodCitizenTooltip,
+    DialogButtonObtainTreasure,
+    DialogButtonObtainTreasureTooltip,
+    DialogButtonOnlyDiscoverTreasure,
+    DialogButtonOnlyDiscoverTreasureTooltip,
+    DialogButtonPrecognition,
+    DialogButtonPrecognitionTooltip,
     DialogButtonQuantumBurst,
     DialogButtonQuantumBurstTooltip,
-    DialogButtonStayHealthy,
-    DialogButtonStayHealthyTooltip,
-    DialogButtonDisallowProtectedItems,
-    DialogButtonDisallowProtectedItemsTooltip,
-    DialogButtonAllowProtectedItems,
-    DialogButtonAllowProtectedItemsTooltip,
-    DialogButtonAllowProtectedItemsWithBreakCheck,
-    DialogButtonAllowProtectedItemsWithBreakCheckTooltip,
-    DialogButtonUseOrbsOfInfluence,
-    DialogButtonUseOrbsOfInfluenceTooltip,
     DialogButtonReadBooks,
     DialogButtonReadBooksTooltip,
     DialogButtonSailToCivilization,
     DialogButtonSailToCivilizationTooltip,
+    DialogButtonStayHealthy,
+    DialogButtonStayHealthyTooltip,
     DialogButtonTameCreature,
     DialogButtonTameCreatureTooltip,
+    DialogButtonUseOrbsOfInfluence,
+    DialogButtonUseOrbsOfInfluenceTooltip,
 
     DialogButtonMoveToBase,
     DialogButtonMoveToDoodad,
@@ -139,6 +212,7 @@ export enum TarsTranslation {
     DialogLabelGeneral,
     DialogLabelIsland,
     DialogLabelItem,
+    DialogLabelItemProtection,
     DialogLabelMultiplayer,
     DialogLabelNPC,
     DialogLabelPlayer,
@@ -157,6 +231,8 @@ export enum TarsTranslation {
     DialogModeTerminatorTooltip,
     DialogModeTidyUp,
     DialogModeTidyUpTooltip,
+    DialogModeTreasureHunter,
+    DialogModeTreasureHunterTooltip,
 }
 
 export enum TarsOptionSectionType {
@@ -195,32 +271,15 @@ export interface ITarsSliderOptionSection extends ITarsOptionSection {
 
 export type TarsOptionSection = ITarsCheckboxOptionSection | ITarsChoiceOptionSection | ITarsSliderOptionSection;
 
-export const uiConfigurableOptions: Array<TarsOptionSection | TarsTranslation | undefined> = [
+export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslation | undefined> = [
     TarsTranslation.DialogLabelGeneral,
-    {
-        option: "exploreIslands",
-        type: TarsOptionSectionType.Checkbox,
-        title: TarsTranslation.DialogButtonExploreIslands,
-        tooltip: TarsTranslation.DialogButtonExploreIslandsTooltip,
-    },
     {
         option: "stayHealthy",
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonStayHealthy,
         tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
     },
-    {
-        option: "useOrbsOfInfluence",
-        type: TarsOptionSectionType.Checkbox,
-        title: TarsTranslation.DialogButtonUseOrbsOfInfluence,
-        tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
-    },
-    {
-        option: "readBooks",
-        type: TarsOptionSectionType.Checkbox,
-        title: TarsTranslation.DialogButtonReadBooks,
-        tooltip: TarsTranslation.DialogButtonReadBooksTooltip,
-    },
+    TarsTranslation.DialogLabelItemProtection,
     {
         option: "useProtectedItems",
         type: TarsOptionSectionType.Choice,
@@ -297,5 +356,44 @@ export const uiConfigurableOptions: Array<TarsOptionSection | TarsTranslation | 
             min: 0,
             max: (context) => context.human.stat.get<IStatMax>(Stat.Thirst).max,
         }
+    },
+];
+
+export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslation | undefined> = [
+    TarsTranslation.DialogModeSurvival,
+    {
+        option: "survivalExploreIslands",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonExploreIslands,
+        tooltip: TarsTranslation.DialogButtonExploreIslandsTooltip,
+    },
+
+    {
+        option: "survivalUseOrbsOfInfluence",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonUseOrbsOfInfluence,
+        tooltip: TarsTranslation.DialogButtonUseOrbsOfInfluenceTooltip,
+    },
+    {
+        option: "survivalReadBooks",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonReadBooks,
+        tooltip: TarsTranslation.DialogButtonReadBooksTooltip,
+    },
+    TarsTranslation.DialogModeTreasureHunter,
+    {
+        option: "treasureHunterPrecognition",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonPrecognition,
+        tooltip: TarsTranslation.DialogButtonPrecognitionTooltip,
+    },
+    {
+        option: "treasureHunterType",
+        type: TarsOptionSectionType.Choice,
+        choices: [
+            [TarsTranslation.DialogButtonOnlyDiscoverTreasure, TarsTranslation.DialogButtonOnlyDiscoverTreasureTooltip, TreasureHunterType.OnlyDiscoverTreasure],
+            [TarsTranslation.DialogButtonDiscoverAndUnlockTreasure, TarsTranslation.DialogButtonDiscoverAndUnlockTreasureTooltip, TreasureHunterType.DiscoverAndUnlockTreasure],
+            [TarsTranslation.DialogButtonObtainTreasure, TarsTranslation.DialogButtonObtainTreasureTooltip, TreasureHunterType.ObtainTreasure],
+        ],
     },
 ];

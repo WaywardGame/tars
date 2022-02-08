@@ -210,7 +210,7 @@ export class SurvivalMode implements ITarsMode {
 			Extra objectives
 		*/
 
-		if (context.options.useOrbsOfInfluence) {
+		if (context.options.survivalUseOrbsOfInfluence) {
 			objectives.push(new AcquireUseOrbOfInfluence());
 		}
 
@@ -391,7 +391,7 @@ export class SurvivalMode implements ITarsMode {
 			End game objectives
 		*/
 
-		if (context.options.exploreIslands && !multiplayer.isConnected()) {
+		if (context.options.survivalExploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
 			const needWaterItems = context.inventory.waterContainer === undefined || context.inventory.waterContainer.filter(item => context.utilities.item.isSafeToDrinkItem(item)).length < 2;
 			const needFoodItems = context.inventory.food === undefined || context.inventory.food.length < 2;

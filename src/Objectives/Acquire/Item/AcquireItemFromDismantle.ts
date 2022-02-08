@@ -64,7 +64,6 @@ export default class AcquireItemFromDismantle extends Objective {
 			}
 
 			const dismantleItem = context.utilities.item.getItemInInventory(context, itemType);
-			const hasRequirements = description.dismantle.required === undefined || context.island.items.getItemForHuman(context.human, description.dismantle.required, { excludeProtectedItems: true, includeProtectedItemsThatWillNotBreak: ActionType.Dismantle }) !== undefined;
 
 			const objectives: IObjective[] = [
 				new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false),
@@ -83,8 +82,24 @@ export default class AcquireItemFromDismantle extends Objective {
 				objectives.push(new SetContextData(hashCode, dismantleItem));
 			}
 
-			if (!hasRequirements) {
-				objectives.push(new AcquireItemByGroup(description.dismantle.required!));
+			let requiredItemHashCode: string | undefined;
+			let requiredItem: Item | undefined;
+
+			if (description.dismantle.required !== undefined) {
+				requiredItemHashCode = `${this.getHashCode()}:${this.getUniqueIdentifier()}`;
+
+				requiredItem = context.island.items.getItemForHuman(context.human, description.dismantle.required, {
+					excludeProtectedItems: true,
+					includeProtectedItemsThatWillNotBreak: ActionType.Dismantle,
+				});
+
+				if (requiredItem === undefined) {
+					objectives.push(new AcquireItemByGroup(description.dismantle.required).setContextDataKey(requiredItemHashCode));
+
+				} else {
+					objectives.push(new ReserveItems(requiredItem));
+					objectives.push(new SetContextData(requiredItemHashCode, requiredItem));
+				}
 			}
 
 			if (context.human.isSwimming()) {
@@ -98,7 +113,16 @@ export default class AcquireItemFromDismantle extends Objective {
 					return;
 				}
 
-				action.execute(context.actionExecutor, item);
+				let requiredItem: Item | undefined;
+				if (requiredItemHashCode) {
+					requiredItem = context.getData<Item>(requiredItemHashCode);
+					if (requiredItem && !requiredItem.isValid()) {
+						this.log.warn(`Missing required item "${requiredItem}" for dismantle. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
+						return;
+					}
+				}
+
+				action.execute(context.actionExecutor, item, requiredItem);
 			}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, itemType).inContext(TextContext.Lowercase).getString()} for ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);

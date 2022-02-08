@@ -12,6 +12,7 @@ import type { ITile } from "game/tile/ITerrain";
 import type { ITerrainLoot } from "game/tile/TerrainResources";
 import { TarsOverlay } from "src/ui/TarsOverlay";
 import type { TarsTranslation } from "../ITarsMod";
+import { TreasureHunterType } from "../modes/TreasureHunter";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
 import { DoodadUtilities } from "../utilities/Doodad";
@@ -36,9 +37,6 @@ export interface ITarsEvents {
 }
 export interface ITarsOptions {
     mode: TarsMode;
-    exploreIslands: boolean;
-    readBooks: boolean;
-    useOrbsOfInfluence: boolean;
     useProtectedItems: TarsUseProtectedItems;
     goodCitizen: boolean;
     stayHealthy: boolean;
@@ -47,6 +45,11 @@ export interface ITarsOptions {
     recoverThresholdHunger: number;
     recoverThresholdThirst: number;
     recoverThresholdThirstFromMax: number;
+    survivalExploreIslands: boolean;
+    survivalUseOrbsOfInfluence: boolean;
+    survivalReadBooks: boolean;
+    treasureHunterPrecognition: boolean;
+    treasureHunterType: TreasureHunterType;
     quantumBurst: boolean;
     debugLogging: boolean;
     freeze: boolean;
@@ -130,6 +133,7 @@ export interface IInventoryItems {
     fireKindling?: Item[];
     fireStarter?: Item;
     fireTinder?: Item;
+    fishingRod?: Item;
     food?: Item[];
     furnace?: Item;
     hammer?: Item;
@@ -138,6 +142,7 @@ export interface IInventoryItems {
     intermediateChest?: Item;
     kiln?: Item;
     knife?: Item;
+    lockPick?: Item;
     pickAxe?: Item;
     sailBoat?: Item;
     shovel?: Item;
@@ -155,7 +160,6 @@ export interface IInventoryItemInfo {
     allowMultiple?: number;
     allowInChests?: boolean;
     allowOnTiles?: boolean;
-    protect?: boolean;
     requiredMinDur?: number;
 }
 export declare type InventoryItemFlags = InventoryItemFlag | {
@@ -204,7 +208,8 @@ export declare enum TarsMode {
     Gardener = 3,
     Harvester = 4,
     Terminator = 5,
-    Quest = 6
+    TreasureHunter = 6,
+    Quest = 7
 }
 export declare enum ReserveType {
     Soft = 0,

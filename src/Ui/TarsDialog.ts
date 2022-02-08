@@ -12,8 +12,9 @@ import { TarsUiSaveDataKey, getTarsTranslation, TarsTranslation, TARS_ID } from 
 import type TarsPanel from "./components/TarsPanel";
 import GeneralPanel from "./panels/GeneralPanel";
 import MoveToPanel from "./panels/MoveToPanel";
-import OptionsPanel from "./panels/OptionsPanel";
 import TasksPanel from "./panels/TasksPanel";
+import GlobalOptionsPanel from "./panels/GlobalOptionsPanel";
+import ModeOptionsPanel from "./panels/ModeOptionsPanel";
 
 export type TabDialogPanelClass = new () => TarsPanel;
 
@@ -24,7 +25,8 @@ const subpanelClasses: TabDialogPanelClass[] = [
 	GeneralPanel,
 	TasksPanel,
 	MoveToPanel,
-	OptionsPanel
+	GlobalOptionsPanel,
+	ModeOptionsPanel,
 ];
 
 export default class TarsDialog extends TabDialog<TarsPanel> {

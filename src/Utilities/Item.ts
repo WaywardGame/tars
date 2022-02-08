@@ -210,9 +210,9 @@ export class ItemUtilities {
 		return search;
 	}
 
-	public isAllowedToUseItem(context: Context, item: Item, allowInventoryItems = true) {
+	public isAllowedToUseItem(context: Context, item: Item, allowProtectedInventoryItems = true) {
 		if (context.options.useProtectedItems !== TarsUseProtectedItems.Yes && item.isProtected()) {
-			if (allowInventoryItems && this.isInventoryItem(context, item)) {
+			if (allowProtectedInventoryItems && this.isInventoryItem(context, item)) {
 				return true;
 			}
 
@@ -289,14 +289,14 @@ export class ItemUtilities {
 		return this.getItemsInContainer(context, context.human.inventory);
 	}
 
-	public getItemInInventory(context: Context, itemTypeSearch: ItemType): Item | undefined {
-		return this.getItemInContainer(context, context.human.inventory, itemTypeSearch);
+	public getItemInInventory(context: Context, itemTypeSearch: ItemType, allowInventoryItems: boolean = false): Item | undefined {
+		return this.getItemInContainer(context, context.human.inventory, itemTypeSearch, allowInventoryItems);
 	}
 
-	private getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType): Item | undefined {
+	public getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, allowInventoryItems: boolean = false): Item | undefined {
 		const orderedItems = context.island.items.getOrderedContainerItems(container);
 		for (const item of orderedItems) {
-			if (this.isInventoryItem(context, item)) {
+			if (!allowInventoryItems && this.isInventoryItem(context, item)) {
 				continue;
 			}
 
@@ -324,10 +324,10 @@ export class ItemUtilities {
 		return undefined;
 	}
 
-	public getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup): Item | undefined {
+	public getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, allowInventoryItems: boolean = false): Item | undefined {
 		const orderedItems = context.island.items.getOrderedContainerItems(container);
 		for (const item of orderedItems) {
-			if (this.isInventoryItem(context, item)) {
+			if (!allowInventoryItems && this.isInventoryItem(context, item)) {
 				continue;
 			}
 

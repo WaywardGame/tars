@@ -9,17 +9,17 @@ import { TooltipLocation } from "ui/component/IComponent";
 import { Bound } from "utilities/Decorators";
 
 import TarsPanel from "../components/TarsPanel";
-import { uiConfigurableOptions, getTarsTranslation, TarsTranslation, TarsOptionSectionType } from "../../ITarsMod";
+import { getTarsTranslation, TarsTranslation, TarsOptionSectionType, TarsOptionSection } from "../../ITarsMod";
 import ChoiceList, { Choice } from "ui/component/ChoiceList";
 
-export default class OptionsPanel extends TarsPanel {
+export default abstract class OptionsPanel extends TarsPanel {
 
     private readonly refreshableComponents: IRefreshable[] = [];
 
-    constructor() {
+    constructor(options: Array<TarsOptionSection | TarsTranslation | undefined>) {
         super();
 
-        for (const uiOption of uiConfigurableOptions) {
+        for (const uiOption of options) {
             if (uiOption === undefined) {
                 new Divider()
                     .appendTo(this);
@@ -87,7 +87,7 @@ export default class OptionsPanel extends TarsPanel {
                                     .addText(text => text.setText(getTarsTranslation(tooltipTranslation)))
                                     .setLocation(TooltipLocation.TopRight))
                         ))
-                        .setRefreshMethod(list => list.choices(choice => choice.id === this.TarsMod.saveData.options.useProtectedItems).first()!)
+                        .setRefreshMethod(list => list.choices(choice => choice.id === this.TarsMod.saveData.options[uiOption.option]).first()!)
                         .event.subscribe("choose", (_, choice) => {
                             this.TarsMod.tarsInstance?.updateOptions({ [uiOption.option]: choice.id });
                         })
@@ -101,9 +101,7 @@ export default class OptionsPanel extends TarsPanel {
         }
     }
 
-    public getTranslation(): TarsTranslation | Translation {
-        return TarsTranslation.DialogPanelOptions;
-    }
+    public abstract override getTranslation(): TarsTranslation | Translation;
 
     protected onSwitchTo() {
         const events = this.TarsMod.event.until(this, "switchAway", "remove");

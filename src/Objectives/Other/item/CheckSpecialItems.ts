@@ -38,7 +38,7 @@ export default class CheckSpecialItems extends Objective {
             ]));
         }
 
-        if (context.options.readBooks) {
+        if (context.options.survivalReadBooks) {
             const books = baseItems
                 .filter(item => item.book === BookType.RandomEvent);
             if (books.length > 0) {

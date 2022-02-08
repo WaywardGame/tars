@@ -61,7 +61,8 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 			if (context.utilities.item.isInventoryItem(context, item)) {
 				// allow diassembling a hoe when we're missing an axe or pick axe
-				if (item !== context.inventory.hoe || (context.inventory.axe && context.inventory.pickAxe)) {
+				const canDisassemble = (item === context.inventory.hoe) && (!context.inventory.axe || !context.inventory.pickAxe);
+				if (!canDisassemble) {
 					continue;
 				}
 			}
@@ -80,12 +81,28 @@ export default class AcquireItemFromDisassemble extends Objective {
 				new MoveItemIntoInventory(item),
 			];
 
+			let requiredItemHashCodes: string[] | undefined;
+
 			if (requiredForDisassembly) {
-				for (const itemTypeOrGroup of requiredForDisassembly) {
-					if (context.island.items.isGroup(itemTypeOrGroup) ?
-						!context.utilities.item.getItemInContainerByGroup(context, context.human.inventory, itemTypeOrGroup) :
-						!context.utilities.item.getItemsInContainerByType(context, context.human.inventory, itemTypeOrGroup)) {
-						objectives.push(context.island.items.isGroup(itemTypeOrGroup) ? new AcquireItemByGroup(itemTypeOrGroup) : new AcquireItem(itemTypeOrGroup));
+				requiredItemHashCodes = [];
+
+				for (let i = 0; i < requiredForDisassembly.length; i++) {
+					const requiredItemHashCode = requiredItemHashCodes[i] = `${this.getHashCode()}:${this.getUniqueIdentifier()}`;
+
+					const itemTypeOrGroup = requiredForDisassembly[i];
+
+					const requiredItem = context.island.items.isGroup(itemTypeOrGroup) ?
+						context.utilities.item.getItemInContainerByGroup(context, context.human.inventory, itemTypeOrGroup, true) :
+						context.utilities.item.getItemInContainer(context, context.human.inventory, itemTypeOrGroup, true);
+					if (requiredItem === undefined) {
+						objectives.push(
+							(context.island.items.isGroup(itemTypeOrGroup) ?
+								new AcquireItemByGroup(itemTypeOrGroup) :
+								new AcquireItem(itemTypeOrGroup)).setContextDataKey(requiredItemHashCode));
+
+					} else {
+						objectives.push(new ReserveItems(requiredItem));
+						objectives.push(new SetContextData(requiredItemHashCode, requiredItem));
 					}
 				}
 			}
@@ -101,13 +118,27 @@ export default class AcquireItemFromDisassemble extends Objective {
 			}
 
 			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Disassemble, (context, action) => {
-				const item = context.getData<Item>(hashCode);
+				const item = context.getData<Item | undefined>(hashCode);
 				if (!item?.isValid()) {
 					this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
 					return;
 				}
 
-				action.execute(context.actionExecutor, item);
+				let requiredItems: Array<Item> | undefined;
+
+				if (requiredItemHashCodes) {
+					for (const requiredItemHashCode of requiredItemHashCodes) {
+						const item = context.getData<Item>(requiredItemHashCode);
+						if (!item?.isValid()) {
+							this.log.warn(`Missing required item "${item}" for disassembly. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
+							return;
+						}
+
+						requiredItems?.push(item);
+					}
+				}
+
+				action.execute(context.actionExecutor, item, requiredItems);
 			}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
 
 			objectivePipelines.push(objectives);
