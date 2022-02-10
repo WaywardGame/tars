@@ -12,6 +12,7 @@ export declare class TileUtilities {
     private readonly cache;
     clearCache(): void;
     getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]>;
+    private _getNearestTileLocation;
     isSwimmingOrOverWater(context: Context): boolean;
     isOverDeepSeaWater(context: Context): boolean;
     isOpenTile(context: Context, point: IVector3, tile: ITile, options?: Partial<IOpenTileOptions>): boolean;

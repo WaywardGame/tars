@@ -64,7 +64,7 @@ export default class OrganizeInventory extends Objective {
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		console.log(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow moving reserved items: ${this.options?.allowReservedItems}. Allow moving into chests: ${this.options?.allowChests}.`, this.options);
+		// console.log(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow moving reserved items: ${this.options?.allowReservedItems}. Allow moving into chests: ${this.options?.allowChests}.`, this.options);
 
 		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
 			return ObjectiveResult.Ignore;

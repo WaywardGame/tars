@@ -25,23 +25,30 @@ export class TileUtilities {
 	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
 		const position = positionOverride ?? context.human;
 
-		const results: ITileLocation[][] = [];
+		const results: ITileLocation[][] = [
+			await this._getNearestTileLocation(context, tileType, position)
+		];
 
-		// for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
-		const z = position.z;
+		if (!positionOverride) {
+			const oppositeOrigin = context.utilities.navigation.getOppositeOrigin();
+			if (oppositeOrigin && oppositeOrigin.z !== position.z) {
+				results.push(await this._getNearestTileLocation(context, tileType, oppositeOrigin));
+			}
+		}
 
-		const cacheId = `${tileType},${position.x},${position.y},${z}`;
+		return results.flat();
+	}
+
+	private async _getNearestTileLocation(context: Context, tileType: TerrainType, position: IVector3): Promise<ITileLocation[]> {
+		const cacheId = `${tileType},${position.x},${position.y},${position.z}`;
 
 		let result = this.cache.get(cacheId);
 		if (!result) {
-			result = await context.utilities.navigation.getNearestTileLocation(tileType, { x: position.x, y: position.y, z: z });
+			result = await context.utilities.navigation.getNearestTileLocation(tileType, position);
 			this.cache.set(cacheId, result);
 		}
 
-		results.push(result);
-		// }
-
-		return results.flat();
+		return result;
 	}
 
 	public isSwimmingOrOverWater(context: Context) {

@@ -119,7 +119,7 @@ export class MovementUtilities {
             const origin = navigation.getOrigin();
             if (!origin || (origin.x !== context.human.x || origin.y !== context.human.y || origin.z !== context.human.z)) {
                 log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
-                navigation.updateOrigin(context.human);
+                await navigation.updateOrigin(context.human);
             }
 
             // const position = context.getPosition();

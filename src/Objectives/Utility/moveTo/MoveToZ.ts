@@ -1,5 +1,6 @@
 import { TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
+import Vector3 from "utilities/math/Vector3";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -34,12 +35,8 @@ export default class MoveToZ extends Objective {
 
 		for (const tileLocation of tileLocations) {
 			objectivePipelines.push([
-				new MoveToTarget(tileLocation.point, false),
-				new SetContextData(ContextDataType.Position, {
-					x: tileLocation.point.x,
-					y: tileLocation.point.y,
-					z: tileLocation.point.z === WorldZ.Overworld ? WorldZ.Cave : WorldZ.Overworld,
-				}),
+				new MoveToTarget(tileLocation.point, false, { idleIfAlreadyThere: true }),
+				new SetContextData(ContextDataType.Position, new Vector3(tileLocation.point.x, tileLocation.point.y, tileLocation.point.z === WorldZ.Overworld ? WorldZ.Cave : WorldZ.Overworld)),
 			]);
 		}
 

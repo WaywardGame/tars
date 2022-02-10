@@ -67,7 +67,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     postExecuteAction(_: any, actionType: ActionType, api: IActionApi, args: any[]): void;
     processInput(player: Player): boolean | undefined;
     onWalkPathChange(human: Human, walkPath: IVector2[] | undefined): void;
-    preMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile): void;
+    onChangeZ(human: Human, z: number, lastZ: number): void;
+    onPreMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile): void;
     onStatChange(human: Human, stat: IStat): void;
     onMoveToIsland(): Promise<void>;
     getContext(): Context;
@@ -107,7 +108,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private gatherFromCorpsesInterrupt;
     private reduceWeightInterrupt;
     private returnToBaseInterrupt;
-    private escapeCavesInterrupt;
     private organizeInventoryInterrupts;
     private processQueuedNavigationUpdates;
     private processQuantumBurst;

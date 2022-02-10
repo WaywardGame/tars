@@ -8,8 +8,10 @@ export interface IMoveToTargetOptions {
     range: number;
     disableStaminaCheck: boolean;
     disableTracking: boolean;
-    skipZCheck: boolean;
     allowBoat: boolean;
+    idleIfAlreadyThere: boolean;
+    skipZCheck: boolean;
+    changeZ: number;
 }
 export default class MoveToTarget extends Objective {
     protected target: IVector3;

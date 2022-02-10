@@ -12,7 +12,6 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
-import { WorldZ } from "game/WorldZ";
 import type Island from "game/island/Island";
 import type { ItemTypeGroup } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
@@ -49,7 +48,6 @@ import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
 import RecoverStamina from "../objectives/recover/RecoverStamina";
 import RecoverThirst from "../objectives/recover/RecoverThirst";
-import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
@@ -449,8 +447,21 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
+    @EventHandler(EventBus.Humans, "changeZ")
+    public onChangeZ(human: Human, z: number, lastZ: number) {
+        if (this.human !== human || !this.isRunning() || !human.hasWalkPath()) {
+            return;
+        }
+
+        if (this.navigationSystemState === NavigationSystemState.Initialized) {
+            this.utilities.navigation.queueUpdateOrigin(this.human);
+        }
+
+        this.interrupt(`Interrupting due to z movement from ${lastZ} to ${z}`);
+    }
+
     @EventHandler(EventBus.Humans, "preMove")
-    public preMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
+    public onPreMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
         if (this.human !== human || !this.isRunning() || !human.hasWalkPath()) {
             return;
         }
@@ -1200,7 +1211,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         interrupts = interrupts.concat([
             this.gatherFromCorpsesInterrupt(context),
             this.repairsInterrupt(context),
-            this.escapeCavesInterrupt(context),
             this.returnToBaseInterrupt(context),
         ]);
 
@@ -1647,12 +1657,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.previousWeightStatus === WeightStatus.Overburdened &&
             context.getData(ContextDataType.MovingToNewIsland) !== MovingToNewIslandState.Ready) {
             return new ReturnToBase();
-        }
-    }
-
-    private escapeCavesInterrupt(context: Context) {
-        if (context.human.z === WorldZ.Cave) {
-            return new MoveToZ(WorldZ.Overworld);
         }
     }
 

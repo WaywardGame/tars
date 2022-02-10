@@ -18,6 +18,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { log } from "../../utilities/Logger";
 import { MoveResult } from "../../utilities/Movement";
+import Idle from "../other/Idle";
 import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
@@ -26,8 +27,11 @@ export interface IMoveToTargetOptions {
 	range: number;
 	disableStaminaCheck: boolean;
 	disableTracking: boolean;
-	skipZCheck: boolean;
 	allowBoat: boolean;
+	idleIfAlreadyThere: boolean;
+
+	skipZCheck: boolean;
+	changeZ: number;
 }
 
 export default class MoveToTarget extends Objective {
@@ -82,18 +86,23 @@ export default class MoveToTarget extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const position = context.getPosition();
-		if (position.z !== this.target.z) {
-			return ObjectiveResult.Impossible;
+
+		if (!this.options?.skipZCheck && position.z !== this.target.z) {
+			const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
+			if (!oppositeZOrigin || oppositeZOrigin.z !== this.target.z) {
+				return ObjectiveResult.Impossible;
+			}
+
+			return [
+				// new MoveToZ(this.target.z),
+
+				// move to cave entrance
+				new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }),
+
+				// move to target
+				new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }),
+			];
 		}
-
-		// if (!this.options?.skipZCheck && position.z !== this.target.z) {
-		// 	this.log.info("Target is on different Z");
-
-		// 	return [
-		// 		new MoveToZ(this.target.z),
-		// 		new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }), // todo: replace with this?
-		// 	];
-		// }
 
 		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget);
 
@@ -107,7 +116,7 @@ export default class MoveToTarget extends Objective {
 					}
 				}
 
-				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
+				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.options?.changeZ ?? this.target.z });
 			}
 
 			return movementPath.difficulty;
@@ -208,6 +217,11 @@ export default class MoveToTarget extends Objective {
 			case MoveResult.Complete:
 				this.log.info("Finished moving to target");
 				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
+
+				if (this.options?.idleIfAlreadyThere && movementPath.difficulty === 0) {
+					return new Idle(false);
+				}
+
 				return ObjectiveResult.Complete;
 		}
 	}
