@@ -4,6 +4,7 @@ import type Player from "game/entity/player/Player";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { IVector3 } from "utilities/math/IVector";
+import Vector3 from "utilities/math/Vector3";
 
 import type { IBase, IInventoryItems, ITarsOptions, IUtilities } from "../ITars";
 import ContextState from "./ContextState";
@@ -191,7 +192,7 @@ export default class Context implements IContext {
 			this.state.reset();
 		}
 
-		this.setData(ContextDataType.Position, this.human.getPoint());
+		this.setData(ContextDataType.Position, new Vector3(this.human.getPoint()));
 	}
 
 	public getHashCode(): string {
@@ -232,8 +233,7 @@ export default class Context implements IContext {
 	public getPosition(): IVector3 {
 		const position = this.getData(ContextDataType.Position);
 		if (position && (position.x === undefined || position.y === undefined || position.z === undefined)) {
-			console.error("invalid value", position);
-			console.trace("lastKnownPosition get");
+			console.error(`[TARS] getPosition - Invalid value ${position}`);
 		}
 
 		return position || this.human.getPoint();

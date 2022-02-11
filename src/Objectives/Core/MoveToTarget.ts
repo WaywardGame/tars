@@ -11,6 +11,7 @@ import TileEvent from "game/tile/TileEvent";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import Vector3 from "utilities/math/Vector3";
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -116,7 +117,7 @@ export default class MoveToTarget extends Objective {
 					}
 				}
 
-				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.options?.changeZ ?? this.target.z });
+				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
 			}
 
 			return movementPath.difficulty;
@@ -216,7 +217,7 @@ export default class MoveToTarget extends Objective {
 
 			case MoveResult.Complete:
 				this.log.info("Finished moving to target");
-				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
+				context.setData(ContextDataType.Position, new Vector3(this.target));
 
 				if (this.options?.idleIfAlreadyThere && movementPath.difficulty === 0) {
 					return new Idle(false);

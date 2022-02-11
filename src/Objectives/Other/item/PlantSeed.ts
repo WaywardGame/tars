@@ -2,7 +2,6 @@ import doodadDescriptions from "game/doodad/Doodads";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
-import type { ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 import terrainDescriptions from "game/tile/Terrains";
@@ -22,6 +21,7 @@ import ReserveItems from "../../core/ReserveItems";
 import MoveItemIntoInventory from "./MoveItemIntoInventory";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import Lambda from "../../core/Lambda";
+import ClearTile from "../tile/ClearTile";
 
 export const gardenMaxTilesChecked = 1536;
 
@@ -72,15 +72,16 @@ export default class PlantSeed extends Objective {
 			context.island,
 			context.utilities.base.getBasePosition(context),
 			(island, point, tile) => {
-				const tileContainer = tile as ITileContainer;
 				return island.isTileEmpty(tile) &&
 					TileHelpers.isOpenTile(island, point, tile) &&
 					island.isTilled(point.x, point.y, point.z) &&
-					allowedTiles.includes(TileHelpers.getType(tile)) &&
-					(tileContainer.containedItems === undefined || tileContainer.containedItems.length === 0);
+					allowedTiles.includes(TileHelpers.getType(tile));
 			}, { maxTilesChecked: gardenMaxTilesChecked });
 		if (emptyTilledTile !== undefined) {
-			objectives.push(new MoveToTarget(emptyTilledTile, true));
+			objectives.push(
+				new MoveToTarget(emptyTilledTile, true),
+				new ClearTile(emptyTilledTile),
+			);
 
 		} else {
 			const nearbyTillableTile = TileHelpers.findMatchingTiles(

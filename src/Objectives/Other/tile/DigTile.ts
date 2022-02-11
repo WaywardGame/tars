@@ -15,7 +15,6 @@ import UseItem from "../item/UseItem";
 import ClearTile from "./ClearTile";
 
 export interface IDigTileOptions {
-	force: boolean;
 	digUntilTypeIsNot: TerrainType;
 }
 

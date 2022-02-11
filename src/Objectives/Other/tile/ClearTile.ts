@@ -36,6 +36,10 @@ export default class ClearTile extends Objective {
 
         const tile = context.island.getTileFromPoint(this.target);
 
+        if (tile.npc || tile.creature || context.human.island.isPlayerAtTile(tile, false, true)) {
+            return ObjectiveResult.Impossible;
+        }
+
         const tileType = TileHelpers.getType(tile);
         const terrainDescription = Terrains[tileType];
         if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
