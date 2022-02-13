@@ -183,7 +183,7 @@ export class ItemUtilities {
 				}
 
 				const description = item.description();
-				if (!description || !description.disassemble || description.blockDisassembly) {
+				if (!description || !description.disassemble) {
 					continue;
 				}
 
