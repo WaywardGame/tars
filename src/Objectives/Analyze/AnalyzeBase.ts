@@ -57,12 +57,12 @@ export default class AnalyzeBase extends Objective {
 					targets = [];
 
 					const nearDoodads = context.base[placeNear];
-					const possiblePoints = AnalyzeBase.getNearPoints(nearDoodads);
+					const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
 
 					for (const point of possiblePoints) {
 						const tile = context.island.getTileFromPoint(point);
 						const doodad = tile.doodad;
-						if (doodad && AnalyzeBase.matchesBaseInfo(info, doodad.type)) {
+						if (doodad && AnalyzeBase.matchesBaseInfo(context, info, doodad.type, doodad)) {
 							targets.push(doodad);
 						}
 					}
@@ -70,7 +70,7 @@ export default class AnalyzeBase extends Objective {
 				} else {
 					targets = info.findTargets ?
 						info.findTargets(context) :
-						context.utilities.object.findDoodads(context, key, doodad => doodad.ownerIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(info, doodad.type));
+						context.utilities.object.findDoodads(context, key, doodad => doodad.ownerIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(context, info, doodad.type, doodad));
 				}
 
 				for (const target of targets) {
@@ -132,25 +132,48 @@ export default class AnalyzeBase extends Objective {
 		return ObjectiveResult.Ignore;
 	}
 
-	public static getNearPoints(doodads: Doodad[]) {
-		const points: IVector3[] = [];
-
-		for (const doodad of doodads) {
-			points.push(...[
-				{ x: doodad.x, y: doodad.y + 2, z: doodad.z },
-				{ x: doodad.x, y: doodad.y - 2, z: doodad.z },
-				{ x: doodad.x + 2, y: doodad.y, z: doodad.z },
-				{ x: doodad.x - 2, y: doodad.y, z: doodad.z },
-			]);
-		}
-
-		return points;
+	public static getNearPointsFromDoodads(doodads: Doodad[]) {
+		return doodads.map(doodad => this.getNearPoints(doodad)).flat();
 	}
 
-	public static matchesBaseInfo(info: IBaseInfo, doodadType: DoodadType): boolean {
+	public static getNearPoints(point: IVector3): IVector3[] {
+		return [
+			{ x: point.x, y: point.y + 2, z: point.z },
+			{ x: point.x, y: point.y - 2, z: point.z },
+			{ x: point.x + 2, y: point.y, z: point.z },
+			{ x: point.x - 2, y: point.y, z: point.z },
+		];
+	}
+
+	public static matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean {
 		const doodadDescription = doodadDescriptions[doodadType];
 		if (!doodadDescription) {
 			return false;
+		}
+
+		if (point && info.tryPlaceNear !== undefined) {
+			const placeNearDoodads = context.base[info.tryPlaceNear];
+
+			// reject doodads that won't be able to be near the desired type
+			const isValid = AnalyzeBase.getNearPoints(point)
+				.some((point) => {
+					const tile = context.island.getTileFromPoint(point);
+
+					if (tile.doodad && placeNearDoodads.includes(tile.doodad)) {
+						// nearby doodad is there
+						return true;
+					}
+
+					if (context.utilities.base.isOpenArea(context, point, tile, 0)) {
+						// there is an open spot for a doodads
+						return true;
+					}
+
+					return false;
+				});
+			if (!isValid) {
+				return false;
+			}
 		}
 
 		if (info.doodadTypes) {

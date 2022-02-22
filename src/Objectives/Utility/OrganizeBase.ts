@@ -1,4 +1,3 @@
-import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { IVector3 } from "utilities/math/IVector";
@@ -37,9 +36,7 @@ export default class OrganizeBase extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		// pick the chest with the most room available
-		const chests = context.base.chest.slice().sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
-		if (chests.length === 0) {
+		if (context.base.chest.length === 0) {
 			return ObjectiveResult.Impossible;
 		}
 

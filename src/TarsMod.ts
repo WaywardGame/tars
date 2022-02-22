@@ -31,12 +31,11 @@ import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
 import type { ITarsModEvents, ISaveData } from "./ITarsMod";
 import { TarsTranslation, setTarsMod, TarsUiSaveDataKey, TARS_ID } from "./ITarsMod";
 import Tars from "./core/Tars";
-import { ITarsOptions, TarsUseProtectedItems } from "./core/ITars";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITars";
 import planner from "./core/planning/Planner";
 import { TarsOverlay } from "./ui/TarsOverlay";
 import TarsNPC from "./npc/TarsNPC";
-import { TreasureHunterType } from "./modes/TreasureHunter";
+import { ITarsOptions, createOptions } from "./core/ITarsOptions";
 
 export default class TarsMod extends Mod {
 
@@ -340,31 +339,7 @@ export default class TarsMod extends Mod {
 			initial.ui = {};
 		}
 
-		initial.options = {
-			mode: TarsMode.Survival,
-
-			useProtectedItems: TarsUseProtectedItems.No,
-			goodCitizen: true,
-			stayHealthy: true,
-
-			recoverThresholdHealth: 30,
-			recoverThresholdStamina: 20,
-			recoverThresholdHunger: 8,
-			recoverThresholdThirst: 10,
-			recoverThresholdThirstFromMax: -10,
-
-			survivalExploreIslands: true,
-			survivalUseOrbsOfInfluence: true,
-			survivalReadBooks: true,
-
-			treasureHunterPrecognition: false,
-			treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
-
-			quantumBurst: false,
-			debugLogging: false,
-			freeze: false,
-			...(initial.options ?? {}) as Partial<ITarsOptions>,
-		}
+		initial.options = createOptions((initial.options ?? {}) as Partial<ITarsOptions>);
 
 		if (initial.options.mode === TarsMode.Manual) {
 			initial.options.mode = TarsMode.Survival;

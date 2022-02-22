@@ -117,29 +117,35 @@ export default class AcquireItemFromDisassemble extends Objective {
 				objectives.push(new CompleteRequirements(requirementInfo));
 			}
 
-			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Disassemble, (context, action) => {
-				const item = context.getData<Item | undefined>(hashCode);
-				if (!item?.isValid()) {
-					this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
-					return;
-				}
-
-				let requiredItems: Array<Item> | undefined;
-
-				if (requiredItemHashCodes) {
-					for (const requiredItemHashCode of requiredItemHashCodes) {
-						const item = context.getData<Item>(requiredItemHashCode);
+			objectives.push(new ExecuteActionForItem(
+				ExecuteActionType.Generic,
+				[this.itemType],
+				{
+					actionType: ActionType.Disassemble,
+					executor: (context, action) => {
+						const item = context.getData<Item | undefined>(hashCode);
 						if (!item?.isValid()) {
-							this.log.warn(`Missing required item "${item}" for disassembly. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
+							this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
 							return;
 						}
 
-						requiredItems?.push(item);
-					}
-				}
+						let requiredItems: Array<Item> | undefined;
 
-				action.execute(context.actionExecutor, item, requiredItems);
-			}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
+						if (requiredItemHashCodes) {
+							for (const requiredItemHashCode of requiredItemHashCodes) {
+								const item = context.getData<Item>(requiredItemHashCode);
+								if (!item?.isValid()) {
+									this.log.warn(`Missing required item "${item}" for disassembly. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
+									return;
+								}
+
+								requiredItems?.push(item);
+							}
+						}
+
+						action.execute(context.actionExecutor, item, requiredItems);
+					},
+				}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

@@ -66,7 +66,7 @@ export default class BuildItem extends Objective {
 
 		const buildDoodadType = description.onUse[ActionType.Build] as DoodadType;
 
-		const baseInfo = this.getBaseInfo(buildDoodadType);
+		const baseInfo = this.getBaseInfo(context, buildDoodadType);
 
 		const isWell = DoodadManager.isInGroup(buildDoodadType, DoodadTypeGroup.Well);
 		if (isWell) {
@@ -76,13 +76,20 @@ export default class BuildItem extends Objective {
 		if (context.utilities.base.hasBase(context)) {
 			if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
 				const nearDoodads = context.base[baseInfo.tryPlaceNear];
-				const possiblePoints = AnalyzeBase.getNearPoints(nearDoodads);
+				if (nearDoodads.length > 0) {
+					const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
 
-				for (const point of possiblePoints) {
-					if (context.utilities.base.isOpenArea(context, point, context.island.getTileFromPoint(point), 0)) {
-						this.target = point;
-						break;
+					for (const point of possiblePoints) {
+						if (context.utilities.base.isOpenArea(context, point, context.island.getTileFromPoint(point), 0)) {
+							this.target = point;
+							break;
+						}
 					}
+
+					// if (this.target === undefined) {
+					// 	// not valid near point by the doodad
+					// 	// pick it up so we'll replace it
+					// }
 				}
 			}
 
@@ -151,9 +158,9 @@ export default class BuildItem extends Objective {
 		return super.onMove(context);
 	}
 
-	private getBaseInfo(buildDoodadType: DoodadType): IBaseInfo | undefined {
+	private getBaseInfo(context: Context, buildDoodadType: DoodadType): IBaseInfo | undefined {
 		for (const [, info] of Object.entries(baseInfo)) {
-			if (AnalyzeBase.matchesBaseInfo(info, buildDoodadType)) {
+			if (AnalyzeBase.matchesBaseInfo(context, info, buildDoodadType)) {
 				return info;
 			}
 		}

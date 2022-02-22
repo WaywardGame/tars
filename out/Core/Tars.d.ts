@@ -15,7 +15,7 @@ import InterruptChoice from "language/dictionary/InterruptChoice";
 import type { ISaveData } from "../ITarsMod";
 import { TarsTranslation } from "../ITarsMod";
 import Context from "./context/Context";
-import { ITarsEvents, ITarsOptions } from "./ITars";
+import { ITarsEvents } from "./ITars";
 import type { ITarsMode } from "./mode/IMode";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Human from "game/entity/Human";
@@ -23,6 +23,7 @@ import NPC from "game/entity/npc/NPC";
 import ItemManager from "game/item/ItemManager";
 import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import Corpse from "game/entity/creature/corpse/Corpse";
+import { ITarsOptions } from "./ITarsOptions";
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private readonly human;
     private readonly saveData;

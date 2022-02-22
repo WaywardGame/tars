@@ -575,6 +575,10 @@ export default class Navigation {
 	}
 
 	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType): boolean {
+		if (tileType === TerrainType.Void) {
+			return true;
+		}
+
 		if (tile.npc !== undefined && tile.npc !== this.human) {
 			return true;
 		}

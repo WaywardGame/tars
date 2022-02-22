@@ -269,22 +269,26 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
-				// remove swamp tiles near the base
-				const swampTiles = context.utilities.base.getSwampTilesNearBase(context);
-				if (swampTiles.length > 0) {
-					const boglings = context.utilities.base.getNonTamedCreaturesNearBase(context)
-						.filter(creature => creature.type === CreatureType.Bogling);
-					if (boglings.length > 0) {
-						objectives.push(new HuntCreatures(boglings));
-					}
+				if (context.options.survivalClearSwamps) {
+					// remove swamp tiles near the base
+					const swampTiles = context.utilities.base.getSwampTilesNearBase(context);
+					if (swampTiles.length > 0) {
+						const boglings = context.utilities.base.getNonTamedCreaturesNearBase(context)
+							.filter(creature => creature.type === CreatureType.Bogling);
+						if (boglings.length > 0) {
+							objectives.push(new HuntCreatures(boglings));
+						}
 
-					objectives.push(new DrainSwamp(swampTiles));
+						objectives.push(new DrainSwamp(swampTiles));
+					}
 				}
 
-				// cleanup base if theres items laying around everywhere
-				const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
-				if (tiles.totalCount > 20) {
-					objectives.push(new OrganizeBase(tiles.tiles));
+				if (context.options.survivalOrganizeBase) {
+					// cleanup base if theres items laying around everywhere
+					const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
+					if (tiles.totalCount > 20) {
+						objectives.push(new OrganizeBase(tiles.tiles));
+					}
 				}
 			}
 
@@ -477,7 +481,9 @@ export class SurvivalMode implements ITarsMode {
 
 			objectives.push(new ReturnToBase());
 
-			objectives.push(new OrganizeBase(context.utilities.base.getTilesWithItemsNearBase(context).tiles));
+			if (context.options.survivalOrganizeBase) {
+				objectives.push(new OrganizeBase(context.utilities.base.getTilesWithItemsNearBase(context).tiles));
+			}
 
 			objectives.push(new OrganizeInventory());
 		}

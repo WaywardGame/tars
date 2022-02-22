@@ -34,7 +34,13 @@ export default class HarvestDoodad extends Objective {
 
         return [
             new MoveToTarget(this.doodad, true),
-            new ExecuteActionForItem(ExecuteActionType.Doodad, itemTypes).setStatus(this),
+            new ExecuteActionForItem(
+                ExecuteActionType.Doodad,
+                itemTypes,
+                {
+                    onlyAllowHarvesting: true,
+                    onlyGatherWithHands: context.options.harvestOnlyUseHands,
+                }).setStatus(this),
             new Restart(), // ensures that no other objectives are ran after this one
         ];
     }

@@ -6,7 +6,8 @@ import type Item from "game/item/Item";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 
-import type { IBase, IInventoryItems, ITarsOptions, IUtilities } from "../ITars";
+import type { IBase, IInventoryItems, IUtilities } from "../ITars";
+import { ITarsOptions } from "../ITarsOptions";
 import ContextState from "./ContextState";
 import type { IContext } from "./IContext";
 import { ContextDataType } from "./IContext";

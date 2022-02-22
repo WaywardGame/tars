@@ -23,8 +23,12 @@ export enum ExecuteActionType {
 	Corpse,
 }
 
-export interface IExecuteActionForItemOptions {
+export interface IExecuteActionForItemOptions<T extends ActionType> {
 	onlyAllowHarvesting: boolean;
+	onlyGatherWithHands: boolean;
+
+	actionType: ActionType;
+	executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void
 }
 
 export default class ExecuteActionForItem<T extends ActionType> extends Objective {
@@ -34,14 +38,12 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 	constructor(
 		private readonly type: ExecuteActionType,
 		private readonly itemTypes: ItemType[],
-		private readonly actionType?: T,
-		private readonly executor?: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void,
-		private readonly options?: Partial<IExecuteActionForItemOptions>) {
+		private readonly options?: Partial<IExecuteActionForItemOptions<T>>) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `ExecuteActionForItem:${ExecuteActionType[this.type]}${this.actionType !== undefined ? `:${ActionType[this.actionType]}` : ""}`;
+		return `ExecuteActionForItem:${ExecuteActionType[this.type]}${this.options?.actionType !== undefined ? `:${ActionType[this.options.actionType]}` : ""}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -122,7 +124,13 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					return ObjectiveResult.Restart;
 				}
 
-				actionArguments.push(context.utilities.item.getBestToolForDoodadGather(context, doodad));
+				if (this.options?.onlyGatherWithHands) {
+					// tool, bypass
+					actionArguments.push(undefined, true);
+
+				} else {
+					actionArguments.push(context.utilities.item.getBestToolForDoodadGather(context, doodad));
+				}
 
 				break;
 
@@ -150,12 +158,12 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 				break;
 
 			case ExecuteActionType.Generic:
-				if (this.actionType === undefined) {
+				if (this.options?.actionType === undefined) {
 					this.log.error("Invalid action type");
 					return ObjectiveResult.Impossible;
 				}
 
-				actionType = this.actionType;
+				actionType = this.options.actionType;
 				break;
 
 			default:
@@ -163,8 +171,8 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		}
 
 		const result = await this.executeActionForItem(context, this.itemTypes, actionType, ((context: Context, action: any) => {
-			if (this.executor) {
-				this.executor(context, action);
+			if (this.options?.executor) {
+				this.options.executor(context, action);
 
 			} else {
 				action.execute(context.actionExecutor, ...actionArguments);

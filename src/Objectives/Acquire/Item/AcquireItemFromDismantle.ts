@@ -106,24 +106,30 @@ export default class AcquireItemFromDismantle extends Objective {
 				objectives.push(new MoveToLand());
 			}
 
-			objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Dismantle, (context, action) => {
-				const item = context.getData<Item>(hashCode);
-				if (!item?.isValid()) {
-					this.log.warn(`Missing dismantle item ${item}. Bug in TARS pipeline, will fix itself`, hashCode);
-					return;
-				}
+			objectives.push(new ExecuteActionForItem(
+				ExecuteActionType.Generic,
+				[this.itemType],
+				{
+					actionType: ActionType.Dismantle,
+					executor: (context, action) => {
+						const item = context.getData<Item>(hashCode);
+						if (!item?.isValid()) {
+							this.log.warn(`Missing dismantle item ${item}. Bug in TARS pipeline, will fix itself`, hashCode);
+							return;
+						}
 
-				let requiredItem: Item | undefined;
-				if (requiredItemHashCode) {
-					requiredItem = context.getData<Item>(requiredItemHashCode);
-					if (requiredItem && !requiredItem.isValid()) {
-						this.log.warn(`Missing required item "${requiredItem}" for dismantle. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
-						return;
-					}
-				}
+						let requiredItem: Item | undefined;
+						if (requiredItemHashCode) {
+							requiredItem = context.getData<Item>(requiredItemHashCode);
+							if (requiredItem && !requiredItem.isValid()) {
+								this.log.warn(`Missing required item "${requiredItem}" for dismantle. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
+								return;
+							}
+						}
 
-				action.execute(context.actionExecutor, item, requiredItem);
-			}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, itemType).inContext(TextContext.Lowercase).getString()} for ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+						action.execute(context.actionExecutor, item, requiredItem);
+					},
+				}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, itemType).inContext(TextContext.Lowercase).getString()} for ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 			objectivePipelines.push(objectives);
 		}

@@ -13,7 +13,6 @@ import type { ITerrainLoot } from "game/tile/TerrainResources";
 import { TarsOverlay } from "src/ui/TarsOverlay";
 
 import type { TarsTranslation } from "../ITarsMod";
-import { TreasureHunterType } from "../modes/TreasureHunter";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
 import { DoodadUtilities } from "../utilities/Doodad";
@@ -24,6 +23,7 @@ import { PlayerUtilities } from "../utilities/Player";
 import { TileUtilities } from "../utilities/Tile";
 import Context from "./context/Context";
 import { IContext } from "./context/IContext";
+import { ITarsOptions } from "./ITarsOptions";
 import Navigation from "./navigation/Navigation";
 
 export const tickSpeed = 333;
@@ -53,41 +53,6 @@ export interface ITarsEvents {
     quantumBurstChange(status: QuantumBurstStatus): void;
 
     delete(): void;
-}
-
-/**
- * List of options
- */
-export interface ITarsOptions {
-    mode: TarsMode;
-
-    useProtectedItems: TarsUseProtectedItems;
-
-    goodCitizen: boolean;
-
-    stayHealthy: boolean;
-    recoverThresholdHealth: number;
-    recoverThresholdStamina: number;
-    recoverThresholdHunger: number;
-    recoverThresholdThirst: number;
-    recoverThresholdThirstFromMax: number;
-
-    survivalExploreIslands: boolean;
-    survivalUseOrbsOfInfluence: boolean;
-    survivalReadBooks: boolean;
-
-    treasureHunterPrecognition: boolean;
-    treasureHunterType: TreasureHunterType;
-
-    quantumBurst: boolean;
-    debugLogging: boolean;
-    freeze: boolean;
-}
-
-export enum TarsUseProtectedItems {
-    No,
-    Yes,
-    YesWithBreakCheck,
 }
 
 export enum NavigationSystemState {

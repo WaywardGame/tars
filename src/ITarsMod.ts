@@ -3,8 +3,9 @@ import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import type Translation from "language/Translation";
 import type Mod from "mod/Mod";
+
+import { ITarsOptions, TarsUseProtectedItems } from "./core/ITarsOptions";
 import type { IContext } from "./core/context/IContext";
-import { ITarsOptions, TarsUseProtectedItems } from "./core/ITars";
 import { TreasureHunterType } from "./modes/TreasureHunter";
 import type TarsMod from "./TarsMod";
 
@@ -71,69 +72,6 @@ export enum TarsUiSaveDataKey {
     TameCreatureDropdown,
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export enum TarsTranslation {
     Name,
 
@@ -168,6 +106,8 @@ export enum TarsTranslation {
     DialogButtonFreezeTooltip,
     DialogButtonGoodCitizen,
     DialogButtonGoodCitizenTooltip,
+    DialogButtonHarvesterOnlyUseHands,
+    DialogButtonHarvesterOnlyUseHandsTooltip,
     DialogButtonObtainTreasure,
     DialogButtonObtainTreasureTooltip,
     DialogButtonOnlyDiscoverTreasure,
@@ -178,6 +118,10 @@ export enum TarsTranslation {
     DialogButtonQuantumBurstTooltip,
     DialogButtonReadBooks,
     DialogButtonReadBooksTooltip,
+    DialogButtonClearSwamps,
+    DialogButtonClearSwampsTooltip,
+    DialogButtonOrganizeBase,
+    DialogButtonOrganizeBaseTooltip,
     DialogButtonSailToCivilization,
     DialogButtonSailToCivilizationTooltip,
     DialogButtonStayHealthy,
@@ -367,7 +311,6 @@ export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslatio
         title: TarsTranslation.DialogButtonExploreIslands,
         tooltip: TarsTranslation.DialogButtonExploreIslandsTooltip,
     },
-
     {
         option: "survivalUseOrbsOfInfluence",
         type: TarsOptionSectionType.Checkbox,
@@ -379,6 +322,25 @@ export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslatio
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonReadBooks,
         tooltip: TarsTranslation.DialogButtonReadBooksTooltip,
+    },
+    {
+        option: "survivalClearSwamps",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonClearSwamps,
+        tooltip: TarsTranslation.DialogButtonClearSwampsTooltip,
+    },
+    {
+        option: "survivalOrganizeBase",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonOrganizeBase,
+        tooltip: TarsTranslation.DialogButtonOrganizeBaseTooltip,
+    },
+    TarsTranslation.DialogModeHarvester,
+    {
+        option: "harvestOnlyUseHands",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonHarvesterOnlyUseHands,
+        tooltip: TarsTranslation.DialogButtonHarvesterOnlyUseHandsTooltip,
     },
     TarsTranslation.DialogModeTreasureHunter,
     {

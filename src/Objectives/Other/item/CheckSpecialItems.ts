@@ -32,9 +32,15 @@ export default class CheckSpecialItems extends Objective {
             return messageInABottles.map(item => ([
                 new ReserveItems(item).keepInInventory(),
                 new MoveItemIntoInventory(item),
-                new ExecuteActionForItem(ExecuteActionType.Generic, [ItemType.GlassBottle], ActionType.OpenBottle, (context, action) => {
-                    action.execute(context.actionExecutor, item);
-                }).setStatus("Opening glass bottle")
+                new ExecuteActionForItem(
+                    ExecuteActionType.Generic,
+                    [ItemType.GlassBottle],
+                    {
+                        actionType: ActionType.OpenBottle,
+                        executor: (context, action) => {
+                            action.execute(context.actionExecutor, item);
+                        }
+                    }).setStatus("Opening glass bottle")
             ]));
         }
 

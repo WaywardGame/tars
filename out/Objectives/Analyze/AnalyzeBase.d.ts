@@ -9,6 +9,7 @@ export default class AnalyzeBase extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
-    static getNearPoints(doodads: Doodad[]): IVector3[];
-    static matchesBaseInfo(info: IBaseInfo, doodadType: DoodadType): boolean;
+    static getNearPointsFromDoodads(doodads: Doodad[]): IVector3[];
+    static getNearPoints(point: IVector3): IVector3[];
+    static matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean;
 }

@@ -179,9 +179,15 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			objectives.push(new MoveToLand());
 		}
 
-		objectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [this.itemType], ActionType.Craft, (context, action) => {
-			action.execute(context.actionExecutor, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
-		}).passAcquireData(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+		objectives.push(new ExecuteActionForItem(
+			ExecuteActionType.Generic,
+			[this.itemType],
+			{
+				actionType: ActionType.Craft,
+				executor: (context, action) => {
+					action.execute(context.actionExecutor, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
+				}
+			}).passAcquireData(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 		return objectives;
 	}

@@ -1,5 +1,6 @@
 import Doodads from "game/doodad/Doodads";
 import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
 import Corpses from "game/entity/creature/corpse/Corpses";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { ItemType } from "game/item/IItem";
@@ -15,6 +16,7 @@ import type { ITerrainSearch, DoodadSearchMap, CreatureSearch } from "../../../c
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ItemUtilities } from "../../../utilities/Item";
 import UseProvidedItem from "../../core/UseProvidedItem";
+import GatherFromBuilt from "../../gather/GatherFromBuilt";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";
 import GatherFromCreature from "../../gather/GatherFromCreature";
@@ -110,6 +112,11 @@ export default class AcquireItem extends AcquireBase {
 				if (revertItemDescription?.lit === this.itemType) {
 					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passAcquireData(this)]);
 				}
+			}
+
+			const buildDoodadType = itemDescription.onUse?.[ActionType.Build];
+			if (buildDoodadType !== undefined) {
+				objectivePipelines.push([new GatherFromBuilt(this.itemType, buildDoodadType as DoodadType).passAcquireData(this)]);
 			}
 		}
 

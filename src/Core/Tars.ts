@@ -61,8 +61,7 @@ import { TileUtilities } from "../utilities/Tile";
 import Context from "./context/Context";
 import { ContextDataType, MovingToNewIslandState } from "./context/IContext";
 import executor, { ExecuteObjectivesResultType } from "./Executor";
-import { IBase, IInventoryItems, IResetOptions, ITarsEvents, ITarsOptions, IUtilities, tickSpeed } from "./ITars";
-import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./ITars";
+import { IBase, IInventoryItems, IResetOptions, ITarsEvents, IUtilities, tickSpeed, TarsMode, NavigationSystemState, QuantumBurstStatus } from "./ITars";
 import type { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import { tileUpdateRadius } from "./navigation/Navigation";
@@ -79,6 +78,7 @@ import ItemManager from "game/item/ItemManager";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import Corpse from "game/entity/creature/corpse/Corpse";
+import { ITarsOptions } from "./ITarsOptions";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -484,7 +484,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     this.statThresholdExceeded[stat.type] = true;
 
                     if (this.isRunning()) {
-                        this.interrupt(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
+                        this.fullInterrupt(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
                     }
                 }
 
@@ -896,6 +896,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.human.walkAlongPath(undefined);
     }
 
+    // todo: make this the default?
     private fullInterrupt(reason: string) {
         this.interrupt(reason);
 

@@ -18,9 +18,10 @@ import type { TerrainType } from "game/tile/ITerrain";
 import doodadDescriptions from "game/doodad/Doodads";
 
 import type Context from "../core/context/Context";
-import { IDisassemblySearch, TarsUseProtectedItems } from "../core/ITars";
+import { IDisassemblySearch } from "../core/ITars";
 import ItemManager from "game/item/ItemManager";
 import { ContextDataType } from "../core/context/IContext";
+import { TarsUseProtectedItems } from "../core/ITarsOptions";
 
 export class ItemUtilities {
 
