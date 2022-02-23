@@ -4,7 +4,7 @@ import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
@@ -25,13 +25,12 @@ export default class GatherFromBuilt extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        return context.utilities.object.findDoodads(context, `${this.getIdentifier()}|1`, doodad => doodad.type === this.doodadtype, 5)
-            .map(target => {
-                const objectives: IObjective[] = [];
-
-                objectives.push(new MoveToTarget(target, true));
-                objectives.push(new ClearTile(target));
-                objectives.push(new ExecuteActionForItem(
+        return context.utilities.object.findDoodads(context, `${this.getIdentifier()}|1`,
+            doodad => doodad.type === this.doodadtype && !context.utilities.base.isBaseDoodad(context, doodad), 5)
+            .map(target => ([
+                new MoveToTarget(target, true),
+                new ClearTile(target),
+                new ExecuteActionForItem(
                     ExecuteActionType.Generic,
                     [this.itemType],
                     {
@@ -40,9 +39,8 @@ export default class GatherFromBuilt extends Objective {
                             action.execute(context.actionExecutor);
                         },
                     }).passAcquireData(this)
-                    .setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.doodadtype).getString()} from ${target.getName()}`));
-                return objectives;
-            });
+                    .setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.doodadtype).getString()} from ${target.getName()}`),
+            ]));
     }
 
     protected override getBaseDifficulty(context: Context): number {

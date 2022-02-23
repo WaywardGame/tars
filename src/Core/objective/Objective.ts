@@ -29,7 +29,7 @@ export default abstract class Objective implements IObjective {
 
 	private _status: IObjective | (() => string) | string | undefined;
 
-	public abstract getIdentifier(): string;
+	public abstract getIdentifier(context: Context | undefined): string;
 
 	/**
 	 * Human readable status for what the objective is doing
@@ -50,8 +50,8 @@ export default abstract class Objective implements IObjective {
 		this._log = log;
 	}
 
-	public getHashCode(addUniqueIdentifier?: boolean): string {
-		let hashCode = this.getIdentifier();
+	public getHashCode(context: Context | undefined, addUniqueIdentifier?: boolean): string {
+		let hashCode = this.getIdentifier(context);
 
 		if (hashCode.includes("[object")) {
 			console.warn("Invalid objective identifier", hashCode);
@@ -74,7 +74,7 @@ export default abstract class Objective implements IObjective {
 		// the context data key check prevents an infinite loop
 		// AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll
 		// -> AcquireItemFromDismantle:Twigs:Branch,SaguaroCactusRibs,Winterberries:156707:[AcquireItemFromDismantle:WoodenShavings:WoodenDowels,Twigs:155925:[AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll:155553:[AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll:154175:
-		if (this.contextDataKey !== ContextDataType.LastAcquiredItem && this.contextDataKey.startsWith(this.getIdentifier())) {
+		if (this.contextDataKey !== ContextDataType.LastAcquiredItem && this.contextDataKey.startsWith(this.getIdentifier(context))) {
 			hashCode += `:[${this.contextDataKey}]`;
 		}
 
@@ -86,7 +86,7 @@ export default abstract class Objective implements IObjective {
 	}
 
 	public toString(): string {
-		return this.getHashCode();
+		return this.getHashCode(undefined);
 	}
 
 	public getName(): string {
@@ -163,6 +163,11 @@ export default abstract class Objective implements IObjective {
 
 	public overrideDifficulty(difficulty: number | undefined) {
 		this._overrideDifficulty = difficulty;
+		return this;
+	}
+
+	public passOverriddenDifficulty(objective: Objective) {
+		this._overrideDifficulty = objective._overrideDifficulty;
 		return this;
 	}
 

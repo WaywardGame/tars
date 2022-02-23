@@ -47,19 +47,19 @@ export default class Plan implements IPlan {
 
 				if (cacheHashcodes) {
 					if (!(objective as any).cachedHashCode) {
-						(objective as any).cachedHashCode = objective.getHashCode();
+						(objective as any).cachedHashCode = objective.getHashCode(context);
 					}
 
 					return (objective as any).cachedHashCode;
 				}
 
-				return objective.getHashCode();
+				return objective.getHashCode(context);
 			}).join(" -> ") :
 			"Empty pipeline";
 	}
 
 	constructor(private readonly planner: IPlanner, private readonly context: Context, private readonly objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]) {
-		this.log = loggerUtilities.createLog("Plan", objectiveInfo.objective.getHashCode());
+		this.log = loggerUtilities.createLog("Plan", objectiveInfo.objective.getHashCode(context));
 
 		// this.tree = this.createExecutionTree(objective, objectives);
 		// this.tree = this.createOptimizedExecutionTree(objectiveInfo.objective, objectives);
@@ -141,7 +141,7 @@ export default class Plan implements IPlan {
 			}
 
 			// queue this messsage to be logged if another message occurs
-			let message = `Executing ${objectiveInfo.objective.getHashCode()} [${objectiveInfo.objective.getStatusMessage(this.context)}]`;
+			let message = `Executing ${objectiveInfo.objective.getHashCode(this.context)} [${objectiveInfo.objective.getStatusMessage(this.context)}]`;
 
 			const contextHashCode = this.context.getHashCode();
 			if (contextHashCode.length > 0) {
@@ -209,7 +209,7 @@ export default class Plan implements IPlan {
 							resultObjectives = objectivePipeline.objectives;
 
 						} else {
-							this.log.warn(`Invalid return value for ${objectiveInfo.objective.getHashCode()}. status: ${objectivePipeline.status}`);
+							this.log.warn(`Invalid return value for ${objectiveInfo.objective.getHashCode(this.context)}. status: ${objectivePipeline.status}`);
 							break;
 						}
 
@@ -282,49 +282,49 @@ export default class Plan implements IPlan {
 	}
 
 	// @ts-ignore
-	private createExecutionTree(objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
-		let id = 0;
+	// private createExecutionTree(objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
+	// 	let id = 0;
 
-		const tree: IExecutionTree = {
-			id: id++,
-			depth: 1,
-			objective: objective,
-			hashCode: objective.getHashCode(),
-			difficulty: 0,
-			logs: [],
-			children: [],
-		};
+	// 	const tree: IExecutionTree = {
+	// 		id: id++,
+	// 		depth: 1,
+	// 		objective: objective,
+	// 		hashCode: objective.getHashCode(this.context),
+	// 		difficulty: 0,
+	// 		logs: [],
+	// 		children: [],
+	// 	};
 
-		const depthMap = new Map<number, IExecutionTree>();
-		depthMap.set(1, tree);
+	// 	const depthMap = new Map<number, IExecutionTree>();
+	// 	depthMap.set(1, tree);
 
-		for (const { depth, objective, difficulty, logs } of objectives) {
-			const parent = depthMap.get(depth - 1);
-			if (!parent) {
-				this.log.error(`Root objective: ${objective}`);
-				this.log.error("Objectives", objectives);
+	// 	for (const { depth, objective, difficulty, logs } of objectives) {
+	// 		const parent = depthMap.get(depth - 1);
+	// 		if (!parent) {
+	// 			this.log.error(`Root objective: ${objective}`);
+	// 			this.log.error("Objectives", objectives);
 
-				throw new Error(`Invalid parent tree ${depth - 1}. Objective: ${objective.getHashCode()}`);
-			}
+	// 			throw new Error(`Invalid parent tree ${depth - 1}. Objective: ${objective.getHashCode(this.context)}`);
+	// 		}
 
-			const childTree: IExecutionTree = {
-				id: id++,
-				depth: depth,
-				objective: objective,
-				hashCode: objective.getHashCode(),
-				difficulty: difficulty,
-				logs: logs,
-				children: [],
-				parent: parent,
-			};
+	// 		const childTree: IExecutionTree = {
+	// 			id: id++,
+	// 			depth: depth,
+	// 			objective: objective,
+	// 			hashCode: objective.getHashCode(this.context),
+	// 			difficulty: difficulty,
+	// 			logs: logs,
+	// 			children: [],
+	// 			parent: parent,
+	// 		};
 
-			parent.children.push(childTree);
+	// 		parent.children.push(childTree);
 
-			depthMap.set(depth, childTree);
-		}
+	// 		depthMap.set(depth, childTree);
+	// 	}
 
-		return tree;
-	}
+	// 	return tree;
+	// }
 
 	// @ts-ignore
 	// private createOptimizedExecutionTree(objective: IObjective, objectives: IObjectiveInfo[]): IExecutionTree {
@@ -511,7 +511,7 @@ export default class Plan implements IPlan {
 			id: id++,
 			depth: 0,
 			objective: objective,
-			hashCode: objective.getHashCode(),
+			hashCode: objective.getHashCode(context),
 			difficulty: 0,
 			logs: [],
 			children: [],
@@ -527,7 +527,7 @@ export default class Plan implements IPlan {
 		const keepInInventoryReserveItemObjectives: Map<Item, number> = new Map();
 
 		for (const { depth, objective, difficulty, logs } of objectives) {
-			const hashCode = objective.getHashCode();
+			const hashCode = objective.getHashCode(context);
 
 			if (objective instanceof ReserveItems) {
 				const map = objective.shouldKeepInInventory() ? keepInInventoryReserveItemObjectives : reserveItemObjectives;
@@ -586,7 +586,7 @@ export default class Plan implements IPlan {
 		const cachedExecutionPriorities: Map<string, Map<IExecutionTree, number>> = new Map();
 
 		const getExecutionPriority = (objective: IObjective, tree: IExecutionTree) => {
-			const hashCode = objective.getHashCode();
+			const hashCode = objective.getHashCode(context);
 
 			let objectivePriorities = cachedExecutionPriorities.get(hashCode);
 			if (!objectivePriorities) {
@@ -641,7 +641,7 @@ export default class Plan implements IPlan {
 				}
 
 				if (position === undefined) {
-					throw new Error(`Unknown gather objective position ${gatherObjectiveTree.objective.getHashCode()} ${this.getTreeString(gatherObjectiveTree)}`);
+					throw new Error(`Unknown gather objective position ${gatherObjectiveTree.objective.getHashCode(context)} ${this.getTreeString(gatherObjectiveTree)}`);
 				}
 
 				const vertex = { tree: gatherObjectiveTree, position };
@@ -685,7 +685,7 @@ export default class Plan implements IPlan {
 
 				const index = visitedTree.parent.children.indexOf(visitedTree);
 				if (index === -1) {
-					throw new Error(`Invalid gather objective tree for ${visitedTree.objective.getHashCode()}`);
+					throw new Error(`Invalid gather objective tree for ${visitedTree.objective.getHashCode(context)}`);
 				}
 
 				visitedTree.parent.children.splice(index, 1);
@@ -711,7 +711,7 @@ export default class Plan implements IPlan {
 				id: id++,
 				depth: 1,
 				objective: reserveItemObjective,
-				hashCode: reserveItemObjective.getHashCode(),
+				hashCode: reserveItemObjective.getHashCode(context),
 				difficulty: 0,
 				logs: [],
 				children: [],
@@ -729,7 +729,7 @@ export default class Plan implements IPlan {
 				id: id++,
 				depth: 1,
 				objective: reserveItemObjective,
-				hashCode: reserveItemObjective.getHashCode(),
+				hashCode: reserveItemObjective.getHashCode(context),
 				difficulty: 0,
 				logs: [],
 				children: [],

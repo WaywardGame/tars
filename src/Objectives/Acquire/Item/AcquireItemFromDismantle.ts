@@ -72,7 +72,7 @@ export default class AcquireItemFromDismantle extends Objective {
 
 			// Set addUniqueIdentifier to true because the pipeline may be ordered and it could run two of the same AcquireItemFromDismantle objectives one after another
 			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
-			const hashCode = this.getHashCode(true);
+			const hashCode = this.getHashCode(context, true);
 
 			if (dismantleItem === undefined) {
 				objectives.push(new AcquireItem(itemType).setContextDataKey(hashCode));
@@ -86,7 +86,7 @@ export default class AcquireItemFromDismantle extends Objective {
 			let requiredItem: Item | undefined;
 
 			if (description.dismantle.required !== undefined) {
-				requiredItemHashCode = `${this.getHashCode()}:${this.getUniqueIdentifier()}`;
+				requiredItemHashCode = `${this.getHashCode(context)}:${this.getUniqueIdentifier()}`;
 
 				requiredItem = context.island.items.getItemForHuman(context.human, description.dismantle.required, {
 					excludeProtectedItems: true,

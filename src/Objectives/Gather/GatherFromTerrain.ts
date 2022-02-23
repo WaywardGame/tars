@@ -108,15 +108,12 @@ export default class GatherFromTerrain extends Objective {
 
 				difficulty = Math.round(difficulty);
 
-				const objectives: IObjective[] = [];
-
-				objectives.push(new MoveToTarget(point, true).addDifficulty(difficulty));
-
-				objectives.push(new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType))
-					.passAcquireData(this)
-					.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, terrainSearch.itemType).getString()} from ${Translation.nameOf(Dictionary.Terrain, terrainSearch.type).getString()}`));
-
-				objectivePipelines.push(objectives);
+				objectivePipelines.push([
+					new MoveToTarget(point, true).addDifficulty(difficulty),
+					new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType))
+						.passAcquireData(this)
+						.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, terrainSearch.itemType).getString()} from ${Translation.nameOf(Dictionary.Terrain, terrainSearch.type).getString()}`),
+				]);
 			}
 		}
 

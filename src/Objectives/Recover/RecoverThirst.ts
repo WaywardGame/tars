@@ -140,7 +140,7 @@ export default class RecoverThirst extends Objective {
 			}
 		}
 
-		return objectivePipelines;
+		return objectivePipelines.length > 0 ? objectivePipelines : ObjectiveResult.Ignore;
 	}
 
 	private async getEmergencyObjectives(context: Context) {

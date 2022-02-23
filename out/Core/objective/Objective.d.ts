@@ -16,12 +16,12 @@ export default abstract class Objective implements IObjective {
     private _additionalDifficulty;
     private _overrideDifficulty;
     private _status;
-    abstract getIdentifier(): string;
+    abstract getIdentifier(context: Context | undefined): string;
     abstract getStatus(context: Context): string | undefined;
     abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
     get log(): ILog;
     setLogger(log: ILog | undefined): void;
-    getHashCode(addUniqueIdentifier?: boolean): string;
+    getHashCode(context: Context | undefined, addUniqueIdentifier?: boolean): string;
     toString(): string;
     getName(): string;
     getStatusMessage(context: Context): string | undefined;
@@ -33,6 +33,7 @@ export default abstract class Objective implements IObjective {
     shouldIncludeContextHashCode(context: Context): boolean;
     addDifficulty(difficulty: number): this;
     overrideDifficulty(difficulty: number | undefined): this;
+    passOverriddenDifficulty(objective: Objective): this;
     isDifficultyOverridden(): boolean;
     getDifficulty(context: Context): number;
     onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean>;

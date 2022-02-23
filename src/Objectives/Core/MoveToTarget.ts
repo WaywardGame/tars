@@ -94,14 +94,17 @@ export default class MoveToTarget extends Objective {
 				return ObjectiveResult.Impossible;
 			}
 
+			// note: passOverriddenDifficulty is very important
+			// MoveItemIntoInventory will set difficulty to 0 for certain base chests (in the event the player needs to move to the base to craft the item anyway)
+			// the overriden difficulty must be passed through to the child actions
 			return [
 				// new MoveToZ(this.target.z),
 
 				// move to cave entrance
-				new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }),
+				new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
 
 				// move to target
-				new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }),
+				new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
 			];
 		}
 

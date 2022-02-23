@@ -36,8 +36,8 @@ export interface IObjective {
     enableLogging: boolean;
     setLogger(log: ILog | undefined): void;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
-    getHashCode(addUniqueIdentifier?: boolean): string;
-    getIdentifier(): string;
+    getHashCode(context: Context | undefined, addUniqueIdentifier?: boolean): string;
+    getIdentifier(context: Context | undefined): string;
     getName(): string;
     getStatusMessage(context: Context): string | undefined;
     getExecutionPriority?(context: Context, tree: IExecutionTree): IObjectivePriority;

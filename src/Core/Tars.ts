@@ -697,7 +697,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             statusMessage = "Miscellaneous processing";
 
             if (plan) {
-                log.warn("Missing status message for objective", plan.tree.objective.getIdentifier());
+                log.warn("Missing status message for objective", plan.tree.objective.getIdentifier(this.context));
             }
         }
 
@@ -965,7 +965,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         const interruptIds = new Set<string>(interrupts
             .filter(objective => Array.isArray(objective) ? objective.length > 0 : objective !== undefined)
-            .map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective!.getIdentifier()));
+            .map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier(this.context)).join(" -> ") : objective!.getIdentifier(this.context)));
 
         let interruptsChanged = this.interruptIds === undefined && interruptIds.size > 0;
         if (!interruptsChanged && this.interruptIds !== undefined) {

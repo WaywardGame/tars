@@ -22,7 +22,7 @@ export default class GatherFromChest extends Objective {
 		super();
 	}
 
-	public getIdentifier(context?: Context): string {
+	public getIdentifier(context: Context | undefined): string {
 		return `GatherFromChest:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseChests)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}`;
 	}
 

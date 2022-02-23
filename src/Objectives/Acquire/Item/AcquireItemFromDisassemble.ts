@@ -69,7 +69,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 			// Set addUniqueIdentifier to true because the pipeline may be ordered and it could run two of the same AcquireItemFromDismantle objectives one after another
 			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
-			const hashCode = this.getHashCode(true);
+			const hashCode = this.getHashCode(context, true);
 
 			// probably doesn't fix a bug
 			// const hashCode = `${this.getHashCode()}:${this.getUniqueIdentifier()}`
@@ -87,7 +87,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				requiredItemHashCodes = [];
 
 				for (let i = 0; i < requiredForDisassembly.length; i++) {
-					const requiredItemHashCode = requiredItemHashCodes[i] = `${this.getHashCode()}:${this.getUniqueIdentifier()}`;
+					const requiredItemHashCode = requiredItemHashCodes[i] = `${this.getHashCode(context)}:${this.getUniqueIdentifier()}`;
 
 					const itemTypeOrGroup = requiredForDisassembly[i];
 
