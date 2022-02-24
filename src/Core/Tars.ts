@@ -16,6 +16,7 @@ import type Island from "game/island/Island";
 import type { ItemTypeGroup } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
+import { WorldZ } from "game/WorldZ";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import { Prompt } from "game/meta/prompt/IPrompt";
 import type { IPrompt } from "game/meta/prompt/Prompts";
@@ -448,8 +449,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     @EventHandler(EventBus.Humans, "changeZ")
-    public onChangeZ(human: Human, z: number, lastZ: number) {
-        if (this.human !== human || !this.isRunning() || !human.hasWalkPath()) {
+    public onChangeZ(human: Human, z: WorldZ, lastZ: WorldZ) {
+        if (this.human !== human || !this.isRunning()) {
             return;
         }
 
@@ -457,7 +458,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.utilities.navigation.queueUpdateOrigin(this.human);
         }
 
-        this.interrupt(`Interrupting due to z movement from ${lastZ} to ${z}`);
+        this.interrupt(`Interrupting due to z movement from ${WorldZ[lastZ]} to ${WorldZ[z]}`);
     }
 
     @EventHandler(EventBus.Humans, "preMove")
@@ -576,9 +577,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (this.saveData.enabled) {
             this.overlay.show();
 
-            if (this.utilities.navigation) {
-                this.utilities.navigation.queueUpdateOrigin(this.human);
-            }
+            this.utilities.navigation.queueUpdateOrigin(this.human);
 
             this.tickTimeoutId = window.setTimeout(this.tick.bind(this), tickSpeed);
 
@@ -911,6 +910,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             }
 
             await this.onTick();
+
             this.updateStatus();
 
         } catch (ex) {
@@ -952,6 +952,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         this.clearCaches();
+
+        await this.utilities.navigation.processQueuedOriginUpdate();
 
         // system objectives
         await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);

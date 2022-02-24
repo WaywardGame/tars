@@ -77,4 +77,20 @@ export class DoodadUtilities {
 		return waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0;
 	}
 
+	public requiresFire(doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
+		const description = Doodads[doodadTypeOrGroup];
+		if (description && description.lit !== undefined) {
+			if (DoodadManager.isGroup(doodadTypeOrGroup)) {
+				const litDescription = Doodads[description.lit];
+				if (litDescription && DoodadManager.isInGroup(description.lit, doodadTypeOrGroup)) {
+					return true;
+				}
+
+			} else if (description.lit === doodadTypeOrGroup) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

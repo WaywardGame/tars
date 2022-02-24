@@ -231,6 +231,15 @@ export default class Navigation {
 		}
 	}
 
+	public async processQueuedOriginUpdate() {
+		if (this.originUpdateTimeout !== undefined) {
+			window.clearTimeout(this.originUpdateTimeout);
+			await this.updateOrigin();
+
+			// log.warn("processQueuedOriginUpdate", this.origin);
+		}
+	}
+
 	public async updateOrigin(origin?: IVector3) {
 		if (origin) {
 			this.origin = { x: origin.x, y: origin.y, z: origin.z };
@@ -240,8 +249,9 @@ export default class Navigation {
 			throw new Error("Invalid origin");
 		}
 
-		const z = this.origin.z;
-		this._updateOrigin(this.origin.x, this.origin.y, z);
+		// log.warn("updateOrigin", this.origin);
+
+		this._updateOrigin(this.origin.x, this.origin.y, this.origin.z);
 
 		const oppositeZ = this.oppositeZ;
 		if (oppositeZ === undefined) {
@@ -263,6 +273,9 @@ export default class Navigation {
 			this.oppositeOrigin = { x, y, z: oppositeZ };
 
 			this._updateOrigin(x, y, oppositeZ);
+
+		} else {
+			this.oppositeOrigin = undefined;
 		}
 
 		// const updateOriginMessage: IUpdateOriginRequest = {

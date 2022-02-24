@@ -33,6 +33,8 @@ export interface IMoveToTargetOptions {
 
 	skipZCheck: boolean;
 	changeZ: number;
+
+	reverse: boolean;
 }
 
 export default class MoveToTarget extends Objective {
@@ -60,9 +62,9 @@ export default class MoveToTarget extends Objective {
 		}
 	}
 
-	public getIdentifier(): string {
+	public getIdentifier(context: Context | undefined): string {
 		// ${this.target} - likely an [object] without a ToString
-		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
+		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}:${this.options?.reverse ?? false}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -88,27 +90,63 @@ export default class MoveToTarget extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const position = context.getPosition();
 
+		// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+		// 	console.warn("player position", context.human.getPoint());
+		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
+		// 	console.warn("oppositeZOrigin", context.utilities.navigation.getOppositeOrigin());
+		// }
+
 		if (!this.options?.skipZCheck && position.z !== this.target.z) {
+			const origin = context.utilities.navigation.getOrigin();
 			const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
-			if (!oppositeZOrigin || oppositeZOrigin.z !== this.target.z) {
+			if (!origin || !oppositeZOrigin) {
 				return ObjectiveResult.Impossible;
 			}
 
-			// note: passOverriddenDifficulty is very important
-			// MoveItemIntoInventory will set difficulty to 0 for certain base chests (in the event the player needs to move to the base to craft the item anyway)
-			// the overriden difficulty must be passed through to the child actions
-			return [
-				// new MoveToZ(this.target.z),
+			switch (this.target.z) {
+				case oppositeZOrigin.z:
+					// the target z is in the known oppositeZ nav map
 
-				// move to cave entrance
-				new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+					// note: passOverriddenDifficulty is very important
+					// MoveItemIntoInventory will set difficulty to 0 for certain base chests (in the event the player needs to move to the base to craft the item anyway)
+					// the overriden difficulty must be passed through to the child actions
+					return [
+						// move to cave entrance
+						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
 
-				// move to target
-				new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
-			];
+						// move to target
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
+					];
+
+				case origin.z:
+					// position is not in target z
+					// position is not in origin z
+					// origin z === target z & is in the primary nav map
+					// should move from position [opposite z] -> cave entrance [origin z]
+					// move to target from reverse(opposite z origin -> position)
+					if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+						// console.warn("broken okay?");
+					}
+
+					return [
+						// move to cave entrance from the current position - reverse is true!
+						new MoveToTarget({ x: position.x, y: position.y, z: position.z }, false, { ...this.options, reverse: true, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+
+						// move to target
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
+					];
+
+				default:
+
+					if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+						// console.warn("broken 2");
+					}
+
+					return ObjectiveResult.Impossible;
+			}
 		}
 
-		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget);
+		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget, this.options?.reverse);
 
 		if (context.calculatingDifficulty) {
 			if (movementPath.difficulty !== ObjectiveResult.Impossible) {
@@ -120,7 +158,29 @@ export default class MoveToTarget extends Objective {
 					}
 				}
 
-				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
+				if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+					// console.warn("diff 2", movementPath.difficulty);
+				}
+
+				// if (this.target.x === 137 && this.target.y === 383 && this.target.z === 1) {
+				// 	console.warn("moved", context.human.getPoint(), context.getPosition().toString(), movementPath.difficulty);
+				// }
+
+				if (this.options?.reverse) {
+					const origin = context.utilities.navigation.getOrigin();
+					const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
+					if (origin && origin.z === this.target.z) {
+						// console.warn("set reversed origin to ", origin);
+						context.setData(ContextDataType.Position, new Vector3(origin.x, origin.y, this.options?.changeZ ?? origin.z));
+
+					} else if (oppositeZOrigin) {
+						// console.warn("set reversed origin to opposite ", oppositeZOrigin);
+						context.setData(ContextDataType.Position, new Vector3(oppositeZOrigin.x, oppositeZOrigin.y, this.options?.changeZ ?? oppositeZOrigin.z));
+					}
+
+				} else {
+					context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
+				}
 			}
 
 			return movementPath.difficulty;

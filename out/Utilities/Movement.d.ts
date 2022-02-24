@@ -18,7 +18,9 @@ export declare class MovementUtilities {
     resetMovementOverlays(): void;
     clearOverlay(tile: ITile): void;
     updateOverlay(path: IVector2[]): void;
-    getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean): Promise<IMovementPath>;
+    ensureOrigin(context: Context): Promise<void>;
+    getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean, reverse?: boolean): Promise<IMovementPath>;
+    private _getMovementPath;
     moveToFaceTarget(context: Context, target: IVector3): Promise<MoveResult>;
     moveToTarget(context: Context, target: IVector3): Promise<MoveResult>;
     move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean, walkOnce?: boolean): Promise<MoveResult>;

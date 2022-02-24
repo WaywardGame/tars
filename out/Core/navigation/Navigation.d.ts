@@ -27,6 +27,7 @@ export default class Navigation {
     updateAll(sailingMode: boolean): Promise<void>;
     getOrigin(): IVector3 | undefined;
     queueUpdateOrigin(origin?: IVector3): void;
+    processQueuedOriginUpdate(): Promise<void>;
     updateOrigin(origin?: IVector3): Promise<void>;
     get oppositeZ(): number | undefined;
     getOppositeOrigin(): IVector3 | undefined;

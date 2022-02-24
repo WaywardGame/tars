@@ -12,6 +12,7 @@ export interface IMoveToTargetOptions {
     idleIfAlreadyThere: boolean;
     skipZCheck: boolean;
     changeZ: number;
+    reverse: boolean;
 }
 export default class MoveToTarget extends Objective {
     protected target: IVector3;
@@ -22,7 +23,7 @@ export default class MoveToTarget extends Objective {
     private trackedItem;
     private trackedPosition;
     constructor(target: IVector3, moveAdjacentToTarget: boolean, options?: Partial<IMoveToTargetOptions> | undefined);
-    getIdentifier(): string;
+    getIdentifier(context: Context | undefined): string;
     getStatus(): string | undefined;
     getPosition(): IVector3;
     isDynamic(): boolean;

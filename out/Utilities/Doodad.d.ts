@@ -5,4 +5,5 @@ export declare class DoodadUtilities {
     getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup, includeLitAndRevert?: boolean): Set<DoodadType>;
     isWaterStillDesalinating(waterStill: Doodad): boolean;
     isWaterStillDrinkable(waterStill: Doodad): boolean;
+    requiresFire(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): boolean;
 }

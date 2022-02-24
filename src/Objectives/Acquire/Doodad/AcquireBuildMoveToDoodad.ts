@@ -45,44 +45,55 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const doodadTypes = context.utilities.doodad.getDoodadTypes(this.doodadTypeOrGroup);
 
-		const doodad = !this.options.ignoreExistingDoodads ?
-			context.utilities.object.findDoodad(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && context.utilities.base.isBaseDoodad(context, d)) :
+		const doodads = !this.options.ignoreExistingDoodads ?
+			context.utilities.object.findDoodads(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && context.utilities.base.isBaseDoodad(context, d)) :
 			undefined;
+		if (doodads !== undefined && doodads.length > 0) {
+			return doodads.map(doodad => {
+				let requiresFire = false;
 
-		let requiresFire = false;
+				const description = doodad.description();
+				if (description && description.lit !== undefined) {
+					if (DoodadManager.isGroup(this.doodadTypeOrGroup)) {
+						const litDescription = Doodads[description.lit];
+						if (litDescription && DoodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {
+							requiresFire = true;
+						}
 
-		if (doodad) {
-			const description = doodad.description();
-			if (description && description.lit !== undefined) {
-				if (DoodadManager.isGroup(this.doodadTypeOrGroup)) {
-					const litDescription = Doodads[description.lit];
-					if (litDescription && DoodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {
+					} else if (description.lit === this.doodadTypeOrGroup) {
 						requiresFire = true;
 					}
-
-				} else if (description.lit === this.doodadTypeOrGroup) {
-					requiresFire = true;
 				}
-			}
+
+				const objectives: IObjective[] = [];
+
+				if (requiresFire) {
+					// StartFire handles fetching fire supplies and moving to the doodad to light it
+					objectives.push(new StartFire(doodad));
+
+				} else if (!this.options.disableMoveTo) {
+					objectives.push(new MoveToTarget(doodad, true));
+				}
+
+				return objectives;
+			});
 		}
+
+		// todo: calculate this correctly?
+		const requiresFire = false;
 
 		const objectives: IObjective[] = [];
 
-		if (!doodad) {
-			const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
-			if (inventoryItem === undefined) {
-				objectives.push(new AcquireItemForDoodad(this.doodadTypeOrGroup));
-			}
-
-			objectives.push(new BuildItem(inventoryItem));
+		const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
+		if (inventoryItem === undefined) {
+			objectives.push(new AcquireItemForDoodad(this.doodadTypeOrGroup));
 		}
+
+		objectives.push(new BuildItem(inventoryItem));
 
 		if (requiresFire) {
 			// StartFire handles fetching fire supplies and moving to the doodad to light it
-			objectives.push(new StartFire(doodad));
-
-		} else if (doodad && !this.options.disableMoveTo) {
-			objectives.push(new MoveToTarget(doodad, true));
+			objectives.push(new StartFire());
 		}
 
 		return objectives;

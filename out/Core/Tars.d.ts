@@ -7,6 +7,7 @@ import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
 import type Island from "game/island/Island";
 import type Item from "game/item/Item";
+import { WorldZ } from "game/WorldZ";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import type { IPrompt } from "game/meta/prompt/Prompts";
 import type Prompts from "game/meta/prompt/Prompts";
@@ -68,7 +69,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     postExecuteAction(_: any, actionType: ActionType, api: IActionApi, args: any[]): void;
     processInput(player: Player): boolean | undefined;
     onWalkPathChange(human: Human, walkPath: IVector2[] | undefined): void;
-    onChangeZ(human: Human, z: number, lastZ: number): void;
+    onChangeZ(human: Human, z: WorldZ, lastZ: WorldZ): void;
     onPreMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile): void;
     onStatChange(human: Human, stat: IStat): void;
     onMoveToIsland(): Promise<void>;
