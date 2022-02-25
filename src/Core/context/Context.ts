@@ -232,6 +232,11 @@ export default class Context implements IContext {
 	// Helper methods
 
 	public getPosition(): IVector3 {
+		// not needed?
+		// if (!this.calculatingDifficulty) {
+		// 	return this.human.getPoint();
+		// }
+
 		const position = this.getData(ContextDataType.Position);
 		if (position && (position.x === undefined || position.y === undefined || position.z === undefined)) {
 			console.error(`[TARS] getPosition - Invalid value ${position}`);

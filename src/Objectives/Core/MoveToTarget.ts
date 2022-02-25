@@ -64,7 +64,7 @@ export default class MoveToTarget extends Objective {
 
 	public getIdentifier(context: Context | undefined): string {
 		// ${this.target} - likely an [object] without a ToString
-		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}:${this.options?.reverse ?? false}`;
+		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}:${this.options?.reverse ?? false}:${this.options?.changeZ ?? this.target.z}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -95,6 +95,11 @@ export default class MoveToTarget extends Objective {
 		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
 		// 	console.warn("oppositeZOrigin", context.utilities.navigation.getOppositeOrigin());
 		// }
+
+		if (this.options?.changeZ === position.z) {
+			// this objective runs dynamically so it's possible it's already in the correct z
+			return ObjectiveResult.Complete;
+		}
 
 		if (!this.options?.skipZCheck && position.z !== this.target.z) {
 			const origin = context.utilities.navigation.getOrigin();
@@ -249,7 +254,7 @@ export default class MoveToTarget extends Objective {
 					return [
 						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
 						new UseItem(ActionType.Paddle, context.inventory.sailBoat),
-						new MoveToTarget(this.target, this.moveAdjacentToTarget, this.options),
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
 					];
 				}
 			}
@@ -279,10 +284,10 @@ export default class MoveToTarget extends Objective {
 				return ObjectiveResult.Pending;
 
 			case MoveResult.Complete:
-				this.log.info("Finished moving to target");
+				this.log.info(`Finished moving to target (${this.target.x},${this.target.y},${this.target.z})`);
 				context.setData(ContextDataType.Position, new Vector3(this.target));
 
-				if (this.options?.idleIfAlreadyThere && movementPath.difficulty === 0) {
+				if (movementPath.difficulty === 0 && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
 					return new Idle(false);
 				}
 

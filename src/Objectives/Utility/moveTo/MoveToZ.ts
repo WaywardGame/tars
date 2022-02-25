@@ -10,6 +10,9 @@ import Objective from "../../../core/objective/Objective";
 import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";
 
+/**
+ * todo: fix this or remove
+ */
 export default class MoveToZ extends Objective {
 
 	constructor(private readonly z: WorldZ) {
