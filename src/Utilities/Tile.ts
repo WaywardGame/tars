@@ -23,13 +23,14 @@ export class TileUtilities {
 	}
 
 	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
-		const position = positionOverride ?? context.human;
+		const position = positionOverride ?? (context.options.fasterPlanning ? context.getPosition() : context.human);
 
 		const results: ITileLocation[][] = [
 			await this._getNearestTileLocation(context, tileType, position)
 		];
 
-		if (!positionOverride) {
+		// assuming opposite origin is in a cave
+		if (!positionOverride && context.options.allowCaves) {
 			const oppositeOrigin = context.utilities.navigation.getOppositeOrigin();
 			if (oppositeOrigin && oppositeOrigin.z !== position.z) {
 				results.push(await this._getNearestTileLocation(context, tileType, oppositeOrigin));

@@ -8,11 +8,13 @@ import { TarsMode } from "./ITars";
 export interface ITarsOptions {
     mode: TarsMode;
 
+    stayHealthy: boolean;
+    allowCaves: boolean;
+
     useProtectedItems: TarsUseProtectedItems;
 
     goodCitizen: boolean;
 
-    stayHealthy: boolean;
     recoverThresholdHealth: number;
     recoverThresholdStamina: number;
     recoverThresholdHunger: number;
@@ -33,6 +35,8 @@ export interface ITarsOptions {
     quantumBurst: boolean;
     debugLogging: boolean;
     freeze: boolean;
+
+    fasterPlanning: boolean;
 }
 
 export enum TarsUseProtectedItems {
@@ -45,9 +49,12 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
     return {
         mode: TarsMode.Survival,
 
-        useProtectedItems: TarsUseProtectedItems.No,
-        goodCitizen: true,
         stayHealthy: true,
+        allowCaves: false,
+
+        useProtectedItems: TarsUseProtectedItems.No,
+
+        goodCitizen: true,
 
         recoverThresholdHealth: 30,
         recoverThresholdStamina: 20,
@@ -69,6 +76,8 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         quantumBurst: false,
         debugLogging: false,
         freeze: false,
+        fasterPlanning: false,
+
         ...initialOptions,
     };
 }

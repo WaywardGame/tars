@@ -131,7 +131,8 @@ class Planner implements IPlanner {
 				const objectiveDeltaTime = performance.now() - objectiveStartTime;
 
 				if (this.debug) {
-					this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+					this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}.`);
+					// (time: ${objectiveDeltaTime.toFixed(2)}ms)
 				}
 
 				switch (objectivePipeline.status) {
@@ -207,9 +208,9 @@ class Planner implements IPlanner {
 
 		const time = performance.now() - start;
 
-		if (this.debug) {
-			this.writeCalculationLog(`Took ${time.toFixed(2)}ms`);
-		}
+		// if (this.debug) {
+		// 	this.writeCalculationLog(`Took ${time.toFixed(2)}ms`);
+		// }
 
 		if (easiestObjectivePipeline) {
 			this.log.info(`Easiest objective for ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} is ${easiestObjectivePipeline.objectives.map(o => o.getHashCode(context)).join(" -> ")} (difficulty: ${easiestObjectivePipeline.difficulty}) (time: ${time.toFixed(2)}ms)`);

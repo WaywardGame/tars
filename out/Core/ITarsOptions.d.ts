@@ -2,9 +2,10 @@ import { TreasureHunterType } from "../modes/TreasureHunter";
 import { TarsMode } from "./ITars";
 export interface ITarsOptions {
     mode: TarsMode;
+    stayHealthy: boolean;
+    allowCaves: boolean;
     useProtectedItems: TarsUseProtectedItems;
     goodCitizen: boolean;
-    stayHealthy: boolean;
     recoverThresholdHealth: number;
     recoverThresholdStamina: number;
     recoverThresholdHunger: number;
@@ -21,6 +22,7 @@ export interface ITarsOptions {
     quantumBurst: boolean;
     debugLogging: boolean;
     freeze: boolean;
+    fasterPlanning: boolean;
 }
 export declare enum TarsUseProtectedItems {
     No = 0,

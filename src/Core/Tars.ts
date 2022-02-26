@@ -21,7 +21,7 @@ import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import { Prompt } from "game/meta/prompt/IPrompt";
 import type { IPrompt } from "game/meta/prompt/Prompts";
 import type Prompts from "game/meta/prompt/Prompts";
-import type { ITile } from "game/tile/ITerrain";
+import { ITile, TerrainType } from "game/tile/ITerrain";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import { Bound } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
@@ -80,6 +80,8 @@ import MoveToTarget from "../objectives/core/MoveToTarget";
 import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import { ITarsOptions } from "./ITarsOptions";
+import Objective from "./objective/Objective";
+import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -458,7 +460,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.utilities.navigation.queueUpdateOrigin(this.human);
         }
 
-        this.interrupt(`Interrupting due to z movement from ${WorldZ[lastZ]} to ${WorldZ[z]}`);
+        this.fullInterrupt(`Interrupting due to z movement from ${WorldZ[lastZ]} to ${WorldZ[z]}`);
     }
 
     @EventHandler(EventBus.Humans, "preMove")
@@ -823,6 +825,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.interruptIds = undefined;
         this.interruptContext = undefined;
         this.interruptContexts.clear();
+
+        Objective.reset();
 
         this.clearCaches();
 
@@ -1214,6 +1218,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         interrupts = interrupts.concat([
             this.gatherFromCorpsesInterrupt(context),
             this.repairsInterrupt(context),
+            this.escapeCavesInterrupt(context),
             this.returnToBaseInterrupt(context),
         ]);
 
@@ -1663,6 +1668,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
+    private escapeCavesInterrupt(context: Context) {
+        if (!context.options.allowCaves && context.human.z === WorldZ.Cave) {
+            return new MoveToZ(WorldZ.Overworld);
+        }
+    }
+
+
     /**
      * Move reserved items into intermediate chests if the player is near the base and is moving away
      * Explicitly not using OrganizeInventory for this - the exact objectives should be specified to prevent issues
@@ -1683,7 +1695,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         const target = walkPath.path[walkPath.path.length - 1];
-        if (this.utilities.base.isNearBase(context, { x: target.x, y: target.y, z: context.human.z })) {
+        const point = { x: target.x, y: target.y, z: context.human.z };
+        if (this.utilities.base.isNearBase(context, point) &&
+            TileHelpers.getType(context.island.getTileFromPoint(point)) !== TerrainType.CaveEntrance) {
             return undefined;
         }
 

@@ -24,6 +24,9 @@ import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
+// caves are scary
+const zChangeDifficulty = 500;
+
 export interface IMoveToTargetOptions {
 	range: number;
 	disableStaminaCheck: boolean;
@@ -90,6 +93,36 @@ export default class MoveToTarget extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const position = context.getPosition();
 
+		if (!context.options.allowCaves && position.z !== this.target.z) {
+			return ObjectiveResult.Impossible;
+		}
+
+		// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
+		// 	console.warn("target", this.target, context.calculatingDifficulty);
+		// 	console.warn("player position", context.human.getPoint());
+		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
+		// }
+
+		if (context.options.fasterPlanning && context.calculatingDifficulty) {
+			if (position.x !== context.human.x || position.y !== context.human.y || position.z !== context.human.z) {
+				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
+				const diff = Vector2.squaredDistance(position, this.target) + (position.z !== this.target.z ? zChangeDifficulty : 0);
+
+				// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
+				// 	console.warn("diff", diff);
+				// }
+
+				return diff;
+			}
+
+			// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
+			// 	console.warn("how");
+			// }
+
+			// if (position.z !== this.target.z) {
+			// }
+		}
+
 		// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
 		// 	console.warn("player position", context.human.getPoint());
 		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
@@ -117,35 +150,37 @@ export default class MoveToTarget extends Objective {
 					// the overriden difficulty must be passed through to the child actions
 					return [
 						// move to cave entrance
-						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this).addDifficulty(zChangeDifficulty),
 
 						// move to target
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
 					];
 
 				case origin.z:
-					// position is not in target z
-					// position is not in origin z
-					// origin z === target z & is in the primary nav map
-					// should move from position [opposite z] -> cave entrance [origin z]
-					// move to target from reverse(opposite z origin -> position)
-					if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
-						// console.warn("broken okay?");
-					}
+					return ObjectiveResult.Impossible;
 
-					return [
-						// move to cave entrance from the current position - reverse is true!
-						new MoveToTarget({ x: position.x, y: position.y, z: position.z }, false, { ...this.options, reverse: true, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+				// position is not in target z
+				// position is not in origin z
+				// origin z === target z & is in the primary nav map
+				// should move from position [opposite z] -> cave entrance [origin z]
+				// move to target from reverse(opposite z origin -> position)
+				// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+				// 	// console.warn("broken okay?");
+				// }
 
-						// move to target
-						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
-					];
+				// return [
+				// 	// move to cave entrance from the current position - reverse is true!
+				// 	new MoveToTarget({ x: position.x, y: position.y, z: position.z }, false, { ...this.options, reverse: true, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+
+				// 	// move to target
+				// 	new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
+				// ];
 
 				default:
 
-					if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
-						// console.warn("broken 2");
-					}
+					// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+					// 	// console.warn("broken 2");
+					// }
 
 					return ObjectiveResult.Impossible;
 			}

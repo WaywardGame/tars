@@ -14,6 +14,10 @@ export default abstract class Objective implements IObjective {
 
 	private static uuid = 0;
 
+	public static reset() {
+		this.uuid = 0;
+	}
+
 	public enableLogging = true;
 
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;

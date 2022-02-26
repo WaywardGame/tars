@@ -168,7 +168,7 @@ export class BaseUtilities {
 		const baseDoodads = this.getBaseDoodads(context);
 
 		for (const doodad of baseDoodads) {
-			if (Vector2.squaredDistance(doodad, point) <= distanceSq) {
+			if (doodad.z === point.z && Vector2.squaredDistance(doodad, point) <= distanceSq) {
 				return true;
 			}
 		}

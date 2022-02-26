@@ -178,7 +178,6 @@ export default class Context implements IContext {
 		return false;
 	}
 
-
 	public setInitialState(state: ContextState = this.state.clone(false)) {
 		this.initialState = state;
 	}

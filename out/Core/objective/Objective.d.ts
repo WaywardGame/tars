@@ -7,6 +7,7 @@ import type Item from "game/item/Item";
 import { ItemType } from "game/item/IItem";
 export default abstract class Objective implements IObjective {
     private static uuid;
+    static reset(): void;
     enableLogging: boolean;
     protected contextDataKey: string;
     protected _shouldKeepInInventory: boolean | undefined;

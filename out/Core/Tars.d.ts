@@ -11,7 +11,7 @@ import { WorldZ } from "game/WorldZ";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import type { IPrompt } from "game/meta/prompt/Prompts";
 import type Prompts from "game/meta/prompt/Prompts";
-import type { ITile } from "game/tile/ITerrain";
+import { ITile } from "game/tile/ITerrain";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import type { ISaveData } from "../ITarsMod";
 import { TarsTranslation } from "../ITarsMod";
@@ -110,6 +110,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private gatherFromCorpsesInterrupt;
     private reduceWeightInterrupt;
     private returnToBaseInterrupt;
+    private escapeCavesInterrupt;
     private organizeInventoryInterrupts;
     private processQueuedNavigationUpdates;
     private processQuantumBurst;

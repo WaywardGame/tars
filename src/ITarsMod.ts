@@ -104,6 +104,8 @@ export enum TarsTranslation {
     DialogButtonExploreIslandsTooltip,
     DialogButtonFreeze,
     DialogButtonFreezeTooltip,
+    DialogButtonFasterPlanning,
+    DialogButtonFasterPlanningTooltip,
     DialogButtonGoodCitizen,
     DialogButtonGoodCitizenTooltip,
     DialogButtonHarvesterOnlyUseHands,
@@ -116,6 +118,8 @@ export enum TarsTranslation {
     DialogButtonPrecognitionTooltip,
     DialogButtonQuantumBurst,
     DialogButtonQuantumBurstTooltip,
+    DialogButtonAllowCaves,
+    DialogButtonAllowCavesTooltip,
     DialogButtonReadBooks,
     DialogButtonReadBooksTooltip,
     DialogButtonClearSwamps,
@@ -223,6 +227,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         title: TarsTranslation.DialogButtonStayHealthy,
         tooltip: TarsTranslation.DialogButtonStayHealthyTooltip,
     },
+    {
+        option: "allowCaves",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonAllowCaves,
+        tooltip: TarsTranslation.DialogButtonAllowCavesTooltip,
+    },
     TarsTranslation.DialogLabelItemProtection,
     {
         option: "useProtectedItems",
@@ -240,13 +250,6 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         title: TarsTranslation.DialogButtonGoodCitizen,
         tooltip: TarsTranslation.DialogButtonGoodCitizenTooltip,
     },
-    TarsTranslation.DialogLabelAdvanced,
-    {
-        option: "quantumBurst",
-        type: TarsOptionSectionType.Checkbox,
-        title: TarsTranslation.DialogButtonQuantumBurst,
-        tooltip: TarsTranslation.DialogButtonQuantumBurstTooltip,
-    },
     TarsTranslation.DialogLabelDeveloper,
     {
         option: "debugLogging",
@@ -259,6 +262,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonFreeze,
         tooltip: TarsTranslation.DialogButtonFreezeTooltip,
+    },
+    {
+        option: "fasterPlanning",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonFasterPlanning,
+        tooltip: TarsTranslation.DialogButtonFasterPlanningTooltip,
     },
     TarsTranslation.DialogLabelRecoverThresholds,
     {
