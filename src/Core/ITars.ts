@@ -52,7 +52,7 @@ export interface ITarsEvents {
 
     quantumBurstChange(status: QuantumBurstStatus): void;
 
-    delete(): void;
+    unload(): void;
 }
 
 export enum NavigationSystemState {

@@ -204,7 +204,7 @@ export default class TarsMod extends Mod {
 
 		this.localPlayerTars = this.createAndLoadTars(localPlayer, this.saveData);
 
-		const tarsEvents = this.localPlayerTars.event.until(this.localPlayerTars, "delete");
+		const tarsEvents = this.localPlayerTars.event.until(this.localPlayerTars, "unload");
 		tarsEvents.subscribe("enableChange", (_, enabled) => {
 			localPlayer.messages
 				.source(this.messageSource)
@@ -314,7 +314,7 @@ export default class TarsMod extends Mod {
 
 		this.tarsInstances.add(tars);
 
-		tars.event.waitFor("delete").then(() => {
+		tars.event.waitFor("unload").then(() => {
 			this.tarsInstances.delete(tars);
 		});
 

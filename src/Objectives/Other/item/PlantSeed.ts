@@ -2,9 +2,8 @@ import doodadDescriptions from "game/doodad/Doodads";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
-import { TerrainType } from "game/tile/ITerrain";
+import { ITile, TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
-import terrainDescriptions from "game/tile/Terrains";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -84,49 +83,34 @@ export default class PlantSeed extends Objective {
 			);
 
 		} else {
-			const nearbyTillableTile = TileHelpers.findMatchingTiles(
-				context.island,
-				context.utilities.base.getBasePosition(context),
-				(_, point, tile) => {
-					if (tile.creature || tile.npc) {
-						return false;
+			let tile: ITile | undefined;
+			let point: IVector3 | undefined;
+
+			const facingTile = context.human.getFacingTile();
+			const facingPoint = context.human.getFacingPoint();
+			if (context.utilities.tile.canTill(context, facingPoint, facingTile, allowedTilesSet)) {
+				tile = facingTile;
+				point = facingPoint;
+
+			} else {
+				const nearbyTillableTile = TileHelpers.findMatchingTiles(
+					context.island,
+					context.utilities.base.getBasePosition(context),
+					(_, point, tile) => context.utilities.tile.canTill(context, point, tile, allowedTilesSet),
+					{
+						maxTilesChecked: gardenMaxTilesChecked,
+						maxTiles: 1,
 					}
+				);
 
-					const tileType = TileHelpers.getType(tile);
-					if (tileType === TerrainType.Grass) {
-						if (!context.utilities.tile.canDig(context, tile)) {
-							return false;
-						}
-
-						// digging grass will reveal dirt
-						if (!allowedTilesSet.has(TerrainType.Dirt)) {
-							return false;
-						}
-
-					} else {
-						if (!allowedTilesSet.has(tileType)) {
-							return false;
-						}
-
-						const terrainDescription = terrainDescriptions[tileType];
-						if (!terrainDescription?.tillable) {
-							return false;
-						}
-					}
-
-					return context.utilities.base.isOpenArea(context, point, tile);
-				},
-				{
-					maxTilesChecked: gardenMaxTilesChecked,
-					maxTiles: 1,
+				if (nearbyTillableTile.length === 0) {
+					return ObjectiveResult.Impossible;
 				}
-			);
 
-			if (nearbyTillableTile.length === 0) {
-				return ObjectiveResult.Impossible;
+				const target = nearbyTillableTile[0];
+				tile = target.tile;
+				point = target.point;
 			}
-
-			const { tile, point } = nearbyTillableTile[0];
 
 			if (TileHelpers.getType(tile) === TerrainType.Grass) {
 				objectives.push(new DigTile(point, { digUntilTypeIsNot: TerrainType.Grass }));

@@ -32,6 +32,11 @@ export interface IRecoverThirstOptions {
 
 export default class RecoverThirst extends Objective {
 
+	public static isEmergency(context: Context) {
+		const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
+		return thirstStat.value <= 3 && context.base.waterStill.concat(context.base.solarStill).every(waterStill => !context.utilities.doodad.isWaterStillDrinkable(waterStill));
+	}
+
 	constructor(private readonly options: IRecoverThirstOptions) {
 		super();
 	}
@@ -46,6 +51,10 @@ export default class RecoverThirst extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (this.options.onlyEmergencies) {
+			if (!RecoverThirst.isEmergency(context)) {
+				return ObjectiveResult.Ignore;
+			}
+
 			return this.getEmergencyObjectives(context);
 		}
 
@@ -144,24 +153,17 @@ export default class RecoverThirst extends Objective {
 	}
 
 	private async getEmergencyObjectives(context: Context) {
-		const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
-
-		const isEmergency = thirstStat.value <= 3 && context.base.waterStill.concat(context.base.solarStill).every(waterStill => !context.utilities.doodad.isWaterStillDrinkable(waterStill));
-		if (!isEmergency) {
-			return ObjectiveResult.Ignore;
-		}
-
 		const objectivePipelines: IObjective[][] = [];
 
 		const health = context.human.stat.get<IStatMax>(Stat.Health);
-		if ((isEmergency && health.value > 4) || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
+		if (health.value > 4 || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = await context.utilities.tile.getNearestTileLocation(context, freshWaterTileLocation);
 
 			for (const { point } of nearestFreshWater) {
 				const objectives: IObjective[] = [];
 
-				objectives.push(new MoveToTarget(point, true).addDifficulty(!isEmergency ? 500 : 0));
+				objectives.push(new MoveToTarget(point, true));
 
 				objectives.push(new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
 					action.execute(context.actionExecutor);
@@ -206,19 +208,17 @@ export default class RecoverThirst extends Objective {
 					}
 
 					if (!context.utilities.doodad.isWaterStillDrinkable(waterStill)) {
-						if (isEmergency) {
-							const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
-							if ((stamina.value / stamina.max) < 0.9) {
-								objectivePipelines.push([new RecoverStamina()]);
+						const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
+						if ((stamina.value / stamina.max) < 0.9) {
+							objectivePipelines.push([new RecoverStamina()]);
 
-							} else {
-								// wait for water still to finish
-								objectivePipelines.push([
-									// new MoveToTarget(waterStill, true, { range: 5 }),
-									new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
-									new Idle().setStatus("Waiting for water still due to emergency"),
-								]);
-							}
+						} else {
+							// wait for water still to finish
+							objectivePipelines.push([
+								// new MoveToTarget(waterStill, true, { range: 5 }),
+								new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
+								new Idle().setStatus("Waiting for water still due to emergency"),
+							]);
 						}
 					}
 				}

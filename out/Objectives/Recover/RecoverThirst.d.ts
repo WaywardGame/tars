@@ -8,6 +8,7 @@ export interface IRecoverThirstOptions {
 }
 export default class RecoverThirst extends Objective {
     private readonly options;
+    static isEmergency(context: Context): boolean;
     constructor(options: IRecoverThirstOptions);
     getIdentifier(): string;
     getStatus(): string | undefined;

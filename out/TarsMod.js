@@ -62,7 +62,7 @@ define(["require", "exports", "game/entity/player/IMessageManager", "language/Tr
                 this.saveData.island[localIsland.id] = {};
             }
             this.localPlayerTars = this.createAndLoadTars(localPlayer, this.saveData);
-            const tarsEvents = this.localPlayerTars.event.until(this.localPlayerTars, "delete");
+            const tarsEvents = this.localPlayerTars.event.until(this.localPlayerTars, "unload");
             tarsEvents.subscribe("enableChange", (_, enabled) => {
                 localPlayer.messages
                     .source(this.messageSource)
@@ -152,7 +152,7 @@ define(["require", "exports", "game/entity/player/IMessageManager", "language/Tr
             const tars = new Tars_1.default(human, saveData, this.tarsOverlay);
             tars.load();
             this.tarsInstances.add(tars);
-            tars.event.waitFor("delete").then(() => {
+            tars.event.waitFor("unload").then(() => {
                 this.tarsInstances.delete(tars);
             });
             return tars;

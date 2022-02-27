@@ -19,6 +19,7 @@ export declare class TileUtilities {
     isFreeOfOtherPlayers(context: Context, point: IVector3): boolean;
     canGather(context: Context, tile: ITile, skipDoodadCheck?: boolean): boolean;
     canDig(context: Context, tile: ITile): boolean;
+    canTill(context: Context, point: IVector3, tile: ITile, allowedTilesSet: Set<TerrainType>): boolean;
     canButcherCorpse(context: Context, tile: ITile, skipCorpseCheck?: boolean): boolean;
     hasCorpses(tile: ITile): boolean;
     hasItems(tile: ITile): boolean;

@@ -144,8 +144,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.navigation.unload();
 
         log.info("Deleted TARS instance");
-
-        this.event.emit("delete");
     }
 
     public load() {
@@ -179,6 +177,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.delete();
 
         EventManager.deregisterEventBusSubscriber(this);
+
+        this.event.emit("unload");
 
         // log.info("Unloaded");
     }

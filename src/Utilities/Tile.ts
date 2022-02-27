@@ -1,6 +1,7 @@
 import { IContainer } from "game/item/IItem";
 import type { ITile, ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
+import terrainDescriptions from "game/tile/Terrains";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
@@ -123,6 +124,36 @@ export class TileUtilities {
 
 	public canDig(context: Context, tile: ITile) {
 		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !this.hasItems(tile) && !context.human.island.isPlayerAtTile(tile, false, true);
+	}
+
+	public canTill(context: Context, point: IVector3, tile: ITile, allowedTilesSet: Set<TerrainType>): boolean {
+		if (tile.creature || tile.npc) {
+			return false;
+		}
+
+		const tileType = TileHelpers.getType(tile);
+		if (tileType === TerrainType.Grass) {
+			if (!this.canDig(context, tile)) {
+				return false;
+			}
+
+			// digging grass will reveal dirt
+			if (!allowedTilesSet.has(TerrainType.Dirt)) {
+				return false;
+			}
+
+		} else {
+			if (!allowedTilesSet.has(tileType)) {
+				return false;
+			}
+
+			const terrainDescription = terrainDescriptions[tileType];
+			if (!terrainDescription?.tillable) {
+				return false;
+			}
+		}
+
+		return context.utilities.base.isOpenArea(context, point, tile);
 	}
 
 	public canButcherCorpse(context: Context, tile: ITile, skipCorpseCheck?: boolean) {

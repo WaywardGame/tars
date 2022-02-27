@@ -33,7 +33,7 @@ export interface ITarsEvents {
     modeFinished(mode: TarsMode, success: boolean): void;
     navigationChange(status: NavigationSystemState): void;
     quantumBurstChange(status: QuantumBurstStatus): void;
-    delete(): void;
+    unload(): void;
 }
 export declare enum NavigationSystemState {
     NotInitialized = 0,
