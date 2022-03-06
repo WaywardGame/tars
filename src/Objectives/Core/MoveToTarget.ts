@@ -34,6 +34,11 @@ export interface IMoveToTargetOptions {
 	allowBoat: boolean;
 	idleIfAlreadyThere: boolean;
 
+	/**
+	 * Equip weapons when close to the target when it's a creature
+	 */
+	equipWeapons: boolean;
+
 	skipZCheck: boolean;
 	changeZ: number;
 
@@ -70,14 +75,15 @@ export default class MoveToTarget extends Objective {
 		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}:${this.options?.reverse ?? false}:${this.options?.changeZ ?? this.target.z}`;
 	}
 
-	public getStatus(): string | undefined {
-		let status = `Moving to `;
+	public getStatus(context: Context): string | undefined {
+		let status = `Moving to`;
 
 		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {
-			status += `${this.target.getName()} `;
+			status += ` ${this.target.getName()}`;
 		}
 
-		status += `(${this.target.x},${this.target.y},${this.target.z})`;
+		status += ` (${this.target.x},${this.target.y},${this.target.z})`;
+		status += ` (distance: ${Math.round(Vector2.distance(context.human, this.target))})`;
 
 		return status;
 	}
@@ -184,6 +190,10 @@ export default class MoveToTarget extends Objective {
 
 					return ObjectiveResult.Impossible;
 			}
+		}
+
+		if (this.trackedCreature && !this.trackedCreature.isValid()) {
+			return ObjectiveResult.Complete;
 		}
 
 		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget, this.options?.reverse);
@@ -343,12 +353,16 @@ export default class MoveToTarget extends Objective {
 		return this.trackedItem === item;
 	}
 
+	public onCreatureRemoved(context: Context, creature: Creature) {
+		return this.trackedCreature === creature;
+	}
+
 	public onCorpseRemoved(context: Context, corpse: Corpse) {
 		return this.trackedCorpse === corpse;
 	}
 
 	/**
-	 * Called when the context human moves
+	 * Called when the context human or creature moves
 	 */
 	public override async onMove(context: Context) {
 		if (this.trackedCreature && this.trackedPosition) {
@@ -375,6 +389,9 @@ export default class MoveToTarget extends Objective {
 				this.log.info("Moving with tracked creature");
 
 				this.trackedPosition = trackedCreaturePosition;
+
+				// ensure a new path is used
+				context.utilities.movement.clearCache();
 
 				// move to it's latest location
 				const moveResult = await context.utilities.movement.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);

@@ -17,4 +17,5 @@ export default class Plan implements IPlan {
     private flattenTree;
     private createOptimizedExecutionTreeV2;
     private getObjectiveResults;
+    private getExecutionTreePosition;
 }

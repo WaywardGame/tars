@@ -41,7 +41,7 @@ export class TerminatorMode implements ITarsMode {
             objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
         }
 
-        const creatures = context.utilities.object.findHuntableCreatures(context, "Terminator", { onlyHostile: true, top: 10 });
+        const creatures = context.utilities.object.findHuntableCreatures(context, "Terminator", { onlyHostile: true });
         if (creatures.length > 0) {
             objectives.push(new HuntCreatures(creatures));
         }

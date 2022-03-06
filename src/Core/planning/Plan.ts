@@ -631,15 +631,7 @@ export default class Plan implements IPlan {
 			const visited: ITreeVertex[] = [];
 
 			for (const gatherObjectiveTree of gatherObjectiveTrees) {
-				let position: IVector3 | undefined;
-
-				for (const child of gatherObjectiveTree.children) {
-					position = child.objective.getPosition?.();
-					if (position !== undefined) {
-						break;
-					}
-				}
-
+				const position = this.getExecutionTreePosition(gatherObjectiveTree);
 				if (position === undefined) {
 					throw new Error(`Unknown gather objective position ${gatherObjectiveTree.objective.getHashCode(context)} ${this.getTreeString(gatherObjectiveTree)}`);
 				}
@@ -744,6 +736,11 @@ export default class Plan implements IPlan {
 	}
 
 	private getObjectiveResults(chain: IObjective[] = [], objectiveStack: IObjectiveInfo[], currentObjectiveInfo: IObjectiveInfo, includeCurrent: boolean = true) {
+		// probably not needed?
+		// if (!this.objectiveInfo.objective.canSaveChildObjectives()) {
+		// 	return [this.objectiveInfo.objective];
+		// }
+
 		const objectiveResult = chain.find(objective => !objective.canSaveChildObjectives());
 		if (objectiveResult) {
 			return [objectiveResult];
@@ -772,6 +769,32 @@ export default class Plan implements IPlan {
 		}
 
 		return results;
+	}
+
+	private getExecutionTreePosition(tree: IExecutionTree): IVector3 | undefined {
+		const position = tree.objective.getPosition?.()
+		if (position !== undefined) {
+			return position;
+		}
+
+		for (const child of tree.children) {
+			const position = child.objective.getPosition?.();
+			if (position !== undefined) {
+				return position;
+			}
+		}
+
+		// check it's children
+		for (const child of tree.children) {
+			for (const child2 of child.children) {
+				const position = this.getExecutionTreePosition(child2);
+				if (position !== undefined) {
+					return position;
+				}
+			}
+		}
+
+		return undefined;
 	}
 
 }

@@ -179,14 +179,6 @@ export class MovementUtilities {
         return ObjectiveResult.Impossible;
     }
 
-    public async moveToFaceTarget(context: Context, target: IVector3): Promise<MoveResult> {
-        return this.move(context, target, true);
-    }
-
-    public async moveToTarget(context: Context, target: IVector3): Promise<MoveResult> {
-        return this.move(context, target, false);
-    }
-
     public async move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean, walkOnce?: boolean): Promise<MoveResult> {
         const movementPath = await this.getMovementPath(context, target, moveAdjacentToTarget);
 
@@ -296,6 +288,7 @@ export class MovementUtilities {
                         // walking into a creature
                         const player = context.human.asPlayer;
                         if (player) {
+                            // todo: fix equipment before this?
                             await context.utilities.action.executeAction(context, ActionType.Move, (context, action) => {
                                 action.execute(player, direction);
                                 return ObjectiveResult.Complete;

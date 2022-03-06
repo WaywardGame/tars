@@ -1,4 +1,5 @@
 import Corpse from "game/entity/creature/corpse/Corpse";
+import Creature from "game/entity/creature/Creature";
 import Item from "game/item/Item";
 import type { IVector3 } from "utilities/math/IVector";
 import type Context from "../../core/context/Context";
@@ -10,6 +11,7 @@ export interface IMoveToTargetOptions {
     disableTracking: boolean;
     allowBoat: boolean;
     idleIfAlreadyThere: boolean;
+    equipWeapons: boolean;
     skipZCheck: boolean;
     changeZ: number;
     reverse: boolean;
@@ -24,12 +26,13 @@ export default class MoveToTarget extends Objective {
     private trackedPosition;
     constructor(target: IVector3, moveAdjacentToTarget: boolean, options?: Partial<IMoveToTargetOptions> | undefined);
     getIdentifier(context: Context | undefined): string;
-    getStatus(): string | undefined;
+    getStatus(context: Context): string | undefined;
     getPosition(): IVector3;
     isDynamic(): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     trackItem(item: Item | undefined): this;
     onItemRemoved(context: Context, item: Item): boolean;
+    onCreatureRemoved(context: Context, creature: Creature): boolean;
     onCorpseRemoved(context: Context, corpse: Corpse): boolean;
     onMove(context: Context): Promise<boolean | import("../../core/objective/IObjective").IObjective>;
 }

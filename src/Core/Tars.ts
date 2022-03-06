@@ -29,6 +29,12 @@ import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
+import Human from "game/entity/Human";
+import NPC from "game/entity/npc/NPC";
+import ItemManager from "game/item/ItemManager";
+import CreatureManager from "game/entity/creature/CreatureManager";
+import CorpseManager from "game/entity/creature/corpse/CorpseManager";
+import Corpse from "game/entity/creature/corpse/Corpse";
 
 import type { ISaveData } from "../ITarsMod";
 import { TarsTranslation } from "../ITarsMod";
@@ -73,12 +79,7 @@ import planner from "./planning/Planner";
 import Plan from "./planning/Plan";
 import { DoodadUtilities } from "../utilities/Doodad";
 import { TarsOverlay } from "../ui/TarsOverlay";
-import Human from "game/entity/Human";
-import NPC from "game/entity/npc/NPC";
-import ItemManager from "game/item/ItemManager";
 import MoveToTarget from "../objectives/core/MoveToTarget";
-import CorpseManager from "game/entity/creature/corpse/CorpseManager";
-import Corpse from "game/entity/creature/corpse/Corpse";
 import { ITarsOptions } from "./ITarsOptions";
 import Objective from "./objective/Objective";
 import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
@@ -307,6 +308,18 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         // }
     }
 
+    @EventHandler(EventBus.CreatureManager, "remove")
+    public onCreatureRemove(_: CreatureManager, creature: Creature) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined && objective instanceof MoveToTarget && objective.onCreatureRemoved(this.context, creature)) {
+            this.fullInterrupt(`${creature} was removed`);
+        }
+    }
+
     @EventHandler(EventBus.CorpseManager, "remove")
     public onCorpseRemove(_: CorpseManager, corpse: Corpse) {
         if (!this.isRunning()) {
@@ -314,11 +327,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         const objective = this.getCurrentObjective();
-        if (objective !== undefined && objective instanceof MoveToTarget) {
-            const result = objective.onCorpseRemoved(this.context, corpse);
-            if (result === true) {
-                this.fullInterrupt(`${corpse} was removed`);
-            }
+        if (objective !== undefined && objective instanceof MoveToTarget && objective.onCorpseRemoved(this.context, corpse)) {
+            this.fullInterrupt(`${corpse} was removed`);
         }
     }
 
@@ -331,8 +341,26 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.processQueuedNavigationUpdates();
     }
 
+    @EventHandler(EventBus.Creatures, "postMove")
+    public async onCreaturePostMove(creature: Creature, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined) {
+            const result = await objective.onMove(this.context);
+            if (result === true) {
+                this.fullInterrupt("Target creature moved");
+
+            } else if (result) {
+                this.interrupt("Target creature moved", result);
+            }
+        }
+    }
+
     @EventHandler(EventBus.NPCs, "postMove")
-    public async onPostMove(npc: NPC, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+    public async onNPCPostMove(npc: NPC, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
         if (this.human !== npc) {
             return;
         }
@@ -351,10 +379,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (objective !== undefined) {
             const result = await objective.onMove(this.context);
             if (result === true) {
-                this.fullInterrupt("Target moved");
+                this.fullInterrupt("Target npc moved");
 
             } else if (result) {
-                this.interrupt("Target moved", result);
+                this.interrupt("Target npc moved", result);
             }
         }
     }
@@ -1240,13 +1268,24 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             (context.human.status.Poisoned && (health.value / health.max) <= poisonHealthPercentThreshold);
 
         const exceededThirstThreshold = context.human.stat.get<IStat>(Stat.Thirst).value <= this.utilities.player.getRecoverThreshold(context, Stat.Thirst);
+        // const isWaterEmergency = RecoverThirst.isEmergency(context);
         const exceededHungerThreshold = context.human.stat.get<IStat>(Stat.Hunger).value <= this.utilities.player.getRecoverThreshold(context, Stat.Hunger);
         const exceededStaminaThreshold = context.human.stat.get<IStat>(Stat.Stamina).value <= this.utilities.player.getRecoverThreshold(context, Stat.Stamina);
 
-        const objectives: IObjective[] = [];
+        const objectives: Array<IObjective | undefined> = [];
+
+        // if ((!onlyUseAvailableItems && (needsHealthRecovery || exceededThirstThreshold || exceededHungerThreshold || exceededStaminaThreshold)) ||
+        //     (onlyUseAvailableItems && isWaterEmergency)) {
+        //     // allow reducing weight in an emergency
+        //     objectives.push(this.reduceWeightInterrupt(context, false, false));
+        // }
 
         if (needsHealthRecovery) {
             objectives.push(new RecoverHealth(onlyUseAvailableItems));
+        }
+
+        if (exceededStaminaThreshold) {
+            objectives.push(new RecoverStamina());
         }
 
         objectives.push(new RecoverThirst({
@@ -1257,9 +1296,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         objectives.push(new RecoverHunger(onlyUseAvailableItems, exceededHungerThreshold));
 
-        if (exceededStaminaThreshold) {
-            objectives.push(new RecoverStamina());
-        }
+        // if (exceededStaminaThreshold) {
+        //     objectives.push(new RecoverStamina());
+        // }
 
         objectives.push(new RecoverThirst({
             onlyUseAvailableItems: onlyUseAvailableItems,
@@ -1652,10 +1691,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    private reduceWeightInterrupt(context: Context): IObjective | undefined {
+    private reduceWeightInterrupt(context: Context, allowReservedItems?: boolean, disableDrop?: boolean): IObjective | undefined {
         return new ReduceWeight({
-            allowReservedItems: !this.utilities.base.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened,
-            disableDrop: this.weightStatus !== WeightStatus.Overburdened && !this.utilities.base.isNearBase(context),
+            allowReservedItems: allowReservedItems ?? (!this.utilities.base.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened),
+            disableDrop: disableDrop ?? (this.weightStatus !== WeightStatus.Overburdened && !this.utilities.base.isNearBase(context)),
         });
     }
 
@@ -1673,7 +1712,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return new MoveToZ(WorldZ.Overworld);
         }
     }
-
 
     /**
      * Move reserved items into intermediate chests if the player is near the base and is moving away

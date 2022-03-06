@@ -83,7 +83,7 @@ export default class CompleteQuestRequirement extends Objective {
             case QuestRequirementType.KillCreature: {
                 const [creatureType, _amount] = this.requirement.options as [CreatureType, number];
 
-                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreature", { type: creatureType, top: 10 });
+                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreature", { type: creatureType });
 
                 return new HuntCreatures(creatures);
             }
@@ -91,7 +91,7 @@ export default class CompleteQuestRequirement extends Objective {
             case QuestRequirementType.KillCreatures: {
                 const [_amount] = this.requirement.options as [number];
 
-                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreatures", { top: 10 });
+                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreatures");
 
                 return new HuntCreatures(creatures);
             }
@@ -201,9 +201,9 @@ export default class CompleteQuestRequirement extends Objective {
                 const [creatureType, _amount] = this.requirement.options as [CreatureType, number];
 
                 // look for non-hostile creatures first
-                let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", { type: creatureType, hostile: false, top: 10 });
+                let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", { type: creatureType, hostile: false });
                 if (creatures.length === 0) {
-                    creatures = context.utilities.object.findTamableCreatures(context, "Tame2", { type: creatureType, hostile: true, top: 10 });
+                    creatures = context.utilities.object.findTamableCreatures(context, "Tame2", { type: creatureType, hostile: true });
                     if (creatures.length === 0) {
                         return ObjectiveResult.Impossible;
                     }
@@ -214,9 +214,9 @@ export default class CompleteQuestRequirement extends Objective {
 
             case QuestRequirementType.TameCreatures: {
                 // look for non-hostile creatures first
-                let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", { hostile: false, top: 10 });
+                let creatures = context.utilities.object.findTamableCreatures(context, "Tame1", { hostile: false });
                 if (creatures.length === 0) {
-                    creatures = context.utilities.object.findTamableCreatures(context, "Tame2", { hostile: true, top: 10 });
+                    creatures = context.utilities.object.findTamableCreatures(context, "Tame2", { hostile: true });
                     if (creatures.length === 0) {
                         return ObjectiveResult.Impossible;
                     }
