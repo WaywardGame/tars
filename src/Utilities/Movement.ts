@@ -286,13 +286,27 @@ export class MovementUtilities {
 
                     } else if (nextTile.creature) {
                         // walking into a creature
+
+                        // ensure we are wearing the correct equipment
+                        const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+                        if (handEquipmentChange) {
+                            log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
+
+                            await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {
+                                action.execute(context.actionExecutor, handEquipmentChange.item, handEquipmentChange.equipType);
+                                return ObjectiveResult.Complete;
+                            });
+                        }
+
                         const player = context.human.asPlayer;
                         if (player) {
-                            // todo: fix equipment before this?
                             await context.utilities.action.executeAction(context, ActionType.Move, (context, action) => {
                                 action.execute(player, direction);
                                 return ObjectiveResult.Complete;
                             });
+
+                        } else {
+                            log.warn("Unable to process next tile as a non-player");
                         }
 
                         return MoveResult.Moving;

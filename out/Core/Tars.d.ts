@@ -103,9 +103,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private optionsInterrupt;
     private equipmentInterrupt;
     private equipInterrupt;
-    private handsEquipInterrupt;
-    private changeEquipmentOption;
-    private handEquipInterrupt;
     private repairsInterrupt;
     private repairInterrupt;
     private nearbyCreatureInterrupt;

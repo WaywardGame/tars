@@ -44,7 +44,7 @@ export default class HuntCreature extends Objective {
             ];
         }
 
-        // MoveToTarget will handle attacking
-        return new MoveToTarget(this.creature, false, this.track ? undefined : { disableTracking: true });
+        // attacking is handled by moving - "autoAttack" is on
+        return new MoveToTarget(this.creature, false, this.track ? { equipWeapons: true } : { disableTracking: true });
     }
 }

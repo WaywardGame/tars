@@ -4,7 +4,6 @@ import EventManager, { EventHandler } from "event/EventManager";
 import type { IActionApi } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
 import type Creature from "game/entity/creature/Creature";
-import type { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import type { IStatMax, IStat } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
@@ -13,7 +12,6 @@ import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
 import type Island from "game/island/Island";
-import type { ItemTypeGroup } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import { WorldZ } from "game/WorldZ";
@@ -735,6 +733,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             log.info(`Status: ${statusMessage}`);
         }
 
+        const walkPath = this.context.human.walkPath;
+        if (walkPath) {
+            statusMessage += ` (distance: ${walkPath.path.length})`;
+        }
+
         return statusMessage;
     }
 
@@ -1314,8 +1317,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private equipmentInterrupt(context: Context): Array<IObjective | undefined> {
+        const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+
         return [
-            this.handsEquipInterrupt(context),
+            handEquipmentChange ? new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item) : undefined,
             this.equipInterrupt(context, EquipType.Chest),
             this.equipInterrupt(context, EquipType.Legs),
             this.equipInterrupt(context, EquipType.Head),
@@ -1346,177 +1351,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             }
 
             return new EquipItem(equip, itemToEquip);
-        }
-    }
-
-    private handsEquipInterrupt(context: Context, preferredDamageType?: DamageType): IObjective | undefined {
-        const leftHandEquipInterrupt = this.handEquipInterrupt(context, EquipType.LeftHand, ActionType.Attack);
-        if (leftHandEquipInterrupt) {
-            return leftHandEquipInterrupt;
-        }
-
-        if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped()) {
-            return new EquipItem(EquipType.RightHand, context.inventory.equipShield);
-        }
-
-        const leftHandItem = context.human.getEquippedItem(EquipType.LeftHand);
-        const rightHandItem = context.human.getEquippedItem(EquipType.RightHand);
-
-        const leftHandDescription = leftHandItem ? leftHandItem.description() : undefined;
-        const leftHandEquipped = leftHandDescription ? leftHandDescription.attack !== undefined : false;
-
-        const rightHandDescription = rightHandItem ? rightHandItem.description() : undefined;
-        const rightHandEquipped = rightHandDescription ? rightHandDescription.attack !== undefined : false;
-
-        if (preferredDamageType !== undefined) {
-            let leftHandDamageTypeMatches = false;
-            if (leftHandEquipped) {
-                const itemDescription = leftHandItem!.description();
-                leftHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
-            }
-
-            let rightHandDamageTypeMatches = false;
-            if (rightHandEquipped) {
-                const itemDescription = rightHandItem!.description();
-                rightHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
-            }
-
-            if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
-                if (leftHandDamageTypeMatches !== context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-                if (rightHandDamageTypeMatches !== context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-
-            } else if (leftHandEquipped || rightHandEquipped) {
-                if (leftHandEquipped && !context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-                if (rightHandEquipped && !context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-
-            } else {
-                if (!context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-                if (!context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-            }
-
-        } else {
-            if (!leftHandEquipped && !rightHandEquipped) {
-                // if we have nothing equipped in both hands, make sure the left hand is enabled
-                if (!context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-            } else if (leftHandEquipped !== context.human.options.leftHand) {
-                this.changeEquipmentOption("leftHand");
-            }
-
-            if (leftHandEquipped) {
-                // if we have the left hand equipped, disable right hand
-                if (context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-
-            } else if (rightHandEquipped !== context.human.options.rightHand) {
-                this.changeEquipmentOption("rightHand");
-            }
-        }
-    }
-
-    private changeEquipmentOption(id: "leftHand" | "rightHand") {
-        if (this.human.isLocalPlayer()) {
-            oldui.changeEquipmentOption(id);
-
-        } else if (!this.human.asPlayer) {
-            const isLeftHand = id === "leftHand";
-            const newValue = isLeftHand ? !this.human.options.leftHand : !this.human.options.rightHand;
-            (this.human.options as any)[id] = newValue;
-
-            // todo: mp somehow?
-        }
-    }
-
-    private handEquipInterrupt(context: Context, equipType: EquipType, use?: ActionType, itemTypes?: Array<ItemType | ItemTypeGroup>, preferredDamageType?: DamageType): IObjective | undefined {
-        const equippedItem = context.human.getEquippedItem(equipType);
-
-        let possibleEquips: Item[];
-        if (use) {
-            possibleEquips = this.utilities.item.getPossibleHandEquips(context, use, preferredDamageType, false);
-
-            if (use === ActionType.Attack) {
-                // equip based on how effective it will be against nearby creatures
-                let closestCreature: Creature | undefined;
-                let closestCreatureDistance: number | undefined;
-
-                for (let x = -2; x <= 2; x++) {
-                    for (let y = -2; y <= 2; y++) {
-                        const point = context.human.island.ensureValidPoint({ x: context.human.x + x, y: context.human.y + y, z: context.human.z });
-                        if (point) {
-                            const tile = context.island.getTileFromPoint(point);
-                            if (tile.creature && !tile.creature.isTamed()) {
-                                const distance = Vector2.squaredDistance(context.human, tile.creature.getPoint());
-                                if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
-                                    closestCreatureDistance = distance;
-                                    closestCreature = tile.creature;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (closestCreature) {
-                    // creature is close, calculate it
-                    possibleEquips
-                        .sort((a, b) => this.utilities.item.estimateDamageModifier(b, closestCreature!) - this.utilities.item.estimateDamageModifier(a, closestCreature!));
-
-                } else if (context.human.getEquippedItem(equipType) !== undefined) {
-                    // don't switch until we're close to a creature
-                    return undefined;
-                }
-            }
-
-            if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
-                // fall back to not caring about the damage type
-                possibleEquips = this.utilities.item.getPossibleHandEquips(context, use, undefined, false);
-            }
-
-        } else if (itemTypes) {
-            possibleEquips = [];
-
-            for (const itemType of itemTypes) {
-                if (context.island.items.isGroup(itemType)) {
-                    possibleEquips.push(...context.utilities.item.getItemsInContainerByGroup(context, context.human.inventory, itemType));
-
-                } else {
-                    possibleEquips.push(...context.utilities.item.getItemsInContainerByType(context, context.human.inventory, itemType));
-                }
-            }
-
-        } else {
-            return undefined;
-        }
-
-        if (possibleEquips.length > 0) {
-            // always try to equip the two best items
-            for (let i = 0; i < 2; i++) {
-                const possibleEquipItem = possibleEquips[i];
-                if (!possibleEquipItem || possibleEquipItem === equippedItem) {
-                    return undefined;
-                }
-
-                if (!possibleEquipItem.isEquipped()) {
-                    return new EquipItem(equipType, possibleEquips[i]);
-                }
-            }
         }
     }
 

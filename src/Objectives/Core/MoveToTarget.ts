@@ -20,6 +20,7 @@ import Objective from "../../core/objective/Objective";
 import { log } from "../../utilities/Logger";
 import { MoveResult } from "../../utilities/Movement";
 import Idle from "../other/Idle";
+import EquipItem from "../other/item/EquipItem";
 import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
@@ -83,7 +84,6 @@ export default class MoveToTarget extends Objective {
 		}
 
 		status += ` (${this.target.x},${this.target.y},${this.target.z})`;
-		status += ` (distance: ${Math.round(Vector2.distance(context.human, this.target))})`;
 
 		return status;
 	}
@@ -379,6 +379,19 @@ export default class MoveToTarget extends Objective {
 			if (Vector2.distance(context.human, this.trackedCreature) > 5) {
 				// track once it's closer
 				return false;
+			}
+
+			if (this.options?.equipWeapons) {
+				const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+				if (handEquipmentChange) {
+					this.log.warn(`Should equip ${handEquipmentChange.item} before attacking`);
+
+					return new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item);
+					// await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {
+					// 	action.execute(context.actionExecutor, handEquipmentChange.item, handEquipmentChange.equipType);
+					// 	return ObjectiveResult.Complete;
+					// });
+				}
 			}
 
 			const trackedCreaturePosition = this.trackedCreature.getPoint();

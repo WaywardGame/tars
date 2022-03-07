@@ -49,6 +49,12 @@ export declare class ItemUtilities {
     getBestEquipment(context: Context, equip: EquipType): Item[];
     calculateEquipItemScore(item: Item): number;
     estimateDamageModifier(weapon: Item, target: Creature): number;
+    updateHandEquipment(context: Context, preferredDamageType?: DamageType): {
+        equipType: EquipType;
+        item: Item;
+    } | undefined;
+    private getDesiredEquipment;
+    private changeEquipmentOption;
     getPossibleHandEquips(context: Context, actionType: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[];
     getInventoryItemsWithEquipType(context: Context, equipType: EquipType): Item[];
     hasInventoryItemForAction(context: Context, actionType: ActionType): boolean;

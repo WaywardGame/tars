@@ -5,6 +5,7 @@ import type { IVector3 } from "utilities/math/IVector";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import EquipItem from "../other/item/EquipItem";
 export interface IMoveToTargetOptions {
     range: number;
     disableStaminaCheck: boolean;
@@ -34,5 +35,5 @@ export default class MoveToTarget extends Objective {
     onItemRemoved(context: Context, item: Item): boolean;
     onCreatureRemoved(context: Context, creature: Creature): boolean;
     onCorpseRemoved(context: Context, corpse: Corpse): boolean;
-    onMove(context: Context): Promise<boolean | import("../../core/objective/IObjective").IObjective>;
+    onMove(context: Context): Promise<boolean | import("../../core/objective/IObjective").IObjective | EquipItem>;
 }

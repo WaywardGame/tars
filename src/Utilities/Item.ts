@@ -22,6 +22,7 @@ import { IDisassemblySearch } from "../core/ITars";
 import ItemManager from "game/item/ItemManager";
 import { ContextDataType } from "../core/context/IContext";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
+import Vector2 from "utilities/math/Vector2";
 
 export class ItemUtilities {
 
@@ -514,6 +515,185 @@ export class ItemUtilities {
 		}
 
 		return weaponAttack + vulnerable - resist;
+	}
+
+	public updateHandEquipment(context: Context, preferredDamageType?: DamageType): { equipType: EquipType; item: Item } | undefined {
+		const leftHandEquipInterrupt = this.getDesiredEquipment(context, EquipType.LeftHand, ActionType.Attack);
+		if (leftHandEquipInterrupt) {
+			return leftHandEquipInterrupt;
+		}
+
+		if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped()) {
+			return {
+				equipType: EquipType.RightHand,
+				item: context.inventory.equipShield,
+			};
+		}
+
+		const leftHandItem = context.human.getEquippedItem(EquipType.LeftHand);
+		const rightHandItem = context.human.getEquippedItem(EquipType.RightHand);
+
+		const leftHandDescription = leftHandItem ? leftHandItem.description() : undefined;
+		const leftHandEquipped = leftHandDescription ? leftHandDescription.attack !== undefined : false;
+
+		const rightHandDescription = rightHandItem ? rightHandItem.description() : undefined;
+		const rightHandEquipped = rightHandDescription ? rightHandDescription.attack !== undefined : false;
+
+		if (preferredDamageType !== undefined) {
+			let leftHandDamageTypeMatches = false;
+			if (leftHandEquipped) {
+				const itemDescription = leftHandItem!.description();
+				leftHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
+			}
+
+			let rightHandDamageTypeMatches = false;
+			if (rightHandEquipped) {
+				const itemDescription = rightHandItem!.description();
+				rightHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
+			}
+
+			if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
+				if (leftHandDamageTypeMatches !== context.human.options.leftHand) {
+					this.changeEquipmentOption(context, "leftHand");
+				}
+
+				if (rightHandDamageTypeMatches !== context.human.options.rightHand) {
+					this.changeEquipmentOption(context, "rightHand");
+				}
+
+			} else if (leftHandEquipped || rightHandEquipped) {
+				if (leftHandEquipped && !context.human.options.leftHand) {
+					this.changeEquipmentOption(context, "leftHand");
+				}
+
+				if (rightHandEquipped && !context.human.options.rightHand) {
+					this.changeEquipmentOption(context, "rightHand");
+				}
+
+			} else {
+				if (!context.human.options.leftHand) {
+					this.changeEquipmentOption(context, "leftHand");
+				}
+
+				if (!context.human.options.rightHand) {
+					this.changeEquipmentOption(context, "rightHand");
+				}
+			}
+
+		} else {
+			if (!leftHandEquipped && !rightHandEquipped) {
+				// if we have nothing equipped in both hands, make sure the left hand is enabled
+				if (!context.human.options.leftHand) {
+					this.changeEquipmentOption(context, "leftHand");
+				}
+
+			} else if (leftHandEquipped !== context.human.options.leftHand) {
+				this.changeEquipmentOption(context, "leftHand");
+			}
+
+			if (leftHandEquipped) {
+				// if we have the left hand equipped, disable right hand
+				if (context.human.options.rightHand) {
+					this.changeEquipmentOption(context, "rightHand");
+				}
+
+			} else if (rightHandEquipped !== context.human.options.rightHand) {
+				this.changeEquipmentOption(context, "rightHand");
+			}
+		}
+	}
+
+	private getDesiredEquipment(context: Context, equipType: EquipType, use?: ActionType, itemTypes?: Array<ItemType | ItemTypeGroup>, preferredDamageType?: DamageType): { equipType: EquipType; item: Item } | undefined {
+		const equippedItem = context.human.getEquippedItem(equipType);
+
+		let possibleEquips: Item[];
+		if (use) {
+			possibleEquips = this.getPossibleHandEquips(context, use, preferredDamageType, false);
+
+			if (use === ActionType.Attack) {
+				// equip based on how effective it will be against nearby creatures
+				let closestCreature: Creature | undefined;
+				let closestCreatureDistance: number | undefined;
+
+				for (let x = -2; x <= 2; x++) {
+					for (let y = -2; y <= 2; y++) {
+						const point = context.human.island.ensureValidPoint({ x: context.human.x + x, y: context.human.y + y, z: context.human.z });
+						if (point) {
+							const tile = context.island.getTileFromPoint(point);
+							if (tile.creature && !tile.creature.isTamed()) {
+								const distance = Vector2.squaredDistance(context.human, tile.creature.getPoint());
+								if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
+									closestCreatureDistance = distance;
+									closestCreature = tile.creature;
+								}
+							}
+						}
+					}
+				}
+
+				if (closestCreature) {
+					// creature is close, calculate it
+					possibleEquips
+						.sort((a, b) => this.estimateDamageModifier(b, closestCreature!) - this.estimateDamageModifier(a, closestCreature!));
+
+				} else if (context.human.getEquippedItem(equipType) !== undefined) {
+					// don't switch until we're close to a creature
+					return undefined;
+				}
+			}
+
+			if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
+				// fall back to not caring about the damage type
+				possibleEquips = this.getPossibleHandEquips(context, use, undefined, false);
+			}
+
+		} else if (itemTypes) {
+			possibleEquips = [];
+
+			for (const itemType of itemTypes) {
+				if (context.island.items.isGroup(itemType)) {
+					possibleEquips.push(...context.utilities.item.getItemsInContainerByGroup(context, context.human.inventory, itemType));
+
+				} else {
+					possibleEquips.push(...context.utilities.item.getItemsInContainerByType(context, context.human.inventory, itemType));
+				}
+			}
+
+		} else {
+			return undefined;
+		}
+
+		if (possibleEquips.length > 0) {
+			// always try to equip the two best items
+			for (let i = 0; i < 2; i++) {
+				const possibleEquipItem = possibleEquips[i];
+				if (!possibleEquipItem || possibleEquipItem === equippedItem) {
+					return undefined;
+				}
+
+				if (!possibleEquipItem.isEquipped()) {
+					return {
+						equipType,
+						item: possibleEquips[i],
+					};
+				}
+			}
+		}
+
+		return undefined;
+	}
+
+	private changeEquipmentOption(context: Context, id: "leftHand" | "rightHand") {
+		if (context.human.isLocalPlayer()) {
+			oldui.changeEquipmentOption(id);
+
+		} else if (!context.human.asPlayer) {
+			const isLeftHand = id === "leftHand";
+			const newValue = isLeftHand ? !context.human.options.leftHand : !context.human.options.rightHand;
+			(context.human.options as any)[id] = newValue;
+
+			// todo: mp somehow?
+		}
 	}
 
 	public getPossibleHandEquips(context: Context, actionType: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[] {
