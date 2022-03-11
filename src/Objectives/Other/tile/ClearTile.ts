@@ -12,12 +12,16 @@ import Restart from "../../core/Restart";
 
 import PickUpAllTileItems from "./PickUpAllTileItems";
 
+export interface IClearTileOptions {
+    skipDoodad: boolean;
+}
+
 /**
  * Clears things on the tile
  */
 export default class ClearTile extends Objective {
 
-    constructor(private readonly target: IVector3) {
+    constructor(private readonly target: IVector3, private readonly options?: Partial<IClearTileOptions>) {
         super();
     }
 
@@ -51,7 +55,7 @@ export default class ClearTile extends Objective {
                 new Restart());
         }
 
-        if (tile.doodad && !tile.doodad.canPickup(context.human)) {
+        if (!this.options?.skipDoodad && tile.doodad && !tile.doodad.canPickup(context.human)) {
             objectives.push(
                 new ExecuteAction(ActionType.Chop, (context, action) => {
                     action.execute(context.actionExecutor, context.utilities.item.getBestToolForDoodadGather(context, tile.doodad!));
