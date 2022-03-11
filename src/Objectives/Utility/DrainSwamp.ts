@@ -7,7 +7,6 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import DigTile from "../other/tile/DigTile";
 import Restart from "../core/Restart";
-import PickUpAllTileItems from "../other/tile/PickUpAllTileItems";
 
 export default class DrainSwamp extends Objective {
 
@@ -32,20 +31,10 @@ export default class DrainSwamp extends Objective {
 
         // restart after digging because there's probably more tiles
         for (const target of this.tiles) {
-            const objectives: IObjective[] = [];
-
-            const tile = context.island.getTileFromPoint(target);
-            if (!context.utilities.tile.canDig(context, tile)) {
-                if (!context.utilities.tile.hasItems(tile)) {
-                    continue;
-                }
-
-                objectives.push(new PickUpAllTileItems(target));
-            }
-
-            objectives.push(new DigTile(target, { digUntilTypeIsNot: TerrainType.Swamp }), new Restart());
-
-            objectivePipelines.push(objectives);
+            objectivePipelines.push([
+                new DigTile(target, { digUntilTypeIsNot: TerrainType.Swamp }),
+                new Restart(),
+            ]);
         }
 
         return objectivePipelines;

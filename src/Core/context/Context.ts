@@ -4,8 +4,10 @@ import type Player from "game/entity/player/Player";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { IVector3 } from "utilities/math/IVector";
+import Vector3 from "utilities/math/Vector3";
 
-import type { IBase, IInventoryItems, ITarsOptions, IUtilities } from "../ITars";
+import type { IBase, IInventoryItems, IUtilities } from "../ITars";
+import { ITarsOptions } from "../ITarsOptions";
 import ContextState from "./ContextState";
 import type { IContext } from "./IContext";
 import { ContextDataType } from "./IContext";
@@ -72,7 +74,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective
 	 */
 	public isReservedItem(item: Item) {
-		if (this.state.softReservedItems.has(item.id) || this.state.hardReservedItems.has(item.id)) {
+		if (this.state.softReservedItems.has(item) || this.state.hardReservedItems.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -84,7 +86,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective and is not going to be consumed
 	 */
 	public isSoftReservedItem(item: Item) {
-		if (this.state.softReservedItems.has(item.id)) {
+		if (this.state.softReservedItems.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -96,7 +98,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective and is going to be consumed
 	 */
 	public isHardReservedItem(item: Item) {
-		if (this.state.hardReservedItems.has(item.id)) {
+		if (this.state.hardReservedItems.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -129,11 +131,11 @@ export default class Context implements IContext {
 
 	public addSoftReservedItems(...items: Item[]) {
 		for (const item of items) {
-			this.state.softReservedItems.add(item.id);
+			this.state.softReservedItems.add(item);
 			this.state.reservedItemTypes.add(item.type);
 
 			if (this.changes) {
-				this.changes.softReservedItems.add(item.id);
+				this.changes.softReservedItems.add(item);
 				this.changes.reservedItemTypes.add(item.type);
 			}
 		}
@@ -141,11 +143,11 @@ export default class Context implements IContext {
 
 	public addHardReservedItems(...items: Item[]) {
 		for (const item of items) {
-			this.state.hardReservedItems.add(item.id);
+			this.state.hardReservedItems.add(item);
 			this.state.reservedItemTypes.add(item.type);
 
 			if (this.changes) {
-				this.changes.hardReservedItems.add(item.id);
+				this.changes.hardReservedItems.add(item);
 				this.changes.reservedItemTypes.add(item.type);
 			}
 		}
@@ -176,7 +178,6 @@ export default class Context implements IContext {
 		return false;
 	}
 
-
 	public setInitialState(state: ContextState = this.state.clone(false)) {
 		this.initialState = state;
 	}
@@ -191,7 +192,7 @@ export default class Context implements IContext {
 			this.state.reset();
 		}
 
-		this.setData(ContextDataType.Position, this.human.getPoint());
+		this.setData(ContextDataType.Position, new Vector3(this.human.getPoint()));
 	}
 
 	public getHashCode(): string {
@@ -230,10 +231,14 @@ export default class Context implements IContext {
 	// Helper methods
 
 	public getPosition(): IVector3 {
+		// not needed?
+		// if (!this.calculatingDifficulty) {
+		// 	return this.human.getPoint();
+		// }
+
 		const position = this.getData(ContextDataType.Position);
 		if (position && (position.x === undefined || position.y === undefined || position.z === undefined)) {
-			console.error("invalid value", position);
-			console.trace("lastKnownPosition get");
+			console.error(`[TARS] getPosition - Invalid value ${position}`);
 		}
 
 		return position || this.human.getPoint();

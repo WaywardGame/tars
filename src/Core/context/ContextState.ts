@@ -1,4 +1,5 @@
 import type { ItemType } from "game/item/IItem";
+import Item from "game/item/Item";
 
 export default class ContextState {
 
@@ -6,8 +7,8 @@ export default class ContextState {
 		public depth: number = 0,
 		public includeHashCode: boolean = false,
 		public minimumAcceptedDifficulty?: number | undefined,
-		public readonly softReservedItems: Set<number> = new Set(), // items that will be used but not consumed
-		public readonly hardReservedItems: Set<number> = new Set(), // items that will be used and consumed
+		public readonly softReservedItems: Set<Item> = new Set(), // items that will be used but not consumed
+		public readonly hardReservedItems: Set<Item> = new Set(), // items that will be used and consumed
 		public readonly reservedItemTypes: Set<ItemType> = new Set(),
 		public readonly providedItems: Map<ItemType, number> = new Map(),
 
@@ -93,11 +94,11 @@ export default class ContextState {
 		let hashCode = "";
 
 		if (this.softReservedItems.size > 0) {
-			hashCode += `Soft Reserved: ${Array.from(this.softReservedItems).join(",")}`;
+			hashCode += `Soft Reserved: ${Array.from(this.softReservedItems).map(item => item.id).join(",")}`;
 		}
 
 		if (this.hardReservedItems.size > 0) {
-			hashCode += `Hard Reserved: ${Array.from(this.hardReservedItems).join(",")}`;
+			hashCode += `Hard Reserved: ${Array.from(this.hardReservedItems).map(item => item.id).join(",")}`;
 		}
 
 		if (this.providedItems.size > 0) {
@@ -111,16 +112,16 @@ export default class ContextState {
 		let hashCode = "";
 
 		if (this.softReservedItems.size > 0) {
-			const filteredSoftReservedItems = Array.from(this.softReservedItems).filter(itemType => allowedItemTypes.has(itemType));
+			const filteredSoftReservedItems = Array.from(this.softReservedItems).filter(item => allowedItemTypes.has(item.type));
 			if (filteredSoftReservedItems.length > 0) {
-				hashCode += `Soft Reserved: ${filteredSoftReservedItems.join(",")}`;
+				hashCode += `Soft Reserved: ${filteredSoftReservedItems.map(item => item.id).join(",")}`;
 			}
 		}
 
 		if (this.hardReservedItems.size > 0) {
-			const filteredHardReservedItems = Array.from(this.hardReservedItems).filter(itemType => allowedItemTypes.has(itemType));
+			const filteredHardReservedItems = Array.from(this.hardReservedItems).filter(item => allowedItemTypes.has(item.type));
 			if (filteredHardReservedItems.length > 0) {
-				hashCode += `Hard Reserved: ${filteredHardReservedItems.join(",")}`;
+				hashCode += `Hard Reserved: ${filteredHardReservedItems.map(item => item.id).join(",")}`;
 			}
 		}
 

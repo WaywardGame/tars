@@ -4,7 +4,8 @@ import type Player from "game/entity/player/Player";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { IVector3 } from "utilities/math/IVector";
-import type { IBase, IInventoryItems, ITarsOptions, IUtilities } from "../ITars";
+import type { IBase, IInventoryItems, IUtilities } from "../ITars";
+import { ITarsOptions } from "../ITarsOptions";
 import ContextState from "./ContextState";
 import type { IContext } from "./IContext";
 export default class Context implements IContext {

@@ -4,7 +4,6 @@ import type Creature from "game/entity/creature/Creature";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import type NPC from "game/entity/npc/NPC";
-import type Item from "game/item/Item";
 import { AiType } from "game/entity/IEntity";
 
 import type Context from "../core/context/Context";
@@ -56,7 +55,8 @@ export class ObjectUtilities {
 		const sortedObjects = this.getSortedObjects(context, type, allObjects);
 
 		for (const object of sortedObjects) {
-			if ((getPoint?.(object) ?? object as any as IVector3).z === context.human.z && isTarget(object)) {
+			// if ((getPoint?.(object) ?? object as any as IVector3).z === context.human.z && isTarget(object)) {
+			if (isTarget(object)) {
 				results.push(object);
 				matches++;
 
@@ -76,10 +76,6 @@ export class ObjectUtilities {
 		return objects.length > 0 ? objects[0] : undefined;
 	}
 
-	public findDoodad(context: Context, id: string, isTarget: (doodad: Doodad) => boolean): Doodad | undefined {
-		return this.findObject(context, FindObjectType.Doodad, id, context.human.island.doodads.getObjects() as Doodad[], isTarget);
-	}
-
 	public findDoodads(context: Context, id: string, isTarget: (doodad: Doodad) => boolean, top?: number): Doodad[] {
 		return this.findObjects(context, FindObjectType.Doodad, id, context.human.island.doodads.getObjects() as Doodad[], isTarget, top);
 	}
@@ -90,10 +86,6 @@ export class ObjectUtilities {
 
 	public findNPCS(context: Context, id: string, isTarget: (npc: NPC) => boolean, top?: number): NPC[] {
 		return this.findObjects(context, FindObjectType.NPC, id, context.human.island.npcs.getObjects() as NPC[], isTarget, top);
-	}
-
-	public findItem(context: Context, id: string, isTarget: (item: Item) => boolean, top?: number): Item[] {
-		return this.findObjects(context, FindObjectType.Item, id, context.human.island.items.getObjects(), isTarget, top, (object) => object.getPoint()!);
 	}
 
 	public findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {

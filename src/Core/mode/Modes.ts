@@ -4,6 +4,7 @@ import { QuestMode } from "../../modes/Quest";
 import { SurvivalMode } from "../../modes/Survival";
 import { TerminatorMode } from "../../modes/Terminator";
 import { TidyUpMode } from "../../modes/TidyUp";
+import { TreasureHunterMode } from "../../modes/TreasureHunter";
 import { TarsMode } from "../ITars";
 import type { ITarsMode } from "./IMode";
 
@@ -16,4 +17,5 @@ modes.set(TarsMode.TidyUp, TidyUpMode);
 modes.set(TarsMode.Gardener, GardenerMode);
 modes.set(TarsMode.Harvester, HarvesterMode);
 modes.set(TarsMode.Terminator, TerminatorMode);
+modes.set(TarsMode.TreasureHunter, TreasureHunterMode);
 modes.set(TarsMode.Quest, QuestMode);

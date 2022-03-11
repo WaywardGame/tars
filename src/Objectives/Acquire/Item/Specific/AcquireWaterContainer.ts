@@ -30,15 +30,21 @@ export default class AcquireWaterContainer extends Objective {
 			messageInABottleObjectives.push(new SetContextData(ContextDataType.Item1, messageInABottleItem));
 		}
 
-		messageInABottleObjectives.push(new ExecuteActionForItem(ExecuteActionType.Generic, [ItemType.GlassBottle], ActionType.OpenBottle, (context, action) => {
-			const item = context.getData(ContextDataType.Item1);
-			if (!item?.isValid()) {
-				this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
-				return;
-			}
+		messageInABottleObjectives.push(new ExecuteActionForItem(
+			ExecuteActionType.Generic,
+			[ItemType.GlassBottle],
+			{
+				actionType: ActionType.OpenBottle,
+				executor: (context, action) => {
+					const item = context.getData(ContextDataType.Item1);
+					if (!item?.isValid()) {
+						this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
+						return;
+					}
 
-			action.execute(context.actionExecutor, item);
-		}).setStatus("Opening glass bottle"));
+					action.execute(context.actionExecutor, item);
+				}
+			}).setStatus("Opening glass bottle"));
 
 		return [
 			[new AcquireItem(ItemType.Waterskin).passAcquireData(this)],

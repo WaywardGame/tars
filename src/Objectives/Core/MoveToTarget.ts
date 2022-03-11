@@ -5,11 +5,13 @@ import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
+import Item from "game/item/Item";
 import terrainDescriptions from "game/tile/Terrains";
 import TileEvent from "game/tile/TileEvent";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import Vector3 from "utilities/math/Vector3";
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -17,20 +19,39 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { log } from "../../utilities/Logger";
 import { MoveResult } from "../../utilities/Movement";
+import Idle from "../other/Idle";
+import EquipItem from "../other/item/EquipItem";
 import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
+// caves are scary
+const zChangeDifficulty = 500;
+
 export interface IMoveToTargetOptions {
 	range: number;
 	disableStaminaCheck: boolean;
-	skipZCheck: boolean;
+	disableTracking: boolean;
 	allowBoat: boolean;
+	idleIfAlreadyThere: boolean;
+
+	/**
+	 * Equip weapons when close to the target when it's a creature
+	 */
+	equipWeapons: boolean;
+
+	skipZCheck: boolean;
+	changeZ: number;
+
+	reverse: boolean;
 }
 
 export default class MoveToTarget extends Objective {
 
 	private trackedCreature: Creature | undefined;
+	private trackedCorpse: Corpse | undefined;
+	private trackedItem: Item | undefined;
+
 	private trackedPosition: IVector3 | undefined;
 
 	constructor(
@@ -38,21 +59,31 @@ export default class MoveToTarget extends Objective {
 		protected readonly moveAdjacentToTarget: boolean,
 		protected readonly options?: Partial<IMoveToTargetOptions>) {
 		super();
+
+		if (!options?.disableTracking) {
+			if (target instanceof Creature) {
+				this.trackedCreature = target;
+				this.trackedPosition = target.getPoint();
+
+			} else if (target instanceof Corpse) {
+				this.trackedCorpse = target;
+			}
+		}
 	}
 
-	public getIdentifier(): string {
+	public getIdentifier(context: Context | undefined): string {
 		// ${this.target} - likely an [object] without a ToString
-		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}`;
+		return `MoveToTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.moveAdjacentToTarget}:${this.options?.disableStaminaCheck ? true : false}:${this.options?.range ?? 0}:${this.options?.reverse ?? false}:${this.options?.changeZ ?? this.target.z}`;
 	}
 
-	public getStatus(): string | undefined {
-		let status = `Moving to `;
+	public getStatus(context: Context): string | undefined {
+		let status = `Moving to`;
 
 		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {
-			status += `${this.target.getName()} `;
+			status += ` ${this.target.getName()}`;
 		}
 
-		status += `(${this.target.x},${this.target.y},${this.target.z})`;
+		status += ` (${this.target.x},${this.target.y},${this.target.z})`;
 
 		return status;
 	}
@@ -67,23 +98,141 @@ export default class MoveToTarget extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const position = context.getPosition();
-		if (position.z !== this.target.z) {
+
+		if (!context.options.allowCaves && position.z !== this.target.z) {
 			return ObjectiveResult.Impossible;
 		}
 
-		// if (!this.options?.skipZCheck && position.z !== this.target.z) {
-		// 	this.log.info("Target is on different Z");
-
-		// 	return [
-		// 		new MoveToZ(this.target.z),
-		// 		new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }), // todo: replace with this?
-		// 	];
+		// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
+		// 	console.warn("target", this.target, context.calculatingDifficulty);
+		// 	console.warn("player position", context.human.getPoint());
+		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
 		// }
 
-		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget);
+		if (context.options.fasterPlanning && context.calculatingDifficulty) {
+			if (position.x !== context.human.x || position.y !== context.human.y || position.z !== context.human.z) {
+				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
+				const diff = Vector2.squaredDistance(position, this.target) + (position.z !== this.target.z ? zChangeDifficulty : 0);
+
+				// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
+				// 	console.warn("diff", diff);
+				// }
+
+				return diff;
+			}
+
+			// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
+			// 	console.warn("how");
+			// }
+
+			// if (position.z !== this.target.z) {
+			// }
+		}
+
+		// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+		// 	console.warn("player position", context.human.getPoint());
+		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
+		// 	console.warn("oppositeZOrigin", context.utilities.navigation.getOppositeOrigin());
+		// }
+
+		if (this.options?.changeZ === position.z) {
+			// this objective runs dynamically so it's possible it's already in the correct z
+			return ObjectiveResult.Complete;
+		}
+
+		if (!this.options?.skipZCheck && position.z !== this.target.z) {
+			const origin = context.utilities.navigation.getOrigin();
+			const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
+			if (!origin || !oppositeZOrigin) {
+				return ObjectiveResult.Impossible;
+			}
+
+			switch (this.target.z) {
+				case oppositeZOrigin.z:
+					// the target z is in the known oppositeZ nav map
+
+					// note: passOverriddenDifficulty is very important
+					// MoveItemIntoInventory will set difficulty to 0 for certain base chests (in the event the player needs to move to the base to craft the item anyway)
+					// the overriden difficulty must be passed through to the child actions
+					return [
+						// move to cave entrance
+						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this).addDifficulty(zChangeDifficulty),
+
+						// move to target
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
+					];
+
+				case origin.z:
+					return ObjectiveResult.Impossible;
+
+				// position is not in target z
+				// position is not in origin z
+				// origin z === target z & is in the primary nav map
+				// should move from position [opposite z] -> cave entrance [origin z]
+				// move to target from reverse(opposite z origin -> position)
+				// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+				// 	// console.warn("broken okay?");
+				// }
+
+				// return [
+				// 	// move to cave entrance from the current position - reverse is true!
+				// 	new MoveToTarget({ x: position.x, y: position.y, z: position.z }, false, { ...this.options, reverse: true, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+
+				// 	// move to target
+				// 	new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
+				// ];
+
+				default:
+
+					// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+					// 	// console.warn("broken 2");
+					// }
+
+					return ObjectiveResult.Impossible;
+			}
+		}
+
+		if (this.trackedCreature && !this.trackedCreature.isValid()) {
+			return ObjectiveResult.Complete;
+		}
+
+		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget, this.options?.reverse);
 
 		if (context.calculatingDifficulty) {
-			context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
+			if (movementPath.difficulty !== ObjectiveResult.Impossible) {
+				if (movementPath.path && (this.trackedCorpse || this.trackedItem)) {
+					const decay = this.trackedCorpse?.decay ?? this.trackedItem?.decay;
+					if (decay !== undefined && decay <= movementPath.path?.length) {
+						// assuming manual turn mode, the corpse / item will decay by the time we arrive
+						return ObjectiveResult.Impossible;
+					}
+				}
+
+				if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
+					// console.warn("diff 2", movementPath.difficulty);
+				}
+
+				// if (this.target.x === 137 && this.target.y === 383 && this.target.z === 1) {
+				// 	console.warn("moved", context.human.getPoint(), context.getPosition().toString(), movementPath.difficulty);
+				// }
+
+				if (this.options?.reverse) {
+					const origin = context.utilities.navigation.getOrigin();
+					const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
+					if (origin && origin.z === this.target.z) {
+						// console.warn("set reversed origin to ", origin);
+						context.setData(ContextDataType.Position, new Vector3(origin.x, origin.y, this.options?.changeZ ?? origin.z));
+
+					} else if (oppositeZOrigin) {
+						// console.warn("set reversed origin to opposite ", oppositeZOrigin);
+						context.setData(ContextDataType.Position, new Vector3(oppositeZOrigin.x, oppositeZOrigin.y, this.options?.changeZ ?? oppositeZOrigin.z));
+					}
+
+				} else {
+					context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
+				}
+			}
+
 			return movementPath.difficulty;
 		}
 
@@ -150,7 +299,7 @@ export default class MoveToTarget extends Objective {
 					return [
 						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
 						new UseItem(ActionType.Paddle, context.inventory.sailBoat),
-						new MoveToTarget(this.target, this.moveAdjacentToTarget, this.options),
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
 					];
 				}
 			}
@@ -180,19 +329,41 @@ export default class MoveToTarget extends Objective {
 				return ObjectiveResult.Pending;
 
 			case MoveResult.Complete:
-				this.log.info("Finished moving to target");
-				context.setData(ContextDataType.Position, { x: this.target.x, y: this.target.y, z: this.target.z });
+				this.log.info(`Finished moving to target (${this.target.x},${this.target.y},${this.target.z})`);
+				context.setData(ContextDataType.Position, new Vector3(this.target));
+
+				if (movementPath.difficulty === 0 && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
+					return new Idle(false);
+				}
+
 				return ObjectiveResult.Complete;
 		}
 	}
 
-	public trackCreature(creature: Creature | undefined) {
-		this.trackedCreature = creature;
-		this.trackedPosition = creature?.getPoint();
+	/**
+	 * Causes an interrupt if the item decays before we arrive.
+	 */
+	public trackItem(item: Item | undefined) {
+		this.trackedItem = item;
 
 		return this;
 	}
 
+	public onItemRemoved(context: Context, item: Item) {
+		return this.trackedItem === item;
+	}
+
+	public onCreatureRemoved(context: Context, creature: Creature) {
+		return this.trackedCreature === creature;
+	}
+
+	public onCorpseRemoved(context: Context, corpse: Corpse) {
+		return this.trackedCorpse === corpse;
+	}
+
+	/**
+	 * Called when the context human or creature moves
+	 */
 	public override async onMove(context: Context) {
 		if (this.trackedCreature && this.trackedPosition) {
 			if (!this.trackedCreature.isValid()) {
@@ -210,6 +381,19 @@ export default class MoveToTarget extends Objective {
 				return false;
 			}
 
+			if (this.options?.equipWeapons) {
+				const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+				if (handEquipmentChange) {
+					this.log.warn(`Should equip ${handEquipmentChange.item} before attacking`);
+
+					return new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item);
+					// await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {
+					// 	action.execute(context.actionExecutor, handEquipmentChange.item, handEquipmentChange.equipType);
+					// 	return ObjectiveResult.Complete;
+					// });
+				}
+			}
+
 			const trackedCreaturePosition = this.trackedCreature.getPoint();
 
 			if (trackedCreaturePosition.x !== this.trackedPosition.x ||
@@ -218,6 +402,9 @@ export default class MoveToTarget extends Objective {
 				this.log.info("Moving with tracked creature");
 
 				this.trackedPosition = trackedCreaturePosition;
+
+				// ensure a new path is used
+				context.utilities.movement.clearCache();
 
 				// move to it's latest location
 				const moveResult = await context.utilities.movement.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);

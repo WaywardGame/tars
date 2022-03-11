@@ -64,6 +64,8 @@ export default class OrganizeInventory extends Objective {
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
+		// console.log(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow moving reserved items: ${this.options?.allowReservedItems}. Allow moving into chests: ${this.options?.allowChests}.`, this.options);
+
 		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
 			return ObjectiveResult.Ignore;
 		}
@@ -128,7 +130,20 @@ export default class OrganizeInventory extends Objective {
 
 		if (this.options.allowChests && context.base.chest.length > 0) {
 			// pick the chest with the most room available
-			const chests = context.base.chest.slice().sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
+			const chests = context.base.chest
+				.slice()
+				.sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
+
+			// prioritize the current facing chest
+			const facingDoodad = context.human.getFacingTile().doodad;
+			if (facingDoodad && context.island.items.isContainer(facingDoodad)) {
+				const chestIndex = chests.indexOf(facingDoodad);
+				if (chestIndex !== undefined) {
+					chests.splice(chestIndex, 1);
+					chests.unshift(facingDoodad);
+				}
+			}
+
 			for (const chest of chests) {
 				if (!this.options.disableDrop && Vector2.distance(context.human, chest) > maxChestDistance) {
 					continue;

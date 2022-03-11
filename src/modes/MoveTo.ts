@@ -146,7 +146,7 @@ export class MoveToMode implements ITarsMode {
                 const creatureObjectives = context.utilities.object.findCreatures(context, "MoveToCreature", creature => creature.type === creatureType, 5)
                     .map(creature => ([
                         new SetContextData(ContextDataType.TamingCreature, creature),
-                        new MoveToTarget(creature, true).trackCreature(creature),
+                        new MoveToTarget(creature, true),
                         new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;

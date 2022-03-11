@@ -16,6 +16,7 @@ export default class Navigation {
     private readonly navigationWorkers;
     private origin;
     private originUpdateTimeout;
+    private oppositeOrigin;
     private sailingMode;
     private workerInitialized;
     static setModPath(modPath: string): void;
@@ -26,7 +27,10 @@ export default class Navigation {
     updateAll(sailingMode: boolean): Promise<void>;
     getOrigin(): IVector3 | undefined;
     queueUpdateOrigin(origin?: IVector3): void;
-    updateOrigin(origin?: IVector3): void;
+    processQueuedOriginUpdate(): Promise<void>;
+    updateOrigin(origin?: IVector3): Promise<void>;
+    get oppositeZ(): number | undefined;
+    getOppositeOrigin(): IVector3 | undefined;
     refreshOverlay(tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;
     onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void;
     getNearestTileLocation(tileType: TerrainType, point: IVector3): Promise<ITileLocation[]>;
@@ -38,4 +42,5 @@ export default class Navigation {
     private submitRequest;
     private isDisabled;
     private getPenalty;
+    private _updateOrigin;
 }

@@ -67,8 +67,8 @@ export interface IObjective {
 
 	execute(context: Context): Promise<ObjectiveExecutionResult>;
 
-	getHashCode(addUniqueIdentifier?: boolean): string;
-	getIdentifier(): string;
+	getHashCode(context: Context | undefined, addUniqueIdentifier?: boolean): string;
+	getIdentifier(context: Context | undefined): string;
 	getName(): string;
 
 	/**

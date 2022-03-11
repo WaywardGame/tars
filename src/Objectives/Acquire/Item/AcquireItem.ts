@@ -1,5 +1,6 @@
 import Doodads from "game/doodad/Doodads";
 import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
+import { ActionType } from "game/entity/action/IAction";
 import Corpses from "game/entity/creature/corpse/Corpses";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { ItemType } from "game/item/IItem";
@@ -15,6 +16,7 @@ import type { ITerrainSearch, DoodadSearchMap, CreatureSearch } from "../../../c
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ItemUtilities } from "../../../utilities/Item";
 import UseProvidedItem from "../../core/UseProvidedItem";
+import GatherFromBuilt from "../../gather/GatherFromBuilt";
 import GatherFromChest from "../../gather/GatherFromChest";
 import GatherFromCorpse from "../../gather/GatherFromCorpse";
 import GatherFromCreature from "../../gather/GatherFromCreature";
@@ -33,7 +35,6 @@ export default class AcquireItem extends AcquireBase {
 	private static readonly terrainSearchCache: Map<ItemType, ITerrainSearch[]> = new Map();
 	private static readonly doodadSearchCache: Map<ItemType, DoodadSearchMap> = new Map();
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
-	private static readonly dismantleSearchCache: Map<ItemType, Set<ItemType>> = new Map();
 
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();
@@ -52,8 +53,12 @@ export default class AcquireItem extends AcquireBase {
 	}
 
 	public override shouldIncludeContextHashCode(context: Context): boolean {
-		// we care about the context's reserved items
-		return true;
+		// we care about the context's reserved items for the nested acquire item objectives
+		// for example: if there is a tree bark and we are trying to AcquireItem:String, it might assume it can dismantle the same TreeBark twice
+		// because the "AcquireItem:StrippedBark" would be cached even though the sub objectives are not
+		// return true;
+
+		return context.isReservedItemType(this.itemType);
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -87,7 +92,7 @@ export default class AcquireItem extends AcquireBase {
 			}
 		}
 
-		const dismantleSearch = this.getDismantleSearch();
+		const dismantleSearch = ItemUtilities.getDismantleSearch(this.itemType);
 		if (dismantleSearch.size > 0) {
 			objectivePipelines.push([new AcquireItemFromDismantle(this.itemType, dismantleSearch).passAcquireData(this)]);
 		}
@@ -107,6 +112,11 @@ export default class AcquireItem extends AcquireBase {
 				if (revertItemDescription?.lit === this.itemType) {
 					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passAcquireData(this)]);
 				}
+			}
+
+			const buildDoodadType = itemDescription.onUse?.[ActionType.Build];
+			if (buildDoodadType !== undefined) {
+				objectivePipelines.push([new GatherFromBuilt(this.itemType, buildDoodadType as DoodadType).passAcquireData(this)]);
 			}
 		}
 
@@ -324,29 +334,6 @@ export default class AcquireItem extends AcquireBase {
 			};
 
 			AcquireItem.creatureSearchCache.set(this.itemType, search);
-		}
-
-		return search;
-	}
-
-	private getDismantleSearch(): Set<ItemType> {
-		let search = AcquireItem.dismantleSearchCache.get(this.itemType);
-		if (search === undefined) {
-			search = new Set();
-
-			for (const it of Enums.values(ItemType)) {
-				const description = itemDescriptions[it];
-				if (description && description.dismantle) {
-					for (const di of description.dismantle.items) {
-						if (di.type === this.itemType) {
-							search.add(it);
-							break;
-						}
-					}
-				}
-			}
-
-			AcquireItem.dismantleSearchCache.set(this.itemType, search);
 		}
 
 		return search;

@@ -9,7 +9,6 @@ export default class AcquireItem extends AcquireBase {
     private static readonly terrainSearchCache;
     private static readonly doodadSearchCache;
     private static readonly creatureSearchCache;
-    private static readonly dismantleSearchCache;
     constructor(itemType: ItemType, options?: Partial<IAcquireItemOptions>);
     getIdentifier(): string;
     getStatus(): string | undefined;
@@ -19,5 +18,4 @@ export default class AcquireItem extends AcquireBase {
     private getTerrainSearch;
     private getDoodadSearch;
     private getCreatureSearch;
-    private getDismantleSearch;
 }

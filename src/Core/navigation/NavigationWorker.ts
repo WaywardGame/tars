@@ -156,13 +156,9 @@ class Navigation {
 	}
 
 	private getTileLocations(message: IGetTileLocationsRequest): IGetTileLocationsResponse {
-		const navigationInfo = this.navigationInfo[message.pos.z];
-
 		const start = performance.now();
 
-		const tileLocationTree = navigationInfo.tileLocations[message.tileType];
-
-		const result = tileLocationTree ? tileLocationTree.nearestPoints(message.pos.x, message.pos.y) : [];
+		const result = this.navigationInfo[message.pos.z].tileLocations[message.tileType]?.nearestPoints(message.pos.x, message.pos.y) ?? [];
 
 		const time = performance.now() - start;
 

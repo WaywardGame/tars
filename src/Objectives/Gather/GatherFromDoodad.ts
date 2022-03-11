@@ -4,7 +4,7 @@ import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import type Context from "../../core/context/Context";
 import type { DoodadSearchMap } from "../../core/ITars";
-import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
@@ -55,17 +55,12 @@ export default class GatherFromDoodad extends Objective {
 
 			return context.utilities.tile.canGather(context, doodad.getTile(), true);
 		}, 5)
-			.map(target => {
-				const objectives: IObjective[] = [];
-
-				objectives.push(new MoveToTarget(target, true));
-
-				objectives.push(new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType])
+			.map(target => ([
+				new MoveToTarget(target, true),
+				new ExecuteActionForItem(ExecuteActionType.Doodad, [this.itemType])
 					.passAcquireData(this)
-					.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from ${target.getName()}`));
-
-				return objectives;
-			});
+					.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from ${target.getName()}`),
+			]));
 	}
 
 	protected override getBaseDifficulty(context: Context): number {

@@ -4,7 +4,6 @@ import EventManager, { EventHandler } from "event/EventManager";
 import type { IActionApi } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
 import type Creature from "game/entity/creature/Creature";
-import type { DamageType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import type { IStatMax, IStat } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
@@ -12,16 +11,15 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
-import { WorldZ } from "game/WorldZ";
 import type Island from "game/island/Island";
-import type { ItemTypeGroup } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
+import { WorldZ } from "game/WorldZ";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import { Prompt } from "game/meta/prompt/IPrompt";
 import type { IPrompt } from "game/meta/prompt/Prompts";
 import type Prompts from "game/meta/prompt/Prompts";
-import type { ITile } from "game/tile/ITerrain";
+import { ITile, TerrainType } from "game/tile/ITerrain";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import { Bound } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
@@ -29,6 +27,12 @@ import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
+import Human from "game/entity/Human";
+import NPC from "game/entity/npc/NPC";
+import ItemManager from "game/item/ItemManager";
+import CreatureManager from "game/entity/creature/CreatureManager";
+import CorpseManager from "game/entity/creature/corpse/CorpseManager";
+import Corpse from "game/entity/creature/corpse/Corpse";
 
 import type { ISaveData } from "../ITarsMod";
 import { TarsTranslation } from "../ITarsMod";
@@ -49,7 +53,6 @@ import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
 import RecoverStamina from "../objectives/recover/RecoverStamina";
 import RecoverThirst from "../objectives/recover/RecoverThirst";
-import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
@@ -63,8 +66,7 @@ import { TileUtilities } from "../utilities/Tile";
 import Context from "./context/Context";
 import { ContextDataType, MovingToNewIslandState } from "./context/IContext";
 import executor, { ExecuteObjectivesResultType } from "./Executor";
-import { IBase, IInventoryItems, IResetOptions, ITarsEvents, ITarsOptions, IUtilities, tickSpeed } from "./ITars";
-import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./ITars";
+import { IBase, IInventoryItems, IResetOptions, ITarsEvents, IUtilities, tickSpeed, TarsMode, NavigationSystemState, QuantumBurstStatus } from "./ITars";
 import type { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import { tileUpdateRadius } from "./navigation/Navigation";
@@ -75,8 +77,10 @@ import planner from "./planning/Planner";
 import Plan from "./planning/Plan";
 import { DoodadUtilities } from "../utilities/Doodad";
 import { TarsOverlay } from "../ui/TarsOverlay";
-import Human from "game/entity/Human";
-import NPC from "game/entity/npc/NPC";
+import MoveToTarget from "../objectives/core/MoveToTarget";
+import { ITarsOptions } from "./ITarsOptions";
+import Objective from "./objective/Objective";
+import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -139,8 +143,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.navigation.unload();
 
         log.info("Deleted TARS instance");
-
-        this.event.emit("delete");
     }
 
     public load() {
@@ -174,6 +176,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.delete();
 
         EventManager.deregisterEventBusSubscriber(this);
+
+        this.event.emit("unload");
 
         // log.info("Unloaded");
     }
@@ -237,13 +241,21 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     @EventHandler(EventBus.LocalPlayer, "die")
     public onPlayerDeath() {
-        this.fullInterrupt();
+        if (this.human !== localPlayer) {
+            return;
+        }
+
+        this.fullInterrupt("Human died");
         this.utilities.movement.resetMovementOverlays();
     }
 
     @EventHandler(EventBus.LocalPlayer, "respawn")
     public onPlayerRespawn() {
-        this.fullInterrupt();
+        if (this.human !== localPlayer) {
+            return;
+        }
+
+        this.fullInterrupt("Human respawned");
         this.utilities.movement.resetMovementOverlays();
 
         if (this.navigationSystemState === NavigationSystemState.Initialized) {
@@ -263,15 +275,58 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.processQuantumBurst();
 
-        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
-        if (objective !== undefined && !Array.isArray(objective[0])) {
-            const result = await objective[0].onMove(this.context);
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined) {
+            const result = await objective.onMove(this.context);
             if (result === true) {
-                this.fullInterrupt();
+                this.fullInterrupt("Target moved");
 
             } else if (result) {
-                this.interrupt(result);
+                this.interrupt("Target moved", result);
             }
+        }
+    }
+
+    @EventHandler(EventBus.ItemManager, "remove")
+    public onItemRemove(_: ItemManager, item: Item) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined && objective instanceof MoveToTarget) {
+            const result = objective.onItemRemoved(this.context, item);
+            if (result === true) {
+                this.fullInterrupt(`${item} was removed`);
+            }
+        }
+
+        // if (this.context.isSoftReservedItem(item)) {
+        //     // we have a problem if the is still needed in more of the pipeline..
+        // }
+    }
+
+    @EventHandler(EventBus.CreatureManager, "remove")
+    public onCreatureRemove(_: CreatureManager, creature: Creature) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined && objective instanceof MoveToTarget && objective.onCreatureRemoved(this.context, creature)) {
+            this.fullInterrupt(`${creature} was removed`);
+        }
+    }
+
+    @EventHandler(EventBus.CorpseManager, "remove")
+    public onCorpseRemove(_: CorpseManager, corpse: Corpse) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined && objective instanceof MoveToTarget && objective.onCorpseRemoved(this.context, corpse)) {
+            this.fullInterrupt(`${corpse} was removed`);
         }
     }
 
@@ -284,8 +339,26 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.processQueuedNavigationUpdates();
     }
 
+    @EventHandler(EventBus.Creatures, "postMove")
+    public async onCreaturePostMove(creature: Creature, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+        if (!this.isRunning()) {
+            return;
+        }
+
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined) {
+            const result = await objective.onMove(this.context);
+            if (result === true) {
+                this.fullInterrupt("Target creature moved");
+
+            } else if (result) {
+                this.interrupt("Target creature moved", result);
+            }
+        }
+    }
+
     @EventHandler(EventBus.NPCs, "postMove")
-    public async onPostMove(npc: NPC, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+    public async onNPCPostMove(npc: NPC, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
         if (this.human !== npc) {
             return;
         }
@@ -300,14 +373,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.processQuantumBurst();
 
-        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
-        if (objective !== undefined && !Array.isArray(objective[0])) {
-            const result = await objective[0].onMove(this.context);
+        const objective = this.getCurrentObjective();
+        if (objective !== undefined) {
+            const result = await objective.onMove(this.context);
             if (result === true) {
-                this.fullInterrupt();
+                this.fullInterrupt("Target npc moved");
 
             } else if (result) {
-                this.interrupt(result);
+                this.interrupt("Target npc moved", result);
             }
         }
     }
@@ -399,19 +472,31 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext);
         if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
-            this.interrupt(...organizeInventoryInterrupts);
+            this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
         }
     }
 
+    @EventHandler(EventBus.Humans, "changeZ")
+    public onChangeZ(human: Human, z: WorldZ, lastZ: WorldZ) {
+        if (this.human !== human || !this.isRunning()) {
+            return;
+        }
+
+        if (this.navigationSystemState === NavigationSystemState.Initialized) {
+            this.utilities.navigation.queueUpdateOrigin(this.human);
+        }
+
+        this.fullInterrupt(`Interrupting due to z movement from ${WorldZ[lastZ]} to ${WorldZ[z]}`);
+    }
+
     @EventHandler(EventBus.Humans, "preMove")
-    public preMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
+    public onPreMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
         if (this.human !== human || !this.isRunning() || !human.hasWalkPath()) {
             return;
         }
 
         if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad && nextTile.doodad.blocksMove()) || human.island.isPlayerAtTile(nextTile, false, true)) {
-            log.info("Interrupting due to blocked movement");
-            this.interrupt();
+            this.interrupt("Interrupting due to blocked movement");
         }
     }
 
@@ -428,9 +513,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     this.statThresholdExceeded[stat.type] = true;
 
                     if (this.isRunning()) {
-                        log.info(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
-
-                        this.interrupt();
+                        this.fullInterrupt(`Stat threshold exceeded for ${Stat[stat.type]}. ${stat.value} < ${recoverThreshold}`);
                     }
                 }
 
@@ -456,9 +539,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     if (this.isRunning()) {
                         // players weight status changed
                         // reset objectives so we'll handle this immediately
-                        log.info(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
-
-                        this.interrupt();
+                        this.interrupt(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
                     }
                 }
 
@@ -524,9 +605,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (this.saveData.enabled) {
             this.overlay.show();
 
-            if (this.utilities.navigation) {
-                this.utilities.navigation.queueUpdateOrigin(this.human);
-            }
+            this.utilities.navigation.queueUpdateOrigin(this.human);
 
             this.tickTimeoutId = window.setTimeout(this.tick.bind(this), tickSpeed);
 
@@ -555,7 +634,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
             for (const changedOption of changedOptions) {
                 switch (changedOption) {
-                    case "exploreIslands":
+                    case "mode":
+                        shouldInterrupt = true;
+                        break;
+
+                    case "survivalExploreIslands":
                         this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
                         break;
 
@@ -578,15 +661,15 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                         break;
 
-                    case "developerMode":
+                    case "debugLogging":
                         shouldInterrupt = false;
-                        planner.debug = this.saveData.options.developerMode;
+                        planner.debug = this.saveData.options.debugLogging;
                         break;
                 }
             }
 
             if (shouldInterrupt) {
-                this.fullInterrupt();
+                this.fullInterrupt("Option changed");
             }
         }
     }
@@ -641,13 +724,18 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             statusMessage = "Miscellaneous processing";
 
             if (plan) {
-                log.warn("Missing status message for objective", plan.tree.objective.getIdentifier());
+                log.warn("Missing status message for objective", plan.tree.objective.getIdentifier(this.context));
             }
         }
 
         if (this.lastStatusMessage !== statusMessage) {
             this.lastStatusMessage = statusMessage;
             log.info(`Status: ${statusMessage}`);
+        }
+
+        const walkPath = this.context.human.walkPath;
+        if (walkPath) {
+            statusMessage += ` (distance: ${walkPath.path.length})`;
         }
 
         return statusMessage;
@@ -769,6 +857,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.interruptContext = undefined;
         this.interruptContexts.clear();
 
+        Objective.reset();
+
         this.clearCaches();
 
         if (options?.delete || options?.resetInventory) {
@@ -816,8 +906,17 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.movement.clearCache();
     }
 
-    private interrupt(...interruptObjectives: IObjective[]) {
-        log.info("Interrupt", Plan.getPipelineString(this.context, interruptObjectives));
+    private getCurrentObjective(): IObjective | undefined {
+        const objective = this.interruptObjectivePipeline || this.objectivePipeline;
+        if (objective !== undefined && !Array.isArray(objective[0])) {
+            return objective[0];
+        }
+
+        return undefined;
+    }
+
+    private interrupt(reason: string, ...interruptObjectives: IObjective[]) {
+        log.info(`Interrupt: ${reason}`, Plan.getPipelineString(this.context, interruptObjectives));
 
         executor.interrupt();
 
@@ -831,8 +930,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.human.walkAlongPath(undefined);
     }
 
-    private fullInterrupt() {
-        this.interrupt();
+    // todo: make this the default?
+    private fullInterrupt(reason: string) {
+        this.interrupt(reason);
 
         this.interruptObjectivePipeline = undefined;
         this.interruptIds = undefined;
@@ -845,6 +945,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             }
 
             await this.onTick();
+
             this.updateStatus();
 
         } catch (ex) {
@@ -887,6 +988,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.clearCaches();
 
+        await this.utilities.navigation.processQueuedOriginUpdate();
+
         // system objectives
         await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
 
@@ -899,7 +1002,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         const interruptIds = new Set<string>(interrupts
             .filter(objective => Array.isArray(objective) ? objective.length > 0 : objective !== undefined)
-            .map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier()).join(" -> ") : objective!.getIdentifier()));
+            .map(objective => Array.isArray(objective) ? objective.map(o => o.getIdentifier(this.context)).join(" -> ") : objective!.getIdentifier(this.context)));
 
         let interruptsChanged = this.interruptIds === undefined && interruptIds.size > 0;
         if (!interruptsChanged && this.interruptIds !== undefined) {
@@ -1168,13 +1271,24 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             (context.human.status.Poisoned && (health.value / health.max) <= poisonHealthPercentThreshold);
 
         const exceededThirstThreshold = context.human.stat.get<IStat>(Stat.Thirst).value <= this.utilities.player.getRecoverThreshold(context, Stat.Thirst);
+        // const isWaterEmergency = RecoverThirst.isEmergency(context);
         const exceededHungerThreshold = context.human.stat.get<IStat>(Stat.Hunger).value <= this.utilities.player.getRecoverThreshold(context, Stat.Hunger);
         const exceededStaminaThreshold = context.human.stat.get<IStat>(Stat.Stamina).value <= this.utilities.player.getRecoverThreshold(context, Stat.Stamina);
 
-        const objectives: IObjective[] = [];
+        const objectives: Array<IObjective | undefined> = [];
+
+        // if ((!onlyUseAvailableItems && (needsHealthRecovery || exceededThirstThreshold || exceededHungerThreshold || exceededStaminaThreshold)) ||
+        //     (onlyUseAvailableItems && isWaterEmergency)) {
+        //     // allow reducing weight in an emergency
+        //     objectives.push(this.reduceWeightInterrupt(context, false, false));
+        // }
 
         if (needsHealthRecovery) {
             objectives.push(new RecoverHealth(onlyUseAvailableItems));
+        }
+
+        if (exceededStaminaThreshold) {
+            objectives.push(new RecoverStamina());
         }
 
         objectives.push(new RecoverThirst({
@@ -1185,9 +1299,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         objectives.push(new RecoverHunger(onlyUseAvailableItems, exceededHungerThreshold));
 
-        if (exceededStaminaThreshold) {
-            objectives.push(new RecoverStamina());
-        }
+        // if (exceededStaminaThreshold) {
+        //     objectives.push(new RecoverStamina());
+        // }
 
         objectives.push(new RecoverThirst({
             onlyUseAvailableItems: onlyUseAvailableItems,
@@ -1203,8 +1317,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private equipmentInterrupt(context: Context): Array<IObjective | undefined> {
+        const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+
         return [
-            this.handsEquipInterrupt(context),
+            handEquipmentChange ? new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item) : undefined,
             this.equipInterrupt(context, EquipType.Chest),
             this.equipInterrupt(context, EquipType.Legs),
             this.equipInterrupt(context, EquipType.Head),
@@ -1235,177 +1351,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             }
 
             return new EquipItem(equip, itemToEquip);
-        }
-    }
-
-    private handsEquipInterrupt(context: Context, preferredDamageType?: DamageType): IObjective | undefined {
-        const leftHandEquipInterrupt = this.handEquipInterrupt(context, EquipType.LeftHand, ActionType.Attack);
-        if (leftHandEquipInterrupt) {
-            return leftHandEquipInterrupt;
-        }
-
-        if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped()) {
-            return new EquipItem(EquipType.RightHand, context.inventory.equipShield);
-        }
-
-        const leftHandItem = context.human.getEquippedItem(EquipType.LeftHand);
-        const rightHandItem = context.human.getEquippedItem(EquipType.RightHand);
-
-        const leftHandDescription = leftHandItem ? leftHandItem.description() : undefined;
-        const leftHandEquipped = leftHandDescription ? leftHandDescription.attack !== undefined : false;
-
-        const rightHandDescription = rightHandItem ? rightHandItem.description() : undefined;
-        const rightHandEquipped = rightHandDescription ? rightHandDescription.attack !== undefined : false;
-
-        if (preferredDamageType !== undefined) {
-            let leftHandDamageTypeMatches = false;
-            if (leftHandEquipped) {
-                const itemDescription = leftHandItem!.description();
-                leftHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
-            }
-
-            let rightHandDamageTypeMatches = false;
-            if (rightHandEquipped) {
-                const itemDescription = rightHandItem!.description();
-                rightHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
-            }
-
-            if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
-                if (leftHandDamageTypeMatches !== context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-                if (rightHandDamageTypeMatches !== context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-
-            } else if (leftHandEquipped || rightHandEquipped) {
-                if (leftHandEquipped && !context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-                if (rightHandEquipped && !context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-
-            } else {
-                if (!context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-                if (!context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-            }
-
-        } else {
-            if (!leftHandEquipped && !rightHandEquipped) {
-                // if we have nothing equipped in both hands, make sure the left hand is enabled
-                if (!context.human.options.leftHand) {
-                    this.changeEquipmentOption("leftHand");
-                }
-
-            } else if (leftHandEquipped !== context.human.options.leftHand) {
-                this.changeEquipmentOption("leftHand");
-            }
-
-            if (leftHandEquipped) {
-                // if we have the left hand equipped, disable right hand
-                if (context.human.options.rightHand) {
-                    this.changeEquipmentOption("rightHand");
-                }
-
-            } else if (rightHandEquipped !== context.human.options.rightHand) {
-                this.changeEquipmentOption("rightHand");
-            }
-        }
-    }
-
-    private changeEquipmentOption(id: "leftHand" | "rightHand") {
-        if (this.human.isLocalPlayer()) {
-            oldui.changeEquipmentOption(id);
-
-        } else if (!this.human.asPlayer) {
-            const isLeftHand = id === "leftHand";
-            const newValue = isLeftHand ? !this.human.options.leftHand : !this.human.options.rightHand;
-            (this.human.options as any)[id] = newValue;
-
-            // todo: mp somehow?
-        }
-    }
-
-    private handEquipInterrupt(context: Context, equipType: EquipType, use?: ActionType, itemTypes?: Array<ItemType | ItemTypeGroup>, preferredDamageType?: DamageType): IObjective | undefined {
-        const equippedItem = context.human.getEquippedItem(equipType);
-
-        let possibleEquips: Item[];
-        if (use) {
-            possibleEquips = this.utilities.item.getPossibleHandEquips(context, use, preferredDamageType, false);
-
-            if (use === ActionType.Attack) {
-                // equip based on how effective it will be against nearby creatures
-                let closestCreature: Creature | undefined;
-                let closestCreatureDistance: number | undefined;
-
-                for (let x = -2; x <= 2; x++) {
-                    for (let y = -2; y <= 2; y++) {
-                        const point = context.human.island.ensureValidPoint({ x: context.human.x + x, y: context.human.y + y, z: context.human.z });
-                        if (point) {
-                            const tile = context.island.getTileFromPoint(point);
-                            if (tile.creature && !tile.creature.isTamed()) {
-                                const distance = Vector2.squaredDistance(context.human, tile.creature.getPoint());
-                                if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
-                                    closestCreatureDistance = distance;
-                                    closestCreature = tile.creature;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (closestCreature) {
-                    // creature is close, calculate it
-                    possibleEquips
-                        .sort((a, b) => this.utilities.item.estimateDamageModifier(b, closestCreature!) - this.utilities.item.estimateDamageModifier(a, closestCreature!));
-
-                } else if (context.human.getEquippedItem(equipType) !== undefined) {
-                    // don't switch until we're close to a creature
-                    return undefined;
-                }
-            }
-
-            if (possibleEquips.length === 0 && preferredDamageType !== undefined) {
-                // fall back to not caring about the damage type
-                possibleEquips = this.utilities.item.getPossibleHandEquips(context, use, undefined, false);
-            }
-
-        } else if (itemTypes) {
-            possibleEquips = [];
-
-            for (const itemType of itemTypes) {
-                if (context.island.items.isGroup(itemType)) {
-                    possibleEquips.push(...context.island.items.getItemsInContainerByGroup(context.human.inventory, itemType));
-
-                } else {
-                    possibleEquips.push(...context.island.items.getItemsInContainerByType(context.human.inventory, itemType));
-                }
-            }
-
-        } else {
-            return undefined;
-        }
-
-        if (possibleEquips.length > 0) {
-            // always try to equip the two best items
-            for (let i = 0; i < 2; i++) {
-                const possibleEquipItem = possibleEquips[i];
-                if (!possibleEquipItem || possibleEquipItem === equippedItem) {
-                    return undefined;
-                }
-
-                if (!possibleEquipItem.isEquipped()) {
-                    return new EquipItem(equipType, possibleEquips[i]);
-                }
-            }
         }
     }
 
@@ -1580,10 +1525,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    private reduceWeightInterrupt(context: Context): IObjective | undefined {
+    private reduceWeightInterrupt(context: Context, allowReservedItems?: boolean, disableDrop?: boolean): IObjective | undefined {
         return new ReduceWeight({
-            allowReservedItems: !this.utilities.base.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened,
-            disableDrop: this.weightStatus !== WeightStatus.Overburdened && !this.utilities.base.isNearBase(context),
+            allowReservedItems: allowReservedItems ?? (!this.utilities.base.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened),
+            disableDrop: disableDrop ?? (this.weightStatus !== WeightStatus.Overburdened && !this.utilities.base.isNearBase(context)),
         });
     }
 
@@ -1597,7 +1542,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private escapeCavesInterrupt(context: Context) {
-        if (context.human.z === WorldZ.Cave) {
+        if (!context.options.allowCaves && context.human.z === WorldZ.Cave) {
             return new MoveToZ(WorldZ.Overworld);
         }
     }
@@ -1622,7 +1567,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         const target = walkPath.path[walkPath.path.length - 1];
-        if (this.utilities.base.isNearBase(context, { x: target.x, y: target.y, z: context.human.z })) {
+        const point = { x: target.x, y: target.y, z: context.human.z };
+        if (this.utilities.base.isNearBase(context, point) &&
+            TileHelpers.getType(context.island.getTileFromPoint(point)) !== TerrainType.CaveEntrance) {
             return undefined;
         }
 
@@ -1661,10 +1608,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             objectives.length > 0 ? "Going to organize inventory space" : "Will not organize inventory space",
             `Reserved items: ${reservedItems.join(",")}`,
             `Unused items: ${unusedItems.join(",")}`,
-            `Context soft reserved items: ${Array.from(context.state.softReservedItems).join(",")}`,
-            `Context hard reserved items: ${Array.from(context.state.hardReservedItems).join(",")}`,
-            `Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).join(",")}`,
-            `Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).join(",")}`,
+            `Context soft reserved items: ${Array.from(context.state.softReservedItems).map(item => item.id).join(",")}`,
+            `Context hard reserved items: ${Array.from(context.state.hardReservedItems).map(item => item.id).join(",")}`,
+            `Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).map(item => item.id).join(",")}`,
+            `Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).map(item => item.id).join(",")}`,
             `Objectives: ${Plan.getPipelineString(this.context, objectives)}`);
 
         return objectives;

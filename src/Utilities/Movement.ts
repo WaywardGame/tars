@@ -35,7 +35,7 @@ export class MovementUtilities {
 
     private movementOverlays: ITrackedOverlay[] = [];
 
-    private readonly cachedPaths: Map<string, NavigationPath | undefined> = new Map();
+    private readonly cachedPaths: Map<string, NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible> = new Map();
 
     public clearCache() {
         this.cachedPaths.clear();
@@ -81,89 +81,102 @@ export class MovementUtilities {
         }
     }
 
-    public async getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean): Promise<IMovementPath> {
-        if (context.human.x === target.x && context.human.y === target.y && context.human.z === target.z && !moveAdjacentToTarget) {
+    public async ensureOrigin(context: Context) {
+        const navigation = context.utilities.navigation;
+
+        const origin = navigation.getOrigin();
+        if (!origin || (origin.x !== context.human.x || origin.y !== context.human.y || origin.z !== context.human.z)) {
+            log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
+            await navigation.updateOrigin(context.human);
+        }
+    }
+
+    public async getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean, reverse: boolean = false): Promise<IMovementPath> {
+        if (context.human.x === target.x && context.human.y === target.y && context.human.z === target.z && !moveAdjacentToTarget && !reverse) {
             return {
                 difficulty: 0,
             };
         }
 
-        const pathId = `${target.x},${target.y},${target.z}:${moveAdjacentToTarget ? "A" : "O"}`;
+        const pathId = `${target.x},${target.y},${target.z}:${moveAdjacentToTarget ? "A" : "O"}:${reverse ? "R" : "N"}`;
 
-        let movementPath: NavigationPath | undefined;
+        let movementPath: NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible | undefined = this.cachedPaths.get(pathId);
+        if (movementPath === undefined) {
+            movementPath = await this._getMovementPath(context, target, moveAdjacentToTarget);
 
-        if (this.cachedPaths.has(pathId)) {
-            movementPath = this.cachedPaths.get(pathId);
-
-        } else {
-            const navigation = context.utilities.navigation;
-
-            // ensure sailing mode is up to date
-            await context.utilities.ensureSailingMode(!!context.human.vehicleItemReference);
-
-            const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
-            if (ends.length === 0) {
-                return {
-                    difficulty: ObjectiveResult.Impossible,
-                };
-            }
-
-            for (const end of ends) {
-                if (context.human.x === end.x && context.human.y === end.y && context.human.z === end.z) {
-                    return {
-                        difficulty: 0,
-                    };
-                }
-            }
-
-            const origin = navigation.getOrigin();
-            if (!origin || (origin.x !== context.human.x || origin.y !== context.human.y || origin.z !== context.human.z)) {
-                log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
-                navigation.updateOrigin(context.human);
-            }
-
-            // pick the easiest path
-            let results = (await Promise.all(ends.map(async end => navigation.findPath(end))))
-                .filter(result => result !== undefined) as NavigationPath[];
-
-            for (const result of results) {
-                const pathLength = result.path.length;
-
-                // the score is length of path + penalty per node
-                // remove the base difficulty and add in our own
-                // take into account that longer paths are worse
-                result.score = Math.round(result.score - pathLength + Math.pow(pathLength, 1.1));
-            }
-
-            results = results.sort((a, b) => a.score - b.score);
-
-            if (results.length > 0) {
-                movementPath = results[0];
+            if (reverse && typeof (movementPath) === "object") {
+                movementPath.path = movementPath.path.reverse();
             }
 
             this.cachedPaths.set(pathId, movementPath);
         }
 
-        if (movementPath) {
-            // log.info("getMovementPath", movementPath.path.length, movementPath.score);
+        switch (movementPath) {
+            case ObjectiveResult.Complete:
+                return {
+                    difficulty: 0,
+                };
 
-            return {
-                difficulty: movementPath.score,
-                path: movementPath.path,
-            };
+            case ObjectiveResult.Impossible:
+                return {
+                    difficulty: ObjectiveResult.Impossible,
+                };
+
+            default:
+                return {
+                    difficulty: movementPath.score,
+                    path: movementPath.path,
+                };
+        }
+    }
+
+    private async _getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean): Promise<NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible> {
+        const navigation = context.utilities.navigation;
+
+        await this.ensureOrigin(context);
+
+        // ensure sailing mode is up to date
+        await context.utilities.ensureSailingMode(!!context.human.vehicleItemReference);
+
+        const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
+        if (ends.length === 0) {
+            return ObjectiveResult.Impossible;
         }
 
-        return {
-            difficulty: ObjectiveResult.Impossible,
-        };
-    }
+        for (const end of ends) {
+            if (context.human.x === end.x && context.human.y === end.y && context.human.z === end.z) {
+                return ObjectiveResult.Complete;
+            }
+        }
 
-    public async moveToFaceTarget(context: Context, target: IVector3): Promise<MoveResult> {
-        return this.move(context, target, true);
-    }
+        // const position = context.getPosition();
+        // if (position.z !== target.z) {
+        //     // return [
+        //     // 	new MoveToZ(this.target.z),
+        //     // 	new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }), // todo: replace with this?
+        //     // ];
+        // }
 
-    public async moveToTarget(context: Context, target: IVector3): Promise<MoveResult> {
-        return this.move(context, target, false);
+        // pick the easiest path
+        let results = (await Promise.all(ends.map(async end => navigation.findPath(end))))
+            .filter(result => result !== undefined) as NavigationPath[];
+
+        for (const result of results) {
+            const pathLength = result.path.length;
+
+            // the score is length of path + penalty per node
+            // remove the base difficulty and add in our own
+            // take into account that longer paths are worse
+            result.score = Math.round(result.score - pathLength + Math.pow(pathLength, 1.1));
+        }
+
+        results = results.sort((a, b) => a.score - b.score);
+
+        if (results.length > 0) {
+            return results[0];
+        }
+
+        return ObjectiveResult.Impossible;
     }
 
     public async move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean, walkOnce?: boolean): Promise<MoveResult> {
@@ -273,12 +286,27 @@ export class MovementUtilities {
 
                     } else if (nextTile.creature) {
                         // walking into a creature
+
+                        // ensure we are wearing the correct equipment
+                        const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+                        if (handEquipmentChange) {
+                            log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
+
+                            await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {
+                                action.execute(context.actionExecutor, handEquipmentChange.item, handEquipmentChange.equipType);
+                                return ObjectiveResult.Complete;
+                            });
+                        }
+
                         const player = context.human.asPlayer;
                         if (player) {
                             await context.utilities.action.executeAction(context, ActionType.Move, (context, action) => {
                                 action.execute(player, direction);
                                 return ObjectiveResult.Complete;
                             });
+
+                        } else {
+                            log.warn("Unable to process next tile as a non-player");
                         }
 
                         return MoveResult.Moving;
@@ -315,7 +343,9 @@ export class MovementUtilities {
                         path = [nextPosition];
                     }
 
-                    context.human.walkAlongPath(path, true);
+                    if (!context.options.freeze) {
+                        context.human.walkAlongPath(path, true);
+                    }
                 }
 
                 return MoveResult.Moving;

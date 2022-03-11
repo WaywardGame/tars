@@ -4,6 +4,7 @@ import { EquipType } from "game/entity/IHuman";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
+import HuntCreature from "../other/creature/HuntCreature";
 import type Context from "../../core/context/Context";
 import type { CreatureSearch } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -15,7 +16,6 @@ import AnalyzeInventory from "../analyze/AnalyzeInventory";
 import AddDifficulty from "../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import Lambda from "../core/Lambda";
-import MoveToTarget from "../core/MoveToTarget";
 import EquipItem from "../other/item/EquipItem";
 
 export default class GatherFromCreature extends Objective {
@@ -58,7 +58,7 @@ export default class GatherFromCreature extends Objective {
 					objectives.push(new AcquireItemForAction(ActionType.Butcher));
 				}
 
-				objectives.push((new MoveToTarget(creature, false)).trackCreature(creature));
+				objectives.push(new HuntCreature(creature, true));
 
 				objectives.push(new Lambda(async context => {
 					const corpses = context.human.getFacingTile().corpses;
@@ -70,7 +70,7 @@ export default class GatherFromCreature extends Objective {
 
 					this.log.warn("Still attacking creature?");
 
-					return ObjectiveResult.Complete;
+					return ObjectiveResult.Restart;
 				}));
 
 				return objectives;

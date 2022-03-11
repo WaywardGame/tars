@@ -64,6 +64,8 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(waterContainer));
 
+		let isPouringWater = false;
+
 		if (!this.options.disablePouring && this.waterStill.gatherReady === undefined) {
 			// water still cannot be desalinated yet
 			let isWaterInContainer = false;
@@ -105,6 +107,8 @@ export default class StartWaterStillDesalination extends Objective {
 
 			// pour our water into the water still
 			objectives.push(new UseItem(ActionType.Pour, availableWaterContainer));
+
+			isPouringWater = true;
 		}
 
 		if (!this.options.disableAttaching && !this.waterStill.stillContainer) {
@@ -114,7 +118,7 @@ export default class StartWaterStillDesalination extends Objective {
 				objectives.push(new AcquireWaterContainer().keepInInventory());
 			}
 
-			if (availableWaterContainer && !context.utilities.item.canGatherWater(availableWaterContainer)) {
+			if (!isPouringWater && availableWaterContainer && !context.utilities.item.canGatherWater(availableWaterContainer)) {
 				// theres water in the container - it's like seawater
 				// pour it out so we can attach it to the container
 				objectives.push(new EmptyWaterContainer(availableWaterContainer));

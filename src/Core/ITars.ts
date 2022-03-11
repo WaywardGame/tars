@@ -23,6 +23,7 @@ import { PlayerUtilities } from "../utilities/Player";
 import { TileUtilities } from "../utilities/Tile";
 import Context from "./context/Context";
 import { IContext } from "./context/IContext";
+import { ITarsOptions } from "./ITarsOptions";
 import Navigation from "./navigation/Navigation";
 
 export const tickSpeed = 333;
@@ -51,29 +52,7 @@ export interface ITarsEvents {
 
     quantumBurstChange(status: QuantumBurstStatus): void;
 
-    delete(): void;
-}
-
-/**
- * List of options
- */
-export interface ITarsOptions {
-    mode: TarsMode;
-
-    exploreIslands: boolean;
-    useOrbsOfInfluence: boolean;
-
-    goodCitizen: boolean;
-
-    stayHealthy: boolean;
-    recoverThresholdHealth: number;
-    recoverThresholdStamina: number;
-    recoverThresholdHunger: number;
-    recoverThresholdThirst: number;
-    recoverThresholdThirstFromMax: number;
-
-    quantumBurst: boolean;
-    developerMode: boolean;
+    unload(): void;
 }
 
 export enum NavigationSystemState {
@@ -232,6 +211,7 @@ export interface IInventoryItems {
     fireKindling?: Item[];
     fireStarter?: Item;
     fireTinder?: Item;
+    fishingRod?: Item;
     food?: Item[];
     furnace?: Item;
     hammer?: Item;
@@ -240,6 +220,7 @@ export interface IInventoryItems {
     intermediateChest?: Item;
     kiln?: Item;
     knife?: Item;
+    lockPick?: Item;
     pickAxe?: Item;
     sailBoat?: Item;
     shovel?: Item;
@@ -258,7 +239,6 @@ export interface IInventoryItemInfo {
     allowMultiple?: number;
     allowInChests?: boolean;
     allowOnTiles?: boolean;
-    protect?: boolean;
     requiredMinDur?: number;
 }
 
@@ -379,7 +359,6 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             ItemType.WoodenShield,
             ItemType.WroughtIronShield,
         ],
-        protect: true,
     },
     equipSword: {
         itemTypes: [
@@ -389,7 +368,6 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             ItemType.WoodenSword,
             ItemType.WroughtIronSword,
         ],
-        protect: true,
     },
     fireKindling: {
         itemTypes: [ItemTypeGroup.Kindling],
@@ -407,6 +385,13 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     fireTinder: {
         itemTypes: [ItemTypeGroup.Tinder],
         flags: InventoryItemFlag.PreferLowerWeight,
+    },
+    fishingRod: {
+        actionTypes: [ActionType.Cast],
+        flags: {
+            flag: InventoryItemFlag.PreferHigherActionBonus,
+            option: ActionType.Cast,
+        },
     },
     food: {
         itemTypes: (context) => Array.from(context.utilities.item.foodItemTypes),
@@ -463,6 +448,13 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         flags: {
             flag: InventoryItemFlag.PreferHigherTier,
             option: ItemTypeGroup.Tongs,
+        },
+    },
+    lockPick: {
+        actionTypes: [ActionType.Lockpick],
+        flags: {
+            flag: InventoryItemFlag.PreferHigherActionBonus,
+            option: ActionType.Lockpick,
         },
     },
     pickAxe: {
@@ -557,6 +549,7 @@ export enum TarsMode {
     Gardener,
     Harvester,
     Terminator,
+    TreasureHunter,
     Quest,
 }
 

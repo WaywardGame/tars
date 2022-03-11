@@ -7,6 +7,7 @@ import Objective from "../../../core/objective/Objective";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
 import Restart from "../../core/Restart";
+import ClearTile from "../tile/ClearTile";
 
 export default class HarvestDoodad extends Objective {
 
@@ -34,7 +35,14 @@ export default class HarvestDoodad extends Objective {
 
         return [
             new MoveToTarget(this.doodad, true),
-            new ExecuteActionForItem(ExecuteActionType.Doodad, itemTypes).setStatus(this),
+            new ClearTile(this.doodad, { skipDoodad: true }),
+            new ExecuteActionForItem(
+                ExecuteActionType.Doodad,
+                itemTypes,
+                {
+                    onlyAllowHarvesting: true,
+                    onlyGatherWithHands: context.options.harvestOnlyUseHands,
+                }).setStatus(this),
             new Restart(), // ensures that no other objectives are ran after this one
         ];
     }

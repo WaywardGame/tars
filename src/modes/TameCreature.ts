@@ -42,7 +42,7 @@ export class TameCreatureMode implements ITarsMode {
             objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
         }
 
-        const creatures = context.utilities.object.findTamableCreatures(context, "Tame", { type: this.creatureType, top: 10 });
+        const creatures = context.utilities.object.findTamableCreatures(context, "Tame", { type: this.creatureType });
         if (creatures.length > 0) {
             objectives.push(new TameCreatures(creatures));
         }

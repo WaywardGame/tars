@@ -1,12 +1,19 @@
 import { IContainer } from "game/item/IItem";
 import type { ITile, ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
+import terrainDescriptions from "game/tile/Terrains";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 
 import Context from "../core/context/Context";
 import type { ITileLocation } from "../core/ITars";
+
+export interface IOpenTileOptions {
+	requireNoItemsOnTile: boolean;
+	disallowWater: boolean;
+	requireShallowWater: boolean;
+}
 
 export class TileUtilities {
 
@@ -17,25 +24,33 @@ export class TileUtilities {
 	}
 
 	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
-		const position = positionOverride ?? context.human;
+		const position = positionOverride ?? (context.options.fasterPlanning ? context.getPosition() : context.human);
 
-		const results: ITileLocation[][] = [];
+		const results: ITileLocation[][] = [
+			await this._getNearestTileLocation(context, tileType, position)
+		];
 
-		// for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
-		const z = position.z;
+		// assuming opposite origin is in a cave
+		if (!positionOverride && context.options.allowCaves) {
+			const oppositeOrigin = context.utilities.navigation.getOppositeOrigin();
+			if (oppositeOrigin && oppositeOrigin.z !== position.z) {
+				results.push(await this._getNearestTileLocation(context, tileType, oppositeOrigin));
+			}
+		}
 
-		const cacheId = `${tileType},${position.x},${position.y},${z}`;
+		return results.flat();
+	}
+
+	private async _getNearestTileLocation(context: Context, tileType: TerrainType, position: IVector3): Promise<ITileLocation[]> {
+		const cacheId = `${tileType},${position.x},${position.y},${position.z}`;
 
 		let result = this.cache.get(cacheId);
 		if (!result) {
-			result = await context.utilities.navigation.getNearestTileLocation(tileType, { x: position.x, y: position.y, z: z });
+			result = await context.utilities.navigation.getNearestTileLocation(tileType, position);
 			this.cache.set(cacheId, result);
 		}
 
-		results.push(result);
-		// }
-
-		return results.flat();
+		return result;
 	}
 
 	public isSwimmingOrOverWater(context: Context) {
@@ -47,9 +62,14 @@ export class TileUtilities {
 		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
-	public isOpenTile(context: Context, point: IVector3, tile: ITile, allowWater: boolean = true, requireShallowWater: boolean = false): boolean {
-		const container = tile as IContainer;
-		if (container.containedItems && container.containedItems.length > 0) {
+	public isOpenTile(context: Context, point: IVector3, tile: ITile, options?: Partial<IOpenTileOptions>): boolean {
+		if (options?.requireNoItemsOnTile) {
+			const container = tile as IContainer;
+			if (container.containedItems && container.containedItems.length > 0) {
+				return false;
+			}
+
+		} else if (context.human.island.isTileFull(tile)) {
 			return false;
 		}
 
@@ -68,12 +88,12 @@ export class TileUtilities {
 				return false;
 			}
 
-			if (requireShallowWater) {
+			if (options?.requireShallowWater) {
 				if (!terrainInfo.shallowWater) {
 					return false;
 				}
 
-			} else if (!allowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
+			} else if (options?.disallowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
 				return false;
 			}
 		}
@@ -104,6 +124,36 @@ export class TileUtilities {
 
 	public canDig(context: Context, tile: ITile) {
 		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !this.hasItems(tile) && !context.human.island.isPlayerAtTile(tile, false, true);
+	}
+
+	public canTill(context: Context, point: IVector3, tile: ITile, allowedTilesSet: Set<TerrainType>): boolean {
+		if (tile.creature || tile.npc) {
+			return false;
+		}
+
+		const tileType = TileHelpers.getType(tile);
+		if (tileType === TerrainType.Grass) {
+			if (!this.canDig(context, tile)) {
+				return false;
+			}
+
+			// digging grass will reveal dirt
+			if (!allowedTilesSet.has(TerrainType.Dirt)) {
+				return false;
+			}
+
+		} else {
+			if (!allowedTilesSet.has(tileType)) {
+				return false;
+			}
+
+			const terrainDescription = terrainDescriptions[tileType];
+			if (!terrainDescription?.tillable) {
+				return false;
+			}
+		}
+
+		return context.utilities.base.isOpenArea(context, point, tile);
 	}
 
 	public canButcherCorpse(context: Context, tile: ITile, skipCorpseCheck?: boolean) {

@@ -100,10 +100,10 @@ class Planner implements IPlanner {
 
 		let easiestObjectivePipeline: PossibleObjectivePipeline | undefined;
 
-		this.log.info(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode()).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
+		this.log.info(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
 
 		if (this.debug) {
-			this.writeCalculationLog(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode()).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
+			this.writeCalculationLog(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
 		}
 
 		let result: ObjectivePipeline = {
@@ -131,12 +131,13 @@ class Planner implements IPlanner {
 				const objectiveDeltaTime = performance.now() - objectiveStartTime;
 
 				if (this.debug) {
-					this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+					this.writeCalculationLog(`Returned "${CalculatedDifficultyStatus[objectivePipeline.status]}" for ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}.`);
+					// (time: ${objectiveDeltaTime.toFixed(2)}ms)
 				}
 
 				switch (objectivePipeline.status) {
 					case CalculatedDifficultyStatus.Impossible:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 						if (objectivePipeline.changes?.includeHashCode) {
 							// this pipeline was impossible because one or more required items were reserved
@@ -147,7 +148,7 @@ class Planner implements IPlanner {
 						break;
 
 					case CalculatedDifficultyStatus.NotCalculatedYet:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 						// if (this.calculatingDifficultyDepth === 1) {
 						// this can infinite loop if objectives rely on each other?
@@ -165,7 +166,7 @@ class Planner implements IPlanner {
 						break;
 
 					case CalculatedDifficultyStatus.NotPlausible:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 						if (result.status === CalculatedDifficultyStatus.NotPlausible) {
 							if (result.minimumDifficulty > objectivePipeline.minimumDifficulty) {
@@ -186,7 +187,7 @@ class Planner implements IPlanner {
 						break;
 
 					case CalculatedDifficultyStatus.Possible:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
 
 						if (easiestObjectivePipeline === undefined || easiestObjectivePipeline.difficulty > objectivePipeline.difficulty) {
 							easiestObjectivePipeline = objectivePipeline;
@@ -207,15 +208,15 @@ class Planner implements IPlanner {
 
 		const time = performance.now() - start;
 
-		if (this.debug) {
-			this.writeCalculationLog(`Took ${time.toFixed(2)}ms`);
-		}
+		// if (this.debug) {
+		// 	this.writeCalculationLog(`Took ${time.toFixed(2)}ms`);
+		// }
 
 		if (easiestObjectivePipeline) {
-			this.log.info(`Easiest objective for ${objectives.map(set => set.map(o => o.getHashCode()).join(" -> ")).join(", ")} is ${easiestObjectivePipeline.objectives.map(o => o.getHashCode()).join(" -> ")} (difficulty: ${easiestObjectivePipeline.difficulty}) (time: ${time.toFixed(2)}ms)`);
+			this.log.info(`Easiest objective for ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} is ${easiestObjectivePipeline.objectives.map(o => o.getHashCode(context)).join(" -> ")} (difficulty: ${easiestObjectivePipeline.difficulty}) (time: ${time.toFixed(2)}ms)`);
 
 			if (time >= 1000) {
-				this._log.warn(`Took ${time.toFixed(2)}ms to determine the easiest objective. ${objectives.map(set => set.map(o => o.getHashCode()).join(" -> ")).join(", ")} (context: ${clonedContext.getHashCode()})`);
+				this._log.warn(`Took ${time.toFixed(2)}ms to determine the easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${clonedContext.getHashCode()})`);
 
 				if (time >= 2000) {
 					if (this.debug) {
@@ -398,7 +399,7 @@ class Planner implements IPlanner {
 			this.calculationLog = [];
 		}
 
-		const objectiveHashCode = objective.getHashCode();
+		const objectiveHashCode = objective.getHashCode(context);
 
 		// check the difficulty cache for the objective hash code (without context)
 		let cachedDifficulty = this.checkAndMergeDifficultyCache(context, objectiveHashCode);

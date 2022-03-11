@@ -11,7 +11,7 @@ export default class GatherFromGround extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     canGroupTogether(): boolean;
-    canIncludeContextHashCode(): Set<ItemType>;
+    canIncludeContextHashCode(): boolean | Set<ItemType>;
     shouldIncludeContextHashCode(context: Context): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     protected getBaseDifficulty(context: Context): number;

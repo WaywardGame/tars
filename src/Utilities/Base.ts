@@ -1,5 +1,4 @@
 import type Doodad from "game/doodad/Doodad";
-import type { IContainer } from "game/item/IItem";
 import type { ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
@@ -95,7 +94,8 @@ export class BaseUtilities {
 	}
 
 	public isOpenArea(context: Context, point: IVector3, tile: ITile, radius: number = 1, allowWater: boolean = false, requireShallowWater: boolean = false): boolean {
-		if (!context.utilities.tile.isOpenTile(context, point, tile, allowWater, requireShallowWater) || context.utilities.tile.hasCorpses(tile)) {
+		if (!context.utilities.tile.isOpenTile(context, point, tile, { disallowWater: !allowWater, requireNoItemsOnTile: true, requireShallowWater }) ||
+			context.utilities.tile.hasCorpses(tile)) {
 			return false;
 		}
 
@@ -116,13 +116,8 @@ export class BaseUtilities {
 						continue;
 					}
 
-					const container = tile as IContainer;
-					if (container.containedItems && container.containedItems.length > 0) {
-						return false;
-					}
-
 					const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
-					if (!context.utilities.tile.isOpenTile(context, nearbyPoint, nearbyTile, requireShallowWater)) {
+					if (!context.utilities.tile.isOpenTile(context, nearbyPoint, nearbyTile, { disallowWater: !requireShallowWater, requireNoItemsOnTile: false })) {
 						return false;
 					}
 				}
@@ -173,7 +168,7 @@ export class BaseUtilities {
 		const baseDoodads = this.getBaseDoodads(context);
 
 		for (const doodad of baseDoodads) {
-			if (Vector2.squaredDistance(doodad, point) <= distanceSq) {
+			if (doodad.z === point.z && Vector2.squaredDistance(doodad, point) <= distanceSq) {
 				return true;
 			}
 		}

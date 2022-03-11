@@ -10,13 +10,12 @@ export default class Plan implements IPlan {
     readonly log: Log;
     readonly tree: IExecutionTree;
     readonly objectives: IObjectiveInfo[];
-    static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined): string;
+    static getPipelineString(context: Context, objectives: Array<IObjective | IObjective[]> | undefined, cacheHashcodes?: boolean): string;
     constructor(planner: IPlanner, context: Context, objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]);
     getTreeString(root?: IExecutionTree): string;
     execute(preExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined, postExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined): Promise<ExecuteResult>;
     private flattenTree;
-    private createExecutionTree;
-    private createOptimizedExecutionTree;
     private createOptimizedExecutionTreeV2;
     private getObjectiveResults;
+    private getExecutionTreePosition;
 }

@@ -163,7 +163,7 @@ class Executor {
 			const plan = this.lastPlan = await planner.createPlan(context, objective);
 			if (!plan) {
 				if (!objective.ignoreInvalidPlans) {
-					log.info(`No valid plan for ${objective.getHashCode()}`);
+					log.info(`No valid plan for ${objective.getHashCode(context)}`);
 				}
 
 				break;

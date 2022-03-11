@@ -1,8 +1,7 @@
-import ProtectItem from "game/entity/action/actions/ProtectItem";
 import type Item from "game/item/Item";
 
 import type Context from "../../core/context/Context";
-import type { IInventoryItems, IInventoryItemInfo } from "../../core/ITars";
+import { IInventoryItems, IInventoryItemInfo } from "../../core/ITars";
 import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -102,36 +101,12 @@ export default class AnalyzeInventory extends Objective {
 
 					context.inventory[key] = newItems as any;
 
-					if (itemInfo.protect) {
-						if (existingItems) {
-							for (const item of existingItems) {
-								if (item.isValid() && item.protected && !newItems.includes(item)) {
-									ProtectItem.execute(context.actionExecutor, item, false);
-								}
-							}
-						}
-
-						for (const item of newItems) {
-							if (item.isValid() && !item.protected) {
-								ProtectItem.execute(context.actionExecutor, item, true);
-							}
-						}
-					}
-
 				} else {
 					const currentItem = context.inventory[key] as Item | undefined;
 					const item = sortedItems[0];
 					if (currentItem !== item) {
-						if (itemInfo.protect && currentItem && currentItem.isValid() && currentItem.protected) {
-							ProtectItem.execute(context.actionExecutor, currentItem, false);
-						}
-
 						context.inventory[key] = item as any;
 						this.log.info(`Found "${key}" - ${item}`);
-
-						if (itemInfo.protect) {
-							ProtectItem.execute(context.actionExecutor, item, true);
-						}
 					}
 				}
 			}
@@ -174,6 +149,12 @@ export default class AnalyzeInventory extends Objective {
 			}
 		}
 
+		for (const item of Array.from(items)) {
+			if (!context.utilities.item.isAllowedToUseItem(context, item, false)) {
+				items.delete(item);
+			}
+		}
+
 		return items;
 	}
 
@@ -183,6 +164,10 @@ export default class AnalyzeInventory extends Objective {
 		}
 
 		if (itemInfo.requiredMinDur !== undefined && item.minDur !== undefined && item.minDur < itemInfo.requiredMinDur) {
+			return false;
+		}
+
+		if (!context.utilities.item.isAllowedToUseItem(context, item, false)) {
 			return false;
 		}
 
@@ -200,4 +185,5 @@ export default class AnalyzeInventory extends Objective {
 
 		return false;
 	}
+
 }

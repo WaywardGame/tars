@@ -31,11 +31,11 @@ import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
 import type { ITarsModEvents, ISaveData } from "./ITarsMod";
 import { TarsTranslation, setTarsMod, TarsUiSaveDataKey, TARS_ID } from "./ITarsMod";
 import Tars from "./core/Tars";
-import type { ITarsOptions } from "./core/ITars";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITars";
 import planner from "./core/planning/Planner";
 import { TarsOverlay } from "./ui/TarsOverlay";
 import TarsNPC from "./npc/TarsNPC";
+import { ITarsOptions, createOptions } from "./core/ITarsOptions";
 
 export default class TarsMod extends Mod {
 
@@ -150,7 +150,7 @@ export default class TarsMod extends Mod {
 
 	public override onLoad(): void {
 		this.initializeTarsSaveData(this.saveData);
-		planner.debug = this.saveData.options.developerMode;
+		planner.debug = this.saveData.options.debugLogging;
 
 		Log.addPreConsoleCallback(loggerUtilities.preConsoleCallback);
 
@@ -204,7 +204,7 @@ export default class TarsMod extends Mod {
 
 		this.localPlayerTars = this.createAndLoadTars(localPlayer, this.saveData);
 
-		const tarsEvents = this.localPlayerTars.event.until(this.localPlayerTars, "delete");
+		const tarsEvents = this.localPlayerTars.event.until(this.localPlayerTars, "unload");
 		tarsEvents.subscribe("enableChange", (_, enabled) => {
 			localPlayer.messages
 				.source(this.messageSource)
@@ -314,7 +314,7 @@ export default class TarsMod extends Mod {
 
 		this.tarsInstances.add(tars);
 
-		tars.event.waitFor("delete").then(() => {
+		tars.event.waitFor("unload").then(() => {
 			this.tarsInstances.delete(tars);
 		});
 
@@ -339,21 +339,7 @@ export default class TarsMod extends Mod {
 			initial.ui = {};
 		}
 
-		initial.options = {
-			mode: TarsMode.Survival,
-			exploreIslands: true,
-			useOrbsOfInfluence: true,
-			goodCitizen: true,
-			stayHealthy: true,
-			recoverThresholdHealth: 30,
-			recoverThresholdStamina: 20,
-			recoverThresholdHunger: 8,
-			recoverThresholdThirst: 10,
-			recoverThresholdThirstFromMax: -10,
-			quantumBurst: false,
-			developerMode: false,
-			...(initial.options ?? {}) as Partial<ITarsOptions>,
-		}
+		initial.options = createOptions((initial.options ?? {}) as Partial<ITarsOptions>);
 
 		if (initial.options.mode === TarsMode.Manual) {
 			initial.options.mode = TarsMode.Survival;

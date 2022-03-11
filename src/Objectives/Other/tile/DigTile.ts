@@ -12,10 +12,15 @@ import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
 
 import UseItem from "../item/UseItem";
+import ClearTile from "./ClearTile";
+
+export interface IDigTileOptions {
+	digUntilTypeIsNot: TerrainType;
+}
 
 export default class DigTile extends Objective {
 
-	constructor(private readonly target: IVector3, private readonly options: Partial<{ digUntilTypeIsNot: TerrainType }> = {}) {
+	constructor(private readonly target: IVector3, private readonly options?: Partial<IDigTileOptions>) {
 		super();
 	}
 
@@ -38,12 +43,13 @@ export default class DigTile extends Objective {
 			);
 		}
 
-		objectives.push(
-			new MoveToTarget(this.target, true),
-			new UseItem(ActionType.Dig, shovel),
-		);
+		objectives.push(new MoveToTarget(this.target, true));
 
-		const digUntilTypeIsNot = this.options.digUntilTypeIsNot;
+		objectives.push(new ClearTile(this.target));
+
+		objectives.push(new UseItem(ActionType.Dig, shovel));
+
+		const digUntilTypeIsNot = this.options?.digUntilTypeIsNot;
 		if (digUntilTypeIsNot !== undefined) {
 			objectives.push(new Lambda(async () => {
 				if (digUntilTypeIsNot === TileHelpers.getType(context.island.getTileFromPoint(this.target))) {

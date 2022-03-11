@@ -45,6 +45,8 @@ export default class Navigation {
 	private origin: IVector3 | undefined;
 	private originUpdateTimeout: number | undefined;
 
+	private oppositeOrigin: IVector3 | undefined;
+
 	private sailingMode: boolean;
 	private workerInitialized: boolean;
 
@@ -229,7 +231,16 @@ export default class Navigation {
 		}
 	}
 
-	public updateOrigin(origin?: IVector3) {
+	public async processQueuedOriginUpdate() {
+		if (this.originUpdateTimeout !== undefined) {
+			window.clearTimeout(this.originUpdateTimeout);
+			await this.updateOrigin();
+
+			// log.warn("processQueuedOriginUpdate", this.origin);
+		}
+	}
+
+	public async updateOrigin(origin?: IVector3) {
 		if (origin) {
 			this.origin = { x: origin.x, y: origin.y, z: origin.z };
 		}
@@ -238,12 +249,34 @@ export default class Navigation {
 			throw new Error("Invalid origin");
 		}
 
-		const dijkstraMapInstance = this.dijkstraMaps.get(this.origin.z);
-		if (!dijkstraMapInstance) {
+		// log.warn("updateOrigin", this.origin);
+
+		this._updateOrigin(this.origin.x, this.origin.y, this.origin.z);
+
+		const oppositeZ = this.oppositeZ;
+		if (oppositeZ === undefined) {
 			return;
 		}
 
-		dijkstraMapInstance.updateOrigin(dijkstraMapInstance.getNode(this.origin.x, this.origin.y));
+		// update the origin in the opposite z to be the location of the closest point of access (cave entrance)
+
+		const nearestCaveEntrances = await this.getNearestTileLocation(TerrainType.CaveEntrance, this.origin);
+		const nearestCaveEntrance = nearestCaveEntrances[0];
+		if (nearestCaveEntrance) {
+			const { x, y } = nearestCaveEntrance.point;
+
+			if (this.oppositeOrigin && this.oppositeOrigin.x === x && this.oppositeOrigin.y === y && this.oppositeOrigin.z === oppositeZ) {
+				// cave entrance is the same location as last time
+				return;
+			}
+
+			this.oppositeOrigin = { x, y, z: oppositeZ };
+
+			this._updateOrigin(x, y, oppositeZ);
+
+		} else {
+			this.oppositeOrigin = undefined;
+		}
 
 		// const updateOriginMessage: IUpdateOriginRequest = {
 		// 	type: NavigationMessageType.UpdateOrigin,
@@ -253,6 +286,26 @@ export default class Navigation {
 		// for (const navigationWorker of this.navigationWorkers) {
 		// 	navigationWorker.worker.postMessage(updateOriginMessage);
 		// }
+	}
+
+	public get oppositeZ(): number | undefined {
+		if (!this.origin) {
+			throw new Error("Invalid origin");
+		}
+
+		switch (this.origin.z) {
+			case WorldZ.Overworld:
+				return WorldZ.Cave;
+
+			case WorldZ.Cave:
+				return WorldZ.Overworld;
+		}
+
+		return undefined;
+	}
+
+	public getOppositeOrigin(): IVector3 | undefined {
+		return this.oppositeOrigin;
 	}
 
 	public refreshOverlay(tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {
@@ -535,6 +588,10 @@ export default class Navigation {
 	}
 
 	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType): boolean {
+		if (tileType === TerrainType.Void) {
+			return true;
+		}
+
 		if (tile.npc !== undefined && tile.npc !== this.human) {
 			return true;
 		}
@@ -646,4 +703,12 @@ export default class Navigation {
 		return Math.min(penalty, 255);
 	}
 
+	private _updateOrigin(x: number, y: number, z: number) {
+		const dijkstraMapInstance = this.dijkstraMaps.get(z);
+		if (!dijkstraMapInstance) {
+			return;
+		}
+
+		dijkstraMapInstance.updateOrigin(dijkstraMapInstance.getNode(x, y));
+	}
 }

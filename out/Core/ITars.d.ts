@@ -22,6 +22,7 @@ import { PlayerUtilities } from "../utilities/Player";
 import { TileUtilities } from "../utilities/Tile";
 import Context from "./context/Context";
 import { IContext } from "./context/IContext";
+import { ITarsOptions } from "./ITarsOptions";
 import Navigation from "./navigation/Navigation";
 export declare const tickSpeed = 333;
 export declare const defaultMaxTilesChecked = 3000;
@@ -32,21 +33,7 @@ export interface ITarsEvents {
     modeFinished(mode: TarsMode, success: boolean): void;
     navigationChange(status: NavigationSystemState): void;
     quantumBurstChange(status: QuantumBurstStatus): void;
-    delete(): void;
-}
-export interface ITarsOptions {
-    mode: TarsMode;
-    exploreIslands: boolean;
-    useOrbsOfInfluence: boolean;
-    goodCitizen: boolean;
-    stayHealthy: boolean;
-    recoverThresholdHealth: number;
-    recoverThresholdStamina: number;
-    recoverThresholdHunger: number;
-    recoverThresholdThirst: number;
-    recoverThresholdThirstFromMax: number;
-    quantumBurst: boolean;
-    developerMode: boolean;
+    unload(): void;
 }
 export declare enum NavigationSystemState {
     NotInitialized = 0,
@@ -122,6 +109,7 @@ export interface IInventoryItems {
     fireKindling?: Item[];
     fireStarter?: Item;
     fireTinder?: Item;
+    fishingRod?: Item;
     food?: Item[];
     furnace?: Item;
     hammer?: Item;
@@ -130,6 +118,7 @@ export interface IInventoryItems {
     intermediateChest?: Item;
     kiln?: Item;
     knife?: Item;
+    lockPick?: Item;
     pickAxe?: Item;
     sailBoat?: Item;
     shovel?: Item;
@@ -147,7 +136,6 @@ export interface IInventoryItemInfo {
     allowMultiple?: number;
     allowInChests?: boolean;
     allowOnTiles?: boolean;
-    protect?: boolean;
     requiredMinDur?: number;
 }
 export declare type InventoryItemFlags = InventoryItemFlag | {
@@ -196,7 +184,8 @@ export declare enum TarsMode {
     Gardener = 3,
     Harvester = 4,
     Terminator = 5,
-    Quest = 6
+    TreasureHunter = 6,
+    Quest = 7
 }
 export declare enum ReserveType {
     Soft = 0,
