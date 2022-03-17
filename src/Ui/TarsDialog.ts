@@ -34,7 +34,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	public static description: IDialogDescription = {
 		minSize: new Vector2(30, 21),
 		size: new Vector2(40, 70),
-		maxSize: new Vector2(60, 70),
+		maxSize: new Vector2(60, 140),
 		edges: [
 			[Edge.Left, 25],
 			[Edge.Bottom, 33],

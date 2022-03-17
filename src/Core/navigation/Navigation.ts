@@ -639,6 +639,10 @@ export default class Navigation {
 		}
 
 		if (tileUpdateType === undefined || tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
+			if (tile.creature) {
+				penalty += 1;
+			}
+
 			// penalty for creatures on or near the tile
 			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
 				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
