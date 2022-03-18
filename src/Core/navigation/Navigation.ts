@@ -490,7 +490,7 @@ export default class Navigation {
 
 		// log.info(`Find path time: ${time.toFixed(2)}ms`, end, response.path ? response.path.length : "failure");
 
-		if (response.path !== undefined && response.score !== undefined) {
+		if (response.success) {
 			// log.info(`Total length: ${response.path.length}. Score: ${response.score}. Distance from start: ${Math.round(Vector2.distance(this.human.getPoint(), response.path[response.path.length - 1]))}`);
 
 			// path has the end node at index 0 and the start node at (length - 1)

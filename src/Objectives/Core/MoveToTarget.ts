@@ -159,7 +159,7 @@ export default class MoveToTarget extends Objective {
 						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this).addDifficulty(zChangeDifficulty),
 
 						// move to target
-						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }).passOverriddenDifficulty(this),
 					];
 
 				case origin.z:
@@ -384,7 +384,7 @@ export default class MoveToTarget extends Objective {
 			if (this.options?.equipWeapons) {
 				const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
 				if (handEquipmentChange) {
-					this.log.warn(`Should equip ${handEquipmentChange.item} before attacking`);
+					this.log.info(`Should equip ${handEquipmentChange.item} before attacking`);
 
 					return new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item);
 					// await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {

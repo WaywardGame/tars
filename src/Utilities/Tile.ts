@@ -158,7 +158,7 @@ export class TileUtilities {
 
 	public canButcherCorpse(context: Context, tile: ITile, skipCorpseCheck?: boolean) {
 		return (skipCorpseCheck || this.hasCorpses(tile))
-			&& !tile.creature && !tile.npc && !this.hasItems(tile) && !context.human.island.isPlayerAtTile(tile, false, true) && !context.human.island.tileEvents.blocksTile(tile);
+			&& !tile.creature && !tile.npc && !context.human.island.isPlayerAtTile(tile, false, true) && !context.human.island.tileEvents.blocksTile(tile);
 	}
 
 	public hasCorpses(tile: ITile) {
