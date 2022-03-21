@@ -104,8 +104,6 @@ export enum TarsTranslation {
     DialogButtonExploreIslandsTooltip,
     DialogButtonFreeze,
     DialogButtonFreezeTooltip,
-    DialogButtonFasterPlanning,
-    DialogButtonFasterPlanningTooltip,
     DialogButtonGoodCitizen,
     DialogButtonGoodCitizenTooltip,
     DialogButtonHarvesterOnlyUseHands,
@@ -262,12 +260,6 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonFreeze,
         tooltip: TarsTranslation.DialogButtonFreezeTooltip,
-    },
-    {
-        option: "fasterPlanning",
-        type: TarsOptionSectionType.Checkbox,
-        title: TarsTranslation.DialogButtonFasterPlanning,
-        tooltip: TarsTranslation.DialogButtonFasterPlanningTooltip,
     },
     TarsTranslation.DialogLabelRecoverThresholds,
     {

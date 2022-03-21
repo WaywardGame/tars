@@ -24,7 +24,7 @@ export class TileUtilities {
 	}
 
 	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
-		const position = positionOverride ?? (context.options.fasterPlanning ? context.getPosition() : context.human);
+		const position = positionOverride ?? context.getPosition();
 
 		const results: ITileLocation[][] = [
 			await this._getNearestTileLocation(context, tileType, position)

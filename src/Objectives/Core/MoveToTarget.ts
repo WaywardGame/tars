@@ -109,7 +109,7 @@ export default class MoveToTarget extends Objective {
 		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
 		// }
 
-		if (context.options.fasterPlanning && context.calculatingDifficulty) {
+		if (context.calculatingDifficulty) {
 			if (position.x !== context.human.x || position.y !== context.human.y || position.z !== context.human.z) {
 				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
 				const diff = Vector2.squaredDistance(position, this.target) + (position.z !== this.target.z ? zChangeDifficulty : 0);

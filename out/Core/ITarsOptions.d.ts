@@ -22,7 +22,6 @@ export interface ITarsOptions {
     quantumBurst: boolean;
     debugLogging: boolean;
     freeze: boolean;
-    fasterPlanning: boolean;
 }
 export declare enum TarsUseProtectedItems {
     No = 0,

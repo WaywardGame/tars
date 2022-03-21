@@ -35,8 +35,6 @@ export interface ITarsOptions {
     quantumBurst: boolean;
     debugLogging: boolean;
     freeze: boolean;
-
-    fasterPlanning: boolean;
 }
 
 export enum TarsUseProtectedItems {
@@ -76,7 +74,6 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         quantumBurst: false,
         debugLogging: false,
         freeze: false,
-        fasterPlanning: false,
 
         ...initialOptions,
     };
