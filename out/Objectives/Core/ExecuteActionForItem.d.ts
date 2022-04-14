@@ -15,6 +15,7 @@ export declare enum ExecuteActionType {
 export interface IExecuteActionForItemOptions<T extends ActionType> {
     onlyAllowHarvesting: boolean;
     onlyGatherWithHands: boolean;
+    moveAllMatchingItems: boolean;
     actionType: ActionType;
     executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void;
 }
