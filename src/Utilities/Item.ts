@@ -444,7 +444,7 @@ export class ItemUtilities {
 	}
 
 	public getBestEquipment(context: Context, equip: EquipType): Item[] {
-		return this.getItemsInInventory(context)
+		const items = new Set(this.getItemsInInventory(context)
 			.filter(item => {
 				if (item.type === ItemType.AnimalPelt) {
 					// we're not savages
@@ -453,8 +453,14 @@ export class ItemUtilities {
 
 				const description = item.description();
 				return description && description.equip === equip;
-			})
-			.sort((a, b) => this.calculateEquipItemScore(b) - this.calculateEquipItemScore(a));
+			}));
+
+		const currentEquippedItem = context.human.getEquippedItem(equip);
+		if (currentEquippedItem) {
+			items.add(currentEquippedItem);
+		}
+
+		return Array.from(items).sort((a, b) => this.calculateEquipItemScore(b) - this.calculateEquipItemScore(a));
 	}
 
 	public calculateEquipItemScore(item: Item): number {

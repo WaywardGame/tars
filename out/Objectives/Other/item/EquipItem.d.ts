@@ -1,4 +1,4 @@
-import type { EquipType } from "game/entity/IHuman";
+import { EquipType } from "game/entity/IHuman";
 import type Item from "game/item/Item";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

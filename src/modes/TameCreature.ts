@@ -34,11 +34,11 @@ export class TameCreatureMode implements ITarsMode {
             objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
         }
 
-        if (context.inventory.equipSword === undefined) {
+        if (context.inventory.equipSword === undefined && !context.options.lockEquipment) {
             objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
         }
 
-        if (context.inventory.equipShield === undefined) {
+        if (context.inventory.equipShield === undefined && !context.options.lockEquipment) {
             objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
         }
 

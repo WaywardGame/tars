@@ -62,22 +62,24 @@ export async function getCommonInitialObjectives(context: Context): Promise<Arra
         objectives.push([new AcquireItemByGroup(ItemTypeGroup.Bedding), new AnalyzeInventory()]);
     }
 
-    if (context.inventory.equipSword === undefined) {
-        objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
-    }
+    if (!context.options.lockEquipment) {
+        if (context.inventory.equipSword === undefined) {
+            objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
+        }
 
-    const chest = context.human.getEquippedItem(EquipType.Chest);
-    if (chest === undefined || chest.type === ItemType.TatteredClothShirt) {
-        objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
-    }
+        const chest = context.human.getEquippedItem(EquipType.Chest);
+        if (chest === undefined || chest.type === ItemType.TatteredClothShirt) {
+            objectives.push([new AcquireItem(ItemType.BarkTunic), new AnalyzeInventory(), new EquipItem(EquipType.Chest)]);
+        }
 
-    const legs = context.human.getEquippedItem(EquipType.Legs);
-    if (legs === undefined || legs.type === ItemType.TatteredClothTrousers) {
-        objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
-    }
+        const legs = context.human.getEquippedItem(EquipType.Legs);
+        if (legs === undefined || legs.type === ItemType.TatteredClothTrousers) {
+            objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
+        }
 
-    if (context.inventory.equipShield === undefined) {
-        objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
+        if (context.inventory.equipShield === undefined) {
+            objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
+        }
     }
 
     return objectives;

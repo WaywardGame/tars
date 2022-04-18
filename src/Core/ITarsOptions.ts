@@ -11,6 +11,8 @@ export interface ITarsOptions {
     stayHealthy: boolean;
     allowCaves: boolean;
 
+    lockInventory: boolean;
+    lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;
 
     goodCitizen: boolean;
@@ -50,6 +52,8 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         stayHealthy: true,
         allowCaves: false,
 
+        lockInventory: false,
+        lockEquipment: false,
         useProtectedItems: TarsUseProtectedItems.No,
 
         goodCitizen: true,

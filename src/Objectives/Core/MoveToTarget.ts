@@ -381,7 +381,7 @@ export default class MoveToTarget extends Objective {
 				return false;
 			}
 
-			if (this.options?.equipWeapons) {
+			if (this.options?.equipWeapons && !context.options.lockEquipment) {
 				const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
 				if (handEquipmentChange) {
 					this.log.info(`Should equip ${handEquipmentChange.item} before attacking`);

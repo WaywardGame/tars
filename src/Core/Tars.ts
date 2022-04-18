@@ -1317,6 +1317,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private equipmentInterrupt(context: Context): Array<IObjective | undefined> {
+        if (context.options.lockEquipment) {
+            return [];
+        }
+
         const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
 
         return [
@@ -1345,6 +1349,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             if (itemToEquip === item) {
                 return undefined;
             }
+
+            log.info(`Going to equip ${itemToEquip} (score: ${this.utilities.item.calculateEquipItemScore(itemToEquip)}) in slot ${EquipType[equip]}.${item ? ` Replacing ${item} (score: ${this.utilities.item.calculateEquipItemScore(item)})` : ""}`);
 
             if (item !== undefined) {
                 return new UnequipItem(item);

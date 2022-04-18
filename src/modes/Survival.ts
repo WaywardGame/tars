@@ -166,7 +166,7 @@ export class SurvivalMode implements ITarsMode {
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;
 
-		const shouldUpgradeToLeather = !waitingForWater;
+		const shouldUpgradeToLeather = !waitingForWater && !context.options.lockEquipment;
 		if (shouldUpgradeToLeather) {
 			/*
 				Upgrade to leather

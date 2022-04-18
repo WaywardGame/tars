@@ -4,6 +4,8 @@ export interface ITarsOptions {
     mode: TarsMode;
     stayHealthy: boolean;
     allowCaves: boolean;
+    lockInventory: boolean;
+    lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;
     goodCitizen: boolean;
     recoverThresholdHealth: number;
