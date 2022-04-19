@@ -230,6 +230,24 @@ export class ItemUtilities {
 		return true;
 	}
 
+	public isAllowedToUseEquipItem(context: Context, item: Item) {
+		if (context.options.useProtectedItems !== TarsUseProtectedItems.Yes && item.isProtected()) {
+			if (this.isInventoryItem(context, item)) {
+				return true;
+			}
+
+			if (context.options.useProtectedItems === TarsUseProtectedItems.No && !context.options.useProtectedItemsForEquipment) {
+				return false;
+			}
+
+			if (item.minDur !== undefined && item.minDur < 5) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	// allow processing with inventory items assuming they wont be consumed
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.human, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
@@ -285,6 +303,11 @@ export class ItemUtilities {
 	public getItemsInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup) {
 		return context.island.items.getItemsInContainerByGroup(container, itemTypeGroup, { includeSubContainers: true })
 			.filter(item => this.isAllowedToUseItem(context, item));
+	}
+
+	public getEquipmentItemsInInventory(context: Context) {
+		return context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true })
+			.filter(item => item.description()?.equip !== undefined && this.isAllowedToUseEquipItem(context, item));
 	}
 
 	public getItemsInInventory(context: Context) {
@@ -444,7 +467,7 @@ export class ItemUtilities {
 	}
 
 	public getBestEquipment(context: Context, equip: EquipType): Item[] {
-		const items = new Set(this.getItemsInInventory(context)
+		const items = new Set(this.getEquipmentItemsInInventory(context)
 			.filter(item => {
 				if (item.type === ItemType.AnimalPelt) {
 					// we're not savages

@@ -97,6 +97,8 @@ export enum TarsTranslation {
     DialogButtonDebugLoggingTooltip,
     DialogButtonDisallowProtectedItems,
     DialogButtonDisallowProtectedItemsTooltip,
+    DialogButtonAllowProtectedItemsForEquipment,
+    DialogButtonAllowProtectedItemsForEquipmentTooltip,
     DialogButtonDiscoverAndUnlockTreasure,
     DialogButtonDiscoverAndUnlockTreasureTooltip,
     DialogButtonEnable,
@@ -256,6 +258,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
             [TarsTranslation.DialogButtonAllowProtectedItems, TarsTranslation.DialogButtonAllowProtectedItemsTooltip, TarsUseProtectedItems.Yes],
             [TarsTranslation.DialogButtonAllowProtectedItemsWithBreakCheck, TarsTranslation.DialogButtonAllowProtectedItemsWithBreakCheckTooltip, TarsUseProtectedItems.YesWithBreakCheck],
         ],
+    },
+    {
+        option: "useProtectedItemsForEquipment",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonAllowProtectedItemsForEquipment,
+        tooltip: TarsTranslation.DialogButtonAllowProtectedItemsForEquipmentTooltip,
     },
     TarsTranslation.DialogLabelMultiplayer,
     {

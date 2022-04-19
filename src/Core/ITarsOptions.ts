@@ -14,6 +14,7 @@ export interface ITarsOptions {
     lockInventory: boolean;
     lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;
+    useProtectedItemsForEquipment: boolean;
 
     goodCitizen: boolean;
 
@@ -55,6 +56,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         lockInventory: false,
         lockEquipment: false,
         useProtectedItems: TarsUseProtectedItems.No,
+        useProtectedItemsForEquipment: true,
 
         goodCitizen: true,
 

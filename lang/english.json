@@ -72,6 +72,8 @@
 			"dialogButtonDisallowProtectedItemsTooltip": "Prevents TARS from using Protected Items.",
 			"dialogButtonAllowProtectedItems": "Allow Protected Items",
 			"dialogButtonAllowProtectedItemsTooltip": "Allow TARS to use all Protected Items.",
+			"dialogButtonAllowProtectedItemsForEquipment": "Allow Equipping Protected Items",
+			"dialogButtonAllowProtectedItemsForEquipmentTooltip": "Allow TARS to equip Protected Items.",
 			"dialogButtonLockInventory": "Lock Inventory",
 			"dialogButtonLockInventoryTooltip": "Prevents TARS from moving existing inventory items into chests",
 			"dialogButtonLockEquipment": "Lock Equipment",

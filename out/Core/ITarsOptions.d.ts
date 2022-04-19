@@ -7,6 +7,7 @@ export interface ITarsOptions {
     lockInventory: boolean;
     lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;
+    useProtectedItemsForEquipment: boolean;
     goodCitizen: boolean;
     recoverThresholdHealth: number;
     recoverThresholdStamina: number;
