@@ -109,7 +109,7 @@ export default class MoveToTarget extends Objective {
 		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
 		// }
 
-		if (context.options.fasterPlanning && context.calculatingDifficulty) {
+		if (context.calculatingDifficulty) {
 			if (position.x !== context.human.x || position.y !== context.human.y || position.z !== context.human.z) {
 				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
 				const diff = Vector2.squaredDistance(position, this.target) + (position.z !== this.target.z ? zChangeDifficulty : 0);
@@ -159,7 +159,7 @@ export default class MoveToTarget extends Objective {
 						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this).addDifficulty(zChangeDifficulty),
 
 						// move to target
-						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options/*, skipZCheck: true*/ }).passOverriddenDifficulty(this),
+						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }).passOverriddenDifficulty(this),
 					];
 
 				case origin.z:
@@ -381,10 +381,10 @@ export default class MoveToTarget extends Objective {
 				return false;
 			}
 
-			if (this.options?.equipWeapons) {
+			if (this.options?.equipWeapons && !context.options.lockEquipment) {
 				const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
 				if (handEquipmentChange) {
-					this.log.warn(`Should equip ${handEquipmentChange.item} before attacking`);
+					this.log.info(`Should equip ${handEquipmentChange.item} before attacking`);
 
 					return new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item);
 					// await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {

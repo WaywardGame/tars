@@ -29,10 +29,12 @@ export declare class ItemUtilities {
     getBaseItemsByType(context: Context, itemType: ItemType): Item[];
     getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[];
     isAllowedToUseItem(context: Context, item: Item, allowProtectedInventoryItems?: boolean): boolean;
+    isAllowedToUseEquipItem(context: Context, item: Item): boolean;
     processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker;
     getItemsInContainer(context: Context, container: IContainer): Item[];
     getItemsInContainerByType(context: Context, container: IContainer, itemType: ItemType): Item[];
     getItemsInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup): Item[];
+    getEquipmentItemsInInventory(context: Context): Item[];
     getItemsInInventory(context: Context): Item[];
     getItemInInventory(context: Context, itemTypeSearch: ItemType, allowInventoryItems?: boolean): Item | undefined;
     getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, allowInventoryItems?: boolean): Item | undefined;

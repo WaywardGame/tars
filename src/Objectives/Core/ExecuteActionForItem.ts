@@ -15,6 +15,7 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
+import Item from "game/item/Item";
 
 export enum ExecuteActionType {
 	Generic,
@@ -26,6 +27,8 @@ export enum ExecuteActionType {
 export interface IExecuteActionForItemOptions<T extends ActionType> {
 	onlyAllowHarvesting: boolean;
 	onlyGatherWithHands: boolean;
+
+	moveAllMatchingItems: boolean;
 
 	actionType: ActionType;
 	executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void
@@ -213,20 +216,31 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			return ObjectiveResult.Complete;
 		}
 
-		const item = context.human.getTile().containedItems?.find(item => itemTypes.includes(item.type));
-		if (item) {
-			matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, ActionType.MoveItem, ((context: Context, action: any) => {
-				action.execute(context.actionExecutor, item, context.human.inventory);
-			}));
+		const matchingTileItems = context.human.getTile().containedItems?.filter(item => itemTypes.includes(item.type));
+		if (matchingTileItems !== undefined && matchingTileItems.length > 0) {
+			const matchingNewItems: Item[] = [];
 
-			if (matchingNewItem !== undefined) {
+			for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
+				const itemToMove = matchingTileItems[i];
+
+				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, ActionType.MoveItem, ((context: Context, action: any) => {
+					action.execute(context.actionExecutor, itemToMove, context.human.inventory);
+				}));
+				if (matchingItem !== undefined) {
+					matchingNewItems.push(matchingItem);
+				}
+			}
+
+			if (matchingNewItems.length > 0) {
+				const matchingNewItem = matchingNewItems[0];
+
 				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}) (via MoveItem)`);
 
 				if (this.reserveType === ReserveType.Soft) {
-					context.addSoftReservedItems(matchingNewItem);
+					context.addSoftReservedItems(...matchingNewItems);
 
 				} else {
-					context.addHardReservedItems(matchingNewItem);
+					context.addHardReservedItems(...matchingNewItems);
 				}
 
 				context.setData(this.contextDataKey, matchingNewItem);

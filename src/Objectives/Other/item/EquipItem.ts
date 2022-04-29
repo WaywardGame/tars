@@ -1,5 +1,5 @@
 import { ActionType } from "game/entity/action/IAction";
-import type { EquipType } from "game/entity/IHuman";
+import { EquipType } from "game/entity/IHuman";
 import type Item from "game/item/Item";
 
 import type Context from "../../../core/context/Context";
@@ -20,7 +20,7 @@ export default class EquipItem extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return `Equipping ${this.item?.getName()}`;
+		return `Equipping ${this.item?.getName()} in slot ${EquipType[this.equip]}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

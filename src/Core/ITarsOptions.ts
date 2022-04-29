@@ -11,7 +11,10 @@ export interface ITarsOptions {
     stayHealthy: boolean;
     allowCaves: boolean;
 
+    lockInventory: boolean;
+    lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;
+    useProtectedItemsForEquipment: boolean;
 
     goodCitizen: boolean;
 
@@ -35,8 +38,6 @@ export interface ITarsOptions {
     quantumBurst: boolean;
     debugLogging: boolean;
     freeze: boolean;
-
-    fasterPlanning: boolean;
 }
 
 export enum TarsUseProtectedItems {
@@ -52,7 +53,10 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         stayHealthy: true,
         allowCaves: false,
 
+        lockInventory: false,
+        lockEquipment: false,
         useProtectedItems: TarsUseProtectedItems.No,
+        useProtectedItemsForEquipment: true,
 
         goodCitizen: true,
 
@@ -76,7 +80,6 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         quantumBurst: false,
         debugLogging: false,
         freeze: false,
-        fasterPlanning: false,
 
         ...initialOptions,
     };

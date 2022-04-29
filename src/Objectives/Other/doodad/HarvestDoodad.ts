@@ -42,6 +42,7 @@ export default class HarvestDoodad extends Objective {
                 {
                     onlyAllowHarvesting: true,
                     onlyGatherWithHands: context.options.harvestOnlyUseHands,
+                    moveAllMatchingItems: true,
                 }).setStatus(this),
             new Restart(), // ensures that no other objectives are ran after this one
         ];

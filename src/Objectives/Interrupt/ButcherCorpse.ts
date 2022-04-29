@@ -41,6 +41,10 @@ export default class ButcherCorpse extends Objective {
 		objectives.push(new MoveToTarget(this.corpse, true));
 
 		objectives.push(new ExecuteAction(ActionType.Butcher, (context, action) => {
+			if (!context.utilities.tile.canButcherCorpse(context, context.human.getFacingTile())) {
+				return ObjectiveResult.Restart;
+			}
+
 			action.execute(context.actionExecutor, tool);
 			return ObjectiveResult.Complete;
 		}).setStatus(this));

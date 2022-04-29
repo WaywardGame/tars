@@ -4,7 +4,10 @@ export interface ITarsOptions {
     mode: TarsMode;
     stayHealthy: boolean;
     allowCaves: boolean;
+    lockInventory: boolean;
+    lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;
+    useProtectedItemsForEquipment: boolean;
     goodCitizen: boolean;
     recoverThresholdHealth: number;
     recoverThresholdStamina: number;
@@ -22,7 +25,6 @@ export interface ITarsOptions {
     quantumBurst: boolean;
     debugLogging: boolean;
     freeze: boolean;
-    fasterPlanning: boolean;
 }
 export declare enum TarsUseProtectedItems {
     No = 0,
