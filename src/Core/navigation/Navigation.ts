@@ -293,7 +293,34 @@ export default class Navigation {
 			throw new Error("Invalid origin");
 		}
 
-		switch (this.origin.z) {
+		return this.calculateOppositeZ(this.origin.z);
+	}
+
+	public getOppositeOrigin(): IVector3 | undefined {
+		return this.oppositeOrigin;
+	}
+
+	/**
+	 * Returns the origin for the opposite the provided z
+	 */
+	public calculateOppositeOrigin(z: WorldZ): IVector3 | undefined {
+		const oppositeZ = this.calculateOppositeZ(z);
+
+		if (oppositeZ !== undefined) {
+			if (this.origin?.z === oppositeZ) {
+				return this.origin;
+			}
+
+			if (this.oppositeOrigin?.z === oppositeZ) {
+				return this.oppositeOrigin;
+			}
+		}
+
+		return undefined;
+	}
+
+	public calculateOppositeZ(z: WorldZ): WorldZ | undefined {
+		switch (z) {
 			case WorldZ.Overworld:
 				return WorldZ.Cave;
 
@@ -302,10 +329,6 @@ export default class Navigation {
 		}
 
 		return undefined;
-	}
-
-	public getOppositeOrigin(): IVector3 | undefined {
-		return this.oppositeOrigin;
 	}
 
 	public refreshOverlay(tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {

@@ -49,7 +49,7 @@ import PlantSeeds from "../objectives/utility/PlantSeeds";
 import GatherWaters from "../objectives/gather/GatherWaters";
 import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
 import type { ITarsMode } from "../core/mode/IMode";
-import type { IInventoryItems } from "../core/ITars";
+import { IInventoryItems } from "../core/ITars";
 import { inventoryItemInfo } from "../core/ITars";
 import { getTarsSaveData } from "../ITarsMod";
 import { getCommonInitialObjectives } from "./CommonInitialObjectives";
@@ -105,22 +105,20 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		let acquireChest = true;
+		if (!context.base.buildAnotherChest) {
+			context.base.buildAnotherChest = true;
 
-		if (context.base.buildAnotherChest) {
-			// build another chest if we're near the base
-			acquireChest = context.utilities.base.isNearBase(context);
-
-		} else if (context.base.chest.length > 0) {
-			for (const c of context.base.chest) {
-				if ((context.human.island.items.computeContainerWeight(c as IContainer) / context.human.island.items.getWeightCapacity(c)!) < 0.9) {
-					acquireChest = false;
-					break;
+			if (context.base.chest.length > 0) {
+				for (const c of context.base.chest) {
+					if ((context.human.island.items.computeContainerWeight(c as IContainer) / context.human.island.items.getWeightCapacity(c)!) < 0.9) {
+						context.base.buildAnotherChest = false;
+						break;
+					}
 				}
 			}
 		}
 
-		if (acquireChest && context.inventory.chest === undefined) {
+		if (context.base.buildAnotherChest && context.inventory.chest === undefined) {
 			// mark that we should build a chest (memory)
 			// we need to do this to prevent a loop
 			// if we take items out of a chest to build another chest,
@@ -129,6 +127,7 @@ export class SurvivalMode implements ITarsMode {
 			context.base.buildAnotherChest = true;
 
 			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
+			// objectives.push([new AcquireItemByTypes(Array.from(chestTypes.keys())), new BuildItem(), new AnalyzeBase()]);
 		}
 
 		if (context.inventory.hammer === undefined) {
@@ -142,7 +141,9 @@ export class SurvivalMode implements ITarsMode {
 		if (context.utilities.base.isNearBase(context)) {
 			// ensure solar stills are solar stilling
 			for (const solarStill of context.base.solarStill) {
-				objectives.push(new StartSolarStill(solarStill));
+				if (!solarStill.stillContainer) {
+					objectives.push(new StartSolarStill(solarStill));
+				}
 			}
 
 			// ensure water stills are water stilling

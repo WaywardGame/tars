@@ -2,7 +2,7 @@ import type Doodad from "game/doodad/Doodad";
 import { ActionType } from "game/entity/action/IAction";
 
 import type Context from "../../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireWaterContainer from "../../acquire/item/specific/AcquireWaterContainer";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -15,6 +15,7 @@ import { inventoryItemInfo } from "../../../core/ITars";
 
 /**
  * It will ensure the solar still has a container
+ * It returns 0 objectives otherwise, which results in an Impossible status
  */
 export default class StartSolarStill extends Objective {
 

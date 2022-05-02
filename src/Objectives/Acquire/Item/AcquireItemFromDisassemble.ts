@@ -55,7 +55,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const { item, disassemblyItems, requiredForDisassembly } of this.searches) {
-			if (context.isHardReservedItem(item) || item.isProtected()) {
+			if (context.isHardReservedItem(item) || item.isProtected() || !context.utilities.item.canDestroyItem(context, item)) {
 				continue;
 			}
 

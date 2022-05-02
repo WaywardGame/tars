@@ -9,6 +9,7 @@ import Objective from "../../core/objective/Objective";
 
 import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
 import ReserveItems from "../core/ReserveItems";
+import { ReserveType } from "../../core/ITars";
 
 /**
  * Gathers unpurified water into a container with a recipe
@@ -58,7 +59,11 @@ export default class GatherWaterWithRecipe extends Objective {
                     const targetItemDescription = itemDescriptions[targetItemType];
                     if (targetItemDescription?.recipe !== undefined) {
                         return [
-                            new ReserveItems(this.item).keepInInventory(),
+                            // ensure that the item is kept in the inventory since it will be used by the recipe
+                            // also mark it was Soft reserved so it can actually be used by the recipe
+                            // todo: is this required? should AcquireItemWithRecipe automatically handle this instead?
+                            // or maybe it will already stay in the inventory since it's an inventory item?
+                            new ReserveItems(this.item).keepInInventory().setReserveType(ReserveType.Soft),
                             new AcquireItemWithRecipe(targetItemType, targetItemDescription.recipe, true),
                         ];
                     }

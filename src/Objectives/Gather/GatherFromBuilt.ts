@@ -25,8 +25,18 @@ export default class GatherFromBuilt extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        return context.utilities.object.findDoodads(context, `${this.getIdentifier()}|1`,
-            doodad => doodad.type === this.doodadtype && !context.utilities.base.isBaseDoodad(context, doodad), 5)
+        return context.utilities.object.findDoodads(context, `${this.getIdentifier()}|1`, doodad => {
+            if (doodad.type !== this.doodadtype || context.utilities.base.isBaseDoodad(context, doodad)) {
+                return false;
+            }
+
+            if (context.options.goodCitizen && multiplayer.isConnected() && doodad.getOwner() !== context.human) {
+                // prevent picking up doodads placed by others
+                return false;
+            }
+
+            return true;
+        }, 5)
             .map(target => ([
                 new MoveToTarget(target, true),
                 new ClearTile(target),

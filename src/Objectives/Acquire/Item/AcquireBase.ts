@@ -20,6 +20,7 @@ export interface IAcquireItemOptions extends IGatherItemOptions {
 export interface IGatherItemOptions {
 	requiredMinDur: number;
 	requirePlayerCreatedIfCraftable: boolean;
+	willDestroyItem: boolean;
 }
 
 export default abstract class AcquireBase extends Objective {

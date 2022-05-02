@@ -470,10 +470,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return;
         }
 
-        const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext);
-        if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
-            this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
-        }
+        // run the following logic in the next tick
+        // this will ensure the walkPath can be changed from within this event (it needs to send the packet from another tick)
+        setTimeout(() => {
+            const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext);
+            if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
+                this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
+            }
+        }, 0);
     }
 
     @EventHandler(EventBus.Humans, "changeZ")
@@ -856,6 +860,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.interruptIds = undefined;
         this.interruptContext = undefined;
         this.interruptContexts.clear();
+
+        this.weightStatus = this.human.getWeightStatus();
+        this.previousWeightStatus = undefined;
 
         Objective.reset();
 

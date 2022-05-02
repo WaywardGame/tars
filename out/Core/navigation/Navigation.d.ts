@@ -1,5 +1,6 @@
 import type { ITerrainDescription, ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
+import { WorldZ } from "game/WorldZ";
 import type { IVector3 } from "utilities/math/IVector";
 import { TileUpdateType } from "game/IGame";
 import type { ITileLocation } from "../ITars";
@@ -31,6 +32,8 @@ export default class Navigation {
     updateOrigin(origin?: IVector3): Promise<void>;
     get oppositeZ(): number | undefined;
     getOppositeOrigin(): IVector3 | undefined;
+    calculateOppositeOrigin(z: WorldZ): IVector3 | undefined;
+    calculateOppositeZ(z: WorldZ): WorldZ | undefined;
     refreshOverlay(tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;
     onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void;
     getNearestTileLocation(tileType: TerrainType, point: IVector3): Promise<ITileLocation[]>;

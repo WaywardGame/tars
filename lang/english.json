@@ -59,7 +59,7 @@
 			"dialogButtonStayHealthy": "Stay Healthy",
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
 			"dialogButtonGoodCitizen": "Good Citizen",
-			"dialogButtonGoodCitizenTooltip": "Instruct TARS to not take items from other players chests when in a multiplayer game.",
+			"dialogButtonGoodCitizenTooltip": "Instruct TARS to be nicer in multiplayer games.\n- Do not take items from other players chests.\n- Do not dismantle/disassemble items that other players crafted.\n- Do not pickup/rearrange objects placed by other players.",
 			"dialogButtonUseOrbsOfInfluence": "Use Orbs Of Influence",
 			"dialogButtonUseOrbsOfInfluenceTooltip": "Allow TARS to use Orbs of Influence when necessary.",
 			"dialogButtonReadBooks": "Read Books",

@@ -12,4 +12,5 @@ export default class ReinforceItem extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
+    private needsReinforcement;
 }

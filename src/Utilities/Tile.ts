@@ -30,10 +30,10 @@ export class TileUtilities {
 			await this._getNearestTileLocation(context, tileType, position)
 		];
 
-		// assuming opposite origin is in a cave
 		if (!positionOverride && context.options.allowCaves) {
-			const oppositeOrigin = context.utilities.navigation.getOppositeOrigin();
-			if (oppositeOrigin && oppositeOrigin.z !== position.z) {
+			const oppositeOrigin = context.utilities.navigation.calculateOppositeOrigin(position.z);
+			// const oppositeOrigin = context.utilities.navigation.getOppositeOrigin();
+			if (oppositeOrigin) {
 				results.push(await this._getNearestTileLocation(context, tileType, oppositeOrigin));
 			}
 		}

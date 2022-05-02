@@ -173,6 +173,7 @@ export class MoveToMode implements ITarsMode {
                     }
 
                     return [
+                        new MoveToIsland(player.islandId),
                         new MoveToTarget(player, true),
                         new Lambda(async () => {
                             this.finished(true);

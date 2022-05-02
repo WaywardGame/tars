@@ -1,6 +1,6 @@
 import type Doodad from "game/doodad/Doodad";
 import type Context from "../../../core/context/Context";
-import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 export default class StartSolarStill extends Objective {
     private readonly solarStill;

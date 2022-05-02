@@ -390,6 +390,16 @@ export class ItemUtilities {
 		return false;
 	}
 
+	public canDestroyItem(context: Context, item: Item) {
+		if (context.options.goodCitizen && multiplayer.isConnected() &&
+			item.ownerIdentifier !== undefined && item.ownerIdentifier !== context.human.identifier) {
+			// prevent destroying other peoples items
+			return false;
+		}
+
+		return true;
+	}
+
 	public isSafeToDrinkItem(item: Item) {
 		return item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfMedicinalWater) ||
 			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfDesalinatedWater) ||

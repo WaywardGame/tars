@@ -82,6 +82,14 @@ export interface IUtilities {
     ensureSailingMode(sailingMode: boolean): Promise<void>;
 }
 
+export const chestTypes: Map<ItemType, DoodadType> = new Map([
+    [ItemType.CopperChest, DoodadType.CopperChest],
+    [ItemType.IronChest, DoodadType.IronChest],
+    [ItemType.OrnateWoodenChest, DoodadType.OrnateWoodenChest],
+    [ItemType.WoodenChest, DoodadType.WoodenChest],
+    [ItemType.WroughtIronChest, DoodadType.WroughtIronChest],
+]);
+
 export interface IBase {
     anvil: Doodad[];
     campfire: Doodad[];
@@ -122,13 +130,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
         litType: DoodadTypeGroup.LitCampfire,
     },
     chest: {
-        doodadTypes: [
-            DoodadType.CopperChest,
-            DoodadType.IronChest,
-            DoodadType.OrnateWoodenChest,
-            DoodadType.WoodenChest,
-            DoodadType.WroughtIronChest,
-        ],
+        doodadTypes: Array.from(chestTypes.values()),
         allowMultiple: true,
         canAdd: (context: Context, target: Doodad) => {
             if (context.base.intermediateChest.includes(target)) {
@@ -136,6 +138,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
             }
 
             if (context.options.goodCitizen && multiplayer.isConnected() && target.getOwner() !== context.human) {
+                // prevent using chests placed by others
                 return false;
             }
 
@@ -324,7 +327,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         },
     },
     chest: {
-        itemTypes: [ItemType.WoodenChest],
+        itemTypes: Array.from(chestTypes.keys()),
         requiredMinDur: 1,
     },
     equipBack: {
@@ -420,13 +423,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         },
     },
     intermediateChest: {
-        itemTypes: [
-            ItemType.CopperChest,
-            ItemType.IronChest,
-            ItemType.OrnateWoodenChest,
-            ItemType.WoodenChest,
-            ItemType.WroughtIronChest,
-        ],
+        itemTypes: Array.from(chestTypes.keys()),
         requiredMinDur: 1,
     },
     kiln: {

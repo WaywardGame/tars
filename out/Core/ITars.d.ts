@@ -58,6 +58,7 @@ export interface IUtilities {
     tile: TileUtilities;
     ensureSailingMode(sailingMode: boolean): Promise<void>;
 }
+export declare const chestTypes: Map<ItemType, DoodadType>;
 export interface IBase {
     anvil: Doodad[];
     campfire: Doodad[];

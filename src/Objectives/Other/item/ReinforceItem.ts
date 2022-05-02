@@ -9,6 +9,7 @@ import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteAction from "../../core/ExecuteAction";
+import Lambda from "../../core/Lambda";
 
 /**
  * Reinforces an item if
@@ -34,27 +35,11 @@ export default class ReinforceItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		const minDur = this.item.minDur;
-		const maxDur = this.item.maxDur;
-		if (minDur === undefined || maxDur === undefined) {
+		if (!this.needsReinforcement(context)) {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (this.options.minWorth !== undefined) {
-			const worth = this.item.description()?.worth;
-			if (worth === undefined || worth < this.options.minWorth) {
-				return ObjectiveResult.Ignore;
-			}
-		}
-
-		if (this.options.targetDurabilityMultipler !== undefined) {
-			const defaultDurability = context.island.items.getDefaultDurability(context.human, this.item.weight, this.item.type, true);
-			if (maxDur / defaultDurability >= this.options.targetDurabilityMultipler) {
-				return ObjectiveResult.Ignore;
-			}
-		}
-
-		this.log.info(`Reinforcing item. Current durability: ${minDur}/${maxDur}`);
+		this.log.info(`Reinforcing item. Current durability: ${this.item.minDur}/${this.item.maxDur}`);
 
 		const objectives: IObjective[] = [];
 
@@ -66,18 +51,51 @@ export default class ReinforceItem extends Objective {
 			objectives.push(new AcquireItemForAction(ActionType.Reinforce).setContextDataKey(ContextDataType.Item1));
 		}
 
-		objectives.push(new ExecuteAction(ActionType.Reinforce, (context, action) => {
-			const reinforceItem = context.getData(ContextDataType.Item1);
-			if (!reinforceItem) {
-				this.log.error("Invalid reinforce item");
-				return ObjectiveResult.Restart;
-			}
+		objectives.push(
+			new ExecuteAction(ActionType.Reinforce, (context, action) => {
+				const reinforceItem = context.getData(ContextDataType.Item1);
+				if (!reinforceItem) {
+					this.log.error("Invalid reinforce item");
+					return ObjectiveResult.Restart;
+				}
 
-			action.execute(context.actionExecutor, reinforceItem, this.item);
-			return ObjectiveResult.Complete;
-		}).setStatus(this));
+				action.execute(context.actionExecutor, reinforceItem, this.item);
+				return ObjectiveResult.Complete;
+			}).setStatus(this),
+			new Lambda(async context => {
+				if (this.needsReinforcement(context)) {
+					this.log.info("Needs more reinforcement");
+					return ObjectiveResult.Restart;
+				}
+
+				return ObjectiveResult.Complete;
+			}).setStatus(this),
+		);
 
 		return objectives;
 	}
 
+	private needsReinforcement(context: Context): boolean {
+		const minDur = this.item.minDur;
+		const maxDur = this.item.maxDur;
+		if (minDur === undefined || maxDur === undefined) {
+			return false;
+		}
+
+		if (this.options.minWorth !== undefined) {
+			const worth = this.item.description()?.worth;
+			if (worth === undefined || worth < this.options.minWorth) {
+				return false;
+			}
+		}
+
+		if (this.options.targetDurabilityMultipler !== undefined) {
+			const defaultDurability = context.island.items.getDefaultDurability(context.human, this.item.weight, this.item.type, true);
+			if (maxDur / defaultDurability >= this.options.targetDurabilityMultipler) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }

@@ -40,6 +40,7 @@ export declare class ItemUtilities {
     getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, allowInventoryItems?: boolean): Item | undefined;
     getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, allowInventoryItems?: boolean): Item | undefined;
     isInventoryItem(context: Context, item: Item): boolean;
+    canDestroyItem(context: Context, item: Item): boolean;
     isSafeToDrinkItem(item: Item): boolean;
     isDrinkableItem(item: Item): boolean;
     canGatherWater(item: Item): boolean;

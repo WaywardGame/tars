@@ -75,6 +75,10 @@ export default class GatherFromChest extends Objective {
 							}
 						}
 
+						if (this.options.willDestroyItem && !context.utilities.item.canDestroyItem(context, item)) {
+							return false;
+						}
+
 						return true;
 					});
 				if (items.length > 0) {

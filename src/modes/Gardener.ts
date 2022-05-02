@@ -31,22 +31,20 @@ export class GardenerMode implements ITarsMode {
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const objectives: Array<IObjective | IObjective[]> = [];
 
-		let acquireChest = true;
+		if (!context.base.buildAnotherChest) {
+			context.base.buildAnotherChest = true;
 
-		if (context.base.buildAnotherChest) {
-			// build another chest if we're near the base
-			acquireChest = context.utilities.base.isNearBase(context);
-
-		} else if (context.base.chest.length > 0) {
-			for (const c of context.base.chest) {
-				if ((context.human.island.items.computeContainerWeight(c as IContainer) / context.human.island.items.getWeightCapacity(c)!) < 0.9) {
-					acquireChest = false;
-					break;
+			if (context.base.chest.length > 0) {
+				for (const c of context.base.chest) {
+					if ((context.human.island.items.computeContainerWeight(c as IContainer) / context.human.island.items.getWeightCapacity(c)!) < 0.9) {
+						context.base.buildAnotherChest = false;
+						break;
+					}
 				}
 			}
 		}
 
-		if (acquireChest && context.inventory.chest === undefined) {
+		if (context.base.buildAnotherChest && context.inventory.chest === undefined) {
 			// mark that we should build a chest (memory)
 			// we need to do this to prevent a loop
 			// if we take items out of a chest to build another chest,
@@ -67,6 +65,7 @@ export class GardenerMode implements ITarsMode {
 			}
 
 			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
+			// objectives.push([new AcquireItemByTypes(Array.from(chestTypes.keys())), new BuildItem(), new AnalyzeBase()]);
 		}
 
 		const seeds = context.utilities.item.getSeeds(context);

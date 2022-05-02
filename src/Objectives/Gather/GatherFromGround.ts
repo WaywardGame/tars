@@ -107,6 +107,10 @@ export default class GatherFromGround extends Objective {
 			}
 		}
 
+		if (this.options.willDestroyItem && !context.utilities.item.canDestroyItem(context, item)) {
+			return false;
+		}
+
 		return true;
 	}
 }

@@ -63,6 +63,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				continue;
 			}
 
+			// todo: integrate canDestroyItem into this method as another arg
 			const dismantleItem = context.utilities.item.getItemInInventory(context, itemType);
 
 			const objectives: IObjective[] = [
@@ -74,8 +75,8 @@ export default class AcquireItemFromDismantle extends Objective {
 			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
 			const hashCode = this.getHashCode(context, true);
 
-			if (dismantleItem === undefined) {
-				objectives.push(new AcquireItem(itemType).setContextDataKey(hashCode));
+			if (dismantleItem === undefined || !context.utilities.item.canDestroyItem(context, dismantleItem)) {
+				objectives.push(new AcquireItem(itemType, { willDestroyItem: true }).setContextDataKey(hashCode));
 
 			} else {
 				objectives.push(new ReserveItems(dismantleItem));
