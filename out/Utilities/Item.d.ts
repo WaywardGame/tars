@@ -16,7 +16,8 @@ export declare class ItemUtilities {
     private static readonly relatedItemsByGroupCache;
     private static readonly dismantleSearchCache;
     foodItemTypes: Set<ItemType>;
-    seedItemTypes: Set<ItemType>;
+    allSeedItemTypes: Set<ItemType>;
+    edibleSeedItemTypes: Set<ItemType>;
     private availableInventoryWeightCache;
     private itemCache;
     private readonly disassembleSearchCache;
@@ -68,9 +69,10 @@ export declare class ItemUtilities {
         allowSailboat: boolean;
     }>): Item[];
     getAvailableInventoryWeight(context: Context): number;
-    getSeeds(context: Context): Item[];
+    getSeeds(context: Context, onlyHealthy: boolean): Item[];
     getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: DoodadType | DoodadTypeGroup): Item | undefined;
     private getFoodItemTypes;
     private getSeedItemTypes;
+    private producesEdibleItem;
     private isHealthyToEat;
 }

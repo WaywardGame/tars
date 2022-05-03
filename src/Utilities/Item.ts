@@ -1,4 +1,4 @@
-import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "game/doodad/IDoodad";
 import { GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import type Creature from "game/entity/creature/Creature";
@@ -31,7 +31,8 @@ export class ItemUtilities {
 	private static readonly dismantleSearchCache: Map<ItemType, Set<ItemType>> = new Map();
 
 	public foodItemTypes: Set<ItemType>;
-	public seedItemTypes: Set<ItemType>;
+	public allSeedItemTypes: Set<ItemType>;
+	public edibleSeedItemTypes: Set<ItemType>;
 
 	private availableInventoryWeightCache: number | undefined;
 	private itemCache: Item[] | undefined;
@@ -147,7 +148,8 @@ export class ItemUtilities {
 
 	public initialize(context: Context) {
 		this.foodItemTypes = this.getFoodItemTypes();
-		this.seedItemTypes = this.getSeedItemTypes();
+		this.allSeedItemTypes = this.getSeedItemTypes(false);
+		this.edibleSeedItemTypes = this.getSeedItemTypes(true);
 	}
 
 	public clearCache() {
@@ -864,13 +866,13 @@ export class ItemUtilities {
 		return this.availableInventoryWeightCache;
 	}
 
-	public getSeeds(context: Context): Item[] {
+	public getSeeds(context: Context, onlyHealthy: boolean): Item[] {
 		const baseItems = this.getBaseItems(context);
 		return baseItems.filter(
 			item =>
 				item.minDur !== undefined &&
 				item.minDur > 0 &&
-				this.seedItemTypes.has(item.type)
+				(onlyHealthy ? this.edibleSeedItemTypes : this.allSeedItemTypes).has(item.type)
 		);
 	}
 
@@ -915,10 +917,8 @@ export class ItemUtilities {
 	/**
 	 * Get a list of item types that are plantable and produce doodads with items that are healthy to eat
 	 */
-	private getSeedItemTypes(): Set<ItemType> {
+	private getSeedItemTypes(onlyEdible: boolean): Set<ItemType> {
 		const result: Set<ItemType> = new Set();
-
-		const growingStages = Enums.values(GrowingStage);
 
 		for (const itemType of Enums.values(ItemType)) {
 			const description = itemDescriptions[itemType];
@@ -927,26 +927,30 @@ export class ItemUtilities {
 				continue;
 			}
 
-			const gatherDoodadDescription = doodadDescriptions[doodadType]?.gather;
-			if (gatherDoodadDescription === undefined) {
-				continue;
-			}
+			const doodadDescription = doodadDescriptions[doodadType];
 
-			for (const growingStage of growingStages) {
-				const resourceItems = gatherDoodadDescription[growingStage];
-				if (!resourceItems) {
-					continue;
-				}
-
-				for (const resourceItem of resourceItems) {
-					if (this.isHealthyToEat(resourceItem.type)) {
-						result.add(itemType);
-					}
-				}
+			if (onlyEdible || (doodadDescription && this.producesEdibleItem(doodadDescription))) {
+				result.add(itemType);
+				continue
 			}
 		}
 
 		return result;
+	}
+
+	private producesEdibleItem(doodadDescription: IDoodadDescription): boolean {
+		const { gather, harvest } = doodadDescription;
+
+		for (const growingStage of Enums.values(GrowingStage)) {
+			const resourceItems = (gather?.[growingStage] ?? []).concat(harvest?.[growingStage] ?? []);
+			for (const resourceItem of resourceItems) {
+				if (this.isHealthyToEat(resourceItem.type)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private isHealthyToEat(itemType: ItemType): boolean {

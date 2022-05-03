@@ -30,7 +30,9 @@ export interface ITarsOptions {
     survivalClearSwamps: boolean;
     survivalOrganizeBase: boolean;
 
-    harvestOnlyUseHands: boolean;
+    gardenerOnlyEdiblePlants: boolean;
+
+    harvesterOnlyUseHands: boolean;
 
     treasureHunterPrecognition: boolean;
     treasureHunterType: TreasureHunterType;
@@ -72,7 +74,9 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         survivalClearSwamps: true,
         survivalOrganizeBase: true,
 
-        harvestOnlyUseHands: false,
+        gardenerOnlyEdiblePlants: true,
+
+        harvesterOnlyUseHands: false,
 
         treasureHunterPrecognition: false,
         treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,

@@ -108,6 +108,8 @@ export enum TarsTranslation {
     DialogButtonFreezeTooltip,
     DialogButtonGoodCitizen,
     DialogButtonGoodCitizenTooltip,
+    DialogButtonGardenerOnlyEdiblePlants,
+    DialogButtonGardenerOnlyEdiblePlantsTooltip,
     DialogButtonHarvesterOnlyUseHands,
     DialogButtonHarvesterOnlyUseHandsTooltip,
     DialogButtonObtainTreasure,
@@ -326,6 +328,13 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
             max: (context) => context.human.stat.get<IStatMax>(Stat.Thirst).max,
         }
     },
+    TarsTranslation.DialogLabelAdvanced,
+    {
+        option: "quantumBurst",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonQuantumBurst,
+        tooltip: TarsTranslation.DialogButtonQuantumBurstTooltip,
+    },
 ];
 
 export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslation | undefined> = [
@@ -360,9 +369,16 @@ export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslatio
         title: TarsTranslation.DialogButtonOrganizeBase,
         tooltip: TarsTranslation.DialogButtonOrganizeBaseTooltip,
     },
+    TarsTranslation.DialogModeGardener,
+    {
+        option: "gardenerOnlyEdiblePlants",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonGardenerOnlyEdiblePlants,
+        tooltip: TarsTranslation.DialogButtonGardenerOnlyEdiblePlantsTooltip,
+    },
     TarsTranslation.DialogModeHarvester,
     {
-        option: "harvestOnlyUseHands",
+        option: "harvesterOnlyUseHands",
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonHarvesterOnlyUseHands,
         tooltip: TarsTranslation.DialogButtonHarvesterOnlyUseHandsTooltip,

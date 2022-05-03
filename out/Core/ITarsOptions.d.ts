@@ -19,7 +19,8 @@ export interface ITarsOptions {
     survivalReadBooks: boolean;
     survivalClearSwamps: boolean;
     survivalOrganizeBase: boolean;
-    harvestOnlyUseHands: boolean;
+    gardenerOnlyEdiblePlants: boolean;
+    harvesterOnlyUseHands: boolean;
     treasureHunterPrecognition: boolean;
     treasureHunterType: TreasureHunterType;
     quantumBurst: boolean;

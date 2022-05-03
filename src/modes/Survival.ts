@@ -151,7 +151,10 @@ export class SurvivalMode implements ITarsMode {
 				objectives.push(new StartWaterStillDesalination(waterStill));
 			}
 
-			objectives.push(new PlantSeeds());
+			const seeds = context.utilities.item.getSeeds(context, true);
+			if (seeds.length > 0) {
+				objectives.push(new PlantSeeds(seeds));
+			}
 
 			objectives.push(new CheckDecayingItems());
 		}

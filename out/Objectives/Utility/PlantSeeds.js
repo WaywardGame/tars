@@ -1,20 +1,20 @@
-define(["require", "exports", "../../core/objective/IObjective", "../../core/objective/Objective", "../core/Restart", "../other/item/PlantSeed"], function (require, exports, IObjective_1, Objective_1, Restart_1, PlantSeed_1) {
+define(["require", "exports", "../../core/objective/Objective", "../core/Restart", "../other/item/PlantSeed"], function (require, exports, Objective_1, Restart_1, PlantSeed_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PlantSeeds extends Objective_1.default {
+        constructor(seeds) {
+            super();
+            this.seeds = seeds;
+        }
         getIdentifier() {
-            return "PlantSeeds";
+            return `PlantSeeds:${this.seeds.join(",")}`;
         }
         getStatus() {
             return "Planting seeds";
         }
         async execute(context) {
-            const seeds = context.utilities.item.getSeeds(context);
-            if (seeds.length === 0) {
-                return IObjective_1.ObjectiveResult.Ignore;
-            }
             const objectivePipelines = [];
-            for (const seed of seeds) {
+            for (const seed of this.seeds) {
                 objectivePipelines.push([
                     new PlantSeed_1.default(seed),
                     new Restart_1.default(),
@@ -25,4 +25,4 @@ define(["require", "exports", "../../core/objective/IObjective", "../../core/obj
     }
     exports.default = PlantSeeds;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUGxhbnRTZWVkcy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9vYmplY3RpdmVzL3V0aWxpdHkvUGxhbnRTZWVkcy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFPQSxNQUFxQixVQUFXLFNBQVEsbUJBQVM7UUFFdEMsYUFBYTtZQUNoQixPQUFPLFlBQVksQ0FBQztRQUN4QixDQUFDO1FBRU0sU0FBUztZQUNaLE9BQU8sZ0JBQWdCLENBQUM7UUFDNUIsQ0FBQztRQUVNLEtBQUssQ0FBQyxPQUFPLENBQUMsT0FBZ0I7WUFDakMsTUFBTSxLQUFLLEdBQUcsT0FBTyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBQ3ZELElBQUksS0FBSyxDQUFDLE1BQU0sS0FBSyxDQUFDLEVBQUU7Z0JBQ3BCLE9BQU8sNEJBQWUsQ0FBQyxNQUFNLENBQUM7YUFDakM7WUFFRCxNQUFNLGtCQUFrQixHQUFtQixFQUFFLENBQUM7WUFFOUMsS0FBSyxNQUFNLElBQUksSUFBSSxLQUFLLEVBQUU7Z0JBQ3RCLGtCQUFrQixDQUFDLElBQUksQ0FBQztvQkFDcEIsSUFBSSxtQkFBUyxDQUFDLElBQUksQ0FBQztvQkFDbkIsSUFBSSxpQkFBTyxFQUFFO2lCQUNoQixDQUFDLENBQUM7YUFDTjtZQUVELE9BQU8sa0JBQWtCLENBQUM7UUFDOUIsQ0FBQztLQUVKO0lBNUJELDZCQTRCQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUGxhbnRTZWVkcy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9vYmplY3RpdmVzL3V0aWxpdHkvUGxhbnRTZWVkcy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFPQSxNQUFxQixVQUFXLFNBQVEsbUJBQVM7UUFFN0MsWUFBNkIsS0FBYTtZQUN0QyxLQUFLLEVBQUUsQ0FBQTtZQURrQixVQUFLLEdBQUwsS0FBSyxDQUFRO1FBRTFDLENBQUM7UUFFTSxhQUFhO1lBQ2hCLE9BQU8sY0FBYyxJQUFJLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDO1FBQ2hELENBQUM7UUFFTSxTQUFTO1lBQ1osT0FBTyxnQkFBZ0IsQ0FBQztRQUM1QixDQUFDO1FBRU0sS0FBSyxDQUFDLE9BQU8sQ0FBQyxPQUFnQjtZQUNqQyxNQUFNLGtCQUFrQixHQUFtQixFQUFFLENBQUM7WUFFOUMsS0FBSyxNQUFNLElBQUksSUFBSSxJQUFJLENBQUMsS0FBSyxFQUFFO2dCQUMzQixrQkFBa0IsQ0FBQyxJQUFJLENBQUM7b0JBQ3BCLElBQUksbUJBQVMsQ0FBQyxJQUFJLENBQUM7b0JBQ25CLElBQUksaUJBQU8sRUFBRTtpQkFDaEIsQ0FBQyxDQUFDO2FBQ047WUFFRCxPQUFPLGtCQUFrQixDQUFDO1FBQzlCLENBQUM7S0FFSjtJQTNCRCw2QkEyQkMifQ==

@@ -16,9 +16,8 @@ import Lambda from "../objectives/core/Lambda";
 import BuildItem from "../objectives/other/item/BuildItem";
 import Idle from "../objectives/other/Idle";
 import type { ITarsMode } from "../core/mode/IMode";
-import AcquireSeed from "../objectives/acquire/item/specific/AcquireSeed";
-import PlantSeeds from "../objectives/utility/PlantSeeds";
 import Restart from "../objectives/core/Restart";
+import AcquireAndPlantSeed from "../objectives/acquire/item/specific/AcquireAndPlantSeed";
 
 export class GardenerMode implements ITarsMode {
 
@@ -68,14 +67,7 @@ export class GardenerMode implements ITarsMode {
 			// objectives.push([new AcquireItemByTypes(Array.from(chestTypes.keys())), new BuildItem(), new AnalyzeBase()]);
 		}
 
-		const seeds = context.utilities.item.getSeeds(context);
-		if (seeds.length === 0) {
-			objectives.push([new AcquireSeed(), new Restart()]);
-		}
-
-		objectives.push(new PlantSeeds());
-
-		// objectives.push(new ReturnToBase());
+		objectives.push([new AcquireAndPlantSeed(context.options.gardenerOnlyEdiblePlants), new Restart()]);
 
 		if (!multiplayer.isConnected()) {
 			if (game.getTurnMode() !== TurnMode.RealTime) {
