@@ -37,8 +37,11 @@ export interface ITarsOptions {
     treasureHunterPrecognition: boolean;
     treasureHunterType: TreasureHunterType;
 
+    planningAccuracy: PlanningAccuracy;
+
     quantumBurst: boolean;
     debugLogging: boolean;
+    navigationOverlays: boolean;
     freeze: boolean;
 }
 
@@ -46,6 +49,11 @@ export enum TarsUseProtectedItems {
     No,
     Yes,
     YesWithBreakCheck,
+}
+
+export enum PlanningAccuracy {
+    Simple,
+    Accurate,
 }
 
 export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITarsOptions {
@@ -60,7 +68,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         useProtectedItems: TarsUseProtectedItems.No,
         useProtectedItemsForEquipment: true,
 
-        goodCitizen: true,
+        goodCitizen: isWebWorker ? false : true,
 
         recoverThresholdHealth: 30,
         recoverThresholdStamina: 20,
@@ -81,8 +89,11 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         treasureHunterPrecognition: false,
         treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
 
+        planningAccuracy: PlanningAccuracy.Simple,
+
         quantumBurst: false,
         debugLogging: false,
+        navigationOverlays: false,
         freeze: false,
 
         ...initialOptions,

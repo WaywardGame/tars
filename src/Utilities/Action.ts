@@ -1,9 +1,10 @@
-import ActionExecutor from "game/entity/action/ActionExecutor";
-import actionDescriptions from "game/entity/action/Actions";
-import type { ActionType, IActionDescription } from "game/entity/action/IAction";
+import { ActionArguments, ActionType, AnyActionDescription } from "game/entity/action/IAction";
+import Message from "language/dictionary/Message";
 
 import type Context from "../core/context/Context";
 import { ObjectiveResult } from "../core/objective/IObjective";
+
+export type GetActionArguments<T extends AnyActionDescription, AV = ActionArguments<T>> = AV | ((context: Context) => AV | ObjectiveResult.Restart);
 
 export class ActionUtilities {
 
@@ -12,10 +13,12 @@ export class ActionUtilities {
         resolve(success: boolean): void;
     }> = {};
 
-    public async executeAction<T extends ActionType>(
+    public async executeAction<T extends AnyActionDescription>(
         context: Context,
-        actionType: T,
-        executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => ObjectiveResult): Promise<ObjectiveResult> {
+        action: T,
+        args: GetActionArguments<T>,
+        expectedMessages?: Set<Message>,
+        expectedCannotUseResult: ObjectiveResult = ObjectiveResult.Restart): Promise<ObjectiveResult> {
         if (context.options.freeze) {
             return ObjectiveResult.Pending;
         }
@@ -37,18 +40,36 @@ export class ActionUtilities {
             });
         }
 
+        const actionType = action.type!;
+
+        const actionArgs = typeof (args) === "function" ? args(context) : args;
+        if (typeof (actionArgs) === "number") {
+            return actionArgs;
+        }
+
+        const canUseResult = action.canUse(context.human, ...actionArgs);
+        if (!canUseResult.usable) {
+            if (canUseResult.message !== undefined && expectedMessages?.has(canUseResult.message)) {
+                return expectedCannotUseResult;
+            }
+
+            context.log.warn(`Tried to use an action that is not usable. Action: ${ActionType[actionType]}. Arguments: ${actionArgs.join(", ")}. Message: ${Message[canUseResult.message!]}`);
+
+            return ObjectiveResult.Restart;
+        }
+
         if (multiplayer.isConnected()) {
             // the action won't be executed immediately, we need to setup a callback
             waiter = this.waitForAction(actionType);
         }
 
-        const objectiveResult = executor(context, ActionExecutor.get(actionDescriptions[actionType]).skipConfirmation() as any);
+        action.skipConfirmation().execute(context.human, ...actionArgs);
 
         if (waiter) {
             await waiter;
         }
 
-        return objectiveResult;
+        return ObjectiveResult.Complete;
     }
 
     public postExecuteAction(actionType: ActionType) {

@@ -1,4 +1,4 @@
-define(["require", "exports", "game/entity/action/IAction", "game/item/IItem", "../../../../core/context/IContext", "../../../../core/objective/Objective", "../../../contextData/SetContextData", "../../../core/ExecuteActionForItem", "../AcquireItem"], function (require, exports, IAction_1, IItem_1, IContext_1, Objective_1, SetContextData_1, ExecuteActionForItem_1, AcquireItem_1) {
+define(["require", "exports", "game/item/IItem", "game/entity/action/actions/OpenBottle", "../../../../core/objective/IObjective", "../../../../core/objective/Objective", "../../../contextData/SetContextData", "../../../core/ExecuteActionForItem", "../../../core/ReserveItems", "../AcquireItem"], function (require, exports, IItem_1, OpenBottle_1, IObjective_1, Objective_1, SetContextData_1, ExecuteActionForItem_1, ReserveItems_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireWaterContainer extends Objective_1.default {
@@ -9,24 +9,28 @@ define(["require", "exports", "game/entity/action/IAction", "game/item/IItem", "
             return "Acquiring a water container";
         }
         async execute(context) {
+            const itemContextDataKey = this.getUniqueContextDataKey("MessageInABottle");
             const messageInABottleObjectives = [];
             const messageInABottleItem = context.utilities.item.getItemInInventory(context, IItem_1.ItemType.MessageInABottle);
-            if (!messageInABottleItem) {
-                messageInABottleObjectives.push(new AcquireItem_1.default(IItem_1.ItemType.MessageInABottle).passAcquireData(this).setContextDataKey(IContext_1.ContextDataType.Item1));
+            if (messageInABottleItem) {
+                messageInABottleObjectives.push(new ReserveItems_1.default(messageInABottleItem));
+                messageInABottleObjectives.push(new SetContextData_1.default(itemContextDataKey, messageInABottleItem));
             }
             else {
-                messageInABottleObjectives.push(new SetContextData_1.default(IContext_1.ContextDataType.Item1, messageInABottleItem));
+                messageInABottleObjectives.push(new AcquireItem_1.default(IItem_1.ItemType.MessageInABottle).passAcquireData(this).setContextDataKey(itemContextDataKey));
             }
             messageInABottleObjectives.push(new ExecuteActionForItem_1.default(ExecuteActionForItem_1.ExecuteActionType.Generic, [IItem_1.ItemType.GlassBottle], {
-                actionType: IAction_1.ActionType.OpenBottle,
-                executor: (context, action) => {
-                    const item = context.getData(IContext_1.ContextDataType.Item1);
-                    if (!item?.isValid()) {
-                        this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
-                        return;
-                    }
-                    action.execute(context.actionExecutor, item);
-                }
+                genericAction: {
+                    action: OpenBottle_1.default,
+                    args: (context) => {
+                        const item = context.getData(itemContextDataKey);
+                        if (!item?.isValid()) {
+                            this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
+                            return IObjective_1.ObjectiveResult.Restart;
+                        }
+                        return [item];
+                    },
+                },
             }).setStatus("Opening glass bottle"));
             return [
                 [new AcquireItem_1.default(IItem_1.ItemType.Waterskin).passAcquireData(this)],
@@ -38,4 +42,4 @@ define(["require", "exports", "game/entity/action/IAction", "game/item/IItem", "
     }
     exports.default = AcquireWaterContainer;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWNxdWlyZVdhdGVyQ29udGFpbmVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL29iamVjdGl2ZXMvYWNxdWlyZS9pdGVtL3NwZWNpZmljL0FjcXVpcmVXYXRlckNvbnRhaW5lci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFXQSxNQUFxQixxQkFBc0IsU0FBUSxtQkFBUztRQUVwRCxhQUFhO1lBQ25CLE9BQU8sdUJBQXVCLENBQUM7UUFDaEMsQ0FBQztRQUVNLFNBQVM7WUFDZixPQUFPLDZCQUE2QixDQUFDO1FBQ3RDLENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCO1lBQ3BDLE1BQU0sMEJBQTBCLEdBQWlCLEVBQUUsQ0FBQztZQUVwRCxNQUFNLG9CQUFvQixHQUFHLE9BQU8sQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLGtCQUFrQixDQUFDLE9BQU8sRUFBRSxnQkFBUSxDQUFDLGdCQUFnQixDQUFDLENBQUM7WUFDM0csSUFBSSxDQUFDLG9CQUFvQixFQUFFO2dCQUMxQiwwQkFBMEIsQ0FBQyxJQUFJLENBQUMsSUFBSSxxQkFBVyxDQUFDLGdCQUFRLENBQUMsZ0JBQWdCLENBQUMsQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLENBQUMsaUJBQWlCLENBQUMsMEJBQWUsQ0FBQyxLQUFLLENBQUMsQ0FBQyxDQUFDO2FBRTNJO2lCQUFNO2dCQUNOLDBCQUEwQixDQUFDLElBQUksQ0FBQyxJQUFJLHdCQUFjLENBQUMsMEJBQWUsQ0FBQyxLQUFLLEVBQUUsb0JBQW9CLENBQUMsQ0FBQyxDQUFDO2FBQ2pHO1lBRUQsMEJBQTBCLENBQUMsSUFBSSxDQUFDLElBQUksOEJBQW9CLENBQ3ZELHdDQUFpQixDQUFDLE9BQU8sRUFDekIsQ0FBQyxnQkFBUSxDQUFDLFdBQVcsQ0FBQyxFQUN0QjtnQkFDQyxVQUFVLEVBQUUsb0JBQVUsQ0FBQyxVQUFVO2dCQUNqQyxRQUFRLEVBQUUsQ0FBQyxPQUFPLEVBQUUsTUFBTSxFQUFFLEVBQUU7b0JBQzdCLE1BQU0sSUFBSSxHQUFHLE9BQU8sQ0FBQyxPQUFPLENBQUMsMEJBQWUsQ0FBQyxLQUFLLENBQUMsQ0FBQztvQkFDcEQsSUFBSSxDQUFDLElBQUksRUFBRSxPQUFPLEVBQUUsRUFBRTt3QkFDckIsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMscUNBQXFDLG9CQUFvQixFQUFFLENBQUMsQ0FBQzt3QkFDM0UsT0FBTztxQkFDUDtvQkFFRCxNQUFNLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBQyxjQUFjLEVBQUUsSUFBSSxDQUFDLENBQUM7Z0JBQzlDLENBQUM7YUFDRCxDQUFDLENBQUMsU0FBUyxDQUFDLHNCQUFzQixDQUFDLENBQUMsQ0FBQztZQUV2QyxPQUFPO2dCQUNOLENBQUMsSUFBSSxxQkFBVyxDQUFDLGdCQUFRLENBQUMsU0FBUyxDQUFDLENBQUMsZUFBZSxDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUMzRCxDQUFDLElBQUkscUJBQVcsQ0FBQyxnQkFBUSxDQUFDLE9BQU8sQ0FBQyxDQUFDLGVBQWUsQ0FBQyxJQUFJLENBQUMsQ0FBQztnQkFDekQsQ0FBQyxJQUFJLHFCQUFXLENBQUMsZ0JBQVEsQ0FBQyxXQUFXLENBQUMsQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLENBQUM7Z0JBQzdELDBCQUEwQjthQUMxQixDQUFDO1FBQ0gsQ0FBQztLQUVEO0lBN0NELHdDQTZDQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWNxdWlyZVdhdGVyQ29udGFpbmVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL29iamVjdGl2ZXMvYWNxdWlyZS9pdGVtL3NwZWNpZmljL0FjcXVpcmVXYXRlckNvbnRhaW5lci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFZQSxNQUFxQixxQkFBc0IsU0FBUSxtQkFBUztRQUVwRCxhQUFhO1lBQ25CLE9BQU8sdUJBQXVCLENBQUM7UUFDaEMsQ0FBQztRQUVNLFNBQVM7WUFDZixPQUFPLDZCQUE2QixDQUFDO1FBQ3RDLENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCO1lBQ3BDLE1BQU0sa0JBQWtCLEdBQUcsSUFBSSxDQUFDLHVCQUF1QixDQUFDLGtCQUFrQixDQUFDLENBQUM7WUFFNUUsTUFBTSwwQkFBMEIsR0FBaUIsRUFBRSxDQUFDO1lBRXBELE1BQU0sb0JBQW9CLEdBQUcsT0FBTyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMsa0JBQWtCLENBQUMsT0FBTyxFQUFFLGdCQUFRLENBQUMsZ0JBQWdCLENBQUMsQ0FBQztZQUMzRyxJQUFJLG9CQUFvQixFQUFFO2dCQUN6QiwwQkFBMEIsQ0FBQyxJQUFJLENBQUMsSUFBSSxzQkFBWSxDQUFDLG9CQUFvQixDQUFDLENBQUMsQ0FBQztnQkFDeEUsMEJBQTBCLENBQUMsSUFBSSxDQUFDLElBQUksd0JBQWMsQ0FBQyxrQkFBa0IsRUFBRSxvQkFBb0IsQ0FBQyxDQUFDLENBQUM7YUFFOUY7aUJBQU07Z0JBQ04sMEJBQTBCLENBQUMsSUFBSSxDQUFDLElBQUkscUJBQVcsQ0FBQyxnQkFBUSxDQUFDLGdCQUFnQixDQUFDLENBQUMsZUFBZSxDQUFDLElBQUksQ0FBQyxDQUFDLGlCQUFpQixDQUFDLGtCQUFrQixDQUFDLENBQUMsQ0FBQzthQUN4STtZQUVELDBCQUEwQixDQUFDLElBQUksQ0FBQyxJQUFJLDhCQUFvQixDQUN2RCx3Q0FBaUIsQ0FBQyxPQUFPLEVBQ3pCLENBQUMsZ0JBQVEsQ0FBQyxXQUFXLENBQUMsRUFDdEI7Z0JBQ0MsYUFBYSxFQUFFO29CQUNkLE1BQU0sRUFBRSxvQkFBVTtvQkFDbEIsSUFBSSxFQUFFLENBQUMsT0FBTyxFQUFFLEVBQUU7d0JBQ2pCLE1BQU0sSUFBSSxHQUFHLE9BQU8sQ0FBQyxPQUFPLENBQUMsa0JBQWtCLENBQUMsQ0FBQzt3QkFDakQsSUFBSSxDQUFDLElBQUksRUFBRSxPQUFPLEVBQUUsRUFBRTs0QkFDckIsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMscUNBQXFDLG9CQUFvQixFQUFFLENBQUMsQ0FBQzs0QkFDM0UsT0FBTyw0QkFBZSxDQUFDLE9BQU8sQ0FBQzt5QkFDL0I7d0JBRUQsT0FBTyxDQUFDLElBQUksQ0FBdUMsQ0FBQztvQkFDckQsQ0FBQztpQkFDRDthQUNELENBQUMsQ0FBQyxTQUFTLENBQUMsc0JBQXNCLENBQUMsQ0FBQyxDQUFDO1lBRXZDLE9BQU87Z0JBQ04sQ0FBQyxJQUFJLHFCQUFXLENBQUMsZ0JBQVEsQ0FBQyxTQUFTLENBQUMsQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLENBQUM7Z0JBQzNELENBQUMsSUFBSSxxQkFBVyxDQUFDLGdCQUFRLENBQUMsT0FBTyxDQUFDLENBQUMsZUFBZSxDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUN6RCxDQUFDLElBQUkscUJBQVcsQ0FBQyxnQkFBUSxDQUFDLFdBQVcsQ0FBQyxDQUFDLGVBQWUsQ0FBQyxJQUFJLENBQUMsQ0FBQztnQkFDN0QsMEJBQTBCO2FBQzFCLENBQUM7UUFDSCxDQUFDO0tBRUQ7SUFsREQsd0NBa0RDIn0=

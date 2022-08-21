@@ -1,6 +1,7 @@
-import { ActionType } from "game/entity/action/IAction";
+import IdleAction from "game/entity/action/actions/Idle";
 import { TurnMode } from "game/IGame";
 import TileHelpers from "utilities/game/TileHelpers";
+
 import type Context from "../../core/context/Context";
 import { defaultMaxTilesChecked } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -47,10 +48,7 @@ export default class Idle extends Objective {
 				}
 			}
 
-			objectivePipelines.push(new ExecuteAction(ActionType.Idle, (context, action) => {
-				action.execute(context.actionExecutor);
-				return ObjectiveResult.Complete;
-			}).setStatus(this));
+			objectivePipelines.push(new ExecuteAction(IdleAction, []).setStatus(this));
 		}
 
 		// always Restart the objective after idling

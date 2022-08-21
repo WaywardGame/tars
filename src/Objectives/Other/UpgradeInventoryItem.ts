@@ -1,6 +1,6 @@
 
 import { ItemType } from "game/item/IItem";
-import itemDescriptions from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
 import Enums from "utilities/enum/Enums";
 
 import type Context from "../../core/context/Context";

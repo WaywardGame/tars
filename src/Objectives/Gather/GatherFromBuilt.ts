@@ -1,5 +1,5 @@
 import { DoodadType } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
+import PickUp from "game/entity/action/actions/PickUp";
 import { ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
@@ -25,12 +25,12 @@ export default class GatherFromBuilt extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        return context.utilities.object.findDoodads(context, `${this.getIdentifier()}|1`, doodad => {
+        return context.utilities.object.findDoodads(context, this.getIdentifier(), doodad => {
             if (doodad.type !== this.doodadtype || context.utilities.base.isBaseDoodad(context, doodad)) {
                 return false;
             }
 
-            if (context.options.goodCitizen && multiplayer.isConnected() && doodad.getOwner() !== context.human) {
+            if (context.options.goodCitizen && multiplayer.isConnected() && doodad.getBuilder() !== context.human) {
                 // prevent picking up doodads placed by others
                 return false;
             }
@@ -44,9 +44,9 @@ export default class GatherFromBuilt extends Objective {
                     ExecuteActionType.Generic,
                     [this.itemType],
                     {
-                        actionType: ActionType.Pickup,
-                        executor: (context, action) => {
-                            action.execute(context.actionExecutor);
+                        genericAction: {
+                            action: PickUp,
+                            args: [],
                         },
                     }).passAcquireData(this)
                     .setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, this.doodadtype).getString()} from ${target.getName()}`),

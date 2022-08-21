@@ -1,14 +1,16 @@
 import Stream from "@wayward/goodstream/Stream";
-import { ActionType } from "game/entity/action/IAction";
+import { ActionArguments, ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
-import { itemDescriptions } from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
 import Dictionary from "language/Dictionary";
 import { ListEnder, TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
+import Dismantle from "game/entity/action/actions/Dismantle";
+
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
@@ -73,33 +75,35 @@ export default class AcquireItemFromDismantle extends Objective {
 
 			// Set addUniqueIdentifier to true because the pipeline may be ordered and it could run two of the same AcquireItemFromDismantle objectives one after another
 			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
-			const hashCode = this.getHashCode(context, true);
+			// this.setExtraHashCode(ItemType[itemType]);
 
-			if (dismantleItem === undefined || !context.utilities.item.canDestroyItem(context, dismantleItem)) {
-				objectives.push(new AcquireItem(itemType, { willDestroyItem: true }).setContextDataKey(hashCode));
+			const itemContextDataKey = this.getUniqueContextDataKey("Dismantle");
+
+			if (dismantleItem && context.utilities.item.canDestroyItem(context, dismantleItem)) {
+				objectives.push(new ReserveItems(dismantleItem));
+				objectives.push(new SetContextData(itemContextDataKey, dismantleItem));
 
 			} else {
-				objectives.push(new ReserveItems(dismantleItem));
-				objectives.push(new SetContextData(hashCode, dismantleItem));
+				objectives.push(new AcquireItem(itemType, { willDestroyItem: true }).setContextDataKey(itemContextDataKey));
 			}
 
 			let requiredItemHashCode: string | undefined;
 			let requiredItem: Item | undefined;
 
 			if (description.dismantle.required !== undefined) {
-				requiredItemHashCode = `${this.getHashCode(context)}:${this.getUniqueIdentifier()}`;
+				requiredItemHashCode = this.getUniqueContextDataKey("RequiredItem");
 
 				requiredItem = context.island.items.getItemForHuman(context.human, description.dismantle.required, {
 					excludeProtectedItems: true,
 					includeProtectedItemsThatWillNotBreak: ActionType.Dismantle,
 				});
 
-				if (requiredItem === undefined) {
-					objectives.push(new AcquireItemByGroup(description.dismantle.required).setContextDataKey(requiredItemHashCode));
-
-				} else {
+				if (requiredItem) {
 					objectives.push(new ReserveItems(requiredItem));
 					objectives.push(new SetContextData(requiredItemHashCode, requiredItem));
+
+				} else {
+					objectives.push(new AcquireItemByGroup(description.dismantle.required).setContextDataKey(requiredItemHashCode));
 				}
 			}
 
@@ -111,24 +115,30 @@ export default class AcquireItemFromDismantle extends Objective {
 				ExecuteActionType.Generic,
 				[this.itemType],
 				{
-					actionType: ActionType.Dismantle,
-					executor: (context, action) => {
-						const item = context.getData<Item>(hashCode);
-						if (!item?.isValid()) {
-							this.log.warn(`Missing dismantle item ${item}. Bug in TARS pipeline, will fix itself`, hashCode);
-							return;
-						}
-
-						let requiredItem: Item | undefined;
-						if (requiredItemHashCode) {
-							requiredItem = context.getData<Item>(requiredItemHashCode);
-							if (requiredItem && !requiredItem.isValid()) {
-								this.log.warn(`Missing required item "${requiredItem}" for dismantle. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
-								return;
+					genericAction: {
+						action: Dismantle,
+						args: (context) => {
+							const item = context.getData<Item>(itemContextDataKey);
+							if (!item?.isValid()) {
+								// treat this as an expected case
+								// the item was likely broken earlier in the execution tree
+								// this.log.warn(`Missing dismantle item ${item}. Bug in TARS pipeline, will fix itself`, hashCode);
+								return ObjectiveResult.Restart;
 							}
-						}
 
-						action.execute(context.actionExecutor, item, requiredItem);
+							let requiredItem: Item | undefined;
+							if (requiredItemHashCode) {
+								requiredItem = context.getData<Item>(requiredItemHashCode);
+								if (requiredItem && !requiredItem.isValid()) {
+									// treat this as an expected case
+									// the item was likely broken earlier in the execution tree
+									// this.log.warn(`Missing required item "${requiredItem}" for dismantle. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
+									return ObjectiveResult.Restart;
+								}
+							}
+
+							return [item, requiredItem] as ActionArguments<typeof Dismantle>;
+						},
 					},
 				}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, itemType).inContext(TextContext.Lowercase).getString()} for ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 

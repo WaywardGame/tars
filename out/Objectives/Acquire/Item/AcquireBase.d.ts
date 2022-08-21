@@ -4,9 +4,14 @@ import type { IExecutionTree } from "../../../core/planning/IPlan";
 import Objective from "../../../core/objective/Objective";
 import { IObjectivePriority } from "../../../core/objective/IObjective";
 export interface IAcquireItemOptions extends IGatherItemOptions {
-    disableCreatureSearch: boolean;
-    disableDoodadSearch: boolean;
+    disallowCreatureSearch: boolean;
+    disallowDoodadSearch: boolean;
     excludeItemTypes: Set<ItemType>;
+    disallowTerrain: boolean;
+    disallowWell: boolean;
+    allowStartingWaterStill: boolean;
+    allowWaitingForWater: boolean;
+    onlyIdleWhenWaitingForWaterStill?: boolean;
 }
 export interface IGatherItemOptions {
     requiredMinDur: number;

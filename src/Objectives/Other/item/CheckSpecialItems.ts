@@ -1,5 +1,6 @@
 import { BookType, ItemType } from "game/item/IItem";
-import { ActionType } from "game/entity/action/IAction";
+import Read from "game/entity/action/actions/Read";
+import OpenBottle from "game/entity/action/actions/OpenBottle";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -36,10 +37,10 @@ export default class CheckSpecialItems extends Objective {
                     ExecuteActionType.Generic,
                     [ItemType.GlassBottle],
                     {
-                        actionType: ActionType.OpenBottle,
-                        executor: (context, action) => {
-                            action.execute(context.actionExecutor, item);
-                        }
+                        genericAction: {
+                            action: OpenBottle,
+                            args: [item],
+                        },
                     }).setStatus("Opening glass bottle")
             ]));
         }
@@ -51,10 +52,7 @@ export default class CheckSpecialItems extends Objective {
                 return books.map(item => ([
                     new ReserveItems(item).keepInInventory(),
                     new MoveItemIntoInventory(item),
-                    new ExecuteAction(ActionType.Read, (context, action) => {
-                        action.execute(context.actionExecutor, item);
-                        return ObjectiveResult.Complete;
-                    }).setStatus(`Reading ${item.getName()}`),
+                    new ExecuteAction(Read, [item]).setStatus(`Reading ${item.getName()}`),
                 ]));
             }
         }

@@ -1,9 +1,8 @@
-import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { Stat } from "game/entity/IStats";
+import RubCounterClockwise from "game/entity/action/actions/RubCounterClockwise";
 
 import type Context from "../../../../core/context/Context";
-import { ContextDataType } from "../../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
@@ -11,6 +10,7 @@ import AcquireItem from "../AcquireItem";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteAction from "../../../core/ExecuteAction";
 import Lambda from "../../../core/Lambda";
+import ReserveItems from "../../../core/ReserveItems";
 
 export default class AcquireUseOrbOfInfluence extends Objective {
 
@@ -30,29 +30,29 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
+		const itemContextDataKey = this.getUniqueContextDataKey("OrbOfInfluence");
+
 		const objectives: IObjective[] = [];
 
 		const orbOfInfluenceItem = context.utilities.item.getItemInInventory(context, ItemType.OrbOfInfluence);
 		if (orbOfInfluenceItem) {
-			objectives.push(new SetContextData(ContextDataType.Item1, orbOfInfluenceItem));
+			objectives.push(new ReserveItems(orbOfInfluenceItem));
+			objectives.push(new SetContextData(itemContextDataKey, orbOfInfluenceItem));
 
 		} else {
-			objectives.push(new AcquireItem(ItemType.OrbOfInfluence).passAcquireData(this).setContextDataKey(ContextDataType.Item1));
+			objectives.push(new AcquireItem(ItemType.OrbOfInfluence).passAcquireData(this).setContextDataKey(itemContextDataKey));
 		}
 
 		objectives.push(new Lambda(async context => {
-			const item = context.getData(ContextDataType.Item1);
+			const item = context.getData(itemContextDataKey);
 			if (!item?.isValid()) {
 				this.log.error("Invalid orb of influence");
 				return ObjectiveResult.Restart;
 			}
 
 			// reduce malignity
-			return (new ExecuteAction(ActionType.RubCounterclockwise, (context, action) => {
-				action.execute(context.actionExecutor, item);
-				return ObjectiveResult.Complete;
-			}).setStatus(this));
-		}));
+			return (new ExecuteAction(RubCounterClockwise, [item]).setStatus(this));
+		}).setStatus(this));
 
 		return objectives;
 	}

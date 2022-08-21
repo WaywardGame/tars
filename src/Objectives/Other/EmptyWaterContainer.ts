@@ -1,4 +1,4 @@
-import { ActionType } from "game/entity/action/IAction";
+import Pour from "game/entity/action/actions/Pour";
 import type Item from "game/item/Item";
 
 import type Context from "../../core/context/Context";
@@ -36,7 +36,7 @@ export default class EmptyWaterContainer extends Objective {
 
 			objectives.push(new MoveToTarget(point, true));
 
-			objectives.push(new UseItem(ActionType.Pour, this.item));
+			objectives.push(new UseItem(Pour, this.item));
 
 			objectivePipelines.push(objectives);
 		}

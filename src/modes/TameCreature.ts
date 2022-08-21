@@ -1,20 +1,18 @@
-import { ItemType } from "game/item/IItem";
-import { EquipType } from "game/entity/IHuman";
-import { CreatureType } from "game/entity/creature/ICreature";
 import { EventBus } from "event/EventBuses";
 import { EventHandler } from "event/EventManager";
 import Creature from "game/entity/creature/Creature";
-import Player from "game/entity/player/Player";
+import { CreatureType } from "game/entity/creature/ICreature";
+import Human from "game/entity/Human";
+import { EquipType } from "game/entity/IHuman";
 
-import TameCreatures from "../objectives/other/creature/TameCreatures";
 import type Context from "../core/context/Context";
+import type { ITarsMode } from "../core/mode/IMode";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
+import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import Lambda from "../objectives/core/Lambda";
+import TameCreatures from "../objectives/other/creature/TameCreatures";
 import EquipItem from "../objectives/other/item/EquipItem";
-import type { ITarsMode } from "../core/mode/IMode";
 
 export class TameCreatureMode implements ITarsMode {
 
@@ -30,16 +28,11 @@ export class TameCreatureMode implements ITarsMode {
     public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
         const objectives: Array<IObjective | IObjective[]> = [];
 
-        if (context.inventory.knife === undefined) {
-            objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
-        }
+        objectives.push(new AcquireInventoryItem("knife"));
 
-        if (context.inventory.equipSword === undefined && !context.options.lockEquipment) {
-            objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
-        }
-
-        if (context.inventory.equipShield === undefined && !context.options.lockEquipment) {
-            objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
+        if (!context.options.lockEquipment) {
+            objectives.push([new AcquireInventoryItem("equipSword"), new EquipItem(EquipType.MainHand)]);
+            objectives.push([new AcquireInventoryItem("equipShield"), new EquipItem(EquipType.OffHand)]);
         }
 
         const creatures = context.utilities.object.findTamableCreatures(context, "Tame", { type: this.creatureType });
@@ -56,7 +49,7 @@ export class TameCreatureMode implements ITarsMode {
     }
 
     @EventHandler(EventBus.Creatures, "tame")
-    public onCreatureTame(creature: Creature, owner: Player) {
+    public onCreatureTame(creature: Creature, owner: Human) {
         if (creature.type === this.creatureType && owner === localPlayer) {
             this.finished(true);
         }

@@ -1,5 +1,6 @@
 import type { ItemType } from "game/item/IItem";
 import Item from "game/item/Item";
+import { HashCodeFiltering } from "../objective/IObjective";
 
 export default class ContextState {
 
@@ -10,6 +11,7 @@ export default class ContextState {
 		public readonly softReservedItems: Set<Item> = new Set(), // items that will be used but not consumed
 		public readonly hardReservedItems: Set<Item> = new Set(), // items that will be used and consumed
 		public readonly reservedItemTypes: Set<ItemType> = new Set(),
+		public readonly reservedItemTypesPerObjectiveHashCode: Map<ItemType, Set<string>> = new Map(),
 		public readonly providedItems: Map<ItemType, number> = new Map(),
 
 		/**
@@ -39,6 +41,19 @@ export default class ContextState {
 			this.reservedItemTypes.add(itemType);
 		}
 
+		for (const [itemType, objectiveHashCodes] of state.reservedItemTypesPerObjectiveHashCode) {
+			let existingSet = this.reservedItemTypesPerObjectiveHashCode.get(itemType);
+			if (!existingSet) {
+				existingSet = new Set(objectiveHashCodes);
+				this.reservedItemTypesPerObjectiveHashCode.set(itemType, existingSet);
+
+			} else {
+				for (const objectiveHashCode of objectiveHashCodes) {
+					existingSet.add(objectiveHashCode);
+				}
+			}
+		}
+
 		for (const item of state.providedItems) {
 			// todo: add numbers when merging this?
 			this.providedItems.set(item[0], (this.providedItems.get(item[0]) ?? 0) + item[1]);
@@ -62,6 +77,7 @@ export default class ContextState {
 		this.softReservedItems.clear();
 		this.hardReservedItems.clear();
 		this.reservedItemTypes.clear();
+		this.reservedItemTypesPerObjectiveHashCode.clear();
 		this.providedItems.clear();
 		this.data = undefined;
 	}
@@ -71,11 +87,27 @@ export default class ContextState {
 	}
 
 	public set<T = any>(type: string, value: T | undefined) {
-		if (!this.data) {
-			this.data = new Map();
-		}
+		if (value !== undefined) {
+			if (!this.data) {
+				this.data = new Map();
+			}
 
-		this.data.set(type, value);
+			this.data.set(type, value);
+
+		} else if (this.data?.delete(type) && this.data.size === 0) {
+			this.data = undefined;
+		}
+	}
+
+	public addReservedItemTypesForObjectiveHashCode(itemType: ItemType, objectiveHashCode: string) {
+		let existingSet = this.reservedItemTypesPerObjectiveHashCode.get(itemType);
+		if (!existingSet) {
+			existingSet = new Set([objectiveHashCode]);
+			this.reservedItemTypesPerObjectiveHashCode.set(itemType, existingSet);
+
+		} else {
+			existingSet.add(objectiveHashCode);
+		}
 	}
 
 	public clone(increaseDepth: boolean): ContextState {
@@ -86,6 +118,7 @@ export default class ContextState {
 			new Set(this.softReservedItems),
 			new Set(this.hardReservedItems),
 			new Set(this.reservedItemTypes),
+			new Map(this.reservedItemTypesPerObjectiveHashCode),
 			new Map(this.providedItems),
 			this.data ? new Map(this.data) : undefined);
 	}
@@ -108,27 +141,59 @@ export default class ContextState {
 		return hashCode;
 	}
 
-	public getFilteredHashCode(allowedItemTypes: Set<ItemType>): string {
+	public getFilteredHashCode(filter: HashCodeFiltering): string {
 		let hashCode = "";
 
-		if (this.softReservedItems.size > 0) {
-			const filteredSoftReservedItems = Array.from(this.softReservedItems).filter(item => allowedItemTypes.has(item.type));
-			if (filteredSoftReservedItems.length > 0) {
-				hashCode += `Soft Reserved: ${filteredSoftReservedItems.map(item => item.id).join(",")}`;
-			}
-		}
+		if (filter instanceof Set) {
+			const allowedItemTypes = filter;
 
-		if (this.hardReservedItems.size > 0) {
-			const filteredHardReservedItems = Array.from(this.hardReservedItems).filter(item => allowedItemTypes.has(item.type));
-			if (filteredHardReservedItems.length > 0) {
-				hashCode += `Hard Reserved: ${filteredHardReservedItems.map(item => item.id).join(",")}`;
+			if (this.softReservedItems.size > 0) {
+				const filteredSoftReservedItems = Array.from(this.softReservedItems).filter(item => allowedItemTypes.has(item.type));
+				if (filteredSoftReservedItems.length > 0) {
+					hashCode += `Soft Reserved: ${filteredSoftReservedItems.map(item => item.id).join(",")}`;
+				}
 			}
-		}
 
-		if (this.providedItems.size > 0) {
-			const filteredProvidedItems = Array.from(this.providedItems).filter(itemType => allowedItemTypes.has(itemType[0]));
-			if (filteredProvidedItems.length > 0) {
-				hashCode += `Provided: ${filteredProvidedItems.map(itemType => `${itemType[0]}:${itemType[1]}`).join(",")}`;
+			if (this.hardReservedItems.size > 0) {
+				const filteredHardReservedItems = Array.from(this.hardReservedItems).filter(item => allowedItemTypes.has(item.type));
+				if (filteredHardReservedItems.length > 0) {
+					hashCode += `Hard Reserved: ${filteredHardReservedItems.map(item => item.id).join(",")}`;
+				}
+			}
+
+			if (this.providedItems.size > 0) {
+				const filteredProvidedItems = Array.from(this.providedItems).filter(itemType => allowedItemTypes.has(itemType[0]));
+				if (filteredProvidedItems.length > 0) {
+					hashCode += `Provided: ${filteredProvidedItems.map(itemType => `${itemType[0]}:${itemType[1]}`).join(",")}`;
+				}
+			}
+
+		} else {
+			const objectiveHashCode = filter.objectiveHashCode;
+			const allowedItemTypes = filter.itemTypes;
+
+			if (this.softReservedItems.size > 0) {
+				const filteredSoftReservedItems = Array.from(this.softReservedItems)
+					.filter(item => allowedItemTypes.has(item.type) && this.reservedItemTypesPerObjectiveHashCode.get(item.type)?.has(objectiveHashCode));
+				if (filteredSoftReservedItems.length > 0) {
+					hashCode += `Soft Reserved: ${filteredSoftReservedItems.map(item => item.id).join(",")}`;
+				}
+			}
+
+			if (this.hardReservedItems.size > 0) {
+				const filteredHardReservedItems = Array.from(this.hardReservedItems)
+					.filter(item => allowedItemTypes.has(item.type) && this.reservedItemTypesPerObjectiveHashCode.get(item.type)?.has(objectiveHashCode));
+				if (filteredHardReservedItems.length > 0) {
+					hashCode += `Hard Reserved: ${filteredHardReservedItems.map(item => item.id).join(",")}`;
+				}
+			}
+
+			if (this.providedItems.size > 0) {
+				const filteredProvidedItems = Array.from(this.providedItems)
+					.filter(([itemType]) => allowedItemTypes.has(itemType) && this.reservedItemTypesPerObjectiveHashCode.get(itemType)?.has(objectiveHashCode));
+				if (filteredProvidedItems.length > 0) {
+					hashCode += `Provided: ${filteredProvidedItems.map(itemType => `${itemType[0]}:${itemType[1]}`).join(",")}`;
+				}
 			}
 		}
 

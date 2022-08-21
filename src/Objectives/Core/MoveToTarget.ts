@@ -1,6 +1,5 @@
 
 import Doodad from "game/doodad/Doodad";
-import { ActionType } from "game/entity/action/IAction";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import type { IStatMax } from "game/entity/IStats";
@@ -12,17 +11,19 @@ import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
+import Paddle from "game/entity/action/actions/Paddle";
+
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { log } from "../../utilities/Logger";
 import { MoveResult } from "../../utilities/Movement";
 import Idle from "../other/Idle";
 import EquipItem from "../other/item/EquipItem";
 import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
+import AddDifficulty from "./AddDifficulty";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
 // caves are scary
@@ -53,6 +54,8 @@ export default class MoveToTarget extends Objective {
 	private trackedItem: Item | undefined;
 
 	private trackedPosition: IVector3 | undefined;
+
+	protected override includePositionInHashCode = true;
 
 	constructor(
 		protected target: IVector3,
@@ -112,7 +115,9 @@ export default class MoveToTarget extends Objective {
 		if (context.calculatingDifficulty) {
 			if (position.x !== context.human.x || position.y !== context.human.y || position.z !== context.human.z) {
 				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
-				const diff = Vector2.squaredDistance(position, this.target) + (position.z !== this.target.z ? zChangeDifficulty : 0);
+
+				// squared distance makes the diff very large. other diffs would have to be modified to compensate
+				const diff = Math.ceil(Vector2.distance(position, this.target) + (position.z !== this.target.z ? zChangeDifficulty : 0));
 
 				// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
 				// 	console.warn("diff", diff);
@@ -155,8 +160,10 @@ export default class MoveToTarget extends Objective {
 					// MoveItemIntoInventory will set difficulty to 0 for certain base chests (in the event the player needs to move to the base to craft the item anyway)
 					// the overriden difficulty must be passed through to the child actions
 					return [
+						new AddDifficulty(zChangeDifficulty),
+
 						// move to cave entrance
-						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this).addDifficulty(zChangeDifficulty),
+						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
 
 						// move to target
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }).passOverriddenDifficulty(this),
@@ -257,7 +264,7 @@ export default class MoveToTarget extends Objective {
 					if (swimTiles > 0) {
 						// going to be swimming soon. make sure we have enough stamina for the trip
 						if (stamina.value - swimTiles <= 10) {
-							log.info(`Going to be swimming for ${swimTiles} tiles soon. Resting first`);
+							context.log.info(`Going to be swimming for ${swimTiles} tiles soon. Resting first`);
 
 							return [
 								new Rest(),
@@ -275,7 +282,7 @@ export default class MoveToTarget extends Objective {
 			const terrainDescription = terrainDescriptions[tileType];
 			if (terrainDescription && terrainDescription.water) {
 				return [
-					new UseItem(ActionType.Paddle, context.inventory.sailBoat),
+					new UseItem(Paddle, context.inventory.sailBoat),
 					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
 				];
 			}
@@ -298,7 +305,7 @@ export default class MoveToTarget extends Objective {
 				if (firstWaterTile) {
 					return [
 						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
-						new UseItem(ActionType.Paddle, context.inventory.sailBoat),
+						new UseItem(Paddle, context.inventory.sailBoat),
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
 					];
 				}
@@ -387,7 +394,7 @@ export default class MoveToTarget extends Objective {
 					this.log.info(`Should equip ${handEquipmentChange.item} before attacking`);
 
 					return new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item);
-					// await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {
+					// await context.utilities.action.executeAction(context, ActionType.Equip, (context) => {
 					// 	action.execute(context.actionExecutor, handEquipmentChange.item, handEquipmentChange.equipType);
 					// 	return ObjectiveResult.Complete;
 					// });

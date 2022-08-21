@@ -1,4 +1,3 @@
-import { canSailAwayFromPosition } from "game/entity/action/actions/SailToIsland";
 import type { ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
@@ -50,12 +49,14 @@ export default class MoveToWater extends Objective {
 				// find the safest point
 
 				if (this.ocean) {
-					const result = canSailAwayFromPosition(context.human.island, point);
+					const result = context.human.canSailAwayFromPosition(context.human.island, point);
 					if (result.canSailAway) {
 						return true;
 					}
 
-					disabledTiles.addFrom(result.blockedTilesChecked);
+					if (result.blockedTilesChecked) {
+						disabledTiles.addFrom(result.blockedTilesChecked);
+					}
 
 					return false;
 				}

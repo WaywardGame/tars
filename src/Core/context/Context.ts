@@ -1,13 +1,13 @@
-import Human from "game/entity/Human";
-import NPC from "game/entity/npc/NPC";
-import type Player from "game/entity/player/Player";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
+import Log from "utilities/Log";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 
 import type { IBase, IInventoryItems, IUtilities } from "../ITars";
 import { ITarsOptions } from "../ITarsOptions";
+import { HashCodeFiltering } from "../objective/IObjective";
+import Tars from "../Tars";
 import ContextState from "./ContextState";
 import type { IContext } from "./IContext";
 import { ContextDataType } from "./IContext";
@@ -17,27 +17,29 @@ export default class Context implements IContext {
 	private changes: ContextState | undefined;
 
 	constructor(
-		public readonly human: Human,
+		public readonly tars: Tars,
 		public readonly base: IBase,
 		public readonly inventory: IInventoryItems,
 		public readonly utilities: IUtilities,
-		public readonly options: Readonly<ITarsOptions>,
 		public state = new ContextState(),
 		public readonly calculatingDifficulty: boolean = false,
 		private initialState?: ContextState) {
 	}
 
-	public get island() {
-		return this.human.island;
+	public get human() {
+		return this.tars.human;
 	}
 
-	public get actionExecutor(): Player | NPC {
-		const executor = this.human.asPlayer ?? this.human.asNPC;
-		if (!executor) {
-			throw new Error("Invalid human");
-		}
+	public get island() {
+		return this.tars.human.island;
+	}
 
-		return executor;
+	public get log(): Log {
+		return this.utilities.logger.log;
+	}
+
+	public get options(): Readonly<ITarsOptions> {
+		return this.tars.saveData.options;
 	}
 
 	public toString() {
@@ -45,7 +47,7 @@ export default class Context implements IContext {
 	}
 
 	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false): Context {
-		return new Context(this.human, this.base, this.inventory, this.utilities, this.options, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState?.clone(increaseDepth));
+		return new Context(this.tars, this.base, this.inventory, this.utilities, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState?.clone(increaseDepth));
 	}
 
 	public merge(state: ContextState): void {
@@ -108,8 +110,16 @@ export default class Context implements IContext {
 
 	/**
 	 * Checks if an item with the given item type is reserved by another objective
+	 * @param objectiveHashCode When provided, check if the item type is reserved due to an objective matching the provided hash code
 	 */
-	public isReservedItemType(itemType: ItemType) {
+	public isReservedItemType(itemType: ItemType, objectiveHashCode?: string) {
+		return this.state.reservedItemTypes.has(itemType) && (!objectiveHashCode || this.state.reservedItemTypesPerObjectiveHashCode.get(itemType)?.has(objectiveHashCode) === true);
+	}
+
+	/**
+	 * Checks if an item with the given item type is reserved by another objective
+	 */
+	public isReservedItemTypeForObjectiveHashCode(itemType: ItemType) {
 		return this.state.reservedItemTypes.has(itemType);
 	}
 
@@ -141,6 +151,20 @@ export default class Context implements IContext {
 		}
 	}
 
+	public addSoftReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
+		for (const item of items) {
+			this.state.softReservedItems.add(item);
+			this.state.reservedItemTypes.add(item.type);
+			this.state.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
+
+			if (this.changes) {
+				this.changes.softReservedItems.add(item);
+				this.changes.reservedItemTypes.add(item.type);
+				this.changes.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
+			}
+		}
+	}
+
 	public addHardReservedItems(...items: Item[]) {
 		for (const item of items) {
 			this.state.hardReservedItems.add(item);
@@ -149,6 +173,20 @@ export default class Context implements IContext {
 			if (this.changes) {
 				this.changes.hardReservedItems.add(item);
 				this.changes.reservedItemTypes.add(item.type);
+			}
+		}
+	}
+
+	public addHardReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
+		for (const item of items) {
+			this.state.hardReservedItems.add(item);
+			this.state.reservedItemTypes.add(item.type);
+			this.state.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
+
+			if (this.changes) {
+				this.changes.hardReservedItems.add(item);
+				this.changes.reservedItemTypes.add(item.type);
+				this.changes.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
 			}
 		}
 	}
@@ -182,6 +220,18 @@ export default class Context implements IContext {
 		this.initialState = state;
 	}
 
+	public setInitialStateData<T = any>(type: string, value: T | undefined) {
+		if (!this.initialState) {
+			if (value === undefined) {
+				return;
+			}
+
+			this.initialState = new ContextState();
+		}
+
+		this.initialState.set(type, value);
+	}
+
 	public reset() {
 		this.changes = undefined;
 
@@ -192,6 +242,10 @@ export default class Context implements IContext {
 			this.state.reset();
 		}
 
+		this.resetPosition();
+	}
+
+	public resetPosition() {
 		this.setData(ContextDataType.Position, new Vector3(this.human.getPoint()));
 	}
 
@@ -199,8 +253,8 @@ export default class Context implements IContext {
 		return this.state.getHashCode();
 	}
 
-	public getFilteredHashCode(allowedItemTypes: Set<ItemType>): string {
-		return this.state.getFilteredHashCode(allowedItemTypes);
+	public getFilteredHashCode(filter: HashCodeFiltering): string {
+		return this.state.getFilteredHashCode(filter);
 	}
 
 	/**

@@ -1,22 +1,25 @@
 import { OwnEventHandler } from "event/EventManager";
-import type Translation from "language/Translation";
-import Mod from "mod/Mod";
+import Translation from "language/Translation";
 import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import TabDialog from "ui/screen/screens/game/component/TabDialog";
 import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { Edge } from "ui/screen/screens/game/Dialogs";
 import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
-import type TarsMod from "../TarsMod";
-import { TarsUiSaveDataKey, getTarsTranslation, TarsTranslation, TARS_ID } from "../ITarsMod";
+import { TarsUiSaveDataKey, getTarsTranslation, TarsTranslation } from "../ITarsMod";
 import type TarsPanel from "./components/TarsPanel";
 import GeneralPanel from "./panels/GeneralPanel";
 import MoveToPanel from "./panels/MoveToPanel";
 import TasksPanel from "./panels/TasksPanel";
 import GlobalOptionsPanel from "./panels/GlobalOptionsPanel";
 import ModeOptionsPanel from "./panels/ModeOptionsPanel";
+import NPCsPanel from "./panels/NPCsPanel";
+import Tars from "../core/Tars";
+import Message from "language/dictionary/Message";
+import ViewportPanel from "./panels/ViewportPanel";
+import DataPanel from "./panels/DataPanel";
 
-export type TabDialogPanelClass = new () => TarsPanel;
+export type TabDialogPanelClass = new (tarsInstance: Tars) => TarsPanel;
 
 /**
  * A list of panel classes that will appear in the dialog.
@@ -27,6 +30,9 @@ const subpanelClasses: TabDialogPanelClass[] = [
 	MoveToPanel,
 	GlobalOptionsPanel,
 	ModeOptionsPanel,
+	NPCsPanel,
+	ViewportPanel,
+	DataPanel,
 ];
 
 export default class TarsDialog extends TabDialog<TarsPanel> {
@@ -39,19 +45,18 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 			[Edge.Left, 25],
 			[Edge.Bottom, 33],
 		],
+		saveOpen: false, // the dialog has custom initialization logic
 	};
 
-	@Mod.instance<TarsMod>(TARS_ID)
-	public readonly TarsMod: TarsMod;
+	private tarsInstance: Tars | undefined;
 
-	public constructor(id: DialogId) {
-		super(id);
-		this.TarsMod.event.until(this, "remove").subscribe("statusChange", this.header.refresh);
+	public constructor(id: DialogId, subId: string = "") {
+		super(id, subId, false);
 	}
 
 	protected override getDefaultSubpanelInformation(): SubpanelInformation {
 		for (const subpanelInformation of this.subpanelInformations) {
-			if (subpanelInformation[0] === this.TarsMod.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
+			if (subpanelInformation[0] === this.tarsInstance!.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
 				return subpanelInformation;
 			}
 		}
@@ -61,11 +66,31 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 
 	@OwnEventHandler(TarsDialog, "changeSubpanel")
 	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
-		this.TarsMod.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
+		this.tarsInstance!.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
 	}
 
 	public override getName(): Translation {
-		return getTarsTranslation(TarsTranslation.DialogTitleMain).addArgs(this.TarsMod.getStatus());
+		if (!this.tarsInstance) {
+			return Translation.message(Message.None)
+		}
+
+		return getTarsTranslation(TarsTranslation.DialogTitleMain)
+			.addArgs(this.tarsInstance.getName(), this.tarsInstance.getStatus());
+	}
+
+	public initialize(tarsInstance: Tars) {
+		if (this.tarsInstance !== tarsInstance) {
+			this.tarsInstance = tarsInstance;
+			this.initializeSubpanels();
+		}
+
+		this.tarsInstance.event.until(this, "remove").subscribe("statusChange", () => this.refreshHeader());
+
+		this.refreshHeader();
+	}
+
+	public refreshHeader() {
+		this.header.refresh();
 	}
 
 	/**
@@ -73,7 +98,27 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	 * This will only be called once
 	 */
 	protected override getSubpanels(): TarsPanel[] {
-		return subpanelClasses.map(cls => new cls());
+		if (!this.tarsInstance) {
+			return [];
+		}
+
+		let panels: TarsPanel[] = [];
+
+		for (const panelClass of subpanelClasses) {
+			if (panelClass === NPCsPanel && this.subId.length !== 0) {
+				// don't show npc panel for npc dialog
+				continue;
+			}
+
+			if (panelClass === ViewportPanel && this.subId.length === 0) {
+				// don't show viewport panel for main dialog
+				continue;
+			}
+
+			panels.push(new panelClass(this.tarsInstance));
+		}
+
+		return panels;
 	}
 
 	/**

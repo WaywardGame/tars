@@ -10,13 +10,12 @@ import type { IVector3 } from "utilities/math/IVector";
 import { sleep } from "utilities/promise/Async";
 import { TileUpdateType } from "game/IGame";
 
-import { log } from "../../utilities/Logger";
-
 import type { ITileLocation } from "../ITars";
 import type { IGetTileLocationsRequest, IGetTileLocationsResponse, IUpdateAllTilesRequest, IUpdateAllTilesResponse, IUpdateTileRequest, NavigationPath, NavigationRequest, NavigationResponse } from "./INavigation";
 import { NavigationMessageType } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
 import Human from "game/entity/Human";
+import Log from "utilities/Log";
 
 interface INavigationWorker {
 	id: number;
@@ -38,7 +37,7 @@ export default class Navigation {
 	// public totalTime = 0;
 	// public totalCount = 0;
 
-	private readonly dijkstraMaps: Map<number, IDijkstraMap> = new Map();
+	private readonly maps: Map<number, { dijkstraMap: IDijkstraMap; dirty: boolean }> = new Map();
 
 	private readonly navigationWorkers: INavigationWorker[] = [];
 
@@ -54,7 +53,7 @@ export default class Navigation {
 		Navigation.modPath = modPath;
 	}
 
-	constructor(private readonly human: Human, private readonly overlay: TarsOverlay) {
+	constructor(private readonly log: Log, private readonly human: Human, private readonly overlay: TarsOverlay) {
 	}
 
 	public load() {
@@ -67,10 +66,13 @@ export default class Navigation {
 
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			try {
-				this.dijkstraMaps.set(z, new Module.DijkstraMap());
+				this.maps.set(z, {
+					dijkstraMap: new Module.DijkstraMap(),
+					dirty: true,
+				});
 			} catch (ex) {
-				log.error("Failed to create dijkstraMap", ex);
-				this.dijkstraMaps.delete(z);
+				this.log.error("Failed to create dijkstraMap", ex);
+				this.maps.delete(z);
 			}
 		}
 
@@ -111,8 +113,15 @@ export default class Navigation {
 			}
 		}
 
+		let navigationWorkerPath = `${Navigation.modPath}\\out\\core\\navigation\\NavigationWorker.js`;
+
+		if (isWebWorker) {
+			// escape the web worker
+			navigationWorkerPath = `..\\..\\..\\..\\${navigationWorkerPath}`;
+		}
+
 		for (let i = 0; i < workerCount; i++) {
-			const worker = new Worker(`${Navigation.modPath}\\out\\core\\navigation\\NavigationWorker.js`);
+			const worker = new Worker(navigationWorkerPath);
 
 			this.navigationWorkers[i] = {
 				id: i,
@@ -135,20 +144,20 @@ export default class Navigation {
 			});
 		}
 
-		log.info(`Created ${workerCount} navigation workers`);
+		this.log.info(`Created ${workerCount} navigation workers`);
 	}
 
 	public unload() {
-		for (const dijkstraMap of this.dijkstraMaps.values()) {
+		for (const mapInfo of this.maps.values()) {
 			try {
-				dijkstraMap.delete();
+				mapInfo.dijkstraMap.delete();
 
 			} catch (ex) {
-				log.error(`Failed to delete dijkstra map: ${ex}`);
+				this.log.error(`Failed to delete dijkstra map: ${ex}`);
 			}
 		}
 
-		this.dijkstraMaps.clear();
+		this.maps.clear();
 
 		for (const navigationWorker of this.navigationWorkers) {
 			navigationWorker.worker.terminate();
@@ -169,13 +178,13 @@ export default class Navigation {
 	}
 
 	public async updateAll(sailingMode: boolean): Promise<void> {
-		log.info("Updating navigation. Please wait...");
+		this.log.info("Updating navigation. Please wait...");
 
 		this.sailingMode = sailingMode;
 
 		const skipWorkerUpdate = this.workerInitialized;
 
-		const array = !skipWorkerUpdate ? new Uint8Array(game.mapSizeSq * this.dijkstraMaps.size * 3) : undefined;
+		const array = !skipWorkerUpdate ? new Uint8Array(game.mapSizeSq * this.maps.size * 3) : undefined;
 
 		const island = this.human.island;
 
@@ -211,7 +220,7 @@ export default class Navigation {
 
 		const time = performance.now() - start;
 
-		log.info(`Updated navigation in ${time}ms`);
+		this.log.info(`Updated navigation in ${time}ms`);
 	}
 
 	public getOrigin() {
@@ -231,15 +240,6 @@ export default class Navigation {
 		}
 	}
 
-	public async processQueuedOriginUpdate() {
-		if (this.originUpdateTimeout !== undefined) {
-			window.clearTimeout(this.originUpdateTimeout);
-			await this.updateOrigin();
-
-			// log.warn("processQueuedOriginUpdate", this.origin);
-		}
-	}
-
 	public async updateOrigin(origin?: IVector3) {
 		if (origin) {
 			this.origin = { x: origin.x, y: origin.y, z: origin.z };
@@ -248,8 +248,6 @@ export default class Navigation {
 		if (!this.origin) {
 			throw new Error("Invalid origin");
 		}
-
-		// log.warn("updateOrigin", this.origin);
 
 		this._updateOrigin(this.origin.x, this.origin.y, this.origin.z);
 
@@ -350,8 +348,8 @@ export default class Navigation {
 	}
 
 	public onTileUpdate(tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile: boolean, array?: Uint8Array, tileUpdateType?: TileUpdateType, skipWorkerUpdate?: boolean): void {
-		const dijkstraMapInstance = this.dijkstraMaps.get(z);
-		if (!dijkstraMapInstance) {
+		const mapInfo = this.maps.get(z);
+		if (!mapInfo) {
 			return;
 		}
 
@@ -366,12 +364,13 @@ export default class Navigation {
 		this.refreshOverlay(tile, x, y, z, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
 		try {
-			dijkstraMapInstance.updateNode(x, y, penalty, isDisabled);
+			mapInfo.dirty = true;
+			mapInfo.dijkstraMap.updateNode(x, y, penalty, isDisabled);
 			// const node = dijkstraMapInstance.getNode(x, y);
 			// node.penalty = penalty;
 			// node.disabled = isDisabled;
 		} catch (ex) {
-			log.trace("invalid node", x, y, penalty, isDisabled);
+			this.log.trace("invalid node", x, y, penalty, isDisabled);
 		}
 
 		if (array) {
@@ -413,7 +412,7 @@ export default class Navigation {
 		// this.totalTime += time;
 		// this.totalCount++;
 
-		// console.log.info("this.totalTime", this.totalTime);
+		// console.this.log.info("this.totalTime", this.totalTime);
 
 		return response.result.map(p => {
 			const nearestPoint = {
@@ -491,9 +490,19 @@ export default class Navigation {
 
 		// const response = await this.submitRequest(request);
 
-		const dijkstraMap = this.dijkstraMaps.get(end.z);
-		if (!dijkstraMap) {
+		const mapInfo = this.maps.get(end.z);
+		if (!mapInfo) {
 			return undefined;
+		}
+
+		if (mapInfo.dirty) {
+			// map is out of date. sync it now
+			if (this.originUpdateTimeout !== undefined) {
+				window.clearTimeout(this.originUpdateTimeout);
+				this.originUpdateTimeout = undefined;
+			}
+
+			await this.updateOrigin();
 		}
 
 		const response: IDijkstraMapFindPathResult = {
@@ -504,17 +513,17 @@ export default class Navigation {
 			endY: end.y,
 		};
 
-		dijkstraMap.findPath2(response);
+		mapInfo.dijkstraMap.findPath2(response);
 
-		// console.log.info("delta", time, response.elapsedTime);
+		// console.this.log.info("delta", time, response.elapsedTime);
 
 		// this.totalTime += time; //response.elapsedTime;
 		// this.totalCount++;
 
-		// log.info(`Find path time: ${time.toFixed(2)}ms`, end, response.path ? response.path.length : "failure");
+		// this.log.info(`Find path time: ${time.toFixed(2)}ms`, end, response.path ? response.path.length : "failure");
 
 		if (response.success) {
-			// log.info(`Total length: ${response.path.length}. Score: ${response.score}. Distance from start: ${Math.round(Vector2.distance(this.human.getPoint(), response.path[response.path.length - 1]))}`);
+			// this.log.info(`Total length: ${response.path.length}. Score: ${response.score}. Distance from start: ${Math.round(Vector2.distance(this.human.getPoint(), response.path[response.path.length - 1]))}`);
 
 			// path has the end node at index 0 and the start node at (length - 1)
 			// normally we would reverse the array, but I path find from end to start instead of start to end
@@ -536,7 +545,7 @@ export default class Navigation {
 
 		const pendingRequests = navigationWorker.pendingRequests[data.type];
 		if (!pendingRequests || pendingRequests.length === 0) {
-			log.info(`No pending requests for ${NavigationMessageType[data.type]}`, data);
+			this.log.info(`No pending requests for ${NavigationMessageType[data.type]}`, data);
 			return;
 		}
 
@@ -565,7 +574,7 @@ export default class Navigation {
 			resolve(data);
 
 		} else {
-			log.warn(`No matching request for ${NavigationMessageType[data.type]}`, data);
+			this.log.warn(`No matching request for ${NavigationMessageType[data.type]}`, data);
 		}
 	}
 
@@ -619,8 +628,9 @@ export default class Navigation {
 			return true;
 		}
 
-		if (tile.doodad !== undefined) {
-			const description = tile.doodad.description();
+		const doodad = tile.doodad;
+		if (doodad !== undefined) {
+			const description = doodad.description();
 			if (!description) {
 				return true;
 			}
@@ -629,7 +639,8 @@ export default class Navigation {
 				!description.isGate &&
 				!description.isWall &&
 				!description.isTree &&
-				(tile.doodad.blocksMove() || tile.doodad.isDangerous(this.human))) {
+				(doodad.blocksMove() || doodad.isDangerous(this.human)) &&
+				!doodad.isVehicle()) {
 				return true;
 			}
 		}
@@ -672,15 +683,17 @@ export default class Navigation {
 					const point = this.human.island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
 					if (point) {
 						const creature = this.human.island.getTileFromPoint(point).creature;
-						if (creature && !creature.isTamed()) {
-							penalty += 20;
+
+						// only apply the penalty if the creature can actually go this tile
+						if (creature && !creature.isTamed() && creature.checkCreatureMove(true, tileX, tileY, tileZ, tile, creature.getMoveType(), true) === 0) {
+							penalty += 10;
 
 							if (x === 0 && y === 0) {
-								penalty += 16;
+								penalty += 8;
 							}
 
 							if (Math.abs(x) <= 1 && Math.abs(y) <= 1) {
-								penalty += 16;
+								penalty += 8;
 							}
 
 							if (creature.aberrant) {
@@ -701,7 +714,7 @@ export default class Navigation {
 
 				} else if (tile.doodad.blocksMove()) {
 					// a gather doodad - large penalty
-					penalty += 15;
+					penalty += 50;
 
 				} else {
 					penalty += 4;
@@ -731,11 +744,12 @@ export default class Navigation {
 	}
 
 	private _updateOrigin(x: number, y: number, z: number) {
-		const dijkstraMapInstance = this.dijkstraMaps.get(z);
-		if (!dijkstraMapInstance) {
+		const mapInfo = this.maps.get(z);
+		if (!mapInfo) {
 			return;
 		}
 
-		dijkstraMapInstance.updateOrigin(dijkstraMapInstance.getNode(x, y));
+		mapInfo.dijkstraMap.updateOrigin(mapInfo.dijkstraMap.getNode(x, y));
+		mapInfo.dirty = false;
 	}
 }

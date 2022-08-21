@@ -1,12 +1,13 @@
 import type Translation from "language/Translation";
 
+import Tars from "../../core/Tars";
 import { TarsTranslation, uiConfigurableGlobalOptions } from "../../ITarsMod";
 import OptionsPanel from "./OptionsPanel";
 
 export default class GlobalOptionsPanel extends OptionsPanel {
 
-    constructor() {
-        super(uiConfigurableGlobalOptions);
+    constructor(tarsInstance: Tars) {
+        super(tarsInstance, uiConfigurableGlobalOptions);
     }
 
     public getTranslation(): TarsTranslation | Translation {

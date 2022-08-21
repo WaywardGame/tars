@@ -1,11 +1,11 @@
 import type Log from "utilities/Log";
-import { MemoryLog, nullLog } from "utilities/Log";
+import { MemoryLog } from "utilities/Log";
+import { LoggerUtilities } from "../../utilities/Logger";
 
 import type Context from "../context/Context";
 import ContextState from "../context/ContextState";
 import type { IObjective, IObjectiveInfo, ObjectivePipeline, PossibleObjectivePipeline } from "../objective/IObjective";
 import { CalculatedDifficultyStatus, ObjectiveResult } from "../objective/IObjective";
-import { loggerUtilities } from "../../utilities/Logger";
 
 import type { IPlanner } from "./IPlanner";
 import Plan from "./Plan";
@@ -23,7 +23,7 @@ import Plan from "./Plan";
  *
  * Or ask Spacetech about it
  */
-class Planner implements IPlanner {
+export class Planner implements IPlanner {
 
 	/**
 	 * Objective hash code -> calculated difficulty
@@ -32,15 +32,16 @@ class Planner implements IPlanner {
 
 	private calculatingDifficultyDepth = 0;
 	private calculationLog: string[];
+	private objectivesCounter: Map<string, number>;
 
-	private readonly _log: Log;
+	private readonly log: Log;
 
-	constructor(public debug = false) {
-		this._log = loggerUtilities.createLog("Planner");
+	constructor(private readonly loggerUtilities: LoggerUtilities, public debug = false) {
+		this.log = loggerUtilities.createLog("Planner");
 	}
 
-	public get log(): Log {
-		return this.calculatingDifficultyDepth <= 1 ? this._log : nullLog;
+	public get shouldLog(): boolean {
+		return this.calculatingDifficultyDepth <= 1;
 	}
 
 	/**
@@ -65,7 +66,7 @@ class Planner implements IPlanner {
 	 */
 	public async createPlan(context: Context, objective: IObjective): Promise<Plan | undefined> {
 		if (this.isCreatingPlan) {
-			this._log.error(`Invalid difficulty depth ${this.calculatingDifficultyDepth}. Resetting to 0...`);
+			this.log.error(`Invalid difficulty depth ${this.calculatingDifficultyDepth}. Resetting to 0...`);
 			this.calculatingDifficultyDepth = 0;
 		}
 
@@ -100,7 +101,9 @@ class Planner implements IPlanner {
 
 		let easiestObjectivePipeline: PossibleObjectivePipeline | undefined;
 
-		this.log.info(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
+		if (this.shouldLog) {
+			this.log.info(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
+		}
 
 		if (this.debug) {
 			this.writeCalculationLog(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
@@ -137,7 +140,9 @@ class Planner implements IPlanner {
 
 				switch (objectivePipeline.status) {
 					case CalculatedDifficultyStatus.Impossible:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						if (this.shouldLog) {
+							this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: Impossible. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						}
 
 						if (objectivePipeline.changes?.includeHashCode) {
 							// this pipeline was impossible because one or more required items were reserved
@@ -148,7 +153,9 @@ class Planner implements IPlanner {
 						break;
 
 					case CalculatedDifficultyStatus.NotCalculatedYet:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						if (this.shouldLog) {
+							this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: NotCalculatedYet. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						}
 
 						// if (this.calculatingDifficultyDepth === 1) {
 						// this can infinite loop if objectives rely on each other?
@@ -166,7 +173,9 @@ class Planner implements IPlanner {
 						break;
 
 					case CalculatedDifficultyStatus.NotPlausible:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						if (this.shouldLog) {
+							this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: NotPlausible. Difficulty: ${objectivePipeline.minimumDifficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						}
 
 						if (result.status === CalculatedDifficultyStatus.NotPlausible) {
 							if (result.minimumDifficulty > objectivePipeline.minimumDifficulty) {
@@ -187,7 +196,9 @@ class Planner implements IPlanner {
 						break;
 
 					case CalculatedDifficultyStatus.Possible:
-						this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						if (this.shouldLog) {
+							this.log.info(`Objective ${objectivesSet.map(o => o.getHashCode(context)).join(" -> ")}. Status: Possible. Difficulty: ${objectivePipeline.difficulty}. (time: ${objectiveDeltaTime.toFixed(2)}ms)`);
+						}
 
 						if (easiestObjectivePipeline === undefined || easiestObjectivePipeline.difficulty > objectivePipeline.difficulty) {
 							easiestObjectivePipeline = objectivePipeline;
@@ -213,14 +224,16 @@ class Planner implements IPlanner {
 		// }
 
 		if (easiestObjectivePipeline) {
-			this.log.info(`Easiest objective for ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} is ${easiestObjectivePipeline.objectives.map(o => o.getHashCode(context)).join(" -> ")} (difficulty: ${easiestObjectivePipeline.difficulty}) (time: ${time.toFixed(2)}ms)`);
+			if (this.shouldLog) {
+				this.log.info(`Easiest objective for ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} is ${easiestObjectivePipeline.objectives.map(o => o.getHashCode(context)).join(" -> ")} (difficulty: ${easiestObjectivePipeline.difficulty}) (time: ${time.toFixed(2)}ms)`);
+			}
 
 			if (time >= 1000) {
-				this._log.warn(`Took ${time.toFixed(2)}ms to determine the easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${clonedContext.getHashCode()})`);
+				this.log.warn(`Took ${time.toFixed(2)}ms to determine the easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${clonedContext.getHashCode()})`);
 
 				if (time >= 2000) {
 					if (this.debug) {
-						this._log.warn(this.calculationLog.join(""));
+						this.log.warn(this.calculationLog.join(""));
 						// throw new Error("Took too long!");
 					}
 				}
@@ -233,7 +246,9 @@ class Planner implements IPlanner {
 			return easiestObjectivePipeline;
 		}
 
-		this.log.info(`All ${objectives.length} objectives are impossible (time: ${time.toFixed(2)}ms)`);
+		if (this.shouldLog) {
+			this.log.info(`All ${objectives.length} objectives are impossible (time: ${time.toFixed(2)}ms)`);
+		}
 
 		return result;
 	}
@@ -397,6 +412,7 @@ class Planner implements IPlanner {
 	private async calculateDifficulty(context: Context, objective: IObjective): Promise<ObjectivePipeline> {
 		if (this.calculatingDifficultyDepth === 0) {
 			this.calculationLog = [];
+			this.objectivesCounter = new Map();
 		}
 
 		const objectiveHashCode = objective.getHashCode(context);
@@ -412,24 +428,32 @@ class Planner implements IPlanner {
 		let includedContextHashCode = false;
 
 		// check if the context could effect the execution of the objective
-		const canIncludeContextHashCode = objective.canIncludeContextHashCode(context);
+		const canIncludeContextHashCode = objective.canIncludeContextHashCode(context, objectiveHashCode);
 		if (canIncludeContextHashCode !== false) {
 			contextHashCode = canIncludeContextHashCode !== true ? context.getFilteredHashCode(canIncludeContextHashCode) : context.getHashCode();
 
-			cachedDifficulty = this.checkAndMergeDifficultyCache(context, `${cacheHashCode}|${contextHashCode}`);
-			if (cachedDifficulty !== undefined) {
-				return cachedDifficulty;
+			// empty context hash codes are not useful
+			if (contextHashCode.length > 0) {
+				cachedDifficulty = this.checkAndMergeDifficultyCache(context, `${cacheHashCode}|${contextHashCode}`);
+				if (cachedDifficulty !== undefined) {
+					return cachedDifficulty;
+				}
+
+				if (objective.shouldIncludeContextHashCode(context, objectiveHashCode)) {
+					// it can effect the execution. include the hash code when checking or adding it to the cache
+					includedContextHashCode = true;
+					cacheHashCode += `|${contextHashCode}`;
+				}
 			}
 
-			if (objective.shouldIncludeContextHashCode(context)) {
-				// it can effect the execution. include the hash code when checking or adding it to the cache
-				includedContextHashCode = true;
-				cacheHashCode += `|${contextHashCode}`;
-			}
+			// not: not setting contextHashCode to undefined if it's empty because it's important to indicate that this objective CAN include a context hash code
+			// we don't want it to be cached without one
 		}
 
 		this.calculatingDifficultyDepth++;
 		// objective.enableLogging = false;
+
+		this.objectivesCounter.set(objectiveHashCode, (this.objectivesCounter.get(objectiveHashCode) ?? 0) + 1);
 
 		const waitingHashCodes = new Set<string>();
 
@@ -452,16 +476,20 @@ class Planner implements IPlanner {
 
 		const objectiveChain: IObjectiveInfo[] = [objectiveInfo];
 
-		const memoryLog = new MemoryLog("MOD", "TARS", objectiveHashCode);
-		memoryLog.setArray(objectiveInfo.logs);
+		if (this.debug) {
+			const memoryLog = new MemoryLog(...this.loggerUtilities.logSources, objectiveHashCode);
+			memoryLog.setArray(objectiveInfo.logs);
 
-		objective.setLogger(memoryLog);
+			objective.setLogger(memoryLog);
+		}
 
 		const changes = context.watchForChanges();
 
-		let executionResult = await objective.execute(context);
+		let executionResult = await objective.execute(context, objectiveHashCode);
 
-		objective.setLogger(undefined);
+		if (this.debug) {
+			objective.setLogger(undefined);
+		}
 
 		if (executionResult !== ObjectiveResult.Complete &&
 			executionResult !== ObjectiveResult.Pending &&
@@ -668,10 +696,21 @@ class Planner implements IPlanner {
 			this.writeCalculationLog(`Set "${cacheHashCode}" to ${CalculatedDifficultyStatus[result.status]}. Difficulty is ${difficulty}`);
 		}
 
-		if (this.calculatingDifficultyDepth === 0 && this.debug) {
-			const logString = this.calculationLog.join("");
-			this.log.debug(logString);
-			// this.log.info("Objectives", context.state.objectives.map(({ depth, objective }) => `Depth ${depth}: ${objective.getHashCode()}`).join("\n"));
+		if (this.calculatingDifficultyDepth === 0) {
+			if (this.debug) {
+				const logString = this.calculationLog.join("");
+				this.log.debug(logString);
+				// this.log.info("Objectives", context.state.objectives.map(({ depth, objective }) => `Depth ${depth}: ${objective.getHashCode()}`).join("\n"));
+			}
+
+			// show top 10 objectives involved
+			const counts = Array.from(this.objectivesCounter)
+				.filter(count => count[1] > 1)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 10);
+			if (counts.length > 0) {
+				this.log.debug(`Objective Stats`, counts.join(", "));
+			}
 		}
 
 		return result;
@@ -681,7 +720,3 @@ class Planner implements IPlanner {
 		this.calculationLog.push(`${"\t".repeat(this.calculatingDifficultyDepth)}${message}\n`);
 	}
 }
-
-const planner: IPlanner = new Planner(false);
-
-export default planner;

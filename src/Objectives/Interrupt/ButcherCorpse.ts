@@ -1,13 +1,16 @@
-import { ActionType } from "game/entity/action/IAction";
 import type Corpse from "game/entity/creature/corpse/Corpse";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
+import Butcher from "game/entity/action/actions/Butcher";
+// import Message from "language/dictionary/Message";
+
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
+import Message from "language/dictionary/Message";
 
 export default class ButcherCorpse extends Objective {
 
@@ -24,7 +27,11 @@ export default class ButcherCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
+		if (!this.corpse.isValid()) {
+			return ObjectiveResult.Impossible;
+		}
+
+		const tool = context.inventory.butcher;
 		if (tool === undefined) {
 			this.log.info("Missing butcher tool for corpse");
 			return ObjectiveResult.Impossible;
@@ -36,20 +43,12 @@ export default class ButcherCorpse extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const objectives: IObjective[] = [];
-
-		objectives.push(new MoveToTarget(this.corpse, true));
-
-		objectives.push(new ExecuteAction(ActionType.Butcher, (context, action) => {
-			if (!context.utilities.tile.canButcherCorpse(context, context.human.getFacingTile())) {
-				return ObjectiveResult.Restart;
-			}
-
-			action.execute(context.actionExecutor, tool);
-			return ObjectiveResult.Complete;
-		}).setStatus(this));
-
-		return objectives;
+		// NothingHereToButcher is expected because we the amount of times a corpse can be carved is random
+		// TARS tries to carve the maximum amount of times
+		return [
+			new MoveToTarget(this.corpse, true),
+			new ExecuteAction(Butcher, [tool], new Set([Message.NothingHereToButcher]), ObjectiveResult.Complete).setStatus(this),
+		];
 	}
 
 }

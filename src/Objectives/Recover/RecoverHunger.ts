@@ -2,6 +2,7 @@ import { ActionType } from "game/entity/action/IAction";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import type Item from "game/item/Item";
+import Eat from "game/entity/action/actions/Eat";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -88,7 +89,7 @@ export default class RecoverHunger extends Objective {
 
 		return [
 			new AcquireFood(isEmergency).keepInInventory(),
-			new UseItem(ActionType.Eat),
+			new UseItem(Eat),
 		];
 	}
 
@@ -113,7 +114,7 @@ export default class RecoverHunger extends Objective {
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
 			new MoveItemIntoInventory(item),
-			new UseItem(ActionType.Eat, item),
+			new UseItem(Eat, item),
 		];
 	}
 }

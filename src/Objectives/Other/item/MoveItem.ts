@@ -1,7 +1,7 @@
-import { ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
 import type { IContainer } from "game/item/IItem";
 import Doodad from "game/doodad/Doodad";
+import MoveItemAction from "game/entity/action/actions/MoveItem";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -40,10 +40,7 @@ export default class MoveItem extends Objective {
 				return ObjectiveResult.Complete;
 			}
 
-			return new ExecuteAction(ActionType.MoveItem, (context, action) => {
-				action.execute(context.actionExecutor, item, this.targetContainer);
-				return ObjectiveResult.Complete;
-			}).setStatus(this);
+			return new ExecuteAction(MoveItemAction, [item, this.targetContainer]).setStatus(this);
 		}).setStatus(this);
 	}
 }

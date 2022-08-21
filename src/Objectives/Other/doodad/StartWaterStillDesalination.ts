@@ -1,7 +1,9 @@
 import type Doodad from "game/doodad/Doodad";
-import { ActionType } from "game/entity/action/IAction";
 import type { IStat } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
+import AttachContainer from "game/entity/action/actions/AttachContainer";
+import DetachContainer from "game/entity/action/actions/DetachContainer";
+import Pour from "game/entity/action/actions/Pour";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -11,7 +13,6 @@ import AcquireWaterContainer from "../../acquire/item/specific/AcquireWaterConta
 import ExecuteAction from "../../core/ExecuteAction";
 import MoveToTarget from "../../core/MoveToTarget";
 import Restart from "../../core/Restart";
-import GatherWater from "../../gather/GatherWater";
 import RepairItem from "../../interrupt/RepairItem";
 
 import UseItem from "../item/UseItem";
@@ -20,6 +21,7 @@ import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import EmptyWaterContainer from "../EmptyWaterContainer";
 import { inventoryItemInfo } from "../../../core/ITars";
 import StokeFire from "./StokeFire";
+import AcquireWater from "../../acquire/item/specific/AcquireWater";
 
 export interface IStartWaterStillDesalinationOptions {
 	disableAttaching: boolean;
@@ -65,6 +67,7 @@ export default class StartWaterStillDesalination extends Objective {
 		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(waterContainer));
 
 		let isPouringWater = false;
+		let detachingContainer = false;
 
 		if (!this.options.disablePouring && this.waterStill.gatherReady === undefined) {
 			// water still cannot be desalinated yet
@@ -88,17 +91,17 @@ export default class StartWaterStillDesalination extends Objective {
 				// detach the still container and use it to pour water into the still
 				this.log.info("Moving to detach container");
 
+				detachingContainer = true;
+
 				objectives.push(new MoveToTarget(this.waterStill, true));
 
-				objectives.push(new ExecuteAction(ActionType.DetachContainer, (context, action) => {
-					action.execute(context.actionExecutor);
-					return ObjectiveResult.Complete;
-				}).setStatus(() => `Detaching container from ${this.waterStill.getName()}`));
+				objectives.push(new ExecuteAction(DetachContainer, []).setStatus(() => `Detaching container from ${this.waterStill.getName()}`));
 			}
 
 			if (!isWaterInContainer) {
 				// gather water for our container
-				objectives.push(new GatherWater(availableWaterContainer, { disallowWaterStill: true }));
+				// objectives.push(new GatherWater(availableWaterContainer, { disallowWaterStill: true }));
+				objectives.push(new AcquireWater({ onlyForDesalination: true }).keepInInventory());
 			}
 
 			objectives.push(new MoveToTarget(this.waterStill, true));
@@ -106,32 +109,46 @@ export default class StartWaterStillDesalination extends Objective {
 			this.log.info("Going to pour water into the water still");
 
 			// pour our water into the water still
-			objectives.push(new UseItem(ActionType.Pour, availableWaterContainer));
+			objectives.push(new UseItem(Pour, availableWaterContainer));
 
 			isPouringWater = true;
 		}
 
-		if (!this.options.disableAttaching && !this.waterStill.stillContainer) {
-			this.log.info("No still container");
+		if (!this.options.disableAttaching) {
+			if (!this.waterStill.stillContainer) {
+				this.log.info("No still container");
 
-			if (availableWaterContainer === undefined) {
-				objectives.push(new AcquireWaterContainer().keepInInventory());
+				if (availableWaterContainer === undefined) {
+					objectives.push(new AcquireWaterContainer().keepInInventory());
+				}
+
+				if (!isPouringWater && availableWaterContainer && !context.utilities.item.canGatherWater(availableWaterContainer)) {
+					// theres water in the container - it's like seawater
+					// pour it out so we can attach it to the container
+					objectives.push(new EmptyWaterContainer(availableWaterContainer));
+				}
+
+				objectives.push(new MoveToTarget(this.waterStill, true));
+
+				objectives.push(new PickUpAllTileItems(this.waterStill));
+
+				this.log.info("Moving to attach container");
+
+				// attach the container to the water still
+				objectives.push(new UseItem(AttachContainer, availableWaterContainer));
+
+			} else if (detachingContainer) {
+				// the container is being detached so we can pour water into the still
+				// reattach it after pouring water in
+				objectives.push(new MoveToTarget(this.waterStill, true));
+
+				objectives.push(new PickUpAllTileItems(this.waterStill));
+
+				this.log.info("Moving to attach container");
+
+				// attach the container to the water still
+				objectives.push(new UseItem(AttachContainer));
 			}
-
-			if (!isPouringWater && availableWaterContainer && !context.utilities.item.canGatherWater(availableWaterContainer)) {
-				// theres water in the container - it's like seawater
-				// pour it out so we can attach it to the container
-				objectives.push(new EmptyWaterContainer(availableWaterContainer));
-			}
-
-			objectives.push(new MoveToTarget(this.waterStill, true));
-
-			objectives.push(new PickUpAllTileItems(this.waterStill));
-
-			this.log.info("Moving to attach container");
-
-			// attach the container to the water still
-			objectives.push(new UseItem(ActionType.AttachContainer, availableWaterContainer));
 		}
 
 		if (!this.options.disableStarting) {

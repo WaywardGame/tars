@@ -2,6 +2,7 @@ import type { ActionType } from "game/entity/action/IAction";
 import type { DamageType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
 import type { ILog, ILogLine } from "utilities/Log";
+import { LoggerUtilities } from "../../utilities/Logger";
 
 import type Context from "../context/Context";
 import type ContextState from "../context/ContextState";
@@ -63,11 +64,12 @@ export interface IObjective {
 
 	enableLogging: boolean;
 
+	ensureLogger(loggerUtilities: LoggerUtilities): void;
 	setLogger(log: ILog | undefined): void;
 
-	execute(context: Context): Promise<ObjectiveExecutionResult>;
+	execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult>;
 
-	getHashCode(context: Context | undefined, addUniqueIdentifier?: boolean): string;
+	getHashCode(context: Context | undefined): string;
 	getIdentifier(context: Context | undefined): string;
 	getName(): string;
 
@@ -85,7 +87,6 @@ export interface IObjective {
 	 */
 	isDynamic(): boolean;
 
-	addDifficulty(difficulty: number): IObjective;
 	getDifficulty(context: Context): number;
 	isDifficultyOverridden(): boolean;
 
@@ -98,15 +99,17 @@ export interface IObjective {
 	 * Checks if the context could effect the execution of the objective.
 	 * Return a set of items that matter for object, which will be filtered down with the context hash code.
 	 * @param context The context
+	 * @param objectiveHashCode The objectives hash code
 	 */
-	canIncludeContextHashCode(context: Context): boolean | Set<ItemType>;
+	canIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean | HashCodeFiltering;
 
 	/**
 	 * Checks if the context could effect the execution of the objective
 	 * Return true if the objective checks the context for items
 	 * @param context The context
+	 * @param objectiveHashCode The objectives hash code
 	 */
-	shouldIncludeContextHashCode(context: Context): boolean;
+	shouldIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean;
 
 	/**
 	 * Shoud child objectives be able to be saved
@@ -162,3 +165,5 @@ export interface IObjectiveInfo {
 	difficulty: number;
 	logs: ILogLine[];
 }
+
+export type HashCodeFiltering = Set<ItemType> | { objectiveHashCode: string; itemTypes: Set<ItemType> };

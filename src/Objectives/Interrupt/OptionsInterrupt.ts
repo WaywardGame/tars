@@ -1,4 +1,4 @@
-import type Player from "game/entity/player/Player";
+import Human from "game/entity/Human";
 import type { IOptions } from "save/data/ISaveDataGlobal";
 import { DropLocation } from "save/data/ISaveDataGlobal";
 import Objects from "utilities/object/Objects";
@@ -10,11 +10,10 @@ import Objective from "../../core/objective/Objective";
 
 export default class OptionsInterrupt extends Objective {
 
-	public static previousOptions: IOptions | undefined;
+	public static previousOptions: Map<number, IOptions | undefined> = new Map();
 
 	private static readonly desiredOptions: Partial<IOptions> = {
 		autoAttack: true, // todo: I think this should be false
-		autoGatherHarvest: false,
 		autoPickup: false,
 		dropLocation: DropLocation.Feet,
 		dropOnDismantle: false, // todo: why is this false?
@@ -27,19 +26,25 @@ export default class OptionsInterrupt extends Objective {
 	/**
 	 * Restores options to the original state before starting TARS
 	 */
-	public static restore(player: Player) {
-		if (!OptionsInterrupt.previousOptions) {
+	public static restore(human: Human) {
+		const referenceId = human.referenceId;
+		if (referenceId === undefined) {
 			return;
 		}
 
-		for (const key of Objects.keys(OptionsInterrupt.previousOptions)) {
-			const optionValue = OptionsInterrupt.previousOptions[key];
-			if ((typeof (optionValue) === "boolean" || typeof (optionValue) === "number") && optionValue !== player.options[key]) {
-				game.updateOption(player, key, optionValue);
+		const previousOptions = OptionsInterrupt.previousOptions.get(referenceId);
+		if (!previousOptions) {
+			return;
+		}
+
+		for (const key of Objects.keys(previousOptions)) {
+			const optionValue = previousOptions[key];
+			if ((typeof (optionValue) === "boolean" || typeof (optionValue) === "number") && optionValue !== human.options[key]) {
+				game.updateOption(human, key, optionValue);
 			}
 		}
 
-		OptionsInterrupt.previousOptions = undefined;
+		OptionsInterrupt.previousOptions.delete(referenceId);
 	}
 
 	public getIdentifier(): string {
@@ -54,12 +59,8 @@ export default class OptionsInterrupt extends Objective {
 	 * Updates options that helps TARS
 	 */
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!context.human.asPlayer) {
-			return ObjectiveResult.Ignore;
-		}
-
-		if (!OptionsInterrupt.previousOptions) {
-			OptionsInterrupt.previousOptions = Objects.deepClone(context.human.options);
+		if (context.human.referenceId !== undefined && !OptionsInterrupt.previousOptions.has(context.human.referenceId)) {
+			OptionsInterrupt.previousOptions.set(context.human.referenceId, Objects.deepClone(context.human.options));
 		}
 
 		const updated: string[] = [];
@@ -67,7 +68,7 @@ export default class OptionsInterrupt extends Objective {
 		for (const optionKey of Object.keys(OptionsInterrupt.desiredOptions) as Array<keyof IOptions>) {
 			if (context.human.options[optionKey] !== OptionsInterrupt.desiredOptions[optionKey]) {
 				updated.push(`Updating ${optionKey}`);
-				game.updateOption(context.human as Player, optionKey, OptionsInterrupt.desiredOptions[optionKey] as any);
+				game.updateOption(context.human, optionKey, OptionsInterrupt.desiredOptions[optionKey] as any);
 			}
 		}
 

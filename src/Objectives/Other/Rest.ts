@@ -1,15 +1,15 @@
 import { ActionType } from "game/entity/action/IAction";
 import { WeightStatus } from "game/entity/player/IPlayer";
+import Extinguish from "game/entity/action/actions/Extinguish";
+import Sleep from "game/entity/action/actions/Sleep";
+import RestAction from "game/entity/action/actions/Rest";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
-import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { creatureUtilities } from "../../utilities/Creature";
 import ExecuteAction from "../core/ExecuteAction";
 import ReduceWeight from "../interrupt/ReduceWeight";
 import MoveToLand from "../utility/moveTo/MoveToLand";
-
 import Idle from "./Idle";
 import RunAwayFromTarget from "./RunAwayFromTarget";
 
@@ -28,16 +28,11 @@ export default class Rest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const player = context.human.asPlayer;
-		if (!player) {
-			return ObjectiveResult.Impossible;
-		}
-
 		if (context.utilities.tile.isSwimmingOrOverWater(context) && !context.utilities.player.isUsingVehicle(context)) {
 			return new MoveToLand();
 		}
 
-		const nearbyCreatures = creatureUtilities.getNearbyCreatures(context);
+		const nearbyCreatures = context.utilities.creature.getNearbyCreatures(context);
 		if (nearbyCreatures.length > 0) {
 			const nearbyCreature = nearbyCreatures[0];
 
@@ -65,24 +60,15 @@ export default class Rest extends Objective {
 		const extinguishableItem = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Extinguish)[0];
 		if (extinguishableItem) {
 			// don't set yourself on fire while sleeping
-			objectivePipeline.push(new ExecuteAction(ActionType.Extinguish, (context, action) => {
-				action.execute(context.actionExecutor, extinguishableItem);
-				return ObjectiveResult.Complete;
-			}));
+			objectivePipeline.push(new ExecuteAction(Extinguish, [extinguishableItem]));
 		}
 
 		const bed = context.inventory.bed;
 		if (bed) {
-			objectivePipeline.push(new ExecuteAction(ActionType.Sleep, (context, action) => {
-				action.execute(player, bed);
-				return ObjectiveResult.Complete;
-			}).setStatus(this));
+			objectivePipeline.push(new ExecuteAction(Sleep, [bed]).setStatus(this));
 
 		} else {
-			objectivePipeline.push(new ExecuteAction(ActionType.Rest, (context, action) => {
-				action.execute(player);
-				return ObjectiveResult.Complete;
-			}).setStatus(this));
+			objectivePipeline.push(new ExecuteAction(RestAction, []).setStatus(this));
 		}
 
 		return objectivePipeline;

@@ -1,6 +1,6 @@
 import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import type CommandManager from "command/CommandManager";
-import type { IEventEmitter } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import type { Source } from "game/entity/player/IMessageManager";
 import type Player from "game/entity/player/Player";
 import type Dictionary from "language/Dictionary";
@@ -12,13 +12,15 @@ import type { DialogId } from "ui/screen/screens/game/Dialogs";
 import type { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
 import { NPCType } from "game/entity/npc/INPCs";
 import Human from "game/entity/Human";
-import type { ITarsModEvents, ISaveData } from "./ITarsMod";
+import { Prompt } from "game/meta/prompt/IPrompt";
+import type { ITarsModEvents, ISaveData, IGlobalSaveData, ISaveDataContainer } from "./ITarsMod";
 import { TarsTranslation } from "./ITarsMod";
 import Tars from "./core/Tars";
 export default class TarsMod extends Mod {
     static readonly INSTANCE: TarsMod;
     event: IEventEmitter<this, ITarsModEvents>;
     saveData: ISaveData;
+    globalSaveData: IGlobalSaveData;
     readonly bindableToggleDialog: Bindable;
     readonly bindableToggleTars: Bindable;
     readonly messageSource: Source;
@@ -31,6 +33,7 @@ export default class TarsMod extends Mod {
     readonly messageQuantumBurstCooldownStart: Message;
     readonly messageQuantumBurstCooldownEnd: Message;
     readonly dictionary: Dictionary;
+    readonly promptDeleteConfirmation: Prompt;
     readonly dialogMain: DialogId;
     readonly menuBarButton: MenuBarButtonType;
     readonly quadrantComponent: QuadrantComponentId;
@@ -38,7 +41,6 @@ export default class TarsMod extends Mod {
     private readonly tarsInstances;
     private readonly tarsOverlay;
     private localPlayerTars;
-    private gamePlaying;
     get tarsInstance(): Tars | undefined;
     onInitialize(): void;
     onUninitialize(): void;
@@ -46,9 +48,16 @@ export default class TarsMod extends Mod {
     onUnload(): void;
     command(_: CommandManager, _player: Player, _args: string): void;
     onToggleTars(): boolean;
+    addDataSlot(container: ISaveDataContainer): void;
+    renameDataSlot(container: ISaveDataContainer, newName: string): void;
+    removeDataSlot(container: ISaveDataContainer): void;
+    importDataSlot(fileData: Uint8Array): void;
+    exportDataSlot(container: ISaveDataContainer): void;
     onGameStart(): void;
     onGameEnd(): void;
+    onPreSaveGame(): void;
     onMultiplayerConnect(): void;
+    private saveDialogState;
     createAndLoadTars(human: Human, saveData: ISaveData): Tars;
     getStatus(): string;
     getTranslation(translation: TarsTranslation | string | Translation): Translation;

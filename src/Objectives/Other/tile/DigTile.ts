@@ -1,18 +1,17 @@
-import { ActionType } from "game/entity/action/IAction";
 import type { IVector3 } from "utilities/math/IVector";
 import TileHelpers from "utilities/game/TileHelpers";
+import Dig from "game/entity/action/actions/Dig";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
-import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
 
 import UseItem from "../item/UseItem";
 import ClearTile from "./ClearTile";
+import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 
 export interface IDigTileOptions {
 	digUntilTypeIsNot: TerrainType;
@@ -35,19 +34,13 @@ export default class DigTile extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectives: IObjective[] = [];
 
-		const shovel = context.inventory.shovel;
-		if (!shovel) {
-			objectives.push(
-				new AcquireItemForAction(ActionType.Dig),
-				new AnalyzeInventory(),
-			);
-		}
+		objectives.push(new AcquireInventoryItem("shovel"));
 
 		objectives.push(new MoveToTarget(this.target, true));
 
 		objectives.push(new ClearTile(this.target));
 
-		objectives.push(new UseItem(ActionType.Dig, shovel));
+		objectives.push(new UseItem(Dig, context.inventory.shovel));
 
 		const digUntilTypeIsNot = this.options?.digUntilTypeIsNot;
 		if (digUntilTypeIsNot !== undefined) {
@@ -57,7 +50,7 @@ export default class DigTile extends Objective {
 				}
 
 				return ObjectiveResult.Complete;
-			}));
+			}).setStatus(this));
 		}
 
 		return objectives;

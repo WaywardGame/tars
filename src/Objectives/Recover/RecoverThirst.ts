@@ -2,6 +2,9 @@ import { ActionType } from "game/entity/action/IAction";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import DrinkInFront from "game/entity/action/actions/DrinkInFront";
+import DrinkItem from "game/entity/action/actions/DrinkItem";
+import Heal from "game/entity/action/actions/Heal";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -16,13 +19,13 @@ import BuildItem from "../other/item/BuildItem";
 import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import UseItem from "../other/item/UseItem";
-import GatherWaterWithRecipe from "../gather/GatherWaterWithRecipe";
 import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
-import AnalyzeBase from "../analyze/AnalyzeBase";
 import RecoverStamina from "./RecoverStamina";
 import AcquireItem from "../acquire/item/AcquireItem";
 import StartSolarStill from "../other/doodad/StartSolarStill";
 import { DoodadType } from "game/doodad/IDoodad";
+import AcquireWater from "../acquire/item/specific/AcquireWater";
+import AddDifficulty from "../core/AddDifficulty";
 
 export interface IRecoverThirstOptions {
 	onlyUseAvailableItems: boolean;
@@ -65,17 +68,14 @@ export default class RecoverThirst extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		if (context.inventory.waterContainer !== undefined) {
-			for (const waterContainer of context.inventory.waterContainer) {
-				if (context.utilities.item.isDrinkableItem(waterContainer)) {
-					if (context.utilities.item.isSafeToDrinkItem(waterContainer)) {
-						this.log.info("Drink water from container");
-						objectivePipelines.push([new UseItem(ActionType.DrinkItem, waterContainer)]);
+			const safeToDrinkWaterContainers = context.inventory.waterContainer.filter(waterContainer => context.utilities.item.isSafeToDrinkItem(waterContainer));
+			for (const waterContainer of safeToDrinkWaterContainers) {
+				this.log.info(`Can safely drink water from ${waterContainer}`);
+				objectivePipelines.push([new UseItem(DrinkItem, waterContainer)]);
+			}
 
-					} else {
-						// try getting purified water
-						objectivePipelines.push([new GatherWaterWithRecipe(waterContainer)]);
-					}
-				}
+			if (context.inventory.waterContainer.length !== safeToDrinkWaterContainers.length) {
+				objectivePipelines.push([new AcquireWater({ onlySafeToDrink: true })]);
 			}
 		}
 
@@ -109,7 +109,6 @@ export default class RecoverThirst extends Objective {
 						objectivePipelines.push([
 							new AcquireItemByGroup(ItemTypeGroup.WaterStill),
 							new BuildItem(),
-							new AnalyzeBase(),
 						]);
 
 					} else if (context.base.solarStill.length < 2) {
@@ -119,7 +118,6 @@ export default class RecoverThirst extends Objective {
 						objectivePipelines.push([
 							new AcquireItem(ItemType.SolarStill),
 							new BuildItem(),
-							new AnalyzeBase(),
 						]);
 					}
 				}
@@ -134,11 +132,7 @@ export default class RecoverThirst extends Objective {
 
 					if (context.utilities.doodad.isWaterStillDrinkable(solarOrWaterStill)) {
 						stillObjectives.push(new MoveToTarget(solarOrWaterStill, true));
-
-						stillObjectives.push(new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-							action.execute(context.actionExecutor);
-							return ObjectiveResult.Complete;
-						}));
+						stillObjectives.push(new ExecuteAction(DrinkInFront, []));
 
 					} else {
 						stillObjectives.push(solarOrWaterStill.type === DoodadType.SolarStill ? new StartSolarStill(solarOrWaterStill) : new StartWaterStillDesalination(solarOrWaterStill));
@@ -165,10 +159,7 @@ export default class RecoverThirst extends Objective {
 
 				objectives.push(new MoveToTarget(point, true));
 
-				objectives.push(new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-					action.execute(context.actionExecutor);
-					return ObjectiveResult.Complete;
-				}));
+				objectives.push(new ExecuteAction(DrinkInFront, []));
 
 				objectivePipelines.push(objectives);
 			}
@@ -184,7 +175,7 @@ export default class RecoverThirst extends Objective {
 						objectivePipelines.push([
 							new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
 							new AcquireItemForAction(ActionType.Heal).keepInInventory(),
-							new UseItem(ActionType.Heal),
+							new UseItem(Heal),
 						]);
 					}
 
@@ -243,10 +234,7 @@ export default class RecoverThirst extends Objective {
 
 						objectivePipelines.push([
 							new MoveToTarget(waterStill, true),
-							new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-								action.execute(context.actionExecutor);
-								return ObjectiveResult.Complete;
-							}),
+							new ExecuteAction(DrinkInFront, []),
 						]);
 					}
 				}
@@ -257,23 +245,28 @@ export default class RecoverThirst extends Objective {
 						this.log.info("Near base, going to drink from solar still");
 
 						objectivePipelines.push([
-							new MoveToTarget(solarStill, true).addDifficulty(-100), // make this preferable over water still
-							new ExecuteAction(ActionType.DrinkInFront, (context, action) => {
-								action.execute(context.actionExecutor);
-								return ObjectiveResult.Complete;
-							}),
+							new AddDifficulty(-100), // make this preferable over water still
+							new MoveToTarget(solarStill, true),
+							new ExecuteAction(DrinkInFront, []),
 						]);
 					}
 				}
 
-				if (context.inventory.waterContainer !== undefined) {
-					for (const waterContainer of context.inventory.waterContainer) {
-						if (context.utilities.item.isDrinkableItem(waterContainer) && !context.utilities.item.isSafeToDrinkItem(waterContainer)) {
-							// we have an unpurified container. try purifying it
-							objectivePipelines.push([new GatherWaterWithRecipe(waterContainer)]);
-						}
-					}
-				}
+				// if (context.inventory.waterContainer) {
+				// 	const safeToDrinkWaterContainers = context.inventory.waterContainer.filter(waterContainer => context.utilities.item.isSafeToDrinkItem(waterContainer));
+				// 	if (context.inventory.waterContainer.length !== safeToDrinkWaterContainers.length) {
+				// 		objectivePipelines.push([new AcquireSafeWater()]);
+				// 	}
+				// }
+
+				// if (context.inventory.waterContainer !== undefined) {
+				// 	for (const waterContainer of context.inventory.waterContainer) {
+				// 		if (context.utilities.item.isDrinkableItem(waterContainer) && !context.utilities.item.isSafeToDrinkItem(waterContainer)) {
+				// 			// we have an unpurified container. try purifying it
+				// 			objectivePipelines.push([new GatherWaterWithRecipe(waterContainer)]);
+				// 		}
+				// 	}
+				// }
 			}
 		}
 

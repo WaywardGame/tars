@@ -1,16 +1,19 @@
 import type Doodad from "game/doodad/Doodad";
-import { ActionType } from "game/entity/action/IAction";
+import StokeFireAction from "game/entity/action/actions/StokeFire";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import MoveToTarget from "../../core/MoveToTarget";
 
-import UseItem from "../item/UseItem";
 import StartFire from "./StartFire";
+import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
+import { ReserveType } from "../../../core/ITars";
+import ExecuteAction from "../../core/ExecuteAction";
+import Item from "game/item/Item";
+import { ActionArguments } from "game/entity/action/IAction";
 
 export default class StokeFire extends Objective {
 
@@ -33,6 +36,8 @@ export default class StokeFire extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
+		const itemContextDataKey = this.getUniqueContextDataKey("Kindling");
+
 		const objectives: IObjective[] = [];
 
 		const description = doodad.description();
@@ -40,13 +45,19 @@ export default class StokeFire extends Objective {
 			objectives.push(new StartFire(doodad));
 		}
 
-		if (context.inventory.fireKindling === undefined || context.inventory.fireKindling.length === 0) {
-			objectives.push(new AcquireItemForAction(ActionType.StokeFire));
-		}
+		objectives.push(new AcquireInventoryItem("fireKindling", { skipHardReservedItems: true, reserveType: ReserveType.Hard }).setContextDataKey(itemContextDataKey));
 
 		objectives.push(new MoveToTarget(doodad, true));
 
-		objectives.push(new UseItem(ActionType.StokeFire, context.inventory.fireKindling?.[0]));
+		objectives.push(new ExecuteAction(StokeFireAction, (context) => {
+			const kindling = context.getData<Item>(itemContextDataKey);
+			if (!kindling?.isValid()) {
+				this.log.warn("Invalid StokeFire kindling");
+				return ObjectiveResult.Restart;
+			}
+
+			return [kindling] as ActionArguments<typeof StokeFireAction>;
+		}).setStatus(this));
 
 		return objectives;
 	}

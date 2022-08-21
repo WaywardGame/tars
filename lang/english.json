@@ -27,11 +27,15 @@
 		"quadrantComponent": {
 			"modTARSTARS": "TARS"
 		},
-		"NPC": {
+		"Npc": {
 			"modTARSTARS": "TARS"
+		},
+		"prompt": {
+			"modTARSTarsDeleteConfirm": "Are you sure to want to delete {0}"
 		},
 		"ModTARSTars": {
 			"name": "TARS",
+			"npcName": "TARS {0}",
 			"dialogButtonAquireItem": "Acquire Item",
 			"dialogButtonAquireItemTooltip": "Instruct TARS to acquire the selected item.",
 			"dialogButtonBuildDoodad": "Build Doodad",
@@ -43,6 +47,7 @@
 			"dialogButtonDebugLogging": "Debug Logging",
 			"dialogButtonDebugLoggingTooltip": "Enables extra debug logging to the console\nWarning: This may significally decrease performance.",
 			"dialogButtonEnable": "Enable TARS {#--text-secondary:({Bindings:ModTARSToggleTars})}",
+			"dialogButtonRename": "Rename",
 			"dialogButtonExploreIslands": "Explore Islands",
 			"dialogButtonExploreIslandsTooltip": "Allow TARS to explore other islandsafter it makes a base, equipment, and has enough resources for traveling.\nNote: This has no effect when in a multiplayer game.",
 			"dialogButtonMoveToBase": "Move to Base",
@@ -56,6 +61,8 @@
 			"dialogButtonQuantumBurstTooltip": "Allow TARS to harness the power of interdimensional energy allowing for quantum computating.\nWarning: The cooldown after disabling this is directly proportional to the time active\nNote: This has no effect when in a multiplayer game.",
 			"dialogButtonFreeze": "Freeze",
 			"dialogButtonFreezeTooltip": "Prevent TARS from executing actions.",
+			"dialogButtonNavigationOverlays": "Navigation Overlay",
+			"dialogButtonNavigationOverlaysTooltip": "Show navigation overlay over tiles.",
 			"dialogButtonStayHealthy": "Stay Healthy",
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
 			"dialogButtonGoodCitizen": "Good Citizen",
@@ -80,8 +87,12 @@
 			"dialogButtonLockEquipmentTooltip": "Prevents TARS from changing equipped items.",
 			"dialogButtonAllowProtectedItemsWithBreakCheck": "Allow Protected Items that are durable",
 			"dialogButtonAllowProtectedItemsWithBreakCheckTooltip": "Allow TARS to use Protected Items that have a durability above 5.\nTARS will not use Protected Items when the durability is too low.",
+			"dialogButtonSimple": "Simple",
+			"dialogButtonSimpleTooltip": "Simple planning that works well for most scenarios.",
+			"dialogButtonAccurate": "Accurate",
+			"dialogButtonAccurateTooltip": "Smarter planning that results in more accurate paths.\nPlanning will take longer / be more expensive.",
 			"dialogButtonAllowCaves": "Allow Caves",
-			"dialogButtonAllowCavesTooltip": "Allows TARS to go into caves for resources.",
+			"dialogButtonAllowCavesTooltip": "Allow TARS to go into caves for resources.",
 			"dialogButtonGardenerOnlyEdiblePlants": "Only Edible Plants",
 			"dialogButtonGardenerOnlyEdiblePlantsTooltip": "Instruct TARS to only plant things are that edible.",
 			"dialogButtonHarvesterOnlyUseHands": "Only Use Hands",
@@ -93,10 +104,22 @@
 			"dialogButtonDiscoverAndUnlockTreasure": "Discover & Unlock Treasure",
 			"dialogButtonDiscoverAndUnlockTreasureTooltip": "Allow TARS to discover, then unlock the treasure.",
 			"dialogButtonObtainTreasure": "Obtain Treasure",
-			"dialogButtonObtainTreasureTooltip": "Allow TARS to discover,  unlock, and grab the treasure.",
+			"dialogButtonObtainTreasureTooltip": "Allow TARS to discover, unlock, and grab the treasure.",
+			"dialogButtonSpawnNPC": "Spawn NPC",
+			"dialogButtonSpawnNPCTooltip": "Spawns a TARS powered NPC.\nNote: This will automatically change the game to Simulated Turn Mode (similar to multiplayer)",
+			"dialogButtonLoadTooltip": "Apply the configuration settings to the current TARS instance.",
+			"dialogButtonConfigurationTooltip": "Configuration",
+			"dialogButtonRenameTooltip": "Rename",
+			"dialogButtonDeleteTooltip": "Delete",
+			"dialogButtonSaveData": "Save Data",
+			"dialogButtonSaveDataTooltip": "Saves the current configuration as a new global data slot.",
+			"dialogButtonImportData": "Import Data",
+			"dialogButtonImportDataTooltip": "Imports a new global data slot from a file.",
+			"DialogButtonExportTooltip": "Export",
 			"dialogLabelAdvanced": "Advanced",
 			"dialogLabelCreature": "{#--text-secondary:Creature}",
 			"dialogLabelDeveloper": "Developer",
+			"dialogLabelPlanningAccuracy": "Planning Accuracy",
 			"dialogLabelDoodad": "{#--text-secondary:Doodad}",
 			"dialogLabelGeneral": "General",
 			"dialogLabelIsland": "{#--text-secondary:Island}",
@@ -126,7 +149,10 @@
 			"dialogPanelGlobalOptions": "Global Options",
 			"dialogPanelModeOptions": "Mode Options",
 			"dialogPanelTasks": "Tasks",
-			"dialogRangeLabel": "{0}",
+			"dialogPanelNPCs": "NPCs",
+			"dialogPanelViewport": "Viewport",
+			"dialogPanelData": "Data",
+			"dialogLabel": "{0}",
 			"dialogRangeRecoverHealthThreshold": "Health",
 			"dialogRangeRecoverHealthThresholdTooltip": "TARS will recover health once it hits this value.",
 			"dialogRangeRecoverHungerThreshold": "Hunger",
@@ -136,7 +162,7 @@
 			"dialogRangeRecoverThirstThreshold": "Thirst",
 			"dialogRangeRecoverThirstThresholdTooltip": "TARS will recover thirst once it hits this value.",
 			"dialogStatusNavigatingInitializing": "Initializing navigation system",
-			"dialogTitleMain": "TARS: {0}"
+			"dialogTitleMain": "TARS{0? / {0}}: {1}"
 		}
 	}
 }

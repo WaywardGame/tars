@@ -1,37 +1,37 @@
-import type { IQuestRequirement } from "game/entity/player/quest/requirement/IRequirement";
-import { QuestRequirementType } from "game/entity/player/quest/requirement/IRequirement";
-import type { QuestInstance } from "game/entity/player/quest/QuestManager";
-import Enums from "utilities/enum/Enums";
-import type { ItemType, ItemTypeGroup } from "game/item/IItem";
-import itemDescriptions from "game/item/Items";
-import ItemManager from "game/item/ItemManager";
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { EquipType } from "game/entity/IHuman";
+import type { QuestInstance } from "game/entity/player/quest/QuestManager";
+import type { IQuestRequirement } from "game/entity/player/quest/requirement/IRequirement";
+import { QuestRequirementType } from "game/entity/player/quest/requirement/IRequirement";
+import type { ItemType, ItemTypeGroup } from "game/item/IItem";
+import { itemDescriptions } from "game/item/ItemDescriptions";
+import ItemManager from "game/item/ItemManager";
+import Enums from "utilities/enum/Enums";
+import StartFire from "game/entity/action/actions/StartFire";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Lambda from "../core/Lambda";
-import AcquireItem from "../acquire/item/AcquireItem";
-import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
-import AcquireItemFromDismantle from "../acquire/item/AcquireItemFromDismantle";
-import HuntCreatures from "../other/creature/HuntCreatures";
-import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
-import Restart from "../core/Restart";
 import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
-import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import UseItem from "../other/item/UseItem";
-import StokeFire from "../other/doodad/StokeFire";
-import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
-import GatherWaterFromStill from "../gather/GatherWaterFromStill";
-import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
+import AcquireItem from "../acquire/item/AcquireItem";
+import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
+import AcquireItemFromDismantle from "../acquire/item/AcquireItemFromDismantle";
+import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
+import AcquireWater from "../acquire/item/specific/AcquireWater";
+import Lambda from "../core/Lambda";
+import Restart from "../core/Restart";
+import HuntCreatures from "../other/creature/HuntCreatures";
 import TameCreatures from "../other/creature/TameCreatures";
+import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
+import StokeFire from "../other/doodad/StokeFire";
 import EquipItem from "../other/item/EquipItem";
 import UnequipItem from "../other/item/UnequipItem";
+import UseItem from "../other/item/UseItem";
 import SailToCivilization from "../utility/SailToCivilization";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -187,12 +187,12 @@ export default class CompleteQuestRequirement extends Objective {
             case QuestRequirementType.Build:
                 const [itemType] = this.requirement.options as [ItemType];
 
-                const doodadType = itemDescriptions[itemType]?.onUse?.[ActionType.Build];
-                if (doodadType === undefined) {
+                const buildInfo = itemDescriptions[itemType]?.onUse?.[ActionType.Build];
+                if (buildInfo === undefined) {
                     return ObjectiveResult.Impossible;
                 }
 
-                return new AcquireBuildMoveToDoodad(typeof (doodadType) === "object" ? doodadType[0] : doodadType, {
+                return new AcquireBuildMoveToDoodad(buildInfo.type, {
                     ignoreExistingDoodads: true,
                     disableMoveTo: true,
                 });
@@ -254,28 +254,16 @@ export default class CompleteQuestRequirement extends Objective {
                     }
 
                     return oldui.screenInGame?.addItemToFreeQuickSlot(itemId) ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
-                });
-
-            case "ModStarterQuestChangeHand":
-                return new Lambda(async (context) => {
-                    const player = context.human.asPlayer;
-                    if (player) {
-                        game.updateOption(player, "leftHand", !context.human.options.leftHand);
-                    }
-
-                    return ObjectiveResult.Complete;
-                });
+                }).setStatus(this);
 
             case "ModStarterQuestLightCampfire":
                 const objectives: IObjective[] = [
                     new AcquireBuildMoveToDoodad(DoodadTypeGroup.LitCampfire),
+                    new AcquireInventoryItem("fireStarter"),
+                    new UseItem(StartFire),
                 ];
 
-                if (context.inventory.fireStarter === undefined) {
-                    objectives.push(new AcquireItemForAction(ActionType.StartFire));
-                }
-
-                objectives.push(new UseItem(ActionType.StartFire, context.inventory.fireStarter));
+                objectives.push();
 
                 return objectives;
 
@@ -349,18 +337,23 @@ export default class CompleteQuestRequirement extends Objective {
             case "ModStarterQuestGatherFromWaterStill": {
                 const objectivePipelines: IObjective[][] = [];
 
-                if (context.inventory.waterContainer === undefined) {
-                    objectivePipelines.push([new AcquireWaterContainer(), new Restart()]);
 
-                } else {
-                    for (const waterStill of context.base.waterStill) {
-                        objectivePipelines.push([new GatherWaterFromStill(waterStill, context.inventory.waterContainer[0], {
-                            allowStartingWaterStill: true,
-                            allowWaitingForWater: true,
-                            onlyIdleWhenWaitingForWaterStill: true,
-                        })]);
-                    }
-                }
+                const objectives: IObjective[] = [];
+
+                // if (context.inventory.waterContainer === undefined) {
+                //     objectives.push(new AcquireWaterContainer());
+                // }
+
+                objectives.push(new AcquireWater({
+                    disallowCreatureSearch: true,
+                    disallowDoodadSearch: true,
+                    disallowTerrain: true,
+                    disallowWell: true,
+
+                    allowStartingWaterStill: true,
+                    allowWaitingForWater: true,
+                    onlyIdleWhenWaitingForWaterStill: true,
+                }));
 
                 return objectivePipelines;
             }

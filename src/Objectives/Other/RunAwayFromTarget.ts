@@ -18,7 +18,7 @@ export default class RunAwayFromTarget extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `RunAwayFromTarget:(${this.target.x},${this.target.y},${this.target.z})`;
+		return `RunAwayFromTarget:(${this.target.x},${this.target.y},${this.target.z}):${this.maxRunAwayDistance}`;
 	}
 
 	public getStatus(): string | undefined {

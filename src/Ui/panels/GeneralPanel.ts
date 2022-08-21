@@ -4,35 +4,63 @@ import ChoiceList, { Choice } from "ui/component/ChoiceList";
 import Divider from "ui/component/Divider";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Decorators";
+import Rename from "game/entity/action/actions/Rename";
+import { promptGameRenameGeneric } from "game/meta/prompt/PromptDescriptions";
 
 import TarsPanel from "../components/TarsPanel";
 import { TarsMode } from "../../core/ITars";
 import { getTarsTranslation, TarsTranslation } from "../../ITarsMod";
+import Tars from "../../core/Tars";
+import Button from "ui/component/Button";
+import Prompts from "game/meta/prompt/Prompts";
+import { TextContext } from "language/ITranslation";
 
 export default class GeneralPanel extends TarsPanel {
 
-    // private readonly labelStatus: LabelledRow;
     private readonly buttonEnable: CheckButton;
     private readonly choiceListMode: ChoiceList<Choice<TarsMode>, true>;
 
-    constructor() {
-        super();
-
-        // this.labelStatus = new LabelledRow()
-        //     .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelStatus).addArgs(this.TARS.getStatus)))
-        //     .appendTo(this);
+    constructor(tarsInstance: Tars) {
+        super(tarsInstance);
 
         this.buttonEnable = new CheckButton()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonEnable))
-            .setRefreshMethod(() => this.TarsMod.tarsInstance?.isEnabled() ?? false)
+            .setRefreshMethod(() => this.tarsInstance.isEnabled() ?? false)
             .event.subscribe("willToggle", (_, checked) => {
-                if (this.TarsMod.tarsInstance?.isEnabled() !== checked) {
-                    this.TarsMod.tarsInstance?.toggle();
+                if (this.tarsInstance.isEnabled() !== checked) {
+                    this.tarsInstance.toggle();
                 }
 
                 return true;
             })
             .appendTo(this);
+
+        const npc = tarsInstance.asNPC;
+        if (npc) {
+            new Divider().appendTo(this);
+
+            new Button()
+                .setText(getTarsTranslation(TarsTranslation.DialogButtonRename))
+                .event.subscribe("activate", () => {
+                    const placeholder = npc.getName().inContext(TextContext.Title);
+
+                    Prompts.queue(promptGameRenameGeneric, placeholder, npc.getName().getString())
+                        .then(newName => {
+                            if (newName === undefined) {
+                                return;
+                            }
+
+                            if (newName === (placeholder?.getString() || "")) {
+                                newName = placeholder.getString();
+                            }
+
+                            Rename.execute(localPlayer, npc, newName);
+                        });
+
+                    return true;
+                })
+                .appendTo(this);
+        }
 
         new Divider().appendTo(this);
 
@@ -51,11 +79,11 @@ export default class GeneralPanel extends TarsPanel {
 
                 return choice;
             }))
-            .setRefreshMethod(list => list.choices(choice => choice.id === this.TarsMod.saveData.options.mode).first())
+            .setRefreshMethod(list => list.choices(choice => choice.id === this.tarsInstance.saveData.options.mode).first())
             .event.subscribe("choose", (_, choice) => {
                 const mode = choice?.id;
-                if (mode !== undefined && mode !== this.TarsMod.saveData.options.mode) {
-                    this.TarsMod.tarsInstance?.updateOptions({ mode });
+                if (mode !== undefined && mode !== this.tarsInstance.saveData.options.mode) {
+                    this.tarsInstance.updateOptions({ mode });
                 }
             })
             .appendTo(this);
@@ -66,7 +94,7 @@ export default class GeneralPanel extends TarsPanel {
     }
 
     protected onSwitchTo() {
-        const events = this.TarsMod.event.until(this, "switchAway", "remove");
+        const events = this.tarsInstance.event.until(this, "switchAway", "remove");
         events.subscribe("enableChange", this.refresh);
         events.subscribe("optionsChange", this.refresh);
     }
@@ -76,7 +104,7 @@ export default class GeneralPanel extends TarsPanel {
         this.buttonEnable.refresh();
         this.choiceListMode.refresh();
 
-        const isManual = this.TarsMod.saveData.options.mode === TarsMode.Manual;
+        const isManual = this.tarsInstance.saveData.options.mode === TarsMode.Manual;
         this.choiceListMode.setDisabled(isManual);
     }
 }

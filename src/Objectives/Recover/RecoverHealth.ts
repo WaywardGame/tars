@@ -2,6 +2,8 @@ import { ActionType } from "game/entity/action/IAction";
 import type { IStat } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
+import Heal from "game/entity/action/actions/Heal";
+
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -34,7 +36,7 @@ export default class RecoverHealth extends Objective {
 		const healItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Heal);
 		if (healItems.length > 0) {
 			this.log.info(`Healing with ${healItems[0].getName().getString()}`);
-			return new UseItem(ActionType.Heal, healItems[0]);
+			return new UseItem(Heal, healItems[0]);
 		}
 
 		if (this.onlyUseAvailableItems) {
@@ -58,7 +60,7 @@ export default class RecoverHealth extends Objective {
 			this.log.info("Acquire a Health item");
 
 			objectives.push(new AcquireItemForAction(ActionType.Heal).keepInInventory());
-			objectives.push(new UseItem(ActionType.Heal));
+			objectives.push(new UseItem(Heal));
 		}
 
 		return objectives;

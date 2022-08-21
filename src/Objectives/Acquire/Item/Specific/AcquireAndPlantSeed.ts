@@ -22,23 +22,23 @@ export default class AcquireAndPlantSeed extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+        const itemContextDataKey = this.getUniqueContextDataKey("Seed");
+
         return Array.from(this.onlyEdiblePlants ? context.utilities.item.edibleSeedItemTypes : context.utilities.item.allSeedItemTypes)
             .map(itemType => {
                 const objectives: IObjective[] = [];
 
-                const hashCode = this.getHashCode(context, true);
-
                 // todo: require minDur > 0
                 const item = context.utilities.item.getItemInInventory(context, itemType);
-                if (item === undefined) {
-                    objectives.push(new AcquireItem(itemType, { requiredMinDur: 1, willDestroyItem: true }).setContextDataKey(hashCode));
+                if (item) {
+                    objectives.push(new ReserveItems(item));
+                    objectives.push(new SetContextData(itemContextDataKey, item));
 
                 } else {
-                    objectives.push(new ReserveItems(item));
-                    objectives.push(new SetContextData(hashCode, item));
+                    objectives.push(new AcquireItem(itemType, { requiredMinDur: 1, willDestroyItem: true }).setContextDataKey(itemContextDataKey));
                 }
 
-                objectives.push(new PlantSeed(itemType).setContextDataKey(hashCode));
+                objectives.push(new PlantSeed(itemType).setContextDataKey(itemContextDataKey));
 
                 return objectives;
             });

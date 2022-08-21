@@ -1,15 +1,12 @@
-import { ActionType } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import { RequirementStatus } from "game/item/IItemManager";
+import { ActionArguments } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
+import Repair from "game/entity/action/actions/Repair";
 
 import type Context from "../../core/context/Context";
-import { ContextDataType } from "../../core/context/IContext";
-import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireItem from "../acquire/item/AcquireItem";
-import SetContextData from "../contextData/SetContextData";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import ExecuteAction from "../core/ExecuteAction";
 import CompleteRequirements from "../utility/CompleteRequirements";
 
@@ -47,33 +44,19 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		const objectives: IObjective[] = [];
+		return [
+			new AcquireInventoryItem("hammer"),
+			new CompleteRequirements(context.island.items.hasAdditionalRequirements(context.human, this.item.type, undefined, true)),
+			new ExecuteAction(Repair, (context) => {
+				const hammer = context.inventory.hammer;
+				if (!hammer) {
+					this.log.error("Invalid hammer");
+					return ObjectiveResult.Restart;
+				}
 
-		if (context.inventory.hammer) {
-			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hammer));
-
-		} else {
-			objectives.push(new AcquireItem(ItemType.StoneHammer).setContextDataKey(ContextDataType.Item1));
-		}
-
-		const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, this.item.type, undefined, undefined, true);
-		if (requirementInfo.requirements === RequirementStatus.Missing) {
-			this.log.info("Repair requirements not met");
-			objectives.push(new CompleteRequirements(requirementInfo));
-		}
-
-		objectives.push(new ExecuteAction(ActionType.Repair, (context, action) => {
-			const hammer = context.getData(ContextDataType.Item1);
-			if (!hammer) {
-				this.log.error("Invalid hammer");
-				return ObjectiveResult.Restart;
-			}
-
-			action.execute(context.actionExecutor, hammer, this.item);
-			return ObjectiveResult.Complete;
-		}).setStatus(this));
-
-		return objectives;
+				return [hammer, this.item] as ActionArguments<typeof Repair>;
+			}).setStatus(this),
+		];
 	}
 
 }

@@ -1,12 +1,11 @@
-import { ActionType } from "game/entity/action/IAction";
 import type Corpse from "game/entity/creature/corpse/Corpse";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import type Context from "../../core/context/Context";
 import type { CreatureSearch } from "../../core/ITars";
-import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
 
@@ -27,8 +26,6 @@ export default class GatherFromCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const hasTool = context.utilities.item.hasInventoryItemForAction(context, ActionType.Butcher);
-
 		return context.utilities.object.findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
 			const itemTypes = this.search.map.get(corpse.type);
 			if (itemTypes) {
@@ -41,28 +38,18 @@ export default class GatherFromCorpse extends Objective {
 
 				const possibleItems = resources.slice(step);
 
-				for (const itemType of itemTypes) {
-					if (possibleItems.includes(itemType)) {
-						return context.utilities.tile.canButcherCorpse(context, context.island.getTileFromPoint(corpse), true);
-					}
-				}
+				return itemTypes.some(itemType => possibleItems.includes(itemType));
 			}
 
 			return false;
 		})
 			.map(corpse => {
-				const objectives: IObjective[] = [];
-
-				if (!hasTool) {
-					objectives.push(new AcquireItemForAction(ActionType.Butcher));
-				}
-
-				objectives.push(new MoveToTarget(corpse, true));
-
-				objectives.push(new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(corpse.type)!)
-					.setStatus(() => `Carving ${Translation.nameOf(Dictionary.Creature, corpse.type).getString()} corpse`));
-
-				return objectives;
+				return [
+					new AcquireInventoryItem("butcher"),
+					new MoveToTarget(corpse, true),
+					new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(corpse.type)!)
+						.setStatus(() => `Carving ${Translation.nameOf(Dictionary.Creature, corpse.type).getString()} corpse`),
+				];
 			});
 	}
 

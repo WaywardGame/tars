@@ -69,6 +69,3 @@ export class CreatureUtilities {
 		return (chest && legs && belt && neck && head && feet && hands) ? true : false;
 	}
 }
-
-export const creatureUtilities = new CreatureUtilities();
-

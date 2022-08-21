@@ -1,6 +1,6 @@
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import { itemDescriptions as Items } from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
@@ -45,7 +45,7 @@ export default class AcquireItemForAction extends Objective {
 			result = [];
 
 			for (const it of Enums.values(ItemType)) {
-				const itemDescription = Items[it];
+				const itemDescription = itemDescriptions[it];
 				if (itemDescription && itemDescription.use !== undefined && itemDescription.use.includes(actionType)) {
 					if (actionType === ActionType.StartFire) {
 						// prefer fire starter items

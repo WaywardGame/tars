@@ -7,4 +7,3 @@ export declare class CreatureUtilities {
     isScaredOfCreature(context: Context, creature: Creature): boolean;
     private hasDecentEquipment;
 }
-export declare const creatureUtilities: CreatureUtilities;

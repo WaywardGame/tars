@@ -1,71 +1,33 @@
-import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
 import { EquipType } from "game/entity/IHuman";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import { ItemType } from "game/item/IItem";
 
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
+import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AcquireItemByGroup from "../objectives/acquire/item/AcquireItemByGroup";
-import AcquireItemForAction from "../objectives/acquire/item/AcquireItemForAction";
-import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
-import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import BuildItem from "../objectives/other/item/BuildItem";
 import EquipItem from "../objectives/other/item/EquipItem";
-import { log } from "../utilities/Logger";
 
 export async function getCommonInitialObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
     const objectives: Array<IObjective | IObjective[]> = [];
 
-    if (context.inventory.axe === undefined) {
-        objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);
+    objectives.push(new AcquireInventoryItem("axe"));
+    objectives.push(new AcquireInventoryItem("pickAxe"));
+
+    if (context.base.campfire.length === 0) {
+        objectives.push([new AcquireInventoryItem("campfire"), new BuildItem()]);
     }
 
-    if (context.inventory.pickAxe === undefined) {
-        objectives.push([new AcquireItem(ItemType.StonePickaxe), new AnalyzeInventory()]);
-    }
-
-    if (context.base.campfire.length === 0 && context.inventory.campfire === undefined) {
-        log.info("Need campfire");
-        objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitCampfire), new BuildItem(), new AnalyzeBase()]);
-    }
-
-    if (context.inventory.fireStarter === undefined) {
-        log.info("Need fire starter");
-        objectives.push([new AcquireItemForAction(ActionType.StartFire), new AnalyzeInventory()]);
-    }
-
-    if (context.inventory.fireKindling === undefined || context.inventory.fireKindling.length === 0) {
-        log.info("Need fire kindling");
-        objectives.push([new AcquireItemByGroup(ItemTypeGroup.Kindling), new AnalyzeInventory()]);
-    }
-
-    if (context.inventory.fireTinder === undefined) {
-        log.info("Need fire tinder");
-        objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tinder), new AnalyzeInventory()]);
-    }
-
-    // if (context.inventory.fireStoker === undefined || context.inventory.fireStoker.length < 4) {
-    // 	objectives.push([new AcquireItemForAction(ActionType.StokeFire), new AnalyzeInventory()]);
-    // }
-
-    if (context.inventory.shovel === undefined) {
-        objectives.push([new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory()]);
-    }
-
-    if (context.inventory.knife === undefined) {
-        objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
-    }
-
-    if (context.inventory.bed === undefined) {
-        objectives.push([new AcquireItemByGroup(ItemTypeGroup.Bedding), new AnalyzeInventory()]);
-    }
+    objectives.push(new AcquireInventoryItem("fireStarter"));
+    objectives.push(new AcquireInventoryItem("fireKindling"));
+    objectives.push(new AcquireInventoryItem("fireTinder"));
+    objectives.push(new AcquireInventoryItem("shovel"));
+    objectives.push(new AcquireInventoryItem("knife"));
+    objectives.push(new AcquireInventoryItem("bed"));
 
     if (!context.options.lockEquipment) {
-        if (context.inventory.equipSword === undefined) {
-            objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
-        }
+        objectives.push([new AcquireInventoryItem("equipSword"), new EquipItem(EquipType.MainHand)]);
 
         const chest = context.human.getEquippedItem(EquipType.Chest);
         if (chest === undefined || chest.type === ItemType.TatteredClothShirt) {
@@ -77,9 +39,7 @@ export async function getCommonInitialObjectives(context: Context): Promise<Arra
             objectives.push([new AcquireItem(ItemType.BarkLeggings), new AnalyzeInventory(), new EquipItem(EquipType.Legs)]);
         }
 
-        if (context.inventory.equipShield === undefined) {
-            objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
-        }
+        objectives.push([new AcquireInventoryItem("equipShield"), new EquipItem(EquipType.OffHand)]);
     }
 
     return objectives;

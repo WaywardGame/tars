@@ -68,7 +68,7 @@ export default class OrganizeBase extends Objective {
 
 				const objectives: IObjective[] = [];
 
-				// pickup items from tile
+				// pick up items from tile
 				objectives.push(new MoveToTarget(position, true));
 
 				for (const item of itemsToMove) {
@@ -86,7 +86,7 @@ export default class OrganizeBase extends Objective {
 				// objectives.push(new MoveToTarget(chests[0], true));
 
 				// for (const item of tile.containedItems) {
-				// 	objectives.push(new ExecuteAction(ActionType.MoveItem, (context, action) => {
+				// 	objectives.push(new ExecuteAction(MoveItem, (context) => {
 				// 		action.execute(context.actionExecutor, item, chests[0] as IContainer);
 				// 	}));
 				// }

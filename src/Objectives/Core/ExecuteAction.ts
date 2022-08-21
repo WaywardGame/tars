@@ -1,29 +1,30 @@
-import type ActionExecutor from "game/entity/action/ActionExecutor";
-import type actionDescriptions from "game/entity/action/Actions";
-import type { IActionDescription } from "game/entity/action/IAction";
+import type { AnyActionDescription } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
 import Dictionary from "language/Dictionary";
+import Message from "language/dictionary/Message";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import type Context from "../../core/context/Context";
-import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
-import { ObjectiveResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import { GetActionArguments } from "../../utilities/Action";
 
-export default class ExecuteAction<T extends ActionType> extends Objective {
+export default class ExecuteAction<T extends AnyActionDescription> extends Objective {
 
 	constructor(
-		private readonly actionType: T,
-		private readonly executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => ObjectiveResult) {
+		private readonly action: T,
+		private readonly args: GetActionArguments<T>,
+		private readonly expectedMessages?: Set<Message>,
+		private readonly expectedCannotUseResult?: ObjectiveResult) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `ExecuteAction:${ActionType[this.actionType]}`;
+		return `ExecuteAction:${ActionType[this.action.type!]}`;
 	}
 
 	public getStatus(): string | undefined {
-		return `Executing ${Translation.nameOf(Dictionary.Action, this.actionType).inContext(TextContext.Lowercase).getString()} action`;
+		return `Executing ${Translation.nameOf(Dictionary.Action, this.action.type!).inContext(TextContext.Lowercase).getString()} action`;
 	}
 
 	public override isDynamic(): boolean {
@@ -35,7 +36,7 @@ export default class ExecuteAction<T extends ActionType> extends Objective {
 			return 0;
 		}
 
-		return context.utilities.action.executeAction(context, this.actionType, this.executor as any);
+		return context.utilities.action.executeAction(context, this.action, this.args, this.expectedMessages, this.expectedCannotUseResult);
 	}
 
 	protected override getBaseDifficulty(context: Context): number {

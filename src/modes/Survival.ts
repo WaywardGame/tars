@@ -1,33 +1,27 @@
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
+import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { AiType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { TurnMode } from "game/IGame";
 import type { IContainer } from "game/item/IItem";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import { CreatureType } from "game/entity/creature/ICreature";
+import Drop from "game/entity/action/actions/Drop";
 
 import type Context from "../core/context/Context";
-import ContextState from "../core/context/ContextState";
 import { ContextDataType, MovingToNewIslandState } from "../core/context/IContext";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import AcquireFood from "../objectives/acquire/item/AcquireFood";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AcquireItemByGroup from "../objectives/acquire/item/AcquireItemByGroup";
-import AcquireItemByTypes from "../objectives/acquire/item/AcquireItemByTypes";
-import AcquireItemForAction from "../objectives/acquire/item/AcquireItemForAction";
 import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
 import AcquireWaterContainer from "../objectives/acquire/item/specific/AcquireWaterContainer";
-import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import ExecuteAction from "../objectives/core/ExecuteAction";
 import Lambda from "../objectives/core/Lambda";
 import Restart from "../objectives/core/Restart";
-import GatherWater from "../objectives/gather/GatherWater";
 import BuildItem from "../objectives/other/item/BuildItem";
 import EquipItem from "../objectives/other/item/EquipItem";
 import Idle from "../objectives/other/Idle";
@@ -46,14 +40,14 @@ import AcquireUseOrbOfInfluence from "../objectives/acquire/item/specific/Acquir
 import CheckDecayingItems from "../objectives/other/item/CheckDecayingItems";
 import HuntCreatures from "../objectives/other/creature/HuntCreatures";
 import PlantSeeds from "../objectives/utility/PlantSeeds";
-import GatherWaters from "../objectives/gather/GatherWaters";
 import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
 import type { ITarsMode } from "../core/mode/IMode";
 import { IInventoryItems } from "../core/ITars";
-import { inventoryItemInfo } from "../core/ITars";
 import { getTarsSaveData } from "../ITarsMod";
 import { getCommonInitialObjectives } from "./CommonInitialObjectives";
 import StartSolarStill from "../objectives/other/doodad/StartSolarStill";
+import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
+import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
 
 /**
  * Survival mode
@@ -89,10 +83,7 @@ export class SurvivalMode implements ITarsMode {
 			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
 			objectives.push([
 				new MoveToLand(),
-				new ExecuteAction(ActionType.Drop, (context, action) => {
-					action.execute(context.actionExecutor, context.inventory.sailBoat!);
-					return ObjectiveResult.Complete;
-				}).setStatus("Dropping sailboat"),
+				new ExecuteAction(Drop, [context.inventory.sailBoat!]).setStatus("Dropping sailboat"),
 				new AnalyzeInventory(),
 			]);
 		}
@@ -101,8 +92,8 @@ export class SurvivalMode implements ITarsMode {
 
 		objectives.push(...await getCommonInitialObjectives(context));
 
-		if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length === 0 && context.inventory.waterStill === undefined) {
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);
+		if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length === 0) {
+			objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
 		}
 
 		if (!context.base.buildAnotherChest) {
@@ -126,19 +117,13 @@ export class SurvivalMode implements ITarsMode {
 			// this is reset to false in baseInfo.onAdd
 			context.base.buildAnotherChest = true;
 
-			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
-			// objectives.push([new AcquireItemByTypes(Array.from(chestTypes.keys())), new BuildItem(), new AnalyzeBase()]);
+			objectives.push([new AcquireInventoryItem("chest"), new BuildItem()]);
 		}
 
-		if (context.inventory.hammer === undefined) {
-			objectives.push([new AcquireItem(ItemType.StoneHammer), new AnalyzeInventory()]);
-		}
+		objectives.push(new AcquireInventoryItem("hammer"));
+		objectives.push(new AcquireInventoryItem("tongs"));
 
-		if (context.inventory.tongs === undefined) {
-			objectives.push([new AcquireItemByGroup(ItemTypeGroup.Tongs), new AnalyzeInventory()]);
-		}
-
-		if (context.utilities.base.isNearBase(context)) {
+		this.whenNearBase(context, objectives, () => {
 			// ensure solar stills are solar stilling
 			for (const solarStill of context.base.solarStill) {
 				if (!solarStill.stillContainer) {
@@ -157,15 +142,13 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			objectives.push(new CheckDecayingItems());
+		});
+
+		if (context.base.kiln.length === 0) {
+			objectives.push([new AcquireInventoryItem("kiln"), new BuildItem()]);
 		}
 
-		if (context.base.kiln.length === 0 && context.inventory.kiln === undefined) {
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitKiln), new BuildItem(), new AnalyzeBase()]);
-		}
-
-		if (context.inventory.heal === undefined) {
-			objectives.push([new AcquireItemForAction(ActionType.Heal), new AnalyzeInventory()]);
-		}
+		objectives.push(new AcquireInventoryItem("heal"));
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;
@@ -218,28 +201,30 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push(new AcquireUseOrbOfInfluence());
 		}
 
-		if (context.base.well.length === 0 && context.inventory.well === undefined && context.base.availableUnlimitedWellLocation !== undefined) {
+		if (context.base.well.length === 0 && context.base.availableUnlimitedWellLocation !== undefined) {
 			// todo: only build a well if we find a good tile?
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Well), new BuildItem(), new AnalyzeBase()]);
+			objectives.push([new AcquireInventoryItem("well"), new BuildItem()]);
 		}
 
-		if (context.base.furnace.length === 0 && context.inventory.furnace === undefined) {
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitFurnace), new BuildItem(), new AnalyzeBase()]);
+		if (context.base.furnace.length === 0) {
+			objectives.push([new AcquireInventoryItem("furnace"), new BuildItem()]);
 		}
 
-		if (context.base.anvil.length === 0 && context.inventory.anvil === undefined) {
-			objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.Anvil), new BuildItem(), new AnalyzeBase()]);
+		if (context.base.anvil.length === 0) {
+			objectives.push([new AcquireInventoryItem("anvil"), new BuildItem()]);
 		}
 
 		if (context.inventory.waterContainer === undefined) {
 			objectives.push([new AcquireWaterContainer(), new AnalyzeInventory()]);
 		}
 
-		// run a few extra things before running upgrade objectives if we're near a base 
-		if (context.utilities.base.isNearBase(context)) {
+		const { drinkableWaterContainers, availableWaterContainers } = context.utilities.item.getWaterContainers(context);
+
+		// run a few extra things before running upgrade objectives if we're near a base
+		this.whenNearBase(context, objectives, () => {
 			// build a second water still
 			if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
-				objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem(), new AnalyzeBase()]);
+				objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem()]);
 			}
 
 			// carry food with you
@@ -248,28 +233,12 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			// carry a bandage with you
-			if (context.inventory.bandage === undefined) {
-				objectives.push([new AcquireItemByTypes(inventoryItemInfo.bandage.itemTypes as ItemType[]), new AnalyzeInventory()]);
-			}
+			objectives.push(new AcquireInventoryItem("bandage"));
 
-			// carry drinkable water with you
-			const drinkableWaterContainers: Item[] = [];
-			const availableWaterContainers: Item[] = [];
-
-			if (context.inventory.waterContainer !== undefined) {
-				for (const waterContainer of context.inventory.waterContainer) {
-					if (context.utilities.item.isSafeToDrinkItem(waterContainer)) {
-						drinkableWaterContainers.push(waterContainer);
-					} else {
-						availableWaterContainers.push(waterContainer);
-					}
-				}
-
-				if (availableWaterContainers.length > 0) {
-					// we are looking for something drinkable
-					// if there is a well, starting the water still will use it
-					objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }));
-				}
+			if (availableWaterContainers.length > 0) {
+				// we are looking for something drinkable
+				// if there is a well, starting the water still will use it
+				objectives.push(new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }));
 			}
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
@@ -298,9 +267,9 @@ export class SurvivalMode implements ITarsMode {
 
 			if (drinkableWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
+				objectives.push(new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 			}
-		}
+		});
 
 		// keep existing equipment in good shape
 		if (context.inventory.equipSword) {
@@ -312,13 +281,13 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		// go on a killing spree once you have a good sword and shield
-		if (context.utilities.base.isNearBase(context)) {
+		this.whenNearBase(context, objectives, () => {
 			const creatures = context.utilities.base.getNonTamedCreaturesNearBase(context)
 				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
 				objectives.push(new HuntCreatures(creatures));
 			}
-		}
+		});
 
 		if (context.inventory.equipBelt) {
 			objectives.push(new ReinforceItem(context.inventory.equipBelt, { minWorth: 200, targetDurabilityMultipler: 2 }));
@@ -381,11 +350,11 @@ export class SurvivalMode implements ITarsMode {
 		this.addUpgradeItemObjectives(context, objectives, "equipHands", new Set([ItemType.LeatherGloves, ItemType.TinGloves]));
 		this.addUpgradeItemObjectives(context, objectives, "equipLegs", new Set([ItemType.LeatherPants, ItemType.TinChausses]));
 		this.addUpgradeItemObjectives(context, objectives, "equipChest", new Set([ItemType.LeatherTunic, ItemType.TinChest]));
-		this.addUpgradeItemObjectives(context, objectives, "axe", new Set([ItemType.StoneAxe, ItemType.TinAxe]));
-		this.addUpgradeItemObjectives(context, objectives, "pickAxe", new Set([ItemType.StonePickaxe, ItemType.TinPickaxe]));
-		this.addUpgradeItemObjectives(context, objectives, "shovel", new Set([ItemType.StoneShovel, ItemType.TinShovel]));
-		this.addUpgradeItemObjectives(context, objectives, "hammer", new Set([ItemType.StoneHammer, ItemType.TinHammer]));
-		this.addUpgradeItemObjectives(context, objectives, "hoe", new Set([ItemType.StoneHoe, ItemType.TinHoe]));
+		this.addUpgradeItemObjectives(context, objectives, "axe", new Set([ItemType.GraniteAxe, ItemType.TinAxe]));
+		this.addUpgradeItemObjectives(context, objectives, "pickAxe", new Set([ItemType.GranitePickaxe, ItemType.TinPickaxe]));
+		this.addUpgradeItemObjectives(context, objectives, "shovel", new Set([ItemType.GraniteShovel, ItemType.TinShovel]));
+		this.addUpgradeItemObjectives(context, objectives, "hammer", new Set([ItemType.GraniteHammer, ItemType.TinHammer]));
+		this.addUpgradeItemObjectives(context, objectives, "hoe", new Set([ItemType.GraniteHoe, ItemType.TinHoe]));
 
 		// extra upgrades
 		// this.addUpgradeItemObjectives(context, objectives, "equipHead", ItemType.PirateHat);
@@ -414,9 +383,7 @@ export class SurvivalMode implements ITarsMode {
 			switch (moveToNewIslandState) {
 				case MovingToNewIslandState.None:
 					objectives.push(new Lambda(async () => {
-						const initialState = new ContextState();
-						initialState.set(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Preparing);
-						context.setInitialState(initialState);
+						context.setInitialStateData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Preparing);
 						return ObjectiveResult.Complete;
 					}));
 
@@ -443,17 +410,13 @@ export class SurvivalMode implements ITarsMode {
 
 					// stock up on water
 					if (needWaterItems) {
-						const availableWaterContainers = context.inventory.waterContainer?.filter(item => !context.utilities.item.isSafeToDrinkItem(item));
-						if (availableWaterContainers && availableWaterContainers.length > 0) {
-							// we are looking for something drinkable
-							// if there is a well, starting the water still will use it
-							objectives.push(new GatherWaters(availableWaterContainers, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
+						// if (availableWaterContainers.length === 0) {
+						// 	objectives.push(new AcquireWaterContainer());
+						// }
 
-						} else {
-							// get a new water container
-							objectives.push(new AcquireWaterContainer());
-							objectives.push(new GatherWater(undefined, { disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
-						}
+						// we are looking for something drinkable
+						// if there is a well, starting the water still will use it
+						objectives.push(new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
 					}
 
 					// stock up on food
@@ -462,9 +425,7 @@ export class SurvivalMode implements ITarsMode {
 					}
 
 					objectives.push(new Lambda(async () => {
-						const initialState = new ContextState();
-						initialState.set(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Ready);
-						context.setInitialState(initialState);
+						context.setInitialStateData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.Ready);
 						return ObjectiveResult.Complete;
 					}));
 			}
@@ -539,5 +500,38 @@ export class SurvivalMode implements ITarsMode {
 			new AnalyzeInventory(),
 			new Restart(), // restart because we'll likely want to reinforce them right after
 		]);
+	}
+
+	/**
+	 * Runs objectives when near the base.
+	 * And remembers to keep running them even if running the objectives ends up moving you away from the base
+	 */
+	private whenNearBase(
+		context: Context,
+		objectives: Array<IObjective | IObjective[]>,
+		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => void) {
+		const isNearBase = context.getDataOrDefault<boolean>(ContextDataType.IsNearBase, false);
+		if (!isNearBase && !context.utilities.base.isNearBase(context)) {
+			return;
+		}
+
+		if (isNearBase) {
+			context.log.debug("Remembered that we should run near base objectives");
+
+		} else {
+			// mark that we're near the base, so we'll keep trying these objectives until we're done
+			objectives.push(new Lambda(async () => {
+				context.setInitialStateData(ContextDataType.IsNearBase, true);
+				return ObjectiveResult.Complete;
+			}).setStatus("Marking as being near the base"));
+		}
+
+		determineObjectives(context, objectives);
+
+		// mark that we're done with the near base objectives
+		objectives.push(new Lambda(async () => {
+			context.setInitialStateData(ContextDataType.IsNearBase, undefined);
+			return ObjectiveResult.Complete;
+		}).setStatus("Finished near base objectives"));
 	}
 }

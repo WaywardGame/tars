@@ -1,6 +1,7 @@
 import type Context from "./context/Context";
 import type { IObjective } from "./objective/IObjective";
 import type { IPlan } from "./planning/IPlan";
+import { IPlanner } from "./planning/IPlanner";
 export declare enum ExecuteObjectivesResultType {
     Completed = 0,
     Pending = 1,
@@ -22,11 +23,12 @@ export interface IExecuteObjectivesContinuingNextTick {
 export interface IExecuteObjectivesRestart {
     type: ExecuteObjectivesResultType.Restart;
 }
-declare class Executor {
+export declare class Executor {
+    private readonly planner;
     private interrupted;
     private weightChanged;
     private lastPlan;
-    constructor();
+    constructor(planner: IPlanner);
     getPlan(): IPlan | undefined;
     reset(): void;
     interrupt(): void;
@@ -36,5 +38,3 @@ declare class Executor {
     executeObjectives(context: Context, objectives: Array<IObjective | IObjective[]>, resetContextState: boolean, checkForInterrupts?: boolean): Promise<ExecuteObjectivesResult>;
     private executeObjectiveChain;
 }
-declare const executor: Executor;
-export default executor;

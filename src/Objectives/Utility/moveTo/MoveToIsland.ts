@@ -1,16 +1,17 @@
-import { ActionType } from "game/entity/action/IAction";
+import { DoodadType } from "game/doodad/IDoodad";
 import type { IslandId } from "game/island/IIsland";
 import { IslandPosition } from "game/island/IIsland";
-import { ItemType } from "game/item/IItem";
+import SailToIsland from "game/entity/action/actions/SailToIsland";
+
 import type Context from "../../../core/context/Context";
-import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItem from "../../acquire/item/AcquireItem";
-import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import ExecuteAction from "../../core/ExecuteAction";
+import MoveToTarget from "../../core/MoveToTarget";
 import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
 import MoveToWater from "./MoveToWater";
+import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 
 export default class MoveToIsland extends Objective {
 
@@ -31,34 +32,43 @@ export default class MoveToIsland extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        const player = context.human.asPlayer;
-        if (!player) {
-            return ObjectiveResult.Impossible;
-        }
-
         const islandPosition = IslandPosition.fromId(this.islandId);
         if (islandPosition === undefined) {
             return ObjectiveResult.Impossible;
         }
 
-        return [
-            ...(context.inventory.sailBoat ? [new MoveItemIntoInventory(context.inventory.sailBoat)] : [new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]),
-            new MoveToWater(true),
-            // new Lambda(async () => canSailAwayFromPosition(context.player.island, context.player) ? ObjectiveResult.Complete : ObjectiveResult.Impossible),
-            new ExecuteAction(ActionType.SailToIsland, (context, action) => {
-                action.execute(player, islandPosition.x, islandPosition.y);
-                return ObjectiveResult.Complete;
-            }).setStatus(this),
+        const objectivePipelines: IObjective[][] = [];
 
+        if (context.inventory.sailBoat) {
+            objectivePipelines.push([
+                new MoveItemIntoInventory(context.inventory.sailBoat),
+                new MoveToWater(true),
+                new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
+            ]);
 
-            // ...(context.inventory.sailBoat ? [new MoveItemIntoInventory(context.inventory.sailBoat)] : [new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]),
-            // new MoveToWater(true),
-            // new MoveToTarget(edgePosition, true, { allowBoat: true, disableStaminaCheck: true }),
-            // new ExecuteAction(ActionType.Move, (context, action) => {
-            //     action.execute(context.actionExecutor, direction);
-            //     return ObjectiveResult.Complete;
-            // }).setStatus(this),
-        ];
+        } else {
+            const sailBoats = context.utilities.object.findDoodads(context, "SailBoat", (doodad) => doodad.type === DoodadType.Sailboat);
+            for (const sailBoat of sailBoats) {
+                const result = context.human.canSailAwayFromPosition(context.human.island, sailBoat);
+                if (result.canSailAway) {
+                    objectivePipelines.push([
+                        new MoveToTarget(sailBoat, false),
+                        new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
+                    ]);
+                }
+            }
+
+            if (objectivePipelines.length === 0) {
+                // no sail boats or sailboats are not in good spots
+                objectivePipelines.push([
+                    new AcquireInventoryItem("sailBoat"),
+                    new MoveToWater(true),
+                    new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
+                ]);
+            }
+        }
+
+        return objectivePipelines;
     }
 
 }

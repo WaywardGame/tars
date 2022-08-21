@@ -68,9 +68,10 @@ export default class AnalyzeBase extends Objective {
 					}
 
 				} else {
+					// UUID for the key in order to ensure this always does a fresh scan
 					targets = info.findTargets ?
 						info.findTargets(context) :
-						context.utilities.object.findDoodads(context, key, doodad => doodad.ownerIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(context, info, doodad.type, doodad));
+						context.utilities.object.findDoodads(context, `${this.getIdentifier()}:${this.getUniqueIdentifier()}`, doodad => doodad.builderIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(context, info, doodad.type, doodad));
 				}
 
 				for (const target of targets) {

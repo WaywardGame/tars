@@ -3,12 +3,15 @@ import type Doodad from "game/doodad/Doodad";
 import DoodadManager from "game/doodad/DoodadManager";
 import { DoodadType } from "game/doodad/IDoodad";
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
+import UpdateWalkPath from "game/entity/action/actions/UpdateWalkPath";
 import { ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
 import { TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+import Build from "game/entity/action/actions/Build";
+
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IBaseInfo } from "../../../core/ITars";
@@ -59,12 +62,16 @@ export default class BuildItem extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		if (!description.onUse || !description.onUse[ActionType.Build] === undefined) {
+		if (!description.onUse) {
 			this.log.error(`Invalid build item. ${item}`);
 			return ObjectiveResult.Impossible;
 		}
 
-		const buildDoodadType = description.onUse[ActionType.Build] as DoodadType;
+		const buildDoodadType = description.onUse[ActionType.Build]?.type;
+		if (buildDoodadType === undefined) {
+			this.log.error(`Invalid build item. ${item}`);
+			return ObjectiveResult.Impossible;
+		}
 
 		const baseInfo = this.getBaseInfo(context, buildDoodadType);
 
@@ -129,7 +136,7 @@ export default class BuildItem extends Objective {
 		return [
 			new MoveToTarget(this.target, true),
 			new PickUpAllTileItems(this.target),
-			new UseItem(ActionType.Build, item),
+			new UseItem(Build, item),
 			new Lambda(async context => {
 				const tile = context.human.getFacingTile();
 				if (tile.doodad) {
@@ -137,7 +144,8 @@ export default class BuildItem extends Objective {
 				}
 
 				return ObjectiveResult.Complete;
-			}),
+			}).setStatus(this),
+			new AnalyzeBase(),
 		];
 	}
 
@@ -152,7 +160,11 @@ export default class BuildItem extends Objective {
 			this.target = undefined;
 
 			context.utilities.movement.resetMovementOverlays();
-			context.human.asPlayer?.walkAlongPath(undefined);
+
+			// run outside the current context
+			setTimeout(() => {
+				UpdateWalkPath.execute(context.human, undefined);
+			}, 0);
 		}
 
 		return super.onMove(context);
@@ -220,13 +232,13 @@ export default class BuildItem extends Objective {
 		switch (context.island.biomeType) {
 			case BiomeType.Coastal:
 				commonTerrainType = TerrainType.Grass;
-				rockType = TerrainType.Rocks;
+				rockType = TerrainType.Granite;
 				waterType = TerrainType.ShallowSeawater;
 				break;
 
 			case BiomeType.IceCap:
 				commonTerrainType = TerrainType.Snow;
-				rockType = TerrainType.RocksWithSnow;
+				rockType = TerrainType.GraniteWithSnow;
 				waterType = TerrainType.FreezingSeawater;
 				break;
 
@@ -239,7 +251,7 @@ export default class BuildItem extends Objective {
 
 			default:
 				commonTerrainType = TerrainType.Dirt;
-				rockType = TerrainType.Rocks;
+				rockType = TerrainType.Granite;
 				waterType = TerrainType.ShallowSeawater;
 				break;
 		}

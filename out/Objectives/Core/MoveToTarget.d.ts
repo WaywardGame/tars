@@ -25,6 +25,7 @@ export default class MoveToTarget extends Objective {
     private trackedCorpse;
     private trackedItem;
     private trackedPosition;
+    protected includePositionInHashCode: boolean;
     constructor(target: IVector3, moveAdjacentToTarget: boolean, options?: Partial<IMoveToTargetOptions> | undefined);
     getIdentifier(context: Context | undefined): string;
     getStatus(context: Context): string | undefined;

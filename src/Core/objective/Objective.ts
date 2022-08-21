@@ -4,11 +4,11 @@ import { nullLog } from "utilities/Log";
 
 import type Context from "../context/Context";
 import { ContextDataType } from "../context/IContext";
-import { loggerUtilities } from "../../utilities/Logger";
 import { ReserveType } from "../ITars";
-import type { IObjective, ObjectiveExecutionResult } from "./IObjective";
+import type { HashCodeFiltering, IObjective, ObjectiveExecutionResult } from "./IObjective";
 import type Item from "game/item/Item";
-import { ItemType } from "game/item/IItem";
+import { LoggerUtilities } from "../../utilities/Logger";
+import { PlanningAccuracy } from "../ITarsOptions";
 
 export default abstract class Objective implements IObjective {
 
@@ -20,6 +20,9 @@ export default abstract class Objective implements IObjective {
 
 	public enableLogging = true;
 
+	protected includeUniqueIdentifierInHashCode?: boolean;
+	protected includePositionInHashCode?: boolean;
+
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
 	protected _shouldKeepInInventory: boolean | undefined; // defaults to false
 	protected reserveType: ReserveType | undefined; // defaults to Hard
@@ -28,7 +31,6 @@ export default abstract class Objective implements IObjective {
 
 	private _uniqueIdentifier: number | undefined;
 
-	private _additionalDifficulty: number | undefined;
 	private _overrideDifficulty: number | undefined;
 
 	private _status: IObjective | (() => string) | string | undefined;
@@ -40,35 +42,42 @@ export default abstract class Objective implements IObjective {
 	 */
 	public abstract getStatus(context: Context): string | undefined;
 
-	public abstract execute(context: Context): Promise<ObjectiveExecutionResult>;
+	public abstract execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult>;
 
 	public get log(): ILog {
-		if (this.enableLogging) {
-			return this._log ??= loggerUtilities.createLog(this.getName());
+		if (this.enableLogging && !this._log) {
+			// throw new Error("Invalid logger");
+			this._log = nullLog;
 		}
 
 		return this._log ?? nullLog;
+	}
+
+	public ensureLogger(loggerUtilities: LoggerUtilities) {
+		if (this._log === undefined) {
+			this.setLogger(loggerUtilities.createLog(this.getName()));
+		}
 	}
 
 	public setLogger(log: ILog | undefined): void {
 		this._log = log;
 	}
 
-	public getHashCode(context: Context | undefined, addUniqueIdentifier?: boolean): string {
+	public getHashCode(context: Context | undefined, skipContextDataKey?: boolean): string {
 		let hashCode = this.getIdentifier(context);
 
 		if (hashCode.includes("[object")) {
 			console.warn("Invalid objective identifier", hashCode);
 		}
 
-		if (this.isDynamic() || addUniqueIdentifier || this._uniqueIdentifier !== undefined) {
-			this.addUniqueIdentifier();
-
-			hashCode += `:${this._uniqueIdentifier}`;
+		// greatly increases accuracy at a cost of performance
+		if (context && (this.includePositionInHashCode || context.options.planningAccuracy === PlanningAccuracy.Accurate)) {
+			const position = context.getPosition();
+			hashCode += `:(${position.x},${position.y},${position.z})`;
 		}
 
-		if (this._additionalDifficulty !== undefined) {
-			hashCode += `:${this._additionalDifficulty}`;
+		if (this.includeUniqueIdentifierInHashCode) {
+			hashCode += `:${this._uniqueIdentifier ??= this.getUniqueIdentifier()}`;
 		}
 
 		if (this._overrideDifficulty !== undefined) {
@@ -78,7 +87,12 @@ export default abstract class Objective implements IObjective {
 		// the context data key check prevents an infinite loop
 		// AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll
 		// -> AcquireItemFromDismantle:Twigs:Branch,SaguaroCactusRibs,Winterberries:156707:[AcquireItemFromDismantle:WoodenShavings:WoodenDowels,Twigs:155925:[AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll:155553:[AcquireItemFromDismantle:ShreddedPaper:TatteredMap,OldInstructionalScroll,PaperSheet,DrawnMap,OrnateBlueBook,Journal,MossCoveredBook,GildedRedBook,OldEducationalScroll:154175:
-		if (this.contextDataKey !== ContextDataType.LastAcquiredItem && this.contextDataKey.startsWith(this.getIdentifier(context))) {
+		// ! updated comment below !
+		// this check used to also be here: && this.contextDataKey.startsWith(this.getIdentifier(context)
+		// that fixes the above infinite loop, but another issue remains
+		// if there's are 2 AcquireItemFromDismantle calls like AcquireItemFromDismantle:StrippedBark:Branch,TreeBark:2830:Hard and AcquireItemFromDismantle:StrippedBark:Branch,TreeBark:2743:Hard and both those calls end up trying to gather a branch from a doodad, the context is lost when deduping the objectives
+		// the special context must be passed along the chain to ensure the individual trees remain unique
+		if (!skipContextDataKey && this.contextDataKey !== ContextDataType.LastAcquiredItem) {
 			hashCode += `:[${this.contextDataKey}]`;
 		}
 
@@ -146,8 +160,9 @@ export default abstract class Objective implements IObjective {
 	/**
 	 * Checks if the context could effect the execution of the objective
 	 * @param context The context
+	 * @param objectiveHashCode The objectives hash code
 	 */
-	public canIncludeContextHashCode(context: Context): boolean | Set<ItemType> {
+	public canIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean | HashCodeFiltering {
 		return false;
 	}
 
@@ -155,14 +170,10 @@ export default abstract class Objective implements IObjective {
 	 * Checks if the context could effect the execution of the objective
 	 * Return true if the objective checks the context for items
 	 * @param context The context
+	 * @param objectiveHashCode The objectives hash code
 	 */
-	public shouldIncludeContextHashCode(context: Context): boolean {
+	public shouldIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean {
 		return false;
-	}
-
-	public addDifficulty(difficulty: number) {
-		this._additionalDifficulty = (this._additionalDifficulty || 0) + difficulty;
-		return this;
 	}
 
 	public overrideDifficulty(difficulty: number | undefined) {
@@ -184,13 +195,7 @@ export default abstract class Objective implements IObjective {
 			return this._overrideDifficulty;
 		}
 
-		let difficulty = this.getBaseDifficulty(context);
-
-		if (this._additionalDifficulty !== undefined) {
-			difficulty += this._additionalDifficulty;
-		}
-
-		return difficulty;
+		return this.getBaseDifficulty(context);
 	}
 
 	/**
@@ -200,7 +205,7 @@ export default abstract class Objective implements IObjective {
 		const walkPath = context.human.walkPath;
 		if (walkPath) {
 			// interrupt if an npc or creature moved along our walk path (only close point)
-			for (let i = 0; i < Math.min(20, walkPath.path.length); i++) {
+			for (let i = 0; i < Math.min(10, walkPath.path.length); i++) {
 				const point = walkPath.path[i];
 				const tile = context.island.getTile(point.x, point.y, context.human.z);
 				if ((tile.npc !== undefined && tile.npc !== context.human) || (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature)) {
@@ -249,6 +254,11 @@ export default abstract class Objective implements IObjective {
 		return this;
 	}
 
+	public passShouldKeepInInventory(objective: Objective) {
+		this._shouldKeepInInventory = objective._shouldKeepInInventory;
+		return this;
+	}
+
 	/**
 	 * Returns the last acquired item based on the context data key
 	 */
@@ -273,12 +283,12 @@ export default abstract class Objective implements IObjective {
 	}
 
 	/**
-	 * Adds a unique identifier to this objective
-	 * Prevents some caching logic related to hash codes
+	 * Gets a unique context data key
 	 */
-	protected addUniqueIdentifier() {
-		if (this._uniqueIdentifier === undefined) {
-			this._uniqueIdentifier = this.getUniqueIdentifier();
-		}
+	protected getUniqueContextDataKey(itemIdentifier: string): string {
+		// not including the context data key fixes an infinite loop
+		// example infinite loop: near infinite AcquireItemFromDismantles
+		return `${this.getHashCode(undefined, true)}:${itemIdentifier}`;
 	}
+
 }

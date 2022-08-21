@@ -2,7 +2,7 @@ import DoodadManager from "game/doodad/DoodadManager";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import { itemDescriptions as Items } from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
@@ -49,9 +49,9 @@ export default class AcquireItemForDoodad extends Objective {
 			const doodadTypes = context.utilities.doodad.getDoodadTypes(this.doodadTypeOrGroup);
 			for (const doodadType of doodadTypes) {
 				for (const itemType of Enums.values(ItemType)) {
-					const itemDescription = Items[itemType];
+					const itemDescription = itemDescriptions[itemType];
 					if (itemDescription && itemDescription.onUse &&
-						(itemDescription.onUse[ActionType.Build] === doodadType || itemDescription.onUse[ActionType.PlaceDown] === doodadType)) {
+						(itemDescription.onUse[ActionType.Build]?.type === doodadType || itemDescription.onUse[ActionType.PlaceDown]?.type === doodadType)) {
 						result.push(itemType);
 					}
 				}

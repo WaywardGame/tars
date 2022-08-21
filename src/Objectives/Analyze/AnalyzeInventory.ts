@@ -175,7 +175,7 @@ export default class AnalyzeInventory extends Objective {
 			return true;
 		}
 
-		if (itemInfo.allowInChests && context.base.chest.some(chest => context.island.items.isContainableInContainer(item, chest))) {
+		if (itemInfo.allowInChests && (context.base.chest.concat(context.base.intermediateChest).some(chest => context.island.items.isContainableInContainer(item, chest)))) {
 			return true;
 		}
 

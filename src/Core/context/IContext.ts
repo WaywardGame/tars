@@ -14,11 +14,6 @@ export enum ContextDataType {
 	LastBuiltDoodad = "LastBuiltDoodad",
 
 	/**
-	 * Spot to store an item across the objective pipeline
-	 */
-	Item1 = "Item1",
-
-	/**
 	 * Allow the OrganizeInventory objective to move reserved items into the intermediate chest
 	 */
 	AllowOrganizingReservedItemsIntoIntermediateChest = "AllowOrganizingReservedItemsIntoIntermediateChest",
@@ -57,6 +52,11 @@ export enum ContextDataType {
 	 * Array of items that will not be moved into chests when overweight
 	 */
 	KeepInInventoryItems = "KeepInInventoryItems",
+
+	/**
+	 * Set when TARS is near the base so it remembers that it should do "near base" things, even if it moves further away from the base while doing said things
+	 */
+	IsNearBase = "IsNearBase",
 }
 
 export enum MovingToNewIslandState {

@@ -3,8 +3,9 @@ import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import type Translation from "language/Translation";
 import type Mod from "mod/Mod";
+import type { IslandId } from "game/island/IIsland";
 
-import { ITarsOptions, TarsUseProtectedItems } from "./core/ITarsOptions";
+import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
 import type { IContext } from "./core/context/IContext";
 import { TreasureHunterType } from "./modes/TreasureHunter";
 import type TarsMod from "./TarsMod";
@@ -35,31 +36,33 @@ export function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T]
 
 export interface ITarsModEvents extends Events<Mod> {
     /**
-     * Emitted when TARS is enabled or disabled
-     */
-    enableChange(enabled: boolean): any;
-
-    /**
-     * Emitted when TARS options change
-     */
-    optionsChange(options: ITarsOptions): any;
-
-    /**
      * Emitted when TARS status is changed
      */
-    statusChange(status: TarsTranslation | string): any;
+    statusChange(): any;
+
+    changedGlobalDataSlots(): any;
+}
+
+export interface IGlobalSaveData {
+    dataSlots: ISaveDataContainer[];
+}
+
+export interface ISaveDataContainer {
+    name: string;
+    version: string;
+    saveData: ISaveData;
 }
 
 export interface ISaveData {
     enabled: boolean;
     configuredThresholds?: boolean;
     options: ITarsOptions;
-    island: Record<string, Record<string, any>>;
+    island: Record<IslandId, Record<string, any>>;
     ui: Partial<Record<TarsUiSaveDataKey, any>>;
 }
 
 export enum TarsUiSaveDataKey {
-    DialogOpened,
+    DialogsOpened,
     ActivePanelId,
     AcquireItemDropdown,
     BuildDoodadDropdown,
@@ -68,23 +71,32 @@ export enum TarsUiSaveDataKey {
     MoveToDoodadDropdown,
     MoveToCreatureDropdown,
     MoveToPlayerDropdown,
-    MoveToNPCDropdown,
+    MoveToNPCTypeDropdown,
     TameCreatureDropdown,
 }
 
+
 export enum TarsTranslation {
     Name,
+    NpcName,
 
     DialogTitleMain,
 
     DialogStatusNavigatingInitializing,
 
     DialogPanelGeneral,
+    DialogPanelNPCs,
+    DialogPanelViewport,
     DialogPanelTasks,
+    DialogPanelData,
     DialogPanelMoveTo,
     DialogPanelGlobalOptions,
     DialogPanelModeOptions,
 
+    DialogButtonSimple,
+    DialogButtonSimpleTooltip,
+    DialogButtonAccurate,
+    DialogButtonAccurateTooltip,
     DialogButtonAllowProtectedItems,
     DialogButtonAllowProtectedItemsTooltip,
     DialogButtonAllowProtectedItemsWithBreakCheck,
@@ -95,6 +107,8 @@ export enum TarsTranslation {
     DialogButtonBuildDoodadTooltip,
     DialogButtonDebugLogging,
     DialogButtonDebugLoggingTooltip,
+    DialogButtonNavigationOverlays,
+    DialogButtonNavigationOverlaysTooltip,
     DialogButtonDisallowProtectedItems,
     DialogButtonDisallowProtectedItemsTooltip,
     DialogButtonAllowProtectedItemsForEquipment,
@@ -102,6 +116,7 @@ export enum TarsTranslation {
     DialogButtonDiscoverAndUnlockTreasure,
     DialogButtonDiscoverAndUnlockTreasureTooltip,
     DialogButtonEnable,
+    DialogButtonRename,
     DialogButtonExploreIslands,
     DialogButtonExploreIslandsTooltip,
     DialogButtonFreeze,
@@ -140,6 +155,17 @@ export enum TarsTranslation {
     DialogButtonTameCreatureTooltip,
     DialogButtonUseOrbsOfInfluence,
     DialogButtonUseOrbsOfInfluenceTooltip,
+    DialogButtonSpawnNPC,
+    DialogButtonSpawnNPCTooltip,
+    DialogButtonLoadTooltip,
+    DialogButtonRenameTooltip,
+    DialogButtonConfigurationTooltip,
+    DialogButtonDeleteTooltip,
+    DialogButtonSaveData,
+    DialogButtonSaveDataTooltip,
+    DialogButtonImportData,
+    DialogButtonImportDataTooltip,
+    DialogButtonExportTooltip,
 
     DialogButtonMoveToBase,
     DialogButtonMoveToDoodad,
@@ -149,7 +175,7 @@ export enum TarsTranslation {
     DialogButtonMoveToPlayer,
     DialogButtonMoveToTerrain,
 
-    DialogRangeLabel,
+    DialogLabel,
     DialogRangeRecoverHealthThreshold,
     DialogRangeRecoverHealthThresholdTooltip,
     DialogRangeRecoverStaminaThreshold,
@@ -172,6 +198,7 @@ export enum TarsTranslation {
     DialogLabelPlayer,
     DialogLabelRecoverThresholds,
     DialogLabelTerrain,
+    DialogLabelPlanningAccuracy,
 
     DialogModeGardener,
     DialogModeGardenerTooltip,
@@ -274,6 +301,15 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         title: TarsTranslation.DialogButtonGoodCitizen,
         tooltip: TarsTranslation.DialogButtonGoodCitizenTooltip,
     },
+    TarsTranslation.DialogLabelPlanningAccuracy,
+    {
+        option: "planningAccuracy",
+        type: TarsOptionSectionType.Choice,
+        choices: [
+            [TarsTranslation.DialogButtonSimple, TarsTranslation.DialogButtonSimpleTooltip, PlanningAccuracy.Simple],
+            [TarsTranslation.DialogButtonAccurate, TarsTranslation.DialogButtonAccurateTooltip, PlanningAccuracy.Accurate],
+        ],
+    },
     TarsTranslation.DialogLabelDeveloper,
     {
         option: "debugLogging",
@@ -286,6 +322,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonFreeze,
         tooltip: TarsTranslation.DialogButtonFreezeTooltip,
+    },
+    {
+        option: "navigationOverlays",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonNavigationOverlays,
+        tooltip: TarsTranslation.DialogButtonNavigationOverlaysTooltip,
     },
     TarsTranslation.DialogLabelRecoverThresholds,
     {

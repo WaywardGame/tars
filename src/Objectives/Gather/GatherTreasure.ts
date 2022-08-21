@@ -1,22 +1,22 @@
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
 import DrawnMap from "game/mapping/DrawnMap";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
+import Lockpick from "game/entity/action/actions/Lockpick";
+import Cast from "game/entity/action/actions/Cast";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import AnalyzeInventory from "../analyze/AnalyzeInventory";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
 import Restart from "../core/Restart";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 import UseItem from "../other/item/UseItem";
 import DigTile from "../other/tile/DigTile";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export interface IGatherTreasureOptions {
     disableUnlocking: boolean;
@@ -43,9 +43,6 @@ export default class GatherTreasure extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        const fishingRod = context.inventory.fishingRod;
-        const lockPick = context.inventory.lockPick;
-
         const objectivePipelines: IObjective[][] = [];
 
         for (const treasure of treasures) {
@@ -65,19 +62,11 @@ export default class GatherTreasure extends Objective {
                         continue;
                     }
 
-                    objectives = [];
-
-                    if (!lockPick) {
-                        objectives.push(
-                            new AcquireItemForAction(ActionType.Lockpick),
-                            new AnalyzeInventory(),
-                        );
-                    }
-
-                    objectives.push(
+                    objectives = [
+                        new AcquireInventoryItem("lockPick"),
                         new MoveToTarget(target, true),
-                        new UseItem(ActionType.Lockpick, lockPick),
-                    );
+                        new UseItem(Lockpick, context.inventory.lockPick),
+                    ];
 
                 } else if (doodad.containedItems && doodad.containedItems.length > 0) {
                     if (this.options?.disableGrabbingItems) {
@@ -103,24 +92,14 @@ export default class GatherTreasure extends Objective {
 
                 const needFishingRod = Terrains[TileHelpers.getType(treasureTile)]?.water ? true : false;
                 if (needFishingRod) {
-                    if (!fishingRod) {
-                        objectives.push(
-                            new AcquireItemForAction(ActionType.Cast),
-                            new AnalyzeInventory(),
-                        );
-                    }
+                    objectives.push(new AcquireInventoryItem("fishingRod"));
                 }
 
-                if (!lockPick) {
-                    objectives.push(
-                        new AcquireItemForAction(ActionType.Lockpick),
-                        new AnalyzeInventory(),
-                    );
-                }
+                objectives.push(new AcquireInventoryItem("lockPick"));
 
                 if (needFishingRod) {
                     objectives.push(new MoveToTarget(target, true));
-                    objectives.push(new UseItem(ActionType.Cast, fishingRod));
+                    objectives.push(new UseItem(Cast, context.inventory.fishingRod));
 
                 } else {
                     objectives.push(new DigTile(target));

@@ -8,11 +8,19 @@ import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOver
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import type { IVector2, IVector3 } from "utilities/math/IVector";
+import Dig from "game/entity/action/actions/Dig";
+import Mine from "game/entity/action/actions/Mine";
+import UpdateDirection from "game/entity/action/actions/UpdateDirection";
+import Move from "game/entity/action/actions/Move";
+import OpenDoor from "game/entity/action/actions/OpenDoor";
 
 import type Context from "../core/context/Context";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import type { NavigationPath } from "../core/navigation/INavigation";
-import { log } from "./Logger";
+import Butcher from "game/entity/action/actions/Butcher";
+import PickUp from "game/entity/action/actions/PickUp";
+import Chop from "game/entity/action/actions/Chop";
+import Equip from "game/entity/action/actions/Equip";
 
 export interface IMovementPath {
     difficulty: number;
@@ -86,7 +94,7 @@ export class MovementUtilities {
 
         const origin = navigation.getOrigin();
         if (!origin || (origin.x !== context.human.x || origin.y !== context.human.y || origin.z !== context.human.z)) {
-            log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
+            context.log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
             await navigation.updateOrigin(context.human);
         }
     }
@@ -191,7 +199,7 @@ export class MovementUtilities {
 
             const end = movementPath.path[pathLength - 1];
             if (!end) {
-                log.info("Broken path!", pathLength, movementPath.path, target.x, target.y, target.z, context.human.x, context.human.y, context.human.z);
+                context.log.info("Broken path!", pathLength, movementPath.path, target.x, target.y, target.z, context.human.x, context.human.y, context.human.z);
                 return MoveResult.NoPath;
             }
 
@@ -210,76 +218,57 @@ export class MovementUtilities {
                         // some terrain is blocking our path
                         if (terrainDescription.gather) {
                             if (direction !== context.human.facingDirection) {
-                                await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
-                                    action.execute(context.actionExecutor, direction, undefined);
-                                    return ObjectiveResult.Complete;
-                                });
+                                await context.utilities.action.executeAction(context, UpdateDirection, [direction]);
                             }
 
-                            const actionType = terrainDescription.gather ? ActionType.Mine : ActionType.Dig;
+                            const actionType = terrainDescription.gather ? Mine : Dig;
 
-                            await context.utilities.action.executeAction(context, actionType, (context, action) => {
-                                action.execute(context.actionExecutor, context.utilities.item.getBestToolForTerrainGather(context, tileType));
-                                return ObjectiveResult.Complete;
-                            });
+                            await context.utilities.action.executeAction(context, actionType, [context.utilities.item.getBestToolForTerrainGather(context, tileType)]);
 
+                            context.log.debug("Gathering from terrain that is blocking movement", TerrainType[tileType]);
                             return MoveResult.Moving;
                         }
 
-                        log.info("Terrain is blocking movement", TerrainType[tileType]);
+                        context.log.info("Terrain is blocking movement", TerrainType[tileType]);
                         return MoveResult.NoPath;
 
-                    } else if (doodad?.blocksMove()) {
+                    } else if (doodad?.blocksMove() && !doodad.isVehicle()) {
                         // doodad is blocking our path
+                        context.log.debug("Doodad is blocking path");
 
                         // face it
                         if (direction !== context.human.facingDirection) {
-                            await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
-                                action.execute(context.actionExecutor, direction, undefined);
-                                return ObjectiveResult.Complete;
-                            });
+                            await context.utilities.action.executeAction(context, UpdateDirection, [direction]);
                         }
 
-                        if (doodad.canPickup(context.human)) {
+                        if (doodad.canPickUp(context.human)) {
                             const doodadDescription = doodad.description();
                             if (doodadDescription && (doodadDescription.isDoor || doodadDescription.isGate) && doodadDescription.isClosed) {
-                                log.info("Opening doodad blocking the path", Direction[direction]);
+                                context.log.info("Opening doodad blocking the path", Direction[direction]);
 
-                                await context.utilities.action.executeAction(context, ActionType.OpenDoor, (context, action) => {
-                                    action.execute(context.actionExecutor);
-                                    return ObjectiveResult.Complete;
-                                });
+                                await context.utilities.action.executeAction(context, OpenDoor, []);
 
                             } else {
-                                log.info("Picking up doodad blocking the path", Direction[direction]);
+                                context.log.info("Picking up doodad blocking the path", Direction[direction]);
 
-                                await context.utilities.action.executeAction(context, ActionType.Pickup, (context, action) => {
-                                    action.execute(context.actionExecutor);
-                                    return ObjectiveResult.Complete;
-                                });
+                                await context.utilities.action.executeAction(context, PickUp, []);
                             }
 
                         } else if (context.utilities.tile.hasCorpses(nextTile)) {
-                            log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);
+                            context.log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);
 
                             const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
                             if (!tool) {
-                                log.info("Missing butchering tool");
+                                context.log.info("Missing butchering tool");
                                 return MoveResult.NoPath;
                             }
 
-                            await context.utilities.action.executeAction(context, ActionType.Butcher, (context, action) => {
-                                action.execute(context.actionExecutor, tool);
-                                return ObjectiveResult.Complete;
-                            });
+                            await context.utilities.action.executeAction(context, Butcher, [tool]);
 
                         } else {
-                            log.info("Gathering from doodad blocking the path", Direction[direction]);
+                            context.log.info("Gathering from doodad blocking the path", Direction[direction]);
 
-                            await context.utilities.action.executeAction(context, ActionType.Chop, (context, action) => {
-                                action.execute(context.actionExecutor, context.utilities.item.getBestToolForDoodadGather(context, doodad));
-                                return ObjectiveResult.Complete;
-                            });
+                            await context.utilities.action.executeAction(context, Chop, [context.utilities.item.getBestToolForDoodadGather(context, doodad)]);
                         }
 
                         return MoveResult.Moving;
@@ -290,29 +279,19 @@ export class MovementUtilities {
                         // ensure we are wearing the correct equipment
                         const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
                         if (handEquipmentChange) {
-                            log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
+                            context.log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
 
-                            await context.utilities.action.executeAction(context, ActionType.Equip, (context, action) => {
-                                action.execute(context.actionExecutor, handEquipmentChange.item, handEquipmentChange.equipType);
-                                return ObjectiveResult.Complete;
-                            });
+                            await context.utilities.action.executeAction(context, Equip, [handEquipmentChange.item, handEquipmentChange.equipType]);
                         }
 
-                        const player = context.human.asPlayer;
-                        if (player) {
-                            await context.utilities.action.executeAction(context, ActionType.Move, (context, action) => {
-                                action.execute(player, direction);
-                                return ObjectiveResult.Complete;
-                            });
+                        context.log.info("Walking into an npc");
 
-                        } else {
-                            log.warn("Unable to process next tile as a non-player");
-                        }
+                        await context.utilities.action.executeAction(context, Move, [direction]);
 
                         return MoveResult.Moving;
 
                     } else if (nextTile.npc && nextTile.npc !== context.human) {
-                        log.warn("No path through npc");
+                        context.log.warn("No path through npc");
                         return MoveResult.NoPath;
                     }
                 }
@@ -336,7 +315,7 @@ export class MovementUtilities {
 
                     if (walkOnce) {
                         if (!nextPosition) {
-                            log.warn("No nextPosition");
+                            context.log.warn("No nextPosition");
                             return MoveResult.NoPath;
                         }
 
@@ -344,9 +323,11 @@ export class MovementUtilities {
                     }
 
                     if (!context.options.freeze) {
-                        context.human.walkAlongPath(path, true);
+                        context.tars.updateWalkPath(path);
                     }
                 }
+
+                // context.log.debug("Walk path is", context.human.walkPath);
 
                 return MoveResult.Moving;
             }
@@ -355,10 +336,7 @@ export class MovementUtilities {
         if (moveAdjacentToTarget) {
             const direction = getDirectionFromMovement(target.x - context.human.x, target.y - context.human.y);
             if (direction !== context.human.facingDirection) {
-                await context.utilities.action.executeAction(context, ActionType.UpdateDirection, (context, action) => {
-                    action.execute(context.actionExecutor, direction, undefined);
-                    return ObjectiveResult.Complete;
-                });
+                await context.utilities.action.executeAction(context, UpdateDirection, [direction]);
             }
         }
 

@@ -1,13 +1,12 @@
 import { WeightStatus } from "game/entity/player/IPlayer";
 
-import { log } from "../utilities/Logger";
 import type Context from "./context/Context";
 import { MovingToNewIslandState, ContextDataType } from "./context/IContext";
 import type { IObjective } from "./objective/IObjective";
 
 import type { IPlan } from "./planning/IPlan";
 import { ExecuteResultType } from "./planning/IPlan";
-import planner from "./planning/Planner";
+import { IPlanner } from "./planning/IPlanner";
 
 export enum ExecuteObjectivesResultType {
 	Completed,
@@ -39,13 +38,13 @@ export interface IExecuteObjectivesRestart {
 /**
  * Execute objectives
  */
-class Executor {
+export class Executor {
 
 	private interrupted: boolean;
 	private weightChanged: boolean;
 	private lastPlan: IPlan | undefined;
 
-	constructor() {
+	constructor(private readonly planner: IPlanner) {
 		this.reset();
 	}
 
@@ -58,7 +57,7 @@ class Executor {
 		this.weightChanged = false;
 		this.lastPlan = undefined;
 
-		planner.reset();
+		this.planner.reset();
 	}
 
 	public interrupt() {
@@ -115,17 +114,12 @@ class Executor {
 
 				const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
 
-				log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`, MovingToNewIslandState[moveToNewIslandState]);
+				context.log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`, MovingToNewIslandState[moveToNewIslandState]);
 			}
 
-			let objectiveChain: IObjective[];
-			if (Array.isArray(objective)) {
-				objectiveChain = objective;
-			} else {
-				objectiveChain = [objective];
-			}
+			this.planner.reset();
 
-			planner.reset();
+			const objectiveChain = Array.isArray(objective) ? objective : [objective];
 
 			const result = await this.executeObjectiveChain(context, objectiveChain, checkForInterrupts);
 
@@ -160,10 +154,10 @@ class Executor {
 	private async executeObjectiveChain(context: Context, objectives: IObjective[], checkForInterrupts: boolean): Promise<ExecuteObjectivesResult> {
 		for (let i = 0; i < objectives.length; i++) {
 			const objective = objectives[i];
-			const plan = this.lastPlan = await planner.createPlan(context, objective);
+			const plan = this.lastPlan = await this.planner.createPlan(context, objective);
 			if (!plan) {
 				if (!objective.ignoreInvalidPlans) {
-					log.info(`No valid plan for ${objective.getHashCode(context)}`);
+					context.log.info(`No valid plan for ${objective.getHashCode(context)}`);
 				}
 
 				break;
@@ -176,16 +170,17 @@ class Executor {
 				},
 				(getObjectiveResults: () => IObjective[]) => {
 					if (this.weightChanged && context.human.getWeightStatus() !== WeightStatus.None) {
-						log.info("Weight changed. Stopping execution");
+						context.log.info("Weight changed. Stopping execution");
 						return {
 							type: ExecuteResultType.Restart,
 						};
 					}
 
-					if (!this.isReady(context, checkForInterrupts)) {
+					const remainingObjectives = getObjectiveResults();
+					if (remainingObjectives.length > 0 && !this.isReady(context, checkForInterrupts)) {
 						return {
 							type: ExecuteResultType.ContinuingNextTick,
-							objectives: getObjectiveResults(),
+							objectives: remainingObjectives,
 						};
 					}
 
@@ -225,7 +220,3 @@ class Executor {
 	}
 
 }
-
-const executor = new Executor();
-
-export default executor;

@@ -13,6 +13,7 @@ import Objective from "../../core/objective/Objective";
 export default class ReserveItems extends Objective {
 
 	public items: Item[];
+	private objectiveHashCode: string | undefined;
 
 	constructor(...items: Item[]) {
 		super();
@@ -21,19 +22,34 @@ export default class ReserveItems extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `ReserveItem:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.shouldKeepInInventory() ? "KeepInInventory:" : ""}${this.items.join(",")}`;
+		return `ReserveItem:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.shouldKeepInInventory() ? "KeepInInventory:" : ""}${this.objectiveHashCode ? this.objectiveHashCode : ""}${this.items.join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
 		return undefined;
 	}
 
+	public passObjectiveHashCode(objectiveHashCode: string) {
+		this.objectiveHashCode = objectiveHashCode;
+		return this;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (this.reserveType === ReserveType.Soft) {
-			context.addSoftReservedItems(...this.items);
+		if (this.objectiveHashCode !== undefined) {
+			if (this.reserveType === ReserveType.Soft) {
+				context.addSoftReservedItemsForObjectiveHashCode(this.objectiveHashCode, ...this.items);
+
+			} else {
+				context.addHardReservedItemsForObjectiveHashCode(this.objectiveHashCode, ...this.items);
+			}
 
 		} else {
-			context.addHardReservedItems(...this.items);
+			if (this.reserveType === ReserveType.Soft) {
+				context.addSoftReservedItems(...this.items);
+
+			} else {
+				context.addHardReservedItems(...this.items);
+			}
 		}
 
 		if (this.shouldKeepInInventory()) {

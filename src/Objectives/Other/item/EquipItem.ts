@@ -1,6 +1,6 @@
-import { ActionType } from "game/entity/action/IAction";
 import { EquipType } from "game/entity/IHuman";
 import type Item from "game/item/Item";
+import Equip from "game/entity/action/actions/Equip";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -36,10 +36,7 @@ export default class EquipItem extends Objective {
 
 		return [
 			new ReserveItems(item).keepInInventory(),
-			new ExecuteAction(ActionType.Equip, (context, action) => {
-				action.execute(context.actionExecutor, item, this.equip);
-				return ObjectiveResult.Complete;
-			}).setStatus(this),
+			new ExecuteAction(Equip, [item, this.equip]).setStatus(this),
 		];
 	}
 

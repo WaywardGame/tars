@@ -1,9 +1,10 @@
 import type Doodad from "game/doodad/Doodad";
-import { ActionType } from "game/entity/action/IAction";
 import type { IContainer } from "game/item/IItem";
 import type Item from "game/item/Item";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
+import Drop from "game/entity/action/actions/Drop";
+
 import { ContextDataType, MovingToNewIslandState } from "../../core/context/IContext";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -14,6 +15,7 @@ import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 import MoveItem from "../other/item/MoveItem";
 import { defaultMaxTilesChecked } from "../../core/ITars";
+
 const maxChestDistance = 128;
 
 export interface IOriganizeInventoryOptions {
@@ -171,10 +173,7 @@ export default class OrganizeInventory extends Objective {
 
 		return [
 			new MoveToTarget(target, false),
-			new ExecuteAction(ActionType.Drop, (context, action) => {
-				action.execute(context.actionExecutor, itemToDrop);
-				return ObjectiveResult.Complete;
-			}).setStatus(`Dropping ${itemToDrop.getName()}`),
+			new ExecuteAction(Drop, [itemToDrop]).setStatus(`Dropping ${itemToDrop.getName()}`),
 		];
 	}
 

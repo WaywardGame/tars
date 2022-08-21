@@ -1,17 +1,18 @@
-import { ActionType } from "game/entity/action/IAction";
 import type { IRecipe } from "game/item/IItem";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type { IRequirementInfo } from "game/item/IItemManager";
-import { RequirementStatus, WeightType } from "game/item/IItemManager";
+import { WeightType } from "game/item/IItemManager";
 import type Item from "game/item/Item";
 import type ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
+import Craft from "game/entity/action/actions/Craft";
+
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import { ReserveType } from "../../../core/ITars";
-import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
-import { ItemUtilities } from "../../../utilities/Item";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import { IGetItemOptions, ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -22,6 +23,7 @@ import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+import AddDifficulty from "../../core/AddDifficulty";
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
@@ -50,8 +52,9 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, this.itemType);
 
-		const checker = context.utilities.item.processRecipe(context, this.recipe, false, this.allowInventoryItems);
-		const checkerWithIntermediateChest = context.utilities.item.processRecipe(context, this.recipe, true, this.allowInventoryItems);
+		const options: IGetItemOptions = { allowInventoryItems: !!this.allowInventoryItems, allowUnsafeWaterContainers: true };
+		const checker = context.utilities.item.processRecipe(context, this.recipe, false, options);
+		const checkerWithIntermediateChest = context.utilities.item.processRecipe(context, this.recipe, true, options);
 
 		const availableInventoryWeight = context.utilities.item.getAvailableInventoryWeight(context);
 		const estimatedItemWeight = context.island.items.getWeight(this.itemType, WeightType.Static);
@@ -172,22 +175,39 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			}
 		}
 
-		if (requirementInfo.requirements === RequirementStatus.Missing) {
-			objectives.push(new CompleteRequirements(requirementInfo));
-
-		} else {
-			objectives.push(new MoveToLand());
+		if (this.recipe.level !== 0) {
+			// breaks ties between Wooden and Ornate Wooden chests
+			objectives.push(new AddDifficulty(this.recipe.level));
 		}
 
-		objectives.push(new ExecuteActionForItem(
-			ExecuteActionType.Generic,
-			[this.itemType],
-			{
-				actionType: ActionType.Craft,
-				executor: (context, action) => {
-					action.execute(context.actionExecutor, this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent);
-				}
-			}).passAcquireData(this).setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
+		objectives.push(
+			new CompleteRequirements(requirementInfo),
+			new MoveToLand(),
+			new ExecuteActionForItem(
+				ExecuteActionType.Generic,
+				[this.itemType],
+				{
+					genericAction: {
+						action: Craft,
+						args: [this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent],
+					},
+					preRetry: () => {
+						const items = [
+							...checker.itemComponentsRequired,
+							...checker.itemComponentsConsumed,
+							checker.itemBaseComponent,
+						];
+						for (const item of items) {
+							if (item && item.isValid()) {
+								// we failed to craft and one of our items broke
+								// restart instead of trying to craft again
+								return ObjectiveResult.Restart;
+							}
+						}
+					}
+				})
+				.passAcquireData(this)
+				.setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));
 
 		return objectives;
 	}

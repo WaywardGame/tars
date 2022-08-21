@@ -1,13 +1,18 @@
 import { IContainer } from "game/item/IItem";
 import type { ITile, ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
-import terrainDescriptions from "game/tile/Terrains";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
+import Dig from "game/entity/action/actions/Dig";
+import Butcher from "game/entity/action/actions/Butcher";
+import Till from "game/entity/action/actions/Till";
 
 import Context from "../core/context/Context";
 import type { ITileLocation } from "../core/ITars";
+import Item from "game/item/Item";
+import { getDirectionFromMovement } from "game/entity/player/IPlayer";
+import { Direction } from "utilities/math/Direction";
 
 export interface IOpenTileOptions {
 	requireNoItemsOnTile: boolean;
@@ -54,11 +59,13 @@ export class TileUtilities {
 	}
 
 	public isSwimmingOrOverWater(context: Context) {
-		return context.human.isSwimming() || Terrains[TileHelpers.getType(context.human.island.getTileFromPoint(context.getPosition()))]?.water === true;
+		const tile = context.human.island.getTileFromPoint(context.getPosition());
+		return context.human.isSwimming() || (tile && Terrains[TileHelpers.getType(tile)]?.water === true);
 	}
 
 	public isOverDeepSeaWater(context: Context) {
-		return TileHelpers.getType(context.human.island.getTileFromPoint(context.getPosition())) === TerrainType.DeepSeawater;
+		const tile = context.human.island.getTileFromPoint(context.getPosition());
+		return tile && TileHelpers.getType(tile) === TerrainType.DeepSeawater;
 		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
 	}
 
@@ -122,43 +129,47 @@ export class TileUtilities {
 		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !context.human.island.isPlayerAtTile(tile, false, true);
 	}
 
-	public canDig(context: Context, tile: ITile) {
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.doodad && !this.hasItems(tile) && !context.human.island.isPlayerAtTile(tile, false, true);
-	}
-
-	public canTill(context: Context, point: IVector3, tile: ITile, allowedTilesSet: Set<TerrainType>): boolean {
-		if (tile.creature || tile.npc) {
+	public canDig(context: Context, tilePosition: IVector3) {
+		const canUseArgs = this.getCanUseArgs(context, tilePosition);
+		if (!canUseArgs) {
 			return false;
 		}
 
-		const tileType = TileHelpers.getType(tile);
-		if (tileType === TerrainType.Grass) {
-			if (!this.canDig(context, tile)) {
-				return false;
-			}
-
-			// digging grass will reveal dirt
-			if (!allowedTilesSet.has(TerrainType.Dirt)) {
-				return false;
-			}
-
-		} else {
-			if (!allowedTilesSet.has(tileType)) {
-				return false;
-			}
-
-			const terrainDescription = terrainDescriptions[tileType];
-			if (!terrainDescription?.tillable) {
-				return false;
-			}
-		}
-
-		return context.utilities.base.isOpenArea(context, point, tile);
+		return Dig.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction).usable;
 	}
 
-	public canButcherCorpse(context: Context, tile: ITile, skipCorpseCheck?: boolean) {
-		return (skipCorpseCheck || this.hasCorpses(tile))
-			&& !tile.creature && !tile.npc && !context.human.island.isPlayerAtTile(tile, false, true) && !context.human.island.tileEvents.blocksTile(tile);
+	public canTill(context: Context, tilePosition: IVector3, tile: ITile, tool: Item | undefined, allowedTilesSet: Set<TerrainType>): boolean {
+		const canUseArgs = this.getCanUseArgs(context, tilePosition);
+		if (!canUseArgs) {
+			return false;
+		}
+
+		// default to any item in the inventory just so ItemNearby is satisfied
+		tool ??= context.human.inventory.containedItems[0];
+
+		const canUse = Till.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool);
+		if (!canUse.usable) {
+			return false;
+		}
+
+		// digging grass will reveal dirt
+		if (!allowedTilesSet.has(canUse.isGrass ? TerrainType.Dirt : canUse.tileType)) {
+			return false;
+		}
+
+		return context.utilities.base.isOpenArea(context, tilePosition, tile);
+	}
+
+	public canButcherCorpse(context: Context, tilePosition: IVector3, tool: Item | undefined) {
+		const canUseArgs = this.getCanUseArgs(context, tilePosition);
+		if (!canUseArgs) {
+			return false;
+		}
+
+		// default to any item in the inventory just so ItemNearby is satisfied
+		tool ??= context.human.inventory.containedItems[0];
+
+		return Butcher.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool).usable;
 	}
 
 	public hasCorpses(tile: ITile) {
@@ -170,4 +181,15 @@ export class TileUtilities {
 		return tileContainer.containedItems && tileContainer.containedItems.length > 0;
 	}
 
+	private getCanUseArgs(context: Context, position: IVector3): { point: IVector3; direction: Direction.Cardinal } | undefined {
+		const neighborPoints = context.utilities.navigation.getValidPoints(position, false);
+		if (neighborPoints.length === 0) {
+			return undefined;
+		}
+
+		const point = neighborPoints[0];
+		const direction = getDirectionFromMovement(position.x - point.x, position.y - point.y);
+
+		return { point, direction };
+	}
 }

@@ -1,18 +1,19 @@
 import type Doodad from "game/doodad/Doodad";
-import { ActionType } from "game/entity/action/IAction";
-import { ItemTypeGroup } from "game/item/IItem";
 import { TileEventType } from "game/tile/ITileEvent";
+import StartFireAction from "game/entity/action/actions/StartFire";
+import { ActionArguments } from "game/entity/action/IAction";
+import Item from "game/item/Item";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItemByGroup from "../../acquire/item/AcquireItemByGroup";
-import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
+import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 import MoveToTarget from "../../core/MoveToTarget";
-
-import UseItem from "../item/UseItem";
+import { ReserveType } from "../../../core/ITars";
+import ExecuteAction from "../../core/ExecuteAction";
+import Lambda from "../../core/Lambda";
 
 export default class StartFire extends Objective {
 
@@ -48,21 +49,45 @@ export default class StartFire extends Objective {
 				return ObjectiveResult.Impossible;
 			}
 
-			if (context.inventory.fireKindling === undefined) {
-				objectives.push(new AcquireItemByGroup(ItemTypeGroup.Kindling));
-			}
+			const kindlingDataKey = this.getUniqueContextDataKey("Kindling");
+			const tinderDataKey = this.getUniqueContextDataKey("Tinder");
 
-			if (context.inventory.fireTinder === undefined) {
-				objectives.push(new AcquireItemByGroup(ItemTypeGroup.Tinder));
-			}
-
-			if (context.inventory.fireStarter === undefined) {
-				objectives.push(new AcquireItemForAction(ActionType.StartFire));
-			}
+			objectives.push(new AcquireInventoryItem("fireKindling", { skipHardReservedItems: true, reserveType: ReserveType.Hard }).setContextDataKey(kindlingDataKey));
+			objectives.push(new AcquireInventoryItem("fireTinder", { skipHardReservedItems: true, reserveType: ReserveType.Hard }).setContextDataKey(tinderDataKey));
+			objectives.push(new AcquireInventoryItem("fireStarter"));
 
 			objectives.push(new MoveToTarget(doodad, true));
 
-			objectives.push(new UseItem(ActionType.StartFire, context.inventory.fireStarter));
+			objectives.push(new ExecuteAction(StartFireAction, (context) => {
+				if (!context.inventory.fireStarter?.isValid()) {
+					this.log.warn("Invalid fireStarter");
+					return ObjectiveResult.Restart;
+				}
+
+				const kindling = context.getData<Item>(kindlingDataKey);
+				if (!kindling?.isValid()) {
+					this.log.warn("Invalid StartFireKindling");
+					return ObjectiveResult.Restart;
+				}
+
+				const tinder = context.getData<Item>(tinderDataKey);
+				if (!tinder?.isValid()) {
+					this.log.warn("Invalid StartFireTinder");
+					return ObjectiveResult.Restart;
+				}
+
+				return [context.inventory.fireStarter, undefined, kindling, tinder, undefined] as ActionArguments<typeof StartFireAction>;
+			}).setStatus(this));
+
+			objectives.push(new Lambda(async context => {
+				const description = doodad.description();
+				if (!description || description.lit === undefined || description.providesFire) {
+					return ObjectiveResult.Complete;
+				}
+
+				// failed to start fire. try again
+				return ObjectiveResult.Restart;
+			}).setStatus(this));
 		}
 
 		return objectives;

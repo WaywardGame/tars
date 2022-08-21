@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/IItem", "game/entity/action/IAction", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../core/ExecuteActionForItem", "../../core/ReserveItems", "../../core/ExecuteAction", "./MoveItemIntoInventory"], function (require, exports, IItem_1, IAction_1, IObjective_1, Objective_1, ExecuteActionForItem_1, ReserveItems_1, ExecuteAction_1, MoveItemIntoInventory_1) {
+define(["require", "exports", "game/item/IItem", "game/entity/action/actions/Read", "game/entity/action/actions/OpenBottle", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../core/ExecuteActionForItem", "../../core/ReserveItems", "../../core/ExecuteAction", "./MoveItemIntoInventory"], function (require, exports, IItem_1, Read_1, OpenBottle_1, IObjective_1, Objective_1, ExecuteActionForItem_1, ReserveItems_1, ExecuteAction_1, MoveItemIntoInventory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CheckSpecialItems extends Objective_1.default {
@@ -17,10 +17,10 @@ define(["require", "exports", "game/item/IItem", "game/entity/action/IAction", "
                     new ReserveItems_1.default(item).keepInInventory(),
                     new MoveItemIntoInventory_1.default(item),
                     new ExecuteActionForItem_1.default(ExecuteActionForItem_1.ExecuteActionType.Generic, [IItem_1.ItemType.GlassBottle], {
-                        actionType: IAction_1.ActionType.OpenBottle,
-                        executor: (context, action) => {
-                            action.execute(context.actionExecutor, item);
-                        }
+                        genericAction: {
+                            action: OpenBottle_1.default,
+                            args: [item],
+                        },
                     }).setStatus("Opening glass bottle")
                 ]));
             }
@@ -31,10 +31,7 @@ define(["require", "exports", "game/item/IItem", "game/entity/action/IAction", "
                     return books.map(item => ([
                         new ReserveItems_1.default(item).keepInInventory(),
                         new MoveItemIntoInventory_1.default(item),
-                        new ExecuteAction_1.default(IAction_1.ActionType.Read, (context, action) => {
-                            action.execute(context.actionExecutor, item);
-                            return IObjective_1.ObjectiveResult.Complete;
-                        }).setStatus(`Reading ${item.getName()}`),
+                        new ExecuteAction_1.default(Read_1.default, [item]).setStatus(`Reading ${item.getName()}`),
                     ]));
                 }
             }
@@ -43,4 +40,4 @@ define(["require", "exports", "game/item/IItem", "game/entity/action/IAction", "
     }
     exports.default = CheckSpecialItems;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ2hlY2tTcGVjaWFsSXRlbXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvb2JqZWN0aXZlcy9vdGhlci9pdGVtL0NoZWNrU3BlY2lhbEl0ZW1zLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztJQWVBLE1BQXFCLGlCQUFrQixTQUFRLG1CQUFTO1FBRTdDLGFBQWE7WUFDaEIsT0FBTyxtQkFBbUIsQ0FBQztRQUMvQixDQUFDO1FBRU0sU0FBUztZQUNaLE9BQU8sNEJBQTRCLENBQUM7UUFDeEMsQ0FBQztRQUVNLEtBQUssQ0FBQyxPQUFPLENBQUMsT0FBZ0I7WUFDakMsTUFBTSxTQUFTLEdBQUcsT0FBTyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMsWUFBWSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBRS9ELE1BQU0saUJBQWlCLEdBQUcsU0FBUztpQkFDOUIsTUFBTSxDQUFDLElBQUksQ0FBQyxFQUFFLENBQUMsSUFBSSxDQUFDLElBQUksS0FBSyxnQkFBUSxDQUFDLGdCQUFnQixDQUFDLENBQUM7WUFDN0QsSUFBSSxpQkFBaUIsQ0FBQyxNQUFNLEdBQUcsQ0FBQyxFQUFFO2dCQUM5QixPQUFPLGlCQUFpQixDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUM7b0JBQ2xDLElBQUksc0JBQVksQ0FBQyxJQUFJLENBQUMsQ0FBQyxlQUFlLEVBQUU7b0JBQ3hDLElBQUksK0JBQXFCLENBQUMsSUFBSSxDQUFDO29CQUMvQixJQUFJLDhCQUFvQixDQUNwQix3Q0FBaUIsQ0FBQyxPQUFPLEVBQ3pCLENBQUMsZ0JBQVEsQ0FBQyxXQUFXLENBQUMsRUFDdEI7d0JBQ0ksVUFBVSxFQUFFLG9CQUFVLENBQUMsVUFBVTt3QkFDakMsUUFBUSxFQUFFLENBQUMsT0FBTyxFQUFFLE1BQU0sRUFBRSxFQUFFOzRCQUMxQixNQUFNLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBQyxjQUFjLEVBQUUsSUFBSSxDQUFDLENBQUM7d0JBQ2pELENBQUM7cUJBQ0osQ0FBQyxDQUFDLFNBQVMsQ0FBQyxzQkFBc0IsQ0FBQztpQkFDM0MsQ0FBQyxDQUFDLENBQUM7YUFDUDtZQUVELElBQUksT0FBTyxDQUFDLE9BQU8sQ0FBQyxpQkFBaUIsRUFBRTtnQkFDbkMsTUFBTSxLQUFLLEdBQUcsU0FBUztxQkFDbEIsTUFBTSxDQUFDLElBQUksQ0FBQyxFQUFFLENBQUMsSUFBSSxDQUFDLElBQUksS0FBSyxnQkFBUSxDQUFDLFdBQVcsQ0FBQyxDQUFDO2dCQUN4RCxJQUFJLEtBQUssQ0FBQyxNQUFNLEdBQUcsQ0FBQyxFQUFFO29CQUNsQixPQUFPLEtBQUssQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxDQUFDO3dCQUN0QixJQUFJLHNCQUFZLENBQUMsSUFBSSxDQUFDLENBQUMsZUFBZSxFQUFFO3dCQUN4QyxJQUFJLCtCQUFxQixDQUFDLElBQUksQ0FBQzt3QkFDL0IsSUFBSSx1QkFBYSxDQUFDLG9CQUFVLENBQUMsSUFBSSxFQUFFLENBQUMsT0FBTyxFQUFFLE1BQU0sRUFBRSxFQUFFOzRCQUNuRCxNQUFNLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBQyxjQUFjLEVBQUUsSUFBSSxDQUFDLENBQUM7NEJBQzdDLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7d0JBQ3BDLENBQUMsQ0FBQyxDQUFDLFNBQVMsQ0FBQyxXQUFXLElBQUksQ0FBQyxPQUFPLEVBQUUsRUFBRSxDQUFDO3FCQUM1QyxDQUFDLENBQUMsQ0FBQztpQkFDUDthQUNKO1lBRUQsT0FBTyw0QkFBZSxDQUFDLE1BQU0sQ0FBQztRQUNsQyxDQUFDO0tBRUo7SUFqREQsb0NBaURDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ2hlY2tTcGVjaWFsSXRlbXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvb2JqZWN0aXZlcy9vdGhlci9pdGVtL0NoZWNrU3BlY2lhbEl0ZW1zLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztJQWdCQSxNQUFxQixpQkFBa0IsU0FBUSxtQkFBUztRQUU3QyxhQUFhO1lBQ2hCLE9BQU8sbUJBQW1CLENBQUM7UUFDL0IsQ0FBQztRQUVNLFNBQVM7WUFDWixPQUFPLDRCQUE0QixDQUFDO1FBQ3hDLENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCO1lBQ2pDLE1BQU0sU0FBUyxHQUFHLE9BQU8sQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLFlBQVksQ0FBQyxPQUFPLENBQUMsQ0FBQztZQUUvRCxNQUFNLGlCQUFpQixHQUFHLFNBQVM7aUJBQzlCLE1BQU0sQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLElBQUksQ0FBQyxJQUFJLEtBQUssZ0JBQVEsQ0FBQyxnQkFBZ0IsQ0FBQyxDQUFDO1lBQzdELElBQUksaUJBQWlCLENBQUMsTUFBTSxHQUFHLENBQUMsRUFBRTtnQkFDOUIsT0FBTyxpQkFBaUIsQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxDQUFDO29CQUNsQyxJQUFJLHNCQUFZLENBQUMsSUFBSSxDQUFDLENBQUMsZUFBZSxFQUFFO29CQUN4QyxJQUFJLCtCQUFxQixDQUFDLElBQUksQ0FBQztvQkFDL0IsSUFBSSw4QkFBb0IsQ0FDcEIsd0NBQWlCLENBQUMsT0FBTyxFQUN6QixDQUFDLGdCQUFRLENBQUMsV0FBVyxDQUFDLEVBQ3RCO3dCQUNJLGFBQWEsRUFBRTs0QkFDWCxNQUFNLEVBQUUsb0JBQVU7NEJBQ2xCLElBQUksRUFBRSxDQUFDLElBQUksQ0FBQzt5QkFDZjtxQkFDSixDQUFDLENBQUMsU0FBUyxDQUFDLHNCQUFzQixDQUFDO2lCQUMzQyxDQUFDLENBQUMsQ0FBQzthQUNQO1lBRUQsSUFBSSxPQUFPLENBQUMsT0FBTyxDQUFDLGlCQUFpQixFQUFFO2dCQUNuQyxNQUFNLEtBQUssR0FBRyxTQUFTO3FCQUNsQixNQUFNLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxJQUFJLENBQUMsSUFBSSxLQUFLLGdCQUFRLENBQUMsV0FBVyxDQUFDLENBQUM7Z0JBQ3hELElBQUksS0FBSyxDQUFDLE1BQU0sR0FBRyxDQUFDLEVBQUU7b0JBQ2xCLE9BQU8sS0FBSyxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUM7d0JBQ3RCLElBQUksc0JBQVksQ0FBQyxJQUFJLENBQUMsQ0FBQyxlQUFlLEVBQUU7d0JBQ3hDLElBQUksK0JBQXFCLENBQUMsSUFBSSxDQUFDO3dCQUMvQixJQUFJLHVCQUFhLENBQUMsY0FBSSxFQUFFLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxTQUFTLENBQUMsV0FBVyxJQUFJLENBQUMsT0FBTyxFQUFFLEVBQUUsQ0FBQztxQkFDekUsQ0FBQyxDQUFDLENBQUM7aUJBQ1A7YUFDSjtZQUVELE9BQU8sNEJBQWUsQ0FBQyxNQUFNLENBQUM7UUFDbEMsQ0FBQztLQUVKO0lBOUNELG9DQThDQyJ9

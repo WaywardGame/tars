@@ -17,6 +17,7 @@ import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../IT
 import { ExecuteObjectivesMode } from "../../modes/ExecuteObjectives";
 import SailToCivilization from "../../objectives/utility/SailToCivilization";
 import { TameCreatureMode } from "../../modes/TameCreature";
+import Tars from "../../core/Tars";
 
 export default class TasksPanel extends TarsPanel {
 
@@ -24,15 +25,15 @@ export default class TasksPanel extends TarsPanel {
     private readonly dropdownDoodadType: DoodadDropdown<string>;
     private readonly dropdownCreature: CreatureDropdown<string>;
 
-    constructor() {
-        super();
+    constructor(tarsInstance: Tars) {
+        super(tarsInstance);
 
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelItem)))
-            .append(this.dropdownItemType = new ItemDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] ?? ItemType.Branch)
+            .append(this.dropdownItemType = new ItemDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] ?? ItemType.Branch)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.AcquireItemDropdown] = selection;
                 }))
             .appendTo(this);
 
@@ -40,7 +41,7 @@ export default class TasksPanel extends TarsPanel {
             .setText(getTarsTranslation(TarsTranslation.DialogButtonAquireItem))
             .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonAquireItemTooltip))))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new AcquireItemMode(this.dropdownItemType.selection as ItemType));
+                await this.tarsInstance.activateManualMode(new AcquireItemMode(this.dropdownItemType.selection as ItemType));
                 return true;
             })
             .appendTo(this);
@@ -50,9 +51,9 @@ export default class TasksPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelDoodad)))
-            .append(this.dropdownDoodadType = new DoodadDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] ?? DoodadType.StoneCampfire)
+            .append(this.dropdownDoodadType = new DoodadDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] ?? DoodadType.GraniteCampfire)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.BuildDoodadDropdown] = selection;
                 }))
             .appendTo(this);
 
@@ -60,7 +61,7 @@ export default class TasksPanel extends TarsPanel {
             .setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodad))
             .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodadTooltip))))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new BuildDoodadMode(this.dropdownDoodadType.selection as DoodadType));
+                await this.tarsInstance.activateManualMode(new BuildDoodadMode(this.dropdownDoodadType.selection as DoodadType));
                 return true;
             })
             .appendTo(this);
@@ -72,9 +73,9 @@ export default class TasksPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelCreature)))
-            .append(this.dropdownCreature = new CreatureDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.TameCreatureDropdown] ?? CreatureType.Rabbit)
+            .append(this.dropdownCreature = new CreatureDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.TameCreatureDropdown] ?? CreatureType.Rabbit)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.TameCreatureDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.TameCreatureDropdown] = selection;
                 }))
             .appendTo(this);
 
@@ -82,7 +83,7 @@ export default class TasksPanel extends TarsPanel {
             .setText(getTarsTranslation(TarsTranslation.DialogButtonTameCreature))
             .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonTameCreatureTooltip))))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new TameCreatureMode(this.dropdownCreature.selection as CreatureType));
+                await this.tarsInstance.activateManualMode(new TameCreatureMode(this.dropdownCreature.selection as CreatureType));
                 return true;
             })
             .appendTo(this);
@@ -93,7 +94,7 @@ export default class TasksPanel extends TarsPanel {
             .setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilization))
             .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilizationTooltip))))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new ExecuteObjectivesMode([new SailToCivilization()]));
+                await this.tarsInstance.activateManualMode(new ExecuteObjectivesMode([new SailToCivilization()]));
                 return true;
             })
             .appendTo(this);

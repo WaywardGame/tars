@@ -1,6 +1,7 @@
 import type Item from "game/item/Item";
 import type { ILogLine } from "utilities/Log";
 import type Log from "utilities/Log";
+// @ts-ignore
 import Vector2 from "utilities/math/Vector2";
 
 import type Context from "../context/Context";
@@ -8,12 +9,12 @@ import type { IObjective, IObjectiveInfo } from "../objective/IObjective";
 import { CalculatedDifficultyStatus, ObjectiveResult } from "../objective/IObjective";
 import ReserveItems from "../../objectives/core/ReserveItems";
 import Restart from "../../objectives/core/Restart";
-import { loggerUtilities } from "../../utilities/Logger";
 
 import type { ExecuteResult, IExecutionTree, IPlan } from "./IPlan";
 import { ExecuteResultType } from "./IPlan";
 import type { IPlanner } from "./IPlanner";
 
+// @ts-ignore
 interface ITreeVertex {
 	tree: IExecutionTree;
 	position: IVector3;
@@ -59,13 +60,13 @@ export default class Plan implements IPlan {
 	}
 
 	constructor(private readonly planner: IPlanner, private readonly context: Context, private readonly objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]) {
-		this.log = loggerUtilities.createLog("Plan", objectiveInfo.objective.getHashCode(context));
+		this.log = context.utilities.logger.createLog("Plan", objectiveInfo.objective.getHashCode(context));
 
 		// this.tree = this.createExecutionTree(objective, objectives);
 		// this.tree = this.createOptimizedExecutionTree(objectiveInfo.objective, objectives);
 		this.tree = this.createOptimizedExecutionTreeV2(context, objectiveInfo.objective, objectives);
 
-		this.objectives = this.flattenTree(this.tree);
+		this.objectives = this.processTree(this.tree);
 
 		// this.getTreeString(this.createExecutionTree(objective, objectives)), 
 
@@ -115,7 +116,7 @@ export default class Plan implements IPlan {
 			if (this.objectiveInfo.objective !== objectiveStack[0].objective) {
 				// print logs for the planned objective if it's not in the stack
 				for (const log of this.objectiveInfo.logs) {
-					loggerUtilities.queueMessage(log.type, log.args);
+					this.context.utilities.logger.queueMessage(log.type, log.args);
 				}
 			}
 		}
@@ -128,7 +129,7 @@ export default class Plan implements IPlan {
 		while (true) {
 			const objectiveInfo = objectiveStack.shift();
 			if (objectiveInfo === undefined) {
-				loggerUtilities.discardQueuedMessages();
+				this.context.utilities.logger.discardQueuedMessages();
 				break;
 			}
 
@@ -136,7 +137,7 @@ export default class Plan implements IPlan {
 
 			const preExecuteObjectiveResult = preExecuteObjective(() => this.getObjectiveResults(chain, objectiveStack, objectiveInfo));
 			if (preExecuteObjectiveResult !== undefined) {
-				loggerUtilities.discardQueuedMessages();
+				this.context.utilities.logger.discardQueuedMessages();
 				return preExecuteObjectiveResult;
 			}
 
@@ -148,19 +149,21 @@ export default class Plan implements IPlan {
 				message += `. Context hash code: ${contextHashCode}`;
 			}
 
-			loggerUtilities.queueMessage(objectiveInfo.objective.log, [message]);
+			objectiveInfo.objective.ensureLogger(this.context.utilities.logger);
+
+			this.context.utilities.logger.queueMessage(objectiveInfo.objective.log, [message]);
 
 			for (const log of objectiveInfo.logs) {
-				loggerUtilities.queueMessage(log.type, log.args);
+				this.context.utilities.logger.queueMessage(log.type, log.args);
 			}
 
-			const result = await objectiveInfo.objective.execute(this.context);
+			const result = await objectiveInfo.objective.execute(this.context, objectiveInfo.objective.getHashCode(this.context));
 
 			if (result === ObjectiveResult.Ignore) {
-				loggerUtilities.discardQueuedMessages();
+				this.context.utilities.logger.discardQueuedMessages();
 
 			} else {
-				loggerUtilities.processQueuedMessages();
+				this.context.utilities.logger.processQueuedMessages();
 			}
 
 			if (result === ObjectiveResult.Pending) {
@@ -256,7 +259,7 @@ export default class Plan implements IPlan {
 		};
 	}
 
-	private flattenTree(root: IExecutionTree): IObjectiveInfo[] {
+	private processTree(root: IExecutionTree): IObjectiveInfo[] {
 		const objectives: IObjectiveInfo[] = [];
 
 		const walkTree = (tree: IExecutionTree, depth: number, logs: ILogLine[]) => {
@@ -271,12 +274,17 @@ export default class Plan implements IPlan {
 			} else {
 				for (let i = 0; i < tree.children.length; i++) {
 					const child = tree.children[i];
+					tree.objective.ensureLogger(this.context.utilities.logger);
 					walkTree(child, depth + 1, i === 0 ? [...logs, ...tree.logs] : []);
 				}
 			}
 		};
 
 		walkTree(root, 0, []);
+
+		for (const objectiveInfo of objectives) {
+			objectiveInfo.objective.ensureLogger(this.context.utilities.logger);
+		}
 
 		return objectives;
 	}
@@ -624,6 +632,7 @@ export default class Plan implements IPlan {
 
 		walkAndSortTree(rootTree);
 
+		/* it needs to take into account objective dependencies. it shouldn't try to craft before obtaining materials
 		// move gather objectives to the front with sorting
 		if (gatherObjectiveTrees.length > 0) {
 			// traveling salesman problem with the first vertex being the players location
@@ -686,6 +695,7 @@ export default class Plan implements IPlan {
 
 			rootTree.children = visited.slice(1).map(({ tree: visitedTree }) => visitedTree).concat(rootTree.children);
 		}
+		*/
 
 		// move all reserve item objectives to the top of the tree so they are executed first
 		// this will prevent interrupt objectives from messing with these items
@@ -771,6 +781,7 @@ export default class Plan implements IPlan {
 		return results;
 	}
 
+	// @ts-ignore
 	private getExecutionTreePosition(tree: IExecutionTree): IVector3 | undefined {
 		const position = tree.objective.getPosition?.()
 		if (position !== undefined) {

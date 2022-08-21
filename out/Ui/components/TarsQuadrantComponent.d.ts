@@ -15,8 +15,8 @@ import type TarsMod from "../../TarsMod";
 export default class TarsQuadrantComponent extends QuadrantComponent {
     readonly TarsMod: TarsMod;
     static preferredQuadrant: Quadrant;
-    private readonly statusText;
     get preferredQuadrant(): Quadrant;
+    private readonly statusText;
     constructor(id: QuadrantComponentId);
     private refresh;
 }

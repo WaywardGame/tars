@@ -17,7 +17,7 @@ export default class CompleteQuests extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const quests = context.human.asPlayer?.quests.getQuests().filter(quest => !quest.data.complete);
+        const quests = context.human.quests.getQuests().filter(quest => !quest.data.complete);
         if (!quests || quests.length === 0) {
             return ObjectiveResult.Complete;
         }

@@ -10,7 +10,6 @@ export declare enum ContextDataType {
     Position = "Position",
     LastAcquiredItem = "LastAcquiredItem",
     LastBuiltDoodad = "LastBuiltDoodad",
-    Item1 = "Item1",
     AllowOrganizingReservedItemsIntoIntermediateChest = "AllowOrganizingReservedItemsIntoIntermediateChest",
     NextActionAllowsIntermediateChest = "NextActionAllowsIntermediateChest",
     CanCraftFromIntermediateChest = "CanCraftFromIntermediateChest",
@@ -18,7 +17,8 @@ export declare enum ContextDataType {
     MovingToNewIsland = "MovingToNewIsland",
     DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
     TamingCreature = "TamingCreature",
-    KeepInInventoryItems = "KeepInInventoryItems"
+    KeepInInventoryItems = "KeepInInventoryItems",
+    IsNearBase = "IsNearBase"
 }
 export declare enum MovingToNewIslandState {
     None = 0,

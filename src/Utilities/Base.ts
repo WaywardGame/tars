@@ -1,8 +1,6 @@
 import type Doodad from "game/doodad/Doodad";
 import type { ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
-import { WorldZ } from "game/WorldZ";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
@@ -13,6 +11,7 @@ import { BiomeType } from "game/biome/IBiome";
 import type Context from "../core/context/Context";
 import type { BaseInfoKey } from "../core/ITars";
 import { baseInfo } from "../core/ITars";
+import { WaterType } from "game/island/IIsland";
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
@@ -59,38 +58,12 @@ export class BaseUtilities {
 			return false;
 		}
 
-		const x = point.x;
-		const y = point.y;
-
-		const caveTerrain = Terrains[TileHelpers.getType(context.island.getTile(x, y, WorldZ.Cave))];
-		if (caveTerrain && (caveTerrain.water || caveTerrain.shallowWater)) {
-			// unlimited fresh water
-			return true;
-		}
-
-		if (onlyUnlimited) {
+		const well = context.island.calculateWell(point);
+		if (well.waterType !== WaterType.FreshWater && well.waterType !== WaterType.Seawater) {
 			return false;
 		}
 
-		if (caveTerrain && !caveTerrain.passable) {
-			// fresh water
-			return true;
-		}
-
-		for (let x2 = x - 6; x2 <= x + 6; x2++) {
-			for (let y2 = y - 6; y2 <= y + 6; y2++) {
-				const validPoint = context.island.ensureValidPoint({ x: x2, y: y2, z: point.z });
-				if (validPoint) {
-					const tileDescription = Terrains[TileHelpers.getType(context.island.getTileFromPoint(validPoint))];
-					if (tileDescription && (tileDescription.water && !tileDescription.freshWater)) {
-						// seawater
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
+		return onlyUnlimited ? well.quantity === -1 : false;
 	}
 
 	public isOpenArea(context: Context, point: IVector3, tile: ITile, radius: number = 1, allowWater: boolean = false, requireShallowWater: boolean = false): boolean {

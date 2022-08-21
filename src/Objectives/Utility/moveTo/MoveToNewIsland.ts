@@ -1,4 +1,4 @@
-import type { IslandId} from "game/island/IIsland";
+import type { IslandId } from "game/island/IIsland";
 import { IslandPosition } from "game/island/IIsland";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";

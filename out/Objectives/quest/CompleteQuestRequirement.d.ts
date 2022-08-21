@@ -1,5 +1,5 @@
-import type { IQuestRequirement } from "game/entity/player/quest/requirement/IRequirement";
 import type { QuestInstance } from "game/entity/player/quest/QuestManager";
+import type { IQuestRequirement } from "game/entity/player/quest/requirement/IRequirement";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";

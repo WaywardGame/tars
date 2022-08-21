@@ -5,12 +5,14 @@ import Objective from "../../core/objective/Objective";
 
 export default class Lambda extends Objective {
 
+	protected override includeUniqueIdentifierInHashCode = true;
+
 	constructor(private readonly lambda: (context: Context, lambda: Lambda) => Promise<ObjectiveExecutionResult>, private readonly difficulty = 1) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return "Lambda";
+		return `Lambda:${this.difficulty}`;
 	}
 
 	public getStatus(): string | undefined {

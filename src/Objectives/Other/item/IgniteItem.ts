@@ -1,6 +1,7 @@
 import { ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
 import { EquipType } from "game/entity/IHuman";
+import Ignite from "game/entity/action/actions/Ignite";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -41,7 +42,7 @@ export default class IgniteItem extends Objective {
         return [
             new AcquireBuildMoveToFire(),
             new EquipItem(EquipType.Held, item),
-            new UseItem(ActionType.Ignite, item),
+            new UseItem(Ignite, item),
         ];
     }
 

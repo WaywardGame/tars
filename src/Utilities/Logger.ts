@@ -2,11 +2,25 @@ import type { ILog, LogSource } from "utilities/Log";
 import Log, { LogLineType } from "utilities/Log";
 import { Bound } from "utilities/Decorators";
 
-class LoggerUtilities {
+export const logSourceName = "TARS";
+
+export class LoggerUtilities {
 	private queuedMessages: Array<{
 		logOrType: ILog | LogLineType;
 		args: any[];
 	}> | undefined;
+
+	public logSources: string[];
+	public readonly log: Log;
+
+	constructor(private readonly tarsInstanceName: () => string) {
+		this.reloadLogSources();
+		this.log = this.createLog();
+	}
+
+	public reloadLogSources() {
+		this.logSources = ["MOD", logSourceName, this.tarsInstanceName()];
+	}
 
 	@Bound
 	public preConsoleCallback() {
@@ -47,14 +61,10 @@ class LoggerUtilities {
 		}
 	}
 
-	public createLog(...name: string[]) {
+	public createLog(...name: string[]): Log {
 		const log = new Log();
 
-		const sources: Array<LogSource | string> = ["MOD", logSourceName];
-
-		if (name.length > 0) {
-			sources.push(...name);
-		}
+		const sources: Array<LogSource | string> = [...this.logSources, ...name];
 
 		log.info = (...args: any[]) => {
 			this.processQueuedMessages();
@@ -85,9 +95,3 @@ class LoggerUtilities {
 	}
 
 }
-
-export const loggerUtilities = new LoggerUtilities();
-
-export const logSourceName = "TARS";
-
-export const log = loggerUtilities.createLog();

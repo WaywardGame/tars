@@ -1,6 +1,6 @@
-import { ActionType } from "game/entity/action/IAction";
 import { QuestType } from "game/entity/player/quest/quest/IQuest";
 import { ItemType } from "game/item/IItem";
+import SailToCivilizationAction from "game/entity/action/actions/SailToCivilization";
 
 import ReserveItems from "../core/ReserveItems";
 import CompleteQuest from "../quest/CompleteQuest";
@@ -9,12 +9,12 @@ import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
-import AnalyzeInventory from "../analyze/AnalyzeInventory";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 import MoveToWater from "./moveTo/MoveToWater";
 import { ContextDataType } from "../../core/context/IContext";
 import SetContextData from "../contextData/SetContextData";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 const requiredItems: ItemType[] = [
     ItemType.GoldSword,
@@ -58,9 +58,7 @@ export default class SailToCivilization extends Objective {
             }
         }
 
-        if (!context.inventory.sailBoat) {
-            objectives.push(new AcquireItem(ItemType.Sailboat), new AnalyzeInventory());
-        }
+        objectives.push(new AcquireInventoryItem("sailBoat"));
 
         if (!game.isChallenge) {
             // todo: add a way to set this only for a specific item?
@@ -77,10 +75,7 @@ export default class SailToCivilization extends Objective {
         objectives.push(
             new MoveItemIntoInventory(context.inventory.sailBoat),
             new MoveToWater(true),
-            new ExecuteAction(ActionType.SailToCivilization, (context, action) => {
-                action.execute(player, context.inventory.sailBoat, true);
-                return ObjectiveResult.Complete;
-            }).setStatus(this)
+            new ExecuteAction(SailToCivilizationAction, [context.inventory.sailBoat, true]).setStatus(this)
         );
 
         return objectives;

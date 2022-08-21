@@ -1,7 +1,8 @@
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
 import type { IRequirementInfo } from "game/item/IItemManager";
 import { RequirementStatus } from "game/item/IItemManager";
+import PickUp from "game/entity/action/actions/PickUp";
+
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -38,6 +39,10 @@ export default class CompleteRequirements extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		if (this.requirementInfo.requirements !== RequirementStatus.Missing) {
+			return ObjectiveResult.Complete;
+		}
+
 		if (this.requirementInfo.doodadsRequired.length > 1) {
 			this.log.warn("Requires more than a single doodad", this.requirementInfo.doodadsRequired);
 			return ObjectiveResult.Impossible;
@@ -69,14 +74,11 @@ export default class CompleteRequirements extends Objective {
 						// the anvil we went to is not our base anvil
 						// it was probably not placed correctly
 						// pick it up. the object will be then built in the correct spot
-						return new ExecuteAction(ActionType.Pickup, (context, action) => {
-							action.execute(context.actionExecutor);
-							return ObjectiveResult.Complete;
-						}).setStatus("Picking up anvil to place it next to the kiln");
+						return new ExecuteAction(PickUp, []).setStatus("Picking up anvil to place it next to the kiln");
 					}
 
 					return ObjectiveResult.Complete;
-				}));
+				}).setStatus(this));
 			}
 
 			if (!kiln) {

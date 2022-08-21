@@ -11,13 +11,14 @@ import { Bound } from "utilities/Decorators";
 import TarsPanel from "../components/TarsPanel";
 import { getTarsTranslation, TarsTranslation, TarsOptionSectionType, TarsOptionSection } from "../../ITarsMod";
 import ChoiceList, { Choice } from "ui/component/ChoiceList";
+import Tars from "../../core/Tars";
 
 export default abstract class OptionsPanel extends TarsPanel {
 
     private readonly refreshableComponents: IRefreshable[] = [];
 
-    constructor(options: Array<TarsOptionSection | TarsTranslation | undefined>) {
-        super();
+    constructor(tarsInstance: Tars, options: Array<TarsOptionSection | TarsTranslation | undefined>) {
+        super(tarsInstance);
 
         for (const uiOption of options) {
             if (uiOption === undefined) {
@@ -42,9 +43,9 @@ export default abstract class OptionsPanel extends TarsPanel {
                     optionComponent = new CheckButton()
                         .setText(getTarsTranslation(uiOption.title))
                         .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(uiOption.tooltip))))
-                        .setRefreshMethod(() => this.TarsMod.saveData.options[uiOption.option] as boolean)
+                        .setRefreshMethod(() => this.tarsInstance.saveData.options[uiOption.option] as boolean)
                         .event.subscribe("willToggle", (_, checked) => {
-                            this.TarsMod.tarsInstance?.updateOptions({ [uiOption.option]: checked });
+                            this.tarsInstance.updateOptions({ [uiOption.option]: checked });
                             return true;
                         })
                         .setDisabled(isDisabled);
@@ -60,19 +61,19 @@ export default abstract class OptionsPanel extends TarsPanel {
                         .setTooltip(tooltip => tooltip
                             .addText(text => text.setText(getTarsTranslation(uiOption.tooltip)))
                             .setLocation(TooltipLocation.TopRight))
-                        .setDisplayValue(() => getTarsTranslation(TarsTranslation.DialogRangeLabel).get(this.TarsMod.saveData.options[uiOption.option] as number))
+                        .setDisplayValue(() => getTarsTranslation(TarsTranslation.DialogLabel).get(this.tarsInstance.saveData.options[uiOption.option] as number))
                         .event.subscribe("change", (_, value) => {
-                            this.TarsMod.tarsInstance?.updateOptions({ [uiOption.option]: value });
+                            this.tarsInstance.updateOptions({ [uiOption.option]: value });
                         })
                         .setDisabled(isDisabled);
 
                     range.editRange(range => range
-                        .setMin(typeof (slider.min) === "number" ? slider.min : this.TarsMod.tarsInstance ? slider.min(this.TarsMod.tarsInstance.getContext()) : 0)
-                        .setMax(typeof (slider.max) === "number" ? slider.max : this.TarsMod.tarsInstance ? slider.max(this.TarsMod.tarsInstance.getContext()) : 0)
+                        .setMin(typeof (slider.min) === "number" ? slider.min : slider.min(this.tarsInstance.getContext()))
+                        .setMax(typeof (slider.max) === "number" ? slider.max : slider.max(this.tarsInstance.getContext()))
                         .setRefreshMethod(() => {
-                            range.setMin(typeof (slider.min) === "number" ? slider.min : this.TarsMod.tarsInstance ? slider.min(this.TarsMod.tarsInstance.getContext()) : 0)
-                            range.setMax(typeof (slider.max) === "number" ? slider.max : this.TarsMod.tarsInstance ? slider.max(this.TarsMod.tarsInstance.getContext()) : 0)
-                            return this.TarsMod.saveData.options[uiOption.option] as number;
+                            range.setMin(typeof (slider.min) === "number" ? slider.min : slider.min(this.tarsInstance.getContext()))
+                            range.setMax(typeof (slider.max) === "number" ? slider.max : slider.max(this.tarsInstance.getContext()))
+                            return this.tarsInstance.saveData.options[uiOption.option] as number;
                         }));
 
                     optionComponent = range;
@@ -87,9 +88,9 @@ export default abstract class OptionsPanel extends TarsPanel {
                                     .addText(text => text.setText(getTarsTranslation(tooltipTranslation)))
                                     .setLocation(TooltipLocation.TopRight))
                         ))
-                        .setRefreshMethod(list => list.choices(choice => choice.id === this.TarsMod.saveData.options[uiOption.option]).first()!)
+                        .setRefreshMethod(list => list.choices(choice => choice.id === this.tarsInstance.saveData.options[uiOption.option]).first()!)
                         .event.subscribe("choose", (_, choice) => {
-                            this.TarsMod.tarsInstance?.updateOptions({ [uiOption.option]: choice.id });
+                            this.tarsInstance.updateOptions({ [uiOption.option]: choice.id });
                         })
                         .setDisabled(isDisabled);
                     break;
@@ -104,7 +105,7 @@ export default abstract class OptionsPanel extends TarsPanel {
     public abstract override getTranslation(): TarsTranslation | Translation;
 
     protected onSwitchTo() {
-        const events = this.TarsMod.event.until(this, "switchAway", "remove");
+        const events = this.tarsInstance.event.until(this, "switchAway", "remove");
         events.subscribe("optionsChange", this.refresh);
     }
 

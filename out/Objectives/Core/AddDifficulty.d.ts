@@ -6,6 +6,5 @@ export default class AddDifficulty extends Objective {
     constructor(difficulty: number);
     getIdentifier(): string;
     getStatus(): string | undefined;
-    isDynamic(): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
 }

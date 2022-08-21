@@ -1,5 +1,5 @@
 import { ItemType } from "game/item/IItem";
-import itemDescriptions from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

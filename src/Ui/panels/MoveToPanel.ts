@@ -10,7 +10,7 @@ import IslandDropdown from "ui/component/dropdown/IslandDropdown";
 import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import PlayerDropdown from "ui/component/dropdown/PlayerDropdown";
 import TerrainDropdown from "ui/component/dropdown/TerrainDropdown";
-import NPCDropdown from "ui/component/dropdown/NPCDropdown";
+import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { Bound } from "utilities/Decorators";
 
@@ -18,6 +18,7 @@ import { MoveToMode, MoveToType } from "../../modes/MoveTo";
 import TarsPanel from "../components/TarsPanel";
 import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
 import { CreatureType } from "game/entity/creature/ICreature";
+import Tars from "../../core/Tars";
 
 export default class MoveToPanel extends TarsPanel {
 
@@ -25,16 +26,16 @@ export default class MoveToPanel extends TarsPanel {
     private readonly dropdownTerrainType: TerrainDropdown<string>;
     private readonly dropdownDoodad: DoodadDropdown<string>;
     private readonly dropdownCreature: CreatureDropdown<string>;
-    private readonly dropdownNPC: NPCDropdown<string>;
+    private readonly dropdownNPC: NPCTypeDropdown<string>;
     private readonly dropdownPlayer: PlayerDropdown;
 
-    constructor() {
-        super();
+    constructor(tarsInstance: Tars) {
+        super(tarsInstance);
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToBase))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new MoveToMode({
+                await this.tarsInstance.activateManualMode(new MoveToMode({
                     type: MoveToType.Base,
                 }));
                 return true;
@@ -46,16 +47,16 @@ export default class MoveToPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelIsland)))
-            .append(this.dropdownIsland = new IslandDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToIslandDropdown] ?? localIsland?.id ?? DEFAULT_ISLAND_ID)
+            .append(this.dropdownIsland = new IslandDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToIslandDropdown] ?? localIsland?.id ?? DEFAULT_ISLAND_ID)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToIslandDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToIslandDropdown] = selection;
                 }))
             .appendTo(this);
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToIsland))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new MoveToMode({
+                await this.tarsInstance.activateManualMode(new MoveToMode({
                     type: MoveToType.Island,
                     islandId: this.dropdownIsland.selection as IslandId,
                 }));
@@ -65,7 +66,7 @@ export default class MoveToPanel extends TarsPanel {
 
         new Divider().appendTo(this);
 
-        this.dropdownPlayer = new PlayerDropdown("");
+        this.dropdownPlayer = new PlayerDropdown();
 
         new LabelledRow()
             .classes.add("dropdown-label")
@@ -76,7 +77,7 @@ export default class MoveToPanel extends TarsPanel {
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToPlayer))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new MoveToMode({
+                await this.tarsInstance.activateManualMode(new MoveToMode({
                     type: MoveToType.Player,
                     playerIdentifier: this.dropdownPlayer.selection,
                 }));
@@ -89,16 +90,16 @@ export default class MoveToPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelDoodad)))
-            .append(this.dropdownDoodad = new DoodadDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToDoodadDropdown] ?? DoodadType.StoneCampfire)
+            .append(this.dropdownDoodad = new DoodadDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToDoodadDropdown] ?? DoodadType.GraniteCampfire)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToDoodadDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToDoodadDropdown] = selection;
                 }))
             .appendTo(this);
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToDoodad))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new MoveToMode({
+                await this.tarsInstance.activateManualMode(new MoveToMode({
                     type: MoveToType.Doodad,
                     doodadType: this.dropdownDoodad.selection as DoodadType,
                 }));
@@ -111,16 +112,16 @@ export default class MoveToPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelTerrain)))
-            .append(this.dropdownTerrainType = new TerrainDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToTerrainDropdown] ?? TerrainType.Grass)
+            .append(this.dropdownTerrainType = new TerrainDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToTerrainDropdown] ?? TerrainType.Grass)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToTerrainDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToTerrainDropdown] = selection;
                 }))
             .appendTo(this);
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToTerrain))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new MoveToMode({
+                await this.tarsInstance.activateManualMode(new MoveToMode({
                     type: MoveToType.Terrain,
                     terrainType: this.dropdownTerrainType.selection as TerrainType,
                 }));
@@ -133,16 +134,16 @@ export default class MoveToPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelCreature)))
-            .append(this.dropdownCreature = new CreatureDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToCreatureDropdown] ?? CreatureType.Rabbit)
+            .append(this.dropdownCreature = new CreatureDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToCreatureDropdown] ?? CreatureType.Rabbit)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToCreatureDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToCreatureDropdown] = selection;
                 }))
             .appendTo(this);
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToCreature))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new MoveToMode({
+                await this.tarsInstance.activateManualMode(new MoveToMode({
                     type: MoveToType.Creature,
                     creatureType: this.dropdownCreature.selection as CreatureType,
                 }));
@@ -155,16 +156,16 @@ export default class MoveToPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelNPC)))
-            .append(this.dropdownNPC = new NPCDropdown(this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToNPCDropdown] ?? NPCType.Merchant)
+            .append(this.dropdownNPC = new NPCTypeDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToNPCTypeDropdown] ?? NPCType.Merchant)
                 .event.subscribe("selection", async (_, selection) => {
-                    this.TarsMod.saveData.ui[TarsUiSaveDataKey.MoveToNPCDropdown] = selection;
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToNPCTypeDropdown] = selection;
                 }))
             .appendTo(this);
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToNPC))
             .event.subscribe("activate", async () => {
-                await this.TarsMod.tarsInstance?.activateManualMode(new MoveToMode({
+                await this.tarsInstance.activateManualMode(new MoveToMode({
                     type: MoveToType.NPC,
                     npcType: this.dropdownNPC.selection as NPCType,
                 }));
@@ -186,6 +187,6 @@ export default class MoveToPanel extends TarsPanel {
     @Bound
     protected refresh() {
         this.dropdownPlayer.refresh();
-        this.dropdownPlayer.options.get(localPlayer.identifier)?.setDisabled(true);
+        // this.dropdownPlayer.options.get(localPlayer.identifier)?.setDisabled(true);
     }
 }

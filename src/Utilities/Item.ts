@@ -1,28 +1,33 @@
+import type Doodad from "game/doodad/Doodad";
+import doodadDescriptions from "game/doodad/Doodads";
 import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "game/doodad/IDoodad";
 import { GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import type Creature from "game/entity/creature/Creature";
-import { DamageType } from "game/entity/IEntity";
+import { AttackType, DamageType } from "game/entity/IEntity";
 import { EquipType, SkillType } from "game/entity/IHuman";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import type { IContainer, IRecipe } from "game/item/IItem";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
+import { itemDescriptions } from "game/item/ItemDescriptions";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
-import Items, { itemDescriptions } from "game/item/Items";
-import Enums from "utilities/enum/Enums";
-import terrainDescriptions from "game/tile/Terrains";
-import type Doodad from "game/doodad/Doodad";
 import type { TerrainType } from "game/tile/ITerrain";
-import doodadDescriptions from "game/doodad/Doodads";
+import terrainDescriptions from "game/tile/Terrains";
+import Enums from "utilities/enum/Enums";
 
-import type Context from "../core/context/Context";
-import { IDisassemblySearch } from "../core/ITars";
 import ItemManager from "game/item/ItemManager";
-import { ContextDataType } from "../core/context/IContext";
-import { TarsUseProtectedItems } from "../core/ITarsOptions";
 import Vector2 from "utilities/math/Vector2";
+import type Context from "../core/context/Context";
+import { ContextDataType } from "../core/context/IContext";
+import { IDisassemblySearch } from "../core/ITars";
+import { TarsUseProtectedItems } from "../core/ITarsOptions";
+
+export interface IGetItemOptions {
+	allowInventoryItems: boolean;
+	allowUnsafeWaterContainers: boolean;
+}
 
 export class ItemUtilities {
 
@@ -36,6 +41,7 @@ export class ItemUtilities {
 
 	private availableInventoryWeightCache: number | undefined;
 	private itemCache: Item[] | undefined;
+	private readonly groundItemCache: Map<ItemType, Item[]> = new Map();
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
 
 	/**
@@ -121,7 +127,7 @@ export class ItemUtilities {
 	}
 
 	/**
-	 * Items that can be dismantled to get the provided one
+	 * itemDescriptions that can be dismantled to get the provided one
 	 */
 	public static getDismantleSearch(itemType: ItemType): Set<ItemType> {
 		let search = this.dismantleSearchCache.get(itemType);
@@ -155,6 +161,7 @@ export class ItemUtilities {
 	public clearCache() {
 		this.availableInventoryWeightCache = undefined;
 		this.itemCache = undefined;
+		this.groundItemCache.clear();
 		this.disassembleSearchCache.clear();
 	}
 
@@ -174,6 +181,20 @@ export class ItemUtilities {
 
 	public getBaseItemsByType(context: Context, itemType: ItemType): Item[] {
 		return this.getBaseItems(context).filter(item => item.type === itemType);
+	}
+
+	public getGroundItems(context: Context, itemType: ItemType): Item[] {
+		let cachedItems = this.groundItemCache.get(itemType);
+		if (cachedItems === undefined) {
+			cachedItems = context.island.items.getObjects()
+				.filter((item) =>
+					item !== undefined &&
+					item.type === itemType &&
+					context.island.items.isTileContainer(item.containedWithin)) as Item[];
+			this.groundItemCache.set(itemType, cachedItems);
+		}
+
+		return cachedItems;
 	}
 
 	public getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[] {
@@ -251,14 +272,14 @@ export class ItemUtilities {
 	}
 
 	// allow processing with inventory items assuming they wont be consumed
-	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker {
+	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, options?: Partial<IGetItemOptions>): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.human, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
 			if (isConsumed) {
 				if (context.isHardReservedItem(item)) {
 					return false;
 				}
 
-				if (!allowInventoryItems && this.isInventoryItem(context, item)) {
+				if (!options?.allowInventoryItems && this.isInventoryItem(context, item, options)) {
 					return false;
 				}
 			}
@@ -316,14 +337,14 @@ export class ItemUtilities {
 		return this.getItemsInContainer(context, context.human.inventory);
 	}
 
-	public getItemInInventory(context: Context, itemTypeSearch: ItemType, allowInventoryItems: boolean = false): Item | undefined {
-		return this.getItemInContainer(context, context.human.inventory, itemTypeSearch, allowInventoryItems);
+	public getItemInInventory(context: Context, itemTypeSearch: ItemType, options?: Partial<IGetItemOptions>): Item | undefined {
+		return this.getItemInContainer(context, context.human.inventory, itemTypeSearch, options);
 	}
 
-	public getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, allowInventoryItems: boolean = false): Item | undefined {
+	public getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, options?: Partial<IGetItemOptions>): Item | undefined {
 		const orderedItems = context.island.items.getOrderedContainerItems(container);
 		for (const item of orderedItems) {
-			if (!allowInventoryItems && this.isInventoryItem(context, item)) {
+			if (!options?.allowInventoryItems && this.isInventoryItem(context, item, options)) {
 				continue;
 			}
 
@@ -339,7 +360,7 @@ export class ItemUtilities {
 				return item;
 			}
 
-			const description = Items[item.type];
+			const description = itemDescriptions[item.type];
 			if (description && description.weightCapacity !== undefined) {
 				const item2 = this.getItemInContainer(context, item as IContainer, itemTypeSearch);
 				if (item2) {
@@ -351,10 +372,10 @@ export class ItemUtilities {
 		return undefined;
 	}
 
-	public getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, allowInventoryItems: boolean = false): Item | undefined {
+	public getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, options?: Partial<IGetItemOptions>): Item | undefined {
 		const orderedItems = context.island.items.getOrderedContainerItems(container);
 		for (const item of orderedItems) {
-			if (!allowInventoryItems && this.isInventoryItem(context, item)) {
+			if (!options?.allowInventoryItems && this.isInventoryItem(context, item, options)) {
 				continue;
 			}
 
@@ -370,9 +391,9 @@ export class ItemUtilities {
 				return item;
 			}
 
-			const description = Items[item.type];
+			const description = itemDescriptions[item.type];
 			if (description && description.weightCapacity !== undefined) {
-				const item2 = this.getItemInContainerByGroup(context, item as IContainer, itemTypeGroup);
+				const item2 = this.getItemInContainerByGroup(context, item as IContainer, itemTypeGroup, options);
 				if (item2) {
 					return item2;
 				}
@@ -382,9 +403,13 @@ export class ItemUtilities {
 		return undefined;
 	}
 
-	public isInventoryItem(context: Context, item: Item) {
-		for (const [, inventoryItem] of Object.entries(context.inventory)) {
+	public isInventoryItem(context: Context, item: Item, options?: Partial<IGetItemOptions>) {
+		for (const [key, inventoryItem] of Object.entries(context.inventory)) {
 			if (Array.isArray(inventoryItem) ? inventoryItem.includes(item) : inventoryItem === item) {
+				if (key === "waterContainer" && options?.allowUnsafeWaterContainers) {
+					return this.isSafeToDrinkItem(item);
+				}
+
 				return true;
 			}
 		}
@@ -394,7 +419,7 @@ export class ItemUtilities {
 
 	public canDestroyItem(context: Context, item: Item) {
 		if (context.options.goodCitizen && multiplayer.isConnected() &&
-			item.ownerIdentifier !== undefined && item.ownerIdentifier !== context.human.identifier) {
+			item.crafterIdentifier !== undefined && item.crafterIdentifier !== context.human.identifier) {
 			// prevent destroying other peoples items
 			return false;
 		}
@@ -405,7 +430,8 @@ export class ItemUtilities {
 	public isSafeToDrinkItem(item: Item) {
 		return item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfMedicinalWater) ||
 			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfDesalinatedWater) ||
-			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfPurifiedFreshWater);
+			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfPurifiedFreshWater) ||
+			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfFilteredWater);
 	}
 
 	public isDrinkableItem(item: Item) {
@@ -524,123 +550,41 @@ export class ItemUtilities {
 		return score;
 	}
 
-	public estimateDamageModifier(weapon: Item, target: Creature): number {
+	public estimateDamageModifier(context: Context, weapon: Item, target: Creature): number {
 		const weaponDescription = weapon.description();
 		const creatureDescription = target.description();
 		if (!weaponDescription || !creatureDescription) {
 			return -99;
 		}
 
-		const weaponAttack = weaponDescription.attack;
-		const weaponDamageType = weaponDescription.damageType;
-		if (weaponAttack === undefined || weaponDamageType === undefined) {
+		const damageType = weaponDescription.damageType;
+		if (damageType === undefined) {
 			return -99;
 		}
 
-		const defense = creatureDescription.defense;
+		const damageAmount = context.human.calculateDamageAmount(AttackType.MeleeWeapon, weapon, undefined);
 
-		const resists = defense.resist;
-		const vulnerabilities = defense.vulnerable;
+		const damageOutcome = context.island.calculateDamageOutcome({
+			human: context.human,
+			target,
+			damageAmount,
+			damageType,
+		});
 
-		let resist = 0;
-		let vulnerable = 0;
-
-		for (const damageType of Enums.values(DamageType)) {
-			if ((weaponDamageType & damageType) && resists[damageType]) {
-				resist += resists[damageType];
-			}
-
-			if ((weaponDamageType & damageType) && vulnerabilities[damageType]) {
-				vulnerable += vulnerabilities[damageType];
-			}
-		}
-
-		return weaponAttack + vulnerable - resist;
+		return damageOutcome?.attackOutcome ?? -99;
 	}
 
 	public updateHandEquipment(context: Context, preferredDamageType?: DamageType): { equipType: EquipType; item: Item } | undefined {
-		const leftHandEquipInterrupt = this.getDesiredEquipment(context, EquipType.LeftHand, ActionType.Attack);
-		if (leftHandEquipInterrupt) {
-			return leftHandEquipInterrupt;
+		const mainHandEquipInterrupt = this.getDesiredEquipment(context, EquipType.MainHand, ActionType.Attack);
+		if (mainHandEquipInterrupt) {
+			return mainHandEquipInterrupt;
 		}
 
 		if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped()) {
 			return {
-				equipType: EquipType.RightHand,
+				equipType: EquipType.OffHand,
 				item: context.inventory.equipShield,
 			};
-		}
-
-		const leftHandItem = context.human.getEquippedItem(EquipType.LeftHand);
-		const rightHandItem = context.human.getEquippedItem(EquipType.RightHand);
-
-		const leftHandDescription = leftHandItem ? leftHandItem.description() : undefined;
-		const leftHandEquipped = leftHandDescription ? leftHandDescription.attack !== undefined : false;
-
-		const rightHandDescription = rightHandItem ? rightHandItem.description() : undefined;
-		const rightHandEquipped = rightHandDescription ? rightHandDescription.attack !== undefined : false;
-
-		if (preferredDamageType !== undefined) {
-			let leftHandDamageTypeMatches = false;
-			if (leftHandEquipped) {
-				const itemDescription = leftHandItem!.description();
-				leftHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
-			}
-
-			let rightHandDamageTypeMatches = false;
-			if (rightHandEquipped) {
-				const itemDescription = rightHandItem!.description();
-				rightHandDamageTypeMatches = itemDescription && itemDescription.damageType !== undefined && (itemDescription.damageType & preferredDamageType) !== 0 ? true : false;
-			}
-
-			if (leftHandDamageTypeMatches || rightHandDamageTypeMatches) {
-				if (leftHandDamageTypeMatches !== context.human.options.leftHand) {
-					this.changeEquipmentOption(context, "leftHand");
-				}
-
-				if (rightHandDamageTypeMatches !== context.human.options.rightHand) {
-					this.changeEquipmentOption(context, "rightHand");
-				}
-
-			} else if (leftHandEquipped || rightHandEquipped) {
-				if (leftHandEquipped && !context.human.options.leftHand) {
-					this.changeEquipmentOption(context, "leftHand");
-				}
-
-				if (rightHandEquipped && !context.human.options.rightHand) {
-					this.changeEquipmentOption(context, "rightHand");
-				}
-
-			} else {
-				if (!context.human.options.leftHand) {
-					this.changeEquipmentOption(context, "leftHand");
-				}
-
-				if (!context.human.options.rightHand) {
-					this.changeEquipmentOption(context, "rightHand");
-				}
-			}
-
-		} else {
-			if (!leftHandEquipped && !rightHandEquipped) {
-				// if we have nothing equipped in both hands, make sure the left hand is enabled
-				if (!context.human.options.leftHand) {
-					this.changeEquipmentOption(context, "leftHand");
-				}
-
-			} else if (leftHandEquipped !== context.human.options.leftHand) {
-				this.changeEquipmentOption(context, "leftHand");
-			}
-
-			if (leftHandEquipped) {
-				// if we have the left hand equipped, disable right hand
-				if (context.human.options.rightHand) {
-					this.changeEquipmentOption(context, "rightHand");
-				}
-
-			} else if (rightHandEquipped !== context.human.options.rightHand) {
-				this.changeEquipmentOption(context, "rightHand");
-			}
 		}
 	}
 
@@ -675,7 +619,7 @@ export class ItemUtilities {
 				if (closestCreature) {
 					// creature is close, calculate it
 					possibleEquips
-						.sort((a, b) => this.estimateDamageModifier(b, closestCreature!) - this.estimateDamageModifier(a, closestCreature!));
+						.sort((a, b) => this.estimateDamageModifier(context, b, closestCreature!) - this.estimateDamageModifier(context, a, closestCreature!));
 
 				} else if (context.human.getEquippedItem(equipType) !== undefined) {
 					// don't switch until we're close to a creature
@@ -724,19 +668,6 @@ export class ItemUtilities {
 		return undefined;
 	}
 
-	private changeEquipmentOption(context: Context, id: "leftHand" | "rightHand") {
-		if (context.human.isLocalPlayer()) {
-			oldui.changeEquipmentOption(id);
-
-		} else if (!context.human.asPlayer) {
-			const isLeftHand = id === "leftHand";
-			const newValue = isLeftHand ? !context.human.options.leftHand : !context.human.options.rightHand;
-			(context.human.options as any)[id] = newValue;
-
-			// todo: mp somehow?
-		}
-	}
-
 	public getPossibleHandEquips(context: Context, actionType: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[] {
 		const items = this.getInventoryItemsWithUse(context, actionType, filterEquipped)
 			.filter(item => {
@@ -756,22 +687,6 @@ export class ItemUtilities {
 			.filter(item => {
 				const description = item.description();
 				return description && description.equip === equipType;
-			});
-	}
-
-	public hasInventoryItemForAction(context: Context, actionType: ActionType): boolean {
-		return this.getItemsInInventory(context)
-			.some(item => {
-				const description = item.description();
-				if (!description) {
-					return false;
-				}
-
-				if (actionType === ActionType.Attack) {
-					return description.attack !== undefined;
-				}
-
-				return description.use && description.use.includes(actionType);
 			});
 	}
 
@@ -866,13 +781,13 @@ export class ItemUtilities {
 		return this.availableInventoryWeightCache;
 	}
 
-	public getSeeds(context: Context, onlyHealthy: boolean): Item[] {
+	public getSeeds(context: Context, onlyEdible: boolean): Item[] {
 		const baseItems = this.getBaseItems(context);
 		return baseItems.filter(
 			item =>
 				item.minDur !== undefined &&
 				item.minDur > 0 &&
-				(onlyHealthy ? this.edibleSeedItemTypes : this.allSeedItemTypes).has(item.type)
+				(onlyEdible ? this.edibleSeedItemTypes : this.allSeedItemTypes).has(item.type)
 		);
 	}
 
@@ -882,8 +797,8 @@ export class ItemUtilities {
 		const doodadTypes = context.utilities.doodad.getDoodadTypes(doodadTypeOrGroup);
 		for (const dt of doodadTypes) {
 			for (const it of Enums.values(ItemType)) {
-				const itemDescription = Items[it];
-				if (itemDescription && itemDescription.onUse && itemDescription.onUse[ActionType.Build] === dt) {
+				const itemDescription = itemDescriptions[it];
+				if (itemDescription && itemDescription.onUse && itemDescription.onUse[ActionType.Build]?.type === dt) {
 					itemTypes.push(it);
 				}
 			}
@@ -892,6 +807,21 @@ export class ItemUtilities {
 		const matchingItems = this.getItemsInInventory(context).filter(item => itemTypes.includes(item.type));
 
 		return matchingItems[0];
+	}
+
+	public getWaterContainers(context: Context) {
+		const drinkableWaterContainers: Item[] = [];
+		const availableWaterContainers: Item[] = [];
+
+		for (const waterContainer of context.inventory.waterContainer ?? []) {
+			if (context.utilities.item.isSafeToDrinkItem(waterContainer)) {
+				drinkableWaterContainers.push(waterContainer);
+			} else {
+				availableWaterContainers.push(waterContainer);
+			}
+		}
+
+		return { drinkableWaterContainers, availableWaterContainers }
 	}
 
 	/**
@@ -905,7 +835,7 @@ export class ItemUtilities {
 		for (const itemTypeOrGroup of goodFoodItems) {
 			const itemTypes = ItemManager.isGroup(itemTypeOrGroup) ? ItemManager.getGroupItems(itemTypeOrGroup) : [itemTypeOrGroup];
 			for (const itemType of itemTypes) {
-				if (this.isHealthyToEat(itemType)) {
+				if (this.isEdible(itemType)) {
 					result.add(itemType);
 				}
 			}
@@ -929,7 +859,7 @@ export class ItemUtilities {
 
 			const doodadDescription = doodadDescriptions[doodadType];
 
-			if (onlyEdible || (doodadDescription && this.producesEdibleItem(doodadDescription))) {
+			if (!onlyEdible || (doodadDescription && this.producesEdibleItem(doodadDescription))) {
 				result.add(itemType);
 				continue
 			}
@@ -944,7 +874,7 @@ export class ItemUtilities {
 		for (const growingStage of Enums.values(GrowingStage)) {
 			const resourceItems = (gather?.[growingStage] ?? []).concat(harvest?.[growingStage] ?? []);
 			for (const resourceItem of resourceItems) {
-				if (this.isHealthyToEat(resourceItem.type)) {
+				if (this.isEdible(resourceItem.type)) {
 					return true;
 				}
 			}
@@ -953,7 +883,7 @@ export class ItemUtilities {
 		return false;
 	}
 
-	private isHealthyToEat(itemType: ItemType): boolean {
+	private isEdible(itemType: ItemType): boolean {
 		const onEat = itemDescriptions[itemType]?.onUse?.[ActionType.Eat];
 		return onEat !== undefined && onEat[0] > 1;
 	}

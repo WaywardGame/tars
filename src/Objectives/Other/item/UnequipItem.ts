@@ -1,5 +1,5 @@
-import { ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
+import Unequip from "game/entity/action/actions/Unequip";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -35,10 +35,7 @@ export default class UnequipItem extends Objective {
 
 		return [
 			new ReserveItems(item).keepInInventory(),
-			new ExecuteAction(ActionType.Unequip, (context, action) => {
-				action.execute(context.actionExecutor, item);
-				return ObjectiveResult.Complete;
-			}).setStatus(this),
+			new ExecuteAction(Unequip, [item]).setStatus(this),
 		];
 	}
 

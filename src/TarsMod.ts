@@ -1,6 +1,6 @@
 import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import type CommandManager from "command/CommandManager";
-import type { IEventEmitter } from "event/EventEmitter";
+import { IEventEmitter, Priority } from "event/EventEmitter";
 import type { Source } from "game/entity/player/IMessageManager";
 import { MessageType } from "game/entity/player/IMessageManager";
 import type Player from "game/entity/player/Player";
@@ -23,16 +23,18 @@ import { NPCType } from "game/entity/npc/INPCs";
 import TileHelpers from "utilities/game/TileHelpers";
 import { RenderSource } from "renderer/IRenderer";
 import Human from "game/entity/Human";
+import { Prompt } from "game/meta/prompt/IPrompt";
+import Files from "utilities/Files";
+import SearchParams from "utilities/SearchParams";
 
 import Navigation from "./core/navigation/Navigation";
 import TarsDialog from "./ui/TarsDialog";
-import { loggerUtilities, logSourceName } from "./utilities/Logger";
+import { logSourceName } from "./utilities/Logger";
 import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
-import type { ITarsModEvents, ISaveData } from "./ITarsMod";
+import type { ITarsModEvents, ISaveData, IGlobalSaveData, ISaveDataContainer } from "./ITarsMod";
 import { TarsTranslation, setTarsMod, TarsUiSaveDataKey, TARS_ID } from "./ITarsMod";
 import Tars from "./core/Tars";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITars";
-import planner from "./core/planning/Planner";
 import { TarsOverlay } from "./ui/TarsOverlay";
 import TarsNPC from "./npc/TarsNPC";
 import { ITarsOptions, createOptions } from "./core/ITarsOptions";
@@ -50,6 +52,9 @@ export default class TarsMod extends Mod {
 
 	@Mod.saveData<TarsMod>()
 	public saveData: ISaveData;
+
+	@Mod.globalData<TarsMod>()
+	public globalSaveData: IGlobalSaveData;
 
 	////////////////////////////////////
 
@@ -95,14 +100,26 @@ export default class TarsMod extends Mod {
 
 	////////////////////////////////////
 
+	@Register.prompt("TarsDeleteConfirm")
+	public readonly promptDeleteConfirmation: Prompt;
+
 	@Register.dialog("Main", TarsDialog.description, TarsDialog)
 	public readonly dialogMain: DialogId;
 
 	@Register.menuBarButton("Dialog", {
-		onActivate: () => gameScreen?.dialogs.toggle(TarsMod.INSTANCE.dialogMain),
+		onActivate: () => gameScreen?.dialogs.toggle<TarsDialog>(TarsMod.INSTANCE.dialogMain, undefined, dialog => {
+			const tarsDialog = dialog as any as TarsDialog;
+
+			const tarsInstance = TarsMod.INSTANCE.tarsInstance;
+			if (tarsInstance) {
+				tarsDialog.initialize(tarsInstance);
+			} else {
+				gameScreen?.dialogs.close(TarsMod.INSTANCE.dialogMain);
+			}
+		}),
 		group: MenuBarButtonGroup.Meta,
 		bindable: Registry<TarsMod>().get("bindableToggleDialog"),
-		tooltip: tooltip => tooltip.dump().addText(text => text.setText(Translation.get(TarsMod.INSTANCE.dictionary, TarsTranslation.DialogTitleMain))),
+		tooltip: tooltip => tooltip.dump().addText(text => text.setText(Translation.get(TarsMod.INSTANCE.dictionary, TarsTranslation.Name))),
 	})
 	public readonly menuBarButton: MenuBarButtonType;
 
@@ -126,14 +143,22 @@ export default class TarsMod extends Mod {
 
 	////////////////////////////////////
 
-	private gamePlaying = false;
-
 	public get tarsInstance(): Tars | undefined {
 		return this.localPlayerTars;
 	}
 
 	public override onInitialize(): void {
 		setTarsMod(this);
+
+		if (!this.globalSaveData) {
+			this.globalSaveData = {
+				dataSlots: [],
+			};
+		}
+
+		if (!this.globalSaveData.dataSlots) {
+			this.globalSaveData.dataSlots = [];
+		}
 
 		Navigation.setModPath(this.getPath());
 
@@ -150,17 +175,8 @@ export default class TarsMod extends Mod {
 
 	public override onLoad(): void {
 		this.initializeTarsSaveData(this.saveData);
-		planner.debug = this.saveData.options.debugLogging;
-
-		Log.addPreConsoleCallback(loggerUtilities.preConsoleCallback);
 
 		(window as any).TARS = this;
-
-		// this is to support hot reloading while in game
-		if (this.saveData.ui[TarsUiSaveDataKey.DialogOpened]) {
-			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = undefined;
-			gameScreen?.dialogs.open(TarsMod.INSTANCE.dialogMain);
-		}
 	}
 
 	public override onUnload(): void {
@@ -169,15 +185,7 @@ export default class TarsMod extends Mod {
 
 		this.tarsOverlay.clear();
 
-		Log.removePreConsoleCallback(loggerUtilities.preConsoleCallback);
-
 		(window as any).TARS = undefined;
-
-		// this is to support hot reloading while in game
-		if (this.gamePlaying && gameScreen?.dialogs.isVisible(TarsMod.INSTANCE.dialogMain)) {
-			this.saveData.ui[TarsUiSaveDataKey.DialogOpened] = true;
-			gameScreen?.dialogs.close(TarsMod.INSTANCE.dialogMain);
-		}
 	}
 
 	@Register.command("TARS")
@@ -192,12 +200,52 @@ export default class TarsMod extends Mod {
 	}
 
 	////////////////////////////////////////////////
+
+	public addDataSlot(container: ISaveDataContainer) {
+		this.globalSaveData.dataSlots.push(container);
+		this.event.emit("changedGlobalDataSlots");
+	}
+
+	public renameDataSlot(container: ISaveDataContainer, newName: string) {
+		container.name = newName;
+		this.event.emit("changedGlobalDataSlots");
+	}
+
+	public removeDataSlot(container: ISaveDataContainer) {
+		const index = this.globalSaveData.dataSlots.findIndex(ds => ds === container);
+		if (index !== -1) {
+			this.globalSaveData.dataSlots.splice(index, 1);
+			this.event.emit("changedGlobalDataSlots");
+		}
+	}
+
+	public importDataSlot(fileData: Uint8Array) {
+		const unserializedContainer: { container?: ISaveDataContainer } = {};
+
+		const serializer = saveManager.getSerializer();
+		serializer.loadFromUint8Array(unserializedContainer, "container", fileData);
+
+		if (unserializedContainer.container) {
+			this.addDataSlot(unserializedContainer.container);
+		}
+	}
+
+	public exportDataSlot(container: ISaveDataContainer) {
+		const serializer = saveManager.getSerializer();
+		const serializedData = serializer.saveToUint8Array({ container }, "container");
+		if (!serializedData) {
+			return;
+		}
+
+		Files.download(`TARS_${container.name}.wayward`, serializedData);
+	}
+
+	////////////////////////////////////////////////
 	// Event Handlers
 
-	@EventHandler(EventBus.Game, "play")
+	// lowest priority will ensure TarsNPC tars instances are initialized before this is ran
+	@EventHandler(EventBus.Game, "play", Priority.Lowest)
 	public onGameStart(): void {
-		this.gamePlaying = true;
-
 		if (!this.saveData.island[localIsland.id]) {
 			this.saveData.island[localIsland.id] = {};
 		}
@@ -210,14 +258,9 @@ export default class TarsMod extends Mod {
 				.source(this.messageSource)
 				.type(MessageType.Good)
 				.send(this.messageToggle, enabled);
-
-			this.event.emit("enableChange", enabled);
 		});
-		tarsEvents.subscribe("optionsChange", (_, options) => {
-			this.event.emit("optionsChange", options);
-		});
-		tarsEvents.subscribe("statusChange", (_, status) => {
-			this.event.emit("statusChange", typeof (status) === "string" ? status : this.getTranslation(status).getString());
+		tarsEvents.subscribe("statusChange", () => {
+			this.event.emit("statusChange");
 		});
 		tarsEvents.subscribe("quantumBurstChange", (_, status) => {
 			switch (status) {
@@ -260,7 +303,7 @@ export default class TarsMod extends Mod {
 					break;
 			}
 		});
-		tarsEvents.subscribe("modeFinished", (_, success) => {
+		tarsEvents.subscribe("modeFinished", (_1, _2, success) => {
 			const message = success ? this.messageTaskComplete : this.messageTaskUnableToComplete;
 			const messageType = success ? MessageType.Good : MessageType.Bad;
 
@@ -270,14 +313,30 @@ export default class TarsMod extends Mod {
 				.send(message);
 		});
 
-		if (!this.localPlayerTars.isRunning() && (this.localPlayerTars.isEnabled() || new URLSearchParams(window.location.search).has("autotars"))) {
+		// reopen dialogs
+		if (gameScreen) {
+			const dialogsOpened = this.saveData.ui[TarsUiSaveDataKey.DialogsOpened] as Array<[DialogId, string]>;
+			if (Array.isArray(dialogsOpened)) {
+				for (const [dialogId, subId] of dialogsOpened) {
+					if (TarsMod.INSTANCE.dialogMain === dialogId) {
+						const tarsInstance = Array.from(this.tarsInstances).find(tarsInstance => tarsInstance.getDialogSubId() === subId);
+						if (tarsInstance) {
+							gameScreen.dialogs.open<TarsDialog>(dialogId, subId)?.initialize(tarsInstance);
+						}
+					}
+				}
+			}
+		}
+
+		if (!this.localPlayerTars.isRunning() && (this.localPlayerTars.isEnabled() || SearchParams.hasSwitch("autotars"))) {
 			this.localPlayerTars.toggle(true);
 		}
 	}
 
-	@EventHandler(EventBus.Game, "stoppingPlay")
+	// this must run before the game screen is removed
+	@EventHandler(EventBus.Game, "stoppingPlay", Priority.Highest)
 	public onGameEnd(): void {
-		this.gamePlaying = false;
+		this.saveDialogState();
 
 		const tarsInstances = Array.from(this.tarsInstances);
 		for (const tars of tarsInstances) {
@@ -288,6 +347,13 @@ export default class TarsMod extends Mod {
 		this.tarsInstances.clear();
 
 		this.localPlayerTars = undefined;
+	}
+
+	@EventHandler(EventBus.Game, "preSaveGame", Priority.Highest)
+	public onPreSaveGame(): void {
+		if (game.playing && this.localPlayerTars) {
+			this.saveDialogState();
+		}
 	}
 
 	@EventHandler(EventBus.Multiplayer, "connect")
@@ -301,6 +367,18 @@ export default class TarsMod extends Mod {
 			for (const npc of island.npcs) {
 				if (npc?.getRegistrarId() === this.npcType) {
 					island.npcs.remove(npc);
+				}
+			}
+		}
+	}
+
+	private saveDialogState() {
+		if (gameScreen) {
+			this.saveData.ui[TarsUiSaveDataKey.DialogsOpened] = [];
+
+			for (const [dialogId, subId] of gameScreen.dialogs.getAll(TarsMod.INSTANCE.dialogMain)) {
+				if (gameScreen.dialogs.isVisible(dialogId, subId) === true) {
+					this.saveData.ui[TarsUiSaveDataKey.DialogsOpened].push([dialogId, subId]);
 				}
 			}
 		}

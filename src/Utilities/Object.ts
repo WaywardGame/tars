@@ -8,13 +8,14 @@ import { AiType } from "game/entity/IEntity";
 
 import type Context from "../core/context/Context";
 import { CreatureType } from "game/entity/creature/ICreature";
+import { ActionType } from "game/entity/action/IAction";
 
 export enum FindObjectType {
 	Creature,
 	Doodad,
 	Corpse,
-	Item,
 	NPC,
+	// note: No Item here because we generally don't care about caching/sorting positions of all Items in the game
 }
 
 export class ObjectUtilities {
@@ -41,7 +42,7 @@ export class ObjectUtilities {
 		return sortedObjects;
 	}
 
-	public findObjects<T>(context: Context, type: FindObjectType, id: string, allObjects: SaferArray<T>, isTarget: (object: T) => boolean, top?: number, getPoint?: (object: T) => IVector3): T[] {
+	private findObjects<T>(context: Context, type: FindObjectType, id: string, allObjects: SaferArray<T>, isTarget: (object: T) => boolean, top?: number, getPoint?: (object: T) => IVector3): T[] {
 		const cacheId = top === undefined ? `${type}-${id}` : `${type}-${id}-${top}`;
 
 		const cachedResults = this.cachedObjects.get(id) || this.cachedObjects.get(cacheId);
@@ -71,11 +72,6 @@ export class ObjectUtilities {
 		return results;
 	}
 
-	public findObject<T extends IVector3>(context: Context, type: FindObjectType, id: string, object: T[], isTarget: (object: T) => boolean): T | undefined {
-		const objects = this.findObjects(context, type, id, object, isTarget, 1);
-		return objects.length > 0 ? objects[0] : undefined;
-	}
-
 	public findDoodads(context: Context, id: string, isTarget: (doodad: Doodad) => boolean, top?: number): Doodad[] {
 		return this.findObjects(context, FindObjectType.Doodad, id, context.human.island.doodads.getObjects() as Doodad[], isTarget, top);
 	}
@@ -90,13 +86,11 @@ export class ObjectUtilities {
 
 	public findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {
 		const island = context.human.island;
+		const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
+
 		return this.findObjects(context, FindObjectType.Corpse, id, island.corpses.getObjects() as Corpse[], corpse => {
 			if (isTarget(corpse)) {
-				const tile = island.getTileFromPoint(corpse);
-				return tile.creature === undefined &&
-					tile.npc === undefined &&
-					tile.events === undefined &&
-					context.utilities.tile.isFreeOfOtherPlayers(context, corpse);
+				return context.utilities.tile.canButcherCorpse(context, corpse, tool);
 			}
 
 			return false;

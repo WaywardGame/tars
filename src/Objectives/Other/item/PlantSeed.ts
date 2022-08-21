@@ -5,24 +5,23 @@ import { ITile, TerrainType } from "game/tile/ITerrain";
 import TileHelpers from "utilities/game/TileHelpers";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
-import itemDescriptions from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
+import Plant from "game/entity/action/actions/Plant";
+import Till from "game/entity/action/actions/Till";
 
 import type Context from "../../../core/context/Context";
-import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItem from "../../acquire/item/AcquireItem";
-import SetContextData from "../../contextData/SetContextData";
 import MoveToTarget from "../../core/MoveToTarget";
 import DigTile from "../tile/DigTile";
 import UseItem from "./UseItem";
 import ReserveItems from "../../core/ReserveItems";
 import MoveItemIntoInventory from "./MoveItemIntoInventory";
-import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import Lambda from "../../core/Lambda";
 import ClearTile from "../tile/ClearTile";
 import Item from "game/item/Item";
+import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 
 export const gardenMaxTilesChecked = 1536;
 
@@ -55,21 +54,12 @@ export default class PlantSeed extends Objective {
 		const objectives: IObjective[] = [
 			new ReserveItems(item).keepInInventory(),
 			new MoveItemIntoInventory(item),
+			new AcquireInventoryItem("hoe"),
 		];
-
-		if (context.inventory.hoe) {
-			objectives.push(new SetContextData(ContextDataType.Item1, context.inventory.hoe));
-
-		} else {
-			objectives.push(
-				new AcquireItem(ItemType.StoneHoe).setContextDataKey(ContextDataType.Item1),
-				new AnalyzeInventory(),
-			);
-		}
 
 		objectives.push(
 			...result,
-			new UseItem(ActionType.Plant, item),
+			new UseItem(Plant, item),
 		);
 
 		return objectives;
@@ -106,7 +96,7 @@ export default class PlantSeed extends Objective {
 
 		const facingTile = context.human.getFacingTile();
 		const facingPoint = context.human.getFacingPoint();
-		if (context.utilities.tile.canTill(context, facingPoint, facingTile, allowedTilesSet)) {
+		if (context.utilities.tile.canTill(context, facingPoint, facingTile, context.inventory.hoe, allowedTilesSet)) {
 			tile = facingTile;
 			point = facingPoint;
 
@@ -114,7 +104,7 @@ export default class PlantSeed extends Objective {
 			const nearbyTillableTile = TileHelpers.findMatchingTiles(
 				context.island,
 				context.utilities.base.getBasePosition(context),
-				(_, point, tile) => context.utilities.tile.canTill(context, point, tile, allowedTilesSet),
+				(_, point, tile) => context.utilities.tile.canTill(context, point, tile, context.inventory.hoe, allowedTilesSet),
 				{
 					maxTilesChecked: gardenMaxTilesChecked,
 					maxTiles: 1,
@@ -138,7 +128,7 @@ export default class PlantSeed extends Objective {
 
 		objectives.push(
 			new MoveToTarget(point, true),
-			new UseItem(ActionType.Till).setContextDataKey(ContextDataType.Item1),
+			new UseItem(Till, "hoe"),
 			new Lambda(async context => {
 				const facingPoint = context.human.getFacingPoint();
 
@@ -149,7 +139,7 @@ export default class PlantSeed extends Objective {
 				this.log.info("Not tilled yet");
 
 				return ObjectiveResult.Restart;
-			}),
+			}).setStatus(this),
 		);
 
 		return objectives;

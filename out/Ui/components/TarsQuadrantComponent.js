@@ -20,13 +20,8 @@ define(["require", "exports", "mod/Mod", "ui/component/Text", "ui/screen/screens
     class TarsQuadrantComponent extends QuadrantComponent_1.default {
         constructor(id) {
             super(id);
-            this.classes.add("hide-in-screenshot-mode");
-            this.element.style.textAlign = "right";
-            if (!steamworks.isElectron() || steamworks.isDevelopmentBranch()) {
-                this.element.style.marginBottom = "7px";
-            }
+            this.classes.add("tars-quadrant-component", "hide-in-screenshot-mode");
             this.statusText = new Text_1.default()
-                .setText(this.TarsMod.getTranslation(ITarsMod_1.TarsTranslation.DialogTitleMain))
                 .appendTo(this);
             this.TarsMod.event.until(this, "remove").subscribe("statusChange", this.refresh);
             this.refresh();
@@ -35,10 +30,12 @@ define(["require", "exports", "mod/Mod", "ui/component/Text", "ui/screen/screens
             return TarsQuadrantComponent.preferredQuadrant;
         }
         refresh() {
-            this.statusText.setText((0, ITarsMod_1.getTarsTranslation)(ITarsMod_1.TarsTranslation.DialogTitleMain).addArgs(this.TarsMod.getStatus()));
+            const tarsInstance = this.TarsMod.tarsInstance;
+            this.statusText.setText((0, ITarsMod_1.getTarsTranslation)(ITarsMod_1.TarsTranslation.DialogTitleMain)
+                .addArgs(tarsInstance?.getName(), tarsInstance?.getStatus() ?? "Not running"));
         }
     }
-    TarsQuadrantComponent.preferredQuadrant = IQuadrantComponent_1.Quadrant.BottomRight;
+    TarsQuadrantComponent.preferredQuadrant = IQuadrantComponent_1.Quadrant.None;
     __decorate([
         Mod_1.default.instance(ITarsMod_1.TARS_ID)
     ], TarsQuadrantComponent.prototype, "TarsMod", void 0);
@@ -47,4 +44,4 @@ define(["require", "exports", "mod/Mod", "ui/component/Text", "ui/screen/screens
     ], TarsQuadrantComponent.prototype, "refresh", null);
     exports.default = TarsQuadrantComponent;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGFyc1F1YWRyYW50Q29tcG9uZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudHMvVGFyc1F1YWRyYW50Q29tcG9uZW50LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7R0FTRzs7Ozs7Ozs7OztJQVdILE1BQXFCLHFCQUFzQixTQUFRLDJCQUFpQjtRQWFoRSxZQUFtQixFQUF1QjtZQUN0QyxLQUFLLENBQUMsRUFBRSxDQUFDLENBQUM7WUFFVixJQUFJLENBQUMsT0FBTyxDQUFDLEdBQUcsQ0FBQyx5QkFBeUIsQ0FBQyxDQUFDO1lBRzVDLElBQUksQ0FBQyxPQUFPLENBQUMsS0FBSyxDQUFDLFNBQVMsR0FBRyxPQUFPLENBQUM7WUFFdkMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxVQUFVLEVBQUUsSUFBSSxVQUFVLENBQUMsbUJBQW1CLEVBQUUsRUFBRTtnQkFDOUQsSUFBSSxDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsWUFBWSxHQUFHLEtBQUssQ0FBQzthQUMzQztZQUVELElBQUksQ0FBQyxVQUFVLEdBQUcsSUFBSSxjQUFJLEVBQUU7aUJBQ3ZCLE9BQU8sQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDLGNBQWMsQ0FBQywwQkFBZSxDQUFDLGVBQWUsQ0FBQyxDQUFDO2lCQUNyRSxRQUFRLENBQUMsSUFBSSxDQUFDLENBQUM7WUFFcEIsSUFBSSxDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsS0FBSyxDQUFDLElBQUksRUFBRSxRQUFRLENBQUMsQ0FBQyxTQUFTLENBQUMsY0FBYyxFQUFFLElBQUksQ0FBQyxPQUFPLENBQUMsQ0FBQztZQUVqRixJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7UUFDbkIsQ0FBQztRQXZCRCxJQUFvQixpQkFBaUI7WUFDakMsT0FBTyxxQkFBcUIsQ0FBQyxpQkFBaUIsQ0FBQztRQUNuRCxDQUFDO1FBd0JPLE9BQU87WUFDWCxJQUFJLENBQUMsVUFBVSxDQUFDLE9BQU8sQ0FBQyxJQUFBLDZCQUFrQixFQUFDLDBCQUFlLENBQUMsZUFBZSxDQUFDLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsU0FBUyxFQUFFLENBQUMsQ0FBQyxDQUFDO1FBQ25ILENBQUM7O0lBaENhLHVDQUFpQixHQUFHLDZCQUFRLENBQUMsV0FBVyxDQUFDO0lBRnZEO1FBREMsYUFBRyxDQUFDLFFBQVEsQ0FBVSxrQkFBTyxDQUFDOzBEQUNFO0lBZ0NqQztRQURDLGtCQUFLO3dEQUdMO0lBckNMLHdDQXVDQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGFyc1F1YWRyYW50Q29tcG9uZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudHMvVGFyc1F1YWRyYW50Q29tcG9uZW50LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7R0FTRzs7Ozs7Ozs7OztJQVdILE1BQXFCLHFCQUFzQixTQUFRLDJCQUFpQjtRQWFoRSxZQUFtQixFQUF1QjtZQUN0QyxLQUFLLENBQUMsRUFBRSxDQUFDLENBQUM7WUFFVixJQUFJLENBQUMsT0FBTyxDQUFDLEdBQUcsQ0FBQyx5QkFBeUIsRUFBRSx5QkFBeUIsQ0FBQyxDQUFDO1lBRXZFLElBQUksQ0FBQyxVQUFVLEdBQUcsSUFBSSxjQUFJLEVBQUU7aUJBQ3ZCLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUVwQixJQUFJLENBQUMsT0FBTyxDQUFDLEtBQUssQ0FBQyxLQUFLLENBQUMsSUFBSSxFQUFFLFFBQVEsQ0FBQyxDQUFDLFNBQVMsQ0FBQyxjQUFjLEVBQUUsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBRWpGLElBQUksQ0FBQyxPQUFPLEVBQUUsQ0FBQztRQUNuQixDQUFDO1FBakJELElBQW9CLGlCQUFpQjtZQUNqQyxPQUFPLHFCQUFxQixDQUFDLGlCQUFpQixDQUFDO1FBQ25ELENBQUM7UUFrQk8sT0FBTztZQUNYLE1BQU0sWUFBWSxHQUFHLElBQUksQ0FBQyxPQUFPLENBQUMsWUFBWSxDQUFDO1lBQy9DLElBQUksQ0FBQyxVQUFVLENBQUMsT0FBTyxDQUFDLElBQUEsNkJBQWtCLEVBQUMsMEJBQWUsQ0FBQyxlQUFlLENBQUM7aUJBQ3RFLE9BQU8sQ0FBQyxZQUFZLEVBQUUsT0FBTyxFQUFFLEVBQUUsWUFBWSxFQUFFLFNBQVMsRUFBRSxJQUFJLGFBQWEsQ0FBQyxDQUFDLENBQUM7UUFDdkYsQ0FBQzs7SUExQmEsdUNBQWlCLEdBQUcsNkJBQVEsQ0FBQyxJQUFJLENBQUM7SUFGaEQ7UUFEQyxhQUFHLENBQUMsUUFBUSxDQUFVLGtCQUFPLENBQUM7MERBQ0U7SUF3QmpDO1FBREMsa0JBQUs7d0RBS0w7SUEvQkwsd0NBaUNDIn0=

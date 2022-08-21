@@ -30,7 +30,7 @@ export default class GatherFromDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		return context.utilities.object.findDoodads(context, `${this.getIdentifier()}|1`, (doodad: Doodad) => {
+		return context.utilities.object.findDoodads(context, this.getIdentifier(), (doodad: Doodad) => {
 			const searchMap = this.doodadSearchMap.get(doodad.type);
 			if (!searchMap) {
 				return false;

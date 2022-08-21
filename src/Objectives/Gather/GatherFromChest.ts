@@ -7,7 +7,6 @@ import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { ItemUtilities } from "../../utilities/Item";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import ReserveItems from "../core/ReserveItems";
@@ -30,12 +29,17 @@ export default class GatherFromChest extends Objective {
 		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a chest`;
 	}
 
-	public override canIncludeContextHashCode() {
-		return ItemUtilities.getRelatedItemTypes(this.itemType);
+	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
+		return {
+			objectiveHashCode,
+			itemTypes: new Set([this.itemType]),
+		};
 	}
 
-	public override shouldIncludeContextHashCode(context: Context): boolean {
-		return context.isReservedItemType(this.itemType);
+	public override shouldIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean {
+		// todo: it should cache this pipeline based on the reserved items by other GatherFromChest pipelines
+		// example: why should this care about Sandstones that were gathered from a ground? gathering from tiles won't affect the caching for this objective
+		return context.isReservedItemType(this.itemType, objectiveHashCode);
 	}
 
 	// we can't group this together because gatherfromchest objectives are prioritized to be ran last
@@ -45,7 +49,7 @@ export default class GatherFromChest extends Objective {
 
 	// todo: add getWeightChange(): number and take that into account when grouping together?
 
-	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
 		const prioritizeBaseChests = context.getData(ContextDataType.PrioritizeBaseChests);
 
 		let chests: Doodad[] = context.base.chest.slice();
@@ -70,7 +74,7 @@ export default class GatherFromChest extends Objective {
 
 						if (this.options.requirePlayerCreatedIfCraftable) {
 							const canCraft = item.description()?.recipe;
-							if (canCraft && !item.ownerIdentifier) {
+							if (canCraft && !item.crafterIdentifier) {
 								return false;
 							}
 						}
@@ -84,7 +88,7 @@ export default class GatherFromChest extends Objective {
 				if (items.length > 0) {
 					const item = items[0];
 					return [
-						new ReserveItems(item).passAcquireData(this),
+						new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
 						new SetContextData(this.contextDataKey, item),
 						new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
 					];

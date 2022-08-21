@@ -1,19 +1,17 @@
-import { TurnMode } from "game/IGame";
-import { ItemType } from "game/item/IItem";
 import { EquipType } from "game/entity/IHuman";
+import { TurnMode } from "game/IGame";
 
 import type Context from "../core/context/Context";
+import type { ITarsMode } from "../core/mode/IMode";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
+import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import Lambda from "../objectives/core/Lambda";
+import HuntCreatures from "../objectives/other/creature/HuntCreatures";
 import Idle from "../objectives/other/Idle";
+import EquipItem from "../objectives/other/item/EquipItem";
 import ReturnToBase from "../objectives/other/ReturnToBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import EquipItem from "../objectives/other/item/EquipItem";
-import HuntCreatures from "../objectives/other/creature/HuntCreatures";
-import type { ITarsMode } from "../core/mode/IMode";
 
 /**
  * DUNDUN DUN DUNDUN
@@ -29,16 +27,11 @@ export class TerminatorMode implements ITarsMode {
     public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
         const objectives: Array<IObjective | IObjective[]> = [];
 
-        if (context.inventory.knife === undefined) {
-            objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
-        }
+        objectives.push(new AcquireInventoryItem("knife"));
 
-        if (context.inventory.equipSword === undefined && !context.options.lockEquipment) {
-            objectives.push([new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.LeftHand)]);
-        }
-
-        if (context.inventory.equipShield === undefined && !context.options.lockEquipment) {
-            objectives.push([new AcquireItem(ItemType.WoodenShield), new AnalyzeInventory(), new EquipItem(EquipType.RightHand)]);
+        if (!context.options.lockEquipment) {
+            objectives.push([new AcquireInventoryItem("equipSword"), new EquipItem(EquipType.MainHand)]);
+            objectives.push([new AcquireInventoryItem("equipShield"), new EquipItem(EquipType.OffHand)]);
         }
 
         const creatures = context.utilities.object.findHuntableCreatures(context, "Terminator", { onlyHostile: true });

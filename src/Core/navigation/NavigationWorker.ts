@@ -267,7 +267,6 @@ webWorkerSelf.onmessage = (event: MessageEvent) => {
 		return;
 	}
 
-
 	console.log("[TARS] Navigation worker initial data", data);
 
 	queuedMessages = [];
@@ -287,7 +286,7 @@ webWorkerSelf.onmessage = (event: MessageEvent) => {
 	// Fix emscripten loading
 	const oldFetch = fetch;
 
-	self.fetch = async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+	self.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
 		input = `${pathPrefix}\\static\\js\\wayward.wasm`;
 		return oldFetch(input, init);
 	};

@@ -1,15 +1,15 @@
-import type ActionExecutor from "game/entity/action/ActionExecutor";
-import type actionDescriptions from "game/entity/action/Actions";
-import type { IActionDescription } from "game/entity/action/IAction";
-import { ActionType } from "game/entity/action/IAction";
+import type { AnyActionDescription } from "game/entity/action/IAction";
+import Message from "language/dictionary/Message";
 import type Context from "../../core/context/Context";
-import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
-import { ObjectiveResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-export default class ExecuteAction<T extends ActionType> extends Objective {
-    private readonly actionType;
-    private readonly executor;
-    constructor(actionType: T, executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => ObjectiveResult);
+import { GetActionArguments } from "../../utilities/Action";
+export default class ExecuteAction<T extends AnyActionDescription> extends Objective {
+    private readonly action;
+    private readonly args;
+    private readonly expectedMessages?;
+    private readonly expectedCannotUseResult?;
+    constructor(action: T, args: GetActionArguments<T>, expectedMessages?: Set<Message> | undefined, expectedCannotUseResult?: ObjectiveResult | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     isDynamic(): boolean;

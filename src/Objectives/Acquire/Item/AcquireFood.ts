@@ -1,6 +1,7 @@
 import { ActionType } from "game/entity/action/IAction";
 import type { IContainer } from "game/item/IItem";
-import itemDescriptions from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
+import Eat from "game/entity/action/actions/Eat";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -10,6 +11,7 @@ import UseItem from "../../other/item/UseItem";
 import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+import AddDifficulty from "../../core/AddDifficulty";
 
 export default class AcquireFood extends Objective {
 
@@ -38,9 +40,9 @@ export default class AcquireFood extends Objective {
 		}
 
 		if (this.allowDangerousFoodItems) {
-			// make this harder since it could result in poison
 			objectivePipelines.push([
-				new AcquireItemForAction(ActionType.Eat).passAcquireData(this).addDifficulty(100),
+				new AddDifficulty(100), // make this harder since it could result in poison
+				new AcquireItemForAction(ActionType.Eat).passAcquireData(this),
 			]);
 		}
 
@@ -71,7 +73,7 @@ export default class AcquireFood extends Objective {
 				if (eatFood) {
 					objectivePipelines.push([
 						new AcquireItemWithRecipe(itemType, recipe).keepInInventory(),
-						new UseItem(ActionType.Eat),
+						new UseItem(Eat),
 					]);
 
 				} else {

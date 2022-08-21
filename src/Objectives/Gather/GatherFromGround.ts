@@ -6,7 +6,6 @@ import Translation from "language/Translation";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { ItemUtilities } from "../../utilities/Item";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import Lambda from "../core/Lambda";
@@ -34,31 +33,36 @@ export default class GatherFromGround extends Objective {
 		return true;
 	}
 
-	public override canIncludeContextHashCode() {
-		return ItemUtilities.getRelatedItemTypes(this.itemType);
+	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
+		return {
+			objectiveHashCode,
+			itemTypes: new Set([this.itemType]),
+		};
 	}
 
-	public override shouldIncludeContextHashCode(context: Context): boolean {
-		return context.isReservedItemType(this.itemType);
+	public override shouldIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean {
+		// todo: it should cache this pipeline based on the reserved items by other GatherFromGround pipelines
+		// example: why should this care about Sandstones that were gathered from a chest? things happening in chests won't affect the caching for this objective
+		return context.isReservedItemType(this.itemType, objectiveHashCode);
 	}
 
-	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
 		const point = context.human.getPoint();
 		const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
 		if (item) {
 			return [
-				new ReserveItems(item).passAcquireData(this),
+				new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
 				new MoveToTarget(item.containedWithin as ITileContainer, false).trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
 				new MoveItem(item, context.human.inventory, point),
 			];
 		}
 
-		return context.island.items.getObjects()
+		return context.utilities.item.getGroundItems(context, this.itemType)
 			.map(item => {
 				if (item && this.itemMatches(context, item)) {
 					return [
-						new ReserveItems(item).passAcquireData(this),
+						new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
 						new MoveToTarget(item.containedWithin as ITileContainer, true).trackItem(item),
 						new SetContextData(this.contextDataKey, item), // todo: this might be wrong
 						new Lambda(async context => {
@@ -68,13 +72,13 @@ export default class GatherFromGround extends Objective {
 							const point = context.human.getFacingPoint();
 							const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item, true));
 							if (item) {
-								objectives.push(new ReserveItems(item).passAcquireData(this));
+								objectives.push(new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode));
 								objectives.push(new SetContextData(this.contextDataKey, item));
 								objectives.push(new MoveItem(item, context.human.inventory, point));
 							}
 
 							return objectives;
-						}),
+						}).setStatus(this),
 					];
 				}
 
@@ -102,7 +106,7 @@ export default class GatherFromGround extends Objective {
 
 		if (this.options.requirePlayerCreatedIfCraftable) {
 			const canCraft = item.description()?.recipe;
-			if (canCraft && !item.ownerIdentifier) {
+			if (canCraft && !item.crafterIdentifier) {
 				return false;
 			}
 		}

@@ -1,0 +1,15 @@
+.tars-quadrant-component .text {
+	pointer-events: all;
+}
+
+.tars-quadrant-component:where([data-quadrant=TopRight], [data-quadrant=BottomRight]) {
+	text-align: right;
+}
+
+.tars-quadrant-component:where([data-quadrant=Top], [data-quadrant=Bottom]) {
+	text-align: center;
+}
+
+:root:where(.is-fullscreen, .platform-darwin.is-maximized, :not(.is-electron, .has-custom-title-bar)) .tars-quadrant-component[data-quadrant=BottomRight] {
+	margin-bottom: calc(16px * max(1, var(--scale)));
+}

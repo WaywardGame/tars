@@ -15,7 +15,7 @@ import type { ICustomizations } from "game/entity/IHuman";
 import { EquipType } from "game/entity/IHuman";
 import { Stat } from "game/entity/IStats";
 import NPC from "game/entity/npc/NPC";
-// import { generateRandomCustomization } from "game/entity/player/Customizations";
+import { generateRandomCustomization } from "game/entity/player/Customizations";
 import { setupSpawnItems } from "game/entity/player/IPlayer";
 import { Quality } from "game/IObject";
 import type { IslandId } from "game/island/IIsland";
@@ -23,25 +23,74 @@ import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import { Direction } from "utilities/math/Direction";
 import { blockedPenalty } from "game/entity/flowfield/IFlowFieldManager";
+import TranslationImpl from "language/impl/TranslationImpl";
+import { Bound } from "utilities/Decorators";
+import { SaveProperty } from "save/serializer/ISerializer";
 
 import Tars from "../core/Tars";
-import { getTarsMod, getTarsTranslation, TarsTranslation } from "../ITarsMod";
+import { getTarsMod, getTarsTranslation, ISaveData, TarsTranslation } from "../ITarsMod";
+import TarsDialog from "../ui/TarsDialog";
 
 export default class TarsNPC extends NPC {
 
-    private readonly tars: Tars;
+    public override readonly isPlayerLike: boolean = true;
+
+    public tarsInstance: Tars | undefined;
+
+    @SaveProperty() private saveData: ISaveData | undefined;
 
     constructor(id?: number, islandId = "" as IslandId, x: number = 0, y: number = 0, z: number = 0) {
         super(getTarsMod()?.npcType, id, islandId, x, y, z);
-
-        const saveData = getTarsMod().initializeTarsSaveData();
-        this.tars = getTarsMod().createAndLoadTars(this, saveData);
-        this.tars.toggle(true);
 
         // do nothing by default
         this.updateMovementIntent({ intent: Direction.None });
 
         this.setMoveType(MoveType.Land | MoveType.Water | MoveType.ShallowWater);
+
+        // handles setup when loading a saved game that contains this npc
+        const gameEvents = game.event.until(this, "deregister");
+        gameEvents.subscribe("play", this.onSpawnOrPlay);
+        gameEvents.subscribe("playingEntityChange", this.onSpawnOrPlay);
+        gameEvents.subscribe("stopPlay", this.onRemoved);
+    }
+
+    @Bound
+    @OwnEventHandler(NPC, "spawn")
+    public onSpawnOrPlay() {
+        if (this.tarsInstance) {
+            // already ready
+            return;
+        }
+
+        if (!this.saveData) {
+            this.saveData = getTarsMod().initializeTarsSaveData();
+        }
+
+        this.tarsInstance = getTarsMod().createAndLoadTars(this, this.saveData);
+
+        if (this.tarsInstance.isEnabled()) {
+            this.tarsInstance.toggle(true);
+        }
+    }
+
+    @Bound
+    @OwnEventHandler(NPC, "removed")
+    public onRemoved() {
+        if (this.tarsInstance) {
+            this.tarsInstance.disable(true);
+            this.tarsInstance.unload();
+            this.tarsInstance = undefined;
+        }
+    }
+
+    @OwnEventHandler(NPC, "renamed")
+    public onRenamed() {
+        if (this.tarsInstance) {
+            const dialog = gameScreen?.dialogs.get<TarsDialog>(getTarsMod().dialogMain, this.tarsInstance.getDialogSubId());
+            if (dialog) {
+                dialog.refreshHeader();
+            }
+        }
     }
 
     protected override initializeStats() {
@@ -50,20 +99,40 @@ export default class TarsNPC extends NPC {
         const hunger = this.island.seededRandom.int(15, 20);
         const thirst = this.island.seededRandom.int(15, 20);
 
-        // this.stat.setValue(Stat.Strength, strength);
+        // Initialize the stat so we don't get a warning
+        this.stat.setValue(Stat.Metabolism, 0);
 
-        this.stat.setMax(Stat.Health, strength, strength);
         this.stat.setMax(Stat.Stamina, stamina, stamina);
         this.stat.setMax(Stat.Hunger, hunger, hunger);
         this.stat.setMax(Stat.Thirst, thirst, thirst);
+
+        // max health is based on strength
+        this.stat.setValue(Stat.Strength, strength);
+        this.stat.setValue(Stat.Health, this.getMaxHealth());
     }
 
     protected override getDefaultCustomization(): ICustomizations {
-        return localPlayer.customization; // generateRandomCustomization(this.island.seededRandom);
+        return generateRandomCustomization(this.island.seededRandom);
     }
 
     protected override getDefaultName() {
-        return getTarsTranslation(TarsTranslation.Name);
+        const existingTarsNpcsNames: Set<string> = new Set();
+
+        for (const npc of this.island.npcs) {
+            if (npc instanceof TarsNPC) {
+                existingTarsNpcsNames.add(npc.getName().toString());
+            }
+        }
+
+        let defaultName: TranslationImpl;
+
+        let i = 0;
+        do {
+            i++;
+            defaultName = getTarsTranslation(TarsTranslation.NpcName).addArgs(i);
+        } while (existingTarsNpcsNames.has(defaultName.toString()));
+
+        return defaultName;
     }
 
     protected override getDefaultEquipment(equipType: EquipType): Item | ItemType | undefined {
@@ -100,15 +169,13 @@ export default class TarsNPC extends NPC {
     //     super.update();
     // }
 
+    public override update(): void {
+        // no-op
+    }
+
     public override isInFov(): boolean {
         // always allow updates for this npc
         return true;
-    }
-
-    @OwnEventHandler(NPC, "removed")
-    public onRemoved() {
-        this.tars.disable(true);
-        this.tars.unload();
     }
 
     protected override checkMove(moveType: MoveType, tileX: number, tileY: number, tileZ: number) {

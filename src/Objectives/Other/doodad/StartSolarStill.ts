@@ -1,5 +1,5 @@
 import type Doodad from "game/doodad/Doodad";
-import { ActionType } from "game/entity/action/IAction";
+import AttachContainer from "game/entity/action/actions/AttachContainer";
 
 import type Context from "../../../core/context/Context";
 import { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -58,7 +58,7 @@ export default class StartSolarStill extends Objective {
             this.log.info("Moving to attach container");
 
             // attach the container to the water still
-            objectives.push(new UseItem(ActionType.AttachContainer, availableWaterContainer));
+            objectives.push(new UseItem(AttachContainer, availableWaterContainer));
         }
 
         return objectives;

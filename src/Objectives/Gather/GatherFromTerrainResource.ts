@@ -1,27 +1,28 @@
-import { ActionType } from "game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import ItemManager from "game/item/ItemManager";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
+
 import type Context from "../../core/context/Context";
-import type { ITerrainSearch } from "../../core/ITars";
+import { ITerrainResourceSearch } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import AddDifficulty from "../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
 
-export default class GatherFromTerrain extends Objective {
+export default class GatherFromTerrainResource extends Objective {
 
 	public readonly gatherObjectivePriority = 200;
 
-	constructor(private readonly search: ITerrainSearch[]) {
+	constructor(private readonly search: ITerrainResourceSearch[]) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `GatherFromTerrain:${this.search.map(search => `${TerrainType[search.type]}:${ItemManager.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
+		return `GatherFromTerrainResource:${this.search.map(search => `${TerrainType[search.type]}:${ItemManager.isGroup(search.itemType) ? ItemTypeGroup[search.itemType] : ItemType[search.itemType]}`).join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -35,7 +36,7 @@ export default class GatherFromTerrain extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		const hasDigTool = context.utilities.item.hasInventoryItemForAction(context, ActionType.Dig);
+		const tool = context.inventory.shovel;
 
 		for (const terrainSearch of this.search) {
 			const terrainDescription = Terrains[terrainSearch.type];
@@ -65,40 +66,42 @@ export default class GatherFromTerrain extends Objective {
 				let difficulty = 0;
 				let matches = 0;
 
-				const nextLootItems = terrainSearch.resource.items.slice(step);
-				for (let i = 0; i < nextLootItems.length; i++) {
-					const loot = nextLootItems[i];
+				const resources = context.island.getTerrainItems(terrainSearch?.resource);
+				if (resources) {
+					const nextLootItems = resources.slice(step);
+					for (let i = 0; i < nextLootItems.length; i++) {
+						const loot = nextLootItems[i];
 
-					let chanceForHit = 0;
+						let chanceForHit = 0;
 
-					if (loot.type === terrainSearch.itemType) {
-						matches++;
+						if (loot.type === terrainSearch.itemType) {
+							matches++;
 
-						if (loot.chance === undefined) {
-							// we are guarenteed to get the item if we keep hitting this
-							difficulty = i * 2;
-							break;
+							if (loot.chance === undefined) {
+								// we are guarenteed to get the item if we keep hitting this
+								difficulty = i * 2;
+								break;
+							}
+
+							chanceForHit = loot.chance / 100;
+
+							difficulty += 60 * (1 - chanceForHit);
+
+						} else {
+							difficulty += 5;
 						}
-
-						chanceForHit = loot.chance / 100;
-
-						difficulty += 60 * (1 - chanceForHit);
-
-					} else {
-						difficulty += 5;
 					}
 				}
 
 				if (matches === 0) {
 					if (step === 0) {
-
-						console.error("GatherFromTerrain no matches", step, ItemType[terrainSearch.itemType], difficulty, JSON.stringify(terrainSearch));
+						this.log.error("GatherFromTerrain no matches", step, ItemType[terrainSearch.itemType], difficulty, JSON.stringify(terrainSearch));
 					}
 
 					continue;
 				}
 
-				if (!terrainDescription.gather && !hasDigTool) {
+				if (!terrainDescription.gather && !tool) {
 					difficulty += 500;
 				}
 
@@ -109,7 +112,8 @@ export default class GatherFromTerrain extends Objective {
 				difficulty = Math.round(difficulty);
 
 				objectivePipelines.push([
-					new MoveToTarget(point, true).addDifficulty(difficulty),
+					new AddDifficulty(difficulty),
+					new MoveToTarget(point, true),
 					new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType))
 						.passAcquireData(this)
 						.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, terrainSearch.itemType).getString()} from ${Translation.nameOf(Dictionary.Terrain, terrainSearch.type).getString()}`),

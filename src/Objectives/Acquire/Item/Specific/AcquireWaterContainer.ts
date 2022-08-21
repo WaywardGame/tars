@@ -1,12 +1,13 @@
-import { ActionType } from "game/entity/action/IAction";
+import { ActionArguments } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
+import OpenBottle from "game/entity/action/actions/OpenBottle";
 
 import type Context from "../../../../core/context/Context";
-import { ContextDataType } from "../../../../core/context/IContext";
-import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../../core/ExecuteActionForItem";
+import ReserveItems from "../../../core/ReserveItems";
 import AcquireItem from "../AcquireItem";
 
 export default class AcquireWaterContainer extends Objective {
@@ -20,30 +21,35 @@ export default class AcquireWaterContainer extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const itemContextDataKey = this.getUniqueContextDataKey("MessageInABottle");
+
 		const messageInABottleObjectives: IObjective[] = [];
 
 		const messageInABottleItem = context.utilities.item.getItemInInventory(context, ItemType.MessageInABottle);
-		if (!messageInABottleItem) {
-			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle).passAcquireData(this).setContextDataKey(ContextDataType.Item1));
+		if (messageInABottleItem) {
+			messageInABottleObjectives.push(new ReserveItems(messageInABottleItem));
+			messageInABottleObjectives.push(new SetContextData(itemContextDataKey, messageInABottleItem));
 
 		} else {
-			messageInABottleObjectives.push(new SetContextData(ContextDataType.Item1, messageInABottleItem));
+			messageInABottleObjectives.push(new AcquireItem(ItemType.MessageInABottle).passAcquireData(this).setContextDataKey(itemContextDataKey));
 		}
 
 		messageInABottleObjectives.push(new ExecuteActionForItem(
 			ExecuteActionType.Generic,
 			[ItemType.GlassBottle],
 			{
-				actionType: ActionType.OpenBottle,
-				executor: (context, action) => {
-					const item = context.getData(ContextDataType.Item1);
-					if (!item?.isValid()) {
-						this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
-						return;
-					}
+				genericAction: {
+					action: OpenBottle,
+					args: (context) => {
+						const item = context.getData(itemContextDataKey);
+						if (!item?.isValid()) {
+							this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
+							return ObjectiveResult.Restart;
+						}
 
-					action.execute(context.actionExecutor, item);
-				}
+						return [item] as ActionArguments<typeof OpenBottle>;
+					},
+				},
 			}).setStatus("Opening glass bottle"));
 
 		return [

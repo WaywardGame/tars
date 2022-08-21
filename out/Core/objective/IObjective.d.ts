@@ -2,6 +2,7 @@ import type { ActionType } from "game/entity/action/IAction";
 import type { DamageType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
 import type { ILog, ILogLine } from "utilities/Log";
+import { LoggerUtilities } from "../../utilities/Logger";
 import type Context from "../context/Context";
 import type ContextState from "../context/ContextState";
 import type { IExecutionTree } from "../planning/IPlan";
@@ -34,21 +35,21 @@ export interface IObjective {
     readonly ignoreInvalidPlans?: boolean;
     readonly gatherObjectivePriority?: number;
     enableLogging: boolean;
+    ensureLogger(loggerUtilities: LoggerUtilities): void;
     setLogger(log: ILog | undefined): void;
-    execute(context: Context): Promise<ObjectiveExecutionResult>;
-    getHashCode(context: Context | undefined, addUniqueIdentifier?: boolean): string;
+    execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult>;
+    getHashCode(context: Context | undefined): string;
     getIdentifier(context: Context | undefined): string;
     getName(): string;
     getStatusMessage(context: Context): string | undefined;
     getExecutionPriority?(context: Context, tree: IExecutionTree): IObjectivePriority;
     getPosition?(): IVector3;
     isDynamic(): boolean;
-    addDifficulty(difficulty: number): IObjective;
     getDifficulty(context: Context): number;
     isDifficultyOverridden(): boolean;
     onMove(context: Context): Promise<IObjective | boolean>;
-    canIncludeContextHashCode(context: Context): boolean | Set<ItemType>;
-    shouldIncludeContextHashCode(context: Context): boolean;
+    canIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean | HashCodeFiltering;
+    shouldIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean;
     canSaveChildObjectives(): boolean;
     canGroupTogether(): boolean;
 }
@@ -87,4 +88,8 @@ export interface IObjectiveInfo {
     difficulty: number;
     logs: ILogLine[];
 }
+export declare type HashCodeFiltering = Set<ItemType> | {
+    objectiveHashCode: string;
+    itemTypes: Set<ItemType>;
+};
 export {};

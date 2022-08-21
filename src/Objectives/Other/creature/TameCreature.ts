@@ -1,5 +1,6 @@
-import { ActionType } from "game/entity/action/IAction";
+import { ActionArguments } from "game/entity/action/IAction";
 import type Creature from "game/entity/creature/Creature";
+import Offer from "game/entity/action/actions/Offer";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -28,11 +29,6 @@ export default class TameCreature extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const player = context.human.asPlayer;
-        if (!player) {
-            return ObjectiveResult.Impossible;
-        }
-
         if (!this.creature.isValid()) {
             return ObjectiveResult.Restart;
         }
@@ -46,6 +42,8 @@ export default class TameCreature extends Objective {
             return ObjectiveResult.Impossible;
         }
 
+        const itemContextDataKey = this.getUniqueContextDataKey("OfferItem");
+
         const objectives: IObjective[] = [];
 
         const items = context.utilities.item.getItemsInInventory(context);
@@ -53,26 +51,24 @@ export default class TameCreature extends Objective {
         const offerItem = this.creature.offer(items);
         if (offerItem) {
             objectives.push(new ReserveItems(offerItem).keepInInventory());
-            objectives.push(new SetContextData(ContextDataType.Item1, offerItem));
+            objectives.push(new SetContextData(itemContextDataKey, offerItem));
 
         } else {
-            objectives.push(new AcquireItemForTaming(this.creature).setContextDataKey(ContextDataType.Item1));
+            objectives.push(new AcquireItemForTaming(this.creature).setContextDataKey(itemContextDataKey));
         }
 
         objectives.push(new SetContextData(ContextDataType.TamingCreature, this.creature));
 
         objectives.push(new MoveToTarget(this.creature, true));
 
-        objectives.push(new ExecuteAction(ActionType.Offer, (context, action) => {
-            const item = context.getData(ContextDataType.Item1);
+        objectives.push(new ExecuteAction(Offer, (context) => {
+            const item = context.getData(itemContextDataKey);
             if (!item?.isValid()) {
                 this.log.error("Invalid offer item");
                 return ObjectiveResult.Restart;
             }
 
-            action.execute(player, item);
-
-            return ObjectiveResult.Complete;
+            return [item] as ActionArguments<typeof Offer>;
         }).setStatus(this));
 
         objectives.push(new SetContextData(ContextDataType.TamingCreature, undefined));

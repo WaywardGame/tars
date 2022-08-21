@@ -1,20 +1,26 @@
 import Doodads from "game/doodad/Doodads";
 import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
+import { ActionArguments, ActionType } from "game/entity/action/IAction";
 import Corpses from "game/entity/creature/corpse/Corpses";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { ItemType } from "game/item/IItem";
-import { itemDescriptions } from "game/item/Items";
+import { itemDescriptions } from "game/item/ItemDescriptions";
 import { TerrainType } from "game/tile/ITerrain";
 import TerrainResources from "game/tile/TerrainResources";
 import terrainDescriptions from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
+import GatherLiquid from "game/entity/action/actions/GatherLiquid";
+
 import type Context from "../../../core/context/Context";
-import type { ITerrainSearch, DoodadSearchMap, CreatureSearch } from "../../../core/ITars";
-import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ITerrainResourceSearch, DoodadSearchMap, CreatureSearch, ITerrainWaterSearch } from "../../../core/ITars";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
 import { ItemUtilities } from "../../../utilities/Item";
+import SetContextData from "../../contextData/SetContextData";
+import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
+import MoveToTarget from "../../core/MoveToTarget";
+import ReserveItems from "../../core/ReserveItems";
 import UseProvidedItem from "../../core/UseProvidedItem";
 import GatherFromBuilt from "../../gather/GatherFromBuilt";
 import GatherFromChest from "../../gather/GatherFromChest";
@@ -22,17 +28,23 @@ import GatherFromCorpse from "../../gather/GatherFromCorpse";
 import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
-import GatherFromTerrain from "../../gather/GatherFromTerrain";
+import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
+import GatherFromTerrainWater from "../../gather/GatherFromTerrainWater";
+import StartSolarStill from "../../other/doodad/StartSolarStill";
+import StartWaterStillDesalination from "../../other/doodad/StartWaterStillDesalination";
+import Idle from "../../other/Idle";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
 import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+import AddDifficulty from "../../core/AddDifficulty";
 
 export default class AcquireItem extends AcquireBase {
 
-	private static readonly terrainSearchCache: Map<ItemType, ITerrainSearch[]> = new Map();
+	private static readonly terrainResourceSearchCache: Map<ItemType, ITerrainResourceSearch[]> = new Map();
+	private static readonly terrainWaterSearchCache: Map<ItemType, ITerrainWaterSearch[]> = new Map();
 	private static readonly doodadSearchCache: Map<ItemType, DoodadSearchMap> = new Map();
 	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
 
@@ -72,19 +84,19 @@ export default class AcquireItem extends AcquireBase {
 			[new UseProvidedItem(this.itemType).passAcquireData(this)],
 		];
 
-		const terrainSearch = this.getTerrainSearch();
-		if (terrainSearch.length > 0) {
-			objectivePipelines.push([new GatherFromTerrain(terrainSearch).passAcquireData(this)]);
+		const terrainResourceSearch = this.getTerrainResourceSearch(context);
+		if (terrainResourceSearch.length > 0) {
+			objectivePipelines.push([new GatherFromTerrainResource(terrainResourceSearch).passAcquireData(this)]);
 		}
 
-		if (!this.options.disableCreatureSearch) {
+		if (!this.options.disallowDoodadSearch) {
 			const doodadSearch = this.getDoodadSearch();
 			if (doodadSearch.size > 0) {
 				objectivePipelines.push([new GatherFromDoodad(this.itemType, doodadSearch).passAcquireData(this)]);
 			}
 		}
 
-		if (!this.options.disableCreatureSearch) {
+		if (!this.options.disallowCreatureSearch) {
 			const creatureSearch: CreatureSearch = this.getCreatureSearch();
 			if (creatureSearch.map.size > 0) {
 				objectivePipelines.push([new GatherFromCorpse(creatureSearch).passAcquireData(this)]);
@@ -114,23 +126,127 @@ export default class AcquireItem extends AcquireBase {
 				}
 			}
 
-			const buildDoodadType = itemDescription.onUse?.[ActionType.Build];
-			if (buildDoodadType !== undefined) {
-				objectivePipelines.push([new GatherFromBuilt(this.itemType, buildDoodadType as DoodadType).passAcquireData(this)]);
+			if (itemDescription.returnOnUseAndDecay !== undefined) {
+				const returnOnUseAndDecayItemType = itemDescription.returnOnUseAndDecay.type;
+
+				const returnOnUseAndDecayItemDescription = itemDescriptions[returnOnUseAndDecayItemType];
+				if (returnOnUseAndDecayItemDescription) {
+					if (!this.options?.disallowTerrain) {
+						const terrainWaterSearch = this.getTerrainWaterSearch(context, returnOnUseAndDecayItemType);
+						if (terrainWaterSearch.length > 0) {
+							const itemContextDataKey = this.getUniqueContextDataKey("WaterContainer");
+
+							const objectives: IObjective[] = [];
+
+							const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
+							if (waterContainer) {
+								objectives.push(new ReserveItems(waterContainer).passShouldKeepInInventory(this));
+								objectives.push(new SetContextData(itemContextDataKey, waterContainer));
+
+							} else {
+								objectives.push(new AcquireItem(returnOnUseAndDecayItemType).passShouldKeepInInventory(this).setContextDataKey(itemContextDataKey));
+							}
+
+							objectives.push(new GatherFromTerrainWater(terrainWaterSearch, itemContextDataKey).passAcquireData(this));
+
+							objectivePipelines.push(objectives);
+						}
+					}
+
+					const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", (doodad) => doodad.getLiquidGatherType() !== undefined);
+					for (const doodad of doodads) {
+						const liquidGatherType = doodad.getLiquidGatherType()!;
+						if (returnOnUseAndDecayItemDescription.liquidGather?.[liquidGatherType] !== this.itemType) {
+							continue;
+						}
+
+						const wellData = context.island.wellData[doodad.getTileId()];
+						if (wellData) {
+							if (this.options?.disallowWell || wellData.quantity === 0) {
+								continue;
+							}
+
+						} else if (!context.utilities.doodad.isWaterStillDrinkable(doodad)) {
+							if (this.options?.allowStartingWaterStill) {
+								// start desalination and run back to the waterstill and wait
+								const objectives: IObjective[] = [
+									doodad.type === DoodadType.SolarStill ? new StartSolarStill(doodad) : new StartWaterStillDesalination(doodad),
+								];
+
+								if (this.options?.allowWaitingForWater) {
+									// add difficulty to show that we don't want to idle
+									objectives.push(new AddDifficulty(100));
+
+									if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
+										objectives.push(new MoveToTarget(doodad, true, { range: 5 }));
+									}
+
+									objectives.push(new Idle());
+								}
+
+								objectivePipelines.push(objectives);
+							}
+
+							continue;
+						}
+
+						const itemContextDataKey = this.getUniqueContextDataKey(`WaterContainerFor${doodad.id}`);
+
+						const objectives: IObjective[] = [];
+
+						// todo: allow emptying unsafe water to pick up purified still water?
+						const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
+						if (waterContainer) {
+							objectives.push(new ReserveItems(waterContainer).passShouldKeepInInventory(this));
+							objectives.push(new SetContextData(itemContextDataKey, waterContainer));
+
+						} else {
+							objectives.push(new AcquireItem(returnOnUseAndDecayItemType).passShouldKeepInInventory(this).setContextDataKey(itemContextDataKey));
+						}
+
+						objectives.push(
+							new MoveToTarget(doodad, true),
+							new ExecuteActionForItem(
+								ExecuteActionType.Generic,
+								[this.itemType],
+								{
+									genericAction: {
+										action: GatherLiquid,
+										args: (context) => {
+											const item = context.getData(itemContextDataKey);
+											if (!item?.isValid()) {
+												this.log.warn("Invalid water container");
+												return ObjectiveResult.Restart;
+											}
+
+											return [item] as ActionArguments<typeof GatherLiquid>;
+										},
+									},
+								})
+								.passAcquireData(this));
+
+						objectivePipelines.push(objectives);
+					}
+				}
+			}
+
+			const buildInfo = itemDescription.onUse?.[ActionType.Build];
+			if (buildInfo !== undefined) {
+				objectivePipelines.push([new GatherFromBuilt(this.itemType, buildInfo.type).passAcquireData(this)]);
 			}
 		}
 
 		return objectivePipelines;
 	}
 
-	private getTerrainSearch(): ITerrainSearch[] {
-		let search = AcquireItem.terrainSearchCache.get(this.itemType);
+	private getTerrainResourceSearch(context: Context): ITerrainResourceSearch[] {
+		let search = AcquireItem.terrainResourceSearchCache.get(this.itemType);
 		if (search === undefined) {
 			search = [];
 
 			// todo: figure out a better way to handle this
 			if (this.itemType !== ItemType.PlantRoots) {
-				const resolvedTypes: Map<TerrainType, ITerrainSearch[]> = new Map();
+				const resolvedTypes: Map<TerrainType, ITerrainResourceSearch[]> = new Map();
 
 				const unresolvedTypes: TerrainType[] = Array.from(Enums.values(TerrainType));
 
@@ -163,8 +279,9 @@ export default class AcquireItem extends AcquireBase {
 					}
 
 					const resource = TerrainResources[terrainType];
-					if (resource && (resource.defaultItem === this.itemType || resource.items.some(ri => ri.type === this.itemType))) {
-						const terrainSearch: ITerrainSearch = {
+					const terrainItems = context.island.getTerrainItems(resource);
+					if (resource && terrainItems && (resource.defaultItem === this.itemType || terrainItems.some(ri => ri.type === this.itemType))) {
+						const terrainSearch: ITerrainResourceSearch = {
 							type: terrainType,
 							itemType: this.itemType,
 							resource: resource,
@@ -192,7 +309,38 @@ export default class AcquireItem extends AcquireBase {
 				}
 			}
 
-			AcquireItem.terrainSearchCache.set(this.itemType, search);
+			AcquireItem.terrainResourceSearchCache.set(this.itemType, search);
+		}
+
+		return search;
+	}
+
+	private getTerrainWaterSearch(context: Context, returnOnUseAndDecayItemType: ItemType): ITerrainWaterSearch[] {
+		let search = AcquireItem.terrainWaterSearchCache.get(this.itemType);
+		if (search === undefined) {
+			search = [];
+
+			const baseItemDescriptions = itemDescriptions[returnOnUseAndDecayItemType];
+			if (baseItemDescriptions.liquidGather !== undefined) {
+				for (const terrainType of Enums.values(TerrainType)) {
+					const terrainDescription = terrainDescriptions[terrainType];
+					if (!terrainDescription) {
+						continue;
+					}
+
+					const liquidGatherType = context.island.getLiquidGatherType(terrainType, terrainDescription);
+					if (liquidGatherType !== undefined && baseItemDescriptions.liquidGather[liquidGatherType] === this.itemType) {
+						// this.itemType can be obtained by gathering a liquid for this terrain type with the base item
+						search.push({
+							type: terrainType,
+							itemType: this.itemType,
+							gatherLiquid: returnOnUseAndDecayItemType,
+						});
+					}
+				}
+			}
+
+			AcquireItem.terrainWaterSearchCache.set(this.itemType, search);
 		}
 
 		return search;

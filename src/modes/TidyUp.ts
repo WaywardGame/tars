@@ -1,35 +1,27 @@
-import { DoodadType } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import { DamageType } from "game/entity/IEntity";
-import { TurnMode } from "game/IGame";
 import type { IContainer } from "game/item/IItem";
-import { ItemType } from "game/item/IItem";
 
 import type Context from "../core/context/Context";
-import type { IObjective } from "../core/objective/IObjective";
-import { ObjectiveResult } from "../core/objective/IObjective";
-import AcquireItem from "../objectives/acquire/item/AcquireItem";
+import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
 import AcquireItemForAction from "../objectives/acquire/item/AcquireItemForAction";
-import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
-import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
-import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
-import Lambda from "../objectives/core/Lambda";
 import BuildItem from "../objectives/other/item/BuildItem";
-import Idle from "../objectives/other/Idle";
 import ReturnToBase from "../objectives/other/ReturnToBase";
 import OrganizeBase from "../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import type { ITarsMode } from "../core/mode/IMode";
+import Lambda from "../objectives/core/Lambda";
+import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 
 /**
  * Marie Kondo mode
  */
 export class TidyUpMode implements ITarsMode {
 
-	private finished: (success: boolean) => void;
+	// private finished: (success: boolean) => void;
 
 	public async initialize(_: Context, finished: (success: boolean) => void) {
-		this.finished = finished;
+		// this.finished = finished;
 	}
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
@@ -61,20 +53,10 @@ export class TidyUpMode implements ITarsMode {
 				objectives.push([new AcquireItemForAction(ActionType.Chop)]);
 			}
 
-			if (context.inventory.shovel === undefined) {
-				objectives.push([new AcquireItemForAction(ActionType.Dig), new AnalyzeInventory()]);
-			}
-
-			if (context.inventory.knife === undefined) {
-				objectives.push([new AcquireItem(ItemType.StoneKnife), new AnalyzeInventory()]);
-			}
-
-			if (context.inventory.axe === undefined) {
-				objectives.push([new AcquireItem(ItemType.StoneAxe), new AnalyzeInventory()]);
-			}
-
-			objectives.push([new AcquireItemForDoodad(DoodadType.WoodenChest), new BuildItem(), new AnalyzeBase()]);
-			// objectives.push([new AcquireItemByTypes(Array.from(chestTypes.keys())), new BuildItem(), new AnalyzeBase()]);
+			objectives.push(new AcquireInventoryItem("shovel"));
+			objectives.push(new AcquireInventoryItem("knife"));
+			objectives.push(new AcquireInventoryItem("axe"));
+			objectives.push([new AcquireInventoryItem("chest"), new BuildItem()]);
 		}
 
 		const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
@@ -86,17 +68,18 @@ export class TidyUpMode implements ITarsMode {
 
 		objectives.push(new OrganizeInventory());
 
-		if (!multiplayer.isConnected()) {
-			if (game.getTurnMode() !== TurnMode.RealTime) {
-				objectives.push(new Lambda(async () => {
-					this.finished(true);
-					return ObjectiveResult.Complete;
-				}));
+		objectives.push(new Lambda(async () => ObjectiveResult.Complete).setStatus("Waiting"));
+		// if (!multiplayer.isConnected()) {
+		// 	if (game.getTurnMode() !== TurnMode.RealTime) {
+		// 		objectives.push(new Lambda(async () => {
+		// 			this.finished(true);
+		// 			return ObjectiveResult.Complete;
+		// 		}));
 
-			} else {
-				objectives.push(new Idle());
-			}
-		}
+		// 	} else {
+		// 		objectives.push(new Idle());
+		// 	}
+		// }
 
 		return objectives;
 	}

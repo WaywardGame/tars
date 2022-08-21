@@ -10,12 +10,13 @@ import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { ITile } from "game/tile/ITerrain";
 import type { ITerrainLoot } from "game/tile/TerrainResources";
-import { TarsOverlay } from "src/ui/TarsOverlay";
-import type { TarsTranslation } from "../ITarsMod";
+import { TarsOverlay } from "../ui/TarsOverlay";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
+import { CreatureUtilities } from "../utilities/Creature";
 import { DoodadUtilities } from "../utilities/Doodad";
 import { ItemUtilities } from "../utilities/Item";
+import { LoggerUtilities } from "../utilities/Logger";
 import { MovementUtilities } from "../utilities/Movement";
 import { ObjectUtilities } from "../utilities/Object";
 import { PlayerUtilities } from "../utilities/Player";
@@ -29,7 +30,7 @@ export declare const defaultMaxTilesChecked = 3000;
 export interface ITarsEvents {
     enableChange(enabled: boolean): void;
     optionsChange(options: ITarsOptions): void;
-    statusChange(status: TarsTranslation | string): void;
+    statusChange(): void;
     modeFinished(mode: TarsMode, success: boolean): void;
     navigationChange(status: NavigationSystemState): void;
     quantumBurstChange(status: QuantumBurstStatus): void;
@@ -48,8 +49,10 @@ export declare enum QuantumBurstStatus {
 export interface IUtilities {
     action: ActionUtilities;
     base: BaseUtilities;
+    creature: CreatureUtilities;
     doodad: DoodadUtilities;
     item: ItemUtilities;
+    logger: LoggerUtilities;
     movement: MovementUtilities;
     navigation: Navigation;
     object: ObjectUtilities;
@@ -165,9 +168,12 @@ export interface CreatureSearch {
     identifier: string;
     map: Map<CreatureType, ItemType[]>;
 }
-export declare type ITerrainSearch = ItemSearch<TerrainType> & {
+export interface ITerrainResourceSearch extends ItemSearch<TerrainType> {
     resource: ITerrainLoot;
-};
+}
+export interface ITerrainWaterSearch extends ItemSearch<TerrainType> {
+    gatherLiquid: ItemType;
+}
 export interface IDisassemblySearch {
     item: Item;
     disassemblyItems: IItemDisassembly[];

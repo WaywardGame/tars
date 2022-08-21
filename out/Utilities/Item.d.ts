@@ -1,3 +1,4 @@
+import type Doodad from "game/doodad/Doodad";
 import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import type Creature from "game/entity/creature/Creature";
@@ -7,10 +8,13 @@ import type { IContainer, IRecipe } from "game/item/IItem";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
-import type Doodad from "game/doodad/Doodad";
 import type { TerrainType } from "game/tile/ITerrain";
 import type Context from "../core/context/Context";
 import { IDisassemblySearch } from "../core/ITars";
+export interface IGetItemOptions {
+    allowInventoryItems: boolean;
+    allowUnsafeWaterContainers: boolean;
+}
 export declare class ItemUtilities {
     private static readonly relatedItemsCache;
     private static readonly relatedItemsByGroupCache;
@@ -20,6 +24,7 @@ export declare class ItemUtilities {
     edibleSeedItemTypes: Set<ItemType>;
     private availableInventoryWeightCache;
     private itemCache;
+    private readonly groundItemCache;
     private readonly disassembleSearchCache;
     static getRelatedItemTypes(itemType: ItemType): Set<ItemType> | boolean;
     static getRelatedItemTypesByGroup(itemTypeGroup: ItemTypeGroup): Set<ItemType> | boolean;
@@ -28,19 +33,20 @@ export declare class ItemUtilities {
     clearCache(): void;
     getBaseItems(context: Context): Item[];
     getBaseItemsByType(context: Context, itemType: ItemType): Item[];
+    getGroundItems(context: Context, itemType: ItemType): Item[];
     getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[];
     isAllowedToUseItem(context: Context, item: Item, allowProtectedInventoryItems?: boolean): boolean;
     isAllowedToUseEquipItem(context: Context, item: Item): boolean;
-    processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, allowInventoryItems?: boolean): ItemRecipeRequirementChecker;
+    processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, options?: Partial<IGetItemOptions>): ItemRecipeRequirementChecker;
     getItemsInContainer(context: Context, container: IContainer): Item[];
     getItemsInContainerByType(context: Context, container: IContainer, itemType: ItemType): Item[];
     getItemsInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup): Item[];
     getEquipmentItemsInInventory(context: Context): Item[];
     getItemsInInventory(context: Context): Item[];
-    getItemInInventory(context: Context, itemTypeSearch: ItemType, allowInventoryItems?: boolean): Item | undefined;
-    getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, allowInventoryItems?: boolean): Item | undefined;
-    getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, allowInventoryItems?: boolean): Item | undefined;
-    isInventoryItem(context: Context, item: Item): boolean;
+    getItemInInventory(context: Context, itemTypeSearch: ItemType, options?: Partial<IGetItemOptions>): Item | undefined;
+    getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, options?: Partial<IGetItemOptions>): Item | undefined;
+    getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, options?: Partial<IGetItemOptions>): Item | undefined;
+    isInventoryItem(context: Context, item: Item, options?: Partial<IGetItemOptions>): boolean;
     canDestroyItem(context: Context, item: Item): boolean;
     isSafeToDrinkItem(item: Item): boolean;
     isDrinkableItem(item: Item): boolean;
@@ -52,16 +58,14 @@ export declare class ItemUtilities {
     getBestToolForTerrainGather(context: Context, terrainType: TerrainType): Item | undefined;
     getBestEquipment(context: Context, equip: EquipType): Item[];
     calculateEquipItemScore(item: Item): number;
-    estimateDamageModifier(weapon: Item, target: Creature): number;
+    estimateDamageModifier(context: Context, weapon: Item, target: Creature): number;
     updateHandEquipment(context: Context, preferredDamageType?: DamageType): {
         equipType: EquipType;
         item: Item;
     } | undefined;
     private getDesiredEquipment;
-    private changeEquipmentOption;
     getPossibleHandEquips(context: Context, actionType: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[];
     getInventoryItemsWithEquipType(context: Context, equipType: EquipType): Item[];
-    hasInventoryItemForAction(context: Context, actionType: ActionType): boolean;
     getInventoryItemsWithUse(context: Context, use: ActionType, filterEquipped?: boolean): Item[];
     getReservedItems(context: Context, includeKeepInInventoryItems: boolean): Item[];
     getUnusedItems(context: Context, options?: Partial<{
@@ -69,10 +73,14 @@ export declare class ItemUtilities {
         allowSailboat: boolean;
     }>): Item[];
     getAvailableInventoryWeight(context: Context): number;
-    getSeeds(context: Context, onlyHealthy: boolean): Item[];
+    getSeeds(context: Context, onlyEdible: boolean): Item[];
     getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: DoodadType | DoodadTypeGroup): Item | undefined;
+    getWaterContainers(context: Context): {
+        drinkableWaterContainers: Item[];
+        availableWaterContainers: Item[];
+    };
     private getFoodItemTypes;
     private getSeedItemTypes;
     private producesEdibleItem;
-    private isHealthyToEat;
+    private isEdible;
 }

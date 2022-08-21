@@ -1,12 +1,19 @@
 import { EventBus } from "event/EventBuses";
 import EventEmitter, { Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
+import Rename from "game/entity/action/actions/Rename";
+import UpdateWalkPath from "game/entity/action/actions/UpdateWalkPath";
 import type { IActionApi } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import type Creature from "game/entity/creature/Creature";
+import CreatureManager from "game/entity/creature/CreatureManager";
+import Human from "game/entity/Human";
 import { EquipType } from "game/entity/IHuman";
-import type { IStatMax, IStat } from "game/entity/IStats";
+import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
+import NPC from "game/entity/npc/NPC";
 import { WeightStatus } from "game/entity/player/IPlayer";
 import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
@@ -14,31 +21,30 @@ import { TileUpdateType } from "game/IGame";
 import type Island from "game/island/Island";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
-import { WorldZ } from "game/WorldZ";
+import ItemManager from "game/item/ItemManager";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import { Prompt } from "game/meta/prompt/IPrompt";
-import type { IPrompt } from "game/meta/prompt/Prompts";
 import type Prompts from "game/meta/prompt/Prompts";
+import type { IPrompt } from "game/meta/prompt/Prompts";
 import { ITile, TerrainType } from "game/tile/ITerrain";
+import { WorldZ } from "game/WorldZ";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import { Bound } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
+import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
+import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
-import Human from "game/entity/Human";
-import NPC from "game/entity/npc/NPC";
-import ItemManager from "game/item/ItemManager";
-import CreatureManager from "game/entity/creature/CreatureManager";
-import CorpseManager from "game/entity/creature/corpse/CorpseManager";
-import Corpse from "game/entity/creature/corpse/Corpse";
 
-import type { ISaveData } from "../ITarsMod";
-import { TarsTranslation } from "../ITarsMod";
+import Translation from "language/Translation";
+import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
+import type TarsNPC from "../npc/TarsNPC";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import ExecuteAction from "../objectives/core/ExecuteAction";
+import MoveToTarget from "../objectives/core/MoveToTarget";
 import ButcherCorpse from "../objectives/interrupt/ButcherCorpse";
 import DefendAgainstCreature from "../objectives/interrupt/DefendAgainstCreature";
 import OptionsInterrupt from "../objectives/interrupt/OptionsInterrupt";
@@ -53,36 +59,38 @@ import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
 import RecoverStamina from "../objectives/recover/RecoverStamina";
 import RecoverThirst from "../objectives/recover/RecoverThirst";
+import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
+import { TarsOverlay } from "../ui/TarsOverlay";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
-import { creatureUtilities } from "../utilities/Creature";
+import { CreatureUtilities } from "../utilities/Creature";
+import { DoodadUtilities } from "../utilities/Doodad";
 import { ItemUtilities } from "../utilities/Item";
-import { log } from "../utilities/Logger";
+import { LoggerUtilities } from "../utilities/Logger";
 import { MovementUtilities } from "../utilities/Movement";
 import { ObjectUtilities } from "../utilities/Object";
 import { PlayerUtilities } from "../utilities/Player";
 import { TileUtilities } from "../utilities/Tile";
 import Context from "./context/Context";
 import { ContextDataType, MovingToNewIslandState } from "./context/IContext";
-import executor, { ExecuteObjectivesResultType } from "./Executor";
-import { IBase, IInventoryItems, IResetOptions, ITarsEvents, IUtilities, tickSpeed, TarsMode, NavigationSystemState, QuantumBurstStatus } from "./ITars";
+import { ExecuteObjectivesResultType, Executor } from "./Executor";
+import { IBase, IInventoryItems, IResetOptions, ITarsEvents, IUtilities, NavigationSystemState, QuantumBurstStatus, TarsMode, tickSpeed } from "./ITars";
+import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
-import { tileUpdateRadius } from "./navigation/Navigation";
-import Navigation from "./navigation/Navigation";
+import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
 import type { IObjective } from "./objective/IObjective";
-import { ObjectiveResult } from "./objective/IObjective";
-import planner from "./planning/Planner";
-import Plan from "./planning/Plan";
-import { DoodadUtilities } from "../utilities/Doodad";
-import { TarsOverlay } from "../ui/TarsOverlay";
-import MoveToTarget from "../objectives/core/MoveToTarget";
-import { ITarsOptions } from "./ITarsOptions";
+import Respawn from "game/entity/action/actions/Respawn";
 import Objective from "./objective/Objective";
-import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
+import Plan from "./planning/Plan";
+import { Planner } from "./planning/Planner";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
+
+    private readonly log: Log;
+    private readonly planner: Planner;
+    private readonly executor: Executor;
 
     private base: IBase;
     private inventory: IInventoryItems;
@@ -111,16 +119,27 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private loaded = false;
 
-    constructor(private readonly human: Human, private readonly saveData: ISaveData, private readonly overlay: TarsOverlay) {
+    constructor(public readonly human: Human, public readonly saveData: ISaveData, private readonly overlay: TarsOverlay) {
         super();
+
+        const loggingUtilities = new LoggerUtilities(() => this.getName().toString());
+
+        this.log = loggingUtilities.createLog();
+
+        this.planner = new Planner(loggingUtilities, false);
+        this.planner.debug = saveData.options.debugLogging;
+
+        this.executor = new Executor(this.planner);
 
         this.utilities = {
             action: new ActionUtilities(),
             base: new BaseUtilities(),
+            creature: new CreatureUtilities(),
             doodad: new DoodadUtilities(),
             item: new ItemUtilities(),
+            logger: loggingUtilities,
             movement: new MovementUtilities(),
-            navigation: new Navigation(human, overlay),
+            navigation: new Navigation(this.log, human, overlay),
             object: new ObjectUtilities(),
             overlay: this.overlay,
             player: new PlayerUtilities(),
@@ -129,7 +148,29 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             ensureSailingMode: (sailingMode) => this.ensureSailingMode(sailingMode),
         };
 
-        log.info("Created TARS instance");
+        this.log.info("Created TARS instance");
+    }
+
+    public getName() {
+        return this.human.getName();
+    }
+
+    public getDialogSubId(): string {
+        if (this.asNPC) {
+            let id = 0;
+
+            for (const npc of this.human.island.npcs) {
+                if (npc?.type === getTarsMod().npcType) {
+                    if (npc === this.human) {
+                        return id.toString();
+                    }
+
+                    id++;
+                }
+            }
+        }
+
+        return "";
     }
 
     private delete() {
@@ -142,7 +183,38 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.utilities.navigation.unload();
 
-        log.info("Deleted TARS instance");
+        this.log.info("Deleted TARS instance");
+    }
+
+    public getSaveDataContainer(): ISaveDataContainer {
+        const saveData = Objects.deepClone(this.saveData);
+        saveData.enabled = false;
+
+        return {
+            name: this.getName().toString(),
+            version: getTarsMod().getVersion(),
+            saveData: this.saveData,
+        };
+    }
+
+    public loadSaveData(container: ISaveDataContainer) {
+        if (this.saveData.enabled) {
+            this.disable();
+        }
+
+        for (const [key, value] of Object.entries(container.saveData)) {
+            if (key === "options") {
+                this.updateOptions(value);
+
+            } else {
+                this.saveData[key as keyof ISaveData] = Objects.deepClone(value);
+            }
+        }
+
+        const npc = this.asNPC;
+        if (npc) {
+            Rename.execute(localPlayer, npc, container.name);
+        }
     }
 
     public load() {
@@ -163,7 +235,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         EventManager.registerEventBusSubscriber(this);
 
-        // log.info("Loaded");
+        Log.addPreConsoleCallback(this.utilities.logger.preConsoleCallback);
+
+        // this.log.info("Loaded");
     }
 
     public unload() {
@@ -179,7 +253,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.event.emit("unload");
 
-        // log.info("Unloaded");
+        Log.removePreConsoleCallback(this.utilities.logger.preConsoleCallback);
+
+        // this.log.info("Unloaded");
     }
 
     public disable(gameIsTravelingOrEnding: boolean = false) {
@@ -197,12 +273,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.utilities.movement.resetMovementOverlays();
 
-        this.human.walkAlongPath(undefined);
+        UpdateWalkPath.execute(this.human, undefined);
 
-        const player = this.human.asPlayer;
-        if (player) {
-            OptionsInterrupt.restore(player);
-        }
+        OptionsInterrupt.restore(this.human);
 
         if (!gameIsTravelingOrEnding && this.saveData.options.mode === TarsMode.Manual) {
             this.updateOptions({ mode: TarsMode.Survival });
@@ -225,7 +298,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.saveData.options.recoverThresholdThirst = 10;
             this.saveData.options.recoverThresholdThirstFromMax = -10;
 
-            log.info(`Configured recover thresholds. health: ${this.saveData.options.recoverThresholdHealth}. stamina: ${this.saveData.options.recoverThresholdStamina}. hunger: ${this.saveData.options.recoverThresholdHunger}`);
+            this.log.info(`Configured recover thresholds. health: ${this.saveData.options.recoverThresholdHealth}. stamina: ${this.saveData.options.recoverThresholdStamina}. hunger: ${this.saveData.options.recoverThresholdHunger}`);
         }
     }
 
@@ -246,6 +319,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         this.fullInterrupt("Human died");
+        this.createContext();
+        this.interruptContext = undefined;
+        this.interruptContexts.clear();
+
         this.utilities.movement.resetMovementOverlays();
     }
 
@@ -256,6 +333,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         this.fullInterrupt("Human respawned");
+        this.createContext();
+        this.interruptContext = undefined;
+        this.interruptContexts.clear();
+
         this.utilities.movement.resetMovementOverlays();
 
         if (this.navigationSystemState === NavigationSystemState.Initialized) {
@@ -263,29 +344,29 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    @EventHandler(EventBus.LocalPlayer, "processMovement")
-    public async processMovement(player: Player): Promise<void> {
-        if (this.human !== player || !this.isRunning()) {
-            return;
-        }
+    // @EventHandler(EventBus.LocalPlayer, "processMovement")
+    // public async processMovement(player: Player): Promise<void> {
+    //     if (this.human !== player || !this.isRunning()) {
+    //         return;
+    //     }
 
-        if (this.navigationSystemState === NavigationSystemState.Initialized) {
-            this.utilities.navigation.queueUpdateOrigin(player);
-        }
+    //     if (this.navigationSystemState === NavigationSystemState.Initialized) {
+    //         this.utilities.navigation.queueUpdateOrigin(player);
+    //     }
 
-        this.processQuantumBurst();
+    //     this.processQuantumBurst();
 
-        const objective = this.getCurrentObjective();
-        if (objective !== undefined) {
-            const result = await objective.onMove(this.context);
-            if (result === true) {
-                this.fullInterrupt("Target moved");
+    //     const objective = this.getCurrentObjective();
+    //     if (objective !== undefined) {
+    //         const result = await objective.onMove(this.context);
+    //         if (result === true) {
+    //             this.fullInterrupt("Target moved");
 
-            } else if (result) {
-                this.interrupt("Target moved", result);
-            }
-        }
-    }
+    //         } else if (result) {
+    //             this.interrupt("Target moved", result);
+    //         }
+    //     }
+    // }
 
     @EventHandler(EventBus.ItemManager, "remove")
     public onItemRemove(_: ItemManager, item: Item) {
@@ -330,9 +411,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    @EventHandler(EventBus.Players, "restEnd")
-    public onRestEnd(player: Player) {
-        if (this.human !== player) {
+    @EventHandler(EventBus.Humans, "restEnd")
+    public onRestEnd(human: Human) {
+        if (this.human !== human) {
             return;
         }
 
@@ -357,9 +438,22 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    @EventHandler(EventBus.NPCs, "postMove")
-    public async onNPCPostMove(npc: NPC, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+    @EventHandler(EventBus.NPCs, "renamed")
+    public onNpcRenamed(npc: NPC) {
         if (this.human !== npc) {
+            return;
+        }
+
+        this.utilities.logger.reloadLogSources();
+    }
+
+    @EventHandler(EventBus.Humans, "postMove")
+    public async onHumanPostMove(human: Human, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+        if (this.human !== human) {
+            return;
+        }
+
+        if (human.asPlayer && !this.isRunning()) {
             return;
         }
 
@@ -368,7 +462,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         // todo: sync this up with regular player logic
 
         if (this.navigationSystemState === NavigationSystemState.Initialized) {
-            this.utilities.navigation.queueUpdateOrigin(npc);
+            this.utilities.navigation.queueUpdateOrigin(human);
         }
 
         this.processQuantumBurst();
@@ -377,27 +471,27 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (objective !== undefined) {
             const result = await objective.onMove(this.context);
             if (result === true) {
-                this.fullInterrupt("Target npc moved");
+                this.fullInterrupt("Target moved");
 
             } else if (result) {
-                this.interrupt("Target npc moved", result);
+                this.interrupt("Target moved", result);
             }
         }
     }
 
-    @EventHandler(EventBus.Players, "moveComplete")
-    public onMoveComplete(player: Player) {
-        if (this.human !== player) {
+    @EventHandler(EventBus.Humans, "moveComplete")
+    public onMoveComplete(human: Human) {
+        if (this.human !== human) {
             return;
         }
 
-        this.utilities.movement.clearOverlay(player.getTile());
+        this.utilities.movement.clearOverlay(human.getTile());
     }
 
     @EventHandler(EventBus.Prompt, "queue", Priority.High)
     public onPrompt(host: Prompts.Events, prompt: IPrompt<IPromptDescriptionBase<any[]>>): string | boolean | void | InterruptChoice | undefined {
         if (this.isRunning() && (prompt.type === Prompt.GameDangerousStep || prompt.type === Prompt.GameIslandTravelConfirmation)) {
-            log.info(`Resolving true for prompt ${Prompt[prompt.type]}`);
+            this.log.info(`Resolving true for prompt ${Prompt[prompt.type]}`);
             prompt.resolve(InterruptChoice.Yes as any);
         }
     }
@@ -453,31 +547,15 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.action.postExecuteAction(api.type);
     }
 
-    @EventHandler(EventBus.Players, "processInput")
-    public processInput(player: Player): boolean | undefined {
-        if (this.human !== player || !this.isRunning()) {
+    @EventHandler(EventBus.Humans, "processInput")
+    public processInput(human: Human): boolean | undefined {
+        if (this.human !== human || !this.isRunning()) {
             return;
         }
 
         this.processQuantumBurst();
 
         return undefined;
-    }
-
-    @EventHandler(EventBus.Humans, "walkPathChange")
-    public onWalkPathChange(human: Human, walkPath: IVector2[] | undefined) {
-        if (this.human !== human || !this.isRunning() || !walkPath || walkPath.length === 0) {
-            return;
-        }
-
-        // run the following logic in the next tick
-        // this will ensure the walkPath can be changed from within this event (it needs to send the packet from another tick)
-        setTimeout(() => {
-            const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext);
-            if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
-                this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
-            }
-        }, 0);
     }
 
     @EventHandler(EventBus.Humans, "changeZ")
@@ -528,26 +606,41 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         switch (stat.type) {
             case Stat.Weight:
-                executor.markWeightChanged();
-
-                const weightStatus = human.getWeightStatus();
-                if (this.weightStatus !== weightStatus) {
-                    this.previousWeightStatus = this.weightStatus;
-
-                    this.weightStatus = weightStatus;
-
-                    if (weightStatus === WeightStatus.None) {
-                        return;
-                    }
-
-                    if (this.isRunning()) {
-                        // players weight status changed
-                        // reset objectives so we'll handle this immediately
-                        this.interrupt(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
-                    }
-                }
-
+                this.onWeightChange(false);
                 break;
+        }
+    }
+
+    @EventHandler(EventBus.Humans, "statMaxChanged")
+    public onStatMaxChanged(human: Human, stat: IStat, oldValue: number | undefined) {
+        if (this.human !== human || !this.isRunning() || stat.max === oldValue) {
+            return;
+        }
+
+        switch (stat.type) {
+            case Stat.Weight:
+                // interrupt when a max weight increase causes the weight status to change
+                this.onWeightChange(true);
+                break;
+        }
+    }
+
+    private onWeightChange(interruptWhenChangingToNone: boolean) {
+        this.executor.markWeightChanged();
+
+        const weightStatus = this.human.getWeightStatus();
+        if (this.weightStatus !== weightStatus) {
+            this.previousWeightStatus = this.weightStatus;
+
+            this.weightStatus = weightStatus;
+
+            if (!interruptWhenChangingToNone && weightStatus === WeightStatus.None) {
+                return;
+            }
+
+            // players weight status changed
+            // reset objectives so we'll handle this immediately
+            this.interrupt(`Weight status changed from ${this.previousWeightStatus !== undefined ? WeightStatus[this.previousWeightStatus] : "N/A"} to ${WeightStatus[this.weightStatus]}`);
         }
     }
 
@@ -573,7 +666,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     ////////////////////////////////////////////////
 
     public getContext(): Context {
-        return this.context ?? new Context(this.human, this.base, this.inventory, this.utilities, this.saveData.options);
+        return this.context ?? new Context(this, this.base, this.inventory, this.utilities);
+    }
+
+    public get asNPC(): TarsNPC | undefined {
+        return this.human.asNPC as (TarsNPC | undefined);
     }
 
     public isEnabled(): boolean {
@@ -596,9 +693,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.saveData.enabled = enabled;
         this.event.emit("enableChange", enabled);
 
-        log.info(this.saveData.enabled ? "Enabled" : "Disabled");
+        this.log.info(this.saveData.enabled ? "Enabled" : "Disabled");
 
-        this.context = new Context(this.human, this.base, this.inventory, this.utilities, this.saveData.options);
+        this.context = new Context(this, this.base, this.inventory, this.utilities);
 
         this.utilities.item.initialize(this.context);
 
@@ -607,7 +704,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.reset();
 
         if (this.saveData.enabled) {
-            this.overlay.show();
+            if (this.saveData.options.navigationOverlays) {
+                this.overlay.show();
+            }
 
             this.utilities.navigation.queueUpdateOrigin(this.human);
 
@@ -630,7 +729,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         if (changedOptions.length > 0) {
-            log.info(`Updating options: ${changedOptions.join(", ")}`);
+            this.log.info(`Updating options: ${changedOptions.join(", ")}`);
 
             this.event.emit("optionsChange", this.saveData.options);
 
@@ -643,7 +742,15 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         break;
 
                     case "survivalExploreIslands":
-                        this.context?.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+                        if (this.context) {
+                            const moveToNewIslandState = this.context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+                            if (moveToNewIslandState !== MovingToNewIslandState.None) {
+                                this.context.setData(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
+
+                            } else {
+                                shouldInterrupt = false;
+                            }
+                        }
                         break;
 
                     case "goodCitizen":
@@ -665,9 +772,19 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                         break;
 
+                    case "navigationOverlays":
+                        if (this.saveData.options.navigationOverlays) {
+                            this.overlay.show();
+
+                        } else {
+                            this.overlay.hide();
+                        }
+
+                        break;
+
                     case "debugLogging":
                         shouldInterrupt = false;
-                        planner.debug = this.saveData.options.debugLogging;
+                        this.planner.debug = this.saveData.options.debugLogging;
                         break;
                 }
             }
@@ -675,6 +792,16 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             if (shouldInterrupt) {
                 this.fullInterrupt("Option changed");
             }
+        }
+    }
+
+    public updateWalkPath(path: IVector2[]) {
+        const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext, path);
+        if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
+            this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
+
+        } else {
+            UpdateWalkPath.execute(this.human, path, true);
         }
     }
 
@@ -689,9 +816,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     @Bound
-    public getStatus(): TarsTranslation | string {
+    public getStatus(): Translation | string {
         if (this.navigationSystemState === NavigationSystemState.Initializing) {
-            return TarsTranslation.DialogStatusNavigatingInitializing;
+            return getTarsTranslation(TarsTranslation.DialogStatusNavigatingInitializing);
         }
 
         if (!this.isRunning()) {
@@ -702,7 +829,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         let planStatusMessage: string | undefined;
 
-        const plan = executor.getPlan();
+        const plan = this.executor.getPlan();
         if (plan !== undefined) {
             planStatusMessage = plan.tree.objective.getStatusMessage(this.context);
         }
@@ -728,13 +855,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             statusMessage = "Miscellaneous processing";
 
             if (plan) {
-                log.warn("Missing status message for objective", plan.tree.objective.getIdentifier(this.context));
+                this.log.warn("Missing status message for objective", plan.tree.objective.getIdentifier(this.context));
             }
         }
 
         if (this.lastStatusMessage !== statusMessage) {
             this.lastStatusMessage = statusMessage;
-            log.info(`Status: ${statusMessage}`);
+            this.log.info(`Status: ${statusMessage}`);
         }
 
         const walkPath = this.context.human.walkPath;
@@ -746,7 +873,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     public updateStatus() {
-        this.event.emit("statusChange", this.getStatus());
+        this.event.emit("statusChange");
     }
 
     public async ensureSailingMode(sailingMode: boolean) {
@@ -759,7 +886,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         if (this.utilities.navigation.shouldUpdateSailingMode(sailingMode)) {
-            log.info("Updating sailing mode", sailingMode);
+            this.log.info("Updating sailing mode", sailingMode);
 
             this.navigationUpdatePromise = new ResolvablePromise();
 
@@ -800,27 +927,24 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    private async getOrCreateModeInstance(context: Context): Promise<ITarsMode> {
+    private async getOrCreateModeInstance(context: Context): Promise<ITarsMode | undefined> {
         const mode = this.saveData.options.mode;
 
         let modeInstance = this.modeCache.get(mode);
         if (!modeInstance) {
             const modeConstructor = modes.get(mode);
-            if (!modeConstructor) {
-                this.disable();
-                throw new Error(`Missing mode initializer for ${TarsMode[mode]}`);
+            if (modeConstructor) {
+                modeInstance = new modeConstructor();
+
+                await this.initializeMode(context, mode, modeInstance);
             }
-
-            modeInstance = new modeConstructor();
-
-            await this.initializeMode(context, mode, modeInstance);
         }
 
         return modeInstance;
     }
 
     private async initializeMode(context: Context, mode: TarsMode, modeInstance: ITarsMode) {
-        log.info(`Initializing ${TarsMode[mode]}`);
+        this.log.info(`Initializing ${TarsMode[mode]}`);
 
         this.disposeMode(context, mode);
 
@@ -841,12 +965,12 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             EventManager.deregisterEventBusSubscriber(modeInstance);
             this.modeCache.delete(mode);
 
-            log.info(`Disposed of "${TarsMode[mode]}" mode`);
+            this.log.info(`Disposed of "${TarsMode[mode]}" mode`);
         }
     }
 
     private reset(options?: Partial<IResetOptions>) {
-        executor.reset();
+        this.executor.reset();
 
         for (const mode of Array.from(this.modeCache.keys())) {
             if (options?.delete || mode !== TarsMode.Manual) {
@@ -901,9 +1025,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.context = undefined as any;
             this.modeCache.clear();
 
-        } else if (options?.resetContext) {
-            this.context = new Context(this.human, this.base, this.inventory, this.utilities, this.saveData.options);
+        } else if (options?.resetContext || options?.resetInventory || options?.resetBase) {
+            this.createContext();
         }
+    }
+
+    private createContext() {
+        this.context = new Context(this, this.base, this.inventory, this.utilities);
     }
 
     private clearCaches(): void {
@@ -923,9 +1051,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private interrupt(reason: string, ...interruptObjectives: IObjective[]) {
-        log.info(`Interrupt: ${reason}`, Plan.getPipelineString(this.context, interruptObjectives));
+        this.log.info(`Interrupt: ${reason}`, Plan.getPipelineString(this.context, interruptObjectives));
 
-        executor.interrupt();
+        this.executor.interrupt();
 
         this.objectivePipeline = undefined;
 
@@ -934,7 +1062,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         this.utilities.movement.resetMovementOverlays();
-        this.human.walkAlongPath(undefined);
+
+        // run outside the current context
+        setTimeout(() => {
+            UpdateWalkPath.execute(this.human, undefined);
+        }, 0);
     }
 
     // todo: make this the default?
@@ -956,7 +1088,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.updateStatus();
 
         } catch (ex) {
-            log.error("onTick error", ex);
+            this.log.error("onTick error", ex);
         }
 
         if (this.tickTimeoutId === undefined) {
@@ -972,17 +1104,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private async onTick() {
-        if (!this.isRunning() || !executor.isReady(this.context, false)) {
+        if (!this.isRunning() || !this.executor.isReady(this.context, false)) {
             if (this.quantumBurstCooldown === 2) {
                 this.quantumBurstCooldown--;
                 this.event.emit("quantumBurstChange", QuantumBurstStatus.CooldownStart);
             }
 
             if (game.playing && this.context.human.isGhost() && game.getGameOptions().respawn && this.context.human.asPlayer) {
-                await new ExecuteAction(ActionType.Respawn, (context, action) => {
-                    action.execute(context.actionExecutor as Player);
-                    return ObjectiveResult.Complete;
-                }).execute(this.context);
+                await new ExecuteAction(Respawn, []).execute(this.context);
             }
 
             return;
@@ -995,13 +1124,21 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.clearCaches();
 
-        await this.utilities.navigation.processQueuedOriginUpdate();
+        // ensure context positions are set correctly
+        // required since some contexts might not be reset for a while
+        for (const context of [this.context, this.interruptContext, ...this.interruptContexts.values()]) {
+            context?.resetPosition();
+        }
 
         // system objectives
-        await executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
+        await this.executor.executeObjectives(this.context, [new AnalyzeInventory(), new AnalyzeBase()], false, false);
 
         // interrupts
         const modeInstance = await this.getOrCreateModeInstance(this.context);
+        if (!modeInstance) {
+            this.disable();
+            return;
+        }
 
         const interrupts = modeInstance.getInterrupts ?
             await modeInstance.getInterrupts(this.context) :
@@ -1024,13 +1161,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         if (interruptsChanged) {
-            log.info(`Interrupts changed from ${this.interruptIds ? Array.from(this.interruptIds).join(", ") : undefined} to ${Array.from(interruptIds).join(", ")}`);
+            this.log.info(`Interrupts changed from ${this.interruptIds ? Array.from(this.interruptIds).join(", ") : undefined} to ${Array.from(interruptIds).join(", ")}`);
             this.interruptIds = interruptIds;
             this.interruptObjectivePipeline = undefined;
         }
 
-        // log.debug("objectivePipeline", this.objectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
-        // log.debug("interruptObjectivePipeline", this.interruptObjectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+        // this.log.debug("objectivePipeline", this.objectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
+        // this.log.debug("interruptObjectivePipeline", this.interruptObjectivePipeline?.map(objective => objective.getHashCode()).join(" -> "));
 
         if (this.interruptObjectivePipeline || interrupts.length > 0) {
             if (!this.interruptContext) {
@@ -1042,20 +1179,20 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                 this.interruptContexts.clear();
 
-                log.debug(`Created interrupt context with hash code: ${this.interruptContext.getHashCode()}`);
+                this.log.debug(`Created interrupt context with hash code: ${this.interruptContext.getHashCode()}`);
             }
 
             if (this.interruptObjectivePipeline) {
                 const interruptHashCode = Plan.getPipelineString(this.context, this.interruptObjectivePipeline);
 
-                log.info("Continuing interrupt execution", interruptHashCode);
+                this.log.info("Continuing interrupt execution", interruptHashCode);
 
-                const result = await executor.executeObjectives(this.interruptContext, this.interruptObjectivePipeline, false);
+                const result = await this.executor.executeObjectives(this.interruptContext, this.interruptObjectivePipeline, false);
                 switch (result.type) {
                     case ExecuteObjectivesResultType.Completed:
                         this.interruptObjectivePipeline = undefined;
                         // this.interruptIds = undefined;
-                        log.info("Completed interrupt objectives");
+                        this.log.info("Completed interrupt objectives");
                         break;
 
                     case ExecuteObjectivesResultType.Restart:
@@ -1069,10 +1206,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         if (interruptHashCode === afterInterruptHashCode) {
                             this.interruptObjectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
                             // this.objectivePipeline = undefined;
-                            log.info(`Updated continuing interrupt objectives - ${ExecuteObjectivesResultType[result.type]}`, Plan.getPipelineString(this.context, this.interruptObjectivePipeline));
+                            this.log.info(`Updated continuing interrupt objectives - ${ExecuteObjectivesResultType[result.type]}`, Plan.getPipelineString(this.context, this.interruptObjectivePipeline));
 
                         } else {
-                            log.info(`Ignoring continuing interrupt objectives due to changed interrupts - ${ExecuteObjectivesResultType[result.type]}. Before: ${interruptHashCode}. After: ${afterInterruptHashCode}`);
+                            this.log.info(`Ignoring continuing interrupt objectives due to changed interrupts - ${ExecuteObjectivesResultType[result.type]}. Before: ${interruptHashCode}. After: ${afterInterruptHashCode}`);
                         }
 
                         return;
@@ -1081,7 +1218,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         this.interruptObjectivePipeline = undefined;
                         // this.interruptIds = undefined;
                         // this.objectivePipeline = undefined;
-                        log.info("Clearing interrupt objective pipeline");
+                        this.log.info("Clearing interrupt objective pipeline");
                         return;
                 }
             }
@@ -1097,12 +1234,12 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     if (savedContext) {
                         this.interruptContext = savedContext;
 
-                        log.debug(`Restored saved context from ${i}. ${this.interruptContext.getHashCode()}`);
+                        this.log.debug(`Restored saved context from ${i}. ${this.interruptContext.getHashCode()}`);
                     }
 
-                    const result = await executor.executeObjectives(this.interruptContext, [interruptObjectives], true);
+                    const result = await this.executor.executeObjectives(this.interruptContext, [interruptObjectives], true);
 
-                    // log.debug("Interrupt result", result);
+                    // this.log.debug("Interrupt result", result);
 
                     if (!this.interruptContext) {
                         // tars was disabled mid run
@@ -1122,7 +1259,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                             if (this.interruptContexts.has(i)) {
                                 this.interruptContexts.delete(i);
-                                log.debug(`Deleting saved context from ${i}`);
+                                this.log.debug(`Deleting saved context from ${i}`);
                             }
                             break;
 
@@ -1131,7 +1268,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                             // save this context so it will be restored next time
                             this.interruptContexts.set(i, this.interruptContext.clone());
-                            log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext.getHashCode()}`);
+                            this.log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext.getHashCode()}`);
 
                             // update the initial state so we don't mess with items between interrupts
                             this.interruptContext.setInitialState();
@@ -1149,19 +1286,19 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 }
             }
 
-            // console.log.info("this.objective", this.objective ? this.objective.getHashCode() : undefined);
+            // console.this.log.info("this.objective", this.objective ? this.objective.getHashCode() : undefined);
 
-            if (executor.tryClearInterrupt()) {
+            if (this.executor.tryClearInterrupt()) {
                 // nested interrupt. update interrupt context
                 this.interruptContext.setInitialState();
 
-                log.debug(`Nested interrupt. Updating context with hash code: ${this.interruptContext.getHashCode()}`);
+                this.log.debug(`Nested interrupt. Updating context with hash code: ${this.interruptContext.getHashCode()}`);
 
                 return;
             }
         }
 
-        if (executor.tryClearInterrupt()) {
+        if (this.executor.tryClearInterrupt()) {
             return;
         }
 
@@ -1172,9 +1309,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             // we have an objective we are working on
             const hashCode = Plan.getPipelineString(this.context, this.objectivePipeline);
 
-            log.info("Continuing execution of objectives", hashCode);
+            this.log.info("Continuing execution of objectives", hashCode);
 
-            const result = await executor.executeObjectives(this.context, this.objectivePipeline, false, true);
+            const result = await this.executor.executeObjectives(this.context, this.objectivePipeline, false, true);
             switch (result.type) {
                 case ExecuteObjectivesResultType.Completed:
                     this.objectivePipeline = undefined;
@@ -1190,10 +1327,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                     if (hashCode === afterHashCode) {
                         this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
-                        log.info(`Updated continuing objectives - ${ExecuteObjectivesResultType[result.type]}`, Plan.getPipelineString(this.context, this.objectivePipeline));
+                        this.log.info(`Updated continuing objectives - ${ExecuteObjectivesResultType[result.type]}`, Plan.getPipelineString(this.context, this.objectivePipeline));
 
                     } else {
-                        log.info(`Ignoring continuing objectives due to changed objectives - ${ExecuteObjectivesResultType[result.type]}. Resetting. Before: ${hashCode}. After: ${afterHashCode}`);
+                        this.log.info(`Ignoring continuing objectives due to changed objectives - ${ExecuteObjectivesResultType[result.type]}. Resetting. Before: ${hashCode}. After: ${afterHashCode}`);
 
                         // todo: the hash code might change because a StoneWaterStill became a LitStoneWaterStill. that might be okay
                         this.objectivePipeline = undefined;
@@ -1210,17 +1347,17 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         // reset before determining objectives
         this.context.reset();
-        log.debug(`Reset context state. Context hash code: ${this.context.getHashCode()}.`);
+        this.log.debug(`Reset context state. Context hash code: ${this.context.getHashCode()}.`);
 
         const objectives = await modeInstance.determineObjectives(this.context);
 
-        const result = await executor.executeObjectives(this.context, objectives, true, true);
+        const result = await this.executor.executeObjectives(this.context, objectives, true, true);
         switch (result.type) {
             case ExecuteObjectivesResultType.Pending:
             case ExecuteObjectivesResultType.ContinuingNextTick:
                 // save the active objective
                 this.objectivePipeline = result.objectives.length > 0 ? result.objectives : undefined;
-                log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, Plan.getPipelineString(this.context, this.objectivePipeline));
+                this.log.info(`Saved objectives - ${ExecuteObjectivesResultType[result.type]}`, Plan.getPipelineString(this.context, this.objectivePipeline));
                 this.updateStatus();
                 return;
 
@@ -1357,7 +1494,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 return undefined;
             }
 
-            log.info(`Going to equip ${itemToEquip} (score: ${this.utilities.item.calculateEquipItemScore(itemToEquip)}) in slot ${EquipType[equip]}.${item ? ` Replacing ${item} (score: ${this.utilities.item.calculateEquipItemScore(item)})` : ""}`);
+            this.log.info(`Going to equip ${itemToEquip} (score: ${this.utilities.item.calculateEquipItemScore(itemToEquip)}) in slot ${EquipType[equip]}.${item ? ` Replacing ${item} (score: ${this.utilities.item.calculateEquipItemScore(item)})` : ""}`);
 
             if (item !== undefined) {
                 return new UnequipItem(item);
@@ -1372,40 +1509,43 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return undefined;
         }
 
+        const queuedRepairs = new Set<Item>();
+
         const objectives = [
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.LeftHand)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.RightHand)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Chest)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Legs)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Head)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Belt)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Feet)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Neck)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Hands)),
-            this.repairInterrupt(context, context.human.getEquippedItem(EquipType.Back)),
-            this.repairInterrupt(context, this.inventory.knife),
-            this.repairInterrupt(context, this.inventory.fireStarter),
-            this.repairInterrupt(context, this.inventory.hoe),
-            this.repairInterrupt(context, this.inventory.axe),
-            this.repairInterrupt(context, this.inventory.pickAxe),
-            this.repairInterrupt(context, this.inventory.shovel),
-            this.repairInterrupt(context, this.inventory.equipSword),
-            this.repairInterrupt(context, this.inventory.equipShield),
-            this.repairInterrupt(context, this.inventory.tongs),
-            this.repairInterrupt(context, this.inventory.bed),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.MainHand)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.OffHand)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Chest)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Legs)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Head)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Belt)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Feet)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Neck)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Hands)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Back)),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.knife),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.butcher),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.fireStarter),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.hoe),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.axe),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.pickAxe),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.shovel),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.equipSword),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.equipShield),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.tongs),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.bed),
         ];
 
         if (this.inventory.waterContainer) {
             for (const waterContainer of this.inventory.waterContainer) {
-                objectives.push(this.repairInterrupt(context, waterContainer));
+                objectives.push(this.repairInterrupt(context, queuedRepairs, waterContainer));
             }
         }
 
         return objectives.filter(objective => objective !== undefined) as IObjective[];
     }
 
-    private repairInterrupt(context: Context, item: Item | undefined): IObjective | undefined {
-        if (item === undefined || item.minDur === undefined || item.maxDur === undefined) {
+    private repairInterrupt(context: Context, queuedRepairs: Set<Item>, item: Item | undefined): IObjective | undefined {
+        if (item === undefined || item.minDur === undefined || item.maxDur === undefined || queuedRepairs.has(item)) {
             return undefined;
         }
 
@@ -1419,33 +1559,35 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return undefined;
         }
 
+        queuedRepairs.add(item);
+
         return new RepairItem(item);
     }
 
     private nearbyCreatureInterrupt(context: Context): IObjective | undefined {
-        const shouldRunAwayFromAllCreatures = creatureUtilities.shouldRunAwayFromAllCreatures(context);
+        const shouldRunAwayFromAllCreatures = context.utilities.creature.shouldRunAwayFromAllCreatures(context);
 
         for (const facingDirecton of Direction.CARDINALS_AND_NONE) {
             const creature = this.checkNearbyCreature(context, facingDirecton);
             if (creature !== undefined) {
                 const tamingCreature = context.getData<Creature>(ContextDataType.TamingCreature);
                 if (tamingCreature && tamingCreature === creature) {
-                    log.info(`Not defending against ${creature.getName().getString()} because we're trying to tame it`);
+                    this.log.info(`Not defending against ${creature.getName().getString()} because we're trying to tame it`);
                     continue;
                 }
 
-                log.info(`Defend against ${creature.getName().getString()}`);
-                return new DefendAgainstCreature(creature, shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature));
+                this.log.info(`Defend against ${creature.getName().getString()}`);
+                return new DefendAgainstCreature(creature, shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature));
             }
         }
 
-        const nearbyCreatures = creatureUtilities.getNearbyCreatures(context);
+        const nearbyCreatures = context.utilities.creature.getNearbyCreatures(context);
         for (const creature of nearbyCreatures) {
-            if (shouldRunAwayFromAllCreatures || creatureUtilities.isScaredOfCreature(context, creature)) {
+            if (shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature)) {
                 // only run away if the creature can path to us
                 const path = creature.findPath(context.human, 16, context.human);
                 if (path) {
-                    log.info(`Run away from ${creature.getName().getString()}`);
+                    this.log.info(`Run away from ${creature.getName().getString()}`);
                     return new RunAwayFromTarget(creature);
                 }
             }
@@ -1527,6 +1669,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         const step = corpse.step || 0;
                         const count = resources.length - step;
 
+                        // try to butcher it the maximum amount of times. the actual amount of times could be different due to randomness
                         for (let i = 0; i < count; i++) {
                             objectives.push(new ButcherCorpse(corpse));
                         }
@@ -1564,14 +1707,15 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
      * Move reserved items into intermediate chests if the player is near the base and is moving away
      * Explicitly not using OrganizeInventory for this - the exact objectives should be specified to prevent issues
      */
-    private organizeInventoryInterrupts(context: Context, interruptContext?: Context): IObjective[] | undefined {
+    private organizeInventoryInterrupts(context: Context, interruptContext?: Context, walkPath?: IVector2[]): IObjective[] | undefined {
         if (context.getDataOrDefault(ContextDataType.DisableMoveAwayFromBaseItemOrganization, false) ||
             context.getData(ContextDataType.MovingToNewIsland) === MovingToNewIslandState.Ready) {
             return undefined;
         }
 
-        const walkPath = context.human.walkPath;
-        if (walkPath === undefined || walkPath.path.length === 0) {
+        walkPath ??= context.human.walkPath?.path;
+
+        if (walkPath === undefined || walkPath.length === 0) {
             return undefined;
         }
 
@@ -1579,7 +1723,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return undefined;
         }
 
-        const target = walkPath.path[walkPath.path.length - 1];
+        const target = walkPath[walkPath.length - 1];
         const point = { x: target.x, y: target.y, z: context.human.z };
         if (this.utilities.base.isNearBase(context, point) &&
             TileHelpers.getType(context.island.getTileFromPoint(point)) !== TerrainType.CaveEntrance) {
@@ -1617,7 +1761,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             }
         }
 
-        log.info(
+        this.log.info(
             objectives.length > 0 ? "Going to organize inventory space" : "Will not organize inventory space",
             `Reserved items: ${reservedItems.join(",")}`,
             `Unused items: ${unusedItems.join(",")}`,
@@ -1643,14 +1787,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return;
         }
 
-        const player = this.context.human.asPlayer;
-        if (!player) {
-            return;
-        }
-
-        player.nextMoveTime = 0;
-        player.movementFinishTime = 0;
-        player.attackAnimationEndTime = 0;
+        this.context.human.nextMoveTime = 0;
+        // this.context.human.movementFinishTime = 0;
+        this.context.human.attackAnimationTime = undefined;
 
         while (this.context.human.hasDelay()) {
             game.absoluteTime += 100;

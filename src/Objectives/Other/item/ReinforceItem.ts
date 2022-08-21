@@ -1,8 +1,8 @@
-import { ActionType } from "game/entity/action/IAction";
+import { ActionArguments, ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
+import Reinforce from "game/entity/action/actions/Reinforce";
 
 import type Context from "../../../core/context/Context";
-import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
@@ -10,6 +10,7 @@ import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
+import ReserveItems from "../../core/ReserveItems";
 
 /**
  * Reinforces an item if
@@ -41,26 +42,28 @@ export default class ReinforceItem extends Objective {
 
 		this.log.info(`Reinforcing item. Current durability: ${this.item.minDur}/${this.item.maxDur}`);
 
+		const itemContextDataKey = this.getUniqueContextDataKey("ReinforceItem");
+
 		const objectives: IObjective[] = [];
 
 		const reinforceItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Reinforce);
 		if (reinforceItems.length > 0) {
-			objectives.push(new SetContextData(ContextDataType.Item1, reinforceItems[0]));
+			objectives.push(new ReserveItems(reinforceItems[0]).keepInInventory());
+			objectives.push(new SetContextData(itemContextDataKey, reinforceItems[0]));
 
 		} else {
-			objectives.push(new AcquireItemForAction(ActionType.Reinforce).setContextDataKey(ContextDataType.Item1));
+			objectives.push(new AcquireItemForAction(ActionType.Reinforce).setContextDataKey(itemContextDataKey));
 		}
 
 		objectives.push(
-			new ExecuteAction(ActionType.Reinforce, (context, action) => {
-				const reinforceItem = context.getData(ContextDataType.Item1);
+			new ExecuteAction(Reinforce, (context) => {
+				const reinforceItem = context.getData(itemContextDataKey);
 				if (!reinforceItem) {
 					this.log.error("Invalid reinforce item");
 					return ObjectiveResult.Restart;
 				}
 
-				action.execute(context.actionExecutor, reinforceItem, this.item);
-				return ObjectiveResult.Complete;
+				return [reinforceItem, this.item] as ActionArguments<typeof Reinforce>;
 			}).setStatus(this),
 			new Lambda(async context => {
 				if (this.needsReinforcement(context)) {

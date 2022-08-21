@@ -8,13 +8,21 @@ import GatherFromCorpse from "../../gather/GatherFromCorpse";
 import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
-import GatherFromTerrain from "../../gather/GatherFromTerrain";
+import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
 import { IObjectivePriority } from "../../../core/objective/IObjective";
 
 export interface IAcquireItemOptions extends IGatherItemOptions {
-	disableCreatureSearch: boolean;
-	disableDoodadSearch: boolean;
+	disallowCreatureSearch: boolean;
+	disallowDoodadSearch: boolean;
+
 	excludeItemTypes: Set<ItemType>;
+
+	disallowTerrain: boolean;
+	disallowWell: boolean;
+
+	allowStartingWaterStill: boolean;
+	allowWaitingForWater: boolean;
+	onlyIdleWhenWaitingForWaterStill?: boolean;
 }
 
 export interface IGatherItemOptions {
@@ -141,7 +149,7 @@ export default abstract class AcquireBase extends Objective {
 			result.gatherWithoutChestObjectiveCount++;
 			result.priority += 500;
 
-		} else if (tree.objective instanceof GatherFromTerrain) {
+		} else if (tree.objective instanceof GatherFromTerrainResource) {
 			result.gatherObjectiveCount++;
 			result.gatherWithoutChestObjectiveCount++;
 			result.priority += 200;

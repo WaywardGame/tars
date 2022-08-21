@@ -14,7 +14,7 @@ export default class Plan implements IPlan {
     constructor(planner: IPlanner, context: Context, objectiveInfo: IObjectiveInfo, objectives: IObjectiveInfo[]);
     getTreeString(root?: IExecutionTree): string;
     execute(preExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined, postExecuteObjective: (getObjectiveResults: () => IObjective[]) => ExecuteResult | undefined): Promise<ExecuteResult>;
-    private flattenTree;
+    private processTree;
     private createOptimizedExecutionTreeV2;
     private getObjectiveResults;
     private getExecutionTreePosition;

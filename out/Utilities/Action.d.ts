@@ -1,11 +1,11 @@
-import ActionExecutor from "game/entity/action/ActionExecutor";
-import actionDescriptions from "game/entity/action/Actions";
-import type { ActionType, IActionDescription } from "game/entity/action/IAction";
+import { ActionArguments, ActionType, AnyActionDescription } from "game/entity/action/IAction";
+import Message from "language/dictionary/Message";
 import type Context from "../core/context/Context";
 import { ObjectiveResult } from "../core/objective/IObjective";
+export declare type GetActionArguments<T extends AnyActionDescription, AV = ActionArguments<T>> = AV | ((context: Context) => AV | ObjectiveResult.Restart);
 export declare class ActionUtilities {
     private pendingActions;
-    executeAction<T extends ActionType>(context: Context, actionType: T, executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => ObjectiveResult): Promise<ObjectiveResult>;
+    executeAction<T extends AnyActionDescription>(context: Context, action: T, args: GetActionArguments<T>, expectedMessages?: Set<Message>, expectedCannotUseResult?: ObjectiveResult): Promise<ObjectiveResult>;
     postExecuteAction(actionType: ActionType): void;
     private waitForAction;
 }

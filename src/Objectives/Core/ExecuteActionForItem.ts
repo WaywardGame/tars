@@ -1,7 +1,5 @@
 import Stream from "@wayward/goodstream/Stream";
-import type ActionExecutor from "game/entity/action/ActionExecutor";
-import type actionDescriptions from "game/entity/action/Actions";
-import type { IActionDescription } from "game/entity/action/IAction";
+import type { AnyActionDescription } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import type { TerrainType } from "game/tile/ITerrain";
@@ -10,12 +8,20 @@ import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
 import TileHelpers from "utilities/game/TileHelpers";
+import Item from "game/item/Item";
+import MoveItem from "game/entity/action/actions/MoveItem";
+import Harvest from "game/entity/action/actions/Harvest";
+import Butcher from "game/entity/action/actions/Butcher";
+import Chop from "game/entity/action/actions/Chop";
+import Dig from "game/entity/action/actions/Dig";
+import Mine from "game/entity/action/actions/Mine";
+
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
-import Item from "game/item/Item";
+import { GetActionArguments } from "../../utilities/Action";
 
 export enum ExecuteActionType {
 	Generic,
@@ -24,40 +30,44 @@ export enum ExecuteActionType {
 	Corpse,
 }
 
-export interface IExecuteActionForItemOptions<T extends ActionType> {
+export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
 	onlyAllowHarvesting: boolean;
 	onlyGatherWithHands: boolean;
 
 	moveAllMatchingItems: boolean;
 
-	actionType: ActionType;
-	executor: (context: Context, action: ((typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never)) => void
+	genericAction: {
+		action: T;
+		args: GetActionArguments<T>;
+	};
+
+	preRetry: (context: Context) => ObjectiveResult | undefined,
 }
 
-export default class ExecuteActionForItem<T extends ActionType> extends Objective {
+export default class ExecuteActionForItem<T extends AnyActionDescription> extends Objective {
 
 	private terrainTileType: TerrainType | undefined;
 
+	private readonly itemTypes: Set<ItemType>;
+
 	constructor(
 		private readonly type: ExecuteActionType,
-		private readonly itemTypes: ItemType[],
+		itemTypes: Set<ItemType> | ItemType[],
 		private readonly options?: Partial<IExecuteActionForItemOptions<T>>) {
 		super();
+
+		this.itemTypes = !(itemTypes instanceof Set) ? new Set(itemTypes) : itemTypes;
 	}
 
 	public getIdentifier(): string {
-		return `ExecuteActionForItem:${ExecuteActionType[this.type]}${this.options?.actionType !== undefined ? `:${ActionType[this.options.actionType]}` : ""}`;
+		return `ExecuteActionForItem:${ExecuteActionType[this.type]}${this.options?.genericAction !== undefined ? `:${ActionType[this.options.genericAction.action.type!]}` : ""}`;
 	}
 
 	public getStatus(): string | undefined {
-		if (this.itemTypes.length > 1) {
-			const translation = Stream.values(Array.from(new Set(this.itemTypes)).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
-				.collect(Translation.formatList, ListEnder.Or);
+		const translation = Stream.values(Array.from(this.itemTypes).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+			.collect(Translation.formatList, ListEnder.Or);
 
-			return `Acquiring ${translation.getString()}`;
-		}
-
-		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemTypes[0]).getString()}`;
+		return `Acquiring ${translation.getString()}`;
 	}
 
 	public override isDynamic(): boolean {
@@ -65,10 +75,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		// settings this here screws up AcquireWaterContainer
-		// only set this once we get the item
-
-		// ! updated comment: this must be there !
+		// ! this must be here !
 		// example: AcquireItemWithRecipe -> IgniteItem 
 		// it should set LastAcquiredItem to undefined, then IgnoreItem will return .Restart
 		// without this, LastAcquiredItem might be some other item before the AcquireItemWithRecipe craft, which would break Ignite
@@ -79,6 +86,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		}
 
 		const tile = context.human.getFacingTile();
+		const facingPoint = context.human.getFacingPoint();
 		const tileType = TileHelpers.getType(tile);
 
 		const terrainDescription = Terrains[tileType];
@@ -94,11 +102,10 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			return ObjectiveResult.Restart;
 		}
 
-		let actionType: ActionType;
-		const actionArguments: any[] = [];
+		let result: ObjectiveResult;
 
 		switch (this.type) {
-			case ExecuteActionType.Doodad:
+			case ExecuteActionType.Doodad: {
 				const doodad = tile.doodad;
 				if (!doodad) {
 					return ObjectiveResult.Restart;
@@ -113,79 +120,50 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 					return ObjectiveResult.Restart;
 				}
 
-				if (doodad.canHarvest()) {
-					actionType = ActionType.Harvest;
+				const action = doodad.canHarvest() ? Harvest : doodad.isGatherable() ? Chop : undefined;
 
-				} else if (doodad.isGatherable()) {
-					actionType = ActionType.Chop;
-
-				} else {
+				if (!action || (this.options?.onlyAllowHarvesting && action !== Harvest)) {
 					return ObjectiveResult.Restart;
 				}
 
-				if (this.options?.onlyAllowHarvesting && actionType !== ActionType.Harvest) {
-					return ObjectiveResult.Restart;
-				}
-
-				if (this.options?.onlyGatherWithHands) {
-					// tool, bypass
-					actionArguments.push(undefined, true);
-
-				} else {
-					actionArguments.push(context.utilities.item.getBestToolForDoodadGather(context, doodad));
-				}
+				result = await this.executeActionForItem(context, this.itemTypes, action, [this.options?.onlyGatherWithHands ? undefined : context.utilities.item.getBestToolForDoodadGather(context, doodad)]);
 
 				break;
+			}
 
 			case ExecuteActionType.Terrain:
-				actionType = terrainDescription.gather ? ActionType.Mine : ActionType.Dig;
+				const action = terrainDescription.gather ? Mine : Dig;
 
-				if (actionType === ActionType.Dig && !context.utilities.tile.canDig(context, tile)) {
+				if (action === Dig && !context.utilities.tile.canDig(context, facingPoint)) {
 					return ObjectiveResult.Restart;
 				}
 
-				actionArguments.push(context.utilities.item.getBestToolForTerrainGather(context, tileType));
+				result = await this.executeActionForItem(context, this.itemTypes, action, [context.utilities.item.getBestToolForTerrainGather(context, tileType)]);
 
 				break;
 
 			case ExecuteActionType.Corpse:
-				const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
-
-				if (tool === undefined || !context.utilities.tile.canButcherCorpse(context, tile)) {
+				const tool = context.inventory.butcher;
+				if (tool === undefined || !context.utilities.tile.canButcherCorpse(context, facingPoint, tool)) {
 					return ObjectiveResult.Restart;
 				}
 
-				actionType = ActionType.Butcher;
-				actionArguments.push(tool);
+				result = await this.executeActionForItem(context, this.itemTypes, Butcher, [tool]);
 
 				break;
 
 			case ExecuteActionType.Generic:
-				if (this.options?.actionType === undefined) {
-					this.log.error("Invalid action type");
+				if (this.options?.genericAction === undefined) {
+					this.log.error("Invalid action");
 					return ObjectiveResult.Impossible;
 				}
 
-				actionType = this.options.actionType;
+				result = await this.executeActionForItem(context, this.itemTypes, this.options.genericAction.action, this.options.genericAction.args);
+
 				break;
 
 			default:
 				return ObjectiveResult.Complete;
-		}
-
-		const result = await this.executeActionForItem(context, this.itemTypes, actionType, ((context: Context, action: any) => {
-			if (this.options?.executor) {
-				this.options.executor(context, action);
-
-			} else {
-				action.execute(context.actionExecutor, ...actionArguments);
-			}
-		}) as any);
-
-		// console.log("Result", ObjectiveResult[result]);
-		if (this.type === ExecuteActionType.Generic) {
-			// never return undefined for generic - that would make it retry this objective with the same arguments
-			return result === ObjectiveResult.Complete ? ObjectiveResult.Complete : ObjectiveResult.Restart;
 		}
 
 		return result;
@@ -195,14 +173,14 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 		return 1;
 	}
 
-	private async executeActionForItem<T extends ActionType>(
-		context: Context,
-		itemTypes: ItemType[],
-		actionType: T,
-		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void): Promise<ObjectiveResult> {
-		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, actionType, executor as any);
+	private async executeActionForItem<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: T, args: GetActionArguments<T>): Promise<ObjectiveResult> {
+		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, action, args);
+		if (typeof (matchingNewItem) === "number") {
+			return matchingNewItem;
+		}
+
 		if (matchingNewItem !== undefined) {
-			this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id})`);
+			this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}, data key: ${this.contextDataKey})`);
 
 			if (this.reserveType === ReserveType.Soft) {
 				context.addSoftReservedItems(matchingNewItem);
@@ -216,16 +194,19 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			return ObjectiveResult.Complete;
 		}
 
-		const matchingTileItems = context.human.getTile().containedItems?.filter(item => itemTypes.includes(item.type));
+		const matchingTileItems = context.human.getTile().containedItems?.filter(item => itemTypes.has(item.type));
 		if (matchingTileItems !== undefined && matchingTileItems.length > 0) {
 			const matchingNewItems: Item[] = [];
 
 			for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
 				const itemToMove = matchingTileItems[i];
 
-				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, ActionType.MoveItem, ((context: Context, action: any) => {
-					action.execute(context.actionExecutor, itemToMove, context.human.inventory);
-				}));
+				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, MoveItem, [itemToMove, context.human.inventory]);
+				if (typeof (matchingItem) === "number") {
+					this.log.warn("Issue moving items");
+					return matchingItem;
+				}
+
 				if (matchingItem !== undefined) {
 					matchingNewItems.push(matchingItem);
 				}
@@ -234,7 +215,7 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 			if (matchingNewItems.length > 0) {
 				const matchingNewItem = matchingNewItems[0];
 
-				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}) (via MoveItem)`);
+				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}, data key: ${this.contextDataKey}) (via MoveItem)`);
 
 				if (this.reserveType === ReserveType.Soft) {
 					context.addSoftReservedItems(...matchingNewItems);
@@ -251,20 +232,23 @@ export default class ExecuteActionForItem<T extends ActionType> extends Objectiv
 
 		context.setData(this.contextDataKey, undefined);
 
-		return ObjectiveResult.Pending;
+		return this.options?.preRetry?.(context) ?? ObjectiveResult.Pending;
 	}
 
-	private async executeActionCompareInventoryItems<T extends ActionType>(
-		context: Context,
-		itemTypes: ItemType[],
-		actionType: T,
-		executor: (context: Context, action: (typeof actionDescriptions)[T] extends IActionDescription<infer A, infer E, infer R, infer AV> ? ActionExecutor<A, E, R, AV> : never) => void) {
-		const itemsBefore = context.human.inventory.containedItems.slice();
+	private async executeActionCompareInventoryItems<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: T, args: GetActionArguments<T>): Promise<ObjectiveResult | Item | undefined> {
+		// map item ids to types. some items might change types due to an action
+		const itemsBefore: Map<number, ItemType> = new Map(context.human.inventory.containedItems.map(item => ([item.id, item.type])));
 
-		await context.utilities.action.executeAction(context, actionType, executor as any);
+		const result = await context.utilities.action.executeAction(context, action, args);
+		if (result !== ObjectiveResult.Complete) {
+			return result;
+		}
 
-		const newItems = context.human.inventory.containedItems.filter(item => !itemsBefore.includes(item));
+		const newOrChangedItems = context.human.inventory.containedItems.filter(item => {
+			const beforeItemType = itemsBefore.get(item.id);
+			return beforeItemType === undefined || beforeItemType !== item.type;
+		});
 
-		return newItems.find(item => itemTypes.includes(item.type));
+		return newOrChangedItems.find(item => itemTypes.has(item.type));
 	}
 }

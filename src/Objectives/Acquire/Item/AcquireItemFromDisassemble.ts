@@ -1,14 +1,14 @@
 import Stream from "@wayward/goodstream/Stream";
-import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import { RequirementStatus } from "game/item/IItemManager";
 import type Item from "game/item/Item";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
+import Disassemble from "game/entity/action/actions/Disassemble";
+
 import type Context from "../../../core/context/Context";
 import type { IDisassemblySearch } from "../../../core/ITars";
-import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
@@ -20,6 +20,7 @@ import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
+import { ActionArguments } from "game/entity/action/IAction";
 
 /**
  * Disassembles one of the items.
@@ -69,15 +70,14 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 			// Set addUniqueIdentifier to true because the pipeline may be ordered and it could run two of the same AcquireItemFromDismantle objectives one after another
 			// ex: SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:289:Log] -> ExecuteAction:MoveItem:11732 -> SetContextData:AcquireItemFromDismantle:TreeBark:Log:[Item:316:Log] -> ExecuteAction:MoveItem:11742 -> ExecuteActionForItem:Generic:Dismantle:11731 -> ExecuteActionForItem:Generic:Dismantle:11710
-			const hashCode = this.getHashCode(context, true);
+			// this.setExtraHashCode(item.toString());
 
-			// probably doesn't fix a bug
-			// const hashCode = `${this.getHashCode()}:${this.getUniqueIdentifier()}`
+			const itemContextDataKey = this.getUniqueContextDataKey("Disassemble");
 
 			const objectives: IObjective[] = [
 				new ReserveItems(item),
 				new ProvideItems(...disassemblyItems.map(item => item.type)),
-				new SetContextData(hashCode, item),
+				new SetContextData(itemContextDataKey, item),
 				new MoveItemIntoInventory(item),
 			];
 
@@ -87,22 +87,22 @@ export default class AcquireItemFromDisassemble extends Objective {
 				requiredItemHashCodes = [];
 
 				for (let i = 0; i < requiredForDisassembly.length; i++) {
-					const requiredItemHashCode = requiredItemHashCodes[i] = `${this.getHashCode(context)}:${this.getUniqueIdentifier()}`;
+					const requiredItemHashCode = requiredItemHashCodes[i] = this.getUniqueContextDataKey(`RequiredItem${i}`);
 
 					const itemTypeOrGroup = requiredForDisassembly[i];
 
 					const requiredItem = context.island.items.isGroup(itemTypeOrGroup) ?
-						context.utilities.item.getItemInContainerByGroup(context, context.human.inventory, itemTypeOrGroup, true) :
-						context.utilities.item.getItemInContainer(context, context.human.inventory, itemTypeOrGroup, true);
-					if (requiredItem === undefined) {
+						context.utilities.item.getItemInContainerByGroup(context, context.human.inventory, itemTypeOrGroup, { allowInventoryItems: true }) :
+						context.utilities.item.getItemInContainer(context, context.human.inventory, itemTypeOrGroup, { allowInventoryItems: true });
+					if (requiredItem) {
+						objectives.push(new ReserveItems(requiredItem));
+						objectives.push(new SetContextData(requiredItemHashCode, requiredItem));
+
+					} else {
 						objectives.push(
 							(context.island.items.isGroup(itemTypeOrGroup) ?
 								new AcquireItemByGroup(itemTypeOrGroup) :
 								new AcquireItem(itemTypeOrGroup)).setContextDataKey(requiredItemHashCode));
-
-					} else {
-						objectives.push(new ReserveItems(requiredItem));
-						objectives.push(new SetContextData(requiredItemHashCode, requiredItem));
 					}
 				}
 			}
@@ -111,39 +111,41 @@ export default class AcquireItemFromDisassemble extends Objective {
 				objectives.push(new MoveToLand());
 			}
 
-			const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, item.type, undefined, undefined, true);
-			if (requirementInfo.requirements === RequirementStatus.Missing) {
-				this.log.info("Disassemble requirements not met");
-				objectives.push(new CompleteRequirements(requirementInfo));
-			}
+			objectives.push(new CompleteRequirements(context.island.items.hasAdditionalRequirements(context.human, item.type, undefined, true)));
 
 			objectives.push(new ExecuteActionForItem(
 				ExecuteActionType.Generic,
 				[this.itemType],
 				{
-					actionType: ActionType.Disassemble,
-					executor: (context, action) => {
-						const item = context.getData<Item | undefined>(hashCode);
-						if (!item?.isValid()) {
-							this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
-							return;
-						}
-
-						let requiredItems: Array<Item> | undefined;
-
-						if (requiredItemHashCodes) {
-							for (const requiredItemHashCode of requiredItemHashCodes) {
-								const item = context.getData<Item>(requiredItemHashCode);
-								if (!item?.isValid()) {
-									this.log.warn(`Missing required item "${item}" for disassembly. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
-									return;
-								}
-
-								requiredItems?.push(item);
+					genericAction: {
+						action: Disassemble,
+						args: (context) => {
+							const item = context.getData<Item | undefined>(itemContextDataKey);
+							if (!item?.isValid()) {
+								// treat this as an expected case
+								// the item was likely broken earlier in the execution tree
+								// this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
+								return ObjectiveResult.Restart;
 							}
-						}
 
-						action.execute(context.actionExecutor, item, requiredItems);
+							let requiredItems: Array<Item> | undefined;
+
+							if (requiredItemHashCodes) {
+								for (const requiredItemHashCode of requiredItemHashCodes) {
+									const item = context.getData<Item>(requiredItemHashCode);
+									if (!item?.isValid()) {
+										// treat this as an expected case
+										// the item was likely broken earlier in the execution tree
+										// this.log.warn(`Missing required item "${item}" for disassembly. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
+										return ObjectiveResult.Restart;
+									}
+
+									requiredItems?.push(item);
+								}
+							}
+
+							return [item, requiredItems] as ActionArguments<typeof Disassemble>;
+						},
 					},
 				}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
 

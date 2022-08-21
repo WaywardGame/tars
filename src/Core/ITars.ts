@@ -10,13 +10,14 @@ import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { ITile } from "game/tile/ITerrain";
 import type { ITerrainLoot } from "game/tile/TerrainResources";
-import { TarsOverlay } from "src/ui/TarsOverlay";
 
-import type { TarsTranslation } from "../ITarsMod";
+import { TarsOverlay } from "../ui/TarsOverlay";
 import { ActionUtilities } from "../utilities/Action";
 import { BaseUtilities } from "../utilities/Base";
+import { CreatureUtilities } from "../utilities/Creature";
 import { DoodadUtilities } from "../utilities/Doodad";
 import { ItemUtilities } from "../utilities/Item";
+import { LoggerUtilities } from "../utilities/Logger";
 import { MovementUtilities } from "../utilities/Movement";
 import { ObjectUtilities } from "../utilities/Object";
 import { PlayerUtilities } from "../utilities/Player";
@@ -44,7 +45,7 @@ export interface ITarsEvents {
     /**
      * Emitted when TARS status is changed
      */
-    statusChange(status: TarsTranslation | string): void;
+    statusChange(): void;
 
     modeFinished(mode: TarsMode, success: boolean): void;
 
@@ -70,8 +71,10 @@ export enum QuantumBurstStatus {
 export interface IUtilities {
     action: ActionUtilities;
     base: BaseUtilities;
+    creature: CreatureUtilities;
     doodad: DoodadUtilities;
     item: ItemUtilities;
+    logger: LoggerUtilities;
     movement: MovementUtilities;
     navigation: Navigation;
     object: ObjectUtilities;
@@ -137,7 +140,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
                 return false;
             }
 
-            if (context.options.goodCitizen && multiplayer.isConnected() && target.getOwner() !== context.human) {
+            if (context.options.goodCitizen && multiplayer.isConnected() && target.getBuilder() !== context.human) {
                 // prevent using chests placed by others
                 return false;
             }
@@ -286,11 +289,15 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     },
     axe: {
         itemTypes: [
+            ItemType.BasaltAxe,
+            // ItemType.BronzeAxle,
+            // ItemType.BronzeDoubleAxe,
             ItemType.CopperAxe,
             ItemType.CopperDoubleAxe,
+            ItemType.GraniteAxe,
             ItemType.IronAxe,
             ItemType.IronDoubleAxe,
-            ItemType.StoneAxe,
+            ItemType.SandstoneAxe,
             ItemType.WroughtIronAxe,
             ItemType.WroughtIronDoubleAxe,
         ],
@@ -301,10 +308,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     },
     bandage: {
         itemTypes: [
-            ItemType.Bandage,
-            ItemType.PeatBandage,
-            ItemType.CharcoalBandage,
             ItemType.AloeVeraBandage,
+            ItemType.Bandage,
+            ItemType.CharcoalBandage,
+            ItemType.PeatBandage,
         ],
     },
     bed: {
@@ -357,6 +364,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     equipShield: {
         itemTypes: [
             ItemType.BarkShield,
+            // ItemType.BronzeKiteShield,
             ItemType.CopperBuckler,
             ItemType.IronHeater,
             ItemType.WoodenShield,
@@ -365,6 +373,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     },
     equipSword: {
         itemTypes: [
+            // ItemType.BronzeSword,
             ItemType.CopperSword,
             ItemType.GoldSword,
             ItemType.IronSword,
@@ -382,6 +391,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             ItemType.BowDrill,
             ItemType.FirePlough,
             ItemType.HandDrill,
+            ItemType.Lens,
         ],
         flags: InventoryItemFlag.PreferLowerWeight,
     },
@@ -432,8 +442,14 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     },
     knife: {
         itemTypes: [
+            ItemType.BasaltKnife,
+            // ItemType.BronzeKnife,
+            ItemType.CopperKnife,
+            ItemType.GraniteKnife,
+            ItemType.IronKnife,
             ItemType.ObsidianKnife,
-            ItemType.StoneKnife,
+            ItemType.SandstoneKnife,
+            ItemType.WroughtIronKnife,
         ],
         flags: {
             flag: InventoryItemFlag.PreferHigherActionBonus,
@@ -456,9 +472,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     },
     pickAxe: {
         itemTypes: [
+            ItemType.BasaltPickaxe,
+            // ItemType.BronzePickaxe,
             ItemType.CopperPickaxe,
+            ItemType.GranitePickaxe,
             ItemType.IronPickaxe,
-            ItemType.StonePickaxe,
             ItemType.WroughtIronPickaxe,
         ],
         flags: {
@@ -486,6 +504,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         actionTypes: [ActionType.GatherLiquid],
         itemTypes: [
             ItemTypeGroup.ContainerOfDesalinatedWater,
+            ItemTypeGroup.ContainerOfFilteredWater,
             ItemTypeGroup.ContainerOfMedicinalWater,
             ItemTypeGroup.ContainerOfPurifiedFreshWater,
             ItemTypeGroup.ContainerOfSeawater,
@@ -499,9 +518,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     },
     well: {
         itemTypes: [
+            ItemType.BasaltWell,
             ItemType.ClayWell,
+            ItemType.GraniteWell,
             ItemType.SandstoneWell,
-            ItemType.StoneWell,
         ],
         requiredMinDur: 1,
     },
@@ -525,7 +545,13 @@ export interface CreatureSearch {
     map: Map<CreatureType, ItemType[]>;
 }
 
-export type ITerrainSearch = ItemSearch<TerrainType> & { resource: ITerrainLoot };
+export interface ITerrainResourceSearch extends ItemSearch<TerrainType> {
+    resource: ITerrainLoot;
+}
+
+export interface ITerrainWaterSearch extends ItemSearch<TerrainType> {
+    gatherLiquid: ItemType;
+}
 
 export interface IDisassemblySearch {
     item: Item;
@@ -552,6 +578,10 @@ export enum TarsMode {
 
 export enum ReserveType {
     Soft,
+
+    /**
+     * Hard means the item will be consumed
+     */
     Hard
 }
 
