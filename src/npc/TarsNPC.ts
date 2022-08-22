@@ -39,6 +39,8 @@ export default class TarsNPC extends NPC {
 
     @SaveProperty() private saveData: ISaveData | undefined;
 
+    private registered = false;
+
     constructor(id?: number, islandId = "" as IslandId, x: number = 0, y: number = 0, z: number = 0) {
         super(getTarsMod()?.npcType, id, islandId, x, y, z);
 
@@ -48,10 +50,7 @@ export default class TarsNPC extends NPC {
         this.setMoveType(MoveType.Land | MoveType.Water | MoveType.ShallowWater);
 
         // handles setup when loading a saved game that contains this npc
-        const gameEvents = game.event.until(this, "deregister");
-        gameEvents.subscribe("play", this.onSpawnOrPlay);
-        gameEvents.subscribe("playingEntityChange", this.onSpawnOrPlay);
-        gameEvents.subscribe("stopPlay", this.onRemoved);
+        this.onRegister();
     }
 
     @Bound
@@ -80,6 +79,28 @@ export default class TarsNPC extends NPC {
             this.tarsInstance.disable(true);
             this.tarsInstance.unload();
             this.tarsInstance = undefined;
+        }
+    }
+
+    @OwnEventHandler(NPC, "reregister")
+    public onRegister() {
+        if (!this.registered) {
+            this.registered = true;
+
+            game.event.subscribe("play", this.onSpawnOrPlay);
+            game.event.subscribe("playingEntityChange", this.onSpawnOrPlay);
+            game.event.subscribe("stopPlay", this.onRemoved);
+        }
+    }
+
+    @OwnEventHandler(NPC, "deregister")
+    public onDeregister() {
+        if (this.registered) {
+            this.registered = false;
+
+            game.event.unsubscribe("play", this.onSpawnOrPlay);
+            game.event.unsubscribe("playingEntityChange", this.onSpawnOrPlay);
+            game.event.unsubscribe("stopPlay", this.onRemoved);
         }
     }
 

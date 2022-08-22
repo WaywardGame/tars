@@ -120,8 +120,11 @@ export default class ViewportPanel extends TarsPanel {
             human.event.until(this, "switchAway", "remove")
                 .subscribe("tickStart", () => this.rerender());
 
-            // human.event.until(this, "switchAway", "remove")
-            //     .subscribe("tickEnd", () => this.rerender());
+            // ensures animations show correctly
+            human.event.until(this, "switchAway", "remove")
+                .subscribe("turnEnd", () => {
+                    this.renderer?.updateView(RenderSource.Mod, false, false);
+                });
 
             human.event.until(this, "switchAway", "remove")
                 .subscribe("postMove", () => this.rerender());

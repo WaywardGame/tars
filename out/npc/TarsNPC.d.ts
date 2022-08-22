@@ -20,9 +20,12 @@ export default class TarsNPC extends NPC {
     readonly isPlayerLike: boolean;
     tarsInstance: Tars | undefined;
     private saveData;
+    private registered;
     constructor(id?: number, islandId?: `${number},${number}`, x?: number, y?: number, z?: number);
     onSpawnOrPlay(): void;
     onRemoved(): void;
+    onRegister(): void;
+    onDeregister(): void;
     onRenamed(): void;
     protected initializeStats(): void;
     protected getDefaultCustomization(): ICustomizations;

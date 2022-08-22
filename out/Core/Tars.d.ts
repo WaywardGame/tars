@@ -79,7 +79,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     onPrompt(host: Prompts.Events, prompt: IPrompt<IPromptDescriptionBase<any[]>>): string | boolean | void | InterruptChoice | undefined;
     onTileUpdate(island: Island, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void;
     postExecuteAction(_: any, actionType: ActionType, api: IActionApi, args: any[]): void;
-    processInput(human: Human): boolean | undefined;
+    processInput(human: Human): false | undefined;
     onChangeZ(human: Human, z: WorldZ, lastZ: WorldZ): void;
     onPreMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile): void;
     onStatChange(human: Human, stat: IStat): void;

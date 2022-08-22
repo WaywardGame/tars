@@ -548,7 +548,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     @EventHandler(EventBus.Humans, "processInput")
-    public processInput(human: Human): boolean | undefined {
+    public processInput(human: Human): false | undefined {
         if (this.human !== human || !this.isRunning()) {
             return;
         }
@@ -825,7 +825,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return "Not running";
         }
 
-        let statusMessage: string | undefined = "Idle";
+        let statusMessage: string | undefined = this.human.isResting() ? "Resting..." : "Idle";
 
         let planStatusMessage: string | undefined;
 
