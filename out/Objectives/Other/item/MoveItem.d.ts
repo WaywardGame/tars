@@ -12,4 +12,5 @@ export default class MoveItem extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
+    protected getBaseDifficulty(): number;
 }

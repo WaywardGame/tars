@@ -43,4 +43,8 @@ export default class MoveItem extends Objective {
 			return new ExecuteAction(MoveItemAction, [item, this.targetContainer]).setStatus(this);
 		}).setStatus(this);
 	}
+
+	protected override getBaseDifficulty() {
+		return 1;
+	}
 }

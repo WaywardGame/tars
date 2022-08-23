@@ -246,7 +246,7 @@ export default class Context implements IContext {
 	}
 
 	public resetPosition() {
-		this.setData(ContextDataType.Position, new Vector3(this.human.getPoint()));
+		this.setData(ContextDataType.Position, new Vector3(this.human));
 	}
 
 	public getHashCode(): string {

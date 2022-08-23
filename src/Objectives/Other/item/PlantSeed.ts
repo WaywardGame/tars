@@ -51,18 +51,13 @@ export default class PlantSeed extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		const objectives: IObjective[] = [
+		return [
 			new ReserveItems(item).keepInInventory(),
 			new MoveItemIntoInventory(item),
 			new AcquireInventoryItem("hoe"),
-		];
-
-		objectives.push(
 			...result,
 			new UseItem(Plant, item),
-		);
-
-		return objectives;
+		];
 	}
 
 	private getTillObjectives(context: Context): IObjective[] | undefined {

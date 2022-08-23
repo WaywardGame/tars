@@ -40,7 +40,7 @@ export default class Navigation {
     getNearestTileLocation(tileType: TerrainType, point: IVector3): Promise<ITileLocation[]>;
     isDisabledFromPoint(point: IVector3): boolean;
     getPenaltyFromPoint(point: IVector3, tile?: ITile): number;
-    getValidPoints(point: IVector3, onlyIncludePoint: boolean): IVector3[];
+    getValidPoints(point: IVector3, moveAdjacentToTarget: boolean): IVector3[];
     findPath(end: IVector3): Promise<NavigationPath | undefined>;
     private onWorkerMessage;
     private submitRequest;

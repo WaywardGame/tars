@@ -454,9 +454,9 @@ export default class Navigation {
 		return this.getPenalty(tile, point.x, point.y, point.z, tileType, terrainDescription);
 	}
 
-	public getValidPoints(point: IVector3, onlyIncludePoint: boolean): IVector3[] {
-		if (onlyIncludePoint && !this.isDisabledFromPoint(point)) {
-			return [point];
+	public getValidPoints(point: IVector3, moveAdjacentToTarget: boolean): IVector3[] {
+		if (!moveAdjacentToTarget) {
+			return !this.isDisabledFromPoint(point) ? [point] : [];
 		}
 
 		// "point" is disabled. we should nav to a neighbor tile instead

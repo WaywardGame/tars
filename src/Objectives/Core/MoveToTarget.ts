@@ -106,39 +106,23 @@ export default class MoveToTarget extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
-		// 	console.warn("target", this.target, context.calculatingDifficulty);
-		// 	console.warn("player position", context.human.getPoint());
-		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
-		// }
+		const endPositions = context.utilities.movement.getMovementEndPositions(context, this.target, this.moveAdjacentToTarget);
+		if (endPositions.length === 0) {
+			return ObjectiveResult.Impossible;
+		}
+
+		const defaultEndPosition = endPositions[0];
 
 		if (context.calculatingDifficulty) {
 			if (position.x !== context.human.x || position.y !== context.human.y || position.z !== context.human.z) {
-				context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
+				context.setData(ContextDataType.Position, new Vector3(defaultEndPosition.x, defaultEndPosition.y, this.options?.changeZ ?? defaultEndPosition.z));
 
 				// squared distance makes the diff very large. other diffs would have to be modified to compensate
-				const diff = Math.ceil(Vector2.distance(position, this.target) + (position.z !== this.target.z ? zChangeDifficulty : 0));
-
-				// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
-				// 	console.warn("diff", diff);
-				// }
+				const diff = Math.ceil(Vector2.distance(position, defaultEndPosition) + (position.z !== defaultEndPosition.z ? zChangeDifficulty : 0));
 
 				return diff;
 			}
-
-			// if (this.target.x === 115 && this.target.y === 388 && this.target.z === 0) {
-			// 	console.warn("how");
-			// }
-
-			// if (position.z !== this.target.z) {
-			// }
 		}
-
-		// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
-		// 	console.warn("player position", context.human.getPoint());
-		// 	console.warn(`context position ${position} - ${context.getData(ContextDataType.Position)}`);
-		// 	console.warn("oppositeZOrigin", context.utilities.navigation.getOppositeOrigin());
-		// }
 
 		if (this.options?.changeZ === position.z) {
 			// this objective runs dynamically so it's possible it's already in the correct z
@@ -190,11 +174,6 @@ export default class MoveToTarget extends Objective {
 				// ];
 
 				default:
-
-					// if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
-					// 	// console.warn("broken 2");
-					// }
-
 					return ObjectiveResult.Impossible;
 			}
 		}
@@ -205,72 +184,71 @@ export default class MoveToTarget extends Objective {
 
 		const movementPath = await context.utilities.movement.getMovementPath(context, this.target, this.moveAdjacentToTarget, this.options?.reverse);
 
+		const path = (movementPath !== ObjectiveResult.Complete && movementPath !== ObjectiveResult.Impossible) ? movementPath.path : undefined;
+
 		if (context.calculatingDifficulty) {
-			if (movementPath.difficulty !== ObjectiveResult.Impossible) {
-				if (movementPath.path && (this.trackedCorpse || this.trackedItem)) {
-					const decay = this.trackedCorpse?.decay ?? this.trackedItem?.decay;
-					if (decay !== undefined && decay <= movementPath.path?.length) {
-						// assuming manual turn mode, the corpse / item will decay by the time we arrive
-						return ObjectiveResult.Impossible;
-					}
-				}
+			if (movementPath === ObjectiveResult.Impossible) {
+				return movementPath;
+			}
 
-				if (this.target.x === 83 && this.target.y === 311 && this.target.z === 1) {
-					// console.warn("diff 2", movementPath.difficulty);
-				}
+			if (movementPath === ObjectiveResult.Complete) {
+				// set position
+				return movementPath;
+			}
 
-				// if (this.target.x === 137 && this.target.y === 383 && this.target.z === 1) {
-				// 	console.warn("moved", context.human.getPoint(), context.getPosition().toString(), movementPath.difficulty);
-				// }
-
-				if (this.options?.reverse) {
-					const origin = context.utilities.navigation.getOrigin();
-					const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
-					if (origin && origin.z === this.target.z) {
-						// console.warn("set reversed origin to ", origin);
-						context.setData(ContextDataType.Position, new Vector3(origin.x, origin.y, this.options?.changeZ ?? origin.z));
-
-					} else if (oppositeZOrigin) {
-						// console.warn("set reversed origin to opposite ", oppositeZOrigin);
-						context.setData(ContextDataType.Position, new Vector3(oppositeZOrigin.x, oppositeZOrigin.y, this.options?.changeZ ?? oppositeZOrigin.z));
-					}
-
-				} else {
-					context.setData(ContextDataType.Position, new Vector3(this.target.x, this.target.y, this.options?.changeZ ?? this.target.z));
+			if (this.trackedCorpse || this.trackedItem) {
+				const decay = this.trackedCorpse?.decay ?? this.trackedItem?.decay;
+				if (decay !== undefined && decay <= movementPath.path.length) {
+					// assuming manual turn mode, the corpse / item will decay by the time we arrive
+					return ObjectiveResult.Impossible;
 				}
 			}
 
-			return movementPath.difficulty;
+			if (this.options?.reverse) {
+				const origin = context.utilities.navigation.getOrigin();
+				const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
+				if (origin && origin.z === this.target.z) {
+					// console.warn("set reversed origin to ", origin);
+					context.setData(ContextDataType.Position, new Vector3(origin.x, origin.y, this.options?.changeZ ?? origin.z));
+
+				} else if (oppositeZOrigin) {
+					// console.warn("set reversed origin to opposite ", oppositeZOrigin);
+					context.setData(ContextDataType.Position, new Vector3(oppositeZOrigin.x, oppositeZOrigin.y, this.options?.changeZ ?? oppositeZOrigin.z));
+				}
+
+			} else {
+				const realEndPosition = movementPath.path[movementPath.path.length - 1];
+				context.setData(ContextDataType.Position, new Vector3(realEndPosition.x, realEndPosition.y, this.options?.changeZ ?? realEndPosition.z));
+			}
+
+			return movementPath.score;
 		}
 
-		if (!this.options?.disableStaminaCheck && !context.human.vehicleItemReference) {
-			const path = movementPath.path;
-			if (path) {
-				// check how our stamina is
-				const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
-				if ((stamina.max - stamina.value) > 2) {
-					let swimTiles = 0;
+		if (!this.options?.disableStaminaCheck && !context.human.vehicleItemReference && path) {
+			// check how our stamina is
+			const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
+			if ((stamina.max - stamina.value) > 2) {
+				let swimTiles = 0;
 
-					for (let i = 4; i < path.length; i++) {
-						const point = path[i];
-						const tile = context.island.getTile(point.x, point.y, context.human.z);
-						const tileType = TileHelpers.getType(tile);
-						const terrainDescription = terrainDescriptions[tileType];
-						if (terrainDescription && terrainDescription.water) {
-							swimTiles++;
-						}
+				for (let i = 4; i < path.length; i++) {
+					const point = path[i];
+					const tile = context.island.getTile(point.x, point.y, context.human.z);
+					const tileType = TileHelpers.getType(tile);
+					const terrainDescription = terrainDescriptions[tileType];
+					if (terrainDescription && terrainDescription.water) {
+						swimTiles++;
 					}
+				}
 
-					if (swimTiles > 0) {
-						// going to be swimming soon. make sure we have enough stamina for the trip
-						if (stamina.value - swimTiles <= 10) {
-							context.log.info(`Going to be swimming for ${swimTiles} tiles soon. Resting first`);
+				if (swimTiles > 0) {
+					// going to be swimming soon. make sure we have enough stamina for the trip
+					if (stamina.value - swimTiles <= 10) {
+						context.log.info(`Going to be swimming for ${swimTiles} tiles soon. Resting first`);
 
-							return [
-								new Rest(),
-								new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, disableStaminaCheck: true }),
-							];
-						}
+						return [
+							new Rest(),
+							new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, disableStaminaCheck: true }),
+						];
 					}
 				}
 			}
@@ -287,7 +265,6 @@ export default class MoveToTarget extends Objective {
 				];
 			}
 
-			const path = movementPath.path;
 			if (path) {
 				let firstWaterTile: IVector2 | undefined;
 
@@ -337,9 +314,9 @@ export default class MoveToTarget extends Objective {
 
 			case MoveResult.Complete:
 				this.log.info(`Finished moving to target (${this.target.x},${this.target.y},${this.target.z})`);
-				context.setData(ContextDataType.Position, new Vector3(this.target));
+				context.setData(ContextDataType.Position, new Vector3(context.human.getPoint()));
 
-				if (movementPath.difficulty === 0 && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
+				if (movementPath === ObjectiveResult.Complete && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
 					return new Idle(false);
 				}
 

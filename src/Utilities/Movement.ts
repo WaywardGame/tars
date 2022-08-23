@@ -22,11 +22,6 @@ import PickUp from "game/entity/action/actions/PickUp";
 import Chop from "game/entity/action/actions/Chop";
 import Equip from "game/entity/action/actions/Equip";
 
-export interface IMovementPath {
-    difficulty: number;
-    path?: IVector2[];
-}
-
 export enum MoveResult {
     NoTarget,
     NoPath,
@@ -44,9 +39,11 @@ export class MovementUtilities {
     private movementOverlays: ITrackedOverlay[] = [];
 
     private readonly cachedPaths: Map<string, NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible> = new Map();
+    private readonly cachedEnds: Map<string, IVector3[]> = new Map();
 
     public clearCache() {
         this.cachedPaths.clear();
+        this.cachedEnds.clear();
     }
 
     public resetMovementOverlays() {
@@ -99,16 +96,26 @@ export class MovementUtilities {
         }
     }
 
-    public async getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean, reverse: boolean = false): Promise<IMovementPath> {
+    public getMovementEndPositions(context: Context, target: IVector3, moveAdjacentToTarget: boolean): IVector3[] {
+        const pathId = `${target.x},${target.y},${target.z}:${moveAdjacentToTarget ? "A" : "O"}`;
+
+        let ends = this.cachedEnds.get(pathId);
+        if (ends === undefined) {
+            ends = context.utilities.navigation.getValidPoints(target, moveAdjacentToTarget);
+            this.cachedEnds.set(pathId, ends);
+        }
+
+        return ends;
+    }
+
+    public async getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean, reverse: boolean = false): Promise<NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible> {
         if (context.human.x === target.x && context.human.y === target.y && context.human.z === target.z && !moveAdjacentToTarget && !reverse) {
-            return {
-                difficulty: 0,
-            };
+            return ObjectiveResult.Complete;
         }
 
         const pathId = `${target.x},${target.y},${target.z}:${moveAdjacentToTarget ? "A" : "O"}:${reverse ? "R" : "N"}`;
 
-        let movementPath: NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible | undefined = this.cachedPaths.get(pathId);
+        let movementPath = this.cachedPaths.get(pathId);
         if (movementPath === undefined) {
             movementPath = await this._getMovementPath(context, target, moveAdjacentToTarget);
 
@@ -119,23 +126,7 @@ export class MovementUtilities {
             this.cachedPaths.set(pathId, movementPath);
         }
 
-        switch (movementPath) {
-            case ObjectiveResult.Complete:
-                return {
-                    difficulty: 0,
-                };
-
-            case ObjectiveResult.Impossible:
-                return {
-                    difficulty: ObjectiveResult.Impossible,
-                };
-
-            default:
-                return {
-                    difficulty: movementPath.score,
-                    path: movementPath.path,
-                };
-        }
+        return movementPath;
     }
 
     private async _getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean): Promise<NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible> {
@@ -146,7 +137,7 @@ export class MovementUtilities {
         // ensure sailing mode is up to date
         await context.utilities.ensureSailingMode(!!context.human.vehicleItemReference);
 
-        const ends = navigation.getValidPoints(target, !moveAdjacentToTarget);
+        const ends = this.getMovementEndPositions(context, target, moveAdjacentToTarget);
         if (ends.length === 0) {
             return ObjectiveResult.Impossible;
         }
@@ -156,14 +147,6 @@ export class MovementUtilities {
                 return ObjectiveResult.Complete;
             }
         }
-
-        // const position = context.getPosition();
-        // if (position.z !== target.z) {
-        //     // return [
-        //     // 	new MoveToZ(this.target.z),
-        //     // 	new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }), // todo: replace with this?
-        //     // ];
-        // }
 
         // pick the easiest path
         let results = (await Promise.all(ends.map(async end => navigation.findPath(end))))
@@ -189,12 +172,11 @@ export class MovementUtilities {
 
     public async move(context: Context, target: IVector3, moveAdjacentToTarget: boolean, force?: boolean, walkOnce?: boolean): Promise<MoveResult> {
         const movementPath = await this.getMovementPath(context, target, moveAdjacentToTarget);
+        if (movementPath === ObjectiveResult.Impossible) {
+            return MoveResult.NoPath;
+        }
 
-        if (movementPath.difficulty !== 0) {
-            if (!movementPath.path) {
-                return MoveResult.NoPath;
-            }
-
+        if (movementPath !== ObjectiveResult.Complete) {
             const pathLength = movementPath.path.length;
 
             const end = movementPath.path[pathLength - 1];
@@ -205,7 +187,7 @@ export class MovementUtilities {
 
             const atEnd = context.human.x === end.x && context.human.y === end.y;
             if (!atEnd) {
-                const nextPosition: IVector2 | undefined = movementPath.path[1];
+                const nextPosition: IVector3 | undefined = movementPath.path[1];
                 if (nextPosition) {
                     const direction = getDirectionFromMovement(nextPosition.x - context.human.x, nextPosition.y - context.human.y);
 

@@ -41,7 +41,7 @@ export default class GatherFromGround extends Objective {
 	}
 
 	public override shouldIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean {
-		// todo: it should cache this pipeline based on the reserved items by other GatherFromGround pipelines
+		// it should cache this pipeline based on the reserved items by other GatherFromGround pipelines
 		// example: why should this care about Sandstones that were gathered from a chest? things happening in chests won't affect the caching for this objective
 		return context.isReservedItemType(this.itemType, objectiveHashCode);
 	}

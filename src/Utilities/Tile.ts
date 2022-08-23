@@ -182,12 +182,12 @@ export class TileUtilities {
 	}
 
 	private getCanUseArgs(context: Context, position: IVector3): { point: IVector3; direction: Direction.Cardinal } | undefined {
-		const neighborPoints = context.utilities.navigation.getValidPoints(position, false);
-		if (neighborPoints.length === 0) {
+		const endPositions = context.utilities.movement.getMovementEndPositions(context, position, true);
+		if (endPositions.length === 0) {
 			return undefined;
 		}
 
-		const point = neighborPoints[0];
+		const point = endPositions[0];
 		const direction = getDirectionFromMovement(position.x - point.x, position.y - point.y);
 
 		return { point, direction };

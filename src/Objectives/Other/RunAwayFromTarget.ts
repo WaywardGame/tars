@@ -5,7 +5,7 @@ import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 const safetyCheckDistance = 5;
@@ -65,7 +65,7 @@ export default class RunAwayFromTarget extends Objective {
 
 		for (const nearbyOpenTile of nearbyOpenTiles) {
 			const movementPath = await context.utilities.movement.getMovementPath(context, nearbyOpenTile.point, false);
-			if (!movementPath.path) {
+			if (movementPath === ObjectiveResult.Complete || movementPath === ObjectiveResult.Impossible) {
 				continue;
 			}
 
