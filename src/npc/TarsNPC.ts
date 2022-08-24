@@ -139,9 +139,9 @@ export default class TarsNPC extends NPC {
     protected override getDefaultName() {
         const existingTarsNpcsNames: Set<string> = new Set();
 
-        for (const npc of this.island.npcs) {
-            if (npc instanceof TarsNPC) {
-                existingTarsNpcsNames.add(npc.getName().toString());
+        for (const nonPlayerHumans of game.getNonPlayerHumans()) {
+            if (nonPlayerHumans instanceof TarsNPC) {
+                existingTarsNpcsNames.add(nonPlayerHumans.getName().toString());
             }
         }
 
