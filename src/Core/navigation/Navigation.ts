@@ -674,7 +674,8 @@ export default class Navigation {
 
 		if (tileUpdateType === undefined || tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
 			if (tile.creature) {
-				penalty += 1;
+				// the penalty has to be high enough to make the player not want to nav to it to avoid simple other obstacles
+				penalty += 120;
 			}
 
 			// penalty for creatures on or near the tile

@@ -7,7 +7,7 @@ import { RenderSource } from "renderer/IRenderer";
 import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOverlayFootPrints";
 import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
-import type { IVector2, IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import Dig from "game/entity/action/actions/Dig";
 import Mine from "game/entity/action/actions/Mine";
 import UpdateDirection from "game/entity/action/actions/UpdateDirection";
@@ -65,22 +65,26 @@ export class MovementUtilities {
         }
     }
 
-    public updateOverlay(path: IVector2[]) {
+    public updateOverlay(path: IVector3[]) {
         this.resetMovementOverlays();
 
         for (let i = 1; i < path.length; i++) {
             const lastPos = path[i - 1];
             const pos = path[i];
-            const nextPos: IVector2 | undefined = path[i + 1];
+            const nextPos: IVector3 | undefined = path[i + 1];
 
-            const tile = localIsland.getTile(pos.x, pos.y, localPlayer.z);
+            if (localPlayer.z !== pos.z) {
+                continue;
+            }
 
             const overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos, false);
             if (overlay) {
+                const tile = localIsland.getTile(pos.x, pos.y, pos.z);
+
                 TileHelpers.Overlay.add(tile, overlay);
                 this.movementOverlays.push({
-                    tile: tile,
-                    overlay: overlay,
+                    tile,
+                    overlay,
                 });
             }
         }

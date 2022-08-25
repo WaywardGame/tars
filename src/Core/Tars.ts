@@ -85,6 +85,7 @@ import Respawn from "game/entity/action/actions/Respawn";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
+import { RenderSource } from "renderer/IRenderer";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -706,6 +707,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (this.saveData.enabled) {
             if (this.saveData.options.navigationOverlays) {
                 this.overlay.show();
+                game.updateView(RenderSource.Mod, false, true);
             }
 
             this.utilities.navigation.queueUpdateOrigin(this.human);
