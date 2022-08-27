@@ -7,6 +7,7 @@ import type ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementCh
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Craft from "game/entity/action/actions/Craft";
+import { ActionArguments } from "game/entity/action/IAction";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -24,6 +25,10 @@ import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
 import AddDifficulty from "../../core/AddDifficulty";
+import Message from "language/dictionary/Message";
+
+// TARS recomputes and fixes itself when this happens
+const expectedCraftMessages = new Set<Message>([Message.ActionCraftYouLackTheRequirements]);
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
@@ -189,7 +194,12 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 				{
 					genericAction: {
 						action: Craft,
-						args: [this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent],
+						args: () => {
+							// todo: actually pass in the right items here? 
+							// checker might just have empty items here
+							return [this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent] as ActionArguments<typeof Craft>;
+						},
+						expectedMessages: expectedCraftMessages,
 					},
 					preRetry: () => {
 						const items = [

@@ -9,8 +9,8 @@ import Objective from "../../../../core/objective/Objective";
 import AcquireItem from "../AcquireItem";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteAction from "../../../core/ExecuteAction";
-import Lambda from "../../../core/Lambda";
 import ReserveItems from "../../../core/ReserveItems";
+import { ActionArguments } from "game/entity/action/IAction";
 
 export default class AcquireUseOrbOfInfluence extends Objective {
 
@@ -43,15 +43,14 @@ export default class AcquireUseOrbOfInfluence extends Objective {
 			objectives.push(new AcquireItem(ItemType.OrbOfInfluence).passAcquireData(this).setContextDataKey(itemContextDataKey));
 		}
 
-		objectives.push(new Lambda(async context => {
+		objectives.push(new ExecuteAction(RubCounterClockwise, (context) => {
 			const item = context.getData(itemContextDataKey);
 			if (!item?.isValid()) {
 				this.log.error("Invalid orb of influence");
 				return ObjectiveResult.Restart;
 			}
 
-			// reduce malignity
-			return (new ExecuteAction(RubCounterClockwise, [item]).setStatus(this));
+			return [item] as ActionArguments<typeof RubCounterClockwise>;
 		}).setStatus(this));
 
 		return objectives;

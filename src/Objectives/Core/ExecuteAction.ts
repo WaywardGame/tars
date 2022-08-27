@@ -11,6 +11,8 @@ import { GetActionArguments } from "../../utilities/Action";
 
 export default class ExecuteAction<T extends AnyActionDescription> extends Objective {
 
+	protected override includeUniqueIdentifierInHashCode = true;
+
 	constructor(
 		private readonly action: T,
 		private readonly args: GetActionArguments<T>,

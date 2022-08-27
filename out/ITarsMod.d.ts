@@ -12,6 +12,7 @@ export declare function getTarsTranslation(translation: TarsTranslation | string
 export declare function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T];
 export interface ITarsModEvents extends Events<Mod> {
     statusChange(): any;
+    refreshNpcIslandIds(): any;
     changedGlobalDataSlots(): any;
 }
 export interface IGlobalSaveData {
@@ -28,6 +29,7 @@ export interface ISaveData {
     options: ITarsOptions;
     island: Record<IslandId, Record<string, any>>;
     ui: Partial<Record<TarsUiSaveDataKey, any>>;
+    instanceIslandIds: Set<IslandId>;
 }
 export declare enum TarsUiSaveDataKey {
     DialogsOpened = 0,

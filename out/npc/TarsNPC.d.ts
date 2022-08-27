@@ -14,7 +14,7 @@ import { EquipType } from "game/entity/IHuman";
 import NPC from "game/entity/npc/NPC";
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
-import TranslationImpl from "language/impl/TranslationImpl";
+import Island from "game/island/Island";
 import Tars from "../core/Tars";
 export default class TarsNPC extends NPC {
     readonly isPlayerLike: boolean;
@@ -27,9 +27,11 @@ export default class TarsNPC extends NPC {
     onRegister(): void;
     onDeregister(): void;
     onRenamed(): void;
+    onLoadedOnIsland(): void;
+    onIslandActivated(island: Island): void;
     protected initializeStats(): void;
     protected getDefaultCustomization(): ICustomizations;
-    protected getDefaultName(): TranslationImpl;
+    protected getDefaultName(): import("../../node_modules/@wayward/types/definitions/game/language/impl/TranslationImpl").default;
     protected getDefaultEquipment(equipType: EquipType): Item | ItemType | undefined;
     protected getDefaultAiType(): AiType;
     protected getDefaultInventory(): Array<Item | ItemType>;

@@ -17,7 +17,7 @@ import type { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IM
 import { MenuBarButtonGroup } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
 import Log from "utilities/Log";
 import { EventBus } from "event/EventBuses";
-import { EventHandler } from "event/EventManager";
+import { EventHandler, OwnEventHandler } from "event/EventManager";
 import TranslationImpl from "language/impl/TranslationImpl";
 import { NPCType } from "game/entity/npc/INPCs";
 import TileHelpers from "utilities/game/TileHelpers";
@@ -137,6 +137,7 @@ export default class TarsMod extends Mod {
 
 	private readonly tarsOverlay: TarsOverlay = new TarsOverlay();
 
+
 	////////////////////////////////////
 
 	private localPlayerTars: Tars | undefined;
@@ -243,9 +244,18 @@ export default class TarsMod extends Mod {
 	////////////////////////////////////////////////
 	// Event Handlers
 
+	@OwnEventHandler(TarsMod, "refreshNpcIslandIds")
+	public refreshNpcIslandIds() {
+		this.saveData.instanceIslandIds.clear();
+
+		for (const tarsInstance of this.tarsInstances) {
+			this.saveData.instanceIslandIds.add(tarsInstance.human.islandId);
+		}
+	}
+
 	// lowest priority will ensure TarsNPC tars instances are initialized before this is ran
 	@EventHandler(EventBus.Game, "play", Priority.Lowest)
-	public onGameStart(): void {
+	public async onGameStart(): Promise<void> {
 		if (!this.saveData.island[localIsland.id]) {
 			this.saveData.island[localIsland.id] = {};
 		}
@@ -313,13 +323,24 @@ export default class TarsMod extends Mod {
 				.send(message);
 		});
 
+		// ensure islands are loaded for all TARS instances
+		if (!multiplayer.isConnected()) {
+			for (const islandId of this.saveData.instanceIslandIds) {
+				const island = game.islands.getIfExists(islandId);
+				if (island && !island.isLoaded) {
+					await island.load();
+				}
+			}
+		}
+
 		// reopen dialogs
 		if (gameScreen) {
 			const dialogsOpened = this.saveData.ui[TarsUiSaveDataKey.DialogsOpened] as Array<[DialogId, string]>;
 			if (Array.isArray(dialogsOpened)) {
 				for (const [dialogId, subId] of dialogsOpened) {
 					if (TarsMod.INSTANCE.dialogMain === dialogId) {
-						const tarsInstance = Array.from(this.tarsInstances).find(tarsInstance => tarsInstance.getDialogSubId() === subId);
+						const tarsInstance = Array.from(this.tarsInstances)
+							.find(tarsInstance => game.islands.getIfExists(tarsInstance.human.islandId) && tarsInstance.getDialogSubId() === subId);
 						if (tarsInstance) {
 							gameScreen.dialogs.open<TarsDialog>(dialogId, subId)?.initialize(tarsInstance);
 						}
@@ -396,6 +417,8 @@ export default class TarsMod extends Mod {
 			this.tarsInstances.delete(tars);
 		});
 
+		this.saveData.instanceIslandIds.add(human.islandId);
+
 		return tars;
 	}
 
@@ -415,6 +438,10 @@ export default class TarsMod extends Mod {
 
 		if (initial.ui === undefined) {
 			initial.ui = {};
+		}
+
+		if (!initial.instanceIslandIds) {
+			initial.instanceIslandIds = new Set();
 		}
 
 		initial.options = createOptions((initial.options ?? {}) as Partial<ITarsOptions>);

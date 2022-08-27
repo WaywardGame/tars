@@ -238,12 +238,12 @@ export default class CompleteQuestRequirement extends Objective {
     private getObjectivesForModdedQuestRequirement(context: Context, requirementTypeString: string): ObjectiveExecutionResult {
         switch (requirementTypeString) {
 
-            case "ModStarterQuestQuickslot":
+            case "ModStarterQuestActionSlots":
                 return new Lambda(async () => {
                     let itemId: number | undefined;
 
                     for (const item of context.human.inventory.containedItems) {
-                        if (item.quickSlot === undefined) {
+                        if (gameScreen?.actionBar.getSlottedIn(item) === undefined) {
                             itemId = item.id;
                             break;
                         }
@@ -253,7 +253,9 @@ export default class CompleteQuestRequirement extends Objective {
                         return ObjectiveResult.Impossible;
                     }
 
-                    return oldui.screenInGame?.addItemToFreeQuickSlot(itemId) ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
+                    // todo: start a new game with starter quest and set tars to quest mode. this should be the first thing it tries
+                    // return (callSomeMethodThatAddsThisItemToAnOpenSlot) ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
+                    return itemId ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
                 }).setStatus(this);
 
             case "ModStarterQuestLightCampfire":

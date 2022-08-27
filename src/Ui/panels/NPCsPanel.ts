@@ -7,6 +7,8 @@ import Component from "ui/component/Component";
 import Prompts from "game/meta/prompt/Prompts";
 import { promptDescriptionFactory } from "game/meta/prompt/PromptDescriptionFactory";
 import { PromptPriority } from "game/meta/prompt/IPrompt";
+import { EventHandler } from "event/EventManager";
+import Island from "game/island/Island";
 
 import TarsPanel from "../components/TarsPanel";
 import { getTarsTranslation, TarsTranslation, TARS_ID } from "../../ITarsMod";
@@ -50,10 +52,25 @@ export default class NPCsPanel extends TarsPanel {
 
     protected onSwitchTo() {
         for (const island of game.islands.active) {
-            const events = island.npcs.event.until(this, "switchAway", "remove");
-            events.subscribe("spawn", this.refresh);
-            events.subscribe("remove", this.refresh);
+            this.onIslandActivated(island);
         }
+    }
+
+    @EventHandler(Island, "activated")
+    protected onIslandActivated(island: Island) {
+        const events = island.npcs.event.until(this, "switchAway", "remove");
+        events.subscribe("spawn", this.refresh);
+        events.subscribe("remove", this.refresh);
+
+        this.refresh();
+    }
+
+    @EventHandler(Island, "deactivated")
+    protected onIslandDeactivated(island: Island) {
+        island.npcs.event.unsubscribe("spawn", this.refresh);
+        island.npcs.event.unsubscribe("remove", this.refresh);
+
+        this.refresh();
     }
 
     @Bound

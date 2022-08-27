@@ -11,9 +11,9 @@ import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad
 import AcquireBuildMoveToFire from "../acquire/doodad/AcquireBuildMoveToFire";
 import AnalyzeBase from "../analyze/AnalyzeBase";
 import ExecuteAction from "../core/ExecuteAction";
-import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import StartFire from "../other/doodad/StartFire";
+import { ActionArguments } from "game/entity/action/IAction";
 
 export default class CompleteRequirements extends Objective {
 
@@ -69,16 +69,16 @@ export default class CompleteRequirements extends Objective {
 			if (!anvil) {
 				objectives.push(new AcquireBuildMoveToDoodad(primaryDoodad));
 				objectives.push(new AnalyzeBase());
-				objectives.push(new Lambda(async context => {
+				objectives.push(new ExecuteAction(PickUp, (context) => {
 					if (!context.base.anvil[0]) {
 						// the anvil we went to is not our base anvil
 						// it was probably not placed correctly
 						// pick it up. the object will be then built in the correct spot
-						return new ExecuteAction(PickUp, []).setStatus("Picking up anvil to place it next to the kiln");
+						return [] as ActionArguments<typeof PickUp>;
 					}
 
 					return ObjectiveResult.Complete;
-				}).setStatus(this));
+				}).setStatus("Picking up anvil to place it next to the kiln"));
 			}
 
 			if (!kiln) {

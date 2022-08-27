@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { OwnEventHandler } from "event/EventManager";
+import EventManager, { EventHandler, OwnEventHandler } from "event/EventManager";
 import { AiType, MoveType } from "game/entity/IEntity";
 import type { ICustomizations } from "game/entity/IHuman";
 import { EquipType } from "game/entity/IHuman";
@@ -23,9 +23,13 @@ import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import { Direction } from "utilities/math/Direction";
 import { blockedPenalty } from "game/entity/flowfield/IFlowFieldManager";
-import TranslationImpl from "language/impl/TranslationImpl";
 import { Bound } from "utilities/Decorators";
 import { SaveProperty } from "save/serializer/ISerializer";
+import Dictionary from "language/Dictionary";
+import HumanName from "language/dictionary/HumanName";
+import Translation from "language/Translation";
+import Island from "game/island/Island";
+import { Game } from "game/Game";
 
 import Tars from "../core/Tars";
 import { getTarsMod, getTarsTranslation, ISaveData, TarsTranslation } from "../ITarsMod";
@@ -42,12 +46,14 @@ export default class TarsNPC extends NPC {
     private registered = false;
 
     constructor(id?: number, islandId = "" as IslandId, x: number = 0, y: number = 0, z: number = 0) {
-        super(getTarsMod()?.npcType, id, islandId, x, y, z);
+        super(getTarsMod().npcType, id, islandId, x, y, z);
 
         // do nothing by default
         this.updateMovementIntent({ intent: Direction.None });
 
         this.setMoveType(MoveType.Land | MoveType.Water | MoveType.ShallowWater);
+
+        this.setWalkPath(undefined);
 
         // handles setup when loading a saved game that contains this npc
         this.onRegister();
@@ -55,6 +61,8 @@ export default class TarsNPC extends NPC {
 
     @Bound
     @OwnEventHandler(NPC, "spawn")
+    @EventHandler(Game, "play")
+    @EventHandler(Game, "playingEntityChange")
     public onSpawnOrPlay() {
         if (this.tarsInstance) {
             // already ready
@@ -74,22 +82,22 @@ export default class TarsNPC extends NPC {
 
     @Bound
     @OwnEventHandler(NPC, "removed")
+    @EventHandler(Game, "stopPlay")
     public onRemoved() {
         if (this.tarsInstance) {
             this.tarsInstance.disable(true);
             this.tarsInstance.unload();
             this.tarsInstance = undefined;
         }
+
+        this.onDeregister();
     }
 
     @OwnEventHandler(NPC, "reregister")
     public onRegister() {
         if (!this.registered) {
             this.registered = true;
-
-            game.event.subscribe("play", this.onSpawnOrPlay);
-            game.event.subscribe("playingEntityChange", this.onSpawnOrPlay);
-            game.event.subscribe("stopPlay", this.onRemoved);
+            EventManager.registerEventBusSubscriber(this);
         }
     }
 
@@ -97,10 +105,7 @@ export default class TarsNPC extends NPC {
     public onDeregister() {
         if (this.registered) {
             this.registered = false;
-
-            game.event.unsubscribe("play", this.onSpawnOrPlay);
-            game.event.unsubscribe("playingEntityChange", this.onSpawnOrPlay);
-            game.event.unsubscribe("stopPlay", this.onRemoved);
+            EventManager.deregisterEventBusSubscriber(this);
         }
     }
 
@@ -111,6 +116,19 @@ export default class TarsNPC extends NPC {
             if (dialog) {
                 dialog.refreshHeader();
             }
+        }
+    }
+
+    @OwnEventHandler(NPC, "loadedOnIsland")
+    public onLoadedOnIsland() {
+        getTarsMod().event.emit("refreshNpcIslandIds");
+    }
+
+    @Bound
+    @EventHandler(Island, "activated")
+    public onIslandActivated(island: Island) {
+        if (island.id === this.islandId) {
+            this.onSpawnOrPlay();
         }
     }
 
@@ -137,23 +155,8 @@ export default class TarsNPC extends NPC {
     }
 
     protected override getDefaultName() {
-        const existingTarsNpcsNames: Set<string> = new Set();
-
-        for (const nonPlayerHumans of game.getNonPlayerHumans()) {
-            if (nonPlayerHumans instanceof TarsNPC) {
-                existingTarsNpcsNames.add(nonPlayerHumans.getName().toString());
-            }
-        }
-
-        let defaultName: TranslationImpl;
-
-        let i = 0;
-        do {
-            i++;
-            defaultName = getTarsTranslation(TarsTranslation.NpcName).addArgs(i);
-        } while (existingTarsNpcsNames.has(defaultName.toString()));
-
-        return defaultName;
+        return getTarsTranslation(TarsTranslation.NpcName)
+            .addArgs(Translation.get(Dictionary.HumanName, HumanName.Full));
     }
 
     protected override getDefaultEquipment(equipType: EquipType): Item | ItemType | undefined {

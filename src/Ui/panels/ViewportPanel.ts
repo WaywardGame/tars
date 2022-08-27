@@ -152,10 +152,13 @@ export default class ViewportPanel extends TarsPanel {
     @Bind.onDown(Bindable.GameZoomIn, Priority.High)
     @Bind.onDown(Bindable.GameZoomOut, Priority.High)
     public onZoomIn(api: IBindHandlerApi) {
-        this.zoomLevel = Math.max(Math.min(this.zoomLevel + (api.bindable === Bindable.GameZoomIn ? 1 : -1), ZOOM_LEVEL_MAX), ZOOM_LEVEL_MIN);
-        this.renderer?.updateZoomLevel();
+        if (api.mouse.isWithin(this.canvas)) {
+            this.zoomLevel = Math.max(Math.min(this.zoomLevel + (api.bindable === Bindable.GameZoomIn ? 1 : -1), ZOOM_LEVEL_MAX), ZOOM_LEVEL_MIN);
+            this.renderer?.updateZoomLevel();
+            return true;
+        }
 
-        return true;
+        return false;
     }
 
     private rerender(reason = RenderSource.Mod) {

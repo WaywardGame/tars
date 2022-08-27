@@ -85,7 +85,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     onStatChange(human: Human, stat: IStat): void;
     onStatMaxChanged(human: Human, stat: IStat, oldValue: number | undefined): void;
     private onWeightChange;
-    onMoveToIsland(): Promise<void>;
+    onMoveToIsland(human: Human): Promise<void>;
     getContext(): Context;
     get asNPC(): TarsNPC | undefined;
     isEnabled(): boolean;

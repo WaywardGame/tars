@@ -22,6 +22,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
 import { GetActionArguments } from "../../utilities/Action";
+import Message from "language/dictionary/Message";
 
 export enum ExecuteActionType {
 	Generic,
@@ -30,21 +31,26 @@ export enum ExecuteActionType {
 	Corpse,
 }
 
+export interface IExecuteActioGenericAction<T extends AnyActionDescription> {
+	action: T;
+	args: GetActionArguments<T>;
+	expectedMessages?: Set<Message>;
+}
+
 export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
 	onlyAllowHarvesting: boolean;
 	onlyGatherWithHands: boolean;
 
 	moveAllMatchingItems: boolean;
 
-	genericAction: {
-		action: T;
-		args: GetActionArguments<T>;
-	};
+	genericAction: IExecuteActioGenericAction<T>;
 
 	preRetry: (context: Context) => ObjectiveResult | undefined,
 }
 
 export default class ExecuteActionForItem<T extends AnyActionDescription> extends Objective {
+
+	protected override includeUniqueIdentifierInHashCode = true;
 
 	private terrainTileType: TerrainType | undefined;
 
@@ -126,7 +132,10 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 					return ObjectiveResult.Restart;
 				}
 
-				result = await this.executeActionForItem(context, this.itemTypes, action, [this.options?.onlyGatherWithHands ? undefined : context.utilities.item.getBestToolForDoodadGather(context, doodad)]);
+				result = await this.executeActionForItem(context, this.itemTypes, {
+					action,
+					args: [this.options?.onlyGatherWithHands ? undefined : context.utilities.item.getBestToolForDoodadGather(context, doodad)]
+				});
 
 				break;
 			}
@@ -138,7 +147,10 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 					return ObjectiveResult.Restart;
 				}
 
-				result = await this.executeActionForItem(context, this.itemTypes, action, [context.utilities.item.getBestToolForTerrainGather(context, tileType)]);
+				result = await this.executeActionForItem(context, this.itemTypes, {
+					action,
+					args: [context.utilities.item.getBestToolForTerrainGather(context, tileType)]
+				});
 
 				break;
 
@@ -148,7 +160,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 					return ObjectiveResult.Restart;
 				}
 
-				result = await this.executeActionForItem(context, this.itemTypes, Butcher, [tool]);
+				result = await this.executeActionForItem(context, this.itemTypes, { action: Butcher, args: [tool] });
 
 				break;
 
@@ -158,7 +170,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 					return ObjectiveResult.Impossible;
 				}
 
-				result = await this.executeActionForItem(context, this.itemTypes, this.options.genericAction.action, this.options.genericAction.args);
+				result = await this.executeActionForItem(context, this.itemTypes, this.options.genericAction);
 
 				break;
 
@@ -173,8 +185,8 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 		return 1;
 	}
 
-	private async executeActionForItem<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: T, args: GetActionArguments<T>): Promise<ObjectiveResult> {
-		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, action, args);
+	private async executeActionForItem<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult> {
+		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, action);
 		if (typeof (matchingNewItem) === "number") {
 			return matchingNewItem;
 		}
@@ -201,7 +213,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
 				const itemToMove = matchingTileItems[i];
 
-				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, MoveItem, [itemToMove, context.human.inventory]);
+				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, context.human.inventory] });
 				if (typeof (matchingItem) === "number") {
 					this.log.warn("Issue moving items");
 					return matchingItem;
@@ -235,11 +247,11 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 		return this.options?.preRetry?.(context) ?? ObjectiveResult.Pending;
 	}
 
-	private async executeActionCompareInventoryItems<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: T, args: GetActionArguments<T>): Promise<ObjectiveResult | Item | undefined> {
+	private async executeActionCompareInventoryItems<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult | Item | undefined> {
 		// map item ids to types. some items might change types due to an action
 		const itemsBefore: Map<number, ItemType> = new Map(context.human.inventory.containedItems.map(item => ([item.id, item.type])));
 
-		const result = await context.utilities.action.executeAction(context, action, args);
+		const result = await context.utilities.action.executeAction(context, action.action, action.args, action.expectedMessages);
 		if (result !== ObjectiveResult.Complete) {
 			return result;
 		}

@@ -527,6 +527,23 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     },
 };
 
+// sorted by most important to least important
+// const inventoryItemsToDrop: Array<keyof IInventoryItems> = [
+//     "axe",
+//     "pickAxe",
+//     "campfire",
+//     "fireStarter",
+//     "fireKindling",
+//     "fireTinder",
+//     "shovel",
+//     "knife",
+//     "bed",
+//     "heal",
+//     "bandage",
+//     "hammer",
+//     "tongs",
+// ];
+
 export interface IBaseItemSearch {
     itemType: ItemType;
     extraDifficulty?: number;

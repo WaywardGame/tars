@@ -83,7 +83,7 @@ export class SurvivalMode implements ITarsMode {
 			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
 			objectives.push([
 				new MoveToLand(),
-				new ExecuteAction(Drop, [context.inventory.sailBoat!]).setStatus("Dropping sailboat"),
+				new ExecuteAction(Drop, [context.inventory.sailBoat]).setStatus("Dropping sailboat"),
 				new AnalyzeInventory(),
 			]);
 		}

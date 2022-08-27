@@ -149,7 +149,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             ensureSailingMode: (sailingMode) => this.ensureSailingMode(sailingMode),
         };
 
-        this.log.info("Created TARS instance");
+        this.log.info(`Created TARS instance on island id ${this.human.islandId}`);
     }
 
     public getName() {
@@ -158,15 +158,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     public getDialogSubId(): string {
         if (this.asNPC) {
-            let id = 0;
-
             for (const npc of this.human.island.npcs) {
-                if (npc?.type === getTarsMod().npcType) {
-                    if (npc === this.human) {
-                        return id.toString();
-                    }
-
-                    id++;
+                if (npc === this.human) {
+                    return npc.identifier.toString();
                 }
             }
         }
@@ -184,7 +178,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.utilities.navigation.unload();
 
-        this.log.info("Deleted TARS instance");
+        this.log.info(`Deleted TARS instance on island id ${this.human.islandId}`);
     }
 
     public getSaveDataContainer(): ISaveDataContainer {
@@ -645,8 +639,12 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    @EventHandler(EventBus.LocalPlayer, "moveToIsland")
-    public async onMoveToIsland() {
+    @EventHandler(EventBus.Humans, "moveToIsland")
+    public async onMoveToIsland(human: Human) {
+        if (this.human !== human) {
+            return;
+        }
+
         if (this.isEnabled()) {
             this.disable(true);
         }
@@ -1684,17 +1682,21 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private reduceWeightInterrupt(context: Context, allowReservedItems?: boolean, disableDrop?: boolean): IObjective | undefined {
+        const exceededStaminaThreshold = context.human.stat.get<IStat>(Stat.Stamina).value <= this.utilities.player.getRecoverThreshold(context, Stat.Stamina);
+
         return new ReduceWeight({
-            allowReservedItems: allowReservedItems ?? (!this.utilities.base.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened),
+            allowReservedItems: allowReservedItems ?? (!this.utilities.base.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened && exceededStaminaThreshold),
             disableDrop: disableDrop ?? (this.weightStatus !== WeightStatus.Overburdened && !this.utilities.base.isNearBase(context)),
         });
     }
 
     private returnToBaseInterrupt(context: Context): IObjective | undefined {
-        if (!this.utilities.base.isNearBase(context) &&
+        if (context.getData(ContextDataType.MovingToNewIsland) !== MovingToNewIslandState.Ready &&
             this.weightStatus !== WeightStatus.None &&
             this.previousWeightStatus === WeightStatus.Overburdened &&
-            context.getData(ContextDataType.MovingToNewIsland) !== MovingToNewIslandState.Ready) {
+            !this.utilities.base.isNearBase(context) &&
+            context.utilities.item.getUnusedItems(context).length > 0) {
+            // return to base to put some extra items in a chest
             return new ReturnToBase();
         }
     }

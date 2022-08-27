@@ -2,13 +2,13 @@ import type Item from "game/item/Item";
 import type { IContainer } from "game/item/IItem";
 import Doodad from "game/doodad/Doodad";
 import MoveItemAction from "game/entity/action/actions/MoveItem";
+import { ActionArguments } from "game/entity/action/IAction";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
-import Lambda from "../../core/Lambda";
 
 export default class MoveItem extends Objective {
 
@@ -35,12 +35,12 @@ export default class MoveItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		return new Lambda(async context => {
+		return new ExecuteAction(MoveItemAction, () => {
 			if (item.containedWithin === this.targetContainer) {
 				return ObjectiveResult.Complete;
 			}
 
-			return new ExecuteAction(MoveItemAction, [item, this.targetContainer]).setStatus(this);
+			return [item, this.targetContainer] as ActionArguments<typeof MoveItemAction>;
 		}).setStatus(this);
 	}
 

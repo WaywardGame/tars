@@ -4,7 +4,7 @@ import Message from "language/dictionary/Message";
 import type Context from "../core/context/Context";
 import { ObjectiveResult } from "../core/objective/IObjective";
 
-export type GetActionArguments<T extends AnyActionDescription, AV = ActionArguments<T>> = AV | ((context: Context) => AV | ObjectiveResult.Restart);
+export type GetActionArguments<T extends AnyActionDescription, AV = ActionArguments<T>> = AV | ((context: Context) => AV | ObjectiveResult.Complete | ObjectiveResult.Restart);
 
 export class ActionUtilities {
 

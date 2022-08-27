@@ -35,7 +35,7 @@
 		},
 		"ModTARSTars": {
 			"name": "TARS",
-			"npcName": "TARS {0}",
+			"npcName": "TARS - {0}",
 			"dialogButtonAquireItem": "Acquire Item",
 			"dialogButtonAquireItemTooltip": "Instruct TARS to acquire the selected item.",
 			"dialogButtonBuildDoodad": "Build Doodad",

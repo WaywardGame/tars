@@ -9,6 +9,7 @@ export default class ExecuteAction<T extends AnyActionDescription> extends Objec
     private readonly args;
     private readonly expectedMessages?;
     private readonly expectedCannotUseResult?;
+    protected includeUniqueIdentifierInHashCode: boolean;
     constructor(action: T, args: GetActionArguments<T>, expectedMessages?: Set<Message> | undefined, expectedCannotUseResult?: ObjectiveResult | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;

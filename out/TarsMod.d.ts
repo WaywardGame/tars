@@ -53,7 +53,8 @@ export default class TarsMod extends Mod {
     removeDataSlot(container: ISaveDataContainer): void;
     importDataSlot(fileData: Uint8Array): void;
     exportDataSlot(container: ISaveDataContainer): void;
-    onGameStart(): void;
+    refreshNpcIslandIds(): void;
+    onGameStart(): Promise<void>;
     onGameEnd(): void;
     onPreSaveGame(): void;
     onMultiplayerConnect(): void;
