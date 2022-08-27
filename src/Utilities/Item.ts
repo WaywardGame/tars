@@ -21,7 +21,7 @@ import ItemManager from "game/item/ItemManager";
 import Vector2 from "utilities/math/Vector2";
 import type Context from "../core/context/Context";
 import { ContextDataType } from "../core/context/IContext";
-import { IDisassemblySearch } from "../core/ITars";
+import { IDisassemblySearch, inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
 
 export interface IGetItemOptions {
@@ -745,6 +745,22 @@ export class ItemUtilities {
 		}
 
 		return reservedItems;
+	}
+
+	/**
+	 * Returns items to build items
+	 * @param context Context
+	 */
+	public getItemsToBuild(context: Context) {
+		const items: Item[] = [];
+
+		for (const key of inventoryBuildItems) {
+			if (context.inventory[key] !== undefined) {
+				items.push(context.inventory[key] as Item);
+			}
+		}
+
+		return items;
 	}
 
 	/**

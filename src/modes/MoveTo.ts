@@ -53,7 +53,7 @@ export interface IMoveToPlayer extends IMoveTo {
 
 export interface IMoveToNPC extends IMoveTo {
     type: MoveToType.NPC;
-    npcType: NPCType;
+    npc: NPC | NPCType;
 }
 
 export interface IMoveToCreature extends IMoveTo {
@@ -123,19 +123,38 @@ export class MoveToMode implements ITarsMode {
                 break;
 
             case MoveToType.NPC:
-                const npcType = this.target.npcType;
+                const npcOrType = this.target.npc;
+                if (typeof (npcOrType) === "number") {
+                    const npcObjectives = context.utilities.object.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcOrType, 5)
+                        .map(npc => ([
+                            new MoveToTarget(npc, true),
+                            new Lambda(async () => {
+                                this.finished(true);
+                                return ObjectiveResult.Complete;
+                            }),
+                        ]));
 
-                const npcObjectives = context.utilities.object.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcType, 5)
-                    .map(npc => ([
-                        new MoveToTarget(npc, true),
+                    if (npcObjectives.length > 0) {
+                        return npcObjectives;
+                    }
+
+                } else if (npcOrType === context.human) {
+                    return [
                         new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;
                         }),
-                    ]));
+                    ];
 
-                if (npcObjectives.length > 0) {
-                    return npcObjectives;
+                } else {
+                    return [
+                        new MoveToIsland(npcOrType.islandId),
+                        new MoveToTarget(npcOrType, true),
+                        new Lambda(async () => {
+                            this.finished(true);
+                            return ObjectiveResult.Complete;
+                        }),
+                    ];
                 }
 
                 break;

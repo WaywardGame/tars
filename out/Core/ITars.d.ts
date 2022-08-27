@@ -155,6 +155,7 @@ export declare enum InventoryItemFlag {
     PreferHigherDecay = 5
 }
 export declare const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo>;
+export declare const inventoryBuildItems: Array<keyof IInventoryItems>;
 export interface IBaseItemSearch {
     itemType: ItemType;
     extraDifficulty?: number;

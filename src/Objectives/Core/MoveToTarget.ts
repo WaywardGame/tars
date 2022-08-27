@@ -317,7 +317,7 @@ export default class MoveToTarget extends Objective {
 				context.setData(ContextDataType.Position, new Vector3(context.human.getPoint()));
 
 				if (movementPath === ObjectiveResult.Complete && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
-					return new Idle(false);
+					return new Idle({ force: true, canMoveToIdle: false });
 				}
 
 				return ObjectiveResult.Complete;

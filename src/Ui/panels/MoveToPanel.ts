@@ -1,4 +1,3 @@
-import { NPCType } from "game/entity/npc/INPCs";
 import { DoodadType } from "game/doodad/IDoodad";
 import { DEFAULT_ISLAND_ID, IslandId } from "game/island/IIsland";
 import { TerrainType } from "game/tile/ITerrain";
@@ -10,7 +9,7 @@ import IslandDropdown from "ui/component/dropdown/IslandDropdown";
 import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import PlayerDropdown from "ui/component/dropdown/PlayerDropdown";
 import TerrainDropdown from "ui/component/dropdown/TerrainDropdown";
-import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
+import NPCDropdown from "ui/component/dropdown/NPCDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { Bound } from "utilities/Decorators";
 
@@ -26,7 +25,7 @@ export default class MoveToPanel extends TarsPanel {
     private readonly dropdownTerrainType: TerrainDropdown<string>;
     private readonly dropdownDoodad: DoodadDropdown<string>;
     private readonly dropdownCreature: CreatureDropdown<string>;
-    private readonly dropdownNPC: NPCTypeDropdown<string>;
+    private readonly dropdownNPC: NPCDropdown;
     private readonly dropdownPlayer: PlayerDropdown;
 
     constructor(tarsInstance: Tars) {
@@ -156,19 +155,19 @@ export default class MoveToPanel extends TarsPanel {
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelNPC)))
-            .append(this.dropdownNPC = new NPCTypeDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToNPCTypeDropdown] ?? NPCType.Merchant)
-                .event.subscribe("selection", async (_, selection) => {
-                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToNPCTypeDropdown] = selection;
-                }))
+            .append(this.dropdownNPC = new NPCDropdown())
             .appendTo(this);
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToNPC))
             .event.subscribe("activate", async () => {
-                await this.tarsInstance.activateManualMode(new MoveToMode({
-                    type: MoveToType.NPC,
-                    npcType: this.dropdownNPC.selection as NPCType,
-                }));
+                if (this.dropdownNPC.selectedNPC) {
+                    await this.tarsInstance.activateManualMode(new MoveToMode({
+                        type: MoveToType.NPC,
+                        npc: this.dropdownNPC.selectedNPC,
+                    }));
+                }
+
                 return true;
             })
             .appendTo(this);

@@ -26,7 +26,7 @@ export default class RecoverStamina extends Objective {
 			if (context.human.stat.get<IStat>(Stat.Stamina).value <= 1) {
 				// emergency. wait it out
 				this.log.info("Emergency idling");
-				return new Idle(false);
+				return new Idle({ canMoveToIdle: false });
 			}
 
 			return ObjectiveResult.Complete;
@@ -34,7 +34,7 @@ export default class RecoverStamina extends Objective {
 
 		if (context.utilities.tile.isSwimmingOrOverWater(context) && context.utilities.player.isUsingVehicle(context)) {
 			this.log.info("Idling to recover stamina");
-			return new Idle(false);
+			return new Idle({ canMoveToIdle: false });
 		}
 
 		// if (context.player.getWeightStatus() !== WeightStatus.Overburdened &&

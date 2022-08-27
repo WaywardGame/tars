@@ -39,7 +39,7 @@ export default class Rest extends Objective {
 			this.log.info(`Nearby creature ${nearbyCreature.getName().getString()} will prevent resting`);
 
 			const objectivePipelines: IObjective[][] = [
-				[new Idle(false)],
+				[new Idle({ canMoveToIdle: false })],
 			];
 
 			if (context.human.getWeightStatus() === WeightStatus.Overburdened) {

@@ -26,6 +26,7 @@ export interface IOriganizeInventoryOptions {
 	onlyIfNearBase: boolean;
 
 	allowReservedItems: boolean;
+	allowInventoryItems: boolean;
 	onlyOrganizeReservedItems: boolean;
 
 	onlyAllowIntermediateChest: boolean;
@@ -66,9 +67,13 @@ export default class OrganizeInventory extends Objective {
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
+		const itemsToBuild = context.utilities.item.getItemsToBuild(context)
+			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
+		const itemsToBuildWeight = itemsToBuild.reduce((a, b) => a + b.getTotalWeight(), 0);
+
 		// console.log(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow moving reserved items: ${this.options?.allowReservedItems}. Allow moving into chests: ${this.options?.allowChests}.`, this.options);
 
-		if (reservedItems.length === 0 && unusedItems.length === 0 && !this.options.items) {
+		if (reservedItems.length === 0 && unusedItems.length === 0 && itemsToBuild.length === 0 && !this.options.items) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -102,7 +107,7 @@ export default class OrganizeInventory extends Objective {
 
 		const allowOrganizingReservedItemsIntoIntermediateChest = context.getData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest) !== false;
 
-		this.log.info(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Allow moving reserved items: ${this.options?.allowReservedItems}. Allow moving into chests: ${this.options?.allowChests}. Allow moving into intermediate chest: ${allowOrganizingReservedItemsIntoIntermediateChest}`);
+		this.log.info(`Reserved items weight: ${reservedItemsWeight}. Unused items weight: ${unusedItemsWeight}. Items to build weight: ${itemsToBuildWeight}. Allow moving reserved items: ${this.options?.allowReservedItems}. Allow moving into chests: ${this.options?.allowChests}. Allow moving into intermediate chest: ${allowOrganizingReservedItemsIntoIntermediateChest}`);
 
 		if (context.base.intermediateChest[0] && allowOrganizingReservedItemsIntoIntermediateChest && reservedItems.length > 0 && reservedItemsWeight >= unusedItemsWeight) {
 			this.log.info(`Going to move reserved items into intermediate chest. ${reservedItems.join(", ")}`);
@@ -115,8 +120,11 @@ export default class OrganizeInventory extends Objective {
 		}
 
 		if (unusedItems.length === 0 && this.options.allowReservedItems) {
-			// ignore reserved items
 			unusedItems = context.utilities.item.getUnusedItems(context, { allowReservedItems: true });
+		}
+
+		if (unusedItems.length === 0 && this.options.allowInventoryItems) {
+			unusedItems = unusedItems.concat(itemsToBuild);
 		}
 
 		if (unusedItems.length === 0) {

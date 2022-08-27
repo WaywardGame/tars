@@ -161,10 +161,9 @@ export default class BuildItem extends Objective {
 
 			context.utilities.movement.resetMovementOverlays();
 
-			// run outside the current context
-			setTimeout(() => {
+			multiplayer.executeClientside(() => {
 				UpdateWalkPath.execute(context.human, undefined);
-			}, 0);
+			});
 		}
 
 		return super.onMove(context);

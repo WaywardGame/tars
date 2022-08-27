@@ -12,14 +12,19 @@ import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 
+export interface IIdleOptions {
+	force: boolean;
+	canMoveToIdle: boolean;
+}
+
 export default class Idle extends Objective {
 
-	constructor(private readonly canMoveToIdle: boolean = true) {
+	constructor(private readonly options?: Partial<IIdleOptions>) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return "Idle";
+		return `Idle:${this.options?.force}:${this.options?.canMoveToIdle}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -29,9 +34,9 @@ export default class Idle extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[] = [];
 
-		if (game.getTurnMode() === TurnMode.RealTime ||
-			game.nextTickTime === 0 ||
-			(game.lastTickTime !== undefined && (game.lastTickTime + (game.getTickSpeed() * game.interval) + 200) > game.absoluteTime)) {
+		if (!this.options?.force &&
+			(game.getTurnMode() === TurnMode.RealTime || game.nextTickTime === 0 ||
+				(game.lastTickTime !== undefined && (game.lastTickTime + (game.getTickSpeed() * game.interval) + 200) > game.absoluteTime))) {
 			// don't idle in realtime mode or in simulated mode if the turns are ticking still. +200ms buffer for ping
 			objectivePipelines.push(new Lambda(async (context, lambda) => {
 				lambda.log.info("Smart idling");
@@ -39,7 +44,7 @@ export default class Idle extends Objective {
 			}).setStatus(this));
 
 		} else {
-			if (this.canMoveToIdle) {
+			if (this.options?.canMoveToIdle) {
 				const target = TileHelpers.findMatchingTile(context.island, context.human, (island, _2, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !island.isTileFull(tile) && !tile.doodad, { maxTilesChecked: defaultMaxTilesChecked });
 				if (target) {
 					this.log.info("Moving to idle position");

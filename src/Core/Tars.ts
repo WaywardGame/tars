@@ -37,8 +37,9 @@ import Vector2 from "utilities/math/Vector2";
 import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
-
+import { RenderSource } from "renderer/IRenderer";
 import Translation from "language/Translation";
+
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import type TarsNPC from "../npc/TarsNPC";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
@@ -85,7 +86,6 @@ import Respawn from "game/entity/action/actions/Respawn";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
-import { RenderSource } from "renderer/IRenderer";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -268,9 +268,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.utilities.movement.resetMovementOverlays();
 
-        UpdateWalkPath.execute(this.human, undefined);
+        multiplayer.executeClientside(() => {
+            UpdateWalkPath.execute(this.human, undefined);
 
-        OptionsInterrupt.restore(this.human);
+            OptionsInterrupt.restore(this.human);
+        });
 
         if (!gameIsTravelingOrEnding && this.saveData.options.mode === TarsMode.Manual) {
             this.updateOptions({ mode: TarsMode.Survival });
@@ -801,7 +803,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
 
         } else {
-            UpdateWalkPath.execute(this.human, path, true);
+            multiplayer.executeClientside(() => {
+                UpdateWalkPath.execute(this.human, path, true);
+            });
         }
     }
 
@@ -1063,10 +1067,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.utilities.movement.resetMovementOverlays();
 
-        // run outside the current context
-        setTimeout(() => {
+        multiplayer.executeClientside(() => {
             UpdateWalkPath.execute(this.human, undefined);
-        }, 0);
+        });
     }
 
     // todo: make this the default?
@@ -1377,13 +1380,16 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.nearbyCreatureInterrupt(context),
         ];
 
+        // reduce weight before recovery.. probably fine
+        interrupts.push(this.reduceWeightInterrupt(context));
+
         if (stayHealthy) {
             interrupts.push(...this.getRecoverInterrupts(context, true));
         }
 
         interrupts = interrupts.concat([
-            this.buildItemObjectives(),
-            this.reduceWeightInterrupt(context),
+            this.buildItemObjectives(context),
+            // this.reduceWeightInterrupt(context),
         ]);
 
         if (stayHealthy) {
@@ -1608,43 +1614,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    private buildItemObjectives(): IObjective[] {
-        const objectives: IObjective[] = [];
-
-        // prioritize building items that are in the inventory
-        if (this.inventory.campfire !== undefined) {
-            objectives.push(new BuildItem(this.inventory.campfire));
-        }
-
-        if (this.inventory.waterStill !== undefined) {
-            objectives.push(new BuildItem(this.inventory.waterStill));
-        }
-
-        if (this.inventory.chest !== undefined) {
-            objectives.push(new BuildItem(this.inventory.chest));
-        }
-
-        if (this.inventory.kiln !== undefined) {
-            objectives.push(new BuildItem(this.inventory.kiln));
-        }
-
-        if (this.inventory.well !== undefined) {
-            objectives.push(new BuildItem(this.inventory.well));
-        }
-
-        if (this.inventory.furnace !== undefined) {
-            objectives.push(new BuildItem(this.inventory.furnace));
-        }
-
-        if (this.inventory.anvil !== undefined) {
-            objectives.push(new BuildItem(this.inventory.anvil));
-        }
-
-        if (this.inventory.solarStill !== undefined) {
-            objectives.push(new BuildItem(this.inventory.solarStill));
-        }
-
-        return objectives;
+    private buildItemObjectives(context: Context): IObjective[] {
+        return this.utilities.item.getItemsToBuild(context).map(item => new BuildItem(item));
     }
 
     private gatherFromCorpsesInterrupt(context: Context): IObjective[] | undefined {
@@ -1681,12 +1652,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    private reduceWeightInterrupt(context: Context, allowReservedItems?: boolean, disableDrop?: boolean): IObjective | undefined {
+    private reduceWeightInterrupt(context: Context): IObjective | undefined {
         const exceededStaminaThreshold = context.human.stat.get<IStat>(Stat.Stamina).value <= this.utilities.player.getRecoverThreshold(context, Stat.Stamina);
 
         return new ReduceWeight({
-            allowReservedItems: allowReservedItems ?? (!this.utilities.base.isNearBase(context) && this.weightStatus === WeightStatus.Overburdened && exceededStaminaThreshold),
-            disableDrop: disableDrop ?? (this.weightStatus !== WeightStatus.Overburdened && !this.utilities.base.isNearBase(context)),
+            allowChests: !exceededStaminaThreshold || this.weightStatus !== WeightStatus.Overburdened,
+            allowReservedItems: exceededStaminaThreshold && this.weightStatus === WeightStatus.Overburdened && !this.utilities.base.isNearBase(context),
+            allowInventoryItems: exceededStaminaThreshold && this.weightStatus === WeightStatus.Overburdened,
+            disableDrop: this.weightStatus !== WeightStatus.Overburdened && !this.utilities.base.isNearBase(context),
         });
     }
 
@@ -1779,6 +1752,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private processQueuedNavigationUpdates() {
+        if (this.navigationSystemState !== NavigationSystemState.Initialized || this.human.isResting()) {
+            return;
+        }
+
         for (const queuedUpdate of this.navigationQueuedUpdates) {
             queuedUpdate();
         }

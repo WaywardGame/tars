@@ -68,6 +68,7 @@ export declare class ItemUtilities {
     getInventoryItemsWithEquipType(context: Context, equipType: EquipType): Item[];
     getInventoryItemsWithUse(context: Context, use: ActionType, filterEquipped?: boolean): Item[];
     getReservedItems(context: Context, includeKeepInInventoryItems: boolean): Item[];
+    getItemsToBuild(context: Context): Item[];
     getUnusedItems(context: Context, options?: Partial<{
         allowReservedItems: boolean;
         allowSailboat: boolean;

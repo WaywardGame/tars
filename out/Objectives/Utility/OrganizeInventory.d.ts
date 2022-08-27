@@ -7,6 +7,7 @@ export interface IOriganizeInventoryOptions {
     disableDrop: boolean;
     onlyIfNearBase: boolean;
     allowReservedItems: boolean;
+    allowInventoryItems: boolean;
     onlyOrganizeReservedItems: boolean;
     onlyAllowIntermediateChest: boolean;
     items: Item[];

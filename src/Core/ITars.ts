@@ -544,6 +544,17 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 //     "tongs",
 // ];
 
+export const inventoryBuildItems: Array<keyof IInventoryItems> = [
+    "campfire",
+    "waterStill",
+    "chest",
+    "kiln",
+    "well",
+    "furnace",
+    "anvil",
+    "solarStill",
+];
+
 export interface IBaseItemSearch {
     itemType: ItemType;
     extraDifficulty?: number;

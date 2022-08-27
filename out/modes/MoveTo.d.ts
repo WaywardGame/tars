@@ -1,4 +1,5 @@
 import type { NPCType } from "game/entity/npc/INPCs";
+import type NPC from "game/entity/npc/NPC";
 import type { DoodadType } from "game/doodad/IDoodad";
 import type { IslandId } from "game/island/IIsland";
 import type { TerrainType } from "game/tile/ITerrain";
@@ -36,7 +37,7 @@ export interface IMoveToPlayer extends IMoveTo {
 }
 export interface IMoveToNPC extends IMoveTo {
     type: MoveToType.NPC;
-    npcType: NPCType;
+    npc: NPC | NPCType;
 }
 export interface IMoveToCreature extends IMoveTo {
     type: MoveToType.Creature;

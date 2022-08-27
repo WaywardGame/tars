@@ -200,7 +200,24 @@ export class MovementUtilities {
                     const tileType = TileHelpers.getType(nextTile);
                     const terrainDescription = Terrains[tileType];
 
-                    if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
+                    if (nextTile.creature) {
+                        // walking into a creature
+
+                        // ensure we are wearing the correct equipment
+                        const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+                        if (handEquipmentChange) {
+                            context.log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
+
+                            await context.utilities.action.executeAction(context, Equip, [handEquipmentChange.item, handEquipmentChange.equipType]);
+                        }
+
+                        context.log.info("Walking into a creature");
+
+                        await context.utilities.action.executeAction(context, Move, [direction]);
+
+                        return MoveResult.Moving;
+
+                    } else if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
                         // some terrain is blocking our path
                         if (terrainDescription.gather) {
                             if (direction !== context.human.facingDirection) {
@@ -256,23 +273,6 @@ export class MovementUtilities {
 
                             await context.utilities.action.executeAction(context, Chop, [context.utilities.item.getBestToolForDoodadGather(context, doodad)]);
                         }
-
-                        return MoveResult.Moving;
-
-                    } else if (nextTile.creature) {
-                        // walking into a creature
-
-                        // ensure we are wearing the correct equipment
-                        const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
-                        if (handEquipmentChange) {
-                            context.log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
-
-                            await context.utilities.action.executeAction(context, Equip, [handEquipmentChange.item, handEquipmentChange.equipType]);
-                        }
-
-                        context.log.info("Walking into an npc");
-
-                        await context.utilities.action.executeAction(context, Move, [direction]);
 
                         return MoveResult.Moving;
 
