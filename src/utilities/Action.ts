@@ -63,7 +63,9 @@ export class ActionUtilities {
             waiter = this.waitForAction(actionType);
         }
 
-        action.skipConfirmation().execute(context.human, ...actionArgs);
+        multiplayer.executeClientside(() => {
+            action.skipConfirmation().execute(context.human, ...actionArgs);
+        });
 
         if (waiter) {
             await waiter;
