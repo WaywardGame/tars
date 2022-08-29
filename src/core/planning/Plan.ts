@@ -5,7 +5,7 @@ import type Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 
 import type Context from "../context/Context";
-import type { IObjective, IObjectiveInfo } from "../objective/IObjective";
+import type { IObjective, IObjectiveInfo, IObjectivePriority } from "../objective/IObjective";
 import { CalculatedDifficultyStatus, ObjectiveResult } from "../objective/IObjective";
 import ReserveItems from "../../objectives/core/ReserveItems";
 import Restart from "../../objectives/core/Restart";
@@ -81,7 +81,17 @@ export default class Plan implements IPlan {
 		let str = "";
 
 		const writeTree = (tree: IExecutionTree, depth = 0) => {
-			str += `${"  ".repeat(depth)}${tree.hashCode}`;
+			str += `${"  ".repeat(depth)}${tree.hashCode} (${tree.id})`;
+
+			str += ` (Difficulty is ${tree.difficulty})`;
+
+			if (tree.priority !== undefined) {
+				str += ` (Priority is ${tree.priority.priority} (${tree.priority.gatherObjectiveCount} gather objectives, ${tree.priority.chestGatherObjectiveCount} chest gather objectives))`;
+			}
+
+			if (tree.groupParent) {
+				str += " (Group parent)";
+			}
 
 			if (tree.groupedAway) {
 				str += " (Regrouped children)";
@@ -263,7 +273,7 @@ export default class Plan implements IPlan {
 		const objectives: IObjectiveInfo[] = [];
 
 		const walkTree = (tree: IExecutionTree, depth: number, logs: ILogLine[]) => {
-			if (tree.children.length === 0) {
+			if (tree.children.length === 0 || tree.objective.isDynamic()) {
 				objectives.push({
 					depth: depth,
 					objective: tree.objective,
@@ -534,6 +544,8 @@ export default class Plan implements IPlan {
 		const reserveItemObjectives: Map<Item, number> = new Map();
 		const keepInInventoryReserveItemObjectives: Map<Item, number> = new Map();
 
+		// todo: find the easiest objective for each group. and make that objective the first one?
+
 		for (const { depth, objective, difficulty, logs } of objectives) {
 			const hashCode = objective.getHashCode(context);
 
@@ -563,10 +575,11 @@ export default class Plan implements IPlan {
 				if (objectiveGroupParent) {
 					// we are changing the parent for this objective
 					// flag the original parent as being changed
-					parent.groupedAway = true;
+					parent.groupedAway = objectiveGroupParent;
 					parent = objectiveGroupParent;
 
 				} else {
+					parent.groupParent = true;
 					objectiveGroups.set(objectiveGroupId, parent);
 				}
 			}
@@ -591,7 +604,7 @@ export default class Plan implements IPlan {
 			}
 		}
 
-		const cachedExecutionPriorities: Map<string, Map<IExecutionTree, number>> = new Map();
+		const cachedExecutionPriorities: Map<string, Map<IExecutionTree, IObjectivePriority>> = new Map();
 
 		const getExecutionPriority = (objective: IObjective, tree: IExecutionTree) => {
 			const hashCode = objective.getHashCode(context);
@@ -604,7 +617,7 @@ export default class Plan implements IPlan {
 
 			let priority = objectivePriorities.get(tree);
 			if (priority === undefined) {
-				priority = objective.getExecutionPriority!(this.context, tree).priority;
+				priority = objective.getExecutionPriority!(this.context, tree);
 				objectivePriorities.set(tree, priority);
 			}
 
@@ -619,7 +632,10 @@ export default class Plan implements IPlan {
 					const priorityA = getExecutionPriority(objectiveA, treeA);
 					const priorityB = getExecutionPriority(objectiveB, treeB);
 
-					return priorityA === priorityB ? 0 : priorityA < priorityB ? 1 : -1;
+					treeA.priority = priorityA;
+					treeB.priority = priorityB;
+
+					return priorityA.priority === priorityB.priority ? 0 : priorityA.priority < priorityB.priority ? 1 : -1;
 				}
 
 				return 0;
@@ -741,6 +757,31 @@ export default class Plan implements IPlan {
 		if (objectivesToInsertAtFront.length > 0) {
 			rootTree.children = objectivesToInsertAtFront.concat(rootTree.children);
 		}
+
+		// move grouped children to the first spot they appear in the tree
+		const groupsSeen = new Set<number>();
+
+		const walkAndRegroupTree = (tree: IExecutionTree) => {
+			if (tree.groupedAway) {
+				if (!groupsSeen.has(tree.groupedAway.id)) {
+					groupsSeen.add(tree.groupedAway.id);
+					tree.children = tree.groupedAway.children;
+				}
+
+			} else if (tree.groupParent) {
+				if (!groupsSeen.has(tree.id)) {
+					groupsSeen.add(tree.id);
+				} else {
+					tree.children = [];
+				}
+			}
+
+			for (const child of tree.children) {
+				walkAndRegroupTree(child);
+			}
+		};
+
+		walkAndRegroupTree(rootTree);
 
 		return rootTree;
 	}

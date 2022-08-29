@@ -29,6 +29,14 @@ export default class GatherFromDoodad extends Objective {
 		return true;
 	}
 
+	public override isDynamic(): boolean {
+		// marked as dynamic because the plan is optimized before execution.
+		// that means this objective could end up regrouped.
+		// the specific objective in the tree might be aiming to gather from some far away place.
+		// running it dynamically will end up having it grab from the nearest spot
+		return true;
+	}
+
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		return context.utilities.object.findDoodads(context, this.getIdentifier(), (doodad: Doodad) => {
 			const searchMap = this.doodadSearchMap.get(doodad.type);

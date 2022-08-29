@@ -57,7 +57,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 		const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, this.itemType);
 
-		const options: IGetItemOptions = { allowInventoryItems: !!this.allowInventoryItems, allowUnsafeWaterContainers: true };
+		const options: Partial<IGetItemOptions> = { allowInventoryItems: !!this.allowInventoryItems, allowUnsafeWaterContainers: true };
 		const checker = context.utilities.item.processRecipe(context, this.recipe, false, options);
 		const checkerWithIntermediateChest = context.utilities.item.processRecipe(context, this.recipe, true, options);
 
@@ -195,8 +195,17 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 					genericAction: {
 						action: Craft,
 						args: () => {
-							// todo: actually pass in the right items here? 
+							// todo: actually pass in the right items here?
 							// checker might just have empty items here
+							// const options: Partial<IGetItemOptions> = {
+							// 	allowInventoryItems: !!this.allowInventoryItems,
+							// 	allowUnsafeWaterContainers: true,
+							// 	onlyAllowReservedItems: true,
+							// };
+							// const checker = checkerWithoutIntermediateChest ?
+							// 	context.utilities.item.processRecipe(context, this.recipe, true, options) :
+							// 	context.utilities.item.processRecipe(context, this.recipe, false, options);
+
 							return [this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent] as ActionArguments<typeof Craft>;
 						},
 						expectedMessages: expectedCraftMessages,

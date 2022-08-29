@@ -1,5 +1,5 @@
 import type { ILogLine } from "utilities/Log";
-import type { IObjective, IObjectiveInfo } from "../objective/IObjective";
+import type { IObjective, IObjectiveInfo, IObjectivePriority } from "../objective/IObjective";
 export interface IPlan {
     readonly tree: IExecutionTree;
     readonly objectives: IObjectiveInfo[];
@@ -12,10 +12,12 @@ export interface IExecutionTree<T extends IObjective = IObjective> {
     objective: T;
     hashCode: string;
     difficulty: number;
+    priority?: IObjectivePriority;
     logs: ILogLine[];
     children: IExecutionTree[];
     parent?: IExecutionTree;
-    groupedAway?: boolean;
+    groupParent?: boolean;
+    groupedAway?: IExecutionTree;
 }
 export declare enum ExecuteResultType {
     Completed = 0,

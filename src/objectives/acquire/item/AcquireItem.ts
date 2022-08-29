@@ -244,8 +244,8 @@ export default class AcquireItem extends AcquireBase {
 		if (search === undefined) {
 			search = [];
 
-			// todo: figure out a better way to handle this
-			if (this.itemType !== ItemType.PlantRoots) {
+			// prevent pickup up stuff that was placed down, such as red carpet & wooden tracks
+			if (!itemDescriptions[this.itemType]?.use?.includes(ActionType.SetDown) && this.itemType !== ItemType.PlantRoots) {
 				const resolvedTypes: Map<TerrainType, ITerrainResourceSearch[]> = new Map();
 
 				const unresolvedTypes: TerrainType[] = Array.from(Enums.values(TerrainType));

@@ -48,11 +48,11 @@ export interface IObjectivePriority {
 	priority: number;
 	objectiveCount: number;
 	acquireObjectiveCount: number;
-	emptyAcquireObjectiveCount: number;
+	// emptyAcquireObjectiveCount: number;
 	gatherObjectiveCount: number;
-	gatherWithoutChestObjectiveCount: number;
+	chestGatherObjectiveCount: number;
 	craftsRequiringNoGatheringCount: number;
-	regroupedChildrenCount: number;
+	// regroupedChildrenCount: number;
 }
 
 export interface IObjective {

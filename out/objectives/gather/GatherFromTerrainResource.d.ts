@@ -9,6 +9,7 @@ export default class GatherFromTerrainResource extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     canGroupTogether(): boolean;
+    isDynamic(): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     protected getBaseDifficulty(context: Context): number;
 }

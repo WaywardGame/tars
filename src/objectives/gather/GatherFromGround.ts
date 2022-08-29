@@ -33,6 +33,15 @@ export default class GatherFromGround extends Objective {
 		return true;
 	}
 
+	// disabled at the moment because it will currently see that it's already reserved and skip it
+	// public override isDynamic(): boolean {
+	// 	// marked as dynamic because the plan is optimized before execution.
+	// 	// that means this objective could end up regrouped.
+	// 	// the specific objective in the tree might be aiming to gather from some far away place.
+	// 	// running it dynamically will end up having it grab from the nearest spot
+	// 	return true;
+	// }
+
 	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
 		return {
 			objectiveHashCode,

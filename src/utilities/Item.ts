@@ -27,6 +27,7 @@ import { TarsUseProtectedItems } from "../core/ITarsOptions";
 export interface IGetItemOptions {
 	allowInventoryItems: boolean;
 	allowUnsafeWaterContainers: boolean;
+	onlyAllowReservedItems: boolean;
 }
 
 export class ItemUtilities {
@@ -275,7 +276,12 @@ export class ItemUtilities {
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, options?: Partial<IGetItemOptions>): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.human, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
 			if (isConsumed) {
-				if (context.isHardReservedItem(item)) {
+				if (options?.onlyAllowReservedItems) {
+					if (!context.isSoftReservedItem(item) && !context.isHardReservedItem(item)) {
+						return false;
+					}
+
+				} else if (context.isHardReservedItem(item)) {
 					return false;
 				}
 
@@ -288,6 +294,9 @@ export class ItemUtilities {
 			// 	// only allow the knife
 			// 	return item === context.inventory.knife;
 			// }
+			if (options?.onlyAllowReservedItems) {
+				return context.isSoftReservedItem(item) || context.isHardReservedItem(item);
+			}
 
 			return true;
 		});

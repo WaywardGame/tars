@@ -14,6 +14,7 @@ import { IDisassemblySearch } from "../core/ITars";
 export interface IGetItemOptions {
     allowInventoryItems: boolean;
     allowUnsafeWaterContainers: boolean;
+    onlyAllowReservedItems: boolean;
 }
 export declare class ItemUtilities {
     private static readonly relatedItemsCache;
