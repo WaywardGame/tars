@@ -2,7 +2,7 @@ import type { ItemType } from "game/item/IItem";
 import type Context from "../../../core/context/Context";
 import type { IExecutionTree } from "../../../core/planning/IPlan";
 import Objective from "../../../core/objective/Objective";
-import { IObjectivePriority } from "../../../core/objective/IObjective";
+import { IObjective, IObjectivePriority } from "../../../core/objective/IObjective";
 export interface IAcquireItemOptions extends IGatherItemOptions {
     disallowCreatureSearch: boolean;
     disallowDoodadSearch: boolean;
@@ -18,7 +18,7 @@ export interface IGatherItemOptions {
     requirePlayerCreatedIfCraftable: boolean;
     willDestroyItem: boolean;
 }
-export default abstract class AcquireBase extends Objective {
+export default abstract class AcquireBase extends Objective implements IObjective {
     getExecutionPriority(context: Context, tree: IExecutionTree): IObjectivePriority;
     private addResult;
     private addGatherObjectivePriorities;

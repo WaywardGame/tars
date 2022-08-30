@@ -3,6 +3,7 @@ import { WeightStatus } from "game/entity/player/IPlayer";
 import type Context from "./context/Context";
 import { MovingToNewIslandState, ContextDataType } from "./context/IContext";
 import type { IObjective } from "./objective/IObjective";
+import Objective from "./objective/Objective";
 
 import type { IPlan } from "./planning/IPlan";
 import { ExecuteResultType } from "./planning/IPlan";
@@ -117,6 +118,7 @@ export class Executor {
 				context.log.debug(`Reset context state. Context hash code: ${context.getHashCode()}.`, MovingToNewIslandState[moveToNewIslandState]);
 			}
 
+			Objective.reset();
 			this.planner.reset();
 
 			const objectiveChain = Array.isArray(objective) ? objective : [objective];

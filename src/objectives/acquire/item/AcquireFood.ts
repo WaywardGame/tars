@@ -12,15 +12,21 @@ import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 import AddDifficulty from "../../core/AddDifficulty";
+import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
 
+export interface IAcquireFoodOptions {
+	onlyAllowBaseItems: boolean;
+	allowDangerousFoodItems: boolean;
+
+}
 export default class AcquireFood extends Objective {
 
-	constructor(private readonly allowDangerousFoodItems: boolean = false) {
+	constructor(private readonly options?: Partial<IAcquireFoodOptions>) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return "AcquireFood";
+		return `AcquireFood:${this.options?.onlyAllowBaseItems}:${this.options?.allowDangerousFoodItems}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -30,16 +36,30 @@ export default class AcquireFood extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
 
-		// check if we can craft food based on our current items
+		// check if we can craft food based on our current items (inventory and base)
 		objectivePipelines.push(...AcquireFood.getFoodRecipeObjectivePipelines(context, false));
 
-		for (const itemType of context.utilities.item.foodItemTypes) {
-			objectivePipelines.push([
-				new AcquireItem(itemType).passAcquireData(this),
-			]);
+		if (this.options?.onlyAllowBaseItems) {
+			// check if we have existing food items in the base
+			for (const item of context.utilities.item.getBaseItems(context)) {
+				if (!context.island.items.isContainableInContainer(item, context.human.inventory)) {
+					if (context.utilities.item.foodItemTypes.has(item.type)) {
+						objectivePipelines.push([
+							new MoveItemIntoInventory(item).passAcquireData(this),
+						]);
+					}
+				}
+			}
+
+		} else {
+			for (const itemType of context.utilities.item.foodItemTypes) {
+				objectivePipelines.push([
+					new AcquireItem(itemType).passAcquireData(this),
+				]);
+			}
 		}
 
-		if (this.allowDangerousFoodItems) {
+		if (this.options?.allowDangerousFoodItems) {
 			objectivePipelines.push([
 				new AddDifficulty(100), // make this harder since it could result in poison
 				new AcquireItemForAction(ActionType.Eat).passAcquireData(this),

@@ -32,12 +32,17 @@ const expectedCraftMessages = new Set<Message>([Message.ActionCraftYouLackTheReq
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
+	private readonly recipeDoesNotRequireFiresOrDoodads: boolean;
+
 	constructor(private readonly itemType: ItemType, private readonly recipe: IRecipe, private readonly allowInventoryItems?: boolean) {
 		super();
+
+		this.recipeDoesNotRequireFiresOrDoodads = !this.recipe.requiresFire && !this.recipe.requiredDoodads;
 	}
 
 	public getIdentifier(): string {
 		return `AcquireItemWithRecipe:${ItemType[this.itemType]}`;
+		// return `AcquireItemWithRecipe:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseChests)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -53,8 +58,6 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const canCraftFromIntermediateChest = !this.recipe.requiresFire && !this.recipe.requiredDoodads;
-
 		const requirementInfo = context.island.items.hasAdditionalRequirements(context.human, this.itemType);
 
 		const options: Partial<IGetItemOptions> = { allowInventoryItems: !!this.allowInventoryItems, allowUnsafeWaterContainers: true };
@@ -70,32 +73,37 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 			this.log.info(`Must use intermediate chest. Available inventory weight: ${availableInventoryWeight}. Estimated item weight: ${estimatedItemWeight}.`);
 
 			return [
-				this.getObjectives(context, requirementInfo, canCraftFromIntermediateChest, true, checkerWithIntermediateChest, checker),
+				this.getObjectives(context, requirementInfo, true, checkerWithIntermediateChest, checker),
 			];
 		}
 
 		// create objective pipelines for normal crafting, and with intermediate chest crafting
 		// it's possible not using the chest is easier
 		return [
-			this.getObjectives(context, requirementInfo, canCraftFromIntermediateChest, false, checker),
-			this.getObjectives(context, requirementInfo, canCraftFromIntermediateChest, false, checkerWithIntermediateChest, checker),
+			this.getObjectives(context, requirementInfo, false, checker),
+			this.getObjectives(context, requirementInfo, false, checkerWithIntermediateChest, checker),
 		];
 	}
 
 	private getObjectives(
 		context: Context,
 		requirementInfo: IRequirementInfo,
-		canCraftFromIntermediateChest: boolean,
 		allowOrganizingItemsIntoIntermediateChest: boolean,
 		checker: ItemRecipeRequirementChecker,
 		checkerWithoutIntermediateChest?: ItemRecipeRequirementChecker): IObjective[] {
 		const objectives: IObjective[] = [
-			// todo: always make this true?
-			new SetContextData(ContextDataType.PrioritizeBaseChests, canCraftFromIntermediateChest),
-			new SetContextData(ContextDataType.CanCraftFromIntermediateChest, canCraftFromIntermediateChest),
+			// todo: invert this statement? probably not though?
+			new SetContextData(ContextDataType.PrioritizeBaseChests, !this.recipeDoesNotRequireFiresOrDoodads),
+			new SetContextData(ContextDataType.CanCraftFromIntermediateChest, this.recipeDoesNotRequireFiresOrDoodads),
 			new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, allowOrganizingItemsIntoIntermediateChest),
 			new SetContextData(ContextDataType.NextActionAllowsIntermediateChest, checkerWithoutIntermediateChest ? true : false),
 		];
+
+		// if (!this.recipeDoesNotRequireFiresOrDoodads) {
+		// 	// we have to go back to the base at some point
+		// 	// may as well prioritize base chests during GatherFromChest objectives
+		// 	objectives.push(new SetContextData(ContextDataType.PrioritizeBaseChests, true));
+		// }
 
 		const requirementsMet = checker.requirementsMet();
 
@@ -156,7 +164,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 				// move to our container before crafting
 				objectives.push(new MoveToTarget(intermediateChest, true));
 
-				if (!canCraftFromIntermediateChest) {
+				if (!this.recipeDoesNotRequireFiresOrDoodads) {
 					// move all the items we need from the chest
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {

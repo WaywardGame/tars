@@ -141,7 +141,13 @@ export class SurvivalMode implements ITarsMode {
 				objectives.push(new PlantSeeds(seeds));
 			}
 
-			objectives.push(new CheckDecayingItems());
+			// carry food with you if it's available from the base
+			const foodItemsNeeded = Math.max(2 - (context.inventory.food?.length ?? 0), 0);
+			if (foodItemsNeeded > 0) {
+				for (let i = 0; i < foodItemsNeeded; i++) {
+					objectives.push([new AcquireFood({ onlyAllowBaseItems: true }), new AnalyzeInventory()]);
+				}
+			}
 		});
 
 		if (context.base.kiln.length === 0) {
@@ -242,6 +248,8 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
+				objectives.push(new CheckDecayingItems());
+
 				if (context.options.survivalClearSwamps) {
 					// remove swamp tiles near the base
 					const swampTiles = context.utilities.base.getSwampTilesNearBase(context);
@@ -367,6 +375,10 @@ export class SurvivalMode implements ITarsMode {
 		/*
 			End game objectives
 		*/
+
+		if (context.base.solarStill.length === 0) {
+			objectives.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
+		}
 
 		if (context.options.survivalExploreIslands && !multiplayer.isConnected()) {
 			// move to a new island

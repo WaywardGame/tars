@@ -7,6 +7,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
     private readonly itemType;
     private readonly recipe;
     private readonly allowInventoryItems?;
+    private readonly recipeDoesNotRequireFiresOrDoodads;
     constructor(itemType: ItemType, recipe: IRecipe, allowInventoryItems?: boolean | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;

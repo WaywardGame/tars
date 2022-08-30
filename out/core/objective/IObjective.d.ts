@@ -21,12 +21,10 @@ export declare enum CalculatedDifficultyStatus {
     Possible = -26
 }
 export interface IObjectivePriority {
-    priority: number;
-    objectiveCount: number;
-    acquireObjectiveCount: number;
-    gatherObjectiveCount: number;
-    chestGatherObjectiveCount: number;
-    craftsRequiringNoGatheringCount: number;
+    gatherObjectives: number;
+    craftObjectives: number;
+    gatherFromCreatureObjectives: number;
+    gatherFromChestObjectives: number;
 }
 export interface IObjective {
     readonly log: ILog;

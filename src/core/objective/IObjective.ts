@@ -45,14 +45,10 @@ export enum CalculatedDifficultyStatus {
 }
 
 export interface IObjectivePriority {
-	priority: number;
-	objectiveCount: number;
-	acquireObjectiveCount: number;
-	// emptyAcquireObjectiveCount: number;
-	gatherObjectiveCount: number;
-	chestGatherObjectiveCount: number;
-	craftsRequiringNoGatheringCount: number;
-	// regroupedChildrenCount: number;
+	gatherObjectives: number;
+	craftObjectives: number;
+	gatherFromCreatureObjectives: number;
+	gatherFromChestObjectives: number;
 }
 
 export interface IObjective {

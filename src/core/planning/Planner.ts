@@ -563,7 +563,9 @@ export class Planner implements IPlanner {
 						this.writeCalculationLog(`Pipeline difficulty: ${pipelineResult.difficulty}. Going to merge "${context.getHashCode()}" (depth: ${context.state.depth}) (objective chain: ${objectiveChain.map(o => `${o.depth},${o.objective}`).join(", ")}) with "${pipelineResult.changes.getHashCode()}" (depth ${pipelineResult.changes.depth}) (objective chain: ${pipelineResult.objectiveChain.map(o => `${o.depth},${o.objective}`).join(", ")})`);
 					}
 
-					difficulty += pipelineResult.difficulty;
+					if (!objective.isDifficultyOverridden()) {
+						difficulty += pipelineResult.difficulty;
+					}
 
 					const depth = pipelineResult.depth;
 

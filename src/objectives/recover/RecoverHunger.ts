@@ -88,7 +88,7 @@ export default class RecoverHunger extends Objective {
 		}
 
 		return [
-			new AcquireFood(isEmergency).keepInInventory(),
+			new AcquireFood({ allowDangerousFoodItems: isEmergency }).keepInInventory(),
 			new UseItem(Eat),
 		];
 	}

@@ -49,7 +49,7 @@ export default class GatherFromChest extends Objective {
 	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
 		const prioritizeBaseChests = context.getData(ContextDataType.PrioritizeBaseChests);
 
-		let chests: Doodad[] = context.base.chest.slice();
+		let chests: Doodad[] = context.base.chest;
 
 		if (!context.getData(ContextDataType.NextActionAllowsIntermediateChest)) {
 			// the intermediate chest cannot be used for the recipe

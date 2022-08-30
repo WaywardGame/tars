@@ -54,6 +54,7 @@ export default class AcquireItem extends AcquireBase {
 
 	public getIdentifier(): string {
 		return `AcquireItem:${ItemType[this.itemType]}`;
+		// ${context?.getData(ContextDataType.PrioritizeBaseChests)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}
 	}
 
 	public getStatus(): string | undefined {

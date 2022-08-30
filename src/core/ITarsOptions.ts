@@ -89,7 +89,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         treasureHunterPrecognition: false,
         treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
 
-        planningAccuracy: PlanningAccuracy.Simple,
+        planningAccuracy: PlanningAccuracy.Accurate,
 
         quantumBurst: false,
         debugLogging: false,

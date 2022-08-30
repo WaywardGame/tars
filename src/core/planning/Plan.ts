@@ -86,7 +86,7 @@ export default class Plan implements IPlan {
 			str += ` (Difficulty is ${tree.difficulty})`;
 
 			if (tree.priority !== undefined) {
-				str += ` (Priority is ${tree.priority.priority} (${tree.priority.gatherObjectiveCount} gather objectives, ${tree.priority.chestGatherObjectiveCount} chest gather objectives))`;
+				str += ` (${tree.priority.gatherObjectives} gather objectives, ${tree.priority.gatherFromChestObjectives} chest gather objectives, ${tree.priority.craftObjectives} craft objectives)`;
 			}
 
 			if (tree.groupParent) {
@@ -635,7 +635,36 @@ export default class Plan implements IPlan {
 					treeA.priority = priorityA;
 					treeB.priority = priorityB;
 
-					return priorityA.priority === priorityB.priority ? 0 : priorityA.priority < priorityB.priority ? 1 : -1;
+					const gatherFromCreatureObjectivesA = priorityA.gatherFromCreatureObjectives;
+					const gatherFromCreatureObjectivesB = priorityB.gatherFromCreatureObjectives;
+					if (gatherFromCreatureObjectivesA !== gatherFromCreatureObjectivesB) {
+						// prioritize the objective that requires gather from creatures
+						return gatherFromCreatureObjectivesB - gatherFromCreatureObjectivesA;
+					}
+
+					const nonChestGatherObjectivesA = priorityA.gatherObjectives - priorityA.gatherFromChestObjectives;
+					const nonChestGatherObjectivesB = priorityB.gatherObjectives - priorityB.gatherFromChestObjectives;
+					if (nonChestGatherObjectivesA !== nonChestGatherObjectivesB) {
+						// prioritize the objective that requires more gathering
+						return nonChestGatherObjectivesB - nonChestGatherObjectivesA;
+					}
+
+					if ((priorityA.craftObjectives > 0 && priorityA.gatherObjectives === 0) ||
+						(priorityB.craftObjectives > 0 && priorityB.gatherObjectives === 0)) {
+						// one or both objectives can be crafted without having to gather anything (all items are in the inventory)
+						// prioritize the objective that can be crafted now
+						return priorityA.gatherObjectives - priorityB.gatherObjectives;
+					}
+
+					const craftObjectivesA = priorityA.craftObjectives;
+					const craftObjectivesB = priorityB.craftObjectives;
+					if (craftObjectivesA !== craftObjectivesB) {
+						// prioritize the objective that requires more crafting
+						return craftObjectivesB - craftObjectivesA;
+					}
+
+					// prioritize the harder recipe - the one that requires more gathering
+					return priorityB.gatherObjectives - priorityA.gatherObjectives;
 				}
 
 				return 0;

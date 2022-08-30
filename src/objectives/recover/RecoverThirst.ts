@@ -24,7 +24,7 @@ import RecoverStamina from "./RecoverStamina";
 import AcquireItem from "../acquire/item/AcquireItem";
 import StartSolarStill from "../other/doodad/StartSolarStill";
 import { DoodadType } from "game/doodad/IDoodad";
-import AcquireWater from "../acquire/item/specific/AcquireWater";
+// import AcquireWater from "../acquire/item/specific/AcquireWater";
 import AddDifficulty from "../core/AddDifficulty";
 
 export interface IRecoverThirstOptions {
@@ -65,6 +65,33 @@ export default class RecoverThirst extends Objective {
 			return this.getBelowThresholdObjectives(context);
 		}
 
+		const waterAndSolarStills = context.base.waterStill.concat(context.base.solarStill);
+
+		if (!RecoverThirst.isEmergency(context) && !context.utilities.base.isNearBase(context)) {
+			const isDrinkableWaterAvailable = waterAndSolarStills.some(solarOrWaterStill => !context.utilities.doodad.isWaterStillDesalinating(solarOrWaterStill) && context.utilities.doodad.isWaterStillDrinkable(solarOrWaterStill));
+			if (isDrinkableWaterAvailable) {
+				// drinkable water is available at the base
+				// don't go back to the base until we have too
+				const thirst = context.human.stat.get(Stat.Thirst)!;
+				const changeTimer = thirst.changeTimer;
+				const nextChangeTimer = thirst.nextChangeTimer;
+				if (changeTimer !== undefined && nextChangeTimer !== undefined) {
+					const pathResult = await context.utilities.navigation.findPath(context.utilities.base.getBasePosition(context));
+					if (pathResult) {
+						// note: assuming walk path is taking us away from the base
+						const pathLength = pathResult.path.length + (context.human.walkPath?.path?.length ?? 0);
+
+						const turnsUntilThirstHitsZero = ((thirst.value - 1) * nextChangeTimer) + changeTimer;
+						if (turnsUntilThirstHitsZero >= pathLength) {
+							// we can make it back to the base and drink water before thirst goes below 0
+							// no need to go back to base now
+							return ObjectiveResult.Ignore;
+						}
+					}
+				}
+			}
+		}
+
 		const objectivePipelines: IObjective[][] = [];
 
 		if (context.inventory.waterContainer !== undefined) {
@@ -74,9 +101,10 @@ export default class RecoverThirst extends Objective {
 				objectivePipelines.push([new UseItem(DrinkItem, waterContainer)]);
 			}
 
-			if (context.inventory.waterContainer.length !== safeToDrinkWaterContainers.length) {
-				objectivePipelines.push([new AcquireWater({ onlySafeToDrink: true })]);
-			}
+			// this could cause us to run across the map to grab unpurified fresh water for boiling
+			// if (context.inventory.waterContainer.length !== safeToDrinkWaterContainers.length) {
+			// 	objectivePipelines.push([new AcquireWater({ onlySafeToDrink: true })]);
+			// }
 		}
 
 		if (this.options.onlyUseAvailableItems) {
@@ -97,8 +125,6 @@ export default class RecoverThirst extends Objective {
 			objectivePipelines.push(waterStillObjectives);
 
 		} else {
-			const waterAndSolarStills = context.base.waterStill.concat(context.base.solarStill);
-
 			const isWaitingForAll = waterAndSolarStills.every(doodad => context.utilities.doodad.isWaterStillDesalinating(doodad));
 			if (isWaitingForAll) {
 				if (context.utilities.player.isHealthy(context)) {
