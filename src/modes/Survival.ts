@@ -26,13 +26,12 @@ import BuildItem from "../objectives/other/item/BuildItem";
 import EquipItem from "../objectives/other/item/EquipItem";
 import Idle from "../objectives/other/Idle";
 import ReinforceItem from "../objectives/other/item/ReinforceItem";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import StartWaterStillDesalination from "../objectives/other/doodad/StartWaterStillDesalination";
 import UpgradeInventoryItem from "../objectives/other/UpgradeInventoryItem";
 import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
 import DrainSwamp from "../objectives/utility/DrainSwamp";
-import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
 import MoveToNewIsland from "../objectives/utility/moveTo/MoveToNewIsland";
 import OrganizeBase from "../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
@@ -43,11 +42,12 @@ import PlantSeeds from "../objectives/utility/PlantSeeds";
 import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
 import type { ITarsMode } from "../core/mode/IMode";
 import { IInventoryItems } from "../core/ITars";
-import { getTarsSaveData } from "../ITarsMod";
 import { getCommonInitialObjectives } from "./CommonInitialObjectives";
 import StartSolarStill from "../objectives/other/doodad/StartSolarStill";
 import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
+import MoveToTarget from "../objectives/core/MoveToTarget";
+import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
 
 /**
  * Survival mode
@@ -80,12 +80,26 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		if (context.inventory.sailBoat && context.human.island.items.isContainableInContainer(context.inventory.sailBoat, context.human.inventory)) {
-			// don't carry the sail boat around if we don't have a base - we likely just moved to a new island
-			objectives.push([
-				new MoveToLand(),
+			//  we likely just moved to a new island
+			const movedToNewIslandObjectives: IObjective[] = [];
+			if (context.utilities.base.hasBase(context)) {
+				movedToNewIslandObjectives.push(new MoveToBase());
+
+			} else {
+				const target = await context.utilities.base.findInitialBuildTile(context);
+				if (target) {
+					movedToNewIslandObjectives.push(new MoveToTarget(target, true));
+				} else {
+					movedToNewIslandObjectives.push(new MoveToLand());
+				}
+			}
+
+			movedToNewIslandObjectives.push(
 				new ExecuteAction(Drop, [context.inventory.sailBoat]).setStatus("Dropping sailboat"),
 				new AnalyzeInventory(),
-			]);
+			);
+
+			objectives.push(movedToNewIslandObjectives);
 		}
 
 		objectives.push(new CheckSpecialItems());
@@ -382,15 +396,15 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.options.survivalExploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
-			const needWaterItems = context.inventory.waterContainer === undefined || context.inventory.waterContainer.filter(item => context.utilities.item.isSafeToDrinkItem(item)).length < 2;
-			const needFoodItems = context.inventory.food === undefined || context.inventory.food.length < 2;
+			const waterItemsNeeded = Math.max(2 - (context.inventory.waterContainer?.filter(item => context.utilities.item.isSafeToDrinkItem(item)).length ?? 0), 0);
+			const foodItemsNeeded = Math.max(2 - (context.inventory.food?.length ?? 0), 0);
 
 			const health = context.human.stat.get<IStatMax>(Stat.Health);
 			const hunger = context.human.stat.get<IStatMax>(Stat.Hunger);
 			const needHealthRecovery = health.value / health.max < 0.9;
 			const needHungerRecovery = hunger.value / hunger.max < 0.7;
 
-			const isPreparing = needWaterItems || needFoodItems || needHealthRecovery || needHungerRecovery;
+			const isPreparing = waterItemsNeeded !== 0 || foodItemsNeeded !== 0 || needHealthRecovery || needHungerRecovery;
 
 			switch (moveToNewIslandState) {
 				case MovingToNewIslandState.None:
@@ -421,19 +435,19 @@ export class SurvivalMode implements ITarsMode {
 					}
 
 					// stock up on water
-					if (needWaterItems) {
-						// if (availableWaterContainers.length === 0) {
-						// 	objectives.push(new AcquireWaterContainer());
-						// }
-
-						// we are looking for something drinkable
-						// if there is a well, starting the water still will use it
-						objectives.push(new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
+					if (waterItemsNeeded > 0) {
+						for (let i = 0; i < waterItemsNeeded; i++) {
+							// we are looking for something drinkable
+							// if there is a well, starting the water still will use it
+							objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
+						}
 					}
 
 					// stock up on food
-					if (needFoodItems) {
-						objectives.push([new AcquireFood(), new AnalyzeInventory()]);
+					if (foodItemsNeeded > 0) {
+						for (let i = 0; i < foodItemsNeeded; i++) {
+							objectives.push([new AcquireFood({ onlyAllowBaseItems: true }), new AnalyzeInventory()]);
+						}
 					}
 
 					objectives.push(new Lambda(async () => {
@@ -456,7 +470,7 @@ export class SurvivalMode implements ITarsMode {
 				objectives.push(new RecoverHunger(false, true));
 			}
 
-			objectives.push(new ReturnToBase());
+			objectives.push(new MoveToBase());
 
 			if (context.options.survivalOrganizeBase) {
 				objectives.push(new OrganizeBase(context.utilities.base.getTilesWithItemsNearBase(context).tiles));
@@ -497,11 +511,15 @@ export class SurvivalMode implements ITarsMode {
 			return;
 		}
 
-		const islandSaveData = getTarsSaveData("island")[context.human.island.id];
-		// if (islandSaveData[upgradeItemKey]) {
-		// 	// already upgraded
-		// 	return;
-		// }
+		let islandSaveData = context.tars.saveData.island[context.human.island.id];
+		if (!islandSaveData) {
+			islandSaveData = context.tars.saveData.island[context.human.island.id] = {};
+		}
+
+		if (islandSaveData[upgradeItemKey]) {
+			// already upgraded this item once
+			return;
+		}
 
 		objectives.push([
 			new UpgradeInventoryItem(inventoryItemKey, fromItemTypes),

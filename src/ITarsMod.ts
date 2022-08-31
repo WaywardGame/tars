@@ -30,10 +30,6 @@ export function getTarsTranslation(translation: TarsTranslation | string | Trans
     return getTarsMod().getTranslation(translation);
 }
 
-export function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T] {
-    return getTarsMod().saveData[key];
-}
-
 export interface ITarsModEvents extends Events<Mod> {
     /**
      * Emitted when TARS status is changed

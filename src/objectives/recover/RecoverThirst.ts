@@ -24,7 +24,7 @@ import RecoverStamina from "./RecoverStamina";
 import AcquireItem from "../acquire/item/AcquireItem";
 import StartSolarStill from "../other/doodad/StartSolarStill";
 import { DoodadType } from "game/doodad/IDoodad";
-// import AcquireWater from "../acquire/item/specific/AcquireWater";
+import AcquireWater from "../acquire/item/specific/AcquireWater";
 import AddDifficulty from "../core/AddDifficulty";
 
 export interface IRecoverThirstOptions {
@@ -81,7 +81,7 @@ export default class RecoverThirst extends Objective {
 						// note: assuming walk path is taking us away from the base
 						const pathLength = pathResult.path.length + (context.human.walkPath?.path?.length ?? 0);
 
-						const turnsUntilThirstHitsZero = ((thirst.value - 1) * nextChangeTimer) + changeTimer;
+						const turnsUntilThirstHitsZero = ((thirst.value - 1) * nextChangeTimer) + changeTimer - 10; // reduce count by 10 turns as a buffer
 						if (turnsUntilThirstHitsZero >= pathLength) {
 							// we can make it back to the base and drink water before thirst goes below 0
 							// no need to go back to base now
@@ -174,6 +174,13 @@ export default class RecoverThirst extends Objective {
 
 	private async getEmergencyObjectives(context: Context) {
 		const objectivePipelines: IObjective[][] = [];
+
+
+		const { availableWaterContainers } = context.utilities.item.getWaterContainers(context);
+		if (availableWaterContainers.length > 0) {
+			// we are looking for something drinkable
+			objectivePipelines.push([new AcquireWater({ onlySafeToDrink: true, disallowTerrain: true })]);
+		}
 
 		const health = context.human.stat.get<IStatMax>(Stat.Health);
 		if (health.value > 4 || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {

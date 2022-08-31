@@ -9,7 +9,6 @@ export declare const TARS_ID = "TARS";
 export declare function getTarsMod(): TarsMod;
 export declare function setTarsMod(instance: TarsMod | undefined): void;
 export declare function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation;
-export declare function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T];
 export interface ITarsModEvents extends Events<Mod> {
     statusChange(): any;
     refreshNpcIslandIds(): any;

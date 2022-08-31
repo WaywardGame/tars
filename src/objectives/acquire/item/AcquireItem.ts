@@ -3,7 +3,7 @@ import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
 import { ActionArguments, ActionType } from "game/entity/action/IAction";
 import Corpses from "game/entity/creature/corpse/Corpses";
 import { CreatureType } from "game/entity/creature/ICreature";
-import { ItemType } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import { TerrainType } from "game/tile/ITerrain";
 import TerrainResources from "game/tile/TerrainResources";
@@ -246,7 +246,16 @@ export default class AcquireItem extends AcquireBase {
 			search = [];
 
 			// prevent pickup up stuff that was placed down, such as red carpet & wooden tracks
-			if (!itemDescriptions[this.itemType]?.use?.includes(ActionType.SetDown) && this.itemType !== ItemType.PlantRoots) {
+			let exclude = false;
+
+			if (itemDescriptions[this.itemType]?.use?.includes(ActionType.SetDown)) {
+				const isHousingOrTrack = context.island.items.isInGroup(this.itemType, ItemTypeGroup.Housing) || context.island.items.isInGroup(this.itemType, ItemTypeGroup.Track);
+				if (isHousingOrTrack) {
+					exclude = true;
+				}
+			}
+
+			if (!exclude && this.itemType !== ItemType.PlantRoots) {
 				const resolvedTypes: Map<TerrainType, ITerrainResourceSearch[]> = new Map();
 
 				const unresolvedTypes: TerrainType[] = Array.from(Enums.values(TerrainType));

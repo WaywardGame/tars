@@ -48,6 +48,7 @@ export interface IObjectivePriority {
 	gatherObjectives: number;
 	craftObjectives: number;
 	gatherFromCreatureObjectives: number;
+	gatherFromCorpseObjectives: number;
 	gatherFromChestObjectives: number;
 }
 

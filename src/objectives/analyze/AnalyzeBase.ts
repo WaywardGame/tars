@@ -1,16 +1,13 @@
 import type Doodad from "game/doodad/Doodad";
-import doodadDescriptions from "game/doodad/Doodads";
-import type { DoodadType } from "game/doodad/IDoodad";
 import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import DoodadManager from "game/doodad/DoodadManager";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import type { BaseInfoKey, IBaseInfo } from "../../core/ITars";
+import type { BaseInfoKey } from "../../core/ITars";
 import { baseInfo } from "../../core/ITars";
 
 const baseDoodadDistanceSq = Math.pow(50, 2);
@@ -62,7 +59,7 @@ export default class AnalyzeBase extends Objective {
 					for (const point of possiblePoints) {
 						const tile = context.island.getTileFromPoint(point);
 						const doodad = tile.doodad;
-						if (doodad && AnalyzeBase.matchesBaseInfo(context, info, doodad.type, doodad)) {
+						if (doodad && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad)) {
 							targets.push(doodad);
 						}
 					}
@@ -71,7 +68,7 @@ export default class AnalyzeBase extends Objective {
 					// UUID for the key in order to ensure this always does a fresh scan
 					targets = info.findTargets ?
 						info.findTargets(context) :
-						context.utilities.object.findDoodads(context, `${this.getIdentifier()}:${this.getUniqueIdentifier()}`, doodad => doodad.builderIdentifier !== undefined && AnalyzeBase.matchesBaseInfo(context, info, doodad.type, doodad));
+						context.utilities.object.findDoodads(context, `${this.getIdentifier()}:${this.getUniqueIdentifier()}`, doodad => doodad.builderIdentifier !== undefined && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad));
 				}
 
 				for (const target of targets) {
@@ -146,61 +143,4 @@ export default class AnalyzeBase extends Objective {
 		];
 	}
 
-	public static matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean {
-		const doodadDescription = doodadDescriptions[doodadType];
-		if (!doodadDescription) {
-			return false;
-		}
-
-		if (point && info.tryPlaceNear !== undefined) {
-			const placeNearDoodads = context.base[info.tryPlaceNear];
-
-			// reject doodads that won't be able to be near the desired type
-			const isValid = AnalyzeBase.getNearPoints(point)
-				.some((point) => {
-					const tile = context.island.getTileFromPoint(point);
-
-					if (tile.doodad && placeNearDoodads.includes(tile.doodad)) {
-						// nearby doodad is there
-						return true;
-					}
-
-					if (context.utilities.base.isOpenArea(context, point, tile, 0)) {
-						// there is an open spot for a doodads
-						return true;
-					}
-
-					return false;
-				});
-			if (!isValid) {
-				return false;
-			}
-		}
-
-		if (info.doodadTypes) {
-			for (const doodadTypeOrGroup of info.doodadTypes) {
-				if (DoodadManager.isGroup(doodadTypeOrGroup)) {
-					if (DoodadManager.isInGroup(doodadType, doodadTypeOrGroup)) {
-						return true;
-					}
-
-					if (doodadDescription.group && doodadDescription.group.includes(doodadTypeOrGroup)) {
-						return true;
-					}
-
-				} else if (doodadTypeOrGroup === doodadType) {
-					return true;
-				}
-			}
-		}
-
-		if (info.litType !== undefined && doodadDescription.lit !== undefined) {
-			const litDescription = doodadDescriptions[doodadDescription.lit];
-			if (litDescription && DoodadManager.isInGroup(doodadDescription.lit, info.litType)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
 }

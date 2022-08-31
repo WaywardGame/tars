@@ -1,11 +1,11 @@
 import { TurnMode } from "game/IGame";
 
 import type Context from "../core/context/Context";
-import type { IObjective} from "../core/objective/IObjective";
+import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import Lambda from "../objectives/core/Lambda";
 import Idle from "../objectives/other/Idle";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import CompleteQuests from "../objectives/quest/CompleteQuests";
 import type { ITarsMode } from "../core/mode/IMode";
@@ -26,7 +26,7 @@ export class QuestMode implements ITarsMode {
 
         objectives.push(new CompleteQuests());
 
-        objectives.push(new ReturnToBase());
+        objectives.push(new MoveToBase());
 
         objectives.push(new OrganizeInventory());
 

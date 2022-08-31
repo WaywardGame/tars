@@ -1,4 +1,5 @@
 import { OwnEventHandler } from "event/EventManager";
+import Message from "language/dictionary/Message";
 import Translation from "language/Translation";
 import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import TabDialog from "ui/screen/screens/game/component/TabDialog";
@@ -6,18 +7,17 @@ import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialog
 import { Edge } from "ui/screen/screens/game/Dialogs";
 import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
-import { TarsUiSaveDataKey, getTarsTranslation, TarsTranslation } from "../ITarsMod";
+import Tars from "../core/Tars";
+import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../ITarsMod";
 import type TarsPanel from "./components/TarsPanel";
+import DataPanel from "./panels/DataPanel";
 import GeneralPanel from "./panels/GeneralPanel";
-import MoveToPanel from "./panels/MoveToPanel";
-import TasksPanel from "./panels/TasksPanel";
 import GlobalOptionsPanel from "./panels/GlobalOptionsPanel";
 import ModeOptionsPanel from "./panels/ModeOptionsPanel";
+import MoveToPanel from "./panels/MoveToPanel";
 import NPCsPanel from "./panels/NPCsPanel";
-import Tars from "../core/Tars";
-import Message from "language/dictionary/Message";
+import TasksPanel from "./panels/TasksPanel";
 import ViewportPanel from "./panels/ViewportPanel";
-import DataPanel from "./panels/DataPanel";
 
 export type TabDialogPanelClass = new (tarsInstance: Tars) => TarsPanel;
 
@@ -38,9 +38,8 @@ const subpanelClasses: TabDialogPanelClass[] = [
 export default class TarsDialog extends TabDialog<TarsPanel> {
 
 	public static description: IDialogDescription = {
-		minSize: new Vector2(30, 21),
+		minResolution: new Vector2(300, 200),
 		size: new Vector2(40, 70),
-		maxSize: new Vector2(60, 140),
 		edges: [
 			[Edge.Left, 25],
 			[Edge.Bottom, 33],

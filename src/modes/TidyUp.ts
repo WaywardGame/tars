@@ -6,7 +6,7 @@ import type Context from "../core/context/Context";
 import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
 import AcquireItemForAction from "../objectives/acquire/item/AcquireItemForAction";
 import BuildItem from "../objectives/other/item/BuildItem";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import OrganizeBase from "../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import type { ITarsMode } from "../core/mode/IMode";
@@ -64,7 +64,7 @@ export class TidyUpMode implements ITarsMode {
 			objectives.push(new OrganizeBase(tiles.tiles));
 		}
 
-		objectives.push(new ReturnToBase());
+		objectives.push(new MoveToBase());
 
 		objectives.push(new OrganizeInventory());
 

@@ -43,6 +43,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 		const result: IObjectivePriority = {
 			gatherObjectives: 0,
 			craftObjectives: 0,
+			gatherFromCorpseObjectives: 0,
 			gatherFromCreatureObjectives: 0,
 			gatherFromChestObjectives: 0,
 		};
@@ -89,6 +90,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 
 		} else if (tree.objective instanceof GatherFromCorpse) {
 			result.gatherObjectives++;
+			result.gatherFromCorpseObjectives++;
 
 		} else if (tree.objective instanceof GatherFromGround) {
 			// gather items from the ground before terrain

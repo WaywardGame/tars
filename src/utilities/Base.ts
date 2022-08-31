@@ -7,14 +7,23 @@ import Vector2 from "utilities/math/Vector2";
 import type Creature from "game/entity/creature/Creature";
 import type Item from "game/item/Item";
 import { BiomeType } from "game/biome/IBiome";
+import { WaterType } from "game/island/IIsland";
 
 import type Context from "../core/context/Context";
-import type { BaseInfoKey } from "../core/ITars";
+import type { BaseInfoKey, IBaseInfo } from "../core/ITars";
 import { baseInfo } from "../core/ITars";
-import { WaterType } from "game/island/IIsland";
+import { FindObjectType } from "./Object";
+import DoodadManager from "game/doodad/DoodadManager";
+import doodadDescriptions from "game/doodad/Doodads";
+import { DoodadType } from "game/doodad/IDoodad";
+import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
+
+const nearRocksDistance = Math.pow(24, 2);
+
+const nearWaterDistance = Math.pow(24, 2);
 
 export interface IBuildTileOptions {
 	openAreaRadius: number;
@@ -220,5 +229,185 @@ export class BaseUtilities {
 		}
 
 		return result;
+	}
+
+	public matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean {
+		const doodadDescription = doodadDescriptions[doodadType];
+		if (!doodadDescription) {
+			return false;
+		}
+
+		if (point && info.tryPlaceNear !== undefined) {
+			const placeNearDoodads = context.base[info.tryPlaceNear];
+
+			// reject doodads that won't be able to be near the desired type
+			const isValid = AnalyzeBase.getNearPoints(point)
+				.some((point) => {
+					const tile = context.island.getTileFromPoint(point);
+
+					if (tile.doodad && placeNearDoodads.includes(tile.doodad)) {
+						// nearby doodad is there
+						return true;
+					}
+
+					if (context.utilities.base.isOpenArea(context, point, tile, 0)) {
+						// there is an open spot for a doodads
+						return true;
+					}
+
+					return false;
+				});
+			if (!isValid) {
+				return false;
+			}
+		}
+
+		if (info.doodadTypes) {
+			for (const doodadTypeOrGroup of info.doodadTypes) {
+				if (DoodadManager.isGroup(doodadTypeOrGroup)) {
+					if (DoodadManager.isInGroup(doodadType, doodadTypeOrGroup)) {
+						return true;
+					}
+
+					if (doodadDescription.group && doodadDescription.group.includes(doodadTypeOrGroup)) {
+						return true;
+					}
+
+				} else if (doodadTypeOrGroup === doodadType) {
+					return true;
+				}
+			}
+		}
+
+		if (info.litType !== undefined && doodadDescription.lit !== undefined) {
+			const litDescription = doodadDescriptions[doodadDescription.lit];
+			if (litDescription && DoodadManager.isInGroup(doodadDescription.lit, info.litType)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public async findInitialBuildTile(context: Context): Promise<IVector3 | undefined> {
+		const facingPoint = context.human.getFacingPoint();
+		const facingTile = context.human.getFacingTile();
+
+		if (await this.isGoodTargetOrigin(context, facingPoint) && context.utilities.base.isGoodBuildTile(context, facingPoint, facingTile)) {
+			return facingPoint;
+		}
+
+		const sortedObjects = context.utilities.object.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[]);
+
+		for (const doodad of sortedObjects) {
+			if (doodad !== undefined && doodad.z === context.human.z) {
+				const description = doodad.description();
+				if (description && description.isTree && await this.isGoodTargetOrigin(context, doodad)) {
+					for (let x = -6; x <= 6; x++) {
+						for (let y = -6; y <= 6; y++) {
+							if (x === 0 && y === 0) {
+								continue;
+							}
+
+							const point: IVector3 = {
+								x: doodad.x + x,
+								y: doodad.y + y,
+								z: doodad.z,
+							};
+
+							const tile = context.island.getTileFromPoint(point);
+
+							if (context.utilities.base.isGoodBuildTile(context, point, tile)) {
+								return point;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private async isGoodTargetOrigin(context: Context, origin: IVector3): Promise<boolean> {
+		// build our base near trees, grass, and open tiles
+		let nearbyTrees = 0;
+		let nearbyCommonTiles = 0;
+		// let openTiles = 0;
+
+		let commonTerrainType: TerrainType;
+		let rockType: TerrainType;
+		let waterType: TerrainType;
+		let treeRequirementCount = 6;
+
+		switch (context.island.biomeType) {
+			case BiomeType.Coastal:
+				commonTerrainType = TerrainType.Grass;
+				rockType = TerrainType.Granite;
+				waterType = TerrainType.ShallowSeawater;
+				break;
+
+			case BiomeType.IceCap:
+				commonTerrainType = TerrainType.Snow;
+				rockType = TerrainType.GraniteWithSnow;
+				waterType = TerrainType.FreezingSeawater;
+				break;
+
+			case BiomeType.Arid:
+				commonTerrainType = TerrainType.DesertSand;
+				rockType = TerrainType.Sandstone;
+				waterType = TerrainType.ShallowSeawater;
+				treeRequirementCount = 3;
+				break;
+
+			default:
+				commonTerrainType = TerrainType.Dirt;
+				rockType = TerrainType.Granite;
+				waterType = TerrainType.ShallowSeawater;
+				break;
+		}
+
+		for (let x = -6; x <= 6; x++) {
+			for (let y = -6; y <= 6; y++) {
+				if (x === 0 && y === 0) {
+					continue;
+				}
+
+				const point: IVector3 = {
+					x: origin.x + x,
+					y: origin.y + y,
+					z: origin.z,
+				};
+
+				const tile = context.island.getTileFromPoint(point);
+				if (tile.doodad) {
+					const description = tile.doodad.description();
+					if (description && description.isTree) {
+						nearbyTrees++;
+					}
+
+				} else if (context.utilities.base.isGoodBuildTile(context, point, tile)) {
+					if (TileHelpers.getType(tile) === commonTerrainType) {
+						nearbyCommonTiles++;
+					}
+				}
+			}
+		}
+
+		if (nearbyCommonTiles < 20 || nearbyTrees < treeRequirementCount) {
+			return false;
+		}
+
+		// build close to rocks
+		const rockTileLocations = await context.utilities.tile.getNearestTileLocation(context, rockType, origin);
+		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance)) {
+			return false;
+		}
+
+		// buiuld close to a water source
+		const shallowSeawaterTileLocations = await context.utilities.tile.getNearestTileLocation(context, waterType, origin);
+		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearWaterDistance)) {
+			return false;
+		}
+
+		return true;
 	}
 }

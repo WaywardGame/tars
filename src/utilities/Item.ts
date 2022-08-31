@@ -910,6 +910,8 @@ export class ItemUtilities {
 
 	private isEdible(itemType: ItemType): boolean {
 		const onEat = itemDescriptions[itemType]?.onUse?.[ActionType.Eat];
-		return onEat !== undefined && onEat[0] > 1;
+		return onEat !== undefined &&
+			onEat[0] >= 1 && // hp. note: must be greater than or equal to 1 for Pemmican
+			onEat[2] > 1; // hunger. don't continously dig for grass seeds
 	}
 }

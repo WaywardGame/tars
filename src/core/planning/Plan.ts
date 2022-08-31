@@ -635,6 +635,13 @@ export default class Plan implements IPlan {
 					treeA.priority = priorityA;
 					treeB.priority = priorityB;
 
+					const gatherFromCorpsesObjectivesA = priorityA.gatherFromCorpseObjectives;
+					const gatherFromCorpsesObjectivesB = priorityB.gatherFromCorpseObjectives;
+					if (gatherFromCorpsesObjectivesA !== gatherFromCorpsesObjectivesB) {
+						// prioritize the objective that requires gather from corpses (corpses can expire!)
+						return gatherFromCorpsesObjectivesB - gatherFromCorpsesObjectivesA;
+					}
+
 					const gatherFromCreatureObjectivesA = priorityA.gatherFromCreatureObjectives;
 					const gatherFromCreatureObjectivesB = priorityB.gatherFromCreatureObjectives;
 					if (gatherFromCreatureObjectivesA !== gatherFromCreatureObjectivesB) {

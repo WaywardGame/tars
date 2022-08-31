@@ -10,7 +10,7 @@ import Lambda from "../objectives/core/Lambda";
 import HuntCreatures from "../objectives/other/creature/HuntCreatures";
 import Idle from "../objectives/other/Idle";
 import EquipItem from "../objectives/other/item/EquipItem";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 
 /**
@@ -39,7 +39,7 @@ export class TerminatorMode implements ITarsMode {
             objectives.push(new HuntCreatures(creatures));
         }
 
-        objectives.push(new ReturnToBase());
+        objectives.push(new MoveToBase());
 
         objectives.push(new OrganizeInventory());
 

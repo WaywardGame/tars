@@ -1,5 +1,5 @@
 import { ActionType } from "game/entity/action/IAction";
-import type { IContainer } from "game/item/IItem";
+import { IContainer, ItemType } from "game/item/IItem";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import Eat from "game/entity/action/actions/Eat";
 
@@ -53,9 +53,17 @@ export default class AcquireFood extends Objective {
 
 		} else {
 			for (const itemType of context.utilities.item.foodItemTypes) {
-				objectivePipelines.push([
-					new AcquireItem(itemType).passAcquireData(this),
-				]);
+				const objectivePipeline: IObjective[] = [];
+
+				// prioritize the direct craft, like Raw Meat -> Cooked Meat
+				const isUndesirable = itemType === ItemType.Pemmican;
+				if (isUndesirable) {
+					objectivePipeline.push(new AddDifficulty(500));
+				}
+
+				objectivePipeline.push(new AcquireItem(itemType).passAcquireData(this));
+
+				objectivePipelines.push(objectivePipeline);
 			}
 		}
 
@@ -73,6 +81,11 @@ export default class AcquireFood extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const itemType of context.utilities.item.foodItemTypes) {
+			if (itemType === ItemType.Pemmican) {
+				// never try to make pemmican
+				continue;
+			}
+
 			const description = itemDescriptions[itemType];
 			if (!description || description.craftable === false) {
 				continue;
@@ -90,17 +103,19 @@ export default class AcquireFood extends Objective {
 			}
 
 			if (checker.requirementsMet()) {
+				const objectivePipeline: IObjective[] = [];
+
 				if (eatFood) {
-					objectivePipelines.push([
+					objectivePipeline.push(
 						new AcquireItemWithRecipe(itemType, recipe).keepInInventory(),
 						new UseItem(Eat),
-					]);
+					);
 
 				} else {
-					objectivePipelines.push([
-						new AcquireItemWithRecipe(itemType, recipe)
-					]);
+					objectivePipeline.push(new AcquireItemWithRecipe(itemType, recipe));
 				}
+
+				objectivePipelines.push(objectivePipeline)
 			}
 		}
 

@@ -4,6 +4,8 @@ import type { IVector3 } from "utilities/math/IVector";
 import type Creature from "game/entity/creature/Creature";
 import type Item from "game/item/Item";
 import type Context from "../core/context/Context";
+import type { IBaseInfo } from "../core/ITars";
+import { DoodadType } from "game/doodad/IDoodad";
 export interface IBuildTileOptions {
     openAreaRadius: number;
     allowWater: boolean;
@@ -34,4 +36,7 @@ export declare class BaseUtilities {
     getTileItemsNearBase(context: Context): Item[];
     getSwampTilesNearBase(context: Context): IVector3[];
     getNonTamedCreaturesNearBase(context: Context): Creature[];
+    matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean;
+    findInitialBuildTile(context: Context): Promise<IVector3 | undefined>;
+    private isGoodTargetOrigin;
 }

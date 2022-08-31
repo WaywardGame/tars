@@ -11,7 +11,7 @@ import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import Lambda from "../objectives/core/Lambda";
 import MoveToTarget from "../objectives/core/MoveToTarget";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToIsland from "../objectives/utility/moveTo/MoveToIsland";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { ContextDataType } from "../core/context/IContext";
@@ -205,7 +205,7 @@ export class MoveToMode implements ITarsMode {
 
             case MoveToType.Base:
                 return [
-                    new ReturnToBase(),
+                    new MoveToBase(),
                     new Lambda(async () => {
                         this.finished(true);
                         return ObjectiveResult.Complete;

@@ -54,7 +54,7 @@ import RepairItem from "../objectives/interrupt/RepairItem";
 import BuildItem from "../objectives/other/item/BuildItem";
 import EquipItem from "../objectives/other/item/EquipItem";
 import UnequipItem from "../objectives/other/item/UnequipItem";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import RunAwayFromTarget from "../objectives/other/RunAwayFromTarget";
 import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
@@ -1670,7 +1670,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             !this.utilities.base.isNearBase(context) &&
             context.utilities.item.getUnusedItems(context).length > 0) {
             // return to base to put some extra items in a chest
-            return new ReturnToBase();
+            return new MoveToBase();
         }
     }
 
