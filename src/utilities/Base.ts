@@ -245,13 +245,14 @@ export class BaseUtilities {
 				.some((point) => {
 					const tile = context.island.getTileFromPoint(point);
 
-					if (tile.doodad && placeNearDoodads.includes(tile.doodad)) {
+					// check if the nearby doodad matches desired one
+					if (tile.doodad && (placeNearDoodads.includes(tile.doodad) || this.matchesBaseInfo(context, baseInfo[info.tryPlaceNear!], tile.doodad.type))) {
 						// nearby doodad is there
 						return true;
 					}
 
 					if (context.utilities.base.isOpenArea(context, point, tile, 0)) {
-						// there is an open spot for a doodads
+						// there is an open spot for the doodad
 						return true;
 					}
 

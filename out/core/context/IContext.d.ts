@@ -13,7 +13,7 @@ export declare enum ContextDataType {
     AllowOrganizingReservedItemsIntoIntermediateChest = "AllowOrganizingReservedItemsIntoIntermediateChest",
     NextActionAllowsIntermediateChest = "NextActionAllowsIntermediateChest",
     CanCraftFromIntermediateChest = "CanCraftFromIntermediateChest",
-    PrioritizeBaseChests = "PrioritizeBaseChests",
+    PrioritizeBaseItems = "PrioritizeBaseItems",
     MovingToNewIsland = "MovingToNewIsland",
     DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
     TamingCreature = "TamingCreature",

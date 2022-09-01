@@ -24,7 +24,8 @@ export declare class ItemUtilities {
     allSeedItemTypes: Set<ItemType>;
     edibleSeedItemTypes: Set<ItemType>;
     private availableInventoryWeightCache;
-    private itemCache;
+    private baseTileItemCache;
+    private baseItemCache;
     private readonly groundItemCache;
     private readonly disassembleSearchCache;
     static getRelatedItemTypes(itemType: ItemType): Set<ItemType> | boolean;
@@ -33,6 +34,7 @@ export declare class ItemUtilities {
     initialize(context: Context): void;
     clearCache(): void;
     getBaseItems(context: Context): Item[];
+    getBaseTileItems(context: Context): Set<Item>;
     getBaseItemsByType(context: Context, itemType: ItemType): Item[];
     getGroundItems(context: Context, itemType: ItemType): Item[];
     getDisassembleSearch(context: Context, itemType: ItemType): IDisassemblySearch[];
@@ -49,7 +51,8 @@ export declare class ItemUtilities {
     getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, options?: Partial<IGetItemOptions>): Item | undefined;
     isInventoryItem(context: Context, item: Item, options?: Partial<IGetItemOptions>): boolean;
     canDestroyItem(context: Context, item: Item): boolean;
-    isSafeToDrinkItem(item: Item): boolean;
+    isSafeToDrinkItem(context: Context, item: Item): boolean;
+    isSafeToDrinkItemType(context: Context, itemType: ItemType): boolean;
     isDrinkableItem(item: Item): boolean;
     canGatherWater(item: Item): boolean;
     hasUseActionType(item: Item, actionType: ActionType): boolean;

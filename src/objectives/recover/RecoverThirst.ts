@@ -95,7 +95,7 @@ export default class RecoverThirst extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		if (context.inventory.waterContainer !== undefined) {
-			const safeToDrinkWaterContainers = context.inventory.waterContainer.filter(waterContainer => context.utilities.item.isSafeToDrinkItem(waterContainer));
+			const safeToDrinkWaterContainers = context.inventory.waterContainer.filter(waterContainer => context.utilities.item.isSafeToDrinkItem(context, waterContainer));
 			for (const waterContainer of safeToDrinkWaterContainers) {
 				this.log.info(`Can safely drink water from ${waterContainer}`);
 				objectivePipelines.push([new UseItem(DrinkItem, waterContainer)]);
@@ -286,7 +286,7 @@ export default class RecoverThirst extends Objective {
 				}
 
 				// if (context.inventory.waterContainer) {
-				// 	const safeToDrinkWaterContainers = context.inventory.waterContainer.filter(waterContainer => context.utilities.item.isSafeToDrinkItem(waterContainer));
+				// 	const safeToDrinkWaterContainers = context.inventory.waterContainer.filter(waterContainer => context.utilities.item.isSafeToDrinkItem(context, waterContainer));
 				// 	if (context.inventory.waterContainer.length !== safeToDrinkWaterContainers.length) {
 				// 		objectivePipelines.push([new AcquireSafeWater()]);
 				// 	}
@@ -294,7 +294,7 @@ export default class RecoverThirst extends Objective {
 
 				// if (context.inventory.waterContainer !== undefined) {
 				// 	for (const waterContainer of context.inventory.waterContainer) {
-				// 		if (context.utilities.item.isDrinkableItem(waterContainer) && !context.utilities.item.isSafeToDrinkItem(waterContainer)) {
+				// 		if (context.utilities.item.isDrinkableItem(waterContainer) && !context.utilities.item.isSafeToDrinkItem(context, waterContainer)) {
 				// 			// we have an unpurified container. try purifying it
 				// 			objectivePipelines.push([new GatherWaterWithRecipe(waterContainer)]);
 				// 		}

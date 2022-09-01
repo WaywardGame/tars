@@ -6,5 +6,6 @@ export declare class SurvivalMode implements ITarsMode {
     initialize(_: Context, finished: (success: boolean) => void): Promise<void>;
     determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>>;
     private addUpgradeItemObjectives;
-    private whenNearBase;
+    private runWhileNearBase;
+    private runWhile;
 }

@@ -29,9 +29,9 @@ export enum ContextDataType {
 	CanCraftFromIntermediateChest = "CanCraftFromIntermediateChest",
 
 	/**
-	 * Prioritize using items from base chest for the objective over gather out in the field
+	 * Prioritize using items from the base for the objective over gathering out in the field
 	 */
-	PrioritizeBaseChests = "PrioritizeBaseChests",
+	PrioritizeBaseItems = "PrioritizeBaseItems",
 
 	/**
 	 * Set when TARS is moving to a new island

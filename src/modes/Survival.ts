@@ -137,7 +137,7 @@ export class SurvivalMode implements ITarsMode {
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
 
-		this.whenNearBase(context, objectives, () => {
+		await this.runWhileNearBase(context, objectives, async (context, objectives) => {
 			// ensure solar stills are solar stilling
 			for (const solarStill of context.base.solarStill) {
 				if (!solarStill.stillContainer) {
@@ -241,7 +241,7 @@ export class SurvivalMode implements ITarsMode {
 		const { drinkableWaterContainers, availableWaterContainers } = context.utilities.item.getWaterContainers(context);
 
 		// run a few extra things before running upgrade objectives if we're near a base
-		this.whenNearBase(context, objectives, () => {
+		this.runWhileNearBase(context, objectives, async (context, objectives) => {
 			// build a second water still
 			if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
 				objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem()]);
@@ -262,8 +262,6 @@ export class SurvivalMode implements ITarsMode {
 			}
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
-				objectives.push(new CheckDecayingItems());
-
 				if (context.options.survivalClearSwamps) {
 					// remove swamp tiles near the base
 					const swampTiles = context.utilities.base.getSwampTilesNearBase(context);
@@ -280,10 +278,14 @@ export class SurvivalMode implements ITarsMode {
 
 				if (context.options.survivalOrganizeBase) {
 					// cleanup base if theres items laying around everywhere
-					const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
-					if (tiles.totalCount > 20) {
-						objectives.push(new OrganizeBase(tiles.tiles));
-					}
+					// and rember we are organizing until we're done!
+					await this.runWhile(context, objectives,
+						"OrganizeBase",
+						async (context) => context.utilities.base.getTilesWithItemsNearBase(context).totalCount > 20,
+						async () => {
+							const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
+							objectives.push(new OrganizeBase(tiles.tiles));
+						});
 				}
 			}
 
@@ -303,7 +305,7 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		// go on a killing spree once you have a good sword and shield
-		this.whenNearBase(context, objectives, () => {
+		this.runWhileNearBase(context, objectives, async (context, objectives) => {
 			const creatures = context.utilities.base.getNonTamedCreaturesNearBase(context)
 				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
@@ -364,7 +366,7 @@ export class SurvivalMode implements ITarsMode {
 		*/
 
 		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenSword, ItemType.TinSword]));
-		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.TinShield]));
+		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.BarkShield, ItemType.TinShield]));
 		this.addUpgradeItemObjectives(context, objectives, "equipBelt", new Set([ItemType.LeatherBelt]));
 		this.addUpgradeItemObjectives(context, objectives, "equipNeck", new Set([ItemType.LeatherGorget, ItemType.TinBevor]));
 		this.addUpgradeItemObjectives(context, objectives, "equipHead", new Set([ItemType.LeatherCap, ItemType.TinHelmet, ItemType.PirateHat]));
@@ -390,13 +392,19 @@ export class SurvivalMode implements ITarsMode {
 			End game objectives
 		*/
 
+		if (moveToNewIslandState === MovingToNewIslandState.None) {
+			this.runWhileNearBase(context, objectives, async (context, objectives) => {
+				objectives.push(new CheckDecayingItems());
+			});
+		}
+
 		if (context.base.solarStill.length === 0) {
 			objectives.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
 		}
 
 		if (context.options.survivalExploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
-			const waterItemsNeeded = Math.max(2 - (context.inventory.waterContainer?.filter(item => context.utilities.item.isSafeToDrinkItem(item)).length ?? 0), 0);
+			const waterItemsNeeded = Math.max(2 - (context.inventory.waterContainer?.filter(item => context.utilities.item.isSafeToDrinkItem(context, item)).length ?? 0), 0);
 			const foodItemsNeeded = Math.max(2 - (context.inventory.food?.length ?? 0), 0);
 
 			const health = context.human.stat.get<IStatMax>(Stat.Health);
@@ -504,8 +512,6 @@ export class SurvivalMode implements ITarsMode {
 			return;
 		}
 
-		const upgradeItemKey = `UpgradeItem:${inventoryItemKey}`;
-
 		if (!fromItemTypes.has((item as Item).type)) {
 			// already upgraded
 			return;
@@ -515,6 +521,8 @@ export class SurvivalMode implements ITarsMode {
 		if (!islandSaveData) {
 			islandSaveData = context.tars.saveData.island[context.human.island.id] = {};
 		}
+
+		const upgradeItemKey = `UpgradeItem:${inventoryItemKey}`;
 
 		if (islandSaveData[upgradeItemKey]) {
 			// already upgraded this item once
@@ -536,32 +544,44 @@ export class SurvivalMode implements ITarsMode {
 	 * Runs objectives when near the base.
 	 * And remembers to keep running them even if running the objectives ends up moving you away from the base
 	 */
-	private whenNearBase(
+	private async runWhileNearBase(
 		context: Context,
 		objectives: Array<IObjective | IObjective[]>,
-		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => void) {
-		const isNearBase = context.getDataOrDefault<boolean>(ContextDataType.IsNearBase, false);
-		if (!isNearBase && !context.utilities.base.isNearBase(context)) {
+		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>) {
+		return this.runWhile(context, objectives,
+			"NearBase",
+			async (context) => context.utilities.base.isNearBase(context),
+			determineObjectives);
+	}
+
+	private async runWhile(
+		context: Context,
+		objectives: Array<IObjective | IObjective[]>,
+		id: string,
+		initialCondition: (context: Context) => Promise<boolean>,
+		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>) {
+		const isContinuing = context.getDataOrDefault<boolean>(id, false);
+		if (!isContinuing && !await initialCondition(context)) {
 			return;
 		}
 
-		if (isNearBase) {
-			context.log.debug("Remembered that we should run near base objectives");
+		if (isContinuing) {
+			context.log.debug(`${id} - Continuing`);
 
 		} else {
 			// mark that we're near the base, so we'll keep trying these objectives until we're done
 			objectives.push(new Lambda(async () => {
-				context.setInitialStateData(ContextDataType.IsNearBase, true);
+				context.setInitialStateData(id, true);
 				return ObjectiveResult.Complete;
-			}).setStatus("Marking as being near the base"));
+			}).setStatus(`${id} - Marked`));
 		}
 
-		determineObjectives(context, objectives);
+		await determineObjectives(context, objectives);
 
 		// mark that we're done with the near base objectives
 		objectives.push(new Lambda(async () => {
-			context.setInitialStateData(ContextDataType.IsNearBase, undefined);
+			context.setInitialStateData(id, undefined);
 			return ObjectiveResult.Complete;
-		}).setStatus("Finished near base objectives"));
+		}).setStatus(`${id} - Finished`));
 	}
 }

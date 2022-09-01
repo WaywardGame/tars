@@ -8,7 +8,6 @@ import { AiType } from "game/entity/IEntity";
 
 import type Context from "../core/context/Context";
 import { CreatureType } from "game/entity/creature/ICreature";
-import { ActionType } from "game/entity/action/IAction";
 
 export enum FindObjectType {
 	Creature,
@@ -85,12 +84,9 @@ export class ObjectUtilities {
 	}
 
 	public findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {
-		const island = context.human.island;
-		const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
-
-		return this.findObjects(context, FindObjectType.Corpse, id, island.corpses.getObjects() as Corpse[], corpse => {
+		return this.findObjects(context, FindObjectType.Corpse, id, context.human.island.corpses.getObjects() as Corpse[], corpse => {
 			if (isTarget(corpse)) {
-				return context.utilities.tile.canButcherCorpse(context, corpse, tool);
+				return context.utilities.tile.canButcherCorpse(context, corpse, context.inventory.butcher);
 			}
 
 			return false;

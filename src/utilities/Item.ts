@@ -23,6 +23,7 @@ import type Context from "../core/context/Context";
 import { ContextDataType } from "../core/context/IContext";
 import { IDisassemblySearch, inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
+// import { IslandId } from "game/island/IIsland";
 
 export interface IGetItemOptions {
 	allowInventoryItems: boolean;
@@ -31,6 +32,8 @@ export interface IGetItemOptions {
 }
 
 export class ItemUtilities {
+
+	// private static readonly impossibleItems: Map<IslandId, { withoutCaves: Set<ItemType>; withCaves: Set<ItemType> }> = new Map();
 
 	private static readonly relatedItemsCache: Map<ItemType, Set<ItemType>> = new Map();
 	private static readonly relatedItemsByGroupCache: Map<ItemTypeGroup, Set<ItemType>> = new Map();
@@ -41,7 +44,8 @@ export class ItemUtilities {
 	public edibleSeedItemTypes: Set<ItemType>;
 
 	private availableInventoryWeightCache: number | undefined;
-	private itemCache: Item[] | undefined;
+	private baseTileItemCache: Set<Item> | undefined;
+	private baseItemCache: Item[] | undefined;
 	private readonly groundItemCache: Map<ItemType, Item[]> = new Map();
 	private readonly disassembleSearchCache: Map<ItemType, IDisassemblySearch[]> = new Map();
 
@@ -161,23 +165,34 @@ export class ItemUtilities {
 
 	public clearCache() {
 		this.availableInventoryWeightCache = undefined;
-		this.itemCache = undefined;
+		this.baseItemCache = undefined;
+		this.baseTileItemCache = undefined;
 		this.groundItemCache.clear();
 		this.disassembleSearchCache.clear();
 	}
 
 	public getBaseItems(context: Context): Item[] {
-		if (this.itemCache === undefined) {
-			const baseTileItems = context.utilities.base.getTileItemsNearBase(context);
+		if (this.baseItemCache === undefined) {
+			const baseTileItems = Array.from(this.getBaseTileItems(context));
 			const baseChestItems = context.base.chest
 				.map(chest => this.getItemsInContainer(context, chest))
 				.flat();
 			const inventoryItems = this.getItemsInInventory(context);
 
-			this.itemCache = baseTileItems.concat(baseChestItems).concat(inventoryItems);
+			this.baseItemCache = baseTileItems
+				.concat(baseChestItems)
+				.concat(inventoryItems);
 		}
 
-		return this.itemCache;
+		return this.baseItemCache;
+	}
+
+	public getBaseTileItems(context: Context): Set<Item> {
+		if (this.baseTileItemCache === undefined) {
+			this.baseTileItemCache = new Set(context.utilities.base.getTileItemsNearBase(context));
+		}
+
+		return this.baseTileItemCache;
 	}
 
 	public getBaseItemsByType(context: Context, itemType: ItemType): Item[] {
@@ -416,7 +431,7 @@ export class ItemUtilities {
 		for (const [key, inventoryItem] of Object.entries(context.inventory)) {
 			if (Array.isArray(inventoryItem) ? inventoryItem.includes(item) : inventoryItem === item) {
 				if (key === "waterContainer" && options?.allowUnsafeWaterContainers) {
-					return this.isSafeToDrinkItem(item);
+					return this.isSafeToDrinkItem(context, item);
 				}
 
 				return true;
@@ -436,11 +451,15 @@ export class ItemUtilities {
 		return true;
 	}
 
-	public isSafeToDrinkItem(item: Item) {
-		return item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfMedicinalWater) ||
-			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfDesalinatedWater) ||
-			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfPurifiedFreshWater) ||
-			item.island.items.isInGroup(item.type, ItemTypeGroup.ContainerOfFilteredWater);
+	public isSafeToDrinkItem(context: Context, item: Item) {
+		return this.isSafeToDrinkItemType(context, item.type);
+	}
+
+	public isSafeToDrinkItemType(context: Context, itemType: ItemType) {
+		return context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfMedicinalWater) ||
+			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfDesalinatedWater) ||
+			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfPurifiedFreshWater) ||
+			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfFilteredWater);
 	}
 
 	public isDrinkableItem(item: Item) {
@@ -839,7 +858,7 @@ export class ItemUtilities {
 		const availableWaterContainers: Item[] = [];
 
 		for (const waterContainer of context.inventory.waterContainer ?? []) {
-			if (context.utilities.item.isSafeToDrinkItem(waterContainer)) {
+			if (context.utilities.item.isSafeToDrinkItem(context, waterContainer)) {
 				drinkableWaterContainers.push(waterContainer);
 			} else {
 				availableWaterContainers.push(waterContainer);

@@ -8,7 +8,7 @@ export default class GatherFromGround extends Objective {
     private readonly options;
     readonly gatherObjectivePriority = 500;
     constructor(itemType: ItemType, options?: Partial<IGatherItemOptions>);
-    getIdentifier(): string;
+    getIdentifier(context: Context | undefined): string;
     getStatus(): string | undefined;
     canGroupTogether(): boolean;
     canIncludeContextHashCode(context: Context, objectiveHashCode: string): {

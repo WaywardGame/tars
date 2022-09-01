@@ -1,4 +1,3 @@
-import { ActionType } from "game/entity/action/IAction";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
 import type { IOverlayInfo, ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
@@ -260,7 +259,7 @@ export class MovementUtilities {
                         } else if (context.utilities.tile.hasCorpses(nextTile)) {
                             context.log.info("Carving corpse on top of doodad blocking the path", Direction[direction]);
 
-                            const tool = context.utilities.item.getBestTool(context, ActionType.Butcher);
+                            const tool = context.inventory.butcher;
                             if (!tool) {
                                 context.log.info("Missing butchering tool");
                                 return MoveResult.NoPath;

@@ -43,7 +43,18 @@ export default class AcquireItemByGroup extends AcquireBase {
 	private getItemTypes(context: Context): ItemType[] {
 		let result = AcquireItemByGroup.cache.get(this.itemTypeGroup);
 		if (result === undefined) {
-			result = Array.from(context.island.items.getGroupItems(this.itemTypeGroup));
+			const groupItems = new Set(context.island.items.getGroupItems(this.itemTypeGroup));
+
+			if (this.itemTypeGroup === ItemTypeGroup.Liquid) {
+				// prevent using good liquids for whatever this is
+				for (const itemType of Array.from(groupItems)) {
+					if (context.utilities.item.isSafeToDrinkItemType(context, itemType)) {
+						groupItems.delete(itemType);
+					}
+				}
+			}
+
+			result = Array.from(groupItems);
 			AcquireItemByGroup.cache.set(this.itemTypeGroup, result);
 		}
 

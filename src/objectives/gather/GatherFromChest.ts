@@ -19,7 +19,7 @@ export default class GatherFromChest extends Objective {
 	}
 
 	public getIdentifier(context: Context | undefined): string {
-		return `GatherFromChest:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseChests)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}`;
+		return `GatherFromChest:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseItems)}:${context?.getData(ContextDataType.NextActionAllowsIntermediateChest)}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -47,7 +47,7 @@ export default class GatherFromChest extends Objective {
 	// todo: add getWeightChange(): number and take that into account when grouping together?
 
 	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
-		const prioritizeBaseChests = context.getData(ContextDataType.PrioritizeBaseChests);
+		const prioritizeBaseItems = context.getData(ContextDataType.PrioritizeBaseItems);
 
 		let chests: Doodad[] = context.base.chest;
 
@@ -87,7 +87,7 @@ export default class GatherFromChest extends Objective {
 					return [
 						new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
 						new SetContextData(this.contextDataKey, item),
-						new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseChests ? 5 : undefined),
+						new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseItems ? 5 : undefined),
 					];
 				}
 

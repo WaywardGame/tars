@@ -64,7 +64,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
 
-		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(waterContainer));
+		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(context, waterContainer));
 
 		let isPouringWater = false;
 		let detachingContainer = false;

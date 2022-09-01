@@ -32,12 +32,12 @@ const expectedCraftMessages = new Set<Message>([Message.ActionCraftYouLackTheReq
 
 export default class AcquireItemWithRecipe extends AcquireBase {
 
-	private readonly recipeDoesNotRequireFiresOrDoodads: boolean;
+	private readonly recipeRequiresBaseDoodads: boolean;
 
 	constructor(private readonly itemType: ItemType, private readonly recipe: IRecipe, private readonly allowInventoryItems?: boolean) {
 		super();
 
-		this.recipeDoesNotRequireFiresOrDoodads = !this.recipe.requiresFire && !this.recipe.requiredDoodads;
+		this.recipeRequiresBaseDoodads = this.recipe.requiresFire === true || this.recipe.requiredDoodads !== undefined;
 	}
 
 	public getIdentifier(): string {
@@ -92,18 +92,17 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		checker: ItemRecipeRequirementChecker,
 		checkerWithoutIntermediateChest?: ItemRecipeRequirementChecker): IObjective[] {
 		const objectives: IObjective[] = [
-			// todo: invert this statement? probably not though?
-			new SetContextData(ContextDataType.PrioritizeBaseChests, !this.recipeDoesNotRequireFiresOrDoodads),
-			new SetContextData(ContextDataType.CanCraftFromIntermediateChest, this.recipeDoesNotRequireFiresOrDoodads),
+			new SetContextData(ContextDataType.CanCraftFromIntermediateChest, this.recipeRequiresBaseDoodads),
 			new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, allowOrganizingItemsIntoIntermediateChest),
 			new SetContextData(ContextDataType.NextActionAllowsIntermediateChest, checkerWithoutIntermediateChest ? true : false),
 		];
 
-		// if (!this.recipeDoesNotRequireFiresOrDoodads) {
-		// 	// we have to go back to the base at some point
-		// 	// may as well prioritize base chests during GatherFromChest objectives
-		// 	objectives.push(new SetContextData(ContextDataType.PrioritizeBaseChests, true));
-		// }
+		if (this.recipeRequiresBaseDoodads) {
+			// we have to go back to the base at some point
+			// prioritize items available at the base
+			// note: we are never setting this to false. because the top down tree matters
+			objectives.push(new SetContextData(ContextDataType.PrioritizeBaseItems, true));
+		}
 
 		const requirementsMet = checker.requirementsMet();
 
@@ -164,7 +163,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 				// move to our container before crafting
 				objectives.push(new MoveToTarget(intermediateChest, true));
 
-				if (!this.recipeDoesNotRequireFiresOrDoodads) {
+				if (this.recipeRequiresBaseDoodads) {
 					// move all the items we need from the chest
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {

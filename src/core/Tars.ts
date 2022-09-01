@@ -1619,7 +1619,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private gatherFromCorpsesInterrupt(context: Context): IObjective[] | undefined {
-        if (this.utilities.item.getInventoryItemsWithUse(context, ActionType.Butcher).length === 0) {
+        if (!this.inventory.butcher) {
             return undefined;
         }
 

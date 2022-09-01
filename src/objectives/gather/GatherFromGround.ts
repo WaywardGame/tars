@@ -4,6 +4,7 @@ import type { ITileContainer } from "game/tile/ITerrain";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import type Context from "../../core/context/Context";
+import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
@@ -21,8 +22,8 @@ export default class GatherFromGround extends Objective {
 		super();
 	}
 
-	public getIdentifier(): string {
-		return `GatherFromGround:${ItemType[this.itemType]}`;
+	public getIdentifier(context: Context | undefined): string {
+		return `GatherFromGround:${ItemType[this.itemType]}:${context?.getData(ContextDataType.PrioritizeBaseItems)}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -56,12 +57,16 @@ export default class GatherFromGround extends Objective {
 	}
 
 	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
+		const prioritizeBaseItems = context.getData(ContextDataType.PrioritizeBaseItems);
+
 		const point = context.human.getPoint();
 		const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
 		if (item) {
 			return [
 				new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
-				new MoveToTarget(item.containedWithin as ITileContainer, false).trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
+				new MoveToTarget(item.containedWithin as ITileContainer, false)
+					.overrideDifficulty((prioritizeBaseItems && context.utilities.item.getBaseTileItems(context).has(item)) ? 5 : undefined)
+					.trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
 				new MoveItem(item, context.human.inventory, point),
 			];
@@ -72,7 +77,9 @@ export default class GatherFromGround extends Objective {
 				if (item && this.itemMatches(context, item)) {
 					return [
 						new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
-						new MoveToTarget(item.containedWithin as ITileContainer, true).trackItem(item),
+						new MoveToTarget(item.containedWithin as ITileContainer, true)
+							.overrideDifficulty((prioritizeBaseItems && context.utilities.item.getBaseTileItems(context).has(item)) ? 5 : undefined)
+							.trackItem(item),
 						new SetContextData(this.contextDataKey, item), // todo: this might be wrong
 						new Lambda(async context => {
 							const objectives: IObjective[] = [];

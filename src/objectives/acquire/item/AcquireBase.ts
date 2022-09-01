@@ -41,11 +41,17 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	 */
 	public getExecutionPriority(context: Context, tree: IExecutionTree): IObjectivePriority {
 		const result: IObjectivePriority = {
-			gatherObjectives: 0,
-			craftObjectives: 0,
-			gatherFromCorpseObjectives: 0,
-			gatherFromCreatureObjectives: 0,
-			gatherFromChestObjectives: 0,
+			totalGatherObjectives: 0,
+			totalCraftObjectives: 0,
+			readyToCraftObjectives: 0,
+			gatherObjectives: {
+				GatherFromChest: 0,
+				GatherFromCorpse: 0,
+				GatherFromCreature: 0,
+				GatherFromDoodad: 0,
+				GatherFromGround: 0,
+				GatherFromTerrainResource: 0,
+			},
 		};
 
 		const children = tree.groupedAway ? tree.groupedAway.children : tree.children;
@@ -67,7 +73,13 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 			const objectiveName = tree.objective.getName();
 
 			if (objectiveName === "AcquireItemWithRecipe") {
-				result.craftObjectives++;
+				result.totalCraftObjectives++;
+
+				if (result.totalGatherObjectives === 0) {
+					// this objective can be completed without having to gather anything (all items are in the inventory)
+					// prioritize the objective that can be crafted now
+					result.readyToCraftObjectives++;
+				}
 			}
 		}
 
@@ -76,7 +88,14 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 
 	private addResult(source: IObjectivePriority, destination: IObjectivePriority) {
 		for (const key of Object.keys(source) as Array<keyof IObjectivePriority>) {
-			destination[key] += source[key];
+			if (typeof (source[key]) === "number") {
+				(destination as any)[key] += source[key] as number;
+
+			} else {
+				for (const key2 of Object.keys(source[key])) {
+					(destination as any)[key][key2] += (source[key] as any)[key2] as number;
+				}
+			}
 		}
 	}
 
@@ -85,27 +104,30 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	 */
 	private addGatherObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree) {
 		if (tree.objective instanceof GatherFromCreature) {
-			result.gatherObjectives++;
-			result.gatherFromCreatureObjectives++;
+			result.totalGatherObjectives++;
+			result.gatherObjectives.GatherFromCreature++;
 
 		} else if (tree.objective instanceof GatherFromCorpse) {
-			result.gatherObjectives++;
-			result.gatherFromCorpseObjectives++;
+			result.totalGatherObjectives++;
+			result.gatherObjectives.GatherFromCorpse++;
 
 		} else if (tree.objective instanceof GatherFromGround) {
 			// gather items from the ground before terrain
-			result.gatherObjectives++;
+			result.totalGatherObjectives++;
+			result.gatherObjectives.GatherFromGround++;
 
 		} else if (tree.objective instanceof GatherFromTerrainResource) {
-			result.gatherObjectives++;
+			result.totalGatherObjectives++;
+			result.gatherObjectives.GatherFromTerrainResource++;
 
 		} else if (tree.objective instanceof GatherFromDoodad) {
-			result.gatherObjectives++;
+			result.totalGatherObjectives++;
+			result.gatherObjectives.GatherFromDoodad++;
 
 		} else if (tree.objective instanceof GatherFromChest) {
 			// gather from chest last, since the chests are likely in our base
-			result.gatherObjectives++;
-			result.gatherFromChestObjectives++;
+			result.totalGatherObjectives++;
+			result.gatherObjectives.GatherFromChest++;
 		}
 	}
 
