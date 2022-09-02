@@ -5,7 +5,7 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 
-import MoveItem from "../item/MoveItem";
+import MoveItemIntoInventory from "../item/MoveItemIntoInventory";
 
 export default class PickUpAllTileItems extends Objective {
 
@@ -27,7 +27,7 @@ export default class PickUpAllTileItems extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        return targetTile.containedItems.map(item => new MoveItem(item, context.human.inventory, this.target));
+        return targetTile.containedItems.map(item => new MoveItemIntoInventory(item));
     }
 
 }

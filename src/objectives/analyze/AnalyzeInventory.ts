@@ -6,6 +6,7 @@ import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import { defaultGetItemOptions } from "../../utilities/Item";
 
 export default class AnalyzeInventory extends Objective {
 
@@ -123,10 +124,10 @@ export default class AnalyzeInventory extends Objective {
 
 			for (const itemTypeOrGroup of itemTypes) {
 				if (context.island.items.isGroup(itemTypeOrGroup)) {
-					items.addFrom(context.island.items.getItemsInContainerByGroup(context.human.inventory, itemTypeOrGroup));
+					items.addFrom(context.island.items.getItemsInContainerByGroup(context.human.inventory, itemTypeOrGroup, defaultGetItemOptions));
 
 				} else {
-					items.addFrom(context.island.items.getItemsInContainerByType(context.human.inventory, itemTypeOrGroup));
+					items.addFrom(context.island.items.getItemsInContainerByType(context.human.inventory, itemTypeOrGroup, defaultGetItemOptions));
 				}
 			}
 		}

@@ -12,7 +12,7 @@ import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
 import type Island from "game/island/Island";
-import type Item from "game/item/Item";
+import Item from "game/item/Item";
 import ItemManager from "game/item/ItemManager";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import type Prompts from "game/meta/prompt/Prompts";
@@ -91,6 +91,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     isEnabled(): boolean;
     isRunning(): boolean;
     isQuantumBurstEnabled(): boolean;
+    canToggle(): boolean;
     toggle(enabled?: boolean): Promise<void>;
     updateOptions(options: Partial<ITarsOptions>): void;
     updateWalkPath(path: IVector2[]): void;
@@ -125,6 +126,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private returnToBaseInterrupt;
     private escapeCavesInterrupt;
     private organizeInventoryInterrupts;
+    private organizeBackpackInterrupts;
     private processQueuedNavigationUpdates;
     private processQuantumBurst;
 }

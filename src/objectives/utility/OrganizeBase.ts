@@ -7,7 +7,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
-import MoveItem from "../other/item/MoveItem";
+import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 
 export default class OrganizeBase extends Objective {
 
@@ -72,7 +72,7 @@ export default class OrganizeBase extends Objective {
 				objectives.push(new MoveToTarget(position, true));
 
 				for (const item of itemsToMove) {
-					objectives.push(new MoveItem(item, context.human.inventory, position));
+					objectives.push(new MoveItemIntoInventory(item, position));
 				}
 
 				// restart now

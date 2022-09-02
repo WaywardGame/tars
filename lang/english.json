@@ -75,6 +75,8 @@
 			"dialogButtonClearSwampsTooltip": "Allow TARS to remove swamp tiles that are around the base.",
 			"dialogButtonOrganizeBase": "Organize Base",
 			"dialogButtonOrganizeBaseTooltip": "Allow TARS to periodically cleanup the area around the base by moving items into chests.",
+			"dialogButtonAllowBackpacks": "Allow Backpacks",
+			"dialogButtonAllowBackpacksTooltip": "Allow TARS to use backpacks for organizational purposes.",
 			"dialogButtonDisallowProtectedItems": "Disallow Protected Items",
 			"dialogButtonDisallowProtectedItemsTooltip": "Prevents TARS from using Protected Items.",
 			"dialogButtonAllowProtectedItems": "Allow Protected Items",

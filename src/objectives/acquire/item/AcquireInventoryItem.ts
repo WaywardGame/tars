@@ -17,6 +17,7 @@ import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 export interface IAcquireInventoryItemOptions {
 	reserveType: ReserveType;
 	skipHardReservedItems: boolean;
+	desiredCount: number;
 }
 
 /**
@@ -41,12 +42,8 @@ export default class AcquireInventoryItem extends Objective {
 		let item = context.inventory[this.inventoryKey];
 
 		if (Array.isArray(item)) {
-			if (this.options?.skipHardReservedItems) {
-				item = item.find(it => !context.isHardReservedItem(it));
-
-			} else {
-				item = item[0];
-			}
+			const items = this.options?.skipHardReservedItems ? item.filter(it => !context.isHardReservedItem(it)) : item;
+			item = items.length >= (this.options?.desiredCount ?? 1) ? items[0] : undefined;
 		}
 
 		if (item !== undefined) {

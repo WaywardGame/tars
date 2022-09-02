@@ -23,7 +23,10 @@ import type Context from "../core/context/Context";
 import { ContextDataType } from "../core/context/IContext";
 import { IDisassemblySearch, inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
+import { IGetItemsOptions } from "game/item/IItemManager";
 // import { IslandId } from "game/island/IIsland";
+
+export const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>> = { includeSubContainers: true };
 
 export interface IGetItemOptions {
 	allowInventoryItems: boolean;
@@ -338,22 +341,22 @@ export class ItemUtilities {
 	}
 
 	public getItemsInContainer(context: Context, container: IContainer) {
-		return context.island.items.getItemsInContainer(container, { includeSubContainers: true })
+		return context.island.items.getItemsInContainer(container, defaultGetItemOptions)
 			.filter(item => this.isAllowedToUseItem(context, item));
 	}
 
 	public getItemsInContainerByType(context: Context, container: IContainer, itemType: ItemType) {
-		return context.island.items.getItemsInContainerByType(container, itemType, { includeSubContainers: true })
+		return context.island.items.getItemsInContainerByType(container, itemType, defaultGetItemOptions)
 			.filter(item => this.isAllowedToUseItem(context, item));
 	}
 
 	public getItemsInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup) {
-		return context.island.items.getItemsInContainerByGroup(container, itemTypeGroup, { includeSubContainers: true })
+		return context.island.items.getItemsInContainerByGroup(container, itemTypeGroup, defaultGetItemOptions)
 			.filter(item => this.isAllowedToUseItem(context, item));
 	}
 
 	public getEquipmentItemsInInventory(context: Context) {
-		return context.island.items.getItemsInContainer(context.human.inventory, { includeSubContainers: true })
+		return context.island.items.getItemsInContainer(context.human.inventory, defaultGetItemOptions)
 			.filter(item => item.description()?.equip !== undefined && this.isAllowedToUseEquipItem(context, item));
 	}
 
@@ -366,8 +369,8 @@ export class ItemUtilities {
 	}
 
 	public getItemInContainer(context: Context, container: IContainer, itemTypeSearch: ItemType, options?: Partial<IGetItemOptions>): Item | undefined {
-		const orderedItems = context.island.items.getOrderedContainerItems(container);
-		for (const item of orderedItems) {
+		const items = context.island.items.getItemsInContainer(container, defaultGetItemOptions);
+		for (const item of items) {
 			if (!options?.allowInventoryItems && this.isInventoryItem(context, item, options)) {
 				continue;
 			}
@@ -397,8 +400,8 @@ export class ItemUtilities {
 	}
 
 	public getItemInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup, options?: Partial<IGetItemOptions>): Item | undefined {
-		const orderedItems = context.island.items.getOrderedContainerItems(container);
-		for (const item of orderedItems) {
+		const items = context.island.items.getItemsInContainer(container, defaultGetItemOptions);
+		for (const item of items) {
 			if (!options?.allowInventoryItems && this.isInventoryItem(context, item, options)) {
 				continue;
 			}
@@ -818,7 +821,11 @@ export class ItemUtilities {
 		if (this.availableInventoryWeightCache === undefined) {
 			const items = this.getItemsInInventory(context)
 				.filter(item => this.isInventoryItem(context, item));
-			const itemsWeight = items.reduce((a, b) => a + b.getTotalWeight(), 0);
+			const itemsWeight = items.reduce((total, b) => {
+				const itemWeight = b.getTotalWeight(true);
+				const weightReduction = b.getContainerWeightReduction();
+				return total + (itemWeight * weightReduction);
+			}, 0);
 			this.availableInventoryWeightCache = context.human.stat.get<IStatMax>(Stat.Weight).max - itemsWeight;
 		}
 
@@ -853,19 +860,37 @@ export class ItemUtilities {
 		return matchingItems[0];
 	}
 
+	public getMoveItemToInventoryTarget(context: Context, item: Item): IContainer {
+		if (context.options.allowBackpacks && context.inventory.backpack?.length) {
+			const itemWeight = item.getTotalWeight();
+
+			for (const backpack of context.inventory.backpack) {
+				const backpackContainer = backpack as IContainer;
+				let weight = context.island.items.computeContainerWeight(backpackContainer);
+				const weightCapacity = context.island.items.getWeightCapacity(backpackContainer);
+				if (weightCapacity !== undefined && weight + itemWeight < weightCapacity) {
+					// move the item directly into the backpacka
+					return backpackContainer;
+				}
+			}
+		}
+
+		return context.human.inventory;
+	}
+
 	public getWaterContainers(context: Context) {
-		const drinkableWaterContainers: Item[] = [];
+		const safeToDrinkWaterContainers: Item[] = [];
 		const availableWaterContainers: Item[] = [];
 
 		for (const waterContainer of context.inventory.waterContainer ?? []) {
 			if (context.utilities.item.isSafeToDrinkItem(context, waterContainer)) {
-				drinkableWaterContainers.push(waterContainer);
+				safeToDrinkWaterContainers.push(waterContainer);
 			} else {
 				availableWaterContainers.push(waterContainer);
 			}
 		}
 
-		return { drinkableWaterContainers, availableWaterContainers }
+		return { safeToDrinkWaterContainers, availableWaterContainers }
 	}
 
 	/**

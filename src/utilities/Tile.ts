@@ -22,10 +22,12 @@ export interface IOpenTileOptions {
 
 export class TileUtilities {
 
-	private readonly cache: Map<string, ITileLocation[]> = new Map();
+	private readonly tileLocationCache: Map<string, ITileLocation[]> = new Map();
+	private readonly canUseArgsCache: Map<string, { point: IVector3; direction: Direction.Cardinal } | null> = new Map();
 
 	public clearCache() {
-		this.cache.clear();
+		this.tileLocationCache.clear();
+		this.canUseArgsCache.clear();
 	}
 
 	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
@@ -49,10 +51,10 @@ export class TileUtilities {
 	private async _getNearestTileLocation(context: Context, tileType: TerrainType, position: IVector3): Promise<ITileLocation[]> {
 		const cacheId = `${tileType},${position.x},${position.y},${position.z}`;
 
-		let result = this.cache.get(cacheId);
+		let result = this.tileLocationCache.get(cacheId);
 		if (!result) {
 			result = await context.utilities.navigation.getNearestTileLocation(tileType, position);
-			this.cache.set(cacheId, result);
+			this.tileLocationCache.set(cacheId, result);
 		}
 
 		return result;
@@ -181,15 +183,25 @@ export class TileUtilities {
 		return tileContainer.containedItems && tileContainer.containedItems.length > 0;
 	}
 
-	private getCanUseArgs(context: Context, position: IVector3): { point: IVector3; direction: Direction.Cardinal } | undefined {
-		const endPositions = context.utilities.movement.getMovementEndPositions(context, position, true);
-		if (endPositions.length === 0) {
-			return undefined;
+	private getCanUseArgs(context: Context, position: IVector3): { point: IVector3; direction: Direction.Cardinal } | null {
+		const cacheId = `${position.x},${position.y},${position.z}`;
+
+		let result = this.canUseArgsCache.get(cacheId);
+		if (result === undefined) {
+			const endPositions = context.utilities.movement.getMovementEndPositions(context, position, true);
+			if (endPositions.length !== 0) {
+				const point = endPositions[0];
+				const direction = getDirectionFromMovement(position.x - point.x, position.y - point.y);
+
+				result = { point, direction };
+
+			} else {
+				result = null;
+			}
+
+			this.canUseArgsCache.set(cacheId, result);
 		}
 
-		const point = endPositions[0];
-		const direction = getDirectionFromMovement(position.x - point.x, position.y - point.y);
-
-		return { point, direction };
+		return result;
 	}
 }

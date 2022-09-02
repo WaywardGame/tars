@@ -242,7 +242,7 @@ export default class CompleteQuestRequirement extends Objective {
                 return new Lambda(async () => {
                     let itemId: number | undefined;
 
-                    for (const item of context.human.inventory.containedItems) {
+                    for (const item of context.utilities.item.getItemsInInventory(context)) {
                         if (gameScreen?.actionBar.getSlottedIn(item) === undefined) {
                             itemId = item.id;
                             break;

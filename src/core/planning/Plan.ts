@@ -89,6 +89,7 @@ export default class Plan implements IPlan {
 				str += " (";
 				str += `${tree.priority.readyToCraftObjectives} ready to craft objectives`;
 				str += `, ${tree.priority.totalCraftObjectives} total craft objectives`;
+				str += `, ${tree.priority.useProvidedItemObjectives} use provided item objectives`;
 
 				str += `, ${tree.priority.totalGatherObjectives} gather objectives`;
 				if (tree.priority.totalGatherObjectives > 0) {
@@ -682,6 +683,18 @@ export default class Plan implements IPlan {
 					if (nonChestGatherObjectivesA !== nonChestGatherObjectivesB) {
 						// prioritize the objective that requires more gathering
 						return nonChestGatherObjectivesB - nonChestGatherObjectivesA;
+					}
+
+					if (priorityA.useProvidedItemObjectives > 0 || priorityB.useProvidedItemObjectives > 0) {
+						// one or both objectives requiring using provided items (dismantling)
+						// prioritize the one that requires less provided items. that should be that one that can be dismantled now
+						const result = priorityA.useProvidedItemObjectives - priorityB.useProvidedItemObjectives;
+						if (result === 0) {
+							// tie break based on difficulty. run the easier objective
+							return treeA.difficulty - treeB.difficulty;
+						}
+
+						return result;
 					}
 
 					const craftObjectivesA = priorityA.totalCraftObjectives;

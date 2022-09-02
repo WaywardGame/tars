@@ -212,8 +212,9 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 			for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
 				const itemToMove = matchingTileItems[i];
+				const targetContainer = context.utilities.item.getMoveItemToInventoryTarget(context, itemToMove);
 
-				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, context.human.inventory] });
+				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, targetContainer] });
 				if (typeof (matchingItem) === "number") {
 					this.log.warn("Issue moving items");
 					return matchingItem;
@@ -249,14 +250,14 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 	private async executeActionCompareInventoryItems<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult | Item | undefined> {
 		// map item ids to types. some items might change types due to an action
-		const itemsBefore: Map<number, ItemType> = new Map(context.human.inventory.containedItems.map(item => ([item.id, item.type])));
+		const itemsBefore: Map<number, ItemType> = new Map(context.utilities.item.getItemsInInventory(context).map(item => ([item.id, item.type])));
 
 		const result = await context.utilities.action.executeAction(context, action.action, action.args, action.expectedMessages);
 		if (result !== ObjectiveResult.Complete) {
 			return result;
 		}
 
-		const newOrChangedItems = context.human.inventory.containedItems.filter(item => {
+		const newOrChangedItems = context.utilities.item.getItemsInInventory(context).filter(item => {
 			const beforeItemType = itemsBefore.get(item.id);
 			return beforeItemType === undefined || beforeItemType !== item.type;
 		});

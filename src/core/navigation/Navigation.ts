@@ -41,6 +41,9 @@ export default class Navigation {
 
 	private readonly navigationWorkers: INavigationWorker[] = [];
 
+	private readonly nodePenaltyCache: Map<string, number> = new Map();
+	private readonly nodeDisableCache: Map<string, boolean> = new Map();
+
 	private origin: IVector3 | undefined;
 	private originUpdateTimeout: number | undefined;
 
@@ -166,6 +169,8 @@ export default class Navigation {
 		this.navigationWorkers.length = 0;
 
 		this.overlay.clear();
+		this.nodePenaltyCache.clear();
+		this.nodeDisableCache.clear();
 
 		if (this.originUpdateTimeout !== undefined) {
 			window.clearTimeout(this.originUpdateTimeout);
@@ -358,8 +363,13 @@ export default class Navigation {
 			return;
 		}
 
-		const isDisabled = this.isDisabled(tile, x, y, z, tileType);
-		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription, tileUpdateType);
+		const cacheId = `${x},${y},${z}`;
+
+		const isDisabled = this.isDisabled(tile, x, y, z, tileType, true);
+		const penalty = this.getPenalty(tile, x, y, z, tileType, terrainDescription, tileUpdateType, true);
+
+		this.nodeDisableCache.set(cacheId, isDisabled);
+		this.nodePenaltyCache.set(cacheId, penalty);
 
 		this.refreshOverlay(tile, x, y, z, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
@@ -619,7 +629,15 @@ export default class Navigation {
 		return response;
 	}
 
-	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType): boolean {
+	private isDisabled(tile: ITile, x: number, y: number, z: number, tileType: TerrainType, skipCache?: boolean): boolean {
+		if (!skipCache) {
+			const cacheId = `${x},${y},${z}`;
+			const result = this.nodeDisableCache.get(cacheId);
+			if (result !== undefined) {
+				return result;
+			}
+		}
+
 		if (tileType === TerrainType.Void) {
 			return true;
 		}
@@ -661,7 +679,15 @@ export default class Navigation {
 		return false;
 	}
 
-	private getPenalty(tile: ITile, tileX: number, tileY: number, tileZ: number, tileType: TerrainType, terrainDescription: ITerrainDescription, tileUpdateType?: TileUpdateType): number {
+	private getPenalty(tile: ITile, x: number, y: number, z: number, tileType: TerrainType, terrainDescription: ITerrainDescription, tileUpdateType?: TileUpdateType, skipCache?: boolean): number {
+		if (!skipCache) {
+			const cacheId = `${x},${y},${z}`;
+			const result = this.nodePenaltyCache.get(cacheId);
+			if (result !== undefined) {
+				return result;
+			}
+		}
+
 		let penalty = 0;
 
 		if (tileType === TerrainType.Lava || tile.events?.some(tileEvent => tileEvent.type === TileEventType.Fire || tileEvent.type === TileEventType.Acid)) {
@@ -681,12 +707,12 @@ export default class Navigation {
 			// penalty for creatures on or near the tile
 			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
 				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
-					const point = this.human.island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
+					const point = this.human.island.ensureValidPoint({ x: x + x, y: y + y, z: z });
 					if (point) {
 						const creature = this.human.island.getTileFromPoint(point).creature;
 
 						// only apply the penalty if the creature can actually go this tile
-						if (creature && !creature.isTamed() && creature.checkCreatureMove(true, tileX, tileY, tileZ, tile, creature.getMoveType(), true) === 0) {
+						if (creature && !creature.isTamed() && creature.checkCreatureMove(true, x, y, z, tile, creature.getMoveType(), true) === 0) {
 							penalty += 10;
 
 							if (x === 0 && y === 0) {

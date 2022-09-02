@@ -19,8 +19,8 @@ import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
 import type Island from "game/island/Island";
-import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
+import { IContainer, ItemType } from "game/item/IItem";
+import Item from "game/item/Item";
 import ItemManager from "game/item/ItemManager";
 import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import { Prompt } from "game/meta/prompt/IPrompt";
@@ -39,6 +39,8 @@ import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
 import { RenderSource } from "renderer/IRenderer";
 import Translation from "language/Translation";
+import MoveItemAction from "game/entity/action/actions/MoveItem";
+import Respawn from "game/entity/action/actions/Respawn";
 
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import type TarsNPC from "../npc/TarsNPC";
@@ -82,7 +84,6 @@ import type { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
 import type { IObjective } from "./objective/IObjective";
-import Respawn from "game/entity/action/actions/Respawn";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
@@ -686,8 +687,12 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         return this.isEnabled() && this.saveData.options.quantumBurst && !multiplayer.isConnected();
     }
 
+    public canToggle() {
+        return this.navigationSystemState !== NavigationSystemState.Initializing;
+    }
+
     public async toggle(enabled = !this.saveData.enabled) {
-        if (this.navigationSystemState === NavigationSystemState.Initializing) {
+        if (!this.canToggle()) {
             return;
         }
 
@@ -775,6 +780,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         break;
 
                     case "navigationOverlays":
+                        shouldInterrupt = false;
+
                         if (this.saveData.options.navigationOverlays) {
                             this.overlay.show();
 
@@ -1380,6 +1387,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.nearbyCreatureInterrupt(context),
         ];
 
+        if (context.options.allowBackpacks && this.inventory.backpack?.length) {
+            interrupts.push(...this.organizeBackpackInterrupts(context, this.inventory.backpack));
+        }
+
         // reduce weight before recovery.. probably fine
         interrupts.push(this.reduceWeightInterrupt(context));
 
@@ -1442,7 +1453,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         objectives.push(new RecoverThirst({
-            onlyUseAvailableItems: onlyUseAvailableItems,
+            onlyUseAvailableItems,
             exceededThreshold: exceededThirstThreshold,
             onlyEmergencies: false,
         }));
@@ -1454,7 +1465,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         // }
 
         objectives.push(new RecoverThirst({
-            onlyUseAvailableItems: onlyUseAvailableItems,
+            onlyUseAvailableItems,
             exceededThreshold: exceededThirstThreshold,
             onlyEmergencies: true,
         }));
@@ -1747,6 +1758,46 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             `Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).map(item => item.id).join(",")}`,
             `Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).map(item => item.id).join(",")}`,
             `Objectives: ${Plan.getPipelineString(this.context, objectives)}`);
+
+        return objectives;
+    }
+
+    /**
+     * Move items into the backpack
+     */
+    private organizeBackpackInterrupts(context: Context, backpacks: Item[]): IObjective[] {
+        const objectives: IObjective[] = [];
+
+        // sorted by lightest to heaviest
+        const itemsToMove = context.utilities.item.getItemsInInventory(context)
+            .filter(item => !item.isEquipped() && !context.island.items.isContainer(item) && item.containedWithin === context.human.inventory)
+            .sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
+        if (itemsToMove.length > 0) {
+            for (const backpack of backpacks) {
+                const backpackContainer = backpack as IContainer;
+                let weight = context.island.items.computeContainerWeight(backpackContainer);
+                const weightCapacity = context.island.items.getWeightCapacity(backpackContainer);
+                if (weightCapacity === undefined) {
+                    continue;
+                }
+
+                while (itemsToMove.length > 0) {
+                    const itemToMove = itemsToMove[0];
+                    const itemToMoveWeight = itemToMove.getTotalWeight();
+                    if (weight + itemToMoveWeight < weightCapacity) {
+                        objectives.push(new ExecuteAction(MoveItemAction, [itemToMove, backpackContainer])
+                            .setStatus(`Moving ${itemToMove.getName()} into ${backpack.getName()}`));
+
+                        weight += itemToMoveWeight;
+
+                        itemsToMove.shift();
+
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
 
         return objectives;
     }

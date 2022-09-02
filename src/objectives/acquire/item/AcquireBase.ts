@@ -44,6 +44,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 			totalGatherObjectives: 0,
 			totalCraftObjectives: 0,
 			readyToCraftObjectives: 0,
+			useProvidedItemObjectives: 0,
 			gatherObjectives: {
 				GatherFromChest: 0,
 				GatherFromCorpse: 0,
@@ -75,7 +76,8 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 			if (objectiveName === "AcquireItemWithRecipe") {
 				result.totalCraftObjectives++;
 
-				if (result.totalGatherObjectives === 0) {
+				// UseProvidedItem objectives imply that a dismantle objective is required for it
+				if (result.totalGatherObjectives === 0 && result.useProvidedItemObjectives === 0) {
 					// this objective can be completed without having to gather anything (all items are in the inventory)
 					// prioritize the objective that can be crafted now
 					result.readyToCraftObjectives++;
@@ -135,6 +137,10 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	 * Higher number = higher priority = it will be executed first
 	 */
 	private addAcquireObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree) {
+		if (tree.objective.getName() === "UseProvidedItem") {
+			result.useProvidedItemObjectives++;
+		}
+
 		// todo: convert to the new system if needed>?
 		// if (tree.objective.getName() === "AcquireItemFromDisassemble") {
 		// 	// this objective may be providing items used by others in the tree

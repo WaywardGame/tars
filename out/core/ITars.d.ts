@@ -95,6 +95,7 @@ export declare const baseInfo: Record<BaseInfoKey, IBaseInfo>;
 export interface IInventoryItems {
     anvil?: Item;
     axe?: Item;
+    backpack?: Item[];
     bandage?: Item;
     bed?: Item;
     butcher?: Item;

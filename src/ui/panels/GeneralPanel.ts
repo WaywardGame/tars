@@ -27,11 +27,12 @@ export default class GeneralPanel extends TarsPanel {
             .setText(getTarsTranslation(TarsTranslation.DialogButtonEnable))
             .setRefreshMethod(() => this.tarsInstance.isEnabled() ?? false)
             .event.subscribe("willToggle", (_, checked) => {
-                if (this.tarsInstance.isEnabled() !== checked) {
+                if (this.tarsInstance.canToggle() && this.tarsInstance.isEnabled() !== checked) {
                     this.tarsInstance.toggle();
+                    return true;
                 }
 
-                return true;
+                return false;
             })
             .appendTo(this);
 
@@ -101,7 +102,7 @@ export default class GeneralPanel extends TarsPanel {
 
     @Bound
     protected refresh() {
-        this.buttonEnable.refresh();
+        this.buttonEnable.refresh(false);
         this.choiceListMode.refresh();
 
         const isManual = this.tarsInstance.saveData.options.mode === TarsMode.Manual;

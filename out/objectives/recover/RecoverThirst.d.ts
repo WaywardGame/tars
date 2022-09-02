@@ -14,5 +14,6 @@ export default class RecoverThirst extends Objective {
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     private getEmergencyObjectives;
-    private getBelowThresholdObjectives;
+    private getAboveThresholdObjectives;
+    private getExceededThresholdObjectives;
 }

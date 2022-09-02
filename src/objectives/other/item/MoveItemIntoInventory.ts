@@ -9,7 +9,7 @@ import MoveItem from "./MoveItem";
 
 export default class MoveItemIntoInventory extends Objective {
 
-    constructor(private readonly item?: Item) {
+    constructor(private readonly item?: Item, private readonly point?: IVector3) {
         super();
     }
 
@@ -32,7 +32,7 @@ export default class MoveItemIntoInventory extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        const point = item.getPoint();
+        const point = this.point ?? item.getPoint();
         if (!point) {
             return ObjectiveResult.Impossible;
         }
@@ -40,7 +40,7 @@ export default class MoveItemIntoInventory extends Objective {
         return [
             // todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
             new MoveToTarget(point, true).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
-            new MoveItem(item, context.human.inventory, point),
+            new MoveItem(item, context.utilities.item.getMoveItemToInventoryTarget(context, item), point),
         ];
     }
 

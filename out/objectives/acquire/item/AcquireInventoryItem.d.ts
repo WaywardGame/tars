@@ -5,6 +5,7 @@ import Objective from "../../../core/objective/Objective";
 export interface IAcquireInventoryItemOptions {
     reserveType: ReserveType;
     skipHardReservedItems: boolean;
+    desiredCount: number;
 }
 export default class AcquireInventoryItem extends Objective {
     private readonly inventoryKey;

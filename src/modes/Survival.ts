@@ -173,6 +173,11 @@ export class SurvivalMode implements ITarsMode {
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;
 
+		if (!waitingForWater && context.options.allowBackpacks) {
+			// get a backpack before continuing. it will make things easier
+			objectives.push(new AcquireInventoryItem("backpack"));
+		}
+
 		const shouldUpgradeToLeather = !waitingForWater && !context.options.lockEquipment;
 		if (shouldUpgradeToLeather) {
 			/*
@@ -238,10 +243,10 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireWaterContainer(), new AnalyzeInventory()]);
 		}
 
-		const { drinkableWaterContainers, availableWaterContainers } = context.utilities.item.getWaterContainers(context);
+		const { safeToDrinkWaterContainers, availableWaterContainers } = context.utilities.item.getWaterContainers(context);
 
 		// run a few extra things before running upgrade objectives if we're near a base
-		this.runWhileNearBase(context, objectives, async (context, objectives) => {
+		await this.runWhileNearBase(context, objectives, async (context, objectives) => {
 			// build a second water still
 			if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
 				objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem()]);
@@ -255,11 +260,15 @@ export class SurvivalMode implements ITarsMode {
 			// carry a bandage with you
 			objectives.push(new AcquireInventoryItem("bandage"));
 
-			if (availableWaterContainers.length > 0) {
-				// we are looking for something drinkable
-				// if there is a well, starting the water still will use it
-				objectives.push(new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }));
-			}
+			// if (availableWaterContainers.length > 0) {
+			// 	// we are looking for something drinkable
+			// 	// if there is a well, starting the water still will use it
+			// 	objectives.push([
+			// 		// ...availableWaterContainers.map(waterContainer => new ProvideItems(waterContainer.type)),
+			// 		new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true }),
+			// 		new AnalyzeInventory(),
+			// 	]);
+			// }
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
 				if (context.options.survivalClearSwamps) {
@@ -289,9 +298,9 @@ export class SurvivalMode implements ITarsMode {
 				}
 			}
 
-			if (drinkableWaterContainers.length < 2 && availableWaterContainers.length > 0) {
+			if (safeToDrinkWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push(new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }));
+				objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
 			}
 		});
 
@@ -305,7 +314,7 @@ export class SurvivalMode implements ITarsMode {
 		}
 
 		// go on a killing spree once you have a good sword and shield
-		this.runWhileNearBase(context, objectives, async (context, objectives) => {
+		await this.runWhileNearBase(context, objectives, async (context, objectives) => {
 			const creatures = context.utilities.base.getNonTamedCreaturesNearBase(context)
 				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
@@ -365,6 +374,11 @@ export class SurvivalMode implements ITarsMode {
 			Upgrade objectives
 		*/
 
+		// go for another backpack first
+		if (context.options.allowBackpacks) {
+			objectives.push(new AcquireInventoryItem("backpack", { desiredCount: 2 }));
+		}
+
 		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenSword, ItemType.TinSword]));
 		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.BarkShield, ItemType.TinShield]));
 		this.addUpgradeItemObjectives(context, objectives, "equipBelt", new Set([ItemType.LeatherBelt]));
@@ -393,7 +407,7 @@ export class SurvivalMode implements ITarsMode {
 		*/
 
 		if (moveToNewIslandState === MovingToNewIslandState.None) {
-			this.runWhileNearBase(context, objectives, async (context, objectives) => {
+			await this.runWhileNearBase(context, objectives, async (context, objectives) => {
 				objectives.push(new CheckDecayingItems());
 			});
 		}
@@ -404,7 +418,8 @@ export class SurvivalMode implements ITarsMode {
 
 		if (context.options.survivalExploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
-			const waterItemsNeeded = Math.max(2 - (context.inventory.waterContainer?.filter(item => context.utilities.item.isSafeToDrinkItem(context, item)).length ?? 0), 0);
+			const { safeToDrinkWaterContainers } = context.utilities.item.getWaterContainers(context);
+			const waterItemsNeeded = Math.max(2 - safeToDrinkWaterContainers.length, 0);
 			const foodItemsNeeded = Math.max(2 - (context.inventory.food?.length ?? 0), 0);
 
 			const health = context.human.stat.get<IStatMax>(Stat.Health);

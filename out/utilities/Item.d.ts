@@ -11,6 +11,8 @@ import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker
 import type { TerrainType } from "game/tile/ITerrain";
 import type Context from "../core/context/Context";
 import { IDisassemblySearch } from "../core/ITars";
+import { IGetItemsOptions } from "game/item/IItemManager";
+export declare const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>>;
 export interface IGetItemOptions {
     allowInventoryItems: boolean;
     allowUnsafeWaterContainers: boolean;
@@ -80,8 +82,9 @@ export declare class ItemUtilities {
     getAvailableInventoryWeight(context: Context): number;
     getSeeds(context: Context, onlyEdible: boolean): Item[];
     getInventoryItemForDoodad(context: Context, doodadTypeOrGroup: DoodadType | DoodadTypeGroup): Item | undefined;
+    getMoveItemToInventoryTarget(context: Context, item: Item): IContainer;
     getWaterContainers(context: Context): {
-        drinkableWaterContainers: Item[];
+        safeToDrinkWaterContainers: Item[];
         availableWaterContainers: Item[];
     };
     private getFoodItemTypes;

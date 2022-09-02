@@ -146,6 +146,8 @@ export enum TarsTranslation {
     DialogButtonClearSwampsTooltip,
     DialogButtonOrganizeBase,
     DialogButtonOrganizeBaseTooltip,
+    DialogButtonAllowBackpacks,
+    DialogButtonAllowBackpacksTooltip,
     DialogButtonSailToCivilization,
     DialogButtonSailToCivilizationTooltip,
     DialogButtonStayHealthy,
@@ -264,6 +266,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonAllowCaves,
         tooltip: TarsTranslation.DialogButtonAllowCavesTooltip,
+    },
+    {
+        option: "allowBackpacks",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonAllowBackpacks,
+        tooltip: TarsTranslation.DialogButtonAllowBackpacksTooltip,
     },
     TarsTranslation.DialogLabelItemProtection,
     // {

@@ -4,7 +4,8 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import Objective from "../../../core/objective/Objective";
 export default class MoveItemIntoInventory extends Objective {
     private readonly item?;
-    constructor(item?: Item | undefined);
+    private readonly point?;
+    constructor(item?: Item | undefined, point?: IVector3 | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;

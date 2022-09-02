@@ -4,6 +4,7 @@ export interface ITarsOptions {
     mode: TarsMode;
     stayHealthy: boolean;
     allowCaves: boolean;
+    allowBackpacks: boolean;
     lockInventory: boolean;
     lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;

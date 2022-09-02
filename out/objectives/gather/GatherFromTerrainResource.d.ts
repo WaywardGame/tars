@@ -12,4 +12,5 @@ export default class GatherFromTerrainResource extends Objective {
     isDynamic(): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
     protected getBaseDifficulty(context: Context): number;
+    private processTerrainLocation;
 }

@@ -31,7 +31,7 @@ export default class AcquireAndPlantSeed extends Objective {
                 // todo: require minDur > 0
                 const item = context.utilities.item.getItemInInventory(context, itemType);
                 if (item) {
-                    objectives.push(new ReserveItems(item));
+                    objectives.push(new ReserveItems(item).keepInInventory());
                     objectives.push(new SetContextData(itemContextDataKey, item));
 
                 } else {

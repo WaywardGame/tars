@@ -10,7 +10,8 @@ export interface IOpenTileOptions {
     requireShallowWater: boolean;
 }
 export declare class TileUtilities {
-    private readonly cache;
+    private readonly tileLocationCache;
+    private readonly canUseArgsCache;
     clearCache(): void;
     getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]>;
     private _getNearestTileLocation;

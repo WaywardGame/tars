@@ -18,7 +18,6 @@ import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
-import MoveItem from "../../other/item/MoveItem";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireBase from "./AcquireBase";
@@ -26,6 +25,7 @@ import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
 import AddDifficulty from "../../core/AddDifficulty";
 import Message from "language/dictionary/Message";
+import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
 
 // TARS recomputes and fixes itself when this happens
 const expectedCraftMessages = new Set<Message>([Message.ActionCraftYouLackTheRequirements]);
@@ -169,7 +169,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item) {
 							if (context.island.items.isContainableInContainer(item, intermediateChest)) {
-								objectives.push(new MoveItem(item, context.human.inventory, intermediateChest));
+								objectives.push(new MoveItemIntoInventory(item, intermediateChest));
 							}
 						}
 					};

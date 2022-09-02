@@ -17,6 +17,8 @@ export default class Navigation {
     private static modPath;
     private readonly maps;
     private readonly navigationWorkers;
+    private readonly nodePenaltyCache;
+    private readonly nodeDisableCache;
     private origin;
     private originUpdateTimeout;
     private oppositeOrigin;

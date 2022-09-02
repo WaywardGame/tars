@@ -47,6 +47,7 @@ export enum CalculatedDifficultyStatus {
 export interface IObjectivePriority {
 	totalCraftObjectives: number;
 	readyToCraftObjectives: number;
+	useProvidedItemObjectives: number;
 	totalGatherObjectives: number;
 	gatherObjectives: Record<"GatherFromCreature" | "GatherFromCorpse" | "GatherFromGround" | "GatherFromTerrainResource" | "GatherFromDoodad" | "GatherFromChest", number>;
 }

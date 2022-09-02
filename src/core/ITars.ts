@@ -199,6 +199,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 export interface IInventoryItems {
     anvil?: Item;
     axe?: Item;
+    backpack?: Item[];
     bandage?: Item;
     bed?: Item;
     butcher?: Item;
@@ -305,6 +306,12 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             flag: InventoryItemFlag.PreferHigherActionBonus,
             option: ActionType.Chop,
         },
+    },
+    backpack: {
+        itemTypes: [
+            ItemType.Backpack,
+        ],
+        allowMultiple: 2,
     },
     bandage: {
         itemTypes: [
