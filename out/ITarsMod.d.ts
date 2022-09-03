@@ -5,13 +5,14 @@ import type { IslandId } from "game/island/IIsland";
 import { ITarsOptions } from "./core/ITarsOptions";
 import type { IContext } from "./core/context/IContext";
 import type TarsMod from "./TarsMod";
+import { Reference } from "game/reference/ReferenceManager";
 export declare const TARS_ID = "TARS";
 export declare function getTarsMod(): TarsMod;
 export declare function setTarsMod(instance: TarsMod | undefined): void;
 export declare function getTarsTranslation(translation: TarsTranslation | string | Translation): Translation;
 export interface ITarsModEvents extends Events<Mod> {
     statusChange(): any;
-    refreshNpcIslandIds(): any;
+    refreshTarsInstanceReferences(): any;
     changedGlobalDataSlots(): any;
 }
 export interface IGlobalSaveData {
@@ -28,7 +29,7 @@ export interface ISaveData {
     options: ITarsOptions;
     island: Record<IslandId, Record<string, any>>;
     ui: Partial<Record<TarsUiSaveDataKey, any>>;
-    instanceIslandIds: Set<IslandId>;
+    instanceIslandIds: Map<IslandId, Reference[]>;
 }
 export declare enum TarsUiSaveDataKey {
     DialogsOpened = 0,

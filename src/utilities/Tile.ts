@@ -13,11 +13,12 @@ import type { ITileLocation } from "../core/ITars";
 import Item from "game/item/Item";
 import { getDirectionFromMovement } from "game/entity/player/IPlayer";
 import { Direction } from "utilities/math/Direction";
+import { WaterType } from "game/island/IIsland";
 
 export interface IOpenTileOptions {
 	requireNoItemsOnTile: boolean;
 	disallowWater: boolean;
-	requireShallowWater: boolean;
+	requireInfiniteShallowWater: boolean;
 }
 
 export class TileUtilities {
@@ -97,8 +98,13 @@ export class TileUtilities {
 				return false;
 			}
 
-			if (options?.requireShallowWater) {
-				if (!terrainInfo.shallowWater) {
+			if (options?.requireInfiniteShallowWater) {
+				// don't make solar still over fresh or swap water
+				if (!terrainInfo.shallowWater || terrainInfo.freshWater || terrainInfo.swampWater) {
+					return false;
+				}
+
+				if (context.island.checkWaterFill(point.x, point.y, point.z, 50, WaterType.None) < 50) {
 					return false;
 				}
 

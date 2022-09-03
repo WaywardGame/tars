@@ -1,5 +1,6 @@
 
 import Doodad from "game/doodad/Doodad";
+import Ride from "game/entity/action/actions/Ride";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import type { IStatMax } from "game/entity/IStats";
@@ -11,7 +12,6 @@ import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import Paddle from "game/entity/action/actions/Paddle";
 
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
@@ -260,7 +260,7 @@ export default class MoveToTarget extends Objective {
 			const terrainDescription = terrainDescriptions[tileType];
 			if (terrainDescription && terrainDescription.water) {
 				return [
-					new UseItem(Paddle, context.inventory.sailBoat),
+					new UseItem(Ride, context.inventory.sailBoat),
 					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
 				];
 			}
@@ -282,7 +282,7 @@ export default class MoveToTarget extends Objective {
 				if (firstWaterTile) {
 					return [
 						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
-						new UseItem(Paddle, context.inventory.sailBoat),
+						new UseItem(Ride, context.inventory.sailBoat),
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
 					];
 				}

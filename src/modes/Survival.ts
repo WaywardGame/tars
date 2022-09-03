@@ -6,7 +6,6 @@ import { Stat } from "game/entity/IStats";
 import { TurnMode } from "game/IGame";
 import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
 import { CreatureType } from "game/entity/creature/ICreature";
 import Drop from "game/entity/action/actions/Drop";
 
@@ -383,16 +382,17 @@ export class SurvivalMode implements ITarsMode {
 		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.BarkShield, ItemType.TinShield]));
 		this.addUpgradeItemObjectives(context, objectives, "equipBelt", new Set([ItemType.LeatherBelt]));
 		this.addUpgradeItemObjectives(context, objectives, "equipNeck", new Set([ItemType.LeatherGorget, ItemType.TinBevor]));
-		this.addUpgradeItemObjectives(context, objectives, "equipHead", new Set([ItemType.LeatherCap, ItemType.TinHelmet, ItemType.PirateHat]));
+		this.addUpgradeItemObjectives(context, objectives, "equipHead", new Set([ItemType.LeatherCap, ItemType.TinHelmet, ItemType.PirateHat, ItemType.StrawHat]));
 		this.addUpgradeItemObjectives(context, objectives, "equipFeet", new Set([ItemType.LeatherBoots, ItemType.TinFootgear]));
 		this.addUpgradeItemObjectives(context, objectives, "equipHands", new Set([ItemType.LeatherGloves, ItemType.TinGloves]));
 		this.addUpgradeItemObjectives(context, objectives, "equipLegs", new Set([ItemType.LeatherPants, ItemType.TinChausses]));
 		this.addUpgradeItemObjectives(context, objectives, "equipChest", new Set([ItemType.LeatherTunic, ItemType.TinChest]));
-		this.addUpgradeItemObjectives(context, objectives, "axe", new Set([ItemType.GraniteAxe, ItemType.TinAxe]));
-		this.addUpgradeItemObjectives(context, objectives, "pickAxe", new Set([ItemType.GranitePickaxe, ItemType.TinPickaxe]));
-		this.addUpgradeItemObjectives(context, objectives, "shovel", new Set([ItemType.GraniteShovel, ItemType.TinShovel]));
-		this.addUpgradeItemObjectives(context, objectives, "hammer", new Set([ItemType.GraniteHammer, ItemType.TinHammer]));
-		this.addUpgradeItemObjectives(context, objectives, "hoe", new Set([ItemType.GraniteHoe, ItemType.TinHoe]));
+		this.addUpgradeItemObjectives(context, objectives, "knife", new Set([ItemType.GraniteKnife, ItemType.BasaltKnife, ItemType.SandstoneKnife, ItemType.TinKnife]));
+		this.addUpgradeItemObjectives(context, objectives, "axe", new Set([ItemType.GraniteAxe, ItemType.BasaltAxe, ItemType.SandstoneAxe, ItemType.TinAxe]));
+		this.addUpgradeItemObjectives(context, objectives, "pickAxe", new Set([ItemType.GranitePickaxe, ItemType.BasaltPickaxe, ItemType.SandstonePickaxe, ItemType.TinPickaxe]));
+		this.addUpgradeItemObjectives(context, objectives, "shovel", new Set([ItemType.GraniteShovel, ItemType.BasaltShovel, ItemType.SandstoneShovel, ItemType.TinShovel]));
+		this.addUpgradeItemObjectives(context, objectives, "hammer", new Set([ItemType.GraniteHammer, ItemType.BasaltHammer, ItemType.SandstoneHammer, ItemType.TinHammer]));
+		this.addUpgradeItemObjectives(context, objectives, "hoe", new Set([ItemType.GraniteHoe, ItemType.BasaltHoe, ItemType.SandstoneHoe, ItemType.TinHoe]));
 
 		// extra upgrades
 		// this.addUpgradeItemObjectives(context, objectives, "equipHead", ItemType.PirateHat);
@@ -412,6 +412,8 @@ export class SurvivalMode implements ITarsMode {
 			});
 		}
 
+		objectives.push([new AcquireInventoryItem("curePoison")]);
+
 		if (context.base.solarStill.length === 0) {
 			objectives.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
 		}
@@ -419,8 +421,8 @@ export class SurvivalMode implements ITarsMode {
 		if (context.options.survivalExploreIslands && !multiplayer.isConnected()) {
 			// move to a new island
 			const { safeToDrinkWaterContainers } = context.utilities.item.getWaterContainers(context);
-			const waterItemsNeeded = Math.max(2 - safeToDrinkWaterContainers.length, 0);
-			const foodItemsNeeded = Math.max(2 - (context.inventory.food?.length ?? 0), 0);
+			const waterItemsNeeded = Math.max(4 - safeToDrinkWaterContainers.length, 0);
+			const foodItemsNeeded = Math.max(4 - (context.inventory.food?.length ?? 0), 0);
 
 			const health = context.human.stat.get<IStatMax>(Stat.Health);
 			const hunger = context.human.stat.get<IStatMax>(Stat.Hunger);
@@ -527,10 +529,11 @@ export class SurvivalMode implements ITarsMode {
 			return;
 		}
 
-		if (!fromItemTypes.has((item as Item).type)) {
-			// already upgraded
-			return;
-		}
+		// try to always upgrade the item once per island visited
+		// if (!fromItemTypes.has((item as Item).type)) {
+		// 	// already upgraded
+		// 	return;
+		// }
 
 		let islandSaveData = context.tars.saveData.island[context.human.island.id];
 		if (!islandSaveData) {
@@ -546,12 +549,17 @@ export class SurvivalMode implements ITarsMode {
 
 		objectives.push([
 			new UpgradeInventoryItem(inventoryItemKey, fromItemTypes),
+			new AnalyzeInventory(),
+			new Restart(), // restart because we'll likely want to reinforce them right after
+		]);
+
+		// marked as upgraded in the next pipeline
+		// this makes it so if the above UpgradeInventoryItem is impossible, it won't waste calculating it again every time
+		objectives.push([
 			new Lambda(async () => {
 				islandSaveData[upgradeItemKey] = true;
 				return ObjectiveResult.Complete;
 			}),
-			new AnalyzeInventory(),
-			new Restart(), // restart because we'll likely want to reinforce them right after
 		]);
 	}
 

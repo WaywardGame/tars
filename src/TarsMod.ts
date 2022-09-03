@@ -244,12 +244,23 @@ export default class TarsMod extends Mod {
 	////////////////////////////////////////////////
 	// Event Handlers
 
-	@OwnEventHandler(TarsMod, "refreshNpcIslandIds")
-	public refreshNpcIslandIds() {
+	@OwnEventHandler(TarsMod, "refreshTarsInstanceReferences")
+	public refreshTarsInstanceReferences() {
 		this.saveData.instanceIslandIds.clear();
 
 		for (const tarsInstance of this.tarsInstances) {
-			this.saveData.instanceIslandIds.add(tarsInstance.human.islandId);
+			const referenceId = game.references.get((tarsInstance.human.asNPC || tarsInstance.human.asPlayer)!);
+			if (!referenceId) {
+				continue;
+			}
+
+			let referencesOnIsland = this.saveData.instanceIslandIds.get(tarsInstance.human.islandId);
+			if (!referencesOnIsland) {
+				referencesOnIsland = [];
+				this.saveData.instanceIslandIds.set(tarsInstance.human.islandId, referencesOnIsland);
+			}
+
+			referencesOnIsland.push(referenceId);
 		}
 	}
 
@@ -259,6 +270,8 @@ export default class TarsMod extends Mod {
 		if (!this.saveData.island[localIsland.id]) {
 			this.saveData.island[localIsland.id] = {};
 		}
+
+		const islandsToLoad = !multiplayer.isConnected() ? Array.from(this.saveData.instanceIslandIds.keys()) : [];
 
 		this.localPlayerTars = this.createAndLoadTars(localPlayer, this.saveData);
 
@@ -324,12 +337,10 @@ export default class TarsMod extends Mod {
 		});
 
 		// ensure islands are loaded for all TARS instances
-		if (!multiplayer.isConnected()) {
-			for (const islandId of this.saveData.instanceIslandIds) {
-				const island = game.islands.getIfExists(islandId);
-				if (island && !island.isLoaded) {
-					await island.load();
-				}
+		for (const islandId of islandsToLoad) {
+			const island = game.islands.getIfExists(islandId);
+			if (island && !island.isLoaded) {
+				await island.load();
 			}
 		}
 
@@ -417,7 +428,7 @@ export default class TarsMod extends Mod {
 			this.tarsInstances.delete(tars);
 		});
 
-		this.saveData.instanceIslandIds.add(human.islandId);
+		this.refreshTarsInstanceReferences();
 
 		return tars;
 	}
@@ -440,8 +451,8 @@ export default class TarsMod extends Mod {
 			initial.ui = {};
 		}
 
-		if (!initial.instanceIslandIds) {
-			initial.instanceIslandIds = new Set();
+		if (!initial.instanceIslandIds || !(initial.instanceIslandIds instanceof Map)) {
+			initial.instanceIslandIds = new Map();
 		}
 
 		initial.options = createOptions((initial.options ?? {}) as Partial<ITarsOptions>);

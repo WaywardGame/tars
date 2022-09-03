@@ -3,6 +3,7 @@ import type { IStat } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
 import Heal from "game/entity/action/actions/Heal";
+import Cure from "game/entity/action/actions/Cure";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -50,6 +51,14 @@ export default class RecoverHealth extends Objective {
 		this.saveChildObjectives = !hasWeightProblems;
 
 		const objectives: IObjective[] = [];
+
+		if (context.human.status.Bleeding && context.inventory.bandage) {
+			objectives.push(new UseItem(Heal, "bandage"));
+		}
+
+		if (context.human.status.Poisoned && context.inventory.curePoison) {
+			objectives.push(new UseItem(Cure, "curePoison"));
+		}
 
 		if (hasWeightProblems) {
 			// special case - reduce weight now

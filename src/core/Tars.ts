@@ -656,6 +656,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         this.utilities.navigation.load();
 
+        getTarsMod().event.emit("refreshTarsInstanceReferences");
+
         if (!this.isEnabled()) {
             return;
         }
@@ -1550,35 +1552,33 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.repairInterrupt(context, queuedRepairs, this.inventory.equipShield),
             this.repairInterrupt(context, queuedRepairs, this.inventory.tongs),
             this.repairInterrupt(context, queuedRepairs, this.inventory.bed),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.backpack),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.waterContainer),
         ];
-
-        if (this.inventory.waterContainer) {
-            for (const waterContainer of this.inventory.waterContainer) {
-                objectives.push(this.repairInterrupt(context, queuedRepairs, waterContainer));
-            }
-        }
 
         return objectives.filter(objective => objective !== undefined) as IObjective[];
     }
 
-    private repairInterrupt(context: Context, queuedRepairs: Set<Item>, item: Item | undefined): IObjective | undefined {
-        if (item === undefined || item.minDur === undefined || item.maxDur === undefined || queuedRepairs.has(item)) {
-            return undefined;
+    private repairInterrupt(context: Context, queuedRepairs: Set<Item>, itemOrItems: Item | Item[] | undefined): IObjective | undefined {
+        for (const item of (Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems])) {
+            if (item === undefined || item.minDur === undefined || item.maxDur === undefined || queuedRepairs.has(item)) {
+                return undefined;
+            }
+
+            const threshold = this.utilities.base.isNearBase(context) ? 0.2 : 0.1;
+            if (item.minDur / item.maxDur >= threshold) {
+                return undefined;
+            }
+
+            if (this.inventory.waterContainer?.includes(item) && context.human.stat.get<IStat>(Stat.Thirst).value < 2) {
+                // don't worry about repairing a water container if it's an emergency
+                return undefined;
+            }
+
+            queuedRepairs.add(item);
+
+            return new RepairItem(item);
         }
-
-        const threshold = this.utilities.base.isNearBase(context) ? 0.2 : 0.1;
-        if (item.minDur / item.maxDur >= threshold) {
-            return undefined;
-        }
-
-        if (this.inventory.waterContainer?.includes(item) && context.human.stat.get<IStat>(Stat.Thirst).value < 2) {
-            // don't worry about repairing a water container if it's an emergency
-            return undefined;
-        }
-
-        queuedRepairs.add(item);
-
-        return new RepairItem(item);
     }
 
     private nearbyCreatureInterrupt(context: Context): IObjective | undefined {

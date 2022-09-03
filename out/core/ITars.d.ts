@@ -3,6 +3,7 @@ import type { GrowingStage } from "game/doodad/IDoodad";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import type { CreatureType } from "game/entity/creature/ICreature";
+import { StatusType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import type Island from "game/island/Island";
 import type { IItemDisassembly } from "game/item/IItem";
@@ -101,6 +102,7 @@ export interface IInventoryItems {
     butcher?: Item;
     campfire?: Item;
     chest?: Item;
+    curePoison?: Item;
     equipBack?: Item;
     equipBelt?: Item;
     equipChest?: Item;
@@ -142,6 +144,7 @@ export interface IInventoryItemInfo {
     allowInChests?: boolean;
     allowOnTiles?: boolean;
     requiredMinDur?: number;
+    cureStatus?: StatusType;
 }
 export declare type InventoryItemFlags = InventoryItemFlag | {
     flag: InventoryItemFlag;

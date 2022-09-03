@@ -121,7 +121,7 @@ export default class TarsNPC extends NPC {
 
     @OwnEventHandler(NPC, "loadedOnIsland")
     public onLoadedOnIsland() {
-        getTarsMod().event.emit("refreshNpcIslandIds");
+        getTarsMod().event.emit("refreshTarsInstanceReferences");
     }
 
     @Bound

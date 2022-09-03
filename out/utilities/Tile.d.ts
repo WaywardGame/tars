@@ -7,7 +7,7 @@ import Item from "game/item/Item";
 export interface IOpenTileOptions {
     requireNoItemsOnTile: boolean;
     disallowWater: boolean;
-    requireShallowWater: boolean;
+    requireInfiniteShallowWater: boolean;
 }
 export declare class TileUtilities {
     private readonly tileLocationCache;

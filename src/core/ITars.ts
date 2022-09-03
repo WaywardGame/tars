@@ -3,6 +3,7 @@ import type { GrowingStage } from "game/doodad/IDoodad";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
 import type { CreatureType } from "game/entity/creature/ICreature";
+import { StatusType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import type Island from "game/island/Island";
 import type { IContainer, IItemDisassembly } from "game/item/IItem";
@@ -205,6 +206,7 @@ export interface IInventoryItems {
     butcher?: Item;
     campfire?: Item;
     chest?: Item;
+    curePoison?: Item;
     equipBack?: Item;
     equipBelt?: Item;
     equipChest?: Item;
@@ -247,6 +249,7 @@ export interface IInventoryItemInfo {
     allowInChests?: boolean;
     allowOnTiles?: boolean;
     requiredMinDur?: number;
+    cureStatus?: StatusType;
 }
 
 export type InventoryItemFlags = InventoryItemFlag | { flag: InventoryItemFlag; option: any };
@@ -332,6 +335,10 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     campfire: {
         itemTypes: [ItemTypeGroup.Campfire],
         requiredMinDur: 1,
+    },
+    curePoison: {
+        actionTypes: [ActionType.Cure],
+        cureStatus: StatusType.Poisoned,
     },
     butcher: {
         actionTypes: [ActionType.Butcher],
@@ -512,7 +519,6 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         itemTypes: [
             ItemTypeGroup.ContainerOfDesalinatedWater,
             ItemTypeGroup.ContainerOfFilteredWater,
-            ItemTypeGroup.ContainerOfMedicinalWater,
             ItemTypeGroup.ContainerOfPurifiedFreshWater,
             ItemTypeGroup.ContainerOfSeawater,
             ItemTypeGroup.ContainerOfUnpurifiedFreshWater,

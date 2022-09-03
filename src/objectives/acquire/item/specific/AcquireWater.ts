@@ -36,7 +36,7 @@ export default class AcquireWater extends Objective {
             return [
                 [new AcquireItemByGroup(ItemTypeGroup.ContainerOfDesalinatedWater, this.options).passAcquireData(this)],
                 [new AcquireItemByGroup(ItemTypeGroup.ContainerOfFilteredWater, this.options).passAcquireData(this)],
-                [new AcquireItemByGroup(ItemTypeGroup.ContainerOfMedicinalWater, this.options).passAcquireData(this)],
+                // [new AcquireItemByGroup(ItemTypeGroup.ContainerOfMedicinalWater, this.options).passAcquireData(this)],
                 [new AcquireItemByGroup(ItemTypeGroup.ContainerOfPurifiedFreshWater, this.options).passAcquireData(this)],
             ];
         }
@@ -44,7 +44,7 @@ export default class AcquireWater extends Objective {
         return [
             [new AcquireItemByGroup(ItemTypeGroup.ContainerOfDesalinatedWater, this.options).passAcquireData(this)],
             [new AcquireItemByGroup(ItemTypeGroup.ContainerOfFilteredWater, this.options).passAcquireData(this)],
-            [new AcquireItemByGroup(ItemTypeGroup.ContainerOfMedicinalWater, this.options).passAcquireData(this)],
+            // [new AcquireItemByGroup(ItemTypeGroup.ContainerOfMedicinalWater, this.options).passAcquireData(this)],
             [new AcquireItemByGroup(ItemTypeGroup.ContainerOfPurifiedFreshWater, this.options).passAcquireData(this)],
             [new AcquireItemByGroup(ItemTypeGroup.ContainerOfSeawater, this.options).passAcquireData(this)],
             [new AcquireItemByGroup(ItemTypeGroup.ContainerOfSwampWater, this.options).passAcquireData(this)],

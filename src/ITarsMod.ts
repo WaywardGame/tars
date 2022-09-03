@@ -9,6 +9,7 @@ import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/IT
 import type { IContext } from "./core/context/IContext";
 import { TreasureHunterType } from "./modes/TreasureHunter";
 import type TarsMod from "./TarsMod";
+import { Reference } from "game/reference/ReferenceManager";
 
 export const TARS_ID = "TARS";
 
@@ -36,7 +37,7 @@ export interface ITarsModEvents extends Events<Mod> {
      */
     statusChange(): any;
 
-    refreshNpcIslandIds(): any;
+    refreshTarsInstanceReferences(): any;
 
     changedGlobalDataSlots(): any;
 }
@@ -57,7 +58,7 @@ export interface ISaveData {
     options: ITarsOptions;
     island: Record<IslandId, Record<string, any>>;
     ui: Partial<Record<TarsUiSaveDataKey, any>>;
-    instanceIslandIds: Set<IslandId>;
+    instanceIslandIds: Map<IslandId, Reference[]>;
 }
 
 export enum TarsUiSaveDataKey {

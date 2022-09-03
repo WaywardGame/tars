@@ -150,6 +150,14 @@ export default class AnalyzeInventory extends Objective {
 			}
 		}
 
+		if (itemInfo.cureStatus !== undefined) {
+			for (const item of Array.from(items)) {
+				if (!item.description()?.canCureStatus?.includes(itemInfo.cureStatus)) {
+					items.delete(item);
+				}
+			}
+		}
+
 		for (const item of Array.from(items)) {
 			if (!context.utilities.item.isAllowedToUseItem(context, item, false)) {
 				items.delete(item);
