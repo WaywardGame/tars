@@ -4,7 +4,6 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 export default class GatherFromCreature extends Objective {
     private readonly search;
-    readonly gatherObjectivePriority = 700;
     constructor(search: CreatureSearch);
     getIdentifier(): string;
     getStatus(): string | undefined;

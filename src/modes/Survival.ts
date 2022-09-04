@@ -549,6 +549,10 @@ export class SurvivalMode implements ITarsMode {
 
 		objectives.push([
 			new UpgradeInventoryItem(inventoryItemKey, fromItemTypes),
+			new Lambda(async () => {
+				islandSaveData[upgradeItemKey] = true;
+				return ObjectiveResult.Complete;
+			}).setStatus(`Marking ${inventoryItemKey} upgrade as done`),
 			new AnalyzeInventory(),
 			new Restart(), // restart because we'll likely want to reinforce them right after
 		]);
@@ -559,7 +563,7 @@ export class SurvivalMode implements ITarsMode {
 			new Lambda(async () => {
 				islandSaveData[upgradeItemKey] = true;
 				return ObjectiveResult.Complete;
-			}),
+			}).setStatus(`Marking ${inventoryItemKey} upgrade as done`),
 		]);
 	}
 

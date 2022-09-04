@@ -28,6 +28,13 @@ import { IGetItemsOptions } from "game/item/IItemManager";
 
 export const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>> = { includeSubContainers: true };
 
+export enum RelatedItemType {
+	All,
+	Recipe,
+	Disassemble,
+	Dismantle,
+}
+
 export interface IGetItemOptions {
 	allowInventoryItems: boolean;
 	allowUnsafeWaterContainers: boolean;
@@ -38,7 +45,7 @@ export class ItemUtilities {
 
 	// private static readonly impossibleItems: Map<IslandId, { withoutCaves: Set<ItemType>; withCaves: Set<ItemType> }> = new Map();
 
-	private static readonly relatedItemsCache: Map<ItemType, Set<ItemType>> = new Map();
+	private static readonly relatedItemsCache: Map<string, Set<ItemType>> = new Map();
 	private static readonly relatedItemsByGroupCache: Map<ItemTypeGroup, Set<ItemType>> = new Map();
 	private static readonly dismantleSearchCache: Map<ItemType, Set<ItemType>> = new Map();
 
@@ -55,57 +62,64 @@ export class ItemUtilities {
 	/**
 	 * All item types related to the provided one
 	 */
-	public static getRelatedItemTypes(itemType: ItemType): Set<ItemType> | boolean {
-		let result = this.relatedItemsCache.get(itemType);
+	public static getRelatedItemTypes(itemType: ItemType, relatedItemType: RelatedItemType): Set<ItemType> | boolean {
+		const cacheId = `${itemType},${relatedItemType}`;
+		let result = this.relatedItemsCache.get(cacheId);
 		if (result === undefined) {
 			result = new Set();
 
 			let queue: ItemType[] = [itemType];
 
 			while (queue.length > 0) {
-				const relatedItemType = queue.shift()!;
+				const otherItemType = queue.shift()!;
 
-				if (result.has(relatedItemType)) {
+				if (result.has(otherItemType)) {
 					continue;
 				}
 
-				result.add(relatedItemType);
+				result.add(otherItemType);
 
-				const description = itemDescriptions[relatedItemType];
+				const description = itemDescriptions[otherItemType];
 				if (!description) {
 					continue;
 				}
 
-				const dismantleItems = description.dismantle?.items;
-				if (dismantleItems) {
-					queue.push(...dismantleItems.map(dismantleItem => dismantleItem.type));
-				}
-
-				const recipe = description.recipe;
-				if (recipe) {
-					if (recipe.baseComponent) {
-						if (ItemManager.isGroup(recipe.baseComponent)) {
-							queue.push(...Array.from(ItemManager.getGroupItems(recipe.baseComponent)));
-
-						} else {
-							queue.push(recipe.baseComponent);
-						}
-					}
-
-					for (const component of recipe.components) {
-						if (ItemManager.isGroup(component.type)) {
-							queue.push(...Array.from(ItemManager.getGroupItems(component.type)));
-
-						} else {
-							queue.push(component.type);
-						}
+				if (relatedItemType === RelatedItemType.All || relatedItemType === RelatedItemType.Dismantle || otherItemType !== itemType) {
+					const dismantleItems = description.dismantle?.items;
+					if (dismantleItems) {
+						queue.push(...dismantleItems.map(dismantleItem => dismantleItem.type));
 					}
 				}
 
-				queue.push(...Array.from(this.getDismantleSearch(relatedItemType)));
+				if (relatedItemType === RelatedItemType.All || relatedItemType === RelatedItemType.Recipe || otherItemType !== itemType) {
+					const recipe = description.recipe;
+					if (recipe) {
+						if (recipe.baseComponent) {
+							if (ItemManager.isGroup(recipe.baseComponent)) {
+								queue.push(...Array.from(ItemManager.getGroupItems(recipe.baseComponent)));
+
+							} else {
+								queue.push(recipe.baseComponent);
+							}
+						}
+
+						for (const component of recipe.components) {
+							if (ItemManager.isGroup(component.type)) {
+								queue.push(...Array.from(ItemManager.getGroupItems(component.type)));
+
+							} else {
+								queue.push(component.type);
+							}
+						}
+					}
+				}
+
+				if (relatedItemType === RelatedItemType.All || relatedItemType === RelatedItemType.Dismantle || otherItemType !== itemType) {
+					queue.push(...Array.from(this.getDismantleSearch(otherItemType)));
+				}
 			}
 
-			this.relatedItemsCache.set(itemType, result);
+			this.relatedItemsCache.set(cacheId, result);
 		}
 
 		return result;
@@ -120,7 +134,7 @@ export class ItemUtilities {
 			result = new Set();
 
 			for (const itemTypeForGroup of ItemManager.getGroupItems(itemTypeGroup)) {
-				const relatedItemTypes = this.getRelatedItemTypes(itemTypeForGroup);
+				const relatedItemTypes = this.getRelatedItemTypes(itemTypeForGroup, RelatedItemType.All);
 				if (relatedItemTypes instanceof Set) {
 					for (const itemType of relatedItemTypes) {
 						result.add(itemType);

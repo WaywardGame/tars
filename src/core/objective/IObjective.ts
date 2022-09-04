@@ -56,8 +56,7 @@ export interface IObjective {
 	readonly log: ILog;
 
 	readonly ignoreInvalidPlans?: boolean;
-
-	readonly gatherObjectivePriority?: number;
+	readonly includePositionInHashCode?: boolean;
 
 	enableLogging: boolean;
 
@@ -66,7 +65,7 @@ export interface IObjective {
 
 	execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult>;
 
-	getHashCode(context: Context | undefined): string;
+	getHashCode(context: Context | undefined, skipContextDataKey?: boolean): string;
 	getIdentifier(context: Context | undefined): string;
 	getName(): string;
 

@@ -10,7 +10,7 @@ export default abstract class Objective implements IObjective {
     static reset(): void;
     enableLogging: boolean;
     protected includeUniqueIdentifierInHashCode?: boolean;
-    protected includePositionInHashCode?: boolean;
+    includePositionInHashCode?: boolean;
     protected contextDataKey: string;
     protected _shouldKeepInInventory: boolean | undefined;
     protected reserveType: ReserveType | undefined;

@@ -20,6 +20,7 @@ import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import UseItem from "./UseItem";
+import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 
 const recalculateMovements = 40;
 
@@ -84,10 +85,8 @@ export default class BuildItem extends Objective {
 						}
 					}
 
-					// if (this.target === undefined) {
-					// 	// not valid near point by the doodad
-					// 	// pick it up so we'll replace it
-					// }
+					// couldn't find a valid spot for this doodad. lets place it somewhere else
+					// it will end up moving the other doodad accordingly
 				}
 			}
 
@@ -106,7 +105,7 @@ export default class BuildItem extends Objective {
 					} else {
 						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => {
 							if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, point)) {
-								// AnalyzeBase won't affect a doodad at this position
+								// AnalyzeBase won't like a doodad at this position
 								return false;
 							}
 
@@ -144,6 +143,7 @@ export default class BuildItem extends Objective {
 				return ObjectiveResult.Complete;
 			}).setStatus(this),
 			new AnalyzeBase(),
+			new AnalyzeInventory(),
 		];
 	}
 

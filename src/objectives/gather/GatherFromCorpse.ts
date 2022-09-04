@@ -11,8 +11,6 @@ import MoveToTarget from "../core/MoveToTarget";
 
 export default class GatherFromCorpse extends Objective {
 
-	public readonly gatherObjectivePriority = 600;
-
 	constructor(private readonly search: CreatureSearch) {
 		super();
 	}

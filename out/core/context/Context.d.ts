@@ -31,7 +31,6 @@ export default class Context implements IContext {
     isSoftReservedItem(item: Item): boolean;
     isHardReservedItem(item: Item): boolean;
     isReservedItemType(itemType: ItemType, objectiveHashCode?: string): boolean;
-    isReservedItemTypeForObjectiveHashCode(itemType: ItemType): boolean;
     getData<T = any>(type: string): T | undefined;
     getDataOrDefault<T = any>(type: string, defaultValue: T): T;
     setData<T = any>(type: string, value: T | undefined): void;

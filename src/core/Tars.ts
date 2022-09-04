@@ -87,6 +87,7 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
+import { AttackType } from "game/entity/IEntity";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -578,6 +579,22 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad && nextTile.doodad.blocksMove()) || human.island.isPlayerAtTile(nextTile, false, true)) {
             this.interrupt("Interrupting due to blocked movement");
         }
+    }
+
+    @EventHandler(EventBus.Humans, "canAttack")
+    public onCanAttack(human: Human, weapon: Item | undefined, attackType: AttackType): boolean | undefined {
+        if (this.human !== human || !this.isRunning()) {
+            return undefined;
+        }
+
+        // we are attacking something. cancel and pending walk path
+        if (this.human.hasWalkPath()) {
+            multiplayer.executeClientside(() => {
+                UpdateWalkPath.execute(this.human, undefined);
+            });
+        }
+
+        return undefined;
     }
 
     @EventHandler(EventBus.Humans, "statChanged")

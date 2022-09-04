@@ -13,7 +13,7 @@ import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import { ReserveType } from "../../../core/ITars";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
-import { IGetItemOptions, ItemUtilities } from "../../../utilities/Item";
+import { IGetItemOptions, ItemUtilities, RelatedItemType } from "../../../utilities/Item";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -50,7 +50,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 	}
 
 	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
-		return ItemUtilities.getRelatedItemTypes(this.itemType);
+		return ItemUtilities.getRelatedItemTypes(this.itemType, RelatedItemType.Recipe);
 	}
 
 	public override shouldIncludeContextHashCode(): boolean {

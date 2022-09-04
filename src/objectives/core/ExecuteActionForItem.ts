@@ -50,7 +50,7 @@ export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
 
 export default class ExecuteActionForItem<T extends AnyActionDescription> extends Objective {
 
-	protected override includeUniqueIdentifierInHashCode = true;
+	protected override readonly includeUniqueIdentifierInHashCode: boolean = true;
 
 	private terrainTileType: TerrainType | undefined;
 

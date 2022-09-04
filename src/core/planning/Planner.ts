@@ -415,6 +415,22 @@ export class Planner implements IPlanner {
 			this.objectivesCounter = new Map();
 		}
 
+		const impossibleObjectiveHashCode = objective.includePositionInHashCode !== true ? objective.getHashCode(undefined, true) : undefined;
+		if (impossibleObjectiveHashCode !== undefined) {
+			if (this.debug) {
+				this.writeCalculationLog(`Checking difficulty for "${impossibleObjectiveHashCode}" (broad 1)`);
+			}
+
+			const result = this.calculateDifficultyCache.get(impossibleObjectiveHashCode);
+			if (result?.status === CalculatedDifficultyStatus.Impossible) {
+				if (this.debug) {
+					this.writeCalculationLog(`Returning Impossible for "${impossibleObjectiveHashCode}" (broad 1)`);
+				}
+
+				return result;
+			}
+		}
+
 		const objectiveHashCode = objective.getHashCode(context);
 
 		// check the difficulty cache for the objective hash code (without context)
@@ -448,6 +464,28 @@ export class Planner implements IPlanner {
 
 			// not: not setting contextHashCode to undefined if it's empty because it's important to indicate that this objective CAN include a context hash code
 			// we don't want it to be cached without one
+		}
+
+		// am impossible objective is also marked as impossible for it's context without without the position/context data key component
+		// check it's impossible for that hash code
+		let cacheImpossibledObjectiveHashCode: string | undefined;
+		if (impossibleObjectiveHashCode) {
+			cacheImpossibledObjectiveHashCode = includedContextHashCode ? `${impossibleObjectiveHashCode}|${contextHashCode}` : impossibleObjectiveHashCode;
+
+			if (includedContextHashCode) {
+				if (this.debug) {
+					this.writeCalculationLog(`Checking difficulty for "${cacheImpossibledObjectiveHashCode}" (broad 2)`);
+				}
+
+				const result = this.calculateDifficultyCache.get(cacheImpossibledObjectiveHashCode);
+				if (result?.status === CalculatedDifficultyStatus.Impossible) {
+					if (this.debug) {
+						this.writeCalculationLog(`Returning Impossible for "${cacheImpossibledObjectiveHashCode}" (broad 2)`);
+					}
+
+					return result;
+				}
+			}
 		}
 
 		this.calculatingDifficultyDepth++;
@@ -592,6 +630,10 @@ export class Planner implements IPlanner {
 			includedContextHashCode = false;
 			cacheHashCode = objectiveHashCode;
 
+			if (cacheImpossibledObjectiveHashCode) {
+				cacheImpossibledObjectiveHashCode = impossibleObjectiveHashCode;
+			}
+
 			if (this.debug) {
 				this.writeCalculationLog("No need to include the hash code");
 			}
@@ -602,16 +644,23 @@ export class Planner implements IPlanner {
 			case CalculatedDifficultyStatus.Impossible:
 				result = {
 					status: CalculatedDifficultyStatus.Impossible,
-					changes: changes,
+					changes,
 				};
 
+				if (cacheImpossibledObjectiveHashCode) {
+					this.calculateDifficultyCache.set(cacheImpossibledObjectiveHashCode, result);
+
+					if (this.debug) {
+						this.writeCalculationLog(`Set "${cacheImpossibledObjectiveHashCode}" to Impossible (broad). (depth: ${changes.depth})`);
+					}
+				}
 				break;
 
 			case CalculatedDifficultyStatus.NotCalculatedYet:
 				result = {
 					status: CalculatedDifficultyStatus.NotCalculatedYet,
 					hashCode: cacheHashCode,
-					changes: changes,
+					changes,
 					waitingHashCodes: new Set(waitingHashCodes),
 				};
 
@@ -621,7 +670,7 @@ export class Planner implements IPlanner {
 				result = {
 					status: CalculatedDifficultyStatus.NotPlausible,
 					hashCode: cacheHashCode,
-					changes: changes,
+					changes,
 					minimumDifficulty: minimumDifficulty!,
 				};
 
@@ -630,11 +679,11 @@ export class Planner implements IPlanner {
 			default:
 				result = {
 					status: CalculatedDifficultyStatus.Possible,
-					changes: changes,
-					difficulty: difficulty,
+					changes,
+					difficulty,
 					depth: this.calculatingDifficultyDepth,
 					objectives: [objective],
-					objectiveChain: objectiveChain,
+					objectiveChain,
 				};
 
 				if (!includedContextHashCode && contextHashCode !== undefined && changes.shouldIncludeHashCode) {

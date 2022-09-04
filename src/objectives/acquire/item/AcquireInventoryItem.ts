@@ -13,6 +13,7 @@ import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";
 import AcquireItemByGroup from "./AcquireItemByGroup";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
+import { IAcquireItemOptions } from "./AcquireBase";
 
 export interface IAcquireInventoryItemOptions {
 	reserveType: ReserveType;
@@ -69,15 +70,16 @@ export default class AcquireInventoryItem extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		const itemInfo = inventoryItemInfo[this.inventoryKey];
+		const options: Partial<IAcquireItemOptions> | undefined = itemInfo?.requiredMinDur !== undefined ? { requiredMinDur: itemInfo.requiredMinDur } : undefined;
 
 		if (itemInfo.itemTypes) {
 			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;
 			for (const itemTypeOrGroup of itemTypes) {
 				if (context.island.items.isGroup(itemTypeOrGroup)) {
-					objectivePipelines.push([new AcquireItemByGroup(itemTypeOrGroup).passAcquireData(this), new AnalyzeInventory()]);
+					objectivePipelines.push([new AcquireItemByGroup(itemTypeOrGroup, options).passAcquireData(this), new AnalyzeInventory()]);
 
 				} else {
-					objectivePipelines.push([new AcquireItem(itemTypeOrGroup).passAcquireData(this), new AnalyzeInventory()]);
+					objectivePipelines.push([new AcquireItem(itemTypeOrGroup, options).passAcquireData(this), new AnalyzeInventory()]);
 				}
 			}
 		}
@@ -86,7 +88,7 @@ export default class AcquireInventoryItem extends Objective {
 			for (const itemType of Enums.values(ItemType)) {
 				const description = itemDescriptions[itemType];
 				if (description && description.equip === itemInfo.equipType) {
-					objectivePipelines.push([new AcquireItem(itemType).passAcquireData(this), new AnalyzeInventory()]);
+					objectivePipelines.push([new AcquireItem(itemType, options).passAcquireData(this), new AnalyzeInventory()]);
 				}
 			}
 		}
@@ -94,7 +96,7 @@ export default class AcquireInventoryItem extends Objective {
 		if (itemInfo.actionTypes) {
 			for (const actionType of itemInfo.actionTypes) {
 				for (const itemType of AcquireItemForAction.getItems(context, actionType)) {
-					objectivePipelines.push([new AcquireItem(itemType).passAcquireData(this), new AnalyzeInventory()]);
+					objectivePipelines.push([new AcquireItem(itemType, options).passAcquireData(this), new AnalyzeInventory()]);
 				}
 			}
 		}

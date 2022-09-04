@@ -31,9 +31,13 @@ export default class AnalyzeBase extends Objective {
 
 		const keys = Object.keys(baseInfo) as BaseInfoKey[];
 		for (const key of keys) {
+			const info = baseInfo[key];
+
 			const doodads = context.base[key] = context.base[key]
 				.filter(doodad => {
-					if (!doodad.isValid()) {
+					// verify the existing base doodad is still valid
+					// maybe we messed up some tiles next to it since when we placed it
+					if (!doodad.isValid() || !context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad)) {
 						changed = true;
 						this.log.info(`"${key}" was removed`);
 
@@ -45,7 +49,6 @@ export default class AnalyzeBase extends Objective {
 					return true;
 				});
 
-			const info = baseInfo[key];
 			if (doodads.length === 0 || info.allowMultiple) {
 				let targets: Doodad[];
 

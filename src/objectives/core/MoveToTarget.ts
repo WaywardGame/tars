@@ -34,6 +34,7 @@ export interface IMoveToTargetOptions {
 	disableStaminaCheck: boolean;
 	disableTracking: boolean;
 	allowBoat: boolean;
+	skipIfAlreadyThere: boolean;
 	idleIfAlreadyThere: boolean;
 
 	/**
@@ -55,7 +56,7 @@ export default class MoveToTarget extends Objective {
 
 	private trackedPosition: IVector3 | undefined;
 
-	protected override includePositionInHashCode = true;
+	public override readonly includePositionInHashCode: boolean = true;
 
 	constructor(
 		protected target: IVector3,
@@ -104,6 +105,10 @@ export default class MoveToTarget extends Objective {
 
 		if (!context.options.allowCaves && position.z !== this.target.z) {
 			return ObjectiveResult.Impossible;
+		}
+
+		if (this.options?.skipIfAlreadyThere && this.target.x === position.x && this.target.y === position.y && this.target.z === position.z) {
+			return ObjectiveResult.Complete;
 		}
 
 		const endPositions = context.utilities.movement.getMovementEndPositions(context, this.target, this.moveAdjacentToTarget);

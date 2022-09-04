@@ -16,8 +16,6 @@ import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 
 export default class GatherFromGround extends Objective {
 
-	public readonly gatherObjectivePriority = 500;
-
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IGatherItemOptions> = {}) {
 		super();
 	}

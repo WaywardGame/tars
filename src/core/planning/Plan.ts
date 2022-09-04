@@ -550,7 +550,6 @@ export default class Plan implements IPlan {
 		const depthMap = new Map<number, IExecutionTree>();
 		depthMap.set(1, rootTree);
 
-		const gatherObjectiveTrees: IExecutionTree[] = [];
 		const reserveItemObjectives: Map<Item, number> = new Map();
 		const keepInInventoryReserveItemObjectives: Map<Item, number> = new Map();
 
@@ -608,10 +607,6 @@ export default class Plan implements IPlan {
 			parent.children.push(childTree);
 
 			depthMap.set(depth, childTree);
-
-			if (objective.gatherObjectivePriority !== undefined) {
-				gatherObjectiveTrees.push(childTree);
-			}
 		}
 
 		const cachedExecutionPriorities: Map<string, Map<IExecutionTree, IObjectivePriority>> = new Map();

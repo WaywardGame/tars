@@ -13,6 +13,12 @@ import type Context from "../core/context/Context";
 import { IDisassemblySearch } from "../core/ITars";
 import { IGetItemsOptions } from "game/item/IItemManager";
 export declare const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>>;
+export declare enum RelatedItemType {
+    All = 0,
+    Recipe = 1,
+    Disassemble = 2,
+    Dismantle = 3
+}
 export interface IGetItemOptions {
     allowInventoryItems: boolean;
     allowUnsafeWaterContainers: boolean;
@@ -30,7 +36,7 @@ export declare class ItemUtilities {
     private baseItemCache;
     private readonly groundItemCache;
     private readonly disassembleSearchCache;
-    static getRelatedItemTypes(itemType: ItemType): Set<ItemType> | boolean;
+    static getRelatedItemTypes(itemType: ItemType, relatedItemType: RelatedItemType): Set<ItemType> | boolean;
     static getRelatedItemTypesByGroup(itemTypeGroup: ItemTypeGroup): Set<ItemType> | boolean;
     static getDismantleSearch(itemType: ItemType): Set<ItemType>;
     initialize(context: Context): void;

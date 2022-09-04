@@ -6,7 +6,6 @@ import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 export default class GatherFromGround extends Objective {
     private readonly itemType;
     private readonly options;
-    readonly gatherObjectivePriority = 500;
     constructor(itemType: ItemType, options?: Partial<IGatherItemOptions>);
     getIdentifier(context: Context | undefined): string;
     getStatus(): string | undefined;

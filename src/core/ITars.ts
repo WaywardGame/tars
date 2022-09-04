@@ -157,6 +157,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
         litType: DoodadTypeGroup.LitFurnace,
     },
     intermediateChest: {
+        doodadTypes: Array.from(chestTypes.values()),
         findTargets: (context: { island: Island; base: IBase }) => {
             const sortedChests = context.base.chest
                 .map(chest =>
@@ -405,7 +406,6 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             ItemType.BowDrill,
             ItemType.FirePlough,
             ItemType.HandDrill,
-            ItemType.Lens,
         ],
         flags: InventoryItemFlag.PreferLowerWeight,
     },

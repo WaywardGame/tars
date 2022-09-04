@@ -113,14 +113,7 @@ export default class Context implements IContext {
 	 * @param objectiveHashCode When provided, check if the item type is reserved due to an objective matching the provided hash code
 	 */
 	public isReservedItemType(itemType: ItemType, objectiveHashCode?: string) {
-		return this.state.reservedItemTypes.has(itemType) && (!objectiveHashCode || this.state.reservedItemTypesPerObjectiveHashCode.get(itemType)?.has(objectiveHashCode) === true);
-	}
-
-	/**
-	 * Checks if an item with the given item type is reserved by another objective
-	 */
-	public isReservedItemTypeForObjectiveHashCode(itemType: ItemType) {
-		return this.state.reservedItemTypes.has(itemType);
+		return this.state.reservedItemTypesPerObjectiveHashCode.has(itemType) && (!objectiveHashCode || this.state.reservedItemTypesPerObjectiveHashCode.get(itemType)?.has(objectiveHashCode) === true);
 	}
 
 	public getData<T = any>(type: string): T | undefined {
@@ -142,11 +135,11 @@ export default class Context implements IContext {
 	public addSoftReservedItems(...items: Item[]) {
 		for (const item of items) {
 			this.state.softReservedItems.add(item);
-			this.state.reservedItemTypes.add(item.type);
+			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
 
 			if (this.changes) {
 				this.changes.softReservedItems.add(item);
-				this.changes.reservedItemTypes.add(item.type);
+				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
 			}
 		}
 	}
@@ -154,13 +147,13 @@ export default class Context implements IContext {
 	public addSoftReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
 		for (const item of items) {
 			this.state.softReservedItems.add(item);
-			this.state.reservedItemTypes.add(item.type);
-			this.state.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
+			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
+			this.state.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 
 			if (this.changes) {
 				this.changes.softReservedItems.add(item);
-				this.changes.reservedItemTypes.add(item.type);
-				this.changes.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
+				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
+				this.changes.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 			}
 		}
 	}
@@ -168,11 +161,11 @@ export default class Context implements IContext {
 	public addHardReservedItems(...items: Item[]) {
 		for (const item of items) {
 			this.state.hardReservedItems.add(item);
-			this.state.reservedItemTypes.add(item.type);
+			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
 
 			if (this.changes) {
 				this.changes.hardReservedItems.add(item);
-				this.changes.reservedItemTypes.add(item.type);
+				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
 			}
 		}
 	}
@@ -180,13 +173,13 @@ export default class Context implements IContext {
 	public addHardReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
 		for (const item of items) {
 			this.state.hardReservedItems.add(item);
-			this.state.reservedItemTypes.add(item.type);
-			this.state.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
+			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
+			this.state.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 
 			if (this.changes) {
 				this.changes.hardReservedItems.add(item);
-				this.changes.reservedItemTypes.add(item.type);
-				this.changes.addReservedItemTypesForObjectiveHashCode(item.type, objectiveHashCode);
+				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
+				this.changes.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 			}
 		}
 	}

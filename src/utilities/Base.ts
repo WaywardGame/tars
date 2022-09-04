@@ -252,7 +252,7 @@ export class BaseUtilities {
 					}
 
 					if (context.utilities.base.isOpenArea(context, point, tile, 0)) {
-						// there is an open spot for the doodad
+						// there is an open spot for the other doodad
 						return true;
 					}
 

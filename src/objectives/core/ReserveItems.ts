@@ -12,6 +12,8 @@ import Objective from "../../core/objective/Objective";
  */
 export default class ReserveItems extends Objective {
 
+	public override readonly includePositionInHashCode: boolean = false;
+
 	public items: Item[];
 	private objectiveHashCode: string | undefined;
 
@@ -22,7 +24,7 @@ export default class ReserveItems extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `ReserveItem:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.shouldKeepInInventory() ? "KeepInInventory:" : ""}${this.objectiveHashCode ? this.objectiveHashCode : ""}${this.items.join(",")}`;
+		return `ReserveItems:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.shouldKeepInInventory() ? "KeepInInventory:" : ""}${this.objectiveHashCode ? this.objectiveHashCode : ""}${this.items.join(",")}`;
 	}
 
 	public getStatus(): string | undefined {

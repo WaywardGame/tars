@@ -30,12 +30,12 @@ export interface IObjectivePriority {
 export interface IObjective {
     readonly log: ILog;
     readonly ignoreInvalidPlans?: boolean;
-    readonly gatherObjectivePriority?: number;
+    readonly includePositionInHashCode?: boolean;
     enableLogging: boolean;
     ensureLogger(loggerUtilities: LoggerUtilities): void;
     setLogger(log: ILog | undefined): void;
     execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult>;
-    getHashCode(context: Context | undefined): string;
+    getHashCode(context: Context | undefined, skipContextDataKey?: boolean): string;
     getIdentifier(context: Context | undefined): string;
     getName(): string;
     getStatusMessage(context: Context): string | undefined;

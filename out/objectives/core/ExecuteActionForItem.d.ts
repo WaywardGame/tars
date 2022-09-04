@@ -27,7 +27,7 @@ export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
 export default class ExecuteActionForItem<T extends AnyActionDescription> extends Objective {
     private readonly type;
     private readonly options?;
-    protected includeUniqueIdentifierInHashCode: boolean;
+    protected readonly includeUniqueIdentifierInHashCode: boolean;
     private terrainTileType;
     private readonly itemTypes;
     constructor(type: ExecuteActionType, itemTypes: Set<ItemType> | ItemType[], options?: Partial<IExecuteActionForItemOptions<T>> | undefined);

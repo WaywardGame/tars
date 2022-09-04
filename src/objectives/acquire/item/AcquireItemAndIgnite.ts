@@ -4,7 +4,7 @@ import Translation from "language/Translation";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { ItemUtilities } from "../../../utilities/Item";
+import { ItemUtilities, RelatedItemType } from "../../../utilities/Item";
 import IgniteItem from "../../other/item/IgniteItem";
 import AcquireItem from "./AcquireItem";
 
@@ -26,7 +26,7 @@ export default class AcquireItemAndIgnite extends Objective {
     }
 
     public override canIncludeContextHashCode(): boolean | Set<ItemType> {
-        return ItemUtilities.getRelatedItemTypes(this.itemType);
+        return ItemUtilities.getRelatedItemTypes(this.itemType, RelatedItemType.All);
     }
 
     public override shouldIncludeContextHashCode(context: Context): boolean {

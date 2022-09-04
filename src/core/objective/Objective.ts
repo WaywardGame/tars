@@ -21,7 +21,12 @@ export default abstract class Objective implements IObjective {
 	public enableLogging = true;
 
 	protected includeUniqueIdentifierInHashCode?: boolean;
-	protected includePositionInHashCode?: boolean;
+
+	/**
+	 * Set to true if the position will always matter
+	 * Set to false if the position of the player does not matter
+	 */
+	public includePositionInHashCode?: boolean;
 
 	protected contextDataKey: string = ContextDataType.LastAcquiredItem;
 	protected _shouldKeepInInventory: boolean | undefined; // defaults to false
@@ -71,7 +76,7 @@ export default abstract class Objective implements IObjective {
 		}
 
 		// greatly increases accuracy at a cost of performance
-		if (context && (this.includePositionInHashCode || context.options.planningAccuracy === PlanningAccuracy.Accurate)) {
+		if (context && this.includePositionInHashCode !== false && (this.includePositionInHashCode || context.options.planningAccuracy === PlanningAccuracy.Accurate)) {
 			const position = context.getPosition();
 			hashCode += `:(${position.x},${position.y},${position.z})`;
 		}
@@ -96,7 +101,7 @@ export default abstract class Objective implements IObjective {
 			hashCode += `:[${this.contextDataKey}]`;
 		}
 
-		if (this.reserveType !== undefined) {
+		if (context && this.reserveType === ReserveType.Soft) {
 			hashCode += `:${ReserveType[this.reserveType]}`;
 		}
 

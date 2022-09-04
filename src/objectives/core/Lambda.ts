@@ -5,7 +5,9 @@ import Objective from "../../core/objective/Objective";
 
 export default class Lambda extends Objective {
 
-	protected override includeUniqueIdentifierInHashCode = true;
+	public override readonly includePositionInHashCode: boolean = false;
+
+	protected override readonly includeUniqueIdentifierInHashCode: boolean = true;
 
 	constructor(private readonly lambda: (context: Context, lambda: Lambda) => Promise<ObjectiveExecutionResult>, private readonly difficulty = 1) {
 		super();

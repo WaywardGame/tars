@@ -5,6 +5,8 @@ import Objective from "../../core/objective/Objective";
 
 export default class AddDifficulty extends Objective {
 
+	public override readonly includePositionInHashCode: boolean = false;
+
 	constructor(private readonly difficulty: number) {
 		super();
 	}

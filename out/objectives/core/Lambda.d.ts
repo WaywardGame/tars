@@ -4,7 +4,8 @@ import Objective from "../../core/objective/Objective";
 export default class Lambda extends Objective {
     private readonly lambda;
     private readonly difficulty;
-    protected includeUniqueIdentifierInHashCode: boolean;
+    readonly includePositionInHashCode: boolean;
+    protected readonly includeUniqueIdentifierInHashCode: boolean;
     constructor(lambda: (context: Context, lambda: Lambda) => Promise<ObjectiveExecutionResult>, difficulty?: number);
     getIdentifier(): string;
     getStatus(): string | undefined;

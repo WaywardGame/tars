@@ -4,6 +4,7 @@ import Objective from "../../core/objective/Objective";
 export default class SetContextData extends Objective {
     private readonly type;
     private readonly value;
+    readonly includePositionInHashCode: boolean;
     constructor(type: string, value: any | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;

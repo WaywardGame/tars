@@ -4,7 +4,6 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 export default class GatherFromTerrainResource extends Objective {
     private readonly search;
-    readonly gatherObjectivePriority = 200;
     constructor(search: ITerrainResourceSearch[]);
     getIdentifier(): string;
     getStatus(): string | undefined;

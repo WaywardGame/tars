@@ -28,6 +28,7 @@ import Context from "./context/Context";
 import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
+import { AttackType } from "game/entity/IEntity";
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
     readonly human: Human;
     readonly saveData: ISaveData;
@@ -82,6 +83,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     processInput(human: Human): false | undefined;
     onChangeZ(human: Human, z: WorldZ, lastZ: WorldZ): void;
     onPreMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile): void;
+    onCanAttack(human: Human, weapon: Item | undefined, attackType: AttackType): boolean | undefined;
     onStatChange(human: Human, stat: IStat): void;
     onStatMaxChanged(human: Human, stat: IStat, oldValue: number | undefined): void;
     private onWeightChange;
