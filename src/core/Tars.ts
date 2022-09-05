@@ -896,7 +896,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         const walkPath = this.context.human.walkPath;
         if (walkPath) {
-            statusMessage += ` (distance: ${walkPath.path.length})`;
+            statusMessage += ` (${walkPath.path.length} tiles away)`;
         }
 
         return statusMessage;
@@ -1203,7 +1203,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 // we should use our main context when running interrupt objectives
                 // this will prevent interrupts from messing with reserved items
                 // when the context is reset, it goes back to this initial state
-                this.interruptContext = this.context.clone();
+                this.interruptContext = this.context.clone(undefined, undefined, true);
                 this.interruptContext.setInitialState();
 
                 this.interruptContexts.clear();
@@ -1296,7 +1296,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                             // in progress. run again during the next tick
 
                             // save this context so it will be restored next time
-                            this.interruptContexts.set(i, this.interruptContext.clone());
+                            this.interruptContexts.set(i, this.interruptContext.clone(undefined, undefined, true));
                             this.log.debug(`Saving context to ${i} with new initial state. ${this.interruptContext.getHashCode()}`);
 
                             // update the initial state so we don't mess with items between interrupts
@@ -1770,10 +1770,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             objectives.length > 0 ? "Going to organize inventory space" : "Will not organize inventory space",
             `Reserved items: ${reservedItems.join(",")}`,
             `Unused items: ${unusedItems.join(",")}`,
-            `Context soft reserved items: ${Array.from(context.state.softReservedItems).map(item => item.id).join(",")}`,
-            `Context hard reserved items: ${Array.from(context.state.hardReservedItems).map(item => item.id).join(",")}`,
-            `Interrupt context soft reserved items: ${Array.from(interruptContext?.state.softReservedItems ?? []).map(item => item.id).join(",")}`,
-            `Interrupt context hard reserved items: ${Array.from(interruptContext?.state.hardReservedItems ?? []).map(item => item.id).join(",")}`,
+            `Context reserved items: ${Array.from(context.state.reservedItems ?? []).map(reserved => `${reserved[0].id}=${reserved[1]}`).join(",")}`,
+            `Interrupt context hard reserved items: ${Array.from(interruptContext?.state.reservedItems ?? []).map(reserved => `${reserved[0].id}=${reserved[1]}`).join(",")}`,
             `Objectives: ${Plan.getPipelineString(this.context, objectives)}`);
 
         return objectives;

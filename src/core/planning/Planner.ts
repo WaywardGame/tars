@@ -444,7 +444,9 @@ export class Planner implements IPlanner {
 		let includedContextHashCode = false;
 
 		// check if the context could effect the execution of the objective
-		const canIncludeContextHashCode = objective.canIncludeContextHashCode(context, objectiveHashCode);
+		// note: hash code filtering / inclusion should attempt to be based on a hash code that does not include the position
+		// this ensures things like GatherFromChest will only be marked as impossible (broadly) when theres literally no chests in the game that includes the target item type
+		const canIncludeContextHashCode = objective.canIncludeContextHashCode(context, impossibleObjectiveHashCode ?? objectiveHashCode);
 		if (canIncludeContextHashCode !== false) {
 			contextHashCode = canIncludeContextHashCode !== true ? context.getFilteredHashCode(canIncludeContextHashCode) : context.getHashCode();
 
@@ -455,10 +457,13 @@ export class Planner implements IPlanner {
 					return cachedDifficulty;
 				}
 
-				if (objective.shouldIncludeContextHashCode(context, objectiveHashCode)) {
+				if (objective.shouldIncludeContextHashCode(context, impossibleObjectiveHashCode ?? objectiveHashCode)) {
 					// it can effect the execution. include the hash code when checking or adding it to the cache
 					includedContextHashCode = true;
 					cacheHashCode += `|${contextHashCode}`;
+
+				} else if (this.debug) {
+					this.writeCalculationLog(`Not including context hash code for "${impossibleObjectiveHashCode ?? objectiveHashCode}" (${Array.from(context.state.reservedItemTypesPerObjectiveHashCode ?? []).map(itemType => `${itemType[0]}:${Array.from(itemType[1]).join(";")}`).join(",")})`);
 				}
 			}
 
@@ -523,7 +528,7 @@ export class Planner implements IPlanner {
 
 		const changes = context.watchForChanges();
 
-		let executionResult = await objective.execute(context, objectiveHashCode);
+		let executionResult = await objective.execute(context, impossibleObjectiveHashCode ?? objectiveHashCode);
 
 		if (this.debug) {
 			objective.setLogger(undefined);

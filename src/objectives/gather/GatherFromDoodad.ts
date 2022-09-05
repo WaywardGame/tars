@@ -20,7 +20,7 @@ export default class GatherFromDoodad extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return "Gathering items from doodads";
+		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a doodad`;
 	}
 
 	public override canGroupTogether(): boolean {

@@ -307,27 +307,18 @@ export class ItemUtilities {
 	// allow processing with inventory items assuming they wont be consumed
 	public processRecipe(context: Context, recipe: IRecipe, useIntermediateChest: boolean, options?: Partial<IGetItemOptions>): ItemRecipeRequirementChecker {
 		const checker = new ItemRecipeRequirementChecker(context.human, recipe, true, false, (item, isConsumed, forItemTypeOrGroup) => {
-			if (isConsumed) {
-				if (options?.onlyAllowReservedItems) {
-					if (!context.isSoftReservedItem(item) && !context.isHardReservedItem(item)) {
-						return false;
-					}
+			if (options?.onlyAllowReservedItems && !context.isReservedItem(item)) {
+				return false;
+			}
 
-				} else if (context.isHardReservedItem(item)) {
+			if (isConsumed) {
+				if (context.isHardReservedItem(item)) {
 					return false;
 				}
 
 				if (!options?.allowInventoryItems && this.isInventoryItem(context, item, options)) {
 					return false;
 				}
-			}
-
-			// if (forItemTypeOrGroup === ItemTypeGroup.Sharpened) {
-			// 	// only allow the knife
-			// 	return item === context.inventory.knife;
-			// }
-			if (options?.onlyAllowReservedItems) {
-				return context.isSoftReservedItem(item) || context.isHardReservedItem(item);
 			}
 
 			return true;

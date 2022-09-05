@@ -1,3 +1,4 @@
+import { MovingClientSide } from "game/entity/IHuman";
 import { WeightStatus } from "game/entity/player/IPlayer";
 
 import type Context from "./context/Context";
@@ -43,20 +44,20 @@ export class Executor {
 
 	private interrupted: boolean;
 	private weightChanged: boolean;
-	private lastPlan: IPlan | undefined;
+	private latestExecutingPlan: IPlan | undefined;
 
 	constructor(private readonly planner: IPlanner) {
 		this.reset();
 	}
 
 	public getPlan(): IPlan | undefined {
-		return this.lastPlan;
+		return this.latestExecutingPlan;
 	}
 
 	public reset() {
 		this.interrupted = false;
 		this.weightChanged = false;
-		this.lastPlan = undefined;
+		this.latestExecutingPlan = undefined;
 
 		this.planner.reset();
 	}
@@ -79,12 +80,12 @@ export class Executor {
 	}
 
 	public isReady(context: Context, checkForInterrupts: boolean) {
-		return !context.human.isResting()
-			&& !context.human.isMovingClientside
-			&& !context.human.hasDelay()
-			&& !context.human.isGhost()
-			&& !game.isPaused
-			&& (!checkForInterrupts || !this.interrupted);
+		return !context.human.isResting() &&
+			context.human.movingClientside !== MovingClientSide.Moving &&
+			!context.human.hasDelay() &&
+			!context.human.isGhost() &&
+			!game.isPaused &&
+			(!checkForInterrupts || !this.interrupted);
 	}
 
 	/**
@@ -156,13 +157,20 @@ export class Executor {
 	private async executeObjectiveChain(context: Context, objectives: IObjective[], checkForInterrupts: boolean): Promise<ExecuteObjectivesResult> {
 		for (let i = 0; i < objectives.length; i++) {
 			const objective = objectives[i];
-			const plan = this.lastPlan = await this.planner.createPlan(context, objective);
+			const plan = await this.planner.createPlan(context, objective);
 			if (!plan) {
 				if (!objective.ignoreInvalidPlans) {
+					this.latestExecutingPlan = plan;
+
 					context.log.info(`No valid plan for ${objective.getHashCode(context)}`);
 				}
 
 				break;
+			}
+
+			if (plan.objectives.length > 1) {
+				// the plan has things to excecute
+				this.latestExecutingPlan = plan;
 			}
 
 			const result = await plan.execute(
@@ -213,7 +221,7 @@ export class Executor {
 			}
 
 			// the plan finished
-			this.lastPlan = undefined;
+			this.latestExecutingPlan = undefined;
 		}
 
 		return {

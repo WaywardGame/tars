@@ -24,7 +24,7 @@ export default class ReserveItems extends Objective {
 	}
 
 	public getIdentifier(): string {
-		return `ReserveItems:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.shouldKeepInInventory() ? "KeepInInventory:" : ""}${this.objectiveHashCode ? this.objectiveHashCode : ""}${this.items.join(",")}`;
+		return `ReserveItems:${ReserveType[this.reserveType ?? ReserveType.Hard]}:${this.shouldKeepInInventory() ? "KeepInInventory:" : ""}${this.objectiveHashCode ?? ""}${this.items.join(",")}`;
 	}
 
 	public getStatus(): string | undefined {

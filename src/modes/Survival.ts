@@ -418,7 +418,7 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
 		}
 
-		if (context.options.survivalExploreIslands && !multiplayer.isConnected()) {
+		if (context.options.survivalExploreIslands && (!multiplayer.isConnected() || multiplayer.getOptions().allowTraveling)) {
 			// move to a new island
 			const { safeToDrinkWaterContainers } = context.utilities.item.getWaterContainers(context);
 			const waterItemsNeeded = Math.max(4 - safeToDrinkWaterContainers.length, 0);

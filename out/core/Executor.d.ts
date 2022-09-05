@@ -27,7 +27,7 @@ export declare class Executor {
     private readonly planner;
     private interrupted;
     private weightChanged;
-    private lastPlan;
+    private latestExecutingPlan;
     constructor(planner: IPlanner);
     getPlan(): IPlan | undefined;
     reset(): void;

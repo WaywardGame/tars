@@ -27,6 +27,7 @@ import { DoodadType } from "game/doodad/IDoodad";
 import AcquireWater from "../acquire/item/specific/AcquireWater";
 import AddDifficulty from "../core/AddDifficulty";
 import Restart from "../core/Restart";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export interface IRecoverThirstOptions {
 	onlyUseAvailableItems: boolean;
@@ -242,11 +243,10 @@ export default class RecoverThirst extends Objective {
 			}
 
 			if (context.base.waterStill.length === 0) {
-				const waterStillObjectives: IObjective[] = [];
-
-				if (context.inventory.waterStill !== undefined) {
-					waterStillObjectives.push(new BuildItem(context.inventory.waterStill));
-				}
+				const waterStillObjectives: IObjective[] = [
+					new AcquireInventoryItem("waterStill"),
+					new BuildItem(),
+				];
 
 				if (context.inventory.waterContainer === undefined) {
 					waterStillObjectives.push(new AcquireWaterContainer().keepInInventory());

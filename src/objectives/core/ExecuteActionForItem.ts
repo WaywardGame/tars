@@ -2,7 +2,7 @@ import Stream from "@wayward/goodstream/Stream";
 import type { AnyActionDescription } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import type { TerrainType } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
@@ -38,6 +38,8 @@ export interface IExecuteActioGenericAction<T extends AnyActionDescription> {
 }
 
 export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
+	expectedTerrainType?: TerrainType;
+
 	onlyAllowHarvesting: boolean;
 	onlyGatherWithHands: boolean;
 
@@ -51,8 +53,6 @@ export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
 export default class ExecuteActionForItem<T extends AnyActionDescription> extends Objective {
 
 	protected override readonly includeUniqueIdentifierInHashCode: boolean = true;
-
-	private terrainTileType: TerrainType | undefined;
 
 	private readonly itemTypes: Set<ItemType>;
 
@@ -100,14 +100,6 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			return ObjectiveResult.Impossible;
 		}
 
-		if (this.terrainTileType === undefined) {
-			this.terrainTileType = tileType;
-
-		} else if (this.terrainTileType !== tileType) {
-			// tile type changed, give up
-			return ObjectiveResult.Restart;
-		}
-
 		let result: ObjectiveResult;
 
 		switch (this.type) {
@@ -141,6 +133,12 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			}
 
 			case ExecuteActionType.Terrain:
+				if (this.options?.expectedTerrainType !== undefined && this.options.expectedTerrainType !== tileType) {
+					// tile type changed, give up
+					this.log.debug(`Terrain type changed from ${TerrainType[this.options.expectedTerrainType]} to ${TerrainType[tileType]}`);
+					return ObjectiveResult.Restart;
+				}
+
 				const action = terrainDescription.gather ? Mine : Dig;
 
 				if (action === Dig && !context.utilities.tile.canDig(context, facingPoint)) {

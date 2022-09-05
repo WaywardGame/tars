@@ -2,7 +2,7 @@ import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import Log from "utilities/Log";
 import type { IVector3 } from "utilities/math/IVector";
-import type { IBase, IInventoryItems, IUtilities } from "../ITars";
+import { IBase, IInventoryItems, IUtilities } from "../ITars";
 import { ITarsOptions } from "../ITarsOptions";
 import { HashCodeFiltering } from "../objective/IObjective";
 import Tars from "../Tars";
@@ -23,7 +23,7 @@ export default class Context implements IContext {
     get log(): Log;
     get options(): Readonly<ITarsOptions>;
     toString(): string;
-    clone(calculatingDifficulty?: boolean, increaseDepth?: boolean): Context;
+    clone(calculatingDifficulty?: boolean, increaseDepth?: boolean, cloneInitialState?: boolean): Context;
     merge(state: ContextState): void;
     watchForChanges(): ContextState;
     unwatch(): void;

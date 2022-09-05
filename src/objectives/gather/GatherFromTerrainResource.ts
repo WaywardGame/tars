@@ -144,7 +144,7 @@ export default class GatherFromTerrainResource extends Objective {
 		objectivePipelines.push([
 			new AddDifficulty(difficulty),
 			new MoveToTarget(point, true),
-			new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType))
+			new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType), { expectedTerrainType: terrainSearch.type })
 				.passAcquireData(this)
 				.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, terrainSearch.itemType).getString()} from ${Translation.nameOf(Dictionary.Terrain, terrainSearch.type).getString()}`),
 		]);

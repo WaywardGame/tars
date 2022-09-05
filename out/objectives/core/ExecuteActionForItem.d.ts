@@ -1,5 +1,6 @@
 import type { AnyActionDescription } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
+import { TerrainType } from "game/tile/ITerrain";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -18,6 +19,7 @@ export interface IExecuteActioGenericAction<T extends AnyActionDescription> {
     expectedMessages?: Set<Message>;
 }
 export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
+    expectedTerrainType?: TerrainType;
     onlyAllowHarvesting: boolean;
     onlyGatherWithHands: boolean;
     moveAllMatchingItems: boolean;
@@ -28,7 +30,6 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
     private readonly type;
     private readonly options?;
     protected readonly includeUniqueIdentifierInHashCode: boolean;
-    private terrainTileType;
     private readonly itemTypes;
     constructor(type: ExecuteActionType, itemTypes: Set<ItemType> | ItemType[], options?: Partial<IExecuteActionForItemOptions<T>> | undefined);
     getIdentifier(): string;

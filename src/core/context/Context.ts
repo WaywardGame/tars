@@ -4,7 +4,7 @@ import Log from "utilities/Log";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 
-import type { IBase, IInventoryItems, IUtilities } from "../ITars";
+import { IBase, IInventoryItems, IUtilities, ReserveType } from "../ITars";
 import { ITarsOptions } from "../ITarsOptions";
 import { HashCodeFiltering } from "../objective/IObjective";
 import Tars from "../Tars";
@@ -46,8 +46,15 @@ export default class Context implements IContext {
 		return `Context: ${this.getHashCode()}. Initial state: ${this.initialState ? this.initialState.getHashCode() : ""}. Data: ${this.state.data ? Array.from(this.state.data.keys()).join(",") : undefined}`;
 	}
 
-	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false): Context {
-		return new Context(this.tars, this.base, this.inventory, this.utilities, this.state.clone(increaseDepth), calculatingDifficulty, this.initialState?.clone(increaseDepth));
+	public clone(calculatingDifficulty: boolean = false, increaseDepth: boolean = false, cloneInitialState?: boolean): Context {
+		return new Context(
+			this.tars,
+			this.base,
+			this.inventory,
+			this.utilities,
+			this.state.clone(increaseDepth),
+			calculatingDifficulty,
+			cloneInitialState ? this.initialState?.clone(increaseDepth) : this.initialState);
 	}
 
 	public merge(state: ContextState): void {
@@ -76,7 +83,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective
 	 */
 	public isReservedItem(item: Item) {
-		if (this.state.softReservedItems.has(item) || this.state.hardReservedItems.has(item)) {
+		if (this.state.reservedItems?.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -88,7 +95,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective and is not going to be consumed
 	 */
 	public isSoftReservedItem(item: Item) {
-		if (this.state.softReservedItems.has(item)) {
+		if (this.state.reservedItems?.get(item) === ReserveType.Soft) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -100,7 +107,7 @@ export default class Context implements IContext {
 	 * Checks if the item is reserved by another objective and is going to be consumed
 	 */
 	public isHardReservedItem(item: Item) {
-		if (this.state.hardReservedItems.has(item)) {
+		if (this.state.reservedItems?.get(item) === ReserveType.Hard) {
 			this.markShouldIncludeHashCode();
 			return true;
 		}
@@ -112,8 +119,9 @@ export default class Context implements IContext {
 	 * Checks if an item with the given item type is reserved by another objective
 	 * @param objectiveHashCode When provided, check if the item type is reserved due to an objective matching the provided hash code
 	 */
-	public isReservedItemType(itemType: ItemType, objectiveHashCode?: string) {
-		return this.state.reservedItemTypesPerObjectiveHashCode.has(itemType) && (!objectiveHashCode || this.state.reservedItemTypesPerObjectiveHashCode.get(itemType)?.has(objectiveHashCode) === true);
+	public isReservedItemType(itemType: ItemType, objectiveHashCode?: string): boolean {
+		const objectiveHashCodes = this.state.reservedItemTypesPerObjectiveHashCode?.get(itemType);
+		return objectiveHashCodes !== undefined && (!objectiveHashCode || objectiveHashCodes?.has(objectiveHashCode));
 	}
 
 	public getData<T = any>(type: string): T | undefined {
@@ -133,74 +141,133 @@ export default class Context implements IContext {
 	}
 
 	public addSoftReservedItems(...items: Item[]) {
+		this.state.reservedItems ??= new Map();
+
 		for (const item of items) {
-			this.state.softReservedItems.add(item);
+			if (this.state.reservedItems.get(item) === ReserveType.Hard) {
+				// console.warn("already hard reserved", item, this.state.reservedItems.get(item));
+
+				if (this.changes && (!this.changes.reservedItems || this.changes.reservedItems.get(item) !== ReserveType.Hard)) {
+					this.changes.reservedItems ??= new Map();
+					this.changes.reservedItems.set(item, ReserveType.Soft);
+					this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
+				}
+
+				continue;
+			}
+
+			this.state.reservedItems.set(item, ReserveType.Soft);
 			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
 
 			if (this.changes) {
-				this.changes.softReservedItems.add(item);
+				this.changes.reservedItems ??= new Map();
+				this.changes.reservedItems.set(item, ReserveType.Soft);
 				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
 			}
 		}
 	}
 
 	public addSoftReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
+		this.state.reservedItems ??= new Map();
+
 		for (const item of items) {
-			this.state.softReservedItems.add(item);
-			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
+			if (this.state.reservedItems.get(item) === ReserveType.Hard) {
+				// console.warn("already hard reserved", item, this.state.reservedItems.get(item));
+
+				if (this.changes && (!this.changes.reservedItems || this.changes.reservedItems.get(item) !== ReserveType.Hard)) {
+					this.changes.reservedItems ??= new Map();
+					this.changes.reservedItems.set(item, ReserveType.Soft);
+					this.changes.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
+				}
+
+				continue;
+			}
+
+			this.state.reservedItems.set(item, ReserveType.Soft);
 			this.state.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 
 			if (this.changes) {
-				this.changes.softReservedItems.add(item);
-				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
+				this.changes.reservedItems ??= new Map();
+				this.changes.reservedItems.set(item, ReserveType.Soft);
 				this.changes.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 			}
 		}
 	}
 
 	public addHardReservedItems(...items: Item[]) {
+		this.state.reservedItems ??= new Map();
+		if (this.changes) {
+			this.changes.reservedItems ??= new Map();
+		}
+
 		for (const item of items) {
-			this.state.hardReservedItems.add(item);
+			// if (this.calculatingDifficulty && this.state.reservedItems.has(item) && this.state.reservedItems.get(item) !== ReserveType.Hard) {
+			// 	console.warn("alrady resered3", item, this.state.reservedItems.get(item), ReserveType.Hard);
+			// 	debugger;
+			// }
+			this.state.reservedItems!.set(item, ReserveType.Hard);
 			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
 
 			if (this.changes) {
-				this.changes.hardReservedItems.add(item);
+				this.changes.reservedItems!.set(item, ReserveType.Hard);
 				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
 			}
 		}
 	}
 
 	public addHardReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
+		this.state.reservedItems ??= new Map();
+		if (this.changes) {
+			this.changes.reservedItems ??= new Map();
+		}
+
 		for (const item of items) {
-			this.state.hardReservedItems.add(item);
-			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
+			// if (this.calculatingDifficulty && this.state.reservedItems.has(item) && this.state.reservedItems.get(item) !== ReserveType.Hard) {
+			// 	console.warn("alrady resered4", item, this.state.reservedItems.get(item), ReserveType.Hard);
+			// 	debugger;
+			// }
+			this.state.reservedItems.set(item, ReserveType.Hard);
 			this.state.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 
 			if (this.changes) {
-				this.changes.hardReservedItems.add(item);
-				this.changes.addReservedItemTypeForObjectiveHashCode(item.type);
+				this.changes.reservedItems!.set(item, ReserveType.Hard);
 				this.changes.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 			}
 		}
 	}
 
 	public addProvidedItems(itemTypes: ItemType[]) {
+		this.state.providedItems ??= new Map();
+		if (this.changes) {
+			this.changes.providedItems ??= new Map();
+		}
+
 		for (const itemType of itemTypes) {
 			this.state.providedItems.set(itemType, (this.state.providedItems.get(itemType) ?? 0) + 1);
 
 			if (this.changes) {
-				this.changes.providedItems.set(itemType, (this.changes.providedItems.get(itemType) ?? 0) + 1);
+				this.changes.providedItems!.set(itemType, (this.changes.providedItems!.get(itemType) ?? 0) + 1);
 			}
 		}
 	}
 
 	public tryUseProvidedItems(itemType: ItemType): boolean {
-		const available = this.state.providedItems.get(itemType) ?? 0;
+		const available = this.state.providedItems?.get(itemType) ?? 0;
 		if (available > 0) {
-			this.state.providedItems.set(itemType, available - 1);
+			const newValue = available - 1;
+			this.state.providedItems!.set(itemType, newValue);
+			if (newValue === 0 && this.state.providedItems!.delete(itemType) && this.state.providedItems!.size === 0) {
+				this.state.providedItems = undefined;
+			}
 
 			if (this.changes) {
-				this.changes.providedItems.set(itemType, (this.changes.providedItems.get(itemType) ?? 0) - 1);
+				this.changes.providedItems ??= new Map();
+
+				const newValue = (this.changes.providedItems.get(itemType) ?? 0) - 1;
+				this.changes.providedItems.set(itemType, newValue);
+				if (newValue === 0 && this.changes.providedItems.delete(itemType) && this.changes.providedItems.size === 0) {
+					this.changes.providedItems = undefined;
+				}
 			}
 
 			return true;
