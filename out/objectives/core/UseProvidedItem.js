@@ -1,4 +1,4 @@
-define(["require", "exports", "game/item/IItem", "language/Dictionary", "language/Translation", "../../core/objective/IObjective", "../../core/objective/Objective", "../../utilities/Item"], function (require, exports, IItem_1, Dictionary_1, Translation_1, IObjective_1, Objective_1, Item_1) {
+define(["require", "exports", "game/item/IItem", "language/Dictionary", "language/Translation", "../../core/objective/IObjective", "../../core/objective/Objective"], function (require, exports, IItem_1, Dictionary_1, Translation_1, IObjective_1, Objective_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class UseProvidedItem extends Objective_1.default {
@@ -7,14 +7,14 @@ define(["require", "exports", "game/item/IItem", "language/Dictionary", "languag
             this.itemType = itemType;
             this.includePositionInHashCode = false;
         }
-        getIdentifier() {
-            return `UseProvidedItem:${IItem_1.ItemType[this.itemType]}`;
+        getIdentifier(context) {
+            return `UseProvidedItem:${IItem_1.ItemType[this.itemType]}:${context?.state.providedItems?.get(this.itemType)}`;
         }
         getStatus() {
             return `Using ${Translation_1.default.nameOf(Dictionary_1.default.Item, this.itemType).getString()}`;
         }
-        canIncludeContextHashCode() {
-            return Item_1.ItemUtilities.getRelatedItemTypes(this.itemType, Item_1.RelatedItemType.All);
+        canIncludeContextHashCode(context, objectiveHashCode) {
+            return true;
         }
         shouldIncludeContextHashCode(context) {
             return context.isReservedItemType(this.itemType);
@@ -25,4 +25,4 @@ define(["require", "exports", "game/item/IItem", "language/Dictionary", "languag
     }
     exports.default = UseProvidedItem;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVXNlUHJvdmlkZWRJdGVtLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL29iamVjdGl2ZXMvY29yZS9Vc2VQcm92aWRlZEl0ZW0udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBWUEsTUFBcUIsZUFBZ0IsU0FBUSxtQkFBUztRQUlsRCxZQUE2QixRQUFrQjtZQUMzQyxLQUFLLEVBQUUsQ0FBQztZQURpQixhQUFRLEdBQVIsUUFBUSxDQUFVO1lBRnRCLDhCQUF5QixHQUFZLEtBQUssQ0FBQztRQUlwRSxDQUFDO1FBRU0sYUFBYTtZQUNoQixPQUFPLG1CQUFtQixnQkFBUSxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsRUFBRSxDQUFDO1FBQ3hELENBQUM7UUFFTSxTQUFTO1lBQ1osT0FBTyxTQUFTLHFCQUFXLENBQUMsTUFBTSxDQUFDLG9CQUFVLENBQUMsSUFBSSxFQUFFLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQyxTQUFTLEVBQUUsRUFBRSxDQUFDO1FBQ3JGLENBQUM7UUFFZSx5QkFBeUI7WUFDckMsT0FBTyxvQkFBYSxDQUFDLG1CQUFtQixDQUFDLElBQUksQ0FBQyxRQUFRLEVBQUUsc0JBQWUsQ0FBQyxHQUFHLENBQUMsQ0FBQztRQUNqRixDQUFDO1FBRWUsNEJBQTRCLENBQUMsT0FBZ0I7WUFDekQsT0FBTyxPQUFPLENBQUMsa0JBQWtCLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDO1FBQ3JELENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCO1lBQ2pDLE9BQU8sT0FBTyxDQUFDLG1CQUFtQixDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQyxDQUFDLENBQUMsNEJBQWUsQ0FBQyxRQUFRLENBQUMsQ0FBQyxDQUFDLDRCQUFlLENBQUMsVUFBVSxDQUFDO1FBQzlHLENBQUM7S0FFSjtJQTVCRCxrQ0E0QkMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVXNlUHJvdmlkZWRJdGVtLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL29iamVjdGl2ZXMvY29yZS9Vc2VQcm92aWRlZEl0ZW0udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBV0EsTUFBcUIsZUFBZ0IsU0FBUSxtQkFBUztRQUlsRCxZQUE2QixRQUFrQjtZQUMzQyxLQUFLLEVBQUUsQ0FBQztZQURpQixhQUFRLEdBQVIsUUFBUSxDQUFVO1lBRnRCLDhCQUF5QixHQUFZLEtBQUssQ0FBQztRQUlwRSxDQUFDO1FBRU0sYUFBYSxDQUFDLE9BQTRCO1lBQzdDLE9BQU8sbUJBQW1CLGdCQUFRLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxJQUFJLE9BQU8sRUFBRSxLQUFLLENBQUMsYUFBYSxFQUFFLEdBQUcsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLEVBQUUsQ0FBQztRQUM1RyxDQUFDO1FBRU0sU0FBUztZQUNaLE9BQU8sU0FBUyxxQkFBVyxDQUFDLE1BQU0sQ0FBQyxvQkFBVSxDQUFDLElBQUksRUFBRSxJQUFJLENBQUMsUUFBUSxDQUFDLENBQUMsU0FBUyxFQUFFLEVBQUUsQ0FBQztRQUNyRixDQUFDO1FBRWUseUJBQXlCLENBQUMsT0FBZ0IsRUFBRSxpQkFBeUI7WUFDakYsT0FBTyxJQUFJLENBQUM7UUFLaEIsQ0FBQztRQUVlLDRCQUE0QixDQUFDLE9BQWdCO1lBQ3pELE9BQU8sT0FBTyxDQUFDLGtCQUFrQixDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztRQUNyRCxDQUFDO1FBRU0sS0FBSyxDQUFDLE9BQU8sQ0FBQyxPQUFnQjtZQUNqQyxPQUFPLE9BQU8sQ0FBQyxtQkFBbUIsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQyxDQUFDLDRCQUFlLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQyw0QkFBZSxDQUFDLFVBQVUsQ0FBQztRQUM5RyxDQUFDO0tBRUo7SUFoQ0Qsa0NBZ0NDIn0=

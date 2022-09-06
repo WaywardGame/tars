@@ -5,7 +5,6 @@ import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { ItemUtilities, RelatedItemType } from "../../utilities/Item";
 
 /**
  * Trys to use a provided item
@@ -18,16 +17,20 @@ export default class UseProvidedItem extends Objective {
         super();
     }
 
-    public getIdentifier(): string {
-        return `UseProvidedItem:${ItemType[this.itemType]}`;
+    public getIdentifier(context: Context | undefined): string {
+        return `UseProvidedItem:${ItemType[this.itemType]}:${context?.state.providedItems?.get(this.itemType)}`;
     }
 
     public getStatus(): string | undefined {
         return `Using ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
     }
 
-    public override canIncludeContextHashCode() {
-        return ItemUtilities.getRelatedItemTypes(this.itemType, RelatedItemType.All);
+    public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
+        return true;
+        // return {
+        //     objectiveHashCode,
+        //     itemTypes: new Set([this.itemType]),
+        // };
     }
 
     public override shouldIncludeContextHashCode(context: Context): boolean {

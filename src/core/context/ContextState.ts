@@ -72,8 +72,18 @@ export default class ContextState {
 		if (state.providedItems) {
 			this.providedItems ??= new Map();
 
-			for (const item of state.providedItems) {
-				this.providedItems.set(item[0], (this.providedItems.get(item[0]) ?? 0) + item[1]);
+			for (const [itemType, amount] of state.providedItems) {
+				const newValue = (this.providedItems.get(itemType) ?? 0) + amount;
+				if (newValue !== 0) {
+					this.providedItems.set(itemType, newValue);
+
+				} else {
+					this.providedItems.delete(itemType);
+				}
+			}
+
+			if (this.providedItems.size === 0) {
+				this.providedItems = undefined;
 			}
 		}
 

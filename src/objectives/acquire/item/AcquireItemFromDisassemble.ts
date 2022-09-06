@@ -5,6 +5,7 @@ import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
 import Disassemble from "game/entity/action/actions/Disassemble";
+import { ActionArguments } from "game/entity/action/IAction";
 
 import type Context from "../../../core/context/Context";
 import type { IDisassemblySearch } from "../../../core/ITars";
@@ -20,7 +21,7 @@ import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
-import { ActionArguments } from "game/entity/action/IAction";
+import UseProvidedItem from "../../core/UseProvidedItem";
 
 /**
  * Disassembles one of the items.
@@ -148,6 +149,8 @@ export default class AcquireItemFromDisassemble extends Objective {
 						},
 					},
 				}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));
+
+			objectives.push(new UseProvidedItem(this.itemType));
 
 			objectivePipelines.push(objectives);
 		}

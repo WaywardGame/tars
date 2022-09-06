@@ -345,6 +345,10 @@ export class SurvivalMode implements ITarsMode {
 			objectives.push(new ReinforceItem(context.inventory.equipChest, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
+		if (context.inventory.equipBack) {
+			objectives.push(new ReinforceItem(context.inventory.equipBack, { targetDurabilityMultipler: 1 }));
+		}
+
 		if (context.inventory.axe) {
 			objectives.push(new ReinforceItem(context.inventory.axe, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}

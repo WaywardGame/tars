@@ -145,8 +145,6 @@ export default class Context implements IContext {
 
 		for (const item of items) {
 			if (this.state.reservedItems.get(item) === ReserveType.Hard) {
-				// console.warn("already hard reserved", item, this.state.reservedItems.get(item));
-
 				if (this.changes && (!this.changes.reservedItems || this.changes.reservedItems.get(item) !== ReserveType.Hard)) {
 					this.changes.reservedItems ??= new Map();
 					this.changes.reservedItems.set(item, ReserveType.Soft);
@@ -201,10 +199,6 @@ export default class Context implements IContext {
 		}
 
 		for (const item of items) {
-			// if (this.calculatingDifficulty && this.state.reservedItems.has(item) && this.state.reservedItems.get(item) !== ReserveType.Hard) {
-			// 	console.warn("alrady resered3", item, this.state.reservedItems.get(item), ReserveType.Hard);
-			// 	debugger;
-			// }
 			this.state.reservedItems!.set(item, ReserveType.Hard);
 			this.state.addReservedItemTypeForObjectiveHashCode(item.type);
 
@@ -222,10 +216,6 @@ export default class Context implements IContext {
 		}
 
 		for (const item of items) {
-			// if (this.calculatingDifficulty && this.state.reservedItems.has(item) && this.state.reservedItems.get(item) !== ReserveType.Hard) {
-			// 	console.warn("alrady resered4", item, this.state.reservedItems.get(item), ReserveType.Hard);
-			// 	debugger;
-			// }
 			this.state.reservedItems.set(item, ReserveType.Hard);
 			this.state.addReservedItemForObjectiveHashCode(item, objectiveHashCode);
 
@@ -265,9 +255,8 @@ export default class Context implements IContext {
 
 				const newValue = (this.changes.providedItems.get(itemType) ?? 0) - 1;
 				this.changes.providedItems.set(itemType, newValue);
-				if (newValue === 0 && this.changes.providedItems.delete(itemType) && this.changes.providedItems.size === 0) {
-					this.changes.providedItems = undefined;
-				}
+
+				// note: we shouldn't set providedItems to undefined here, because we want to merge the change
 			}
 
 			return true;

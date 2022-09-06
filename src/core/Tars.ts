@@ -1652,32 +1652,31 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         const targets = this.utilities.object.findCarvableCorpses(context, "gatherFromCorpsesInterrupt", corpse => Vector2.distance(context.human, corpse) < 16);
-        if (targets) {
-            const objectives: IObjective[] = [];
 
-            for (const target of targets) {
-                const tile = context.island.getTileFromPoint(target);
-                const corpses = tile.corpses;
-                if (corpses && corpses.length > 0) {
-                    for (const corpse of corpses) {
-                        const resources = corpse.getResources(true);
-                        if (!resources || resources.length === 0) {
-                            continue;
-                        }
+        const objectives: IObjective[] = [];
 
-                        const step = corpse.step || 0;
-                        const count = resources.length - step;
+        for (const target of targets) {
+            const tile = context.island.getTileFromPoint(target);
+            const corpses = tile.corpses;
+            if (corpses && corpses.length > 0) {
+                for (const corpse of corpses) {
+                    const resources = corpse.getResources(true);
+                    if (!resources || resources.length === 0) {
+                        continue;
+                    }
 
-                        // try to butcher it the maximum amount of times. the actual amount of times could be different due to randomness
-                        for (let i = 0; i < count; i++) {
-                            objectives.push(new ButcherCorpse(corpse));
-                        }
+                    const step = corpse.step || 0;
+                    const count = resources.length - step;
+
+                    // try to butcher it the maximum amount of times. the actual amount of times could be different due to randomness
+                    for (let i = 0; i < count; i++) {
+                        objectives.push(new ButcherCorpse(corpse));
                     }
                 }
             }
-
-            return objectives;
         }
+
+        return objectives;
     }
 
     private reduceWeightInterrupt(context: Context): IObjective | undefined {

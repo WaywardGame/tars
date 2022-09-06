@@ -6,9 +6,9 @@ export default class UseProvidedItem extends Objective {
     private readonly itemType;
     readonly includePositionInHashCode: boolean;
     constructor(itemType: ItemType);
-    getIdentifier(): string;
+    getIdentifier(context: Context | undefined): string;
     getStatus(): string | undefined;
-    canIncludeContextHashCode(): boolean | Set<ItemType>;
+    canIncludeContextHashCode(context: Context, objectiveHashCode: string): boolean;
     shouldIncludeContextHashCode(context: Context): boolean;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
 }
