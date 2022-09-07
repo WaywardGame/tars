@@ -517,7 +517,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                             this.utilities.navigation.onTileUpdate(
                                 otherTile,
                                 TileHelpers.getType(otherTile),
-                                tileX + x, tileY + y, tileZ,
+                                point.x, point.y, point.z,
                                 this.utilities.base.isBaseTile(this.getContext(), otherTile),
                                 undefined, tileUpdateType);
                         }
@@ -1041,6 +1041,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 furnace: [],
                 intermediateChest: [],
                 kiln: [],
+                sailboat: [],
                 solarStill: [],
                 waterStill: [],
                 well: [],
@@ -1403,8 +1404,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         let interrupts: Array<IObjective | IObjective[] | undefined> = [
             this.optionsInterrupt(),
             ...this.equipmentInterrupt(context),
-            this.nearbyCreatureInterrupt(context),
         ];
+
+        if (stayHealthy) {
+            // don't allow stamina recovery here since we might need to run away from creatures
+            interrupts.push(...this.getRecoverInterrupts(context, true, false));
+        }
+
+        interrupts.push(this.nearbyCreatureInterrupt(context));
 
         if (context.options.allowBackpacks && this.inventory.backpack?.length) {
             interrupts.push(...this.organizeBackpackInterrupts(context, this.inventory.backpack));
@@ -1414,7 +1421,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         interrupts.push(this.reduceWeightInterrupt(context));
 
         if (stayHealthy) {
-            interrupts.push(...this.getRecoverInterrupts(context, true));
+            interrupts.push(...this.getRecoverInterrupts(context, true, true));
         }
 
         interrupts = interrupts.concat([
@@ -1423,7 +1430,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         ]);
 
         if (stayHealthy) {
-            interrupts.push(...this.getRecoverInterrupts(context, false));
+            interrupts.push(...this.getRecoverInterrupts(context, false, true));
         }
 
         interrupts = interrupts.concat([
@@ -1441,7 +1448,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         return interrupts;
     }
 
-    private getRecoverInterrupts(context: Context, onlyUseAvailableItems: boolean) {
+    private getRecoverInterrupts(context: Context, onlyUseAvailableItems: boolean, allowWaiting: boolean) {
         // focus on healing if our health is below 85% while poisoned
         const poisonHealthPercentThreshold = 0.85;
 
@@ -1467,7 +1474,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             objectives.push(new RecoverHealth(onlyUseAvailableItems));
         }
 
-        if (exceededStaminaThreshold) {
+        if (allowWaiting && exceededStaminaThreshold) {
             objectives.push(new RecoverStamina());
         }
 
@@ -1483,11 +1490,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         //     objectives.push(new RecoverStamina());
         // }
 
-        objectives.push(new RecoverThirst({
-            onlyUseAvailableItems,
-            exceededThreshold: exceededThirstThreshold,
-            onlyEmergencies: true,
-        }));
+        if (allowWaiting) {
+            objectives.push(new RecoverThirst({
+                onlyUseAvailableItems,
+                exceededThreshold: exceededThirstThreshold,
+                onlyEmergencies: true,
+            }));
+        }
 
         return objectives;
     }

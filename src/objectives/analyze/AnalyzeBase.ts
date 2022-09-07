@@ -77,7 +77,7 @@ export default class AnalyzeBase extends Objective {
 				for (const target of targets) {
 					if (!info.canAdd || info.canAdd(context, target)) {
 						const distance = Vector2.squaredDistance(context.getPosition(), target);
-						if (distance < baseDoodadDistanceSq && !context.base[key].includes(target)) {
+						if (distance < (info.nearBaseDistanceSq ?? baseDoodadDistanceSq) && !context.base[key].includes(target)) {
 							changed = true;
 
 							context.base[key].push(target);

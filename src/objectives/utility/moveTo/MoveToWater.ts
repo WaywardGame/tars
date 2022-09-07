@@ -11,12 +11,12 @@ import MoveToTarget from "../../core/MoveToTarget";
 
 export default class MoveToWater extends Objective {
 
-	constructor(private readonly ocean = true) {
+	constructor(private readonly ocean = true, private readonly allowBoat = true) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `MoveToWater:${this.ocean}`;
+		return `MoveToWater:${this.ocean}:${this.allowBoat}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -71,7 +71,7 @@ export default class MoveToWater extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		return new MoveToTarget(target, false, { allowBoat: true, disableStaminaCheck: true });
+		return new MoveToTarget(target, false, { allowBoat: this.allowBoat, disableStaminaCheck: true });
 	}
 
 }

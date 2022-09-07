@@ -3,7 +3,8 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import Objective from "../../../core/objective/Objective";
 export default class MoveToWater extends Objective {
     private readonly ocean;
-    constructor(ocean?: boolean);
+    private readonly allowBoat;
+    constructor(ocean?: boolean, allowBoat?: boolean);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;

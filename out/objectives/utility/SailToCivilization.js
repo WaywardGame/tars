@@ -36,7 +36,7 @@ define(["require", "exports", "game/entity/player/quest/quest/IQuest", "game/ite
                     }
                 }
             }
-            objectives.push(new AcquireInventoryItem_1.default("sailBoat"));
+            objectives.push(new AcquireInventoryItem_1.default("sailboat"));
             if (!game.isChallenge) {
                 objectives.push(new SetContextData_1.default(IContext_1.ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, false));
                 for (const itemType of requiredItems) {
@@ -46,7 +46,7 @@ define(["require", "exports", "game/entity/player/quest/quest/IQuest", "game/ite
                     }
                 }
             }
-            objectives.push(new MoveItemIntoInventory_1.default(context.inventory.sailBoat), new MoveToWater_1.default(true), new ExecuteAction_1.default(SailToCivilization_1.default, [context.inventory.sailBoat, true]).setStatus(this));
+            objectives.push(new MoveItemIntoInventory_1.default(context.inventory.sailboat), new MoveToWater_1.default(true), new ExecuteAction_1.default(SailToCivilization_1.default, [context.inventory.sailboat, true]).setStatus(this));
             return objectives;
         }
     }

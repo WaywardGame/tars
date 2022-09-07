@@ -70,6 +70,7 @@ export interface IBase {
     furnace: Doodad[];
     intermediateChest: Doodad[];
     kiln: Doodad[];
+    sailboat: Doodad[];
     solarStill: Doodad[];
     waterStill: Doodad[];
     well: Doodad[];
@@ -127,7 +128,7 @@ export interface IInventoryItems {
     knife?: Item;
     lockPick?: Item;
     pickAxe?: Item;
-    sailBoat?: Item;
+    sailboat?: Item;
     shovel?: Item;
     solarStill?: Item;
     tongs?: Item;

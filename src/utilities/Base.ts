@@ -45,13 +45,18 @@ export class BaseUtilities {
 	}
 
 	public isGoodBuildTile(context: Context, point: IVector3, tile: ITile, options?: Partial<IBuildTileOptions>): boolean {
+		const tileType = TileHelpers.getType(tile);
+		if (tileType === TerrainType.Swamp) {
+			// don't build on swamp tiles
+			return false;
+		}
+
 		if (!this.isOpenArea(context, point, tile, options?.openAreaRadius, options?.allowWater, options?.requireShallowWater)) {
 			return false;
 		}
 
 		if (!this.hasBase(context)) {
 			// this is the first base item. don't make it on beach sand or gravel
-			const tileType = TileHelpers.getType(tile);
 			if (tileType === TerrainType.BeachSand || tileType === TerrainType.Gravel) {
 				return false;
 			}
@@ -88,13 +93,12 @@ export class BaseUtilities {
 						continue;
 					}
 
-					const nearbyPoint: IVector3 = {
+					const nearbyPoint = context.island.ensureValidPoint({
 						x: point.x + x,
 						y: point.y + y,
 						z: point.z,
-					};
-
-					if (!context.island.ensureValidPoint(nearbyPoint)) {
+					});
+					if (!nearbyPoint) {
 						continue;
 					}
 
@@ -150,7 +154,7 @@ export class BaseUtilities {
 		const baseDoodads = this.getBaseDoodads(context);
 
 		for (const doodad of baseDoodads) {
-			if (doodad.z === point.z && Vector2.squaredDistance(doodad, point) <= distanceSq) {
+			if (doodad.z === point.z && (distanceSq === Infinity || Vector2.squaredDistance(doodad, point) <= distanceSq)) {
 				return true;
 			}
 		}
@@ -310,11 +314,14 @@ export class BaseUtilities {
 								continue;
 							}
 
-							const point: IVector3 = {
+							const point = context.island.ensureValidPoint({
 								x: doodad.x + x,
 								y: doodad.y + y,
 								z: doodad.z,
-							};
+							});
+							if (!point) {
+								continue;
+							}
 
 							const tile = context.island.getTileFromPoint(point);
 
@@ -335,33 +342,40 @@ export class BaseUtilities {
 		// let openTiles = 0;
 
 		let commonTerrainType: TerrainType;
-		let rockType: TerrainType;
+		let rockTypes: Set<TerrainType>;
 		let waterType: TerrainType;
 		let treeRequirementCount = 6;
 
 		switch (context.island.biomeType) {
 			case BiomeType.Coastal:
 				commonTerrainType = TerrainType.Grass;
-				rockType = TerrainType.Granite;
+				rockTypes = new Set([TerrainType.Granite]);
 				waterType = TerrainType.ShallowSeawater;
 				break;
 
 			case BiomeType.IceCap:
 				commonTerrainType = TerrainType.Snow;
-				rockType = TerrainType.GraniteWithSnow;
+				rockTypes = new Set([TerrainType.GraniteWithSnow]);
 				waterType = TerrainType.FreezingSeawater;
 				break;
 
 			case BiomeType.Arid:
 				commonTerrainType = TerrainType.DesertSand;
-				rockType = TerrainType.Sandstone;
+				rockTypes = new Set([TerrainType.Sandstone]);
+				waterType = TerrainType.ShallowSeawater;
+				treeRequirementCount = 3;
+				break;
+
+			case BiomeType.Wetlands:
+				commonTerrainType = TerrainType.Spikerush;
+				rockTypes = new Set([TerrainType.Granite, TerrainType.GraniteGround]);
 				waterType = TerrainType.ShallowSeawater;
 				treeRequirementCount = 3;
 				break;
 
 			default:
 				commonTerrainType = TerrainType.Dirt;
-				rockType = TerrainType.Granite;
+				rockTypes = new Set([TerrainType.Granite]);
 				waterType = TerrainType.ShallowSeawater;
 				break;
 		}
@@ -372,11 +386,14 @@ export class BaseUtilities {
 					continue;
 				}
 
-				const point: IVector3 = {
+				const point = context.island.ensureValidPoint({
 					x: origin.x + x,
 					y: origin.y + y,
 					z: origin.z,
-				};
+				});
+				if (!point) {
+					continue;
+				}
 
 				const tile = context.island.getTileFromPoint(point);
 				if (tile.doodad) {
@@ -398,8 +415,16 @@ export class BaseUtilities {
 		}
 
 		// build close to rocks
-		const rockTileLocations = await context.utilities.tile.getNearestTileLocation(context, rockType, origin);
-		if (rockTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearRocksDistance)) {
+		let foundRock = false;
+		for (const rockType of rockTypes) {
+			const rockTileLocations = await context.utilities.tile.getNearestTileLocation(context, rockType, origin);
+			if (rockTileLocations.some(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) <= nearRocksDistance)) {
+				foundRock = true;
+				break;
+			}
+		}
+
+		if (!foundRock) {
 			return false;
 		}
 

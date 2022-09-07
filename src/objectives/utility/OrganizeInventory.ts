@@ -5,7 +5,7 @@ import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
 import Drop from "game/entity/action/actions/Drop";
 
-import { ContextDataType, MovingToNewIslandState } from "../../core/context/IContext";
+import { ContextDataType } from "../../core/context/IContext";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -57,13 +57,11 @@ export default class OrganizeInventory extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
-
 		const reservedItems = context.utilities.item.getReservedItems(context, false)
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const reservedItemsWeight = reservedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 
-		let unusedItems = context.utilities.item.getUnusedItems(context, { allowSailboat: moveToNewIslandState === MovingToNewIslandState.None })
+		let unusedItems = context.utilities.item.getUnusedItems(context)
 			.sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
 		const unusedItemsWeight = unusedItems.reduce((a, b) => a + b.getTotalWeight(), 0);
 

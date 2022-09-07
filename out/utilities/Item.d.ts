@@ -70,7 +70,7 @@ export declare class ItemUtilities {
     getBestToolForTerrainGather(context: Context, terrainType: TerrainType): Item | undefined;
     getBestEquipment(context: Context, equip: EquipType): Item[];
     calculateEquipItemScore(item: Item): number;
-    estimateDamageModifier(context: Context, weapon: Item, target: Creature): number;
+    estimateWeaponDamage(context: Context, weapon: Item, target: Creature): number;
     updateHandEquipment(context: Context, preferredDamageType?: DamageType): {
         equipType: EquipType;
         item: Item;
@@ -83,7 +83,6 @@ export declare class ItemUtilities {
     getItemsToBuild(context: Context): Item[];
     getUnusedItems(context: Context, options?: Partial<{
         allowReservedItems: boolean;
-        allowSailboat: boolean;
     }>): Item[];
     getAvailableInventoryWeight(context: Context): number;
     getSeeds(context: Context, onlyEdible: boolean): Item[];

@@ -72,7 +72,7 @@
 			"dialogButtonReadBooks": "Read Books",
 			"dialogButtonReadBooksTooltip": "Allow TARS to read books.",
 			"dialogButtonClearSwamps": "Clear Swamps",
-			"dialogButtonClearSwampsTooltip": "Allow TARS to remove swamp tiles that are around the base.",
+			"dialogButtonClearSwampsTooltip": "Allow TARS to remove swamp tiles that are around the base.\nNote: TARS will not clear swamps when on a Wetlands island.",
 			"dialogButtonOrganizeBase": "Organize Base",
 			"dialogButtonOrganizeBaseTooltip": "Allow TARS to periodically cleanup the area around the base by moving items into chests.",
 			"dialogButtonAllowBackpacks": "Allow Backpacks",

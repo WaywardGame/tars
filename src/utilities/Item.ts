@@ -586,28 +586,23 @@ export class ItemUtilities {
 		return score;
 	}
 
-	public estimateDamageModifier(context: Context, weapon: Item, target: Creature): number {
-		const weaponDescription = weapon.description();
-		const creatureDescription = target.description();
-		if (!weaponDescription || !creatureDescription) {
-			return -99;
+	public estimateWeaponDamage(context: Context, weapon: Item, target: Creature): number {
+		let damageAmount = context.human.calculateDamageAmount(AttackType.MeleeWeapon, weapon);
+
+		const damageType = weapon.description()?.damageType;
+		if (damageType !== undefined) {
+			const attackOutcome = context.island.calculateDamageOutcome({
+				human: context.human,
+				target,
+				damageAmount,
+				damageType,
+			})?.attackOutcome;
+			if (attackOutcome !== undefined) {
+				damageAmount = attackOutcome;
+			}
 		}
 
-		const damageType = weaponDescription.damageType;
-		if (damageType === undefined) {
-			return -99;
-		}
-
-		const damageAmount = context.human.calculateDamageAmount(AttackType.MeleeWeapon, weapon, undefined);
-
-		const damageOutcome = context.island.calculateDamageOutcome({
-			human: context.human,
-			target,
-			damageAmount,
-			damageType,
-		});
-
-		return damageOutcome?.attackOutcome ?? -99;
+		return damageAmount;
 	}
 
 	public updateHandEquipment(context: Context, preferredDamageType?: DamageType): { equipType: EquipType; item: Item } | undefined {
@@ -655,7 +650,15 @@ export class ItemUtilities {
 				if (closestCreature) {
 					// creature is close, calculate it
 					possibleEquips
-						.sort((a, b) => this.estimateDamageModifier(context, b, closestCreature!) - this.estimateDamageModifier(context, a, closestCreature!));
+						.sort((itemA, itemB) => {
+							const damageA = this.estimateWeaponDamage(context, itemA, closestCreature!);
+							const damageB = this.estimateWeaponDamage(context, itemB, closestCreature!);
+							if (damageA !== damageB) {
+								return damageB - damageA;
+							}
+
+							return (itemB.getItemUseBonus(use) - itemA.getItemUseBonus(use)) || (itemB.minDur - itemA.minDur);
+						});
 
 				} else if (context.human.getEquippedItem(equipType) !== undefined) {
 					// don't switch until we're close to a creature
@@ -791,8 +794,9 @@ export class ItemUtilities {
 		const items: Item[] = [];
 
 		for (const key of inventoryBuildItems) {
-			if (context.inventory[key] !== undefined) {
-				items.push(context.inventory[key] as Item);
+			const item = context.inventory[key] as Item | undefined;
+			if (item && context.human.vehicleItemReference?.item !== item) {
+				items.push(item);
 			}
 		}
 
@@ -802,12 +806,12 @@ export class ItemUtilities {
 	/**
 	 * Returns unused items sorted by oldest to newest
 	 */
-	public getUnusedItems(context: Context, options: Partial<{ allowReservedItems: boolean; allowSailboat: boolean }> = {}) {
+	public getUnusedItems(context: Context, options: Partial<{ allowReservedItems: boolean }> = {}) {
 		const items = this.getItemsInInventory(context);
 		return items
 			.filter(item => {
 				if (item.isEquipped() ||
-					((!options.allowSailboat || item !== context.inventory.sailBoat) && this.isInventoryItem(context, item)) ||
+					this.isInventoryItem(context, item) ||
 					(!options.allowReservedItems && context.isReservedItem(item))) {
 					return false;
 				}

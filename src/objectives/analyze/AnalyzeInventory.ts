@@ -180,6 +180,10 @@ export default class AnalyzeInventory extends Objective {
 			return false;
 		}
 
+		if (itemInfo.cureStatus !== undefined && !item.description()?.canCureStatus?.includes(itemInfo.cureStatus)) {
+			return false;
+		}
+
 		if (context.island.items.isContainableInContainer(item, context.human.inventory)) {
 			return true;
 		}

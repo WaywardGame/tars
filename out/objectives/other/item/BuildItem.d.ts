@@ -1,6 +1,6 @@
 import type Item from "game/item/Item";
 import type Context from "../../../core/context/Context";
-import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 export default class BuildItem extends Objective {
     private readonly item?;
@@ -10,6 +10,6 @@ export default class BuildItem extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
-    onMove(context: Context): Promise<boolean | import("../../../core/objective/IObjective").IObjective>;
+    onMove(context: Context): Promise<boolean | IObjective>;
     private getBaseInfo;
 }

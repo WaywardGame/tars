@@ -136,13 +136,13 @@ define(["require", "exports", "game/doodad/Doodad", "game/entity/action/actions/
                     }
                 }
             }
-            if (this.options?.allowBoat && context.inventory.sailBoat && !context.human.vehicleItemReference) {
+            if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
                 const tile = context.human.getTile();
                 const tileType = TileHelpers_1.default.getType(tile);
                 const terrainDescription = Terrains_1.default[tileType];
                 if (terrainDescription && terrainDescription.water) {
                     return [
-                        new UseItem_1.default(Ride_1.default, context.inventory.sailBoat),
+                        new UseItem_1.default(Ride_1.default, context.inventory.sailboat),
                         new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
                     ];
                 }
@@ -161,7 +161,7 @@ define(["require", "exports", "game/doodad/Doodad", "game/entity/action/actions/
                     if (firstWaterTile) {
                         return [
                             new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
-                            new UseItem_1.default(Ride_1.default, context.inventory.sailBoat),
+                            new UseItem_1.default(Ride_1.default, context.inventory.sailboat),
                             new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
                         ];
                     }
@@ -248,7 +248,7 @@ define(["require", "exports", "game/doodad/Doodad", "game/entity/action/actions/
                     }
                 }
             }
-            if (this.options?.allowBoat && context.inventory.sailBoat && !context.human.vehicleItemReference) {
+            if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
                 const tile = context.human.getTile();
                 const tileType = TileHelpers_1.default.getType(tile);
                 const terrainDescription = Terrains_1.default[tileType];

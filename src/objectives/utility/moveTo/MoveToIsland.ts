@@ -1,4 +1,3 @@
-import { DoodadType } from "game/doodad/IDoodad";
 import type { IslandId } from "game/island/IIsland";
 import { IslandPosition } from "game/island/IIsland";
 import SailToIsland from "game/entity/action/actions/SailToIsland";
@@ -9,7 +8,6 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import MoveToTarget from "../../core/MoveToTarget";
-import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
 import MoveToWater from "./MoveToWater";
 import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 
@@ -39,33 +37,23 @@ export default class MoveToIsland extends Objective {
 
         const objectivePipelines: IObjective[][] = [];
 
-        if (context.inventory.sailBoat) {
-            objectivePipelines.push([
-                new MoveItemIntoInventory(context.inventory.sailBoat),
-                new MoveToWater(true),
-                new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
-            ]);
-
-        } else {
-            const sailBoats = context.utilities.object.findDoodads(context, "SailBoat", (doodad) => doodad.type === DoodadType.Sailboat);
-            for (const sailBoat of sailBoats) {
-                const result = context.human.canSailAwayFromPosition(context.human.island, sailBoat);
-                if (result.canSailAway) {
-                    objectivePipelines.push([
-                        new MoveToTarget(sailBoat, false),
-                        new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
-                    ]);
-                }
-            }
-
-            if (objectivePipelines.length === 0) {
-                // no sail boats or sailboats are not in good spots
+        for (const sailboat of context.base.sailboat) {
+            const result = context.human.canSailAwayFromPosition(context.human.island, sailboat);
+            if (result.canSailAway) {
                 objectivePipelines.push([
-                    new AcquireInventoryItem("sailBoat"),
-                    new MoveToWater(true),
+                    new MoveToTarget(sailboat, false),
                     new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
                 ]);
             }
+        }
+
+        if (objectivePipelines.length === 0) {
+            // no sail boats or sailboats are not in good spots
+            objectivePipelines.push([
+                new AcquireInventoryItem("sailboat"),
+                new MoveToWater(true),
+                new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
+            ]);
         }
 
         return objectivePipelines;

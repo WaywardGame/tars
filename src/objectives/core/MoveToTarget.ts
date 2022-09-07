@@ -260,13 +260,13 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailBoat && !context.human.vehicleItemReference) {
+		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.getTile();
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];
 			if (terrainDescription && terrainDescription.water) {
 				return [
-					new UseItem(Ride, context.inventory.sailBoat),
+					new UseItem(Ride, context.inventory.sailboat),
 					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
 				];
 			}
@@ -288,7 +288,7 @@ export default class MoveToTarget extends Objective {
 				if (firstWaterTile) {
 					return [
 						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
-						new UseItem(Ride, context.inventory.sailBoat),
+						new UseItem(Ride, context.inventory.sailboat),
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
 					];
 				}
@@ -419,7 +419,7 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailBoat && !context.human.vehicleItemReference) {
+		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.getTile();
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = terrainDescriptions[tileType];

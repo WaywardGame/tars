@@ -1,9 +1,10 @@
 import { ActionType } from "game/entity/action/IAction";
-import type { IStat } from "game/entity/IStats";
+import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
 import Heal from "game/entity/action/actions/Heal";
 import Cure from "game/entity/action/actions/Cure";
+import Eat from "game/entity/action/actions/Eat";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -38,6 +39,20 @@ export default class RecoverHealth extends Objective {
 		if (healItems.length > 0) {
 			this.log.info(`Healing with ${healItems[0].getName().getString()}`);
 			return new UseItem(Heal, healItems[0]);
+		}
+
+		const health = context.human.stat.get<IStatMax>(Stat.Health);
+		if (health.value <= 10) {
+			// emergency. eating can recover health
+			// const eatItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Eat);
+			// const bestEatItem = eatItems.filter(item => context.utilities.item.isEdible(item.type));
+			const healthRecoveryFoodItems = Array.from(context.utilities.item.foodItemTypes)
+				.map(foodItemType => context.utilities.item.getItemsInContainerByType(context, context.human.inventory, foodItemType))
+				.flat()
+				.sort((a, b) => (b.description()?.onUse?.[ActionType.Eat]?.[0] ?? -99) - (a.description()?.onUse?.[ActionType.Eat]?.[0] ?? -99));
+			if (healthRecoveryFoodItems.length > 0) {
+				return new UseItem(Eat, healthRecoveryFoodItems[0]);
+			}
 		}
 
 		if (this.onlyUseAvailableItems) {

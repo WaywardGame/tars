@@ -7,7 +7,7 @@ import { TurnMode } from "game/IGame";
 import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import { CreatureType } from "game/entity/creature/ICreature";
-import Drop from "game/entity/action/actions/Drop";
+import { BiomeType } from "game/biome/IBiome";
 
 import type Context from "../core/context/Context";
 import { ContextDataType, MovingToNewIslandState } from "../core/context/IContext";
@@ -18,7 +18,6 @@ import AcquireItem from "../objectives/acquire/item/AcquireItem";
 import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
 import AcquireWaterContainer from "../objectives/acquire/item/specific/AcquireWaterContainer";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
-import ExecuteAction from "../objectives/core/ExecuteAction";
 import Lambda from "../objectives/core/Lambda";
 import Restart from "../objectives/core/Restart";
 import BuildItem from "../objectives/other/item/BuildItem";
@@ -78,9 +77,10 @@ export class SurvivalMode implements ITarsMode {
 			return objectives;
 		}
 
-		if (context.inventory.sailBoat && context.human.island.items.isContainableInContainer(context.inventory.sailBoat, context.human.inventory)) {
+		if (context.inventory.sailboat && context.human.island.items.isContainableInContainer(context.inventory.sailboat, context.human.inventory)) {
 			//  we likely just moved to a new island
 			const movedToNewIslandObjectives: IObjective[] = [];
+
 			if (context.utilities.base.hasBase(context)) {
 				movedToNewIslandObjectives.push(new MoveToBase());
 
@@ -93,10 +93,7 @@ export class SurvivalMode implements ITarsMode {
 				}
 			}
 
-			movedToNewIslandObjectives.push(
-				new ExecuteAction(Drop, [context.inventory.sailBoat]).setStatus("Dropping sailboat"),
-				new AnalyzeInventory(),
-			);
+			movedToNewIslandObjectives.push(new AnalyzeInventory());
 
 			objectives.push(movedToNewIslandObjectives);
 		}
@@ -270,7 +267,8 @@ export class SurvivalMode implements ITarsMode {
 			// }
 
 			if (moveToNewIslandState === MovingToNewIslandState.None) {
-				if (context.options.survivalClearSwamps) {
+				// it will take too long to clean up wetlands
+				if (context.options.survivalClearSwamps && context.island.biomeType !== BiomeType.Wetlands) {
 					// remove swamp tiles near the base
 					const swampTiles = context.utilities.base.getSwampTilesNearBase(context);
 					if (swampTiles.length > 0) {
@@ -433,7 +431,7 @@ export class SurvivalMode implements ITarsMode {
 			const needHealthRecovery = health.value / health.max < 0.9;
 			const needHungerRecovery = hunger.value / hunger.max < 0.7;
 
-			const isPreparing = waterItemsNeeded !== 0 || foodItemsNeeded !== 0 || needHealthRecovery || needHungerRecovery;
+			// const isPreparing = waterItemsNeeded !== 0 || foodItemsNeeded !== 0 || needHealthRecovery || needHungerRecovery;
 
 			switch (moveToNewIslandState) {
 				case MovingToNewIslandState.None:
@@ -446,13 +444,8 @@ export class SurvivalMode implements ITarsMode {
 					// make a sail boat
 
 					// it's possible theres a sailboat at the time this is checked, but it's actually dropped after
-					if (!context.inventory.sailBoat) {
-						objectives.push([new AcquireItem(ItemType.Sailboat), new AnalyzeInventory()]);
-
-						if (isPreparing) {
-							// this lets TARS drop the sailboat until we're ready
-							objectives.push(new Restart());
-						}
+					if (context.base.sailboat.length === 0) {
+						objectives.push([new AcquireInventoryItem("sailboat"), new BuildItem()]);
 					}
 
 					if (needHealthRecovery) {

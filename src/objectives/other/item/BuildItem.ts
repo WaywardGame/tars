@@ -12,7 +12,7 @@ import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IBaseInfo } from "../../../core/ITars";
 import { defaultMaxTilesChecked, baseInfo } from "../../../core/ITars";
-import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AnalyzeBase from "../../analyze/AnalyzeBase";
@@ -21,6 +21,8 @@ import MoveToTarget from "../../core/MoveToTarget";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import UseItem from "./UseItem";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
+import { ItemType } from "game/item/IItem";
+import MoveToWater from "../../utility/moveTo/MoveToWater";
 
 const recalculateMovements = 40;
 
@@ -65,74 +67,87 @@ export default class BuildItem extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const baseInfo = this.getBaseInfo(context, buildDoodadType);
+		let moveToTargetObjectives: IObjective[];
 
-		const isWell = DoodadManager.isInGroup(buildDoodadType, DoodadTypeGroup.Well);
-		if (isWell) {
-			this.log.info("Going build a well");
-		}
+		if (item.type === ItemType.Sailboat) {
+			moveToTargetObjectives = [
+				new MoveToWater(true, false),
+			];
 
-		if (context.utilities.base.hasBase(context)) {
-			if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
-				const nearDoodads = context.base[baseInfo.tryPlaceNear];
-				if (nearDoodads.length > 0) {
-					const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
+		} else {
+			const baseInfo = this.getBaseInfo(context, buildDoodadType);
 
-					for (const point of possiblePoints) {
-						if (context.utilities.base.isOpenArea(context, point, context.island.getTileFromPoint(point), 0)) {
-							this.target = point;
+			const isWell = DoodadManager.isInGroup(buildDoodadType, DoodadTypeGroup.Well);
+			if (isWell) {
+				this.log.info("Going build a well");
+			}
+
+			if (context.utilities.base.hasBase(context)) {
+				if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
+					const nearDoodads = context.base[baseInfo.tryPlaceNear];
+					if (nearDoodads.length > 0) {
+						const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
+
+						for (const point of possiblePoints) {
+							if (context.utilities.base.isGoodBuildTile(context, point, context.island.getTileFromPoint(point), { openAreaRadius: 0 })) {
+								this.target = point;
+								break;
+							}
+						}
+
+						// couldn't find a valid spot for this doodad. lets place it somewhere else
+						// it will end up moving the other doodad accordingly
+					}
+				}
+
+				if (!this.target) {
+					const baseDoodads = context.utilities.base.getBaseDoodads(context);
+
+					for (const baseDoodad of baseDoodads) {
+						if (isWell) {
+							// look for unlimited wells first
+							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+							if (this.target === undefined) {
+								this.log.info("Couldn't find unlimited well tile");
+								this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+							}
+
+						} else {
+							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => {
+								if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, point)) {
+									// AnalyzeBase won't like a doodad at this position
+									return false;
+								}
+
+								return context.utilities.base.isGoodBuildTile(context, point, tile, baseInfo);
+							}, { maxTilesChecked: defaultMaxTilesChecked });
+						}
+
+						if (this.target !== undefined) {
 							break;
 						}
 					}
-
-					// couldn't find a valid spot for this doodad. lets place it somewhere else
-					// it will end up moving the other doodad accordingly
 				}
+
+			} else if (!isWell) {
+				this.log.info("Looking for build tile...");
+
+				this.target = await context.utilities.base.findInitialBuildTile(context);
 			}
 
-			if (!this.target) {
-				const baseDoodads = context.utilities.base.getBaseDoodads(context);
-
-				for (const baseDoodad of baseDoodads) {
-					if (isWell) {
-						// look for unlimited wells first
-						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
-						if (this.target === undefined) {
-							this.log.info("Couldn't find unlimited well tile");
-							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
-						}
-
-					} else {
-						this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => {
-							if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, point)) {
-								// AnalyzeBase won't like a doodad at this position
-								return false;
-							}
-
-							return context.utilities.base.isGoodBuildTile(context, point, tile, baseInfo);
-						}, { maxTilesChecked: defaultMaxTilesChecked });
-					}
-
-					if (this.target !== undefined) {
-						break;
-					}
-				}
+			if (this.target === undefined) {
+				this.log.info("Unable to find location for build item");
+				return ObjectiveResult.Impossible;
 			}
 
-		} else if (!isWell) {
-			this.log.info("Looking for build tile...");
-
-			this.target = await context.utilities.base.findInitialBuildTile(context);
-		}
-
-		if (this.target === undefined) {
-			this.log.info("Unable to find location for build item");
-			return ObjectiveResult.Impossible;
+			moveToTargetObjectives = [
+				new MoveToTarget(this.target, true),
+				new PickUpAllTileItems(this.target),
+			];
 		}
 
 		return [
-			new MoveToTarget(this.target, true),
-			new PickUpAllTileItems(this.target),
+			...moveToTargetObjectives,
 			new UseItem(Build, item),
 			new Lambda(async context => {
 				const tile = context.human.getFacingTile();
