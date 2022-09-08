@@ -17,12 +17,12 @@ import { ActionArguments } from "game/entity/action/IAction";
 
 export default class StokeFire extends Objective {
 
-	constructor(private readonly doodad?: Doodad) {
+	constructor(private readonly doodad?: Doodad, private readonly numberOfStokes: number = 0) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `StokeFire:${this.doodad}`;
+		return `StokeFire:${this.doodad}:${this.numberOfStokes}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -45,7 +45,7 @@ export default class StokeFire extends Objective {
 			objectives.push(new StartFire(doodad));
 		}
 
-		objectives.push(new AcquireInventoryItem("fireKindling", { skipHardReservedItems: true, reserveType: ReserveType.Hard }).setContextDataKey(itemContextDataKey));
+		objectives.push(new AcquireInventoryItem("fireKindling", { skipHardReservedItems: true, reserveType: ReserveType.Hard, desiredCount: this.numberOfStokes }).setContextDataKey(itemContextDataKey));
 
 		objectives.push(new MoveToTarget(doodad, true));
 

@@ -65,7 +65,7 @@ export default class GatherFromChest extends Objective {
 							return false;
 						}
 
-						if (this.options.requiredMinDur !== undefined && (item.minDur === undefined || item.minDur < this.options.requiredMinDur)) {
+						if (this.options.requiredMinDur !== undefined && (item.durability === undefined || item.durability < this.options.requiredMinDur)) {
 							return false;
 						}
 

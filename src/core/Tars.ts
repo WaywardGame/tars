@@ -1,7 +1,9 @@
 import { EventBus } from "event/EventBuses";
 import EventEmitter, { Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
+import MoveItemAction from "game/entity/action/actions/MoveItem";
 import Rename from "game/entity/action/actions/Rename";
+import Respawn from "game/entity/action/actions/Respawn";
 import UpdateWalkPath from "game/entity/action/actions/UpdateWalkPath";
 import type { IActionApi } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
@@ -29,6 +31,8 @@ import type { IPrompt } from "game/meta/prompt/Prompts";
 import { ITile, TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
 import InterruptChoice from "language/dictionary/InterruptChoice";
+import Translation from "language/Translation";
+import { RenderSource } from "renderer/IRenderer";
 import { Bound } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
@@ -37,11 +41,8 @@ import Vector2 from "utilities/math/Vector2";
 import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
-import { RenderSource } from "renderer/IRenderer";
-import Translation from "language/Translation";
-import MoveItemAction from "game/entity/action/actions/MoveItem";
-import Respawn from "game/entity/action/actions/Respawn";
 
+import { AttackType } from "game/entity/IEntity";
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import type TarsNPC from "../npc/TarsNPC";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
@@ -56,12 +57,12 @@ import RepairItem from "../objectives/interrupt/RepairItem";
 import BuildItem from "../objectives/other/item/BuildItem";
 import EquipItem from "../objectives/other/item/EquipItem";
 import UnequipItem from "../objectives/other/item/UnequipItem";
-import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import RunAwayFromTarget from "../objectives/other/RunAwayFromTarget";
 import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
 import RecoverStamina from "../objectives/recover/RecoverStamina";
 import RecoverThirst from "../objectives/recover/RecoverThirst";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import { TarsOverlay } from "../ui/TarsOverlay";
@@ -87,7 +88,6 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
-import { AttackType } from "game/entity/IEntity";
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
@@ -1587,12 +1587,12 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private repairInterrupt(context: Context, queuedRepairs: Set<Item>, itemOrItems: Item | Item[] | undefined): IObjective | undefined {
         for (const item of (Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems])) {
-            if (item === undefined || item.minDur === undefined || item.maxDur === undefined || queuedRepairs.has(item)) {
+            if (item === undefined || item.durability === undefined || item.durabilityMax === undefined || queuedRepairs.has(item)) {
                 return undefined;
             }
 
             const threshold = this.utilities.base.isNearBase(context) ? 0.2 : 0.1;
-            if (item.minDur / item.maxDur >= threshold) {
+            if (item.durability / item.durabilityMax >= threshold) {
                 return undefined;
             }
 

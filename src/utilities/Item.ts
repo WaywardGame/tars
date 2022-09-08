@@ -17,13 +17,13 @@ import type { TerrainType } from "game/tile/ITerrain";
 import terrainDescriptions from "game/tile/Terrains";
 import Enums from "utilities/enum/Enums";
 
+import { IGetItemsOptions } from "game/item/IItemManager";
 import ItemManager from "game/item/ItemManager";
 import Vector2 from "utilities/math/Vector2";
 import type Context from "../core/context/Context";
 import { ContextDataType } from "../core/context/IContext";
 import { IDisassemblySearch, inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
-import { IGetItemsOptions } from "game/item/IItemManager";
 // import { IslandId } from "game/island/IIsland";
 
 export const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>> = { includeSubContainers: true };
@@ -278,7 +278,7 @@ export class ItemUtilities {
 				return false;
 			}
 
-			if (item.minDur !== undefined && item.minDur < 5) {
+			if (item.durability !== undefined && item.durability < 5) {
 				return false;
 			}
 		}
@@ -296,7 +296,7 @@ export class ItemUtilities {
 				return false;
 			}
 
-			if (item.minDur !== undefined && item.minDur < 5) {
+			if (item.durability !== undefined && item.durability < 5) {
 				return false;
 			}
 		}
@@ -657,7 +657,7 @@ export class ItemUtilities {
 								return damageB - damageA;
 							}
 
-							return (itemB.getItemUseBonus(use) - itemA.getItemUseBonus(use)) || (itemB.minDur - itemA.minDur);
+							return (itemB.getItemUseBonus(use) - itemA.getItemUseBonus(use)) || (itemB.durability - itemA.durability);
 						});
 
 				} else if (context.human.getEquippedItem(equipType) !== undefined) {
@@ -765,7 +765,7 @@ export class ItemUtilities {
 					}
 				}
 
-				return a.minDur !== undefined && b.minDur !== undefined ? b.minDur - a.minDur : 0;
+				return a.durability !== undefined && b.durability !== undefined ? b.durability - a.durability : 0;
 			});
 	}
 
@@ -845,8 +845,8 @@ export class ItemUtilities {
 		const baseItems = this.getBaseItems(context);
 		return baseItems.filter(
 			item =>
-				item.minDur !== undefined &&
-				item.minDur > 0 &&
+				item.durability !== undefined &&
+				item.durability > 0 &&
 				(onlyEdible ? this.edibleSeedItemTypes : this.allSeedItemTypes).has(item.type)
 		);
 	}

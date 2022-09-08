@@ -4,7 +4,8 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import Objective from "../../../core/objective/Objective";
 export default class StokeFire extends Objective {
     private readonly doodad?;
-    constructor(doodad?: Doodad | undefined);
+    private readonly numberOfStokes;
+    constructor(doodad?: Doodad | undefined, numberOfStokes?: number);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;

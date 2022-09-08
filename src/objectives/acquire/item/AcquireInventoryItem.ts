@@ -1,5 +1,5 @@
 
-import { ItemType } from "game/item/IItem";
+import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import Enums from "utilities/enum/Enums";
 
@@ -40,11 +40,19 @@ export default class AcquireInventoryItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		let item = context.inventory[this.inventoryKey];
+		let numberOfMissingItems: number;
 
+		let item = context.inventory[this.inventoryKey];
 		if (Array.isArray(item)) {
 			const items = this.options?.skipHardReservedItems ? item.filter(it => !context.isHardReservedItem(it)) : item;
-			item = items.length >= (this.options?.desiredCount ?? 1) ? items[0] : undefined;
+			numberOfMissingItems = (this.options?.desiredCount ?? 1) - items.length;
+			item = items[0];
+
+		} else if (!item) {
+			numberOfMissingItems = 1;
+
+		} else {
+			numberOfMissingItems = 0;
 		}
 
 		if (item !== undefined) {
@@ -75,12 +83,7 @@ export default class AcquireInventoryItem extends Objective {
 		if (itemInfo.itemTypes) {
 			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;
 			for (const itemTypeOrGroup of itemTypes) {
-				if (context.island.items.isGroup(itemTypeOrGroup)) {
-					objectivePipelines.push([new AcquireItemByGroup(itemTypeOrGroup, options).passAcquireData(this), new AnalyzeInventory()]);
-
-				} else {
-					objectivePipelines.push([new AcquireItem(itemTypeOrGroup, options).passAcquireData(this), new AnalyzeInventory()]);
-				}
+				this.addPipeline(context, itemTypeOrGroup, numberOfMissingItems, options);
 			}
 		}
 
@@ -88,7 +91,7 @@ export default class AcquireInventoryItem extends Objective {
 			for (const itemType of Enums.values(ItemType)) {
 				const description = itemDescriptions[itemType];
 				if (description && description.equip === itemInfo.equipType) {
-					objectivePipelines.push([new AcquireItem(itemType, options).passAcquireData(this), new AnalyzeInventory()]);
+					this.addPipeline(context, itemType, numberOfMissingItems, options);
 				}
 			}
 		}
@@ -96,12 +99,29 @@ export default class AcquireInventoryItem extends Objective {
 		if (itemInfo.actionTypes) {
 			for (const actionType of itemInfo.actionTypes) {
 				for (const itemType of AcquireItemForAction.getItems(context, actionType)) {
-					objectivePipelines.push([new AcquireItem(itemType, options).passAcquireData(this), new AnalyzeInventory()]);
+					this.addPipeline(context, itemType, numberOfMissingItems, options);
 				}
 			}
 		}
 
 		return objectivePipelines;
+	}
+
+	private addPipeline(context: Context, itemTypeOrGroup: ItemType | ItemTypeGroup, numberOfItems: number, options: Partial<IAcquireItemOptions> | undefined): IObjective[] {
+		const objectivePipeline: IObjective[] = [];
+
+		for (let i = 0; i < numberOfItems; i++) {
+			if (context.island.items.isGroup(itemTypeOrGroup)) {
+				objectivePipeline.push(new AcquireItemByGroup(itemTypeOrGroup, options).passAcquireData(this));
+
+			} else {
+				objectivePipeline.push(new AcquireItem(itemTypeOrGroup, options).passAcquireData(this));
+			}
+		}
+
+		objectivePipeline.push(new AnalyzeInventory());
+
+		return objectivePipeline;
 	}
 
 }

@@ -1,6 +1,6 @@
+import Repair from "game/entity/action/actions/Repair";
 import { ActionArguments } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
-import Repair from "game/entity/action/actions/Repair";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -29,7 +29,7 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (this.item.minDur === undefined || this.item.maxDur === undefined) {
+		if (this.item.durability === undefined || this.item.durabilityMax === undefined) {
 			this.log.warn(`Can't repair item ${this.item}, invalid durability`);
 			return ObjectiveResult.Ignore;
 		}

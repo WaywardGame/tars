@@ -1,9 +1,9 @@
 import type Doodad from "game/doodad/Doodad";
-import type { IStat } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
 import AttachContainer from "game/entity/action/actions/AttachContainer";
 import DetachContainer from "game/entity/action/actions/DetachContainer";
 import Pour from "game/entity/action/actions/Pour";
+import type { IStat } from "game/entity/IStats";
+import { Stat } from "game/entity/IStats";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -15,13 +15,13 @@ import MoveToTarget from "../../core/MoveToTarget";
 import Restart from "../../core/Restart";
 import RepairItem from "../../interrupt/RepairItem";
 
-import UseItem from "../item/UseItem";
-import PickUpAllTileItems from "../tile/PickUpAllTileItems";
+import { inventoryItemInfo } from "../../../core/ITars";
+import AcquireWater from "../../acquire/item/specific/AcquireWater";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import EmptyWaterContainer from "../EmptyWaterContainer";
-import { inventoryItemInfo } from "../../../core/ITars";
+import UseItem from "../item/UseItem";
+import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import StokeFire from "./StokeFire";
-import AcquireWater from "../../acquire/item/specific/AcquireWater";
 
 export interface IStartWaterStillDesalinationOptions {
 	disableAttaching: boolean;
@@ -77,9 +77,9 @@ export default class StartWaterStillDesalination extends Objective {
 			if (availableWaterContainer) {
 				isWaterInContainer = context.utilities.item.isDrinkableItem(availableWaterContainer);
 
-				if (availableWaterContainer.minDur !== undefined &&
-					availableWaterContainer.maxDur !== undefined &&
-					(availableWaterContainer.minDur / availableWaterContainer.maxDur) < 0.6) {
+				if (availableWaterContainer.durability !== undefined &&
+					availableWaterContainer.durabilityMax !== undefined &&
+					(availableWaterContainer.durability / availableWaterContainer.durabilityMax) < 0.6) {
 					// repair our container
 					objectives.push(new RepairItem(availableWaterContainer));
 				}
@@ -159,7 +159,7 @@ export default class StartWaterStillDesalination extends Objective {
 				// only start the fire if we are near the base or if we have an emergency
 				if (this.options.forceStarting || context.utilities.base.isNearBase(context) || context.human.stat.get<IStat>(Stat.Thirst).value <= 3) {
 					// we need to start the fire. stoke fire will do it for us
-					objectives.push(new StokeFire(this.waterStill));
+					objectives.push(new StokeFire(this.waterStill, 4));
 					objectives.push(new Restart());
 
 				} else {
@@ -170,9 +170,11 @@ export default class StartWaterStillDesalination extends Objective {
 			} else if (this.waterStill.decay !== undefined && this.waterStill.gatherReady !== undefined) {
 				// water still is lit and desalinating
 				if (this.waterStill.decay <= this.waterStill.gatherReady) {
-					this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}`);
+					const estimatedNumbersOfStokes = Math.ceil((this.waterStill.gatherReady - this.waterStill.decay) / 50);
 
-					objectives.push(new StokeFire(this.waterStill));
+					this.log.info(`Going to stoke fire. Water still decay is ${this.waterStill.decay}. Gather ready is ${this.waterStill.gatherReady}. Estimated: ${estimatedNumbersOfStokes}`);
+
+					objectives.push(new StokeFire(this.waterStill, estimatedNumbersOfStokes));
 					objectives.push(new Restart());
 
 				} else {

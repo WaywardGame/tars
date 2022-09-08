@@ -1,8 +1,7 @@
 import type Item from "game/item/Item";
 
 import type Context from "../../core/context/Context";
-import { IInventoryItems, IInventoryItemInfo } from "../../core/ITars";
-import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
+import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
@@ -82,7 +81,7 @@ export default class AnalyzeInventory extends Objective {
 							return (descriptionB.tier?.[flagOption] ?? 0) - (descriptionA.tier?.[flagOption] ?? 0);
 
 						case InventoryItemFlag.PreferHigherDurability:
-							return (itemB.minDur ?? 999999) - (itemA.minDur ?? 999999);
+							return (itemB.durability ?? 999999) - (itemA.durability ?? 999999);
 
 						case InventoryItemFlag.PreferHigherDecay:
 							return (itemB.decay ?? 999999) - (itemA.decay ?? 999999);
@@ -144,7 +143,7 @@ export default class AnalyzeInventory extends Objective {
 
 		if (itemInfo.requiredMinDur !== undefined) {
 			for (const item of Array.from(items)) {
-				if (item.minDur !== undefined && item.minDur < itemInfo.requiredMinDur) {
+				if (item.durability !== undefined && item.durability < itemInfo.requiredMinDur) {
 					items.delete(item);
 				}
 			}
@@ -172,7 +171,7 @@ export default class AnalyzeInventory extends Objective {
 			return false;
 		}
 
-		if (itemInfo.requiredMinDur !== undefined && item.minDur !== undefined && item.minDur < itemInfo.requiredMinDur) {
+		if (itemInfo.requiredMinDur !== undefined && item.durability !== undefined && item.durability < itemInfo.requiredMinDur) {
 			return false;
 		}
 

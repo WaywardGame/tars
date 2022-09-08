@@ -1,15 +1,15 @@
 import type { Events } from "event/EventEmitter";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
+import type { IslandId } from "game/island/IIsland";
 import type Translation from "language/Translation";
 import type Mod from "mod/Mod";
-import type { IslandId } from "game/island/IIsland";
 
-import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
+import { Reference } from "game/reference/IReferenceManager";
 import type { IContext } from "./core/context/IContext";
+import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
 import { TreasureHunterType } from "./modes/TreasureHunter";
 import type TarsMod from "./TarsMod";
-import { Reference } from "game/reference/ReferenceManager";
 
 export const TARS_ID = "TARS";
 

@@ -1,6 +1,6 @@
+import Reinforce from "game/entity/action/actions/Reinforce";
 import { ActionArguments, ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
-import Reinforce from "game/entity/action/actions/Reinforce";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -40,7 +40,7 @@ export default class ReinforceItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		this.log.info(`Reinforcing item. Current durability: ${this.item.minDur}/${this.item.maxDur}`);
+		this.log.info(`Reinforcing item. Current durability: ${this.item.durability}/${this.item.durabilityMax}`);
 
 		const itemContextDataKey = this.getUniqueContextDataKey("ReinforceItem");
 
@@ -79,8 +79,8 @@ export default class ReinforceItem extends Objective {
 	}
 
 	private needsReinforcement(context: Context): boolean {
-		const minDur = this.item.minDur;
-		const maxDur = this.item.maxDur;
+		const minDur = this.item.durability;
+		const maxDur = this.item.durabilityMax;
 		if (minDur === undefined || maxDur === undefined) {
 			return false;
 		}

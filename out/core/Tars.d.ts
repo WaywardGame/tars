@@ -21,6 +21,7 @@ import { ITile } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
+import { AttackType } from "game/entity/IEntity";
 import { ISaveData, ISaveDataContainer } from "../ITarsMod";
 import type TarsNPC from "../npc/TarsNPC";
 import { TarsOverlay } from "../ui/TarsOverlay";
@@ -28,7 +29,6 @@ import Context from "./context/Context";
 import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
-import { AttackType } from "game/entity/IEntity";
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
     readonly human: Human;
     readonly saveData: ISaveData;

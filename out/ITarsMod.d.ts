@@ -1,11 +1,11 @@
 import type { Events } from "event/EventEmitter";
+import type { IslandId } from "game/island/IIsland";
 import type Translation from "language/Translation";
 import type Mod from "mod/Mod";
-import type { IslandId } from "game/island/IIsland";
-import { ITarsOptions } from "./core/ITarsOptions";
+import { Reference } from "game/reference/IReferenceManager";
 import type { IContext } from "./core/context/IContext";
+import { ITarsOptions } from "./core/ITarsOptions";
 import type TarsMod from "./TarsMod";
-import { Reference } from "game/reference/ReferenceManager";
 export declare const TARS_ID = "TARS";
 export declare function getTarsMod(): TarsMod;
 export declare function setTarsMod(instance: TarsMod | undefined): void;
