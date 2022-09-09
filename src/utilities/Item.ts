@@ -611,7 +611,7 @@ export class ItemUtilities {
 			return mainHandEquipInterrupt;
 		}
 
-		if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped()) {
+		if (context.inventory.equipShield && !context.inventory.equipShield.isEquipped(true)) {
 			return {
 				equipType: EquipType.OffHand,
 				item: context.inventory.equipShield,
@@ -695,7 +695,7 @@ export class ItemUtilities {
 					return undefined;
 				}
 
-				if (!possibleEquipItem.isEquipped()) {
+				if (!possibleEquipItem.isEquipped(true)) {
 					return {
 						equipType,
 						item: possibleEquips[i],
@@ -732,7 +732,7 @@ export class ItemUtilities {
 	public getInventoryItemsWithUse(context: Context, use: ActionType, filterEquipped?: boolean): Item[] {
 		return this.getItemsInInventory(context)
 			.filter(item => {
-				if (filterEquipped && item.isEquipped()) {
+				if (filterEquipped && item.isEquipped(true)) {
 					return false;
 				}
 
@@ -810,7 +810,7 @@ export class ItemUtilities {
 		const items = this.getItemsInInventory(context);
 		return items
 			.filter(item => {
-				if (item.isEquipped() ||
+				if (item.isEquipped(true) ||
 					this.isInventoryItem(context, item) ||
 					(!options.allowReservedItems && context.isReservedItem(item))) {
 					return false;

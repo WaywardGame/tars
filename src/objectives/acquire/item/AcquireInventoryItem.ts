@@ -73,7 +73,7 @@ export default class AcquireInventoryItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		context.log.info(`Acquiring ${this.inventoryKey}`);
+		context.log.info(`Acquiring ${this.inventoryKey}. Number of missing: ${numberOfMissingItems}`);
 
 		const objectivePipelines: IObjective[][] = [];
 
@@ -83,7 +83,7 @@ export default class AcquireInventoryItem extends Objective {
 		if (itemInfo.itemTypes) {
 			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;
 			for (const itemTypeOrGroup of itemTypes) {
-				this.addPipeline(context, itemTypeOrGroup, numberOfMissingItems, options);
+				objectivePipelines.push(this.getObjectivePipeline(context, itemTypeOrGroup, numberOfMissingItems, options));
 			}
 		}
 
@@ -91,7 +91,7 @@ export default class AcquireInventoryItem extends Objective {
 			for (const itemType of Enums.values(ItemType)) {
 				const description = itemDescriptions[itemType];
 				if (description && description.equip === itemInfo.equipType) {
-					this.addPipeline(context, itemType, numberOfMissingItems, options);
+					objectivePipelines.push(this.getObjectivePipeline(context, itemType, numberOfMissingItems, options));
 				}
 			}
 		}
@@ -99,7 +99,7 @@ export default class AcquireInventoryItem extends Objective {
 		if (itemInfo.actionTypes) {
 			for (const actionType of itemInfo.actionTypes) {
 				for (const itemType of AcquireItemForAction.getItems(context, actionType)) {
-					this.addPipeline(context, itemType, numberOfMissingItems, options);
+					objectivePipelines.push(this.getObjectivePipeline(context, itemType, numberOfMissingItems, options));
 				}
 			}
 		}
@@ -107,7 +107,7 @@ export default class AcquireInventoryItem extends Objective {
 		return objectivePipelines;
 	}
 
-	private addPipeline(context: Context, itemTypeOrGroup: ItemType | ItemTypeGroup, numberOfItems: number, options: Partial<IAcquireItemOptions> | undefined): IObjective[] {
+	private getObjectivePipeline(context: Context, itemTypeOrGroup: ItemType | ItemTypeGroup, numberOfItems: number, options: Partial<IAcquireItemOptions> | undefined): IObjective[] {
 		const objectivePipeline: IObjective[] = [];
 
 		for (let i = 0; i < numberOfItems; i++) {

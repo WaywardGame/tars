@@ -68,8 +68,6 @@ export default class TasksPanel extends TarsPanel {
 
         new Divider().appendTo(this);
 
-        new Divider().appendTo(this);
-
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelCreature)))

@@ -4,6 +4,7 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import Objective from "../../../core/objective/Objective";
 export default class UnequipItem extends Objective {
     private readonly item?;
+    readonly includePositionInHashCode: boolean;
     constructor(item?: Item | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;

@@ -14,5 +14,5 @@ export default class AcquireInventoryItem extends Objective {
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
-    private addPipeline;
+    private getObjectivePipeline;
 }

@@ -61,11 +61,11 @@ export class CreatureUtilities {
 	private hasDecentEquipment(context: Context): boolean {
 		const chest = context.human.getEquippedItem(EquipType.Chest) ? 1 : 0;
 		const legs = context.human.getEquippedItem(EquipType.Legs) ? 1 : 0;
-		const belt = context.human.getEquippedItem(EquipType.Belt) ? 1 : 0;
+		const waist = context.human.getEquippedItem(EquipType.Waist) ? 1 : 0;
 		const neck = context.human.getEquippedItem(EquipType.Neck) ? 1 : 0;
 		const head = context.human.getEquippedItem(EquipType.Head) ? 1 : 0;
 		const feet = context.human.getEquippedItem(EquipType.Feet) ? 1 : 0;
 		const hands = context.human.getEquippedItem(EquipType.Hands) ? 1 : 0;
-		return (chest + legs + belt + neck + head + feet + hands) >= 4 ? true : false;
+		return (chest + legs + waist + neck + head + feet + hands) >= 4 ? true : false;
 	}
 }

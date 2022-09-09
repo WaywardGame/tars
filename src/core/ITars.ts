@@ -214,7 +214,7 @@ export interface IInventoryItems {
     chest?: Item;
     curePoison?: Item;
     equipBack?: Item;
-    equipBelt?: Item;
+    equipWaist?: Item;
     equipChest?: Item;
     equipFeet?: Item;
     equipHands?: Item;
@@ -360,8 +360,8 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
     equipBack: {
         equipType: EquipType.Back,
     },
-    equipBelt: {
-        equipType: EquipType.Belt,
+    equipWaist: {
+        equipType: EquipType.Waist,
     },
     equipChest: {
         equipType: EquipType.Chest,

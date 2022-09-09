@@ -12,6 +12,7 @@ import TerrainDropdown from "ui/component/dropdown/TerrainDropdown";
 import NPCDropdown from "ui/component/dropdown/NPCDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { Bound } from "utilities/Decorators";
+import { BlockRow } from "ui/component/BlockRow";
 
 import { MoveToMode, MoveToType } from "../../modes/MoveTo";
 import TarsPanel from "../components/TarsPanel";
@@ -65,23 +66,35 @@ export default class MoveToPanel extends TarsPanel {
 
         new Divider().appendTo(this);
 
-        this.dropdownPlayer = new PlayerDropdown();
-
         new LabelledRow()
             .classes.add("dropdown-label")
             .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabelPlayer)))
-            .append(this.dropdownPlayer)
+            .append(this.dropdownPlayer = new PlayerDropdown(this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToPlayerDropdown] ?? "")
+                .event.subscribe("selection", async (_, selection) => {
+                    this.tarsInstance.saveData.ui[TarsUiSaveDataKey.MoveToPlayerDropdown] = selection;
+                }))
             .appendTo(this);
 
-        new Button()
-            .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToPlayer))
-            .event.subscribe("activate", async () => {
-                await this.tarsInstance.activateManualMode(new MoveToMode({
-                    type: MoveToType.Player,
-                    playerIdentifier: this.dropdownPlayer.selection,
-                }));
-                return true;
-            })
+        new BlockRow()
+            .append(new Button()
+                .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToPlayer))
+                .event.subscribe("activate", async () => {
+                    await this.tarsInstance.activateManualMode(new MoveToMode({
+                        type: MoveToType.Player,
+                        playerIdentifier: this.dropdownPlayer.selection,
+                    }));
+                    return true;
+                }))
+            .append(new Button()
+                .setText(getTarsTranslation(TarsTranslation.DialogButtonFollowPlayer))
+                .event.subscribe("activate", async () => {
+                    await this.tarsInstance.activateManualMode(new MoveToMode({
+                        type: MoveToType.Player,
+                        playerIdentifier: this.dropdownPlayer.selection,
+                        follow: true,
+                    }));
+                    return true;
+                }))
             .appendTo(this);
 
         new Divider().appendTo(this);
@@ -158,18 +171,32 @@ export default class MoveToPanel extends TarsPanel {
             .append(this.dropdownNPC = new NPCDropdown())
             .appendTo(this);
 
-        new Button()
-            .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToNPC))
-            .event.subscribe("activate", async () => {
-                if (this.dropdownNPC.selectedNPC) {
-                    await this.tarsInstance.activateManualMode(new MoveToMode({
-                        type: MoveToType.NPC,
-                        npc: this.dropdownNPC.selectedNPC,
-                    }));
-                }
+        new BlockRow()
+            .append(new Button()
+                .setText(getTarsTranslation(TarsTranslation.DialogButtonMoveToNPC))
+                .event.subscribe("activate", async () => {
+                    if (this.dropdownNPC.selectedNPC) {
+                        await this.tarsInstance.activateManualMode(new MoveToMode({
+                            type: MoveToType.NPC,
+                            npc: this.dropdownNPC.selectedNPC,
+                        }));
+                    }
 
-                return true;
-            })
+                    return true;
+                }))
+            .append(new Button()
+                .setText(getTarsTranslation(TarsTranslation.DialogButtonFollowNPC))
+                .event.subscribe("activate", async () => {
+                    if (this.dropdownNPC.selectedNPC) {
+                        await this.tarsInstance.activateManualMode(new MoveToMode({
+                            type: MoveToType.NPC,
+                            npc: this.dropdownNPC.selectedNPC,
+                            follow: true,
+                        }));
+                    }
+
+                    return true;
+                }))
             .appendTo(this);
     }
 
@@ -186,6 +213,5 @@ export default class MoveToPanel extends TarsPanel {
     @Bound
     protected refresh() {
         this.dropdownPlayer.refresh();
-        // this.dropdownPlayer.options.get(localPlayer.identifier)?.setDisabled(true);
     }
 }

@@ -176,6 +176,8 @@ export enum TarsTranslation {
     DialogButtonMoveToCreature,
     DialogButtonMoveToPlayer,
     DialogButtonMoveToTerrain,
+    DialogButtonFollowPlayer,
+    DialogButtonFollowNPC,
 
     DialogLabel,
     DialogRangeRecoverHealthThreshold,

@@ -6,6 +6,7 @@ import Objective from "../../../core/objective/Objective";
 export default class EquipItem extends Objective {
     private readonly equip;
     private readonly item?;
+    readonly includePositionInHashCode: boolean;
     constructor(equip: EquipType, item?: Item | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;

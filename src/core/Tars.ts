@@ -731,7 +731,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (this.saveData.enabled) {
             if (this.saveData.options.navigationOverlays) {
                 this.overlay.show();
-                game.updateView(RenderSource.Mod, false, true);
+                renderers.updateView(RenderSource.Mod, false, true);
             }
 
             this.utilities.navigation.queueUpdateOrigin(this.human);
@@ -1517,7 +1517,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.equipInterrupt(context, EquipType.Chest),
             this.equipInterrupt(context, EquipType.Legs),
             this.equipInterrupt(context, EquipType.Head),
-            this.equipInterrupt(context, EquipType.Belt),
+            this.equipInterrupt(context, EquipType.Waist),
             this.equipInterrupt(context, EquipType.Feet),
             this.equipInterrupt(context, EquipType.Hands),
             this.equipInterrupt(context, EquipType.Neck),
@@ -1562,7 +1562,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Chest)),
             this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Legs)),
             this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Head)),
-            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Belt)),
+            this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Waist)),
             this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Feet)),
             this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Neck)),
             this.repairInterrupt(context, queuedRepairs, context.human.getEquippedItem(EquipType.Hands)),
@@ -1793,7 +1793,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         // sorted by lightest to heaviest
         const itemsToMove = context.utilities.item.getItemsInInventory(context)
-            .filter(item => !item.isEquipped() && !context.island.items.isContainer(item) && item.containedWithin === context.human.inventory)
+            .filter(item => !item.isEquipped(true) && !context.island.items.isContainer(item) && item.containedWithin === context.human.inventory)
             .sort((a, b) => a.getTotalWeight() - b.getTotalWeight());
         if (itemsToMove.length > 0) {
             for (const backpack of backpacks) {

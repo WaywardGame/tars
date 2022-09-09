@@ -16,7 +16,7 @@ export declare class MovementUtilities {
     clearCache(): void;
     resetMovementOverlays(): void;
     clearOverlay(tile: ITile): void;
-    updateOverlay(path: IVector3[]): void;
+    updateOverlay(context: Context, path: IVector3[]): void;
     ensureOrigin(context: Context): Promise<void>;
     getMovementEndPositions(context: Context, target: IVector3, moveAdjacentToTarget: boolean): IVector3[];
     getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean, reverse?: boolean): Promise<NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible>;

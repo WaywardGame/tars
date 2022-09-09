@@ -10,6 +10,8 @@ import ReserveItems from "../../core/ReserveItems";
 
 export default class UnequipItem extends Objective {
 
+	public override readonly includePositionInHashCode: boolean = false;
+
 	constructor(private readonly item?: Item) {
 		super();
 	}
@@ -29,7 +31,7 @@ export default class UnequipItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		if (!item.isEquipped()) {
+		if (!item.isEquipped(true)) {
 			return ObjectiveResult.Complete;
 		}
 

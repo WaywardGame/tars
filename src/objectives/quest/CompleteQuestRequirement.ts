@@ -120,7 +120,7 @@ export default class CompleteQuestRequirement extends Objective {
 
                         const matchingItem = context.utilities.item.getItemInInventory(context, itemType);
                         if (matchingItem !== undefined) {
-                            objectivePipelines.push(matchingItem.isEquipped() ?
+                            objectivePipelines.push(matchingItem.isEquipped(true) ?
                                 [new UnequipItem(matchingItem), new EquipItem(equipType, matchingItem)] :
                                 [new EquipItem(equipType, matchingItem)]);
 

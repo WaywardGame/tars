@@ -105,7 +105,7 @@ export interface IInventoryItems {
     chest?: Item;
     curePoison?: Item;
     equipBack?: Item;
-    equipBelt?: Item;
+    equipWaist?: Item;
     equipChest?: Item;
     equipFeet?: Item;
     equipHands?: Item;

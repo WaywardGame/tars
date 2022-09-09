@@ -85,6 +85,8 @@ export default class TarsNPC extends NPC {
     @EventHandler(Game, "stopPlay")
     public onRemoved() {
         if (this.tarsInstance) {
+            gameScreen?.dialogs.get<TarsDialog>(getTarsMod().dialogMain, this.tarsInstance.getDialogSubId())?.close();
+
             this.tarsInstance.disable(true);
             this.tarsInstance.unload();
             this.tarsInstance = undefined;
@@ -186,15 +188,6 @@ export default class TarsNPC extends NPC {
         inventoryItems.push(this.createItemInInventory(ItemType.WoodenPole, Quality.Random, false));
 
         return inventoryItems;
-    }
-
-    // public override update(): void {
-    //     // this.updateMovementIntent({ intent: Direction.South });
-    //     super.update();
-    // }
-
-    public override update(): void {
-        // no-op
     }
 
     public override isInFov(): boolean {

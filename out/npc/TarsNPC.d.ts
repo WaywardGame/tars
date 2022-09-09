@@ -35,7 +35,6 @@ export default class TarsNPC extends NPC {
     protected getDefaultEquipment(equipType: EquipType): Item | ItemType | undefined;
     protected getDefaultAiType(): AiType;
     protected getDefaultInventory(): Array<Item | ItemType>;
-    update(): void;
     isInFov(): boolean;
     protected checkMove(moveType: MoveType, tileX: number, tileY: number, tileZ: number): 0 | -1 | -2 | -3;
 }

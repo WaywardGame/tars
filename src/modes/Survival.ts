@@ -61,7 +61,7 @@ export class SurvivalMode implements ITarsMode {
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const chest = context.human.getEquippedItem(EquipType.Chest);
 		const legs = context.human.getEquippedItem(EquipType.Legs);
-		const belt = context.human.getEquippedItem(EquipType.Belt);
+		const waist = context.human.getEquippedItem(EquipType.Waist);
 		const neck = context.human.getEquippedItem(EquipType.Neck);
 		const back = context.human.getEquippedItem(EquipType.Back);
 		const head = context.human.getEquippedItem(EquipType.Head);
@@ -181,8 +181,8 @@ export class SurvivalMode implements ITarsMode {
 				Order is based on recipe level
 			*/
 
-			if (belt === undefined) {
-				objectives.push([new AcquireItem(ItemType.LeatherBelt), new AnalyzeInventory(), new EquipItem(EquipType.Belt)]);
+			if (waist === undefined) {
+				objectives.push([new AcquireItem(ItemType.LeatherBelt), new AnalyzeInventory(), new EquipItem(EquipType.Waist)]);
 			}
 
 			if (neck === undefined) {
@@ -319,8 +319,8 @@ export class SurvivalMode implements ITarsMode {
 			}
 		});
 
-		if (context.inventory.equipBelt) {
-			objectives.push(new ReinforceItem(context.inventory.equipBelt, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		if (context.inventory.equipWaist) {
+			objectives.push(new ReinforceItem(context.inventory.equipWaist, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
 		if (context.inventory.equipNeck) {
@@ -382,7 +382,7 @@ export class SurvivalMode implements ITarsMode {
 
 		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenSword, ItemType.TinSword]));
 		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.BarkShield, ItemType.TinShield]));
-		this.addUpgradeItemObjectives(context, objectives, "equipBelt", new Set([ItemType.LeatherBelt]));
+		this.addUpgradeItemObjectives(context, objectives, "equipWaist", new Set([ItemType.LeatherBelt]));
 		this.addUpgradeItemObjectives(context, objectives, "equipNeck", new Set([ItemType.LeatherGorget, ItemType.TinBevor]));
 		this.addUpgradeItemObjectives(context, objectives, "equipHead", new Set([ItemType.LeatherCap, ItemType.TinHelmet, ItemType.PirateHat, ItemType.StrawHat]));
 		this.addUpgradeItemObjectives(context, objectives, "equipFeet", new Set([ItemType.LeatherBoots, ItemType.TinFootgear]));
@@ -399,7 +399,7 @@ export class SurvivalMode implements ITarsMode {
 		// extra upgrades
 		// this.addUpgradeItemObjectives(context, objectives, "equipHead", ItemType.PirateHat);
 
-		// this.addUpgradeItemObjectives(context, objectives, "equipBelt", ItemType.ScaleBelt);
+		// this.addUpgradeItemObjectives(context, objectives, "equipWaist", ItemType.ScaleBelt);
 		// this.addUpgradeItemObjectives(context, objectives, "equipNeck", ItemType.ScaleBevor);
 		// this.addUpgradeItemObjectives(context, objectives, "equipFeet", ItemType.ScaleBoots);
 		// this.addUpgradeItemObjectives(context, objectives, "equipHands", ItemType.ScaleGloves);

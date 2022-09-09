@@ -11,12 +11,14 @@ import ReserveItems from "../../core/ReserveItems";
 
 export default class EquipItem extends Objective {
 
+	public override readonly includePositionInHashCode: boolean = false;
+
 	constructor(private readonly equip: EquipType, private readonly item?: Item) {
 		super();
 	}
 
 	public getIdentifier(): string {
-		return `EquipItem:${this.item}`;
+		return `EquipItem:${this.item}:${this.equip}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -30,7 +32,7 @@ export default class EquipItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		if (item.isEquipped()) {
+		if (item.isEquipped(true)) {
 			return ObjectiveResult.Complete;
 		}
 

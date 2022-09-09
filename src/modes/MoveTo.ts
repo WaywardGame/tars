@@ -49,11 +49,13 @@ export interface IMoveToDoodad extends IMoveTo {
 export interface IMoveToPlayer extends IMoveTo {
     type: MoveToType.Player;
     playerIdentifier: string;
+    follow?: boolean;
 }
 
 export interface IMoveToNPC extends IMoveTo {
     type: MoveToType.NPC;
     npc: NPC | NPCType;
+    follow?: boolean;
 }
 
 export interface IMoveToCreature extends IMoveTo {
@@ -147,14 +149,19 @@ export class MoveToMode implements ITarsMode {
                     ];
 
                 } else {
-                    return [
+                    const objectives: IObjective[] = [
                         new MoveToIsland(npcOrType.islandId),
                         new MoveToTarget(npcOrType, true),
-                        new Lambda(async () => {
+                    ]
+
+                    if (!this.target.follow) {
+                        objectives.push(new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;
-                        }),
-                    ];
+                        }));
+                    }
+
+                    return objectives;
                 }
 
                 break;
@@ -191,14 +198,19 @@ export class MoveToMode implements ITarsMode {
                         ];
                     }
 
-                    return [
+                    const objectives: IObjective[] = [
                         new MoveToIsland(player.islandId),
                         new MoveToTarget(player, true),
-                        new Lambda(async () => {
+                    ]
+
+                    if (!this.target.follow) {
+                        objectives.push(new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;
-                        }),
-                    ];
+                        }));
+                    }
+
+                    return objectives;
                 }
 
                 break;

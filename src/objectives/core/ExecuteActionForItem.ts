@@ -214,7 +214,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, targetContainer] });
 				if (typeof (matchingItem) === "number") {
-					this.log.warn("Issue moving items");
+					this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
 					return matchingItem;
 				}
 

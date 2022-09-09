@@ -115,7 +115,7 @@ export default class NPCsPanel extends TarsPanel {
                             return;
                         }
 
-                        localIsland.npcs.remove(human);
+                        human.island.npcs.remove(human);
                     }))
                 .appendTo(this.rows);
 

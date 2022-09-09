@@ -53,7 +53,7 @@ export class MovementUtilities {
         this.movementOverlays.length = 0;
 
         if (game.playing) {
-            game.updateView(RenderSource.Mod, false);
+            renderers.updateView(RenderSource.Mod, false);
         }
     }
 
@@ -64,7 +64,7 @@ export class MovementUtilities {
         }
     }
 
-    public updateOverlay(path: IVector3[]) {
+    public updateOverlay(context: Context, path: IVector3[]) {
         this.resetMovementOverlays();
 
         for (let i = 1; i < path.length; i++) {
@@ -78,7 +78,7 @@ export class MovementUtilities {
 
             const overlay = PathOverlayFootPrints(i, path.length, pos, lastPos, nextPos, false);
             if (overlay) {
-                const tile = localIsland.getTile(pos.x, pos.y, pos.z);
+                const tile = context.island.getTile(pos.x, pos.y, pos.z);
 
                 TileHelpers.Overlay.add(tile, overlay);
                 this.movementOverlays.push({
@@ -283,7 +283,7 @@ export class MovementUtilities {
 
                 if (force || !context.human.hasWalkPath()) {
                     // walk along the path up to the first obstacle. we don't want to let the Move action automatically gather (it uses tools poorly)
-                    this.updateOverlay(movementPath.path);
+                    this.updateOverlay(context, movementPath.path);
 
                     let path = movementPath.path;
                     for (let i = 2; i < path.length; i++) {

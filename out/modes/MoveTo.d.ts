@@ -34,10 +34,12 @@ export interface IMoveToDoodad extends IMoveTo {
 export interface IMoveToPlayer extends IMoveTo {
     type: MoveToType.Player;
     playerIdentifier: string;
+    follow?: boolean;
 }
 export interface IMoveToNPC extends IMoveTo {
     type: MoveToType.NPC;
     npc: NPC | NPCType;
+    follow?: boolean;
 }
 export interface IMoveToCreature extends IMoveTo {
     type: MoveToType.Creature;
