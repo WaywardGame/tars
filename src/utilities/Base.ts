@@ -373,6 +373,13 @@ export class BaseUtilities {
 				treeRequirementCount = 3;
 				break;
 
+			case BiomeType.Volcanic:
+				commonTerrainType = TerrainType.BasaltGround;
+				rockTypes = new Set([TerrainType.Basalt]);
+				waterType = TerrainType.ShallowSeawater;
+				treeRequirementCount = 3;
+				break;
+
 			default:
 				commonTerrainType = TerrainType.Dirt;
 				rockTypes = new Set([TerrainType.Granite]);

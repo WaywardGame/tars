@@ -46,7 +46,7 @@ export default class AcquireInventoryItem extends Objective {
 		if (Array.isArray(item)) {
 			const items = this.options?.skipHardReservedItems ? item.filter(it => !context.isHardReservedItem(it)) : item;
 			numberOfMissingItems = (this.options?.desiredCount ?? 1) - items.length;
-			item = items[0];
+			item = numberOfMissingItems <= 0 ? items[0] : undefined;
 
 		} else if (!item) {
 			numberOfMissingItems = 1;
