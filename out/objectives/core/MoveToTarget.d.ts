@@ -8,6 +8,7 @@ import Objective from "../../core/objective/Objective";
 import EquipItem from "../other/item/EquipItem";
 export interface IMoveToTargetOptions {
     range: number;
+    stopWhenWithinRange: boolean;
     disableStaminaCheck: boolean;
     disableTracking: boolean;
     allowBoat: boolean;

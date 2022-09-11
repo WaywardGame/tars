@@ -1580,6 +1580,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             this.repairInterrupt(context, queuedRepairs, this.inventory.bed),
             this.repairInterrupt(context, queuedRepairs, this.inventory.backpack),
             this.repairInterrupt(context, queuedRepairs, this.inventory.waterContainer),
+            this.repairInterrupt(context, queuedRepairs, this.inventory.fishing),
         ];
 
         return objectives.filter(objective => objective !== undefined) as IObjective[];
@@ -1806,7 +1807,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
                 while (itemsToMove.length > 0) {
                     const itemToMove = itemsToMove[0];
-                    const itemToMoveWeight = itemToMove.getTotalWeight();
+                    const itemToMoveWeight = itemToMove.getTotalWeight(undefined, backpackContainer);
                     if (weight + itemToMoveWeight < weightCapacity) {
                         objectives.push(new ExecuteAction(MoveItemAction, [itemToMove, backpackContainer])
                             .setStatus(`Moving ${itemToMove.getName()} into ${backpack.getName()}`));

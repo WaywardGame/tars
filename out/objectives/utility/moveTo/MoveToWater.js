@@ -1,23 +1,30 @@
-define(["require", "exports", "game/tile/ITerrain", "game/tile/Terrains", "utilities/game/TileHelpers", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../core/MoveToTarget"], function (require, exports, ITerrain_1, Terrains_1, TileHelpers_1, IObjective_1, Objective_1, MoveToTarget_1) {
+define(["require", "exports", "game/entity/player/IPlayer", "game/island/IIsland", "game/tile/ITerrain", "game/tile/Terrains", "utilities/game/TileHelpers", "utilities/math/Vector2", "../../../core/objective/IObjective", "../../../core/objective/Objective", "../../core/MoveToTarget"], function (require, exports, IPlayer_1, IIsland_1, ITerrain_1, Terrains_1, TileHelpers_1, Vector2_1, IObjective_1, Objective_1, MoveToTarget_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.MoveToWaterType = void 0;
+    var MoveToWaterType;
+    (function (MoveToWaterType) {
+        MoveToWaterType[MoveToWaterType["AnyWater"] = 0] = "AnyWater";
+        MoveToWaterType[MoveToWaterType["SailAwayWater"] = 1] = "SailAwayWater";
+        MoveToWaterType[MoveToWaterType["FishableWater"] = 2] = "FishableWater";
+    })(MoveToWaterType = exports.MoveToWaterType || (exports.MoveToWaterType = {}));
     class MoveToWater extends Objective_1.default {
-        constructor(ocean = true, allowBoat = true) {
+        constructor(waterType, options) {
             super();
-            this.ocean = ocean;
-            this.allowBoat = allowBoat;
+            this.waterType = waterType;
+            this.options = options;
         }
         getIdentifier() {
-            return `MoveToWater:${this.ocean}:${this.allowBoat}`;
+            return `MoveToWater:${this.waterType}:${this.options?.disallowBoats}:${this.options?.moveToAdjacentTile}`;
         }
         getStatus() {
-            return this.ocean ? "Moving to the ocean" : "Moving to water";
+            return this.waterType === MoveToWaterType.AnyWater ? "Moving to water" : "Moving to the ocean";
         }
         async execute(context) {
             if (context.human.vehicleItemReference) {
                 return IObjective_1.ObjectiveResult.Complete;
             }
-            if (this.ocean ? context.utilities.tile.isOverDeepSeaWater(context) : context.utilities.tile.isSwimmingOrOverWater(context)) {
+            if (this.waterType === MoveToWaterType.AnyWater && context.utilities.tile.isSwimmingOrOverWater(context)) {
                 return IObjective_1.ObjectiveResult.Complete;
             }
             const navigation = context.utilities.navigation;
@@ -28,28 +35,87 @@ define(["require", "exports", "game/tile/ITerrain", "game/tile/Terrains", "utili
                 }
                 const tileType = TileHelpers_1.default.getType(tile);
                 const terrainDescription = Terrains_1.default[tileType];
-                if (terrainDescription && (this.ocean ? tileType === ITerrain_1.TerrainType.DeepSeawater : terrainDescription.water) &&
-                    !navigation.isDisabledFromPoint(point)) {
-                    if (this.ocean) {
-                        const result = context.human.canSailAwayFromPosition(context.human.island, point);
-                        if (result.canSailAway) {
-                            return true;
-                        }
-                        if (result.blockedTilesChecked) {
-                            disabledTiles.addFrom(result.blockedTilesChecked);
-                        }
-                        return false;
-                    }
-                    return true;
+                if (!terrainDescription) {
+                    return false;
                 }
-                return false;
+                switch (this.waterType) {
+                    case MoveToWaterType.AnyWater:
+                        if (!terrainDescription.water) {
+                            return false;
+                        }
+                        break;
+                    case MoveToWaterType.SailAwayWater:
+                        if (tileType !== ITerrain_1.TerrainType.DeepSeawater) {
+                            return false;
+                        }
+                        const result = context.human.canSailAwayFromPosition(context.human.island, point);
+                        if (!result.canSailAway) {
+                            if (result.blockedTilesChecked) {
+                                disabledTiles.addFrom(result.blockedTilesChecked);
+                            }
+                            return false;
+                        }
+                        break;
+                    case MoveToWaterType.FishableWater:
+                        if (!terrainDescription.water || terrainDescription.shallowWater) {
+                            return false;
+                        }
+                        const tileData = context.island.getTileData(point.x, point.y, point.z);
+                        if (tileData && !tileData[0].fishAvailable) {
+                            return false;
+                        }
+                        const standableNearbyPoints = [];
+                        for (const nearbyPoint of TileHelpers_1.default.getPointsAround(point)) {
+                            const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
+                            const nearbyTileType = TileHelpers_1.default.getType(nearbyTile);
+                            const nearbyTerrainDescription = Terrains_1.default[nearbyTileType];
+                            if ((nearbyTerrainDescription?.shallowWater || !nearbyTerrainDescription?.water) && !navigation.isDisabledFromPoint(nearbyPoint)) {
+                                standableNearbyPoints.push(nearbyPoint);
+                            }
+                        }
+                        if (standableNearbyPoints.length === 0) {
+                            return false;
+                        }
+                        const targetPoints = [];
+                        for (const standableNearbyPoint of standableNearbyPoints) {
+                            const direction = Vector2_1.default.DIRECTIONS[(0, IPlayer_1.getDirectionFromMovement)(point.x - standableNearbyPoint.x, point.y - standableNearbyPoint.y)];
+                            const targetX = standableNearbyPoint.x + (direction.x * (this.options?.fishingRange ?? 1));
+                            const targetY = standableNearbyPoint.y + (direction.y * (this.options?.fishingRange ?? 1));
+                            const targetTile = context.island.getTile(targetX, targetY, point.z);
+                            const targetTileType = TileHelpers_1.default.getType(targetTile);
+                            const targetTerrainDescription = Terrains_1.default[targetTileType];
+                            if (targetTerrainDescription?.shallowWater || !targetTerrainDescription?.water) {
+                                return false;
+                            }
+                            const targetTileData = context.island.getTileData(targetX, targetY, point.z);
+                            if (targetTileData && !targetTileData[0].fishAvailable) {
+                                return false;
+                            }
+                            targetPoints.push({ x: targetX, y: targetY, z: point.z });
+                        }
+                        for (const targetPoint of targetPoints) {
+                            const checkTiles = 16;
+                            const fillCount = context.island.checkWaterFill(targetPoint.x, targetPoint.y, targetPoint.z, checkTiles, IIsland_1.WaterType.None);
+                            if (fillCount < checkTiles) {
+                                return false;
+                            }
+                        }
+                        break;
+                }
+                if (navigation.isDisabledFromPoint(point)) {
+                    return false;
+                }
+                return true;
             });
             if (!target) {
                 return IObjective_1.ObjectiveResult.Impossible;
             }
-            return new MoveToTarget_1.default(target, false, { allowBoat: this.allowBoat, disableStaminaCheck: true });
+            return new MoveToTarget_1.default(target, this.options?.moveToAdjacentTile ? true : false, {
+                allowBoat: !this.options?.disallowBoats,
+                disableStaminaCheck: true,
+            });
         }
     }
     exports.default = MoveToWater;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiTW92ZVRvV2F0ZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvb2JqZWN0aXZlcy91dGlsaXR5L21vdmVUby9Nb3ZlVG9XYXRlci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFXQSxNQUFxQixXQUFZLFNBQVEsbUJBQVM7UUFFakQsWUFBNkIsUUFBUSxJQUFJLEVBQW1CLFlBQVksSUFBSTtZQUMzRSxLQUFLLEVBQUUsQ0FBQztZQURvQixVQUFLLEdBQUwsS0FBSyxDQUFPO1lBQW1CLGNBQVMsR0FBVCxTQUFTLENBQU87UUFFNUUsQ0FBQztRQUVNLGFBQWE7WUFDbkIsT0FBTyxlQUFlLElBQUksQ0FBQyxLQUFLLElBQUksSUFBSSxDQUFDLFNBQVMsRUFBRSxDQUFDO1FBQ3RELENBQUM7UUFFTSxTQUFTO1lBQ2YsT0FBTyxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsQ0FBQyxxQkFBcUIsQ0FBQyxDQUFDLENBQUMsaUJBQWlCLENBQUM7UUFDL0QsQ0FBQztRQUVNLEtBQUssQ0FBQyxPQUFPLENBQUMsT0FBZ0I7WUFDcEMsSUFBSSxPQUFPLENBQUMsS0FBSyxDQUFDLG9CQUFvQixFQUFFO2dCQUV2QyxPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO2FBQ2hDO1lBRUQsSUFBSSxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsQ0FBQyxPQUFPLENBQUMsU0FBUyxDQUFDLElBQUksQ0FBQyxrQkFBa0IsQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFDLENBQUMsT0FBTyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMscUJBQXFCLENBQUMsT0FBTyxDQUFDLEVBQUU7Z0JBQzVILE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7YUFDaEM7WUFFRCxNQUFNLFVBQVUsR0FBRyxPQUFPLENBQUMsU0FBUyxDQUFDLFVBQVUsQ0FBQztZQUVoRCxNQUFNLGFBQWEsR0FBZSxJQUFJLEdBQUcsRUFBRSxDQUFDO1lBRTVDLE1BQU0sTUFBTSxHQUFHLHFCQUFXLENBQUMsZ0JBQWdCLENBQUMsT0FBTyxDQUFDLE1BQU0sRUFBRSxPQUFPLENBQUMsV0FBVyxFQUFFLEVBQUUsQ0FBQyxDQUFDLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxFQUFFO2dCQUNyRyxJQUFJLGFBQWEsQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLEVBQUU7b0JBQzVCLE9BQU8sS0FBSyxDQUFDO2lCQUNiO2dCQUVELE1BQU0sUUFBUSxHQUFHLHFCQUFXLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUMzQyxNQUFNLGtCQUFrQixHQUFHLGtCQUFRLENBQUMsUUFBUSxDQUFDLENBQUM7Z0JBQzlDLElBQUksa0JBQWtCLElBQUksQ0FBQyxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsQ0FBQyxRQUFRLEtBQUssc0JBQVcsQ0FBQyxZQUFZLENBQUMsQ0FBQyxDQUFDLGtCQUFrQixDQUFDLEtBQUssQ0FBQztvQkFDeEcsQ0FBQyxVQUFVLENBQUMsbUJBQW1CLENBQUMsS0FBSyxDQUFDLEVBQUU7b0JBR3hDLElBQUksSUFBSSxDQUFDLEtBQUssRUFBRTt3QkFDZixNQUFNLE1BQU0sR0FBRyxPQUFPLENBQUMsS0FBSyxDQUFDLHVCQUF1QixDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsTUFBTSxFQUFFLEtBQUssQ0FBQyxDQUFDO3dCQUNsRixJQUFJLE1BQU0sQ0FBQyxXQUFXLEVBQUU7NEJBQ3ZCLE9BQU8sSUFBSSxDQUFDO3lCQUNaO3dCQUVELElBQUksTUFBTSxDQUFDLG1CQUFtQixFQUFFOzRCQUMvQixhQUFhLENBQUMsT0FBTyxDQUFDLE1BQU0sQ0FBQyxtQkFBbUIsQ0FBQyxDQUFDO3lCQUNsRDt3QkFFRCxPQUFPLEtBQUssQ0FBQztxQkFDYjtvQkFFRCxPQUFPLElBQUksQ0FBQztpQkFDWjtnQkFFRCxPQUFPLEtBQUssQ0FBQztZQUNkLENBQUMsQ0FBQyxDQUFDO1lBRUgsSUFBSSxDQUFDLE1BQU0sRUFBRTtnQkFDWixPQUFPLDRCQUFlLENBQUMsVUFBVSxDQUFDO2FBQ2xDO1lBRUQsT0FBTyxJQUFJLHNCQUFZLENBQUMsTUFBTSxFQUFFLEtBQUssRUFBRSxFQUFFLFNBQVMsRUFBRSxJQUFJLENBQUMsU0FBUyxFQUFFLG1CQUFtQixFQUFFLElBQUksRUFBRSxDQUFDLENBQUM7UUFDbEcsQ0FBQztLQUVEO0lBakVELDhCQWlFQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiTW92ZVRvV2F0ZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvb2JqZWN0aXZlcy91dGlsaXR5L21vdmVUby9Nb3ZlVG9XYXRlci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0lBY0EsSUFBWSxlQUlYO0lBSkQsV0FBWSxlQUFlO1FBQzFCLDZEQUFRLENBQUE7UUFDUix1RUFBYSxDQUFBO1FBQ2IsdUVBQWEsQ0FBQTtJQUNkLENBQUMsRUFKVyxlQUFlLEdBQWYsdUJBQWUsS0FBZix1QkFBZSxRQUkxQjtJQVFELE1BQXFCLFdBQVksU0FBUSxtQkFBUztRQUVqRCxZQUE2QixTQUEwQixFQUFtQixPQUFzQztZQUMvRyxLQUFLLEVBQUUsQ0FBQztZQURvQixjQUFTLEdBQVQsU0FBUyxDQUFpQjtZQUFtQixZQUFPLEdBQVAsT0FBTyxDQUErQjtRQUVoSCxDQUFDO1FBRU0sYUFBYTtZQUNuQixPQUFPLGVBQWUsSUFBSSxDQUFDLFNBQVMsSUFBSSxJQUFJLENBQUMsT0FBTyxFQUFFLGFBQWEsSUFBSSxJQUFJLENBQUMsT0FBTyxFQUFFLGtCQUFrQixFQUFFLENBQUM7UUFDM0csQ0FBQztRQUVNLFNBQVM7WUFDZixPQUFPLElBQUksQ0FBQyxTQUFTLEtBQUssZUFBZSxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUMsaUJBQWlCLENBQUMsQ0FBQyxDQUFDLHFCQUFxQixDQUFDO1FBQ2hHLENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCO1lBQ3BDLElBQUksT0FBTyxDQUFDLEtBQUssQ0FBQyxvQkFBb0IsRUFBRTtnQkFFdkMsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQzthQUNoQztZQUVELElBQUksSUFBSSxDQUFDLFNBQVMsS0FBSyxlQUFlLENBQUMsUUFBUSxJQUFJLE9BQU8sQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLHFCQUFxQixDQUFDLE9BQU8sQ0FBQyxFQUFFO2dCQUN6RyxPQUFPLDRCQUFlLENB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

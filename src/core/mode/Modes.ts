@@ -1,3 +1,4 @@
+import { AnglerMode } from "../../modes/Angler";
 import { GardenerMode } from "../../modes/Gardener";
 import { HarvesterMode } from "../../modes/Harvester";
 import { QuestMode } from "../../modes/Quest";
@@ -19,3 +20,5 @@ modes.set(TarsMode.Harvester, HarvesterMode);
 modes.set(TarsMode.Terminator, TerminatorMode);
 modes.set(TarsMode.TreasureHunter, TreasureHunterMode);
 modes.set(TarsMode.Quest, QuestMode);
+modes.set(TarsMode.Angler, AnglerMode);
+

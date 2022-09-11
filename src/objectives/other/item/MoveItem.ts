@@ -40,6 +40,14 @@ export default class MoveItem extends Objective {
 				return ObjectiveResult.Complete;
 			}
 
+			// console.warn(context.island.items.hasRoomInContainer(this.targetContainer, item));
+
+			// const weightCapacity = context.island.items.getWeightCapacity(this.targetContainer);
+			// if (weightCapacity !== undefined && context.island.items.computeContainerWeight(this.targetContainer) + item.getTotalWeight() > weightCapacity) {
+			// 	// we won't be able to move the item
+			// 	return ObjectiveResult.Restart;
+			// }
+
 			return [item, this.targetContainer] as ActionArguments<typeof MoveItemAction>;
 		}).setStatus(this);
 	}

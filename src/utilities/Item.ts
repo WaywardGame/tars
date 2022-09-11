@@ -870,15 +870,11 @@ export class ItemUtilities {
 	}
 
 	public getMoveItemToInventoryTarget(context: Context, item: Item): IContainer {
-		if (context.options.allowBackpacks && context.inventory.backpack?.length) {
-			const itemWeight = item.getTotalWeight();
-
+		if (context.options.allowBackpacks && !context.island.items.isContainer(item) && context.inventory.backpack?.length) {
 			for (const backpack of context.inventory.backpack) {
 				const backpackContainer = backpack as IContainer;
-				let weight = context.island.items.computeContainerWeight(backpackContainer);
-				const weightCapacity = context.island.items.getWeightCapacity(backpackContainer);
-				if (weightCapacity !== undefined && weight + itemWeight < weightCapacity) {
-					// move the item directly into the backpacka
+				if (context.island.items.hasRoomInContainer(backpackContainer, item)) {
+					// move the item directly into the backpack
 					return backpackContainer;
 				}
 			}

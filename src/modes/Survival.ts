@@ -4,7 +4,6 @@ import { EquipType } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { TurnMode } from "game/IGame";
-import type { IContainer } from "game/item/IItem";
 import { ItemType } from "game/item/IItem";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { BiomeType } from "game/biome/IBiome";
@@ -40,17 +39,17 @@ import PlantSeeds from "../objectives/utility/PlantSeeds";
 import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
 import type { ITarsMode } from "../core/mode/IMode";
 import { IInventoryItems } from "../core/ITars";
-import { getCommonInitialObjectives } from "./CommonInitialObjectives";
 import StartSolarStill from "../objectives/other/doodad/StartSolarStill";
 import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
+import { BaseMode } from "./BaseMode";
 
 /**
  * Survival mode
  */
-export class SurvivalMode implements ITarsMode {
+export class SurvivalMode extends BaseMode implements ITarsMode {
 
 	private finished: (success: boolean) => void;
 
@@ -100,35 +99,13 @@ export class SurvivalMode implements ITarsMode {
 
 		objectives.push(new CheckSpecialItems());
 
-		objectives.push(...await getCommonInitialObjectives(context));
+		objectives.push(...await this.getCommonInitialObjectives(context));
 
 		if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length === 0) {
 			objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
 		}
 
-		if (!context.base.buildAnotherChest) {
-			context.base.buildAnotherChest = true;
-
-			if (context.base.chest.length > 0) {
-				for (const c of context.base.chest) {
-					if ((context.human.island.items.computeContainerWeight(c as IContainer) / context.human.island.items.getWeightCapacity(c)!) < 0.9) {
-						context.base.buildAnotherChest = false;
-						break;
-					}
-				}
-			}
-		}
-
-		if (context.base.buildAnotherChest && context.inventory.chest === undefined) {
-			// mark that we should build a chest (memory)
-			// we need to do this to prevent a loop
-			// if we take items out of a chest to build another chest,
-			// the weight capacity could go back under the threshold. and then it wouldn't want to build another chest
-			// this is reset to false in baseInfo.onAdd
-			context.base.buildAnotherChest = true;
-
-			objectives.push([new AcquireInventoryItem("chest"), new BuildItem()]);
-		}
+		objectives.push(...await this.getBuildAnotherChestObjectives(context));
 
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
@@ -455,6 +432,9 @@ export class SurvivalMode implements ITarsMode {
 					if (needHungerRecovery) {
 						objectives.push(new RecoverHunger(false, true));
 					}
+
+					// carry two bandages before sailing
+					objectives.push(new AcquireInventoryItem("bandage", { desiredCount: 2 }));
 
 					// stock up on water
 					if (waterItemsNeeded > 0) {

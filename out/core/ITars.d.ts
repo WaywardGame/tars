@@ -105,7 +105,6 @@ export interface IInventoryItems {
     chest?: Item;
     curePoison?: Item;
     equipBack?: Item;
-    equipWaist?: Item;
     equipChest?: Item;
     equipFeet?: Item;
     equipHands?: Item;
@@ -114,10 +113,11 @@ export interface IInventoryItems {
     equipNeck?: Item;
     equipShield?: Item;
     equipSword?: Item;
+    equipWaist?: Item;
     fireKindling?: Item[];
     fireStarter?: Item;
     fireTinder?: Item;
-    fishingRod?: Item;
+    fishing?: Item;
     food?: Item[];
     furnace?: Item;
     hammer?: Item;
@@ -198,7 +198,8 @@ export declare enum TarsMode {
     Harvester = 4,
     Terminator = 5,
     TreasureHunter = 6,
-    Quest = 7
+    Quest = 7,
+    Angler = 8
 }
 export declare enum ReserveType {
     Soft = 0,

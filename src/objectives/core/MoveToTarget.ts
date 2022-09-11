@@ -31,6 +31,8 @@ const zChangeDifficulty = 500;
 
 export interface IMoveToTargetOptions {
 	range: number;
+	stopWhenWithinRange: boolean;
+
 	disableStaminaCheck: boolean;
 	disableTracking: boolean;
 	allowBoat: boolean;
@@ -427,6 +429,12 @@ export default class MoveToTarget extends Objective {
 				this.log.warn("Interrupting to use sail boat");
 				return true;
 			}
+		}
+
+		const range = this.options?.range;
+		if (range !== undefined && this.options?.stopWhenWithinRange && Vector2.isDistanceWithin(context.human, this.target, range)) {
+			this.log.info("Within range of the target");
+			return true;
 		}
 
 		return super.onMove(context, this.trackedCreature);

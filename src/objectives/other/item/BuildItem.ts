@@ -22,7 +22,7 @@ import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import UseItem from "./UseItem";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import { ItemType } from "game/item/IItem";
-import MoveToWater from "../../utility/moveTo/MoveToWater";
+import MoveToWater, { MoveToWaterType } from "../../utility/moveTo/MoveToWater";
 
 const recalculateMovements = 40;
 
@@ -71,7 +71,7 @@ export default class BuildItem extends Objective {
 
 		if (item.type === ItemType.Sailboat) {
 			moveToTargetObjectives = [
-				new MoveToWater(true, false),
+				new MoveToWater(MoveToWaterType.SailAwayWater, { disallowBoats: true }),
 			];
 
 		} else {

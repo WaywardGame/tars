@@ -214,7 +214,6 @@ export interface IInventoryItems {
     chest?: Item;
     curePoison?: Item;
     equipBack?: Item;
-    equipWaist?: Item;
     equipChest?: Item;
     equipFeet?: Item;
     equipHands?: Item;
@@ -223,10 +222,11 @@ export interface IInventoryItems {
     equipNeck?: Item;
     equipShield?: Item;
     equipSword?: Item;
+    equipWaist?: Item;
     fireKindling?: Item[];
     fireStarter?: Item;
     fireTinder?: Item;
-    fishingRod?: Item;
+    fishing?: Item;
     food?: Item[];
     furnace?: Item;
     hammer?: Item;
@@ -418,8 +418,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         itemTypes: [ItemTypeGroup.Tinder],
         flags: InventoryItemFlag.PreferLowerWeight,
     },
-    fishingRod: {
-        actionTypes: [ActionType.Cast],
+    fishing: {
+        // actionTypes: [ActionType.Cast],
+        itemTypes: [
+            ItemType.FishingNet,
+        ],
         flags: {
             flag: InventoryItemFlag.PreferHigherActionBonus,
             option: ActionType.Cast,
@@ -621,6 +624,7 @@ export enum TarsMode {
     Terminator,
     TreasureHunter,
     Quest,
+    Angler,
 }
 
 export enum ReserveType {

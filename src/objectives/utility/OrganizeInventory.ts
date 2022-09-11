@@ -202,12 +202,12 @@ export default class OrganizeInventory extends Objective {
 		const targetContainer = chest as IContainer;
 		let chestWeight = context.island.items.computeContainerWeight(targetContainer);
 		const chestWeightCapacity = context.island.items.getWeightCapacity(targetContainer);
-		if (chestWeightCapacity !== undefined && chestWeight + itemsToMove[0].getTotalWeight() <= chestWeightCapacity) {
+		if (chestWeightCapacity !== undefined && chestWeight + itemsToMove[0].getTotalWeight(undefined, targetContainer) <= chestWeightCapacity) {
 			// at least 1 item fits in the chest. move to it and start moving items
 			objectives.push(new MoveToTarget(chest, true));
 
 			for (const item of itemsToMove) {
-				const itemWeight = item.getTotalWeight();
+				const itemWeight = item.getTotalWeight(undefined, targetContainer);
 				if (chestWeight + itemWeight > chestWeightCapacity) {
 					break;
 				}

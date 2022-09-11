@@ -1,3 +1,4 @@
+import { IContainer } from "game/item/IItem";
 import type Item from "game/item/Item";
 
 import type Context from "../../../core/context/Context";
@@ -9,7 +10,7 @@ import MoveItem from "./MoveItem";
 
 export default class MoveItemIntoInventory extends Objective {
 
-    constructor(private readonly item?: Item, private readonly point?: IVector3) {
+    constructor(private readonly item?: Item, private readonly point?: IVector3, private readonly targetContainer?: IContainer) {
         super();
     }
 
@@ -40,7 +41,7 @@ export default class MoveItemIntoInventory extends Objective {
         return [
             // todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
             new MoveToTarget(point, true, { skipIfAlreadyThere: true }).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
-            new MoveItem(item, context.utilities.item.getMoveItemToInventoryTarget(context, item), point),
+            new MoveItem(item, this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, item), point),
         ];
     }
 

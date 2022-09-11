@@ -8,7 +8,7 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import MoveToTarget from "../../core/MoveToTarget";
-import MoveToWater from "./MoveToWater";
+import MoveToWater, { MoveToWaterType } from "./MoveToWater";
 import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 
 export default class MoveToIsland extends Objective {
@@ -51,7 +51,7 @@ export default class MoveToIsland extends Objective {
             // no sail boats or sailboats are not in good spots
             objectivePipelines.push([
                 new AcquireInventoryItem("sailboat"),
-                new MoveToWater(true),
+                new MoveToWater(MoveToWaterType.SailAwayWater),
                 new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
             ]);
         }

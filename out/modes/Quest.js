@@ -1,14 +1,14 @@
-define(["require", "exports", "game/IGame", "../core/objective/IObjective", "../objectives/core/Lambda", "../objectives/other/Idle", "../objectives/utility/moveTo/MoveToBase", "../objectives/utility/OrganizeInventory", "../objectives/quest/CompleteQuests", "./CommonInitialObjectives"], function (require, exports, IGame_1, IObjective_1, Lambda_1, Idle_1, MoveToBase_1, OrganizeInventory_1, CompleteQuests_1, CommonInitialObjectives_1) {
+define(["require", "exports", "game/IGame", "../core/objective/IObjective", "../objectives/core/Lambda", "../objectives/other/Idle", "../objectives/utility/moveTo/MoveToBase", "../objectives/utility/OrganizeInventory", "../objectives/quest/CompleteQuests", "./BaseMode"], function (require, exports, IGame_1, IObjective_1, Lambda_1, Idle_1, MoveToBase_1, OrganizeInventory_1, CompleteQuests_1, BaseMode_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.QuestMode = void 0;
-    class QuestMode {
+    class QuestMode extends BaseMode_1.BaseMode {
         async initialize(_, finished) {
             this.finished = finished;
         }
         async determineObjectives(context) {
             const objectives = [];
-            objectives.push(...await (0, CommonInitialObjectives_1.getCommonInitialObjectives)(context));
+            objectives.push(...await this.getCommonInitialObjectives(context));
             objectives.push(new CompleteQuests_1.default());
             objectives.push(new MoveToBase_1.default());
             objectives.push(new OrganizeInventory_1.default());
@@ -28,4 +28,4 @@ define(["require", "exports", "game/IGame", "../core/objective/IObjective", "../
     }
     exports.QuestMode = QuestMode;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUXVlc3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvbW9kZXMvUXVlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztJQWFBLE1BQWEsU0FBUztRQUlYLEtBQUssQ0FBQyxVQUFVLENBQUMsQ0FBVSxFQUFFLFFBQW9DO1lBQ3BFLElBQUksQ0FBQyxRQUFRLEdBQUcsUUFBUSxDQUFDO1FBQzdCLENBQUM7UUFFTSxLQUFLLENBQUMsbUJBQW1CLENBQUMsT0FBZ0I7WUFDN0MsTUFBTSxVQUFVLEdBQXFDLEVBQUUsQ0FBQztZQUV4RCxVQUFVLENBQUMsSUFBSSxDQUFDLEdBQUcsTUFBTSxJQUFBLG9EQUEwQixFQUFDLE9BQU8sQ0FBQyxDQUFDLENBQUM7WUFFOUQsVUFBVSxDQUFDLElBQUksQ0FBQyxJQUFJLHdCQUFjLEVBQUUsQ0FBQyxDQUFDO1lBRXRDLFVBQVUsQ0FBQyxJQUFJLENBQUMsSUFBSSxvQkFBVSxFQUFFLENBQUMsQ0FBQztZQUVsQyxVQUFVLENBQUMsSUFBSSxDQUFDLElBQUksMkJBQWlCLEVBQUUsQ0FBQyxDQUFDO1lBRXpDLElBQUksQ0FBQyxXQUFXLENBQUMsV0FBVyxFQUFFLEVBQUU7Z0JBQzVCLElBQUksSUFBSSxDQUFDLFdBQVcsRUFBRSxLQUFLLGdCQUFRLENBQUMsUUFBUSxFQUFFO29CQUMxQyxVQUFVLENBQUMsSUFBSSxDQUFDLElBQUksZ0JBQU0sQ0FBQyxLQUFLLElBQUksRUFBRTt3QkFDbEMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQzt3QkFDcEIsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQztvQkFDcEMsQ0FBQyxDQUFDLENBQUMsQ0FBQztpQkFFUDtxQkFBTTtvQkFDSCxVQUFVLENBQUMsSUFBSSxDQUFDLElBQUksY0FBSSxFQUFFLENBQUMsQ0FBQztpQkFDL0I7YUFDSjtZQUVELE9BQU8sVUFBVSxDQUFDO1FBQ3RCLENBQUM7S0FDSjtJQWpDRCw4QkFpQ0MifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUXVlc3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvbW9kZXMvUXVlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztJQWFBLE1BQWEsU0FBVSxTQUFRLG1CQUFRO1FBSTVCLEtBQUssQ0FBQyxVQUFVLENBQUMsQ0FBVSxFQUFFLFFBQW9DO1lBQ3BFLElBQUksQ0FBQyxRQUFRLEdBQUcsUUFBUSxDQUFDO1FBQzdCLENBQUM7UUFFTSxLQUFLLENBQUMsbUJBQW1CLENBQUMsT0FBZ0I7WUFDN0MsTUFBTSxVQUFVLEdBQXFDLEVBQUUsQ0FBQztZQUV4RCxVQUFVLENBQUMsSUFBSSxDQUFDLEdBQUcsTUFBTSxJQUFJLENBQUMsMEJBQTBCLENBQUMsT0FBTyxDQUFDLENBQUMsQ0FBQztZQUVuRSxVQUFVLENBQUMsSUFBSSxDQUFDLElBQUksd0JBQWMsRUFBRSxDQUFDLENBQUM7WUFFdEMsVUFBVSxDQUFDLElBQUksQ0FBQyxJQUFJLG9CQUFVLEVBQUUsQ0FBQyxDQUFDO1lBRWxDLFVBQVUsQ0FBQyxJQUFJLENBQUMsSUFBSSwyQkFBaUIsRUFBRSxDQUFDLENBQUM7WUFFekMsSUFBSSxDQUFDLFdBQVcsQ0FBQyxXQUFXLEVBQUUsRUFBRTtnQkFDNUIsSUFBSSxJQUFJLENBQUMsV0FBVyxFQUFFLEtBQUssZ0JBQVEsQ0FBQyxRQUFRLEVBQUU7b0JBQzFDLFVBQVUsQ0FBQyxJQUFJLENBQUMsSUFBSSxnQkFBTSxDQUFDLEtBQUssSUFBSSxFQUFFO3dCQUNsQyxJQUFJLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO3dCQUNwQixPQUFPLDRCQUFlLENBQUMsUUFBUSxDQUFDO29CQUNwQyxDQUFDLENBQUMsQ0FBQyxDQUFDO2lCQUVQO3FCQUFNO29CQUNILFVBQVUsQ0FBQyxJQUFJLENBQUMsSUFBSSxjQUFJLEVBQUUsQ0FBQyxDQUFDO2lCQUMvQjthQUNKO1lBRUQsT0FBTyxVQUFVLENBQUM7UUFDdEIsQ0FBQztLQUNKO0lBakNELDhCQWlDQyJ9

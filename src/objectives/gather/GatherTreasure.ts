@@ -92,14 +92,14 @@ export default class GatherTreasure extends Objective {
 
                 const needFishingRod = Terrains[TileHelpers.getType(treasureTile)]?.water ? true : false;
                 if (needFishingRod) {
-                    objectives.push(new AcquireInventoryItem("fishingRod"));
+                    objectives.push(new AcquireInventoryItem("fishing"));
                 }
 
                 objectives.push(new AcquireInventoryItem("lockPick"));
 
                 if (needFishingRod) {
                     objectives.push(new MoveToTarget(target, true));
-                    objectives.push(new UseItem(Cast, context.inventory.fishingRod));
+                    objectives.push(new UseItem(Cast, context.inventory.fishing));
 
                 } else {
                     objectives.push(new DigTile(target));

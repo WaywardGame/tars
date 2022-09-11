@@ -108,13 +108,24 @@ export default class RecoverThirst extends Objective {
 				} else {
 					this.log.info("Running back to wait for water still");
 
-					// run back to the waterstill and wait
-					for (const waterStill of context.base.waterStill) {
+					if (context.base.waterStill.length < 3 && context.human.stat.get<IStatMax>(Stat.Stamina).value > 2) {
+						this.log.info("Building another water still while waiting");
+
+						// build a water still while waiting
 						objectivePipelines.push([
-							// new MoveToTarget(waterStill, true, { range: 5 }),
-							new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
-							new Idle().setStatus("Waiting for water still due to emergency"),
+							new AcquireItemByGroup(ItemTypeGroup.WaterStill),
+							new BuildItem(),
 						]);
+
+					} else {
+						// run back to the waterstill and wait
+						for (const waterStill of context.base.waterStill) {
+							objectivePipelines.push([
+								// new MoveToTarget(waterStill, true, { range: 5 }),
+								new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
+								new Idle().setStatus("Waiting for water still due to emergency"),
+							]);
+						}
 					}
 				}
 

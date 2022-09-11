@@ -176,8 +176,10 @@ export declare enum TarsTranslation {
     DialogModeTerminatorTooltip = 128,
     DialogModeTidyUp = 129,
     DialogModeTidyUpTooltip = 130,
-    DialogModeTreasureHunter = 131,
-    DialogModeTreasureHunterTooltip = 132
+    DialogModeAngler = 131,
+    DialogModeAnglerTooltip = 132,
+    DialogModeTreasureHunter = 133,
+    DialogModeTreasureHunterTooltip = 134
 }
 export declare enum TarsOptionSectionType {
     Checkbox = 0,

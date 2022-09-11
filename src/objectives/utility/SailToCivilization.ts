@@ -11,7 +11,7 @@ import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
-import MoveToWater from "./moveTo/MoveToWater";
+import MoveToWater, { MoveToWaterType } from "./moveTo/MoveToWater";
 import { ContextDataType } from "../../core/context/IContext";
 import SetContextData from "../contextData/SetContextData";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
@@ -74,7 +74,7 @@ export default class SailToCivilization extends Objective {
 
         objectives.push(
             new MoveItemIntoInventory(context.inventory.sailboat),
-            new MoveToWater(true),
+            new MoveToWater(MoveToWaterType.SailAwayWater),
             new ExecuteAction(SailToCivilizationAction, [context.inventory.sailboat, true]).setStatus(this)
         );
 

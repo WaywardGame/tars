@@ -216,6 +216,8 @@ export enum TarsTranslation {
     DialogModeTerminatorTooltip,
     DialogModeTidyUp,
     DialogModeTidyUpTooltip,
+    DialogModeAngler,
+    DialogModeAnglerTooltip,
     DialogModeTreasureHunter,
     DialogModeTreasureHunterTooltip,
 }

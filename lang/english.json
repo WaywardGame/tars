@@ -142,6 +142,8 @@
 			"dialogModeSurvivalTooltip": "TARS will setup a camp, gather resources, build equipment, stay healthy, and survive.",
 			"dialogModeTidyUp": "Tidy Up Mode",
 			"dialogModeTidyUpTooltip": "TARS will tidy up items around the base by building & moving items into chests.",
+			"dialogModeAngler": "Angler Mode",
+			"dialogModeAnglerTooltip": "TARS will go around fishing.\nNote: It will keep fishing until there are no fish left in the world.",
 			"dialogModeTerminator": "Terminator Mode",
 			"dialogModeTerminatorTooltip": "TARS will go around terminating hostile wildlife.\nNote: It's recommended to only use this mode when TARS has decent equipment!",
 			"dialogModeTreasureHunter": "Treasure Hunter Mode",

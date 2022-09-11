@@ -9,9 +9,9 @@ import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import CompleteQuests from "../objectives/quest/CompleteQuests";
 import type { ITarsMode } from "../core/mode/IMode";
-import { getCommonInitialObjectives } from "./CommonInitialObjectives";
+import { BaseMode } from "./BaseMode";
 
-export class QuestMode implements ITarsMode {
+export class QuestMode extends BaseMode implements ITarsMode {
 
     private finished: (success: boolean) => void;
 
@@ -22,7 +22,7 @@ export class QuestMode implements ITarsMode {
     public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
         const objectives: Array<IObjective | IObjective[]> = [];
 
-        objectives.push(...await getCommonInitialObjectives(context));
+        objectives.push(...await this.getCommonInitialObjectives(context));
 
         objectives.push(new CompleteQuests());
 
