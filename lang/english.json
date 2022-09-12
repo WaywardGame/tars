@@ -79,6 +79,8 @@
 			"dialogButtonOrganizeBaseTooltip": "Allow TARS to periodically cleanup the area around the base by moving items into chests.",
 			"dialogButtonAllowBackpacks": "Allow Backpacks",
 			"dialogButtonAllowBackpacksTooltip": "Allow TARS to use backpacks for organizational purposes.",
+			"dialogButtonMaintainLowDifficulty": "Maintain Low Difficulty",
+			"dialogButtonMaintainLowDifficultyTooltip": "Allow TARS to periodically fish in order to increase its reputation to lower the difficulty.",
 			"dialogButtonDisallowProtectedItems": "Disallow Protected Items",
 			"dialogButtonDisallowProtectedItemsTooltip": "Prevents TARS from using Protected Items.",
 			"dialogButtonAllowProtectedItems": "Allow Protected Items",

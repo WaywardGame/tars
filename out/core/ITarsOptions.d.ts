@@ -20,6 +20,7 @@ export interface ITarsOptions {
     survivalReadBooks: boolean;
     survivalClearSwamps: boolean;
     survivalOrganizeBase: boolean;
+    survivalMaintainLowDifficulty: boolean;
     gardenerOnlyEdiblePlants: boolean;
     harvesterOnlyUseHands: boolean;
     treasureHunterPrecognition: boolean;

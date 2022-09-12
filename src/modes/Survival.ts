@@ -45,6 +45,7 @@ import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
 import { BaseMode } from "./BaseMode";
+import Fish from "../objectives/other/tile/Fish";
 
 /**
  * Survival mode
@@ -142,6 +143,23 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		}
 
 		objectives.push(new AcquireInventoryItem("heal"));
+
+		if (context.options.survivalMaintainLowDifficulty && context.utilities.creature.hasDecentEquipment(context)) {
+			// trigger once rep is below 5k
+			await this.runWhile(context, objectives,
+				"LoweringMalignity",
+				async (context) => context.island.getReputation() < 5000,
+				async (context, objectives) => {
+					// stop once rep is above 15k
+					if (context.island.getReputation() >= 15000) {
+						return;
+					}
+
+					objectives.push(new Fish());
+
+					objectives.push(new Restart());
+				});
+		}
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;

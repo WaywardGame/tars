@@ -149,6 +149,8 @@ export enum TarsTranslation {
     DialogButtonOrganizeBaseTooltip,
     DialogButtonAllowBackpacks,
     DialogButtonAllowBackpacksTooltip,
+    DialogButtonMaintainLowDifficulty,
+    DialogButtonMaintainLowDifficultyTooltip,
     DialogButtonSailToCivilization,
     DialogButtonSailToCivilizationTooltip,
     DialogButtonStayHealthy,
@@ -422,6 +424,12 @@ export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslatio
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonOrganizeBase,
         tooltip: TarsTranslation.DialogButtonOrganizeBaseTooltip,
+    },
+    {
+        option: "survivalMaintainLowDifficulty",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonMaintainLowDifficulty,
+        tooltip: TarsTranslation.DialogButtonMaintainLowDifficultyTooltip,
     },
     TarsTranslation.DialogModeGardener,
     {

@@ -58,7 +58,7 @@ export class CreatureUtilities {
 		}
 	}
 
-	private hasDecentEquipment(context: Context): boolean {
+	public hasDecentEquipment(context: Context): boolean {
 		const chest = context.human.getEquippedItem(EquipType.Chest) ? 1 : 0;
 		const legs = context.human.getEquippedItem(EquipType.Legs) ? 1 : 0;
 		const waist = context.human.getEquippedItem(EquipType.Waist) ? 1 : 0;

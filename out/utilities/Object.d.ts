@@ -25,6 +25,7 @@ export declare class ObjectUtilities {
         type: CreatureType;
         onlyHostile: boolean;
         top: number;
+        skipWaterCreatures: boolean;
     }>): Creature[];
     findTamableCreatures(context: Context, id: string, options?: Partial<{
         type: CreatureType;

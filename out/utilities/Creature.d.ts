@@ -5,5 +5,5 @@ export declare class CreatureUtilities {
     shouldRunAwayFromAllCreatures(context: Context): boolean;
     getNearbyCreatures(context: Context): Creature[];
     isScaredOfCreature(context: Context, creature: Creature): boolean;
-    private hasDecentEquipment;
+    hasDecentEquipment(context: Context): boolean;
 }

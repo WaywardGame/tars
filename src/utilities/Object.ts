@@ -4,7 +4,7 @@ import type Creature from "game/entity/creature/Creature";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import type NPC from "game/entity/npc/NPC";
-import { AiType } from "game/entity/IEntity";
+import { AiType, MoveType } from "game/entity/IEntity";
 
 import type Context from "../core/context/Context";
 import { CreatureType } from "game/entity/creature/ICreature";
@@ -93,7 +93,7 @@ export class ObjectUtilities {
 		});
 	}
 
-	public findHuntableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; onlyHostile: boolean; top: number }>) {
+	public findHuntableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; onlyHostile: boolean; top: number; skipWaterCreatures: boolean }>) {
 		return context.utilities.object.findCreatures(context, id, creature => {
 			if (creature.isTamed()) {
 				return false;
@@ -104,6 +104,10 @@ export class ObjectUtilities {
 			}
 
 			if (options?.onlyHostile && !creature.hasAi(AiType.Hostile)) {
+				return false;
+			}
+
+			if (options?.skipWaterCreatures && !(creature.getMoveType() & MoveType.Land)) {
 				return false;
 			}
 

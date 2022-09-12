@@ -30,6 +30,7 @@ export interface ITarsOptions {
     survivalReadBooks: boolean;
     survivalClearSwamps: boolean;
     survivalOrganizeBase: boolean;
+    survivalMaintainLowDifficulty: boolean;
 
     gardenerOnlyEdiblePlants: boolean;
 
@@ -63,6 +64,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
 
         stayHealthy: true,
         allowCaves: false,
+        allowBackpacks: true,
 
         lockInventory: false,
         lockEquipment: false,
@@ -82,7 +84,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
         survivalReadBooks: true,
         survivalClearSwamps: true,
         survivalOrganizeBase: true,
-        allowBackpacks: true,
+        survivalMaintainLowDifficulty: false,
 
         gardenerOnlyEdiblePlants: true,
 

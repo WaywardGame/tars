@@ -32,6 +32,7 @@ import UnequipItem from "../other/item/UnequipItem";
 import UseItem from "../other/item/UseItem";
 import SailToCivilization from "../utility/SailToCivilization";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
+import Item from "game/item/Item";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -91,7 +92,7 @@ export default class CompleteQuestRequirement extends Objective {
             case QuestRequirementType.KillCreatures: {
                 const [_amount] = this.requirement.options as [number];
 
-                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreatures");
+                const creatures = context.utilities.object.findHuntableCreatures(context, "KillCreatures", { skipWaterCreatures: true });
 
                 return new HuntCreatures(creatures);
             }
@@ -240,22 +241,27 @@ export default class CompleteQuestRequirement extends Objective {
 
             case "ModStarterQuestActionSlots":
                 return new Lambda(async () => {
-                    let itemId: number | undefined;
+                    let itemToSlot: Item | undefined;
 
                     for (const item of context.utilities.item.getItemsInInventory(context)) {
-                        if (gameScreen?.actionBar.getSlottedIn(item) === undefined) {
-                            itemId = item.id;
+                        if (gameScreen?.actionBar.getSlottedIn(item).length === 0) {
+                            itemToSlot = item;
                             break;
                         }
                     }
 
-                    if (itemId === undefined) {
+                    if (itemToSlot === undefined) {
                         return ObjectiveResult.Impossible;
                     }
 
-                    // todo: start a new game with starter quest and set tars to quest mode. this should be the first thing it tries
-                    // return (callSomeMethodThatAddsThisItemToAnOpenSlot) ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
-                    return itemId ? ObjectiveResult.Complete : ObjectiveResult.Impossible;
+                    const slots = gameScreen?.actionBar?.getSlots();
+                    if (slots) {
+                        console.log(itemToSlot);
+                        Array.from(slots)[0].equipItem(itemToSlot, false);
+                        return ObjectiveResult.Complete;
+                    }
+
+                    return ObjectiveResult.Impossible;
                 }).setStatus(this);
 
             case "ModStarterQuestLightCampfire":
@@ -339,7 +345,6 @@ export default class CompleteQuestRequirement extends Objective {
             case "ModStarterQuestGatherFromWaterStill": {
                 const objectivePipelines: IObjective[][] = [];
 
-
                 const objectives: IObjective[] = [];
 
                 // if (context.inventory.waterContainer === undefined) {
@@ -356,6 +361,8 @@ export default class CompleteQuestRequirement extends Objective {
                     allowWaitingForWater: true,
                     onlyIdleWhenWaitingForWaterStill: true,
                 }));
+
+                objectivePipelines.push(objectives);
 
                 return objectivePipelines;
             }
