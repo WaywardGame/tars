@@ -16,7 +16,7 @@ export default class ContextState {
     merge(state: ContextState): void;
     reset(): void;
     get<T = any>(type: string): T | undefined;
-    set<T = any>(type: string, value: T | undefined): void;
+    set<T = any>(type: string, value: T | undefined, trackUndefined?: boolean): void;
     addReservedItemTypeForObjectiveHashCode(itemType: ItemType, objectiveHashCode?: string): void;
     addReservedItemForObjectiveHashCode(item: Item, objectiveHashCode: string): void;
     clone(increaseDepth: boolean): ContextState;

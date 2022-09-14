@@ -136,7 +136,7 @@ export default class Context implements IContext {
 		this.state.set(type, value);
 
 		if (this.changes) {
-			this.changes.set(type, value);
+			this.changes.set(type, value, true);
 		}
 	}
 

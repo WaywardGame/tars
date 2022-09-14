@@ -93,7 +93,16 @@ export default class ContextState {
 			}
 
 			for (const [type, value] of state.data) {
-				this.data.set(type, value);
+				if (value === undefined) {
+					this.data.delete(type);
+
+				} else {
+					this.data.set(type, value);
+				}
+			}
+
+			if (this.data.size === 0) {
+				this.data = undefined;
 			}
 		}
 	}
@@ -113,8 +122,8 @@ export default class ContextState {
 		return this.data?.get(type);
 	}
 
-	public set<T = any>(type: string, value: T | undefined) {
-		if (value !== undefined) {
+	public set<T = any>(type: string, value: T | undefined, trackUndefined?: boolean) {
+		if (value !== undefined || trackUndefined) {
 			if (!this.data) {
 				this.data = new Map();
 			}
