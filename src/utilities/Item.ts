@@ -557,7 +557,11 @@ export class ItemUtilities {
 			items.add(currentEquippedItem);
 		}
 
-		return Array.from(items).sort((a, b) => this.calculateEquipItemScore(b) - this.calculateEquipItemScore(a));
+		return Array.from(items)
+			.sort((a, b) => {
+				const result = this.calculateEquipItemScore(b) - this.calculateEquipItemScore(a);
+				return result !== 0 ? result : (a.id - b.id); // ensure ties are broken deterministically
+			});
 	}
 
 	public calculateEquipItemScore(item: Item): number {

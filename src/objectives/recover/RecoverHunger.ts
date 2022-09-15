@@ -3,6 +3,7 @@ import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import type Item from "game/item/Item";
 import Eat from "game/entity/action/actions/Eat";
+import { WeightStatus } from "game/entity/player/IPlayer";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -41,7 +42,7 @@ export default class RecoverHunger extends Objective {
 			if ((hunger.value / hunger.max) < 0.9) {
 				let decayingSoonFoodItems: Item[] = [];
 
-				if (context.utilities.base.isNearBase(context)) {
+				if (context.utilities.base.isNearBase(context) && context.human.getWeightStatus() === WeightStatus.None) {
 					// only make food if theres not enough
 					const foodItemsInBase = this.getFoodItemsInBase(context);
 
@@ -70,8 +71,8 @@ export default class RecoverHunger extends Objective {
 
 		let foodItems: Item[] = [];
 
-		// prefer eating food that was prepared ahead of time if we're near our base
-		if (context.utilities.base.isNearBase(context)) {
+		// prefer eating food that was prepared ahead of time if we're near our base and can spare the weight
+		if (context.utilities.base.isNearBase(context) && context.human.getWeightStatus() === WeightStatus.None) {
 			foodItems = this.getFoodItemsInBase(context);
 		}
 
@@ -113,7 +114,7 @@ export default class RecoverHunger extends Objective {
 	private eatItem(context: Context, item: Item) {
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
-			new MoveItemIntoInventory(item),
+			new MoveItemIntoInventory(item).keepInInventory(),
 			new UseItem(Eat, item),
 		];
 	}

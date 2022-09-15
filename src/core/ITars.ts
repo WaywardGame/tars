@@ -147,6 +147,11 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
                 return false;
             }
 
+            if (context.utilities.base.isTreasureChestLocation(context, target)) {
+                // don't allow treasure chests to be base chests
+                return false;
+            }
+
             return true;
         },
         onAdd: (context: Context) => {

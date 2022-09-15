@@ -36,6 +36,7 @@ export declare class BaseUtilities {
     getTileItemsNearBase(context: Context): Item[];
     getSwampTilesNearBase(context: Context): IVector3[];
     getNonTamedCreaturesNearBase(context: Context): Creature[];
+    isTreasureChestLocation(context: Context, point: IVector3): boolean;
     matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean;
     findInitialBuildTile(context: Context): Promise<IVector3 | undefined>;
     private isGoodTargetOrigin;

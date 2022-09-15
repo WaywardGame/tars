@@ -55,16 +55,26 @@ export class BaseUtilities {
 			return false;
 		}
 
-		if (!this.hasBase(context)) {
+		let good = false;
+
+		if (this.hasBase(context)) {
+			good = this.isNearBase(context, point, options?.nearBaseDistanceSq);
+
+		} else {
 			// this is the first base item. don't make it on beach sand or gravel
 			if (tileType === TerrainType.BeachSand || tileType === TerrainType.Gravel) {
 				return false;
 			}
 
-			return true;
+			good = true;
 		}
 
-		return this.isNearBase(context, point, options?.nearBaseDistanceSq);
+		if (good && this.isTreasureChestLocation(context, point)) {
+			// these are cursed spots
+			good = false;
+		}
+
+		return good;
 	}
 
 	public isGoodWellBuildTile(context: Context, point: IVector3, tile: ITile, onlyUnlimited: boolean): boolean {
@@ -233,6 +243,12 @@ export class BaseUtilities {
 		}
 
 		return result;
+	}
+
+	public isTreasureChestLocation(context: Context, point: IVector3): boolean {
+		return context.island.treasureMaps
+			.some(drawnMap => drawnMap.getTreasure()
+				.some(treasure => treasure.x === point.x && treasure.y === point.y && drawnMap.position.z === point.z));
 	}
 
 	public matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean {

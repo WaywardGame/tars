@@ -48,12 +48,12 @@ export default class GatherTreasure extends Objective {
         for (const treasure of treasures) {
             let objectives: IObjective[];
 
-            const target: IVector3 = { x: treasure.x, y: treasure.y, z: context.human.z };
+            const target: IVector3 = { x: treasure.x, y: treasure.y, z: this.drawnMap.position.z };
             const treasureTile = context.human.island.getTileFromPoint(target);
 
             if (this.drawnMap.isTreasureDiscovered(treasure)) {
                 const doodad = treasureTile.doodad;
-                if (!doodad) {
+                if (!doodad || doodad.crafterIdentifier) {
                     continue;
                 }
 
