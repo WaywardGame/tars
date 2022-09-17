@@ -895,8 +895,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         const walkPath = this.context.human.walkPath;
-        if (walkPath) {
-            statusMessage += ` (${walkPath.path.length} tiles away)`;
+        if (walkPath && walkPath.path.length > 0) {
+            const tilesAway = Math.ceil(Vector2.distance(this.human, walkPath.path[walkPath.path.length - 1]));
+            if (tilesAway > 0) {
+                statusMessage += ` (${tilesAway} tile${tilesAway > 1 ? "s" : ""} away)`;
+            }
         }
 
         return statusMessage;
