@@ -28,6 +28,7 @@ import { ITarsOptions } from "./ITarsOptions";
 import Navigation from "./navigation/Navigation";
 export declare const tickSpeed = 333;
 export declare const defaultMaxTilesChecked = 3000;
+export declare const tarsUniqueNpcType = "TARS";
 export interface ITarsEvents {
     enableChange(enabled: boolean): void;
     optionsChange(options: ITarsOptions): void;

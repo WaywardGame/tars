@@ -32,6 +32,8 @@ export const tickSpeed = 333;
 
 export const defaultMaxTilesChecked = 3000;
 
+export const tarsUniqueNpcType = "TARS";
+
 export interface ITarsEvents {
     /**
      * Emitted when TARS is enabled or disabled

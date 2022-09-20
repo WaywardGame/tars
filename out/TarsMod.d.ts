@@ -10,12 +10,12 @@ import Mod from "mod/Mod";
 import type Bindable from "ui/input/Bindable";
 import type { DialogId } from "ui/screen/screens/game/Dialogs";
 import type { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import { NPCType } from "game/entity/npc/INPCs";
 import Human from "game/entity/Human";
 import { Prompt } from "game/meta/prompt/IPrompt";
 import type { ITarsModEvents, ISaveData, IGlobalSaveData, ISaveDataContainer } from "./ITarsMod";
 import { TarsTranslation } from "./ITarsMod";
 import Tars from "./core/Tars";
+import NPC from "game/entity/npc/NPC";
 export default class TarsMod extends Mod {
     static readonly INSTANCE: TarsMod;
     event: IEventEmitter<this, ITarsModEvents>;
@@ -37,7 +37,6 @@ export default class TarsMod extends Mod {
     readonly dialogMain: DialogId;
     readonly menuBarButton: MenuBarButtonType;
     readonly quadrantComponent: QuadrantComponentId;
-    readonly npcType: NPCType;
     private readonly tarsInstances;
     private readonly tarsOverlay;
     private localPlayerTars;
@@ -57,11 +56,12 @@ export default class TarsMod extends Mod {
     onGameStart(): Promise<void>;
     onGameEnd(): void;
     onPreSaveGame(): void;
-    onMultiplayerConnect(): void;
     private saveDialogState;
     createAndLoadTars(human: Human, saveData: ISaveData): Tars;
     getStatus(): string;
     getTranslation(translation: TarsTranslation | string | Translation): Translation;
     initializeTarsSaveData(initial?: Partial<ISaveData>): ISaveData;
+    onNPCSpawn(host: any, npc: NPC): void;
     spawnNpc(): void;
+    private bindControllableNpc;
 }

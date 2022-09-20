@@ -12,10 +12,9 @@ import Island from "game/island/Island";
 
 import TarsPanel from "../components/TarsPanel";
 import { getTarsTranslation, TarsTranslation, TARS_ID } from "../../ITarsMod";
-import Tars from "../../core/Tars";
+import Tars, { TarsNPC } from "../../core/Tars";
 import Mod from "mod/Mod";
 import TarsMod from "../../TarsMod";
-import TarsNPC from "../../npc/TarsNPC";
 import TarsDialog from "../TarsDialog";
 
 export default class NPCsPanel extends TarsPanel {
@@ -82,11 +81,12 @@ export default class NPCsPanel extends TarsPanel {
 
         const nonPlayerHumans = game.getNonPlayerHumans();
         for (const human of nonPlayerHumans) {
-            if (!(human instanceof TarsNPC)) {
+            const npc = human.asNPC;
+            if (!npc) {
                 continue;
             }
 
-            const tarsInstance = human.tarsInstance;
+            const tarsInstance = (npc as TarsNPC).tarsInstance;
             if (tarsInstance === undefined) {
                 continue;
             }
@@ -99,7 +99,7 @@ export default class NPCsPanel extends TarsPanel {
                         .addHeading(heading => heading
                             .setText(getTarsTranslation(TarsTranslation.DialogButtonConfigurationTooltip))))
                     .event.subscribe("activate", () => {
-                        gameScreen?.dialogs.open<TarsDialog>(this.TarsMod.dialogMain, tarsInstance.getDialogSubId())?.initialize(tarsInstance);
+                        gameScreen?.dialogs.open<TarsDialog>(this.TarsMod.dialogMain, tarsInstance.dialogSubId)?.initialize(tarsInstance);
                     }))
                 .addButton(button => button
                     .classes.add("button-delete")
@@ -115,7 +115,8 @@ export default class NPCsPanel extends TarsPanel {
                             return;
                         }
 
-                        human.island.npcs.remove(human);
+                        // todo: action callable by multiplayer host for this
+                        human.island.npcs.remove(npc);
                     }))
                 .appendTo(this.rows);
 

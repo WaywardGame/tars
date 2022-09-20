@@ -123,7 +123,7 @@ export default class ViewportPanel extends TarsPanel {
             // ensures animations show correctly
             human.event.until(this, "switchAway", "remove")
                 .subscribe("turnEnd", () => {
-                    this.renderer?.updateView(RenderSource.Mod, false, false);
+                    this.renderer?.updateView(RenderSource.Mod, false);
                 });
 
             human.event.until(this, "switchAway", "remove")
@@ -162,7 +162,7 @@ export default class ViewportPanel extends TarsPanel {
     }
 
     private rerender(reason = RenderSource.Mod) {
-        this.renderer?.updateView(reason, true, true);
+        this.renderer?.updateView(reason, true);
     }
 
     protected refresh(): void {

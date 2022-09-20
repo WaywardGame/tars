@@ -23,16 +23,20 @@ import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { AttackType } from "game/entity/IEntity";
 import { ISaveData, ISaveDataContainer } from "../ITarsMod";
-import type TarsNPC from "../npc/TarsNPC";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Context from "./context/Context";
 import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
+import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+export declare type TarsNPC = ControllableNPC<ISaveData> & {
+    tarsInstance?: Tars;
+};
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
     readonly human: Human;
     readonly saveData: ISaveData;
     private readonly overlay;
+    readonly dialogSubId: string;
     private readonly log;
     private readonly planner;
     private readonly executor;
@@ -57,9 +61,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private readonly modeCache;
     private loaded;
     constructor(human: Human, saveData: ISaveData, overlay: TarsOverlay);
-    getName(): import("../../node_modules/@wayward/types/definitions/game/language/impl/TranslationImpl").default;
-    getDialogSubId(): string;
     private delete;
+    getName(): import("../../node_modules/@wayward/types/definitions/game/language/impl/TranslationImpl").default;
     getSaveDataContainer(): ISaveDataContainer;
     loadSaveData(container: ISaveDataContainer): void;
     load(): void;
@@ -131,4 +134,5 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private organizeBackpackInterrupts;
     private processQueuedNavigationUpdates;
     private processQuantumBurst;
+    private getDialogSubId;
 }

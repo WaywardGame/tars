@@ -2,6 +2,7 @@ import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi"
 import type CommandManager from "command/CommandManager";
 import { IEventEmitter, Priority } from "event/EventEmitter";
 import type { Source } from "game/entity/player/IMessageManager";
+import CreateControllableNPC from "game/entity/action/actions/CreateControllableNPC";
 import { MessageType } from "game/entity/player/IMessageManager";
 import type Player from "game/entity/player/Player";
 import type Dictionary from "language/Dictionary";
@@ -19,9 +20,7 @@ import Log from "utilities/Log";
 import { EventBus } from "event/EventBuses";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import TranslationImpl from "language/impl/TranslationImpl";
-import { NPCType } from "game/entity/npc/INPCs";
 import TileHelpers from "utilities/game/TileHelpers";
-import { RenderSource } from "renderer/IRenderer";
 import Human from "game/entity/Human";
 import { Prompt } from "game/meta/prompt/IPrompt";
 import Files from "utilities/Files";
@@ -33,11 +32,11 @@ import { logSourceName } from "./utilities/Logger";
 import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
 import type { ITarsModEvents, ISaveData, IGlobalSaveData, ISaveDataContainer } from "./ITarsMod";
 import { TarsTranslation, setTarsMod, TarsUiSaveDataKey, TARS_ID } from "./ITarsMod";
-import Tars from "./core/Tars";
-import { NavigationSystemState, QuantumBurstStatus, TarsMode } from "./core/ITars";
+import Tars, { TarsNPC } from "./core/Tars";
+import { NavigationSystemState, QuantumBurstStatus, TarsMode, tarsUniqueNpcType } from "./core/ITars";
 import { TarsOverlay } from "./ui/TarsOverlay";
-import TarsNPC from "./npc/TarsNPC";
 import { ITarsOptions, createOptions } from "./core/ITarsOptions";
+import NPC from "game/entity/npc/NPC";
 
 export default class TarsMod extends Mod {
 
@@ -125,11 +124,6 @@ export default class TarsMod extends Mod {
 
 	@Register.quadrantComponent("TARS", TarsQuadrantComponent)
 	public readonly quadrantComponent: QuadrantComponentId;
-
-	////////////////////////////////////
-
-	@Register.npc("TARS", TarsNPC)
-	public readonly npcType: NPCType;
 
 	////////////////////////////////////
 
@@ -336,11 +330,24 @@ export default class TarsMod extends Mod {
 				.send(message);
 		});
 
-		// ensure islands are loaded for all TARS instances
-		for (const islandId of islandsToLoad) {
-			const island = game.islands.getIfExists(islandId);
-			if (island && !island.isLoaded) {
-				await island.load();
+		if (!multiplayer.isConnected() || localPlayer.isMultiplayerHost()) {
+			// ensure islands are loaded for all TARS instances
+			for (const islandId of islandsToLoad) {
+				const island = game.islands.getIfExists(islandId);
+				if (island && !island.isLoaded) {
+					await island.load();
+				}
+			}
+
+			// activate TARS NPCs
+			const nonPlayerHumans = game.getNonPlayerHumans();
+			for (const human of nonPlayerHumans) {
+				const npc = human.asNPC;
+				if (!npc || (npc as TarsNPC).uniqueNpcType !== tarsUniqueNpcType) {
+					continue;
+				}
+
+				this.bindControllableNpc(npc as TarsNPC);
 			}
 		}
 
@@ -351,7 +358,7 @@ export default class TarsMod extends Mod {
 				for (const [dialogId, subId] of dialogsOpened) {
 					if (TarsMod.INSTANCE.dialogMain === dialogId) {
 						const tarsInstance = Array.from(this.tarsInstances)
-							.find(tarsInstance => game.islands.getIfExists(tarsInstance.human.islandId) && tarsInstance.getDialogSubId() === subId);
+							.find(tarsInstance => game.islands.getIfExists(tarsInstance.human.islandId) && tarsInstance.dialogSubId === subId);
 						if (tarsInstance) {
 							gameScreen.dialogs.open<TarsDialog>(dialogId, subId)?.initialize(tarsInstance);
 						}
@@ -388,22 +395,6 @@ export default class TarsMod extends Mod {
 		}
 	}
 
-	@EventHandler(EventBus.Multiplayer, "connect")
-	public onMultiplayerConnect(): void {
-		if (!multiplayer.isServer()) {
-			return;
-		}
-
-		// remove all TARS npcs when starting a multiplayer server in order to prevent desyncs
-		for (const island of game.islands.active) {
-			for (const npc of island.npcs) {
-				if (npc?.getRegistrarId() === this.npcType) {
-					island.npcs.remove(npc);
-				}
-			}
-		}
-	}
-
 	private saveDialogState() {
 		if (gameScreen) {
 			this.saveData.ui[TarsUiSaveDataKey.DialogsOpened] = [];
@@ -426,6 +417,8 @@ export default class TarsMod extends Mod {
 
 		tars.event.waitFor("unload").then(() => {
 			this.tarsInstances.delete(tars);
+
+			this.refreshTarsInstanceReferences();
 		});
 
 		this.refreshTarsInstanceReferences();
@@ -464,21 +457,84 @@ export default class TarsMod extends Mod {
 		return initial as ISaveData;
 	}
 
-	public spawnNpc() {
-		if (multiplayer.isConnected()) {
-			throw new Error("TARS npcs are not supported in multiplayer");
-		}
+	//////////////////////////////////////////////////
 
+	@EventHandler(EventBus.NPCManager, "spawn")
+	public onNPCSpawn(host: any, npc: NPC) {
+		if ((npc as TarsNPC).uniqueNpcType === tarsUniqueNpcType) {
+			this.bindControllableNpc(npc as TarsNPC);
+		}
+	}
+
+	public spawnNpc() {
 		const spawnPosition = TileHelpers.findMatchingTile(localIsland, localPlayer, TileHelpers.isSuitableSpawnPointTileForMultiplayer);
 		if (!spawnPosition) {
 			throw new Error("Invalid spawn position");
 		}
 
-		const npc = localIsland.npcs.spawn(this.npcType, spawnPosition.x, spawnPosition.y, spawnPosition.z);
-		if (!npc) {
-			throw new Error("Failed to spawn npc");
+		CreateControllableNPC.execute(localPlayer, tarsUniqueNpcType, spawnPosition);
+	}
+
+	/**
+	 * Assume direct control of an NPC
+	 */
+	private bindControllableNpc(npc: TarsNPC) {
+		if (multiplayer.isConnected() && !localPlayer.isMultiplayerHost()) {
+			// never bind against server-controlled npcs
+			return;
 		}
 
-		renderer?.updateView(RenderSource.Mod, true, true);
+		const tarsNpc: typeof npc & { tarsInstance?: Tars } = npc;
+
+		npc.event.waitFor("ready").then(() => {
+			if (tarsNpc.tarsInstance) {
+				// already ready
+				return;
+			}
+
+			if (!tarsNpc.saveData) {
+				tarsNpc.saveData = this.initializeTarsSaveData();
+			}
+
+			tarsNpc.tarsInstance = this.createAndLoadTars(tarsNpc, tarsNpc.saveData);
+
+			if (tarsNpc.tarsInstance.isEnabled()) {
+				tarsNpc.tarsInstance.toggle(true);
+			}
+		});
+
+		npc.event.waitFor("cleanup").then(() => {
+			if (tarsNpc.tarsInstance) {
+				gameScreen?.dialogs.get<TarsDialog>(this.dialogMain, tarsNpc.tarsInstance.dialogSubId)?.close();
+
+				tarsNpc.tarsInstance.disable(true);
+				tarsNpc.tarsInstance.unload();
+				tarsNpc.tarsInstance = undefined;
+			}
+		});
+
+		npc.event.subscribe("renamed", () => {
+			if (tarsNpc.tarsInstance) {
+				const dialog = gameScreen?.dialogs.get<TarsDialog>(this.dialogMain, tarsNpc.tarsInstance.dialogSubId);
+				if (dialog) {
+					dialog.refreshHeader();
+				}
+			}
+		});
+
+		npc.event.subscribe("loadedOnIsland", () => {
+			this.event.emit("refreshTarsInstanceReferences");
+		});
+
+		if (!tarsNpc.saveData) {
+			tarsNpc.saveData = this.initializeTarsSaveData();
+		}
+
+		tarsNpc.tarsInstance = this.createAndLoadTars(tarsNpc, tarsNpc.saveData);
+
+		if (tarsNpc.tarsInstance.isEnabled()) {
+			tarsNpc.tarsInstance.toggle(true);
+		}
 	}
+
 }

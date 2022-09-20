@@ -44,7 +44,6 @@ import ResolvablePromise from "utilities/promise/ResolvablePromise";
 
 import { AttackType } from "game/entity/IEntity";
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
-import type TarsNPC from "../npc/TarsNPC";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import ExecuteAction from "../objectives/core/ExecuteAction";
@@ -88,8 +87,13 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
+import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+
+export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
 export default class Tars extends EventEmitter.Host<ITarsEvents> {
+
+    public readonly dialogSubId: string;
 
     private readonly log: Log;
     private readonly planner: Planner;
@@ -152,22 +156,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         };
 
         this.log.info(`Created TARS instance on island id ${this.human.islandId}`);
-    }
 
-    public getName() {
-        return this.human.getName();
-    }
-
-    public getDialogSubId(): string {
-        if (this.asNPC) {
-            for (const npc of this.human.island.npcs) {
-                if (npc === this.human) {
-                    return npc.identifier.toString();
-                }
-            }
-        }
-
-        return "";
+        this.dialogSubId = this.getDialogSubId();
     }
 
     private delete() {
@@ -181,6 +171,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         this.utilities.navigation.unload();
 
         this.log.info(`Deleted TARS instance on island id ${this.human.islandId}`);
+    }
+
+    public getName() {
+        return this.human.getName();
     }
 
     public getSaveDataContainer(): ISaveDataContainer {
@@ -731,7 +725,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (this.saveData.enabled) {
             if (this.saveData.options.navigationOverlays) {
                 this.overlay.show();
-                renderers.updateView(RenderSource.Mod, false, true);
+                renderers.updateView(RenderSource.Mod, false);
             }
 
             this.utilities.navigation.queueUpdateOrigin(this.human);
@@ -1853,6 +1847,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         while (this.context.human.hasDelay()) {
             game.absoluteTime += 100;
         }
+    }
+
+    private getDialogSubId(): string {
+        return this.asNPC ? this.human.identifier.toString() : "";
     }
 
 }
