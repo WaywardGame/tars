@@ -104,7 +104,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 		let panels: TarsPanel[] = [];
 
 		for (const panelClass of subpanelClasses) {
-			if (panelClass === NPCsPanel && (this.subId.length !== 0 || (multiplayer.isConnected() && !localPlayer.isMultiplayerHost()))) {
+			if (panelClass === NPCsPanel && (this.subId.length !== 0 || !localPlayer.isHost())) {
 				// don't show npc panel for npc dialog or for non-mp hostss
 				continue;
 			}

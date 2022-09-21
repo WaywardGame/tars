@@ -9,6 +9,7 @@ import { promptDescriptionFactory } from "game/meta/prompt/PromptDescriptionFact
 import { PromptPriority } from "game/meta/prompt/IPrompt";
 import { EventHandler } from "event/EventManager";
 import Island from "game/island/Island";
+import RemoveControllableNPC from "game/entity/action/actions/RemoveControllableNPC";
 
 import TarsPanel from "../components/TarsPanel";
 import { getTarsTranslation, TarsTranslation, TARS_ID } from "../../ITarsMod";
@@ -115,8 +116,7 @@ export default class NPCsPanel extends TarsPanel {
                             return;
                         }
 
-                        // todo: action callable by multiplayer host for this
-                        human.island.npcs.remove(npc);
+                        RemoveControllableNPC.execute(localPlayer, npc);
                     }))
                 .appendTo(this.rows);
 

@@ -330,7 +330,7 @@ export default class TarsMod extends Mod {
 				.send(message);
 		});
 
-		if (!multiplayer.isConnected() || localPlayer.isMultiplayerHost()) {
+		if (localPlayer.isHost()) {
 			// ensure islands are loaded for all TARS instances
 			for (const islandId of islandsToLoad) {
 				const island = game.islands.getIfExists(islandId);
@@ -462,7 +462,7 @@ export default class TarsMod extends Mod {
 	@EventHandler(EventBus.NPCManager, "spawn")
 	public onNPCSpawn(host: any, npc: NPC) {
 		if ((npc as TarsNPC).uniqueNpcType === tarsUniqueNpcType) {
-			this.bindControllableNpc(npc as TarsNPC);
+			this.bindControllableNpc(npc as TarsNPC, true);
 		}
 	}
 
@@ -478,8 +478,8 @@ export default class TarsMod extends Mod {
 	/**
 	 * Assume direct control of an NPC
 	 */
-	private bindControllableNpc(npc: TarsNPC) {
-		if (multiplayer.isConnected() && !localPlayer.isMultiplayerHost()) {
+	private bindControllableNpc(npc: TarsNPC, openDialog?: boolean) {
+		if (!localPlayer.isHost()) {
 			// never bind against server-controlled npcs
 			return;
 		}
@@ -534,6 +534,10 @@ export default class TarsMod extends Mod {
 
 		if (tarsNpc.tarsInstance.isEnabled()) {
 			tarsNpc.tarsInstance.toggle(true);
+		}
+
+		if (openDialog) {
+			gameScreen?.dialogs.open<TarsDialog>(this.dialogMain, tarsNpc.tarsInstance.dialogSubId)?.initialize(tarsNpc.tarsInstance);
 		}
 	}
 
