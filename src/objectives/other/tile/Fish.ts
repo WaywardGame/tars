@@ -6,9 +6,9 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 
-import UseItem from "../item/UseItem";
 import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 import MoveToWater, { MoveToWaterType } from "../../utility/moveTo/MoveToWater";
+import UseItem from "../item/UseItem";
 
 export default class Fish extends Objective {
 
@@ -28,7 +28,7 @@ export default class Fish extends Objective {
         const ranged = context.inventory.fishing?.description()?.ranged;
         if (ranged !== undefined) {
             const itemRange = ranged.range + (context.inventory.fishing!.magic.get(MagicalPropertyType.Range) ?? 0);
-            const range = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), true);
+            const range = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "max");
 
             objectives.push(new MoveToWater(
                 MoveToWaterType.FishableWater,

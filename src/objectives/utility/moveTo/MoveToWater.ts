@@ -103,7 +103,7 @@ export default class MoveToWater extends Objective {
 					// determine where the player is going to end up when moving to this fishable tile
 					const standableNearbyPoints: IVector3[] = [];
 
-					for (const nearbyPoint of TileHelpers.getPointsAround(point)) {
+					for (const nearbyPoint of TileHelpers.getPointsAround(context.island, point)) {
 						const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
 						const nearbyTileType = TileHelpers.getType(nearbyTile);
 						const nearbyTerrainDescription = Terrains[nearbyTileType];
