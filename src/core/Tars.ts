@@ -12,7 +12,7 @@ import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import type Creature from "game/entity/creature/Creature";
 import CreatureManager from "game/entity/creature/CreatureManager";
 import Human from "game/entity/Human";
-import { EquipType } from "game/entity/IHuman";
+import { EquipType, MovingClientSide } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import NPC from "game/entity/npc/NPC";
@@ -41,8 +41,9 @@ import Vector2 from "utilities/math/Vector2";
 import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
-
 import { AttackType } from "game/entity/IEntity";
+import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
@@ -87,7 +88,6 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
-import ControllableNPC from "game/entity/npc/NPCS/Controllable";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -1841,7 +1841,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
 
         this.context.human.nextMoveTime = 0;
-        // this.context.human.movementFinishTime = 0;
+        this.context.human.movingClientside = MovingClientSide.NoInput;
         this.context.human.attackAnimationTime = undefined;
 
         while (this.context.human.hasDelay()) {

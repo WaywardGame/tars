@@ -22,13 +22,13 @@ import { WorldZ } from "game/WorldZ";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { AttackType } from "game/entity/IEntity";
+import ControllableNPC from "game/entity/npc/NPCS/Controllable";
 import { ISaveData, ISaveDataContainer } from "../ITarsMod";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Context from "./context/Context";
 import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
-import ControllableNPC from "game/entity/npc/NPCS/Controllable";
 export declare type TarsNPC = ControllableNPC<ISaveData> & {
     tarsInstance?: Tars;
 };
