@@ -11,7 +11,7 @@ import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import Lambda from "../objectives/core/Lambda";
 import MoveToTarget from "../objectives/core/MoveToTarget";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToIsland from "../objectives/utility/moveTo/MoveToIsland";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { ContextDataType } from "../core/context/IContext";
@@ -49,11 +49,13 @@ export interface IMoveToDoodad extends IMoveTo {
 export interface IMoveToPlayer extends IMoveTo {
     type: MoveToType.Player;
     playerIdentifier: string;
+    follow?: boolean;
 }
 
 export interface IMoveToNPC extends IMoveTo {
     type: MoveToType.NPC;
-    npcType: NPCType;
+    npc: NPC | NPCType;
+    follow?: boolean;
 }
 
 export interface IMoveToCreature extends IMoveTo {
@@ -123,19 +125,43 @@ export class MoveToMode implements ITarsMode {
                 break;
 
             case MoveToType.NPC:
-                const npcType = this.target.npcType;
+                const npcOrType = this.target.npc;
+                if (typeof (npcOrType) === "number") {
+                    const npcObjectives = context.utilities.object.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcOrType, 5)
+                        .map(npc => ([
+                            new MoveToTarget(npc, true),
+                            new Lambda(async () => {
+                                this.finished(true);
+                                return ObjectiveResult.Complete;
+                            }),
+                        ]));
 
-                const npcObjectives = context.utilities.object.findNPCS(context, "MoveToNPC", (npc: NPC) => npc.type === npcType, 5)
-                    .map(npc => ([
-                        new MoveToTarget(npc, true),
+                    if (npcObjectives.length > 0) {
+                        return npcObjectives;
+                    }
+
+                } else if (npcOrType === context.human) {
+                    return [
                         new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;
                         }),
-                    ]));
+                    ];
 
-                if (npcObjectives.length > 0) {
-                    return npcObjectives;
+                } else {
+                    const objectives: IObjective[] = [
+                        new MoveToIsland(npcOrType.islandId),
+                        new MoveToTarget(npcOrType, true),
+                    ]
+
+                    if (!this.target.follow) {
+                        objectives.push(new Lambda(async () => {
+                            this.finished(true);
+                            return ObjectiveResult.Complete;
+                        }));
+                    }
+
+                    return objectives;
                 }
 
                 break;
@@ -172,20 +198,26 @@ export class MoveToMode implements ITarsMode {
                         ];
                     }
 
-                    return [
+                    const objectives: IObjective[] = [
+                        new MoveToIsland(player.islandId),
                         new MoveToTarget(player, true),
-                        new Lambda(async () => {
+                    ]
+
+                    if (!this.target.follow) {
+                        objectives.push(new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;
-                        }),
-                    ];
+                        }));
+                    }
+
+                    return objectives;
                 }
 
                 break;
 
             case MoveToType.Base:
                 return [
-                    new ReturnToBase(),
+                    new MoveToBase(),
                     new Lambda(async () => {
                         this.finished(true);
                         return ObjectiveResult.Complete;

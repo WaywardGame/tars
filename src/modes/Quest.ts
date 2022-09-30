@@ -1,17 +1,17 @@
 import { TurnMode } from "game/IGame";
 
 import type Context from "../core/context/Context";
-import type { IObjective} from "../core/objective/IObjective";
+import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import Lambda from "../objectives/core/Lambda";
 import Idle from "../objectives/other/Idle";
-import ReturnToBase from "../objectives/other/ReturnToBase";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import CompleteQuests from "../objectives/quest/CompleteQuests";
 import type { ITarsMode } from "../core/mode/IMode";
-import { getCommonInitialObjectives } from "./CommonInitialObjectives";
+import { BaseMode } from "./BaseMode";
 
-export class QuestMode implements ITarsMode {
+export class QuestMode extends BaseMode implements ITarsMode {
 
     private finished: (success: boolean) => void;
 
@@ -22,11 +22,11 @@ export class QuestMode implements ITarsMode {
     public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
         const objectives: Array<IObjective | IObjective[]> = [];
 
-        objectives.push(...await getCommonInitialObjectives(context));
+        objectives.push(...await this.getCommonInitialObjectives(context));
 
         objectives.push(new CompleteQuests());
 
-        objectives.push(new ReturnToBase());
+        objectives.push(new MoveToBase());
 
         objectives.push(new OrganizeInventory());
 

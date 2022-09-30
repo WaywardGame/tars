@@ -1,6 +1,6 @@
 import { EventBus } from "event/EventBuses";
 import { EventHandler } from "event/EventManager";
-import type Player from "game/entity/player/Player";
+import type Human from "game/entity/Human";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 
@@ -26,7 +26,7 @@ export class AcquireItemMode implements ITarsMode {
 
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemUpdate")
-	public onInventoryItemAddOrUpdate(_: Player, item: Item) {
+	public onInventoryItemAddOrUpdate(_: Human, item: Item) {
 		// todo: compare player with context.player?
 		if (item.type === this.itemType) {
 			this.finished(true);

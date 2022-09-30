@@ -1,4 +1,4 @@
-import type Player from "game/entity/player/Player";
+import type Human from "game/entity/Human";
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
 import type { ITarsMode } from "../core/mode/IMode";
@@ -10,5 +10,5 @@ export declare class AcquireItemMode implements ITarsMode {
     constructor(itemType: ItemType);
     initialize(_: Context, finished: (success: boolean) => void): Promise<void>;
     determineObjectives(_: Context): Promise<Array<IObjective | IObjective[]>>;
-    onInventoryItemAddOrUpdate(_: Player, item: Item): void;
+    onInventoryItemAddOrUpdate(_: Human, item: Item): void;
 }

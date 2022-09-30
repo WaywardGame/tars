@@ -1,11 +1,13 @@
 import type { Events } from "event/EventEmitter";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
+import type { IslandId } from "game/island/IIsland";
 import type Translation from "language/Translation";
 import type Mod from "mod/Mod";
 
-import { ITarsOptions, TarsUseProtectedItems } from "./core/ITarsOptions";
+import { Reference } from "game/reference/IReferenceManager";
 import type { IContext } from "./core/context/IContext";
+import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
 import { TreasureHunterType } from "./modes/TreasureHunter";
 import type TarsMod from "./TarsMod";
 
@@ -29,37 +31,38 @@ export function getTarsTranslation(translation: TarsTranslation | string | Trans
     return getTarsMod().getTranslation(translation);
 }
 
-export function getTarsSaveData<T extends keyof ISaveData>(key: T): ISaveData[T] {
-    return getTarsMod().saveData[key];
-}
-
 export interface ITarsModEvents extends Events<Mod> {
-    /**
-     * Emitted when TARS is enabled or disabled
-     */
-    enableChange(enabled: boolean): any;
-
-    /**
-     * Emitted when TARS options change
-     */
-    optionsChange(options: ITarsOptions): any;
-
     /**
      * Emitted when TARS status is changed
      */
-    statusChange(status: TarsTranslation | string): any;
+    statusChange(): any;
+
+    refreshTarsInstanceReferences(): any;
+
+    changedGlobalDataSlots(): any;
+}
+
+export interface IGlobalSaveData {
+    dataSlots: ISaveDataContainer[];
+}
+
+export interface ISaveDataContainer {
+    name: string;
+    version: string;
+    saveData: ISaveData;
 }
 
 export interface ISaveData {
     enabled: boolean;
     configuredThresholds?: boolean;
     options: ITarsOptions;
-    island: Record<string, Record<string, any>>;
+    island: Record<IslandId, Record<string, any>>;
     ui: Partial<Record<TarsUiSaveDataKey, any>>;
+    instanceIslandIds: Map<IslandId, Reference[]>;
 }
 
 export enum TarsUiSaveDataKey {
-    DialogOpened,
+    DialogsOpened,
     ActivePanelId,
     AcquireItemDropdown,
     BuildDoodadDropdown,
@@ -68,23 +71,32 @@ export enum TarsUiSaveDataKey {
     MoveToDoodadDropdown,
     MoveToCreatureDropdown,
     MoveToPlayerDropdown,
-    MoveToNPCDropdown,
+    MoveToNPCTypeDropdown,
     TameCreatureDropdown,
 }
 
+
 export enum TarsTranslation {
     Name,
+    NpcName,
 
     DialogTitleMain,
 
     DialogStatusNavigatingInitializing,
 
     DialogPanelGeneral,
+    DialogPanelNPCs,
+    DialogPanelViewport,
     DialogPanelTasks,
+    DialogPanelData,
     DialogPanelMoveTo,
     DialogPanelGlobalOptions,
     DialogPanelModeOptions,
 
+    DialogButtonSimple,
+    DialogButtonSimpleTooltip,
+    DialogButtonAccurate,
+    DialogButtonAccurateTooltip,
     DialogButtonAllowProtectedItems,
     DialogButtonAllowProtectedItemsTooltip,
     DialogButtonAllowProtectedItemsWithBreakCheck,
@@ -95,6 +107,8 @@ export enum TarsTranslation {
     DialogButtonBuildDoodadTooltip,
     DialogButtonDebugLogging,
     DialogButtonDebugLoggingTooltip,
+    DialogButtonNavigationOverlays,
+    DialogButtonNavigationOverlaysTooltip,
     DialogButtonDisallowProtectedItems,
     DialogButtonDisallowProtectedItemsTooltip,
     DialogButtonAllowProtectedItemsForEquipment,
@@ -102,12 +116,15 @@ export enum TarsTranslation {
     DialogButtonDiscoverAndUnlockTreasure,
     DialogButtonDiscoverAndUnlockTreasureTooltip,
     DialogButtonEnable,
+    DialogButtonRename,
     DialogButtonExploreIslands,
     DialogButtonExploreIslandsTooltip,
     DialogButtonFreeze,
     DialogButtonFreezeTooltip,
     DialogButtonGoodCitizen,
     DialogButtonGoodCitizenTooltip,
+    DialogButtonGardenerOnlyEdiblePlants,
+    DialogButtonGardenerOnlyEdiblePlantsTooltip,
     DialogButtonHarvesterOnlyUseHands,
     DialogButtonHarvesterOnlyUseHandsTooltip,
     DialogButtonObtainTreasure,
@@ -130,6 +147,10 @@ export enum TarsTranslation {
     DialogButtonClearSwampsTooltip,
     DialogButtonOrganizeBase,
     DialogButtonOrganizeBaseTooltip,
+    DialogButtonAllowBackpacks,
+    DialogButtonAllowBackpacksTooltip,
+    DialogButtonMaintainLowDifficulty,
+    DialogButtonMaintainLowDifficultyTooltip,
     DialogButtonSailToCivilization,
     DialogButtonSailToCivilizationTooltip,
     DialogButtonStayHealthy,
@@ -138,6 +159,17 @@ export enum TarsTranslation {
     DialogButtonTameCreatureTooltip,
     DialogButtonUseOrbsOfInfluence,
     DialogButtonUseOrbsOfInfluenceTooltip,
+    DialogButtonSpawnNPC,
+    DialogButtonSpawnNPCTooltip,
+    DialogButtonLoadTooltip,
+    DialogButtonRenameTooltip,
+    DialogButtonConfigurationTooltip,
+    DialogButtonDeleteTooltip,
+    DialogButtonSaveData,
+    DialogButtonSaveDataTooltip,
+    DialogButtonImportData,
+    DialogButtonImportDataTooltip,
+    DialogButtonExportTooltip,
 
     DialogButtonMoveToBase,
     DialogButtonMoveToDoodad,
@@ -146,8 +178,10 @@ export enum TarsTranslation {
     DialogButtonMoveToCreature,
     DialogButtonMoveToPlayer,
     DialogButtonMoveToTerrain,
+    DialogButtonFollowPlayer,
+    DialogButtonFollowNPC,
 
-    DialogRangeLabel,
+    DialogLabel,
     DialogRangeRecoverHealthThreshold,
     DialogRangeRecoverHealthThresholdTooltip,
     DialogRangeRecoverStaminaThreshold,
@@ -170,6 +204,7 @@ export enum TarsTranslation {
     DialogLabelPlayer,
     DialogLabelRecoverThresholds,
     DialogLabelTerrain,
+    DialogLabelPlanningAccuracy,
 
     DialogModeGardener,
     DialogModeGardenerTooltip,
@@ -183,6 +218,8 @@ export enum TarsTranslation {
     DialogModeTerminatorTooltip,
     DialogModeTidyUp,
     DialogModeTidyUpTooltip,
+    DialogModeAngler,
+    DialogModeAnglerTooltip,
     DialogModeTreasureHunter,
     DialogModeTreasureHunterTooltip,
 }
@@ -237,6 +274,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         title: TarsTranslation.DialogButtonAllowCaves,
         tooltip: TarsTranslation.DialogButtonAllowCavesTooltip,
     },
+    {
+        option: "allowBackpacks",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonAllowBackpacks,
+        tooltip: TarsTranslation.DialogButtonAllowBackpacksTooltip,
+    },
     TarsTranslation.DialogLabelItemProtection,
     // {
     //     option: "lockInventory",
@@ -272,6 +315,15 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         title: TarsTranslation.DialogButtonGoodCitizen,
         tooltip: TarsTranslation.DialogButtonGoodCitizenTooltip,
     },
+    TarsTranslation.DialogLabelPlanningAccuracy,
+    {
+        option: "planningAccuracy",
+        type: TarsOptionSectionType.Choice,
+        choices: [
+            [TarsTranslation.DialogButtonSimple, TarsTranslation.DialogButtonSimpleTooltip, PlanningAccuracy.Simple],
+            [TarsTranslation.DialogButtonAccurate, TarsTranslation.DialogButtonAccurateTooltip, PlanningAccuracy.Accurate],
+        ],
+    },
     TarsTranslation.DialogLabelDeveloper,
     {
         option: "debugLogging",
@@ -284,6 +336,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonFreeze,
         tooltip: TarsTranslation.DialogButtonFreezeTooltip,
+    },
+    {
+        option: "navigationOverlays",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonNavigationOverlays,
+        tooltip: TarsTranslation.DialogButtonNavigationOverlaysTooltip,
     },
     TarsTranslation.DialogLabelRecoverThresholds,
     {
@@ -326,6 +384,13 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
             max: (context) => context.human.stat.get<IStatMax>(Stat.Thirst).max,
         }
     },
+    TarsTranslation.DialogLabelAdvanced,
+    {
+        option: "quantumBurst",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonQuantumBurst,
+        tooltip: TarsTranslation.DialogButtonQuantumBurstTooltip,
+    },
 ];
 
 export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslation | undefined> = [
@@ -360,9 +425,22 @@ export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslatio
         title: TarsTranslation.DialogButtonOrganizeBase,
         tooltip: TarsTranslation.DialogButtonOrganizeBaseTooltip,
     },
+    {
+        option: "survivalMaintainLowDifficulty",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonMaintainLowDifficulty,
+        tooltip: TarsTranslation.DialogButtonMaintainLowDifficultyTooltip,
+    },
+    TarsTranslation.DialogModeGardener,
+    {
+        option: "gardenerOnlyEdiblePlants",
+        type: TarsOptionSectionType.Checkbox,
+        title: TarsTranslation.DialogButtonGardenerOnlyEdiblePlants,
+        tooltip: TarsTranslation.DialogButtonGardenerOnlyEdiblePlantsTooltip,
+    },
     TarsTranslation.DialogModeHarvester,
     {
-        option: "harvestOnlyUseHands",
+        option: "harvesterOnlyUseHands",
         type: TarsOptionSectionType.Checkbox,
         title: TarsTranslation.DialogButtonHarvesterOnlyUseHands,
         tooltip: TarsTranslation.DialogButtonHarvesterOnlyUseHandsTooltip,
