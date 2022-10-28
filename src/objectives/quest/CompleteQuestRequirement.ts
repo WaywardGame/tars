@@ -1,4 +1,5 @@
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
+import StartFire from "game/entity/action/actions/StartFire";
 import { ActionType } from "game/entity/action/IAction";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { EquipType } from "game/entity/IHuman";
@@ -9,13 +10,14 @@ import type { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import ItemManager from "game/item/ItemManager";
 import Enums from "utilities/enum/Enums";
-import StartFire from "game/entity/action/actions/StartFire";
 
+import Item from "game/item/Item";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
 import AcquireItemFromDismantle from "../acquire/item/AcquireItemFromDismantle";
@@ -31,8 +33,6 @@ import EquipItem from "../other/item/EquipItem";
 import UnequipItem from "../other/item/UnequipItem";
 import UseItem from "../other/item/UseItem";
 import SailToCivilization from "../utility/SailToCivilization";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import Item from "game/item/Item";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -244,7 +244,7 @@ export default class CompleteQuestRequirement extends Objective {
                     let itemToSlot: Item | undefined;
 
                     for (const item of context.utilities.item.getItemsInInventory(context)) {
-                        if (gameScreen?.actionBar.getSlottedIn(item).length === 0) {
+                        if ((gameScreen?.actionBar.getSlottedIn(item)?.size ?? 0) === 0) {
                             itemToSlot = item;
                             break;
                         }

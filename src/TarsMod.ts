@@ -243,7 +243,13 @@ export default class TarsMod extends Mod {
 		this.saveData.instanceIslandIds.clear();
 
 		for (const tarsInstance of this.tarsInstances) {
-			const referenceId = game.references.get((tarsInstance.human.asNPC || tarsInstance.human.asPlayer)!);
+			const npc = tarsInstance.human.asNPC;
+			if (!npc) {
+				// the local player island will always be loaded
+				continue;
+			}
+
+			const referenceId = game.references.get(npc);
 			if (!referenceId) {
 				continue;
 			}
