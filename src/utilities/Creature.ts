@@ -50,8 +50,8 @@ export class CreatureUtilities {
 
 			case CreatureType.Kraken:
 				return !this.hasDecentEquipment(context) ||
-					context.human.getEquippedItem(EquipType.Legs)!.type === ItemType.BarkLeggings ||
-					context.human.getEquippedItem(EquipType.Chest)!.type === ItemType.BarkTunic;
+					context.human.getEquippedItem(EquipType.Legs)?.type === ItemType.BarkLeggings ||
+					context.human.getEquippedItem(EquipType.Chest)?.type === ItemType.BarkTunic;
 
 			default:
 				return creature.aberrant ? !this.hasDecentEquipment(context) : false;
