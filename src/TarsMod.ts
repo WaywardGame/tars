@@ -26,7 +26,6 @@ import { Prompt } from "game/meta/prompt/IPrompt";
 import Files from "utilities/Files";
 import SearchParams from "utilities/SearchParams";
 
-import Navigation from "./core/navigation/Navigation";
 import TarsDialog from "./ui/TarsDialog";
 import { logSourceName } from "./utilities/Logger";
 import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
@@ -154,8 +153,6 @@ export default class TarsMod extends Mod {
 		if (!this.globalSaveData.dataSlots) {
 			this.globalSaveData.dataSlots = [];
 		}
-
-		Navigation.setModPath(this.getPath());
 
 		Log.setSourceFilter(Log.LogType.File, false, logSourceName);
 	}

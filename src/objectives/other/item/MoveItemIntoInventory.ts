@@ -1,5 +1,6 @@
 import { IContainer } from "game/item/IItem";
 import type Item from "game/item/Item";
+import { IVector3 } from "utilities/math/IVector";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

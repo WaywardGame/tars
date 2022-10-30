@@ -89,13 +89,13 @@ export class MovementUtilities {
         }
     }
 
-    public async ensureOrigin(context: Context) {
+    public ensureOrigin(context: Context) {
         const navigation = context.utilities.navigation;
 
         const origin = navigation.getOrigin();
         if (!origin || (origin.x !== context.human.x || origin.y !== context.human.y || origin.z !== context.human.z)) {
             context.log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
-            await navigation.updateOrigin(context.human);
+            navigation.updateOrigin(context.human);
         }
     }
 
@@ -104,7 +104,7 @@ export class MovementUtilities {
 
         let ends = this.cachedEnds.get(pathId);
         if (ends === undefined) {
-            ends = context.utilities.navigation.getValidPoints(target, moveAdjacentToTarget);
+            ends = context.utilities.navigation.getValidPoints(context.island, target, moveAdjacentToTarget);
             this.cachedEnds.set(pathId, ends);
         }
 
@@ -135,7 +135,7 @@ export class MovementUtilities {
     private async _getMovementPath(context: Context, target: IVector3, moveAdjacentToTarget: boolean): Promise<NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible> {
         const navigation = context.utilities.navigation;
 
-        await this.ensureOrigin(context);
+        this.ensureOrigin(context);
 
         // ensure sailing mode is up to date
         await context.utilities.ensureSailingMode(!!context.human.vehicleItemReference);
@@ -152,7 +152,7 @@ export class MovementUtilities {
         }
 
         // pick the easiest path
-        let results = (await Promise.all(ends.map(async end => navigation.findPath(end))))
+        let results = ends.map(end => navigation.findPath(end))
             .filter(result => result !== undefined) as NavigationPath[];
 
         for (const result of results) {

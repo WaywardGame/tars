@@ -29,7 +29,7 @@ export default class MoveToLand extends Objective {
 			const tileType = TileHelpers.getType(tile);
 			const terrainDescription = Terrains[tileType];
 			if (terrainDescription && !terrainDescription.water &&
-				!navigation.isDisabledFromPoint(point) && navigation.getPenaltyFromPoint(point) === 0) {
+				!navigation.isDisabledFromPoint(context.island, point) && navigation.getPenaltyFromPoint(context.island, point) === 0) {
 				// find the safest point to land on
 				return true;
 			}

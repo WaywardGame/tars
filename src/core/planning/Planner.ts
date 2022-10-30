@@ -93,27 +93,27 @@ export class Planner implements IPlanner {
 	/**
 	 * Determines the easiest objective pipeline to execute
 	 * @param context The context
-	 * @param objectives List of objective pipelines
+	 * @param objectivesSets List of objective pipelines
 	 * @returns The objective pipeline to execute
 	 */
-	public async pickEasiestObjectivePipeline(context: Context, objectives: IObjective[][]): Promise<ObjectivePipeline> {
+	public async pickEasiestObjectivePipeline(context: Context, objectivesSets: IObjective[][]): Promise<ObjectivePipeline> {
 		const start = performance.now();
 
 		let easiestObjectivePipeline: PossibleObjectivePipeline | undefined;
 
 		if (this.shouldLog) {
-			this.log.info(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
+			this.log.info(`Determining easiest objective. ${objectivesSets.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
 		}
 
 		if (this.debug) {
-			this.writeCalculationLog(`Determining easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
+			this.writeCalculationLog(`Determining easiest objective. ${objectivesSets.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${context.getHashCode()})`);
 		}
 
 		let result: ObjectivePipeline = {
 			status: CalculatedDifficultyStatus.Impossible,
 		};
 
-		if (objectives.length === 0) {
+		if (objectivesSets.length === 0) {
 			return result;
 		}
 
@@ -126,7 +126,7 @@ export class Planner implements IPlanner {
 		while (calculateObjectives) {
 			calculateObjectives = false;
 
-			for (const objectivesSet of objectives) {
+			for (const objectivesSet of objectivesSets) {
 				// this.log.debug(`Checking status for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}...`);
 
 				const objectiveStartTime = performance.now();
@@ -225,11 +225,11 @@ export class Planner implements IPlanner {
 
 		if (easiestObjectivePipeline) {
 			if (this.shouldLog) {
-				this.log.info(`Easiest objective for ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} is ${easiestObjectivePipeline.objectives.map(o => o.getHashCode(context)).join(" -> ")} (difficulty: ${easiestObjectivePipeline.difficulty}) (time: ${time.toFixed(2)}ms)`);
+				this.log.info(`Easiest objective for ${objectivesSets.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} is ${easiestObjectivePipeline.objectives.map(o => o.getHashCode(context)).join(" -> ")} (difficulty: ${easiestObjectivePipeline.difficulty}) (time: ${time.toFixed(2)}ms)`);
 			}
 
 			if (time >= 1000) {
-				this.log.warn(`Took ${time.toFixed(2)}ms to determine the easiest objective. ${objectives.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${clonedContext.getHashCode()})`);
+				this.log.warn(`Took ${time.toFixed(2)}ms to determine the easiest objective. ${objectivesSets.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${clonedContext.getHashCode()})`);
 
 				if (time >= 2000) {
 					if (this.debug) {
@@ -247,7 +247,7 @@ export class Planner implements IPlanner {
 		}
 
 		if (this.shouldLog) {
-			this.log.info(`All ${objectives.length} objectives are impossible (time: ${time.toFixed(2)}ms)`);
+			this.log.info(`All ${objectivesSets.length} objectives are impossible (time: ${time.toFixed(2)}ms)`);
 		}
 
 		return result;

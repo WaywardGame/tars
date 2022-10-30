@@ -31,30 +31,30 @@ export class TileUtilities {
 		this.canUseArgsCache.clear();
 	}
 
-	public async getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]> {
+	public getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): ITileLocation[] {
 		const position = positionOverride ?? context.getPosition();
 
 		const results: ITileLocation[][] = [
-			await this._getNearestTileLocation(context, tileType, position)
+			this._getNearestTileLocation(context, tileType, position)
 		];
 
 		if (!positionOverride && context.options.allowCaves) {
 			const oppositeOrigin = context.utilities.navigation.calculateOppositeOrigin(position.z);
 			// const oppositeOrigin = context.utilities.navigation.getOppositeOrigin();
 			if (oppositeOrigin) {
-				results.push(await this._getNearestTileLocation(context, tileType, oppositeOrigin));
+				results.push(this._getNearestTileLocation(context, tileType, oppositeOrigin));
 			}
 		}
 
 		return results.flat();
 	}
 
-	private async _getNearestTileLocation(context: Context, tileType: TerrainType, position: IVector3): Promise<ITileLocation[]> {
+	private _getNearestTileLocation(context: Context, tileType: TerrainType, position: IVector3): ITileLocation[] {
 		const cacheId = `${tileType},${position.x},${position.y},${position.z}`;
 
 		let result = this.tileLocationCache.get(cacheId);
 		if (!result) {
-			result = await context.utilities.navigation.getNearestTileLocation(tileType, position);
+			result = context.utilities.navigation.getNearestTileLocation(tileType, position);
 			this.tileLocationCache.set(cacheId, result);
 		}
 

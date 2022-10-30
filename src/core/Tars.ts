@@ -43,6 +43,7 @@ import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
 import { AttackType } from "game/entity/IEntity";
 import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+import { IVector2 } from "utilities/math/IVector";
 
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
@@ -509,22 +510,24 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         if (point) {
                             const otherTile = island.getTileFromPoint(point);
                             this.utilities.navigation.onTileUpdate(
+                                island,
                                 otherTile,
                                 TileHelpers.getType(otherTile),
                                 point.x, point.y, point.z,
                                 this.utilities.base.isBaseTile(this.getContext(), otherTile),
-                                undefined, tileUpdateType);
+                                tileUpdateType);
                         }
                     }
                 }
 
             } else {
                 this.utilities.navigation.onTileUpdate(
+                    island,
                     tile,
                     TileHelpers.getType(tile),
                     tileX, tileY, tileZ,
                     this.utilities.base.isBaseTile(this.getContext(), tile),
-                    undefined, tileUpdateType);
+                    tileUpdateType);
             }
         }
     }
@@ -942,7 +945,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             // give a chance for the message to show up on screen before starting nav update
             await sleep(100);
 
-            await this.utilities.navigation.updateAll(sailingMode);
+            this.utilities.navigation.updateAll(sailingMode);
 
             this.utilities.navigation.queueUpdateOrigin(this.human);
 
@@ -1027,7 +1030,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             if (this.base && typeof (localIsland) !== "undefined") {
                 const baseDoodads = this.utilities.base.getBaseDoodads(this.getContext());
                 for (const doodad of baseDoodads) {
-                    this.utilities.navigation.refreshOverlay(doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+                    this.utilities.navigation.refreshOverlay(localIsland, doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
                 }
             }
 

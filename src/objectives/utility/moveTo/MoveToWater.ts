@@ -4,6 +4,7 @@ import type { ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
+import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
 import type Context from "../../../core/context/Context";
@@ -107,7 +108,7 @@ export default class MoveToWater extends Objective {
 						const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
 						const nearbyTileType = TileHelpers.getType(nearbyTile);
 						const nearbyTerrainDescription = Terrains[nearbyTileType];
-						if ((nearbyTerrainDescription?.shallowWater || !nearbyTerrainDescription?.water) && !navigation.isDisabledFromPoint(nearbyPoint)) {
+						if ((nearbyTerrainDescription?.shallowWater || !nearbyTerrainDescription?.water) && !navigation.isDisabledFromPoint(context.island, nearbyPoint)) {
 							standableNearbyPoints.push(nearbyPoint);
 						}
 					}
@@ -155,7 +156,7 @@ export default class MoveToWater extends Objective {
 					break;
 			}
 
-			if (navigation.isDisabledFromPoint(point)) {
+			if (navigation.isDisabledFromPoint(context.island, point)) {
 				return false;
 			}
 

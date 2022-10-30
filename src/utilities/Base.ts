@@ -440,7 +440,7 @@ export class BaseUtilities {
 		// build close to rocks
 		let foundRock = false;
 		for (const rockType of rockTypes) {
-			const rockTileLocations = await context.utilities.tile.getNearestTileLocation(context, rockType, origin);
+			const rockTileLocations = context.utilities.tile.getNearestTileLocation(context, rockType, origin);
 			if (rockTileLocations.some(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) <= nearRocksDistance)) {
 				foundRock = true;
 				break;
@@ -452,7 +452,7 @@ export class BaseUtilities {
 		}
 
 		// buiuld close to a water source
-		const shallowSeawaterTileLocations = await context.utilities.tile.getNearestTileLocation(context, waterType, origin);
+		const shallowSeawaterTileLocations = context.utilities.tile.getNearestTileLocation(context, waterType, origin);
 		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearWaterDistance)) {
 			return false;
 		}

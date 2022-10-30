@@ -9,7 +9,6 @@ import Heal from "game/entity/action/actions/Heal";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
-import { freshWaterTileLocation } from "../../core/navigation/INavigation";
 import Objective from "../../core/objective/Objective";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
 import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
@@ -28,6 +27,7 @@ import AcquireWater from "../acquire/item/specific/AcquireWater";
 import AddDifficulty from "../core/AddDifficulty";
 import Restart from "../core/Restart";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
+import { freshWaterTileLocation } from "../../core/navigation/INavigation";
 
 export interface IRecoverThirstOptions {
 	onlyUseAvailableItems: boolean;
@@ -78,7 +78,7 @@ export default class RecoverThirst extends Objective {
 		const health = context.human.stat.get<IStatMax>(Stat.Health);
 		if (health.value > 4 || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
-			const nearestFreshWater = await context.utilities.tile.getNearestTileLocation(context, freshWaterTileLocation);
+			const nearestFreshWater = context.utilities.tile.getNearestTileLocation(context, freshWaterTileLocation);
 
 			for (const { point } of nearestFreshWater) {
 				const objectives: IObjective[] = [];
@@ -222,7 +222,7 @@ export default class RecoverThirst extends Objective {
 				const changeTimer = thirst.changeTimer;
 				const nextChangeTimer = thirst.nextChangeTimer;
 				if (changeTimer !== undefined && nextChangeTimer !== undefined) {
-					const pathResult = await context.utilities.navigation.findPath(context.utilities.base.getBasePosition(context));
+					const pathResult = context.utilities.navigation.findPath(context.utilities.base.getBasePosition(context));
 					if (pathResult) {
 						// note: assuming walk path is taking us away from the base
 						const pathLength = pathResult.path.length + (context.human.walkPath?.path?.length ?? 0);

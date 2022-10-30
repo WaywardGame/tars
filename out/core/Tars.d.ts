@@ -23,6 +23,7 @@ import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { AttackType } from "game/entity/IEntity";
 import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+import { IVector2 } from "utilities/math/IVector";
 import { ISaveData, ISaveDataContainer } from "../ITarsMod";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Context from "./context/Context";

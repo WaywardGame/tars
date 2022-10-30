@@ -28,7 +28,7 @@ export default class MoveToZ extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
-		const tileLocations = await context.utilities.tile.getNearestTileLocation(context, TerrainType.CaveEntrance);
+		const tileLocations = context.utilities.tile.getNearestTileLocation(context, TerrainType.CaveEntrance);
 
 		for (const tileLocation of tileLocations) {
 			objectivePipelines.push([

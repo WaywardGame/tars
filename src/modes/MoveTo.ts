@@ -92,7 +92,7 @@ export class MoveToMode implements ITarsMode {
                 ];
 
             case MoveToType.Terrain:
-                const tileLocations = await context.utilities.tile.getNearestTileLocation(context, this.target.terrainType);
+                const tileLocations = context.utilities.tile.getNearestTileLocation(context, this.target.terrainType);
 
                 if (tileLocations.length > 0) {
                     return tileLocations.map(tileLocation => ([

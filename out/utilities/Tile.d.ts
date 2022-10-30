@@ -13,7 +13,7 @@ export declare class TileUtilities {
     private readonly tileLocationCache;
     private readonly canUseArgsCache;
     clearCache(): void;
-    getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): Promise<ITileLocation[]>;
+    getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): ITileLocation[];
     private _getNearestTileLocation;
     isSwimmingOrOverWater(context: Context): boolean;
     isOverDeepSeaWater(context: Context): boolean;
