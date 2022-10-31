@@ -2,21 +2,18 @@ import type { IDijkstraMap } from "@cplusplus/index";
 import type { ITerrainDescription, ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
-import type { IVector2, IVector3 } from "utilities/math/IVector";
-import { KdTree } from "utilities/collection/tree/KdTree";
+import type { IVector3 } from "utilities/math/IVector";
 import { TileUpdateType } from "game/IGame";
 import Human from "game/entity/Human";
 import Log from "utilities/Log";
+import Island from "game/island/Island";
 import type { ITileLocation } from "../ITars";
 import { NavigationPath } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
-import Island from "game/island/Island";
+import { NavigationKdTrees } from "./NavigationKdTrees";
 interface INavigationMapData {
     dijkstraMap: IDijkstraMap;
     dirtyDijkstra: boolean;
-    kdTreeTileTypes: Uint8Array;
-    kdTrees: Map<TerrainType, KdTree>;
-    tileTypeCache: Map<TerrainType, Map<ITile, IVector2>>;
 }
 export declare const tileUpdateRadius = 2;
 export declare const creaturePenaltyRadius = 2;
@@ -24,6 +21,7 @@ export default class Navigation {
     private readonly log;
     private readonly human;
     private readonly overlay;
+    private readonly kdTrees;
     private readonly maps;
     private readonly nodePenaltyCache;
     private readonly nodeDisableCache;
@@ -31,14 +29,11 @@ export default class Navigation {
     private originUpdateTimeout;
     private oppositeOrigin;
     private sailingMode;
-    private readonly freshWaterTypes;
-    private readonly seaWaterTypes;
-    private readonly gatherableTypes;
-    constructor(log: Log, human: Human, overlay: TarsOverlay);
+    constructor(log: Log, human: Human, overlay: TarsOverlay, kdTrees: NavigationKdTrees);
     load(): void;
     unload(): void;
     shouldUpdateSailingMode(sailingMode: boolean): boolean;
-    updateAll(sailingMode: boolean): void;
+    updateAll(sailingMode: boolean): Promise<void>;
     getOrigin(): IVector3 | undefined;
     queueUpdateOrigin(origin?: IVector3): void;
     updateOrigin(origin?: IVector3): void;
@@ -48,7 +43,7 @@ export default class Navigation {
     calculateOppositeZ(z: WorldZ): WorldZ | undefined;
     refreshOverlay(island: Island, tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;
     onTileUpdate(island: Island, tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile: boolean, tileUpdateType?: TileUpdateType, mapData?: INavigationMapData): void;
-    getNearestTileLocation(tileType: TerrainType, point: IVector3): ITileLocation[];
+    getNearestTileLocation(island: Island, tileType: TerrainType, point: IVector3): ITileLocation[];
     isDisabledFromPoint(island: Island, point: IVector3): boolean;
     getPenaltyFromPoint(island: Island, point: IVector3, tile?: ITile): number;
     getValidPoints(island: Island, point: IVector3, moveAdjacentToTarget: boolean): IVector3[];
@@ -56,7 +51,5 @@ export default class Navigation {
     private isDisabled;
     private getPenalty;
     private _updateOrigin;
-    private updateKdTree;
-    private updateKdTreeSpecialTileTypes;
 }
 export {};

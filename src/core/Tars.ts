@@ -89,6 +89,7 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
+import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -127,7 +128,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private loaded = false;
 
-    constructor(public readonly human: Human, public readonly saveData: ISaveData, private readonly overlay: TarsOverlay) {
+    constructor(public readonly human: Human, public readonly saveData: ISaveData, private readonly overlay: TarsOverlay, navigationKdTrees: NavigationKdTrees) {
         super();
 
         const loggingUtilities = new LoggerUtilities(() => this.getName().toString());
@@ -147,7 +148,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             item: new ItemUtilities(),
             logger: loggingUtilities,
             movement: new MovementUtilities(),
-            navigation: new Navigation(this.log, human, overlay),
+            navigation: new Navigation(this.log, human, overlay, navigationKdTrees),
             object: new ObjectUtilities(),
             overlay: this.overlay,
             player: new PlayerUtilities(),
@@ -945,7 +946,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             // give a chance for the message to show up on screen before starting nav update
             await sleep(100);
 
-            this.utilities.navigation.updateAll(sailingMode);
+            await this.utilities.navigation.updateAll(sailingMode);
 
             this.utilities.navigation.queueUpdateOrigin(this.human);
 

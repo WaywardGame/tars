@@ -36,6 +36,7 @@ import { NavigationSystemState, QuantumBurstStatus, TarsMode, tarsUniqueNpcType 
 import { TarsOverlay } from "./ui/TarsOverlay";
 import { ITarsOptions, createOptions } from "./core/ITarsOptions";
 import NPC from "game/entity/npc/NPC";
+import { NavigationKdTrees } from "./core/navigation/NavigationKdTrees";
 
 export default class TarsMod extends Mod {
 
@@ -130,6 +131,7 @@ export default class TarsMod extends Mod {
 
 	private readonly tarsOverlay: TarsOverlay = new TarsOverlay();
 
+	private readonly tarsNavigationKdTrees: NavigationKdTrees = new NavigationKdTrees();
 
 	////////////////////////////////////
 
@@ -268,6 +270,8 @@ export default class TarsMod extends Mod {
 			this.saveData.island[localIsland.id] = {};
 		}
 
+		this.tarsNavigationKdTrees.load();
+
 		const islandsToLoad = !multiplayer.isConnected() ? Array.from(this.saveData.instanceIslandIds.keys()) : [];
 
 		this.localPlayerTars = this.createAndLoadTars(localPlayer, this.saveData);
@@ -388,6 +392,8 @@ export default class TarsMod extends Mod {
 
 		this.tarsInstances.clear();
 
+		this.tarsNavigationKdTrees.unload();
+
 		this.localPlayerTars = undefined;
 	}
 
@@ -413,7 +419,7 @@ export default class TarsMod extends Mod {
 	////////////////////////////////////
 
 	public createAndLoadTars(human: Human, saveData: ISaveData): Tars {
-		const tars = new Tars(human, saveData, this.tarsOverlay);
+		const tars = new Tars(human, saveData, this.tarsOverlay, this.tarsNavigationKdTrees);
 		tars.load();
 
 		this.tarsInstances.add(tars);

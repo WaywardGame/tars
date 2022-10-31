@@ -54,7 +54,7 @@ export class TileUtilities {
 
 		let result = this.tileLocationCache.get(cacheId);
 		if (!result) {
-			result = context.utilities.navigation.getNearestTileLocation(tileType, position);
+			result = context.utilities.navigation.getNearestTileLocation(context.island, tileType, position);
 			this.tileLocationCache.set(cacheId, result);
 		}
 
