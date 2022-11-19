@@ -42,7 +42,7 @@ import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
 import { AttackType } from "game/entity/IEntity";
-import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+import ControllableNPC from "game/entity/npc/npcs/Controllable";
 import { IVector2 } from "utilities/math/IVector";
 
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
