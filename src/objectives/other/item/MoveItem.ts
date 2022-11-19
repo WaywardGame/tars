@@ -3,6 +3,7 @@ import type { IContainer } from "game/item/IItem";
 import Doodad from "game/doodad/Doodad";
 import MoveItemAction from "game/entity/action/actions/MoveItem";
 import { ActionArguments } from "game/entity/action/IAction";
+import { IVector3 } from "utilities/math/IVector";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

@@ -41,7 +41,7 @@ export default class AnalyzeBase extends Objective {
 						changed = true;
 						this.log.info(`"${key}" was removed`);
 
-						context.utilities.navigation.refreshOverlay(doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+						context.utilities.navigation.refreshOverlay(context.island, doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
 
 						return false;
 					}
@@ -86,7 +86,7 @@ export default class AnalyzeBase extends Objective {
 
 							info.onAdd?.(context, target);
 
-							context.utilities.navigation.refreshOverlay(target.getTile(), target.x, target.y, target.z, true);
+							context.utilities.navigation.refreshOverlay(context.island, target.getTile(), target.x, target.y, target.z, true);
 
 							if (!info.allowMultiple) {
 								break;

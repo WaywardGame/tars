@@ -16,7 +16,7 @@ export declare class Planner implements IPlanner {
     get isCreatingPlan(): boolean;
     reset(): void;
     createPlan(context: Context, objective: IObjective): Promise<Plan | undefined>;
-    pickEasiestObjectivePipeline(context: Context, objectives: IObjective[][]): Promise<ObjectivePipeline>;
+    pickEasiestObjectivePipeline(context: Context, objectivesSets: IObjective[][]): Promise<ObjectivePipeline>;
     private getObjectivePipeline;
     private checkAndMergeDifficultyCache;
     private calculateDifficulty;

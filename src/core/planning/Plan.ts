@@ -3,6 +3,7 @@ import type { ILogLine } from "utilities/Log";
 import type Log from "utilities/Log";
 // @ts-ignore
 import Vector2 from "utilities/math/Vector2";
+import { IVector3 } from "utilities/math/IVector";
 
 import type Context from "../context/Context";
 import type { IObjective, IObjectiveInfo, IObjectivePriority } from "../objective/IObjective";

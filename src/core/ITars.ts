@@ -9,8 +9,9 @@ import type Island from "game/island/Island";
 import type { IContainer, IItemDisassembly } from "game/item/IItem";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
-import type { ITile } from "game/tile/ITerrain";
+import type { ITile, TerrainType } from "game/tile/ITerrain";
 import type { ITerrainLoot } from "game/tile/TerrainResources";
+import { IVector3 } from "utilities/math/IVector";
 
 import { TarsOverlay } from "../ui/TarsOverlay";
 import { ActionUtilities } from "../utilities/Action";

@@ -1,4 +1,5 @@
 import type { IVector3 } from "utilities/math/IVector";
+import { TerrainType } from "game/tile/ITerrain";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";

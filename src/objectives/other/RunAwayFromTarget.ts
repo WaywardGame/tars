@@ -47,7 +47,7 @@ export default class RunAwayFromTarget extends Objective {
 					return false;
 				}
 
-				if (navigation.isDisabledFromPoint(point)) {
+				if (navigation.isDisabledFromPoint(context.island, point)) {
 					return false;
 				}
 
@@ -84,7 +84,7 @@ export default class RunAwayFromTarget extends Objective {
 
 					const pointZ = { ...point, z: context.human.z };
 
-					pointScore += navigation.getPenaltyFromPoint(pointZ) * 10;
+					pointScore += navigation.getPenaltyFromPoint(context.island, pointZ) * 10;
 
 					// try to avoid paths that has blocking things
 					const tile = context.island.getTileFromPoint(pointZ);
@@ -105,7 +105,7 @@ export default class RunAwayFromTarget extends Objective {
 						context.island,
 						pointZ,
 						(_, point, tile) => {
-							pointScore! += navigation.getPenaltyFromPoint(point, tile);
+							pointScore! += navigation.getPenaltyFromPoint(context.island, point, tile);
 
 							// creatures are scary
 							// if (tile.creature !== undefined) {

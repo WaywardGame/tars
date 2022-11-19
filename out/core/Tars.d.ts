@@ -22,13 +22,15 @@ import { WorldZ } from "game/WorldZ";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { AttackType } from "game/entity/IEntity";
-import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+import ControllableNPC from "game/entity/npc/npcs/Controllable";
+import { IVector2 } from "utilities/math/IVector";
 import { ISaveData, ISaveDataContainer } from "../ITarsMod";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Context from "./context/Context";
 import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
+import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
 export declare type TarsNPC = ControllableNPC<ISaveData> & {
     tarsInstance?: Tars;
 };
@@ -60,7 +62,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private readonly navigationQueuedUpdates;
     private readonly modeCache;
     private loaded;
-    constructor(human: Human, saveData: ISaveData, overlay: TarsOverlay);
+    constructor(human: Human, saveData: ISaveData, overlay: TarsOverlay, navigationKdTrees: NavigationKdTrees);
     private delete;
     getName(): import("../../node_modules/@wayward/types/definitions/game/language/impl/TranslationImpl").default;
     getSaveDataContainer(): ISaveDataContainer;

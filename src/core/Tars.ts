@@ -42,7 +42,8 @@ import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
 import { AttackType } from "game/entity/IEntity";
-import ControllableNPC from "game/entity/npc/NPCS/Controllable";
+import ControllableNPC from "game/entity/npc/npcs/Controllable";
+import { IVector2 } from "utilities/math/IVector";
 
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
@@ -88,6 +89,7 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
+import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -126,7 +128,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private loaded = false;
 
-    constructor(public readonly human: Human, public readonly saveData: ISaveData, private readonly overlay: TarsOverlay) {
+    constructor(public readonly human: Human, public readonly saveData: ISaveData, private readonly overlay: TarsOverlay, navigationKdTrees: NavigationKdTrees) {
         super();
 
         const loggingUtilities = new LoggerUtilities(() => this.getName().toString());
@@ -146,7 +148,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             item: new ItemUtilities(),
             logger: loggingUtilities,
             movement: new MovementUtilities(),
-            navigation: new Navigation(this.log, human, overlay),
+            navigation: new Navigation(this.log, human, overlay, navigationKdTrees),
             object: new ObjectUtilities(),
             overlay: this.overlay,
             player: new PlayerUtilities(),
@@ -509,22 +511,24 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         if (point) {
                             const otherTile = island.getTileFromPoint(point);
                             this.utilities.navigation.onTileUpdate(
+                                island,
                                 otherTile,
                                 TileHelpers.getType(otherTile),
                                 point.x, point.y, point.z,
                                 this.utilities.base.isBaseTile(this.getContext(), otherTile),
-                                undefined, tileUpdateType);
+                                tileUpdateType);
                         }
                     }
                 }
 
             } else {
                 this.utilities.navigation.onTileUpdate(
+                    island,
                     tile,
                     TileHelpers.getType(tile),
                     tileX, tileY, tileZ,
                     this.utilities.base.isBaseTile(this.getContext(), tile),
-                    undefined, tileUpdateType);
+                    tileUpdateType);
             }
         }
     }
@@ -1027,7 +1031,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             if (this.base && typeof (localIsland) !== "undefined") {
                 const baseDoodads = this.utilities.base.getBaseDoodads(this.getContext());
                 for (const doodad of baseDoodads) {
-                    this.utilities.navigation.refreshOverlay(doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+                    this.utilities.navigation.refreshOverlay(localIsland, doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
                 }
             }
 

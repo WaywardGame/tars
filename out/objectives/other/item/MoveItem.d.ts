@@ -1,6 +1,7 @@
 import type Item from "game/item/Item";
 import type { IContainer } from "game/item/IItem";
 import Doodad from "game/doodad/Doodad";
+import { IVector3 } from "utilities/math/IVector";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";

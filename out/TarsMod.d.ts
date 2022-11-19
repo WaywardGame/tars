@@ -39,6 +39,7 @@ export default class TarsMod extends Mod {
     readonly quadrantComponent: QuadrantComponentId;
     private readonly tarsInstances;
     private readonly tarsOverlay;
+    private readonly tarsNavigationKdTrees;
     private localPlayerTars;
     get tarsInstance(): Tars | undefined;
     onInitialize(): void;

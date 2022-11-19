@@ -26,7 +26,6 @@ import { Prompt } from "game/meta/prompt/IPrompt";
 import Files from "utilities/Files";
 import SearchParams from "utilities/SearchParams";
 
-import Navigation from "./core/navigation/Navigation";
 import TarsDialog from "./ui/TarsDialog";
 import { logSourceName } from "./utilities/Logger";
 import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
@@ -37,6 +36,7 @@ import { NavigationSystemState, QuantumBurstStatus, TarsMode, tarsUniqueNpcType 
 import { TarsOverlay } from "./ui/TarsOverlay";
 import { ITarsOptions, createOptions } from "./core/ITarsOptions";
 import NPC from "game/entity/npc/NPC";
+import { NavigationKdTrees } from "./core/navigation/NavigationKdTrees";
 
 export default class TarsMod extends Mod {
 
@@ -131,6 +131,7 @@ export default class TarsMod extends Mod {
 
 	private readonly tarsOverlay: TarsOverlay = new TarsOverlay();
 
+	private readonly tarsNavigationKdTrees: NavigationKdTrees = new NavigationKdTrees();
 
 	////////////////////////////////////
 
@@ -154,8 +155,6 @@ export default class TarsMod extends Mod {
 		if (!this.globalSaveData.dataSlots) {
 			this.globalSaveData.dataSlots = [];
 		}
-
-		Navigation.setModPath(this.getPath());
 
 		Log.setSourceFilter(Log.LogType.File, false, logSourceName);
 	}
@@ -270,6 +269,8 @@ export default class TarsMod extends Mod {
 		if (!this.saveData.island[localIsland.id]) {
 			this.saveData.island[localIsland.id] = {};
 		}
+
+		this.tarsNavigationKdTrees.load();
 
 		const islandsToLoad = !multiplayer.isConnected() ? Array.from(this.saveData.instanceIslandIds.keys()) : [];
 
@@ -391,6 +392,8 @@ export default class TarsMod extends Mod {
 
 		this.tarsInstances.clear();
 
+		this.tarsNavigationKdTrees.unload();
+
 		this.localPlayerTars = undefined;
 	}
 
@@ -416,7 +419,7 @@ export default class TarsMod extends Mod {
 	////////////////////////////////////
 
 	public createAndLoadTars(human: Human, saveData: ISaveData): Tars {
-		const tars = new Tars(human, saveData, this.tarsOverlay);
+		const tars = new Tars(human, saveData, this.tarsOverlay, this.tarsNavigationKdTrees);
 		tars.load();
 
 		this.tarsInstances.add(tars);

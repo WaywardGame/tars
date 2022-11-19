@@ -43,7 +43,7 @@ export default class GatherFromTerrainResource extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const terrainSearch of this.search) {
-			const tileLocations = await context.utilities.tile.getNearestTileLocation(context, terrainSearch.type);
+			const tileLocations = context.utilities.tile.getNearestTileLocation(context, terrainSearch.type);
 
 			for (const tileLocation of tileLocations) {
 				this.processTerrainLocation(context, objectivePipelines, terrainSearch, tileLocation);

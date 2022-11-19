@@ -36,7 +36,7 @@ export default class GatherFromTerrainWater extends Objective {
 				continue;
 			}
 
-			const tileLocations = await context.utilities.tile.getNearestTileLocation(context, terrainSearch.type);
+			const tileLocations = context.utilities.tile.getNearestTileLocation(context, terrainSearch.type);
 
 			for (const { tile, point } of tileLocations) {
 				if (tile.creature || tile.npc || tile.doodad || context.island.isPlayerAtTile(tile)) {

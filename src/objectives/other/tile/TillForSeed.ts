@@ -7,6 +7,7 @@ import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import Till from "game/entity/action/actions/Till";
+import { IVector3 } from "utilities/math/IVector";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
