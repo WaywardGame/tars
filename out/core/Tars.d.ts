@@ -31,7 +31,7 @@ import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
 import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
-export declare type TarsNPC = ControllableNPC<ISaveData> & {
+export type TarsNPC = ControllableNPC<ISaveData> & {
     tarsInstance?: Tars;
 };
 export default class Tars extends EventEmitter.Host<ITarsEvents> {

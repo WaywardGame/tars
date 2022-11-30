@@ -211,7 +211,7 @@ export interface ITarsSliderOptionSection extends ITarsOptionSection {
         max: number | ((context: IContext) => number);
     };
 }
-export declare type TarsOptionSection = ITarsCheckboxOptionSection | ITarsChoiceOptionSection | ITarsSliderOptionSection;
+export type TarsOptionSection = ITarsCheckboxOptionSection | ITarsChoiceOptionSection | ITarsSliderOptionSection;
 export declare const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslation | undefined>;
 export declare const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslation | undefined>;
 export {};

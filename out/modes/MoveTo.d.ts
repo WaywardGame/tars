@@ -48,7 +48,7 @@ export interface IMoveToCreature extends IMoveTo {
 export interface IMoveToBase extends IMoveTo {
     type: MoveToType.Base;
 }
-export declare type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToCreature | IMoveToNPC | IMoveToBase;
+export type MoveTo = IMoveToIsland | IMoveToTerrain | IMoveToDoodad | IMoveToPlayer | IMoveToCreature | IMoveToNPC | IMoveToBase;
 export declare class MoveToMode implements ITarsMode {
     private readonly target;
     private finished;

@@ -14,7 +14,7 @@ export declare enum ObjectiveResult {
     Restart = -4,
     Impossible = -5
 }
-export declare type ObjectiveExecutionResult = IObjective | IObjective[] | IObjective[][] | ObjectiveResult | number;
+export type ObjectiveExecutionResult = IObjective | IObjective[] | IObjective[][] | ObjectiveResult | number;
 export declare enum CalculatedDifficultyStatus {
     Impossible = -5,
     NotCalculatedYet = -6,
@@ -59,34 +59,34 @@ interface IBaseObjectivePipeline {
     status: CalculatedDifficultyStatus;
     changes?: ContextState;
 }
-export declare type ImpossibleObjectivePipeline = IBaseObjectivePipeline & {
+export type ImpossibleObjectivePipeline = IBaseObjectivePipeline & {
     status: CalculatedDifficultyStatus.Impossible;
 };
-export declare type NotPlausibleObjectivePipeline = IBaseObjectivePipeline & {
+export type NotPlausibleObjectivePipeline = IBaseObjectivePipeline & {
     status: CalculatedDifficultyStatus.NotPlausible;
     hashCode: string;
     minimumDifficulty: number;
 };
-export declare type NotCalculatedYetObjectivePipeline = IBaseObjectivePipeline & {
+export type NotCalculatedYetObjectivePipeline = IBaseObjectivePipeline & {
     status: CalculatedDifficultyStatus.NotCalculatedYet;
     hashCode: string;
     waitingHashCodes: Set<string>;
 };
-export declare type PossibleObjectivePipeline = Required<IBaseObjectivePipeline> & {
+export type PossibleObjectivePipeline = Required<IBaseObjectivePipeline> & {
     status: CalculatedDifficultyStatus.Possible;
     depth: number;
     objectives: IObjective[];
     objectiveChain: IObjectiveInfo[];
     difficulty: number;
 };
-export declare type ObjectivePipeline = ImpossibleObjectivePipeline | NotCalculatedYetObjectivePipeline | PossibleObjectivePipeline | NotPlausibleObjectivePipeline;
+export type ObjectivePipeline = ImpossibleObjectivePipeline | NotCalculatedYetObjectivePipeline | PossibleObjectivePipeline | NotPlausibleObjectivePipeline;
 export interface IObjectiveInfo {
     depth: number;
     objective: IObjective;
     difficulty: number;
     logs: ILogLine[];
 }
-export declare type HashCodeFiltering = Set<ItemType> | {
+export type HashCodeFiltering = Set<ItemType> | {
     objectiveHashCode: string;
     itemTypes: Set<ItemType>;
 };

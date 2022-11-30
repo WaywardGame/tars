@@ -94,7 +94,7 @@ export interface IBaseInfo {
         base: IBase;
     }): Doodad[];
 }
-export declare type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "availableUnlimitedWellLocation">;
+export type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "availableUnlimitedWellLocation">;
 export declare const baseInfo: Record<BaseInfoKey, IBaseInfo>;
 export interface IInventoryItems {
     anvil?: Item;
@@ -149,7 +149,7 @@ export interface IInventoryItemInfo {
     requiredMinDur?: number;
     cureStatus?: StatusType;
 }
-export declare type InventoryItemFlags = InventoryItemFlag | {
+export type InventoryItemFlags = InventoryItemFlag | {
     flag: InventoryItemFlag;
     option: any;
 };
@@ -170,8 +170,8 @@ export interface IBaseItemSearch {
 export interface ItemSearch<T> extends IBaseItemSearch {
     type: T;
 }
-export declare type DoodadSearch = ItemSearch<DoodadType>;
-export declare type DoodadSearchMap = Map<DoodadType, Map<GrowingStage, number>>;
+export type DoodadSearch = ItemSearch<DoodadType>;
+export type DoodadSearchMap = Map<DoodadType, Map<GrowingStage, number>>;
 export interface CreatureSearch {
     identifier: string;
     map: Map<CreatureType, ItemType[]>;
