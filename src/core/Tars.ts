@@ -1056,6 +1056,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (options?.delete) {
             this.context = undefined as any;
             this.modeCache.clear();
+            this.log.debug("Deleted context");
 
         } else if (options?.resetContext || options?.resetInventory || options?.resetBase) {
             this.createContext();
@@ -1135,6 +1136,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private async onTick() {
+        if (!this.context) {
+            return;
+        }
+
         if (!this.isRunning() || !this.executor.isReady(this.context, false)) {
             if (this.quantumBurstCooldown === 2) {
                 this.quantumBurstCooldown--;
