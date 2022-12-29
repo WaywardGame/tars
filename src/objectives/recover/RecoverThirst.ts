@@ -108,7 +108,8 @@ export default class RecoverThirst extends Objective {
 				} else {
 					this.log.info("Running back to wait for water still");
 
-					if (context.base.waterStill.length < 3 && context.human.stat.get<IStatMax>(Stat.Stamina).value > 2) {
+					// todo: add max water still option? context.base.waterStill.length < 3 && 
+					if (context.human.stat.get<IStatMax>(Stat.Stamina).value > 2) {
 						this.log.info("Building another water still while waiting");
 
 						// build a water still while waiting
@@ -287,6 +288,20 @@ export default class RecoverThirst extends Objective {
 							// build a solar still while waiting
 							objectivePipelines.push([
 								new AcquireItem(ItemType.SolarStill),
+								new BuildItem(),
+							]);
+
+						} else {
+							// todo: option for this?
+
+							// build another of whichever is easier
+							objectivePipelines.push([
+								new AcquireItem(ItemType.SolarStill),
+								new BuildItem(),
+							]);
+
+							objectivePipelines.push([
+								new AcquireItemByGroup(ItemTypeGroup.WaterStill),
 								new BuildItem(),
 							]);
 						}

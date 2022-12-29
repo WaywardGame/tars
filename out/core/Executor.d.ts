@@ -8,7 +8,7 @@ export declare enum ExecuteObjectivesResultType {
     ContinuingNextTick = 2,
     Restart = 3
 }
-export declare type ExecuteObjectivesResult = IExecuteObjectivesCompleted | IExecuteObjectivesInProgress | IExecuteObjectivesContinuingNextTick | IExecuteObjectivesRestart;
+export type ExecuteObjectivesResult = IExecuteObjectivesCompleted | IExecuteObjectivesInProgress | IExecuteObjectivesContinuingNextTick | IExecuteObjectivesRestart;
 export interface IExecuteObjectivesCompleted {
     type: ExecuteObjectivesResultType.Completed;
 }

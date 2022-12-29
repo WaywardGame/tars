@@ -1056,6 +1056,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (options?.delete) {
             this.context = undefined as any;
             this.modeCache.clear();
+            this.log.debug("Deleted context");
 
         } else if (options?.resetContext || options?.resetInventory || options?.resetBase) {
             this.createContext();
@@ -1135,6 +1136,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     private async onTick() {
+        if (!this.context) {
+            return;
+        }
+
         if (!this.isRunning() || !this.executor.isReady(this.context, false)) {
             if (this.quantumBurstCooldown === 2) {
                 this.quantumBurstCooldown--;
@@ -1612,7 +1617,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     private nearbyCreatureInterrupt(context: Context): IObjective | undefined {
         const shouldRunAwayFromAllCreatures = context.utilities.creature.shouldRunAwayFromAllCreatures(context);
 
-        for (const facingDirecton of Direction.CARDINALS_AND_NONE) {
+        for (const facingDirecton of Direction.CARDINALS) {
             const creature = this.checkNearbyCreature(context, facingDirecton);
             if (creature !== undefined) {
                 const tamingCreature = context.getData<Creature>(ContextDataType.TamingCreature);
@@ -1639,16 +1644,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         }
     }
 
-    private checkNearbyCreature(context: Context, direction: Direction.Cardinal | Direction.None): Creature | undefined {
-        if (direction !== Direction.None) {
-            const point = Vector2.DIRECTIONS[direction];
-            const validPoint = context.island.ensureValidPoint({ x: context.human.x + point.x, y: context.human.y + point.y, z: context.human.z });
-            if (validPoint) {
-                const tile = context.island.getTileFromPoint(validPoint);
-                if (tile && tile.creature && !tile.creature.isTamed()) {
-                    //  && (tile.creature.ai & AiType.Hostile) !== 0
-                    return tile.creature;
-                }
+    private checkNearbyCreature(context: Context, direction: Direction.Cardinal): Creature | undefined {
+        const point = Vector2.DIRECTIONS[direction];
+        const validPoint = context.island.ensureValidPoint({ x: context.human.x + point.x, y: context.human.y + point.y, z: context.human.z });
+        if (validPoint) {
+            const tile = context.island.getTileFromPoint(validPoint);
+            if (tile && tile.creature && !tile.creature.isTamed()) {
+                //  && (tile.creature.ai & AiType.Hostile) !== 0
+                return tile.creature;
             }
         }
     }

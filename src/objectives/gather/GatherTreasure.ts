@@ -98,6 +98,18 @@ export default class GatherTreasure extends Objective {
                 objectives.push(new AcquireInventoryItem("lockPick"));
 
                 if (needFishingRod) {
+                    // if (context.inventory.fishing) {
+                    //     const ranged = context.inventory.fishing.description()?.ranged ?? { range: 1 };
+                    //     const itemRange = ranged.range + (context.inventory.fishing?.magic.get(MagicalPropertyType.Range) ?? 0);
+                    //     const minRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "min");
+                    //     const maxRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "max");
+
+                    //     objectives.push(new MoveToTargetRange(target, minRange, maxRange));
+                    //     objectives.push(new UseItem(Cast, context.inventory.fishing));
+
+                    // } else {
+                    //     objectives.push(new Restart());
+                    // }
                     objectives.push(new MoveToTarget(target, true));
                     objectives.push(new UseItem(Cast, context.inventory.fishing));
 

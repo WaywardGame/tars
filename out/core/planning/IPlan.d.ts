@@ -26,7 +26,7 @@ export declare enum ExecuteResultType {
     Ignored = 3,
     ContinuingNextTick = 4
 }
-export declare type ExecuteResult = IExecuteCompleted | IExecutePending | IExecuteWaitingForNextTick | IExecuteRestart | IExecuteIgnored;
+export type ExecuteResult = IExecuteCompleted | IExecutePending | IExecuteWaitingForNextTick | IExecuteRestart | IExecuteIgnored;
 export interface IExecuteCompleted {
     type: ExecuteResultType.Completed;
 }
