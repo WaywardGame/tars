@@ -244,7 +244,7 @@ export default class CompleteQuestRequirement extends Objective {
                     let itemToSlot: Item | undefined;
 
                     for (const item of context.utilities.item.getItemsInInventory(context)) {
-                        if ((gameScreen?.actionBar.getSlottedIn(item)?.size ?? 0) === 0) {
+                        if ((gameScreen?.actionBar?.getSlottedIn(item)?.size ?? 0) === 0) {
                             itemToSlot = item;
                             break;
                         }
