@@ -1,22 +1,22 @@
+import { EventHandler } from "event/EventManager";
+import RemoveControllableNPC from "game/entity/action/actions/RemoveControllableNPC";
+import Island from "game/island/Island";
+import { PromptPriority } from "game/meta/prompt/IPrompt";
+import { promptDescriptionFactory } from "game/meta/prompt/PromptDescriptionFactory";
+import Prompts from "game/meta/prompt/Prompts";
 import type Translation from "language/Translation";
 import Button from "ui/component/Button";
-import Divider from "ui/component/Divider";
-import { Bound } from "utilities/Decorators";
-import { LabeledButtonRow } from "ui/component/LabeledButtonRow";
 import Component from "ui/component/Component";
-import Prompts from "game/meta/prompt/Prompts";
-import { promptDescriptionFactory } from "game/meta/prompt/PromptDescriptionFactory";
-import { PromptPriority } from "game/meta/prompt/IPrompt";
-import { EventHandler } from "event/EventManager";
-import Island from "game/island/Island";
-import RemoveControllableNPC from "game/entity/action/actions/RemoveControllableNPC";
+import Divider from "ui/component/Divider";
+import { LabeledButtonRow } from "ui/component/LabeledButtonRow";
+import { Bound } from "utilities/Decorators";
 
-import TarsPanel from "../components/TarsPanel";
-import { getTarsTranslation, TarsTranslation, TARS_ID } from "../../ITarsMod";
-import Tars, { TarsNPC } from "../../core/Tars";
 import Mod from "mod/Mod";
+import { TARS_ID, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
 import TarsMod from "../../TarsMod";
+import Tars, { TarsNPC } from "../../core/Tars";
 import TarsDialog from "../TarsDialog";
+import TarsPanel from "../components/TarsPanel";
 
 export default class NPCsPanel extends TarsPanel {
 
@@ -30,7 +30,7 @@ export default class NPCsPanel extends TarsPanel {
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonSpawnNPC))
-            .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonSpawnNPCTooltip))))
+            .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonSpawnNPCTooltip)))
             .event.subscribe("activate", async () => {
                 this.TarsMod.spawnNpc();
                 return true;
@@ -96,17 +96,13 @@ export default class NPCsPanel extends TarsPanel {
                 .setLabel(label => label.setText(human.getName()))
                 .addButton(button => button
                     .classes.add("button-gear")
-                    .setTooltip(tooltip => tooltip
-                        .addHeading(heading => heading
-                            .setText(getTarsTranslation(TarsTranslation.DialogButtonConfigurationTooltip))))
+                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonConfigurationTooltip)))
                     .event.subscribe("activate", () => {
                         gameScreen?.dialogs.open<TarsDialog>(this.TarsMod.dialogMain, tarsInstance.dialogSubId)?.initialize(tarsInstance);
                     }))
                 .addButton(button => button
                     .classes.add("button-delete")
-                    .setTooltip(tooltip => tooltip
-                        .addHeading(heading => heading
-                            .setText(getTarsTranslation(TarsTranslation.DialogButtonDeleteTooltip))))
+                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonDeleteTooltip)))
                     .event.subscribe("activate", async () => {
                         if (!await Prompts.queue(
                             promptDescriptionFactory

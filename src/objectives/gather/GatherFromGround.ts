@@ -57,16 +57,17 @@ export default class GatherFromGround extends Objective {
 	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
 		const prioritizeBaseItems = context.getData(ContextDataType.PrioritizeBaseItems);
 
-		const point = context.human.getPoint();
-		const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item));
+		const item = context.human.tile.containedItems?.find(item => this.itemMatches(context, item));
 		if (item) {
+			const tile = item.island.getTileFromPoint(item.containedWithin as ITileContainer);
+
 			return [
 				new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
-				new MoveToTarget(item.containedWithin as ITileContainer, false)
+				new MoveToTarget(tile, false)
 					.overrideDifficulty((prioritizeBaseItems && context.utilities.item.getBaseTileItems(context).has(item)) ? 5 : undefined)
 					.trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
-				new MoveItemIntoInventory(item, item.containedWithin as ITileContainer),
+				new MoveItemIntoInventory(item, tile),
 			];
 		}
 
@@ -75,7 +76,7 @@ export default class GatherFromGround extends Objective {
 				if (item && this.itemMatches(context, item)) {
 					return [
 						new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
-						new MoveToTarget(item.containedWithin as ITileContainer, true)
+						new MoveToTarget(item.island.getTileFromPoint(item.containedWithin as ITileContainer), true)
 							.overrideDifficulty((prioritizeBaseItems && context.utilities.item.getBaseTileItems(context).has(item)) ? 5 : undefined)
 							.trackItem(item),
 						new SetContextData(this.contextDataKey, item), // todo: this might be wrong
@@ -83,12 +84,12 @@ export default class GatherFromGround extends Objective {
 							const objectives: IObjective[] = [];
 
 							// itemMatches must not check that the item is not reserved (because it is)
-							const point = context.human.getFacingPoint();
-							const item = context.island.getTileFromPoint(point).containedItems?.find(item => this.itemMatches(context, item, true));
+							const tile = context.human.facingTile;
+							const item = tile.containedItems?.find(item => this.itemMatches(context, item, true));
 							if (item) {
 								objectives.push(new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode));
 								objectives.push(new SetContextData(this.contextDataKey, item));
-								objectives.push(new MoveItemIntoInventory(item, point));
+								objectives.push(new MoveItemIntoInventory(item, tile));
 							}
 
 							return objectives;

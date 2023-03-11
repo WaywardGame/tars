@@ -5,6 +5,7 @@ import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import DrinkInFront from "game/entity/action/actions/DrinkInFront";
 import DrinkItem from "game/entity/action/actions/DrinkItem";
 import Heal from "game/entity/action/actions/Heal";
+import { DoodadType } from "game/doodad/IDoodad";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -22,7 +23,6 @@ import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
 import RecoverStamina from "./RecoverStamina";
 import AcquireItem from "../acquire/item/AcquireItem";
 import StartSolarStill from "../other/doodad/StartSolarStill";
-import { DoodadType } from "game/doodad/IDoodad";
 import AcquireWater from "../acquire/item/specific/AcquireWater";
 import AddDifficulty from "../core/AddDifficulty";
 import Restart from "../core/Restart";
@@ -80,10 +80,10 @@ export default class RecoverThirst extends Objective {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = context.utilities.tile.getNearestTileLocation(context, freshWaterTileLocation);
 
-			for (const { point } of nearestFreshWater) {
+			for (const { tile } of nearestFreshWater) {
 				const objectives: IObjective[] = [];
 
-				objectives.push(new MoveToTarget(point, true));
+				objectives.push(new MoveToTarget(tile, true));
 
 				objectives.push(new ExecuteAction(DrinkInFront, []));
 
@@ -223,7 +223,7 @@ export default class RecoverThirst extends Objective {
 				const changeTimer = thirst.changeTimer;
 				const nextChangeTimer = thirst.nextChangeTimer;
 				if (changeTimer !== undefined && nextChangeTimer !== undefined) {
-					const pathResult = context.utilities.navigation.findPath(context.utilities.base.getBasePosition(context));
+					const pathResult = context.utilities.navigation.findPath(context.utilities.base.getBaseTile(context));
 					if (pathResult) {
 						// note: assuming walk path is taking us away from the base
 						const pathLength = pathResult.path.length + (context.human.walkPath?.path?.length ?? 0);

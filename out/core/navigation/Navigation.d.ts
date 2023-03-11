@@ -1,5 +1,5 @@
 import type { IDijkstraMap } from "@cplusplus/index";
-import type { ITerrainDescription, ITile } from "game/tile/ITerrain";
+import type { ITerrainDescription } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
 import type { IVector3 } from "utilities/math/IVector";
@@ -8,9 +8,10 @@ import Human from "game/entity/Human";
 import Log from "utilities/Log";
 import Island from "game/island/Island";
 import type { ITileLocation } from "../ITars";
-import { NavigationPath } from "./INavigation";
+import { ExtendedTerrainType, NavigationPath } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
 import { NavigationKdTrees } from "./NavigationKdTrees";
+import Tile from "game/tile/Tile";
 interface INavigationMapData {
     dijkstraMap: IDijkstraMap;
     dirtyDijkstra: boolean;
@@ -41,15 +42,15 @@ export default class Navigation {
     getOppositeOrigin(): IVector3 | undefined;
     calculateOppositeOrigin(z: WorldZ): IVector3 | undefined;
     calculateOppositeZ(z: WorldZ): WorldZ | undefined;
-    refreshOverlay(island: Island, tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;
-    onTileUpdate(island: Island, tile: ITile, tileType: TerrainType, x: number, y: number, z: number, isBaseTile: boolean, tileUpdateType?: TileUpdateType, mapData?: INavigationMapData): void;
-    getNearestTileLocation(island: Island, tileType: TerrainType, point: IVector3): ITileLocation[];
+    refreshOverlay(tile: Tile, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;
+    onTileUpdate(island: Island, tile: Tile, tileType: TerrainType, isBaseTile: boolean, tileUpdateType?: TileUpdateType, mapData?: INavigationMapData): void;
+    getNearestTileLocation(island: Island, tileType: ExtendedTerrainType, point: IVector3): ITileLocation[];
     isDisabledFromPoint(island: Island, point: IVector3): boolean;
-    getPenaltyFromPoint(island: Island, point: IVector3, tile?: ITile): number;
+    getPenaltyFromPoint(island: Island, point: IVector3, tile?: Tile): number;
     getValidPoints(island: Island, point: IVector3, moveAdjacentToTarget: boolean): IVector3[];
     findPath(end: IVector3): NavigationPath | undefined;
-    private isDisabled;
-    private getPenalty;
+    isDisabled(tile: Tile, tileType?: TerrainType, skipCache?: boolean): boolean;
+    getPenalty(tile: Tile, tileType?: TerrainType, terrainDescription?: ITerrainDescription | undefined, tileUpdateType?: TileUpdateType, skipCache?: boolean): number;
     private _updateOrigin;
 }
 export {};

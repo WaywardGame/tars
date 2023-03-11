@@ -1,8 +1,7 @@
 import Terrains from "game/tile/Terrains";
-import TileHelpers from "utilities/game/TileHelpers";
-import type { IVector3 } from "utilities/math/IVector";
 import Mine from "game/entity/action/actions/Mine";
 import Chop from "game/entity/action/actions/Chop";
+import Tile from "game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -10,7 +9,6 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 import Restart from "../../core/Restart";
-
 import PickUpAllTileItems from "./PickUpAllTileItems";
 import ButcherCorpse from "../../interrupt/ButcherCorpse";
 
@@ -23,7 +21,7 @@ export interface IClearTileOptions {
  */
 export default class ClearTile extends Objective {
 
-    constructor(private readonly target: IVector3, private readonly options?: Partial<IClearTileOptions>) {
+    constructor(private readonly target: Tile, private readonly options?: Partial<IClearTileOptions>) {
         super();
     }
 
@@ -40,13 +38,13 @@ export default class ClearTile extends Objective {
             new PickUpAllTileItems(this.target),
         ];
 
-        const tile = context.island.getTileFromPoint(this.target);
+        const tile = this.target;
 
-        if (tile.npc || tile.creature || context.human.island.isPlayerAtTile(tile, false, true)) {
+        if (tile.npc || tile.creature || tile.isPlayerOnTile(false, true)) {
             return ObjectiveResult.Impossible;
         }
 
-        const tileType = TileHelpers.getType(tile);
+        const tileType = tile.type;
         const terrainDescription = Terrains[tileType];
         if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
             objectives.push(

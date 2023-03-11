@@ -1,8 +1,7 @@
 import { IContainer } from "game/item/IItem";
-import type { ITile, ITileContainer } from "game/tile/ITerrain";
+import type { ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import Terrains from "game/tile/Terrains";
-import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import Dig from "game/entity/action/actions/Dig";
 import Butcher from "game/entity/action/actions/Butcher";
@@ -11,9 +10,10 @@ import Till from "game/entity/action/actions/Till";
 import Context from "../core/context/Context";
 import type { ITileLocation } from "../core/ITars";
 import Item from "game/item/Item";
-import { getDirectionFromMovement } from "game/entity/player/IPlayer";
 import { Direction } from "utilities/math/Direction";
 import { WaterType } from "game/island/IIsland";
+import Tile from "game/tile/Tile";
+import { ExtendedTerrainType } from "src/core/navigation/INavigation";
 
 export interface IOpenTileOptions {
 	requireNoItemsOnTile: boolean;
@@ -31,8 +31,8 @@ export class TileUtilities {
 		this.canUseArgsCache.clear();
 	}
 
-	public getNearestTileLocation(context: Context, tileType: TerrainType, positionOverride?: IVector3): ITileLocation[] {
-		const position = positionOverride ?? context.getPosition();
+	public getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, positionOverride?: IVector3): ITileLocation[] {
+		const position = positionOverride ?? context.getTile();
 
 		const results: ITileLocation[][] = [
 			this._getNearestTileLocation(context, tileType, position)
@@ -49,7 +49,7 @@ export class TileUtilities {
 		return results.flat();
 	}
 
-	private _getNearestTileLocation(context: Context, tileType: TerrainType, position: IVector3): ITileLocation[] {
+	private _getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, position: IVector3): ITileLocation[] {
 		const cacheId = `${tileType},${position.x},${position.y},${position.z}`;
 
 		let result = this.tileLocationCache.get(cacheId);
@@ -62,24 +62,23 @@ export class TileUtilities {
 	}
 
 	public isSwimmingOrOverWater(context: Context) {
-		const tile = context.human.island.getTileFromPoint(context.getPosition());
-		return context.human.isSwimming() || (tile && Terrains[TileHelpers.getType(tile)]?.water === true);
+		const tile = context.getTile();
+		return context.human.isSwimming() || (tile && Terrains[tile.type]?.water === true);
 	}
 
 	public isOverDeepSeaWater(context: Context) {
-		const tile = context.human.island.getTileFromPoint(context.getPosition());
-		return tile && TileHelpers.getType(tile) === TerrainType.DeepSeawater;
-		// return Terrains[TileHelpers.getType(game.getTileFromPoint(context.getPosition()))]?.deepWater === true;
+		return context.getTile()?.type === TerrainType.DeepSeawater;
+		// return Terrains[game.getTileFromPoint(context.getPosition(.type))]?.deepWater === true;
 	}
 
-	public isOpenTile(context: Context, point: IVector3, tile: ITile, options?: Partial<IOpenTileOptions>): boolean {
+	public isOpenTile(context: Context, tile: Tile, options?: Partial<IOpenTileOptions>): boolean {
 		if (options?.requireNoItemsOnTile) {
 			const container = tile as IContainer;
 			if (container.containedItems && container.containedItems.length > 0) {
 				return false;
 			}
 
-		} else if (context.human.island.isTileFull(tile)) {
+		} else if (tile.isFull) {
 			return false;
 		}
 
@@ -87,7 +86,7 @@ export class TileUtilities {
 			return false;
 		}
 
-		const terrainType = TileHelpers.getType(tile);
+		const terrainType = tile.type;
 		if (terrainType === TerrainType.CaveEntrance || terrainType === TerrainType.Lava || terrainType === TerrainType.CoolingLava) {
 			return false;
 		}
@@ -104,7 +103,7 @@ export class TileUtilities {
 					return false;
 				}
 
-				if (context.island.checkWaterFill(point.x, point.y, point.z, 50, WaterType.None) < 50) {
+				if (context.island.checkWaterFill(tile, 50, WaterType.None) < 50) {
 					return false;
 				}
 
@@ -113,11 +112,11 @@ export class TileUtilities {
 			}
 		}
 
-		return this.isFreeOfOtherPlayers(context, point);
+		return this.isFreeOfOtherPlayers(context, tile);
 	}
 
-	public isFreeOfOtherPlayers(context: Context, point: IVector3) {
-		const players = context.human.island.getPlayersAtPosition(point.x, point.y, point.z, false, true);
+	public isFreeOfOtherPlayers(context: Context, tile: Tile) {
+		const players = tile.getPlayersOnTile(false, true);
 		if (players.length > 0) {
 			for (const player of players) {
 				if (player !== context.human) {
@@ -129,16 +128,16 @@ export class TileUtilities {
 		return true;
 	}
 
-	public canGather(context: Context, tile: ITile, skipDoodadCheck?: boolean) {
-		if (!skipDoodadCheck && !Terrains[TileHelpers.getType(tile)]?.gather && (tile.doodad || this.hasItems(tile))) {
+	public canGather(context: Context, tile: Tile, skipDoodadCheck?: boolean) {
+		if (!skipDoodadCheck && !Terrains[tile.type]?.gather && (tile.doodad || this.hasItems(tile))) {
 			return false;
 		}
 
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !context.human.island.isPlayerAtTile(tile, false, true);
+		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.isPlayerOnTile(false, true);
 	}
 
-	public canDig(context: Context, tilePosition: IVector3) {
-		const canUseArgs = this.getCanUseArgs(context, tilePosition);
+	public canDig(context: Context, tile: Tile) {
+		const canUseArgs = this.getCanUseArgs(context, tile);
 		if (!canUseArgs) {
 			return false;
 		}
@@ -146,8 +145,8 @@ export class TileUtilities {
 		return Dig.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction).usable;
 	}
 
-	public canTill(context: Context, tilePosition: IVector3, tile: ITile, tool: Item | undefined, allowedTilesSet: Set<TerrainType>): boolean {
-		const canUseArgs = this.getCanUseArgs(context, tilePosition);
+	public canTill(context: Context, tile: Tile, tool: Item | undefined, allowedTilesSet: Set<TerrainType>): boolean {
+		const canUseArgs = this.getCanUseArgs(context, tile);
 		if (!canUseArgs) {
 			return false;
 		}
@@ -165,11 +164,11 @@ export class TileUtilities {
 			return false;
 		}
 
-		return context.utilities.base.isOpenArea(context, tilePosition, tile);
+		return context.utilities.base.isOpenArea(context, tile);
 	}
 
-	public canButcherCorpse(context: Context, tilePosition: IVector3, tool: Item | undefined) {
-		const canUseArgs = this.getCanUseArgs(context, tilePosition);
+	public canButcherCorpse(context: Context, tile: Tile, tool: Item | undefined) {
+		const canUseArgs = this.getCanUseArgs(context, tile);
 		if (!canUseArgs) {
 			return false;
 		}
@@ -180,24 +179,24 @@ export class TileUtilities {
 		return Butcher.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool).usable;
 	}
 
-	public hasCorpses(tile: ITile) {
+	public hasCorpses(tile: Tile) {
 		return !!(tile.corpses && tile.corpses.length);
 	}
 
-	public hasItems(tile: ITile) {
+	public hasItems(tile: Tile) {
 		const tileContainer = tile as ITileContainer;
 		return tileContainer.containedItems && tileContainer.containedItems.length > 0;
 	}
 
-	private getCanUseArgs(context: Context, position: IVector3): { point: IVector3; direction: Direction.Cardinal } | null {
-		const cacheId = `${position.x},${position.y},${position.z}`;
+	private getCanUseArgs(context: Context, tile: Tile): { point: IVector3; direction: Direction.Cardinal } | null {
+		const cacheId = `${tile.x},${tile.y},${tile.z}`;
 
 		let result = this.canUseArgsCache.get(cacheId);
 		if (result === undefined) {
-			const endPositions = context.utilities.movement.getMovementEndPositions(context, position, true);
+			const endPositions = context.utilities.movement.getMovementEndPositions(context, tile, true);
 			if (endPositions.length !== 0) {
 				const point = endPositions[0];
-				const direction = getDirectionFromMovement(position.x - point.x, position.y - point.y);
+				const direction = context.island.getDirectionFromMovement(tile.x - point.x, tile.y - point.y);
 
 				result = { point, direction };
 

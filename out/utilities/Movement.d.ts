@@ -1,8 +1,8 @@
-import type { ITile } from "game/tile/ITerrain";
 import type { IVector3 } from "utilities/math/IVector";
 import type Context from "../core/context/Context";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import type { NavigationPath } from "../core/navigation/INavigation";
+import Tile from "game/tile/Tile";
 export declare enum MoveResult {
     NoTarget = 0,
     NoPath = 1,
@@ -15,7 +15,7 @@ export declare class MovementUtilities {
     private readonly cachedEnds;
     clearCache(): void;
     resetMovementOverlays(): void;
-    clearOverlay(tile: ITile): void;
+    clearOverlay(tile: Tile): void;
     updateOverlay(context: Context, path: IVector3[]): void;
     ensureOrigin(context: Context): void;
     getMovementEndPositions(context: Context, target: IVector3, moveAdjacentToTarget: boolean): IVector3[];

@@ -1,21 +1,21 @@
-import type Translation from "language/Translation";
-import Button from "ui/component/Button";
-import Divider from "ui/component/Divider";
-import { Bound } from "utilities/Decorators";
-import { BlockRow } from "ui/component/BlockRow";
-import Component from "ui/component/Component";
 import { PromptPriority } from "game/meta/prompt/IPrompt";
 import { promptDescriptionFactory } from "game/meta/prompt/PromptDescriptionFactory";
-import Prompts from "game/meta/prompt/Prompts";
-import { LabeledButtonRow } from "ui/component/LabeledButtonRow";
-import Mod from "mod/Mod";
 import { promptGameRenameGeneric } from "game/meta/prompt/PromptDescriptions";
+import Prompts from "game/meta/prompt/Prompts";
+import type Translation from "language/Translation";
+import Mod from "mod/Mod";
+import { BlockRow } from "ui/component/BlockRow";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import Divider from "ui/component/Divider";
+import { LabeledButtonRow } from "ui/component/LabeledButtonRow";
+import { Bound } from "utilities/Decorators";
 import Files from "utilities/Files";
 
-import TarsPanel from "../components/TarsPanel";
-import { getTarsTranslation, TarsTranslation, TARS_ID } from "../../ITarsMod";
-import Tars from "../../core/Tars";
+import { TARS_ID, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
 import TarsMod from "../../TarsMod";
+import Tars from "../../core/Tars";
+import TarsPanel from "../components/TarsPanel";
 
 export default class DataPanel extends TarsPanel {
 
@@ -32,14 +32,14 @@ export default class DataPanel extends TarsPanel {
         new BlockRow()
             .append(new Button()
                 .setText(getTarsTranslation(TarsTranslation.DialogButtonSaveData))
-                .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonSaveDataTooltip))))
+                .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonSaveDataTooltip)))
                 .event.subscribe("activate", async () => {
                     this.TarsMod.addDataSlot(tarsInstance.getSaveDataContainer());
                     return true;
                 }))
             .append(new Button("label")
                 .setText(getTarsTranslation(TarsTranslation.DialogButtonImportData))
-                .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonImportDataTooltip))))
+                .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonImportDataTooltip)))
                 .attributes.set("for", importInputId)
                 .append(new Component("input")
                     .setId(importInputId)
@@ -86,17 +86,13 @@ export default class DataPanel extends TarsPanel {
                 .setLabel(label => label.setText(getTarsTranslation(TarsTranslation.DialogLabel).addArgs(container.name)))
                 .addButton(button => button
                     .classes.add("button-check")
-                    .setTooltip(tooltip => tooltip
-                        .addHeading(heading => heading
-                            .setText(getTarsTranslation(TarsTranslation.DialogButtonLoadTooltip))))
+                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonLoadTooltip)))
                     .event.subscribe("activate", () => {
                         this.tarsInstance.loadSaveData(container);
                     }))
                 .addButton(button => button
                     .classes.add("button-edit")
-                    .setTooltip(tooltip => tooltip
-                        .addHeading(heading => heading
-                            .setText(getTarsTranslation(TarsTranslation.DialogButtonRenameTooltip))))
+                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonRenameTooltip)))
                     .event.subscribe("activate", () => {
                         const placeholder = container.name;
 
@@ -111,17 +107,13 @@ export default class DataPanel extends TarsPanel {
                     }))
                 .addButton(button => button
                     .classes.add("button-export")
-                    .setTooltip(tooltip => tooltip
-                        .addHeading(heading => heading
-                            .setText(getTarsTranslation(TarsTranslation.DialogButtonExportTooltip))))
+                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonExportTooltip)))
                     .event.subscribe("activate", () => {
                         this.TarsMod.exportDataSlot(container);
                     }))
                 .addButton(button => button
                     .classes.add("button-delete")
-                    .setTooltip(tooltip => tooltip
-                        .addHeading(heading => heading
-                            .setText(getTarsTranslation(TarsTranslation.DialogButtonDeleteTooltip))))
+                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonDeleteTooltip)))
                     .event.subscribe("activate", async () => {
                         if (!await Prompts.queue(
                             promptDescriptionFactory

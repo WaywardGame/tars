@@ -1,9 +1,9 @@
-import type Translation from "language/Translation";
 import Island from "game/island/Island";
-import TarsPanel from "../components/TarsPanel";
+import type Translation from "language/Translation";
 import { TarsTranslation } from "../../ITarsMod";
-import Tars from "../../core/Tars";
 import TarsMod from "../../TarsMod";
+import Tars from "../../core/Tars";
+import TarsPanel from "../components/TarsPanel";
 export default class NPCsPanel extends TarsPanel {
     readonly TarsMod: TarsMod;
     private readonly rows;

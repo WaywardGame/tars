@@ -1,10 +1,10 @@
 import type Doodad from "game/doodad/Doodad";
-import type { DoodadType} from "game/doodad/IDoodad";
+import type { DoodadType } from "game/doodad/IDoodad";
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import Vector2 from "utilities/math/Vector2";
 
 import type Context from "../../../core/context/Context";
-import type { BaseInfoKey} from "../../../core/ITars";
+import type { BaseInfoKey } from "../../../core/ITars";
 import { baseInfo } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
@@ -46,7 +46,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 			}
 
 		} else {
-			const position = context.getPosition();
+			const tile = context.getTile();
 
 			const doodadInfos = ([context.base.campfire, context.base.kiln, context.base.furnace]
 				.map(doodads => {
@@ -64,7 +64,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 				})
 				.filter(doodadInfo => doodadInfo !== undefined) as Array<{ doodad: Doodad; providesFire: boolean }>)
 				// todo: make this use objective pipelines and move to easiest one?
-				.sort((a, b) => Vector2.squaredDistance(position, a.doodad) - Vector2.squaredDistance(position, b.doodad));
+				.sort((a, b) => Vector2.squaredDistance(tile, a.doodad) - Vector2.squaredDistance(tile, b.doodad));
 
 			for (const doodadInfo of doodadInfos) {
 				if (!doodad) {

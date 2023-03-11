@@ -2,19 +2,19 @@ import { EventBus } from "event/EventBuses";
 import EventManager, { EventHandler } from "event/EventManager";
 import { TileUpdateType } from "game/IGame";
 import Island from "game/island/Island";
-import { ITile, TerrainType } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import terrainDescriptions from "game/tile/Terrains";
+import Tile from "game/tile/Tile";
 import { WorldZ } from "game/WorldZ";
 import { KdTree } from "utilities/collection/tree/KdTree";
 import Enums from "utilities/enum/Enums";
-import TileHelpers from "utilities/game/TileHelpers";
 import { IVector2 } from "utilities/math/IVector";
 
-import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation } from "./INavigation";
+import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation, ExtendedTerrainType } from "./INavigation";
 
 interface INavigationMapData {
     kdTreeTileTypes: Uint8Array;
-    kdTrees: Map<TerrainType, KdTree>;
+    kdTrees: Map<ExtendedTerrainType, KdTree>;
 }
 
 /**
@@ -79,7 +79,7 @@ export class NavigationKdTrees {
         for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
             const data: INavigationMapData = {
                 kdTrees: new Map(),
-                kdTreeTileTypes: new Uint8Array(game.mapSizeSq),
+                kdTreeTileTypes: new Uint8Array(island.mapSizeSq),
             };
 
             data.kdTrees.set(freshWaterTileLocation, new KdTree());
@@ -87,18 +87,18 @@ export class NavigationKdTrees {
             data.kdTrees.set(gatherableTileLocation, new KdTree());
 
             // attempt to make a somewhat balanced kdtree by starting at the midpoint
-            const halfMapSize = Math.floor(game.mapSize / 2);
+            const halfMapSize = Math.floor(island.mapSize / 2);
 
             for (let offsetX = 0; offsetX < halfMapSize; offsetX++) {
                 for (let offsetY = 0; offsetY < halfMapSize; offsetY++) {
                     const x1 = halfMapSize + offsetX;
                     const y1 = halfMapSize + offsetY;
-                    this.updateKdTree(island, x1, y1, z, TileHelpers.getType(island.getTile(x1, y1, z)), data);
+                    this.updateKdTree(island, x1, y1, z, island.getTile(x1, y1, z).type, data);
 
                     if (offsetX !== 0 || offsetY !== 0) {
                         const x2 = halfMapSize - offsetX;
                         const y2 = halfMapSize - offsetY;
-                        this.updateKdTree(island, x2, y2, z, TileHelpers.getType(island.getTile(x2, y2, z)), data);
+                        this.updateKdTree(island, x2, y2, z, island.getTile(x2, y2, z).type, data);
                     }
                 }
             }
@@ -109,18 +109,18 @@ export class NavigationKdTrees {
         this.maps.set(island, islandMaps);
     }
 
-    public getKdTree(island: Island, z: number, tileType: TerrainType): KdTree | undefined {
+    public getKdTree(island: Island, z: number, tileType: ExtendedTerrainType): KdTree | undefined {
         return this.maps.get(island)?.get(z)?.kdTrees.get(tileType);
     }
 
     @EventHandler(EventBus.Island, "tileUpdate")
-    public onTileUpdate(island: Island, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
+    public onTileUpdate(island: Island, tile: Tile, tileUpdateType: TileUpdateType): void {
         const maps = this.maps.get(island);
         if (!maps) {
             return;
         }
 
-        this.updateKdTree(island, tileX, tileY, tileZ, TileHelpers.getType(tile), maps.get(tileZ));
+        this.updateKdTree(island, tile.x, tile.y, tile.z, tile.type, maps.get(tile.z));
     }
 
     public updateKdTree(island: Island, x: number, y: number, z: number, tileType: number, navigationMapData: INavigationMapData | undefined = this.maps.get(island)?.get(z)) {
@@ -130,7 +130,7 @@ export class NavigationKdTrees {
 
         const point: IVector2 = { x, y };
 
-        const kdTreeIndex = (y * game.mapSize) + x;
+        const kdTreeIndex = (y * island.mapSize) + x;
         let kdTreeTileType = navigationMapData.kdTreeTileTypes[kdTreeIndex];
         if (kdTreeTileType !== 0) {
             kdTreeTileType--;

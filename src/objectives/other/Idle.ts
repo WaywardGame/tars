@@ -1,6 +1,5 @@
 import IdleAction from "game/entity/action/actions/Idle";
 import { TurnMode } from "game/IGame";
-import TileHelpers from "utilities/game/TileHelpers";
 
 import type Context from "../../core/context/Context";
 import { defaultMaxTilesChecked } from "../../core/ITars";
@@ -45,7 +44,7 @@ export default class Idle extends Objective {
 
 		} else {
 			if (this.options?.canMoveToIdle) {
-				const target = TileHelpers.findMatchingTile(context.island, context.human, (island, _2, tile) => (!tile.containedItems || tile.containedItems.length === 0) && !island.isTileFull(tile) && !tile.doodad, { maxTilesChecked: defaultMaxTilesChecked });
+				const target = context.human.tile.findMatchingTile(tile => (!tile.containedItems || tile.containedItems.length === 0) && !tile.isFull && !tile.doodad, { maxTilesChecked: defaultMaxTilesChecked });
 				if (target) {
 					this.log.info("Moving to idle position");
 

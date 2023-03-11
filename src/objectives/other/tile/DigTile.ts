@@ -1,7 +1,6 @@
-import type { IVector3 } from "utilities/math/IVector";
-import TileHelpers from "utilities/game/TileHelpers";
 import Dig from "game/entity/action/actions/Dig";
 import { TerrainType } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -9,7 +8,6 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
-
 import UseItem from "../item/UseItem";
 import ClearTile from "./ClearTile";
 import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
@@ -20,7 +18,7 @@ export interface IDigTileOptions {
 
 export default class DigTile extends Objective {
 
-	constructor(private readonly target: IVector3, private readonly options?: Partial<IDigTileOptions>) {
+	constructor(private readonly target: Tile, private readonly options?: Partial<IDigTileOptions>) {
 		super();
 	}
 
@@ -46,7 +44,7 @@ export default class DigTile extends Objective {
 		const digUntilTypeIsNot = this.options?.digUntilTypeIsNot;
 		if (digUntilTypeIsNot !== undefined) {
 			objectives.push(new Lambda(async () => {
-				if (digUntilTypeIsNot === TileHelpers.getType(context.island.getTileFromPoint(this.target))) {
+				if (digUntilTypeIsNot === this.target.type) {
 					return ObjectiveResult.Restart;
 				}
 

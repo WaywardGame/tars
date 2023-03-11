@@ -86,7 +86,7 @@ export class ObjectUtilities {
 	public findCarvableCorpses(context: Context, id: string, isTarget: (corpse: Corpse) => boolean): Corpse[] {
 		return this.findObjects(context, FindObjectType.Corpse, id, context.human.island.corpses.getObjects() as Corpse[], corpse => {
 			if (isTarget(corpse)) {
-				return context.utilities.tile.canButcherCorpse(context, corpse, context.inventory.butcher);
+				return context.utilities.tile.canButcherCorpse(context, corpse.tile, context.inventory.butcher);
 			}
 
 			return false;

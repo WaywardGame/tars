@@ -78,8 +78,9 @@ export default class GatherFromTerrainResource extends Objective {
 
 		let step = 0;
 
-		const point = tileLocation.point;
-		const tileData = context.island.getTileData(point.x, point.y, point.z);
+		const tile = tileLocation.tile;
+
+		const tileData = tile.getTileData();
 		if (tileData && tileData.length > 0) {
 			const tileDataStep = tileData[0].step;
 			if (tileDataStep !== undefined) {
@@ -143,7 +144,7 @@ export default class GatherFromTerrainResource extends Objective {
 
 		objectivePipelines.push([
 			new AddDifficulty(difficulty),
-			new MoveToTarget(point, true),
+			new MoveToTarget(tile, true),
 			new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType), { expectedTerrainType: terrainSearch.type })
 				.passAcquireData(this)
 				.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, terrainSearch.itemType).getString()} from ${Translation.nameOf(Dictionary.Terrain, terrainSearch.type).getString()}`),

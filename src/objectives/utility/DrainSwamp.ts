@@ -1,4 +1,4 @@
-import type { IVector3 } from "utilities/math/IVector";
+import Tile from "game/tile/Tile";
 import { TerrainType } from "game/tile/ITerrain";
 
 import type Context from "../../core/context/Context";
@@ -10,7 +10,7 @@ import Restart from "../core/Restart";
 
 export default class DrainSwamp extends Objective {
 
-    constructor(private readonly tiles: IVector3[]) {
+    constructor(private readonly tiles: Tile[]) {
         super();
     }
 

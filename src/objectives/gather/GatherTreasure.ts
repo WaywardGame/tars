@@ -1,8 +1,6 @@
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import DrawnMap from "game/mapping/DrawnMap";
 import Terrains from "game/tile/Terrains";
-import TileHelpers from "utilities/game/TileHelpers";
-import { IVector3 } from "utilities/math/IVector";
 import Lockpick from "game/entity/action/actions/Lockpick";
 import Cast from "game/entity/action/actions/Cast";
 
@@ -48,11 +46,10 @@ export default class GatherTreasure extends Objective {
         for (const treasure of treasures) {
             let objectives: IObjective[];
 
-            const target: IVector3 = { x: treasure.x, y: treasure.y, z: this.drawnMap.position.z };
-            const treasureTile = context.human.island.getTileFromPoint(target);
+            const tile = context.human.island.getTile(treasure.x, treasure.y, this.drawnMap.position.z);
 
             if (this.drawnMap.isTreasureDiscovered(treasure)) {
-                const doodad = treasureTile.doodad;
+                const doodad = tile.doodad;
                 if (!doodad || doodad.crafterIdentifier) {
                     continue;
                 }
@@ -64,7 +61,7 @@ export default class GatherTreasure extends Objective {
 
                     objectives = [
                         new AcquireInventoryItem("lockPick"),
-                        new MoveToTarget(target, true),
+                        new MoveToTarget(tile, true),
                         new UseItem(Lockpick, context.inventory.lockPick),
                     ];
 
@@ -90,7 +87,7 @@ export default class GatherTreasure extends Objective {
                 // dig/cast the treasure out
                 objectives = [];
 
-                const needFishingRod = Terrains[TileHelpers.getType(treasureTile)]?.water ? true : false;
+                const needFishingRod = Terrains[tile.type]?.water ? true : false;
                 if (needFishingRod) {
                     objectives.push(new AcquireInventoryItem("fishing"));
                 }
@@ -110,11 +107,11 @@ export default class GatherTreasure extends Objective {
                     // } else {
                     //     objectives.push(new Restart());
                     // }
-                    objectives.push(new MoveToTarget(target, true));
+                    objectives.push(new MoveToTarget(tile, true));
                     objectives.push(new UseItem(Cast, context.inventory.fishing));
 
                 } else {
-                    objectives.push(new DigTile(target));
+                    objectives.push(new DigTile(tile));
                 }
             }
 

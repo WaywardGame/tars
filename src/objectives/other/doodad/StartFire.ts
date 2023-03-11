@@ -44,7 +44,7 @@ export default class StartFire extends Objective {
 			objectives.push(new MoveToTarget(doodad, true));
 
 		} else {
-			if (context.island.tileEvents.getFromTile(doodad.getTile(), TileEventType.Fire)) {
+			if (context.island.tileEvents.getFromTile(doodad.tile, TileEventType.Fire)) {
 				this.log.warn("Doodad already on fire?");
 				return ObjectiveResult.Impossible;
 			}

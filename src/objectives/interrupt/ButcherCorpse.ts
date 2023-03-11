@@ -37,8 +37,7 @@ export default class ButcherCorpse extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const tile = context.island.getTileFromPoint(this.corpse);
-
+		const tile = this.corpse.tile;
 		if (tile.events !== undefined || tile.creature !== undefined) {
 			return ObjectiveResult.Impossible;
 		}

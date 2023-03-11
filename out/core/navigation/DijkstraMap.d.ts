@@ -10,9 +10,10 @@ export interface IDijkstraMapNode extends IVector2 {
     closed?: boolean;
 }
 export declare class DijkstraMap {
+    private readonly mapSize;
     private readonly nodes;
     private origin;
-    constructor();
+    constructor(mapSize: number);
     getNode(x: number, y: number): IDijkstraMapNode;
     updateNode(x: number, y: number, penalty: number, disabled: boolean): void;
     updateOrigin(origin: IVector2): void;

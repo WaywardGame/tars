@@ -1,10 +1,9 @@
 import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@cplusplus/index";
-import type { ITerrainDescription, ITile } from "game/tile/ITerrain";
+import type { ITerrainDescription } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
 import terrainDescriptions from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
-import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import { TileUpdateType } from "game/IGame";
 import Human from "game/entity/Human";
@@ -12,9 +11,10 @@ import Log from "utilities/Log";
 import Island from "game/island/Island";
 
 import type { ITileLocation } from "../ITars";
-import { NavigationPath } from "./INavigation";
+import { ExtendedTerrainType, NavigationPath } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
 import { NavigationKdTrees } from "./NavigationKdTrees";
+import Tile from "game/tile/Tile";
 
 interface INavigationMapData {
 	dijkstraMap: IDijkstraMap;
@@ -52,7 +52,7 @@ export default class Navigation {
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			try {
 				const data: INavigationMapData = {
-					dijkstraMap: new Module.DijkstraMap(),
+					dijkstraMap: new Module.DijkstraMap(this.human.island.mapSize),
 					dirtyDijkstra: true,
 				};
 
@@ -105,10 +105,10 @@ export default class Navigation {
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			const mapData = this.maps.get(z);
 
-			for (let x = 0; x < game.mapSize; x++) {
-				for (let y = 0; y < game.mapSize; y++) {
+			for (let x = 0; x < island.mapSize; x++) {
+				for (let y = 0; y < island.mapSize; y++) {
 					const tile = island.getTile(x, y, z);
-					this.onTileUpdate(island, tile, TileHelpers.getType(tile), x, y, z, false, undefined, mapData);
+					this.onTileUpdate(island, tile, tile.type, false, undefined, mapData);
 				}
 			}
 		}
@@ -156,7 +156,7 @@ export default class Navigation {
 		const nearestCaveEntrances = this.getNearestTileLocation(this.human.island, TerrainType.CaveEntrance, this.origin);
 		const nearestCaveEntrance = nearestCaveEntrances[0];
 		if (nearestCaveEntrance) {
-			const { x, y } = nearestCaveEntrance.point;
+			const { x, y } = nearestCaveEntrance.tile;
 
 			if (this.oppositeOrigin && this.oppositeOrigin.x === x && this.oppositeOrigin.y === y && this.oppositeOrigin.z === oppositeZ) {
 				// cave entrance is the same location as last time
@@ -215,8 +215,8 @@ export default class Navigation {
 		return undefined;
 	}
 
-	public refreshOverlay(island: Island, tile: ITile, x: number, y: number, z: number, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {
-		tileType ??= TileHelpers.getType(tile);
+	public refreshOverlay(tile: Tile, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {
+		tileType ??= tile.type;
 		terrainDescription ??= terrainDescriptions[tileType];
 
 		if (!terrainDescription) {
@@ -225,25 +225,19 @@ export default class Navigation {
 
 		this.overlay.addOrUpdate(
 			tile,
-			x,
-			y,
-			z,
 			isBaseTile,
-			isDisabled ?? this.isDisabled(island, tile, x, y, z, tileType),
-			penalty ?? this.getPenalty(island, tile, x, y, z, tileType, terrainDescription, tileUpdateType));
+			isDisabled ?? this.isDisabled(tile, tileType),
+			penalty ?? this.getPenalty(tile, tileType, terrainDescription, tileUpdateType));
 	}
 
 	public onTileUpdate(
 		island: Island,
-		tile: ITile,
+		tile: Tile,
 		tileType: TerrainType,
-		x: number,
-		y: number,
-		z: number,
 		isBaseTile: boolean,
 		tileUpdateType?: TileUpdateType,
 		mapData?: INavigationMapData): void {
-		const mapInfo = this.maps.get(z);
+		const mapInfo = this.maps.get(tile.z);
 		if (!mapInfo) {
 			return;
 		}
@@ -253,21 +247,21 @@ export default class Navigation {
 			return;
 		}
 
-		const cacheId = `${x},${y},${z}`;
+		const cacheId = `${tile.x},${tile.y},${tile.z}`;
 
-		const isDisabled = this.isDisabled(island, tile, x, y, z, tileType, true);
-		const penalty = this.getPenalty(island, tile, x, y, z, tileType, terrainDescription, tileUpdateType, true);
+		const isDisabled = this.isDisabled(tile, tileType, true);
+		const penalty = this.getPenalty(tile, tileType, terrainDescription, tileUpdateType, true);
 
 		this.nodeDisableCache.set(cacheId, isDisabled);
 		this.nodePenaltyCache.set(cacheId, penalty);
 
-		this.refreshOverlay(island, tile, x, y, z, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
+		this.refreshOverlay(tile, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
 		try {
 			mapInfo.dirtyDijkstra = true;
-			mapInfo.dijkstraMap.updateNode(x, y, penalty, isDisabled);
+			mapInfo.dijkstraMap.updateNode(tile.x, tile.y, penalty, isDisabled);
 		} catch (ex) {
-			this.log.trace("invalid node", x, y, penalty, isDisabled);
+			this.log.trace("invalid node", tile.x, tile.y, penalty, isDisabled);
 		}
 
 		if (!mapData) {
@@ -275,7 +269,7 @@ export default class Navigation {
 		}
 	}
 
-	public getNearestTileLocation(island: Island, tileType: TerrainType, point: IVector3): ITileLocation[] {
+	public getNearestTileLocation(island: Island, tileType: ExtendedTerrainType, point: IVector3): ITileLocation[] {
 		// const start = performance.now();
 		const kdTree = this.kdTrees.getKdTree(island, point.z, tileType);
 		if (!kdTree) {
@@ -290,38 +284,37 @@ export default class Navigation {
 				z: point.z,
 			};
 
-			const tile = this.human.island.getTileFromPoint(nearestPoint);
+			const tile = island.getTileFromPoint(nearestPoint);
 			if (!tile) {
 				throw new Error(`Invalid point ${nearestPoint.x},${nearestPoint.y}`);
 			}
 
 			return {
 				type: tileType,
-				point: nearestPoint,
 				tile,
 			} as ITileLocation;
 		});
 	}
 
 	public isDisabledFromPoint(island: Island, point: IVector3): boolean {
-		if (!this.human.island.ensureValidPoint(point)) {
+		if (!island.ensureValidPoint(point)) {
 			return true;
 		}
 
-		const tile = this.human.island.getTileFromPoint(point);
-		const tileType = TileHelpers.getType(tile);
+		const tile = island.getTileFromPoint(point);
+		const tileType = tile.type;
 
-		return this.isDisabled(island, tile, point.x, point.y, point.z, tileType);
+		return this.isDisabled(tile, tileType);
 	}
 
-	public getPenaltyFromPoint(island: Island, point: IVector3, tile: ITile = island.getTileFromPoint(point)): number {
-		const tileType = TileHelpers.getType(tile);
+	public getPenaltyFromPoint(island: Island, point: IVector3, tile: Tile = island.getTileFromPoint(point)): number {
+		const tileType = tile.type;
 		const terrainDescription = terrainDescriptions[tileType];
 		if (!terrainDescription) {
 			return 0;
 		}
 
-		return this.getPenalty(island, tile, point.x, point.y, point.z, tileType, terrainDescription);
+		return this.getPenalty(tile, tileType, terrainDescription);
 	}
 
 	public getValidPoints(island: Island, point: IVector3, moveAdjacentToTarget: boolean): IVector3[] {
@@ -397,9 +390,9 @@ export default class Navigation {
 		return undefined;
 	}
 
-	private isDisabled(island: Island, tile: ITile, x: number, y: number, z: number, tileType: TerrainType, skipCache?: boolean): boolean {
+	public isDisabled(tile: Tile, tileType: TerrainType = tile.type, skipCache?: boolean): boolean {
 		if (!skipCache) {
-			const cacheId = `${x},${y},${z}`;
+			const cacheId = `${tile.x},${tile.y},${tile.z}`;
 			const result = this.nodeDisableCache.get(cacheId);
 			if (result !== undefined) {
 				return result;
@@ -435,7 +428,7 @@ export default class Navigation {
 			return true;
 		}
 
-		const players = island.getPlayersAtPosition(x, y, z, false, true);
+		const players = tile.getPlayersOnTile(false, true);
 		if (players.length > 0) {
 			for (const player of players) {
 				if (player !== this.human) {
@@ -447,9 +440,9 @@ export default class Navigation {
 		return false;
 	}
 
-	private getPenalty(island: Island, tile: ITile, x: number, y: number, z: number, tileType: TerrainType, terrainDescription: ITerrainDescription, tileUpdateType?: TileUpdateType, skipCache?: boolean): number {
+	public getPenalty(tile: Tile, tileType: TerrainType = tile.type, terrainDescription: ITerrainDescription | undefined = tile.description(), tileUpdateType?: TileUpdateType, skipCache?: boolean): number {
 		if (!skipCache) {
-			const cacheId = `${x},${y},${z}`;
+			const cacheId = `${tile.x},${tile.y},${tile.z}`;
 			const result = this.nodePenaltyCache.get(cacheId);
 			if (result !== undefined) {
 				return result;
@@ -472,15 +465,17 @@ export default class Navigation {
 				penalty += tile.creature.isTamed() ? 10 : 120;
 			}
 
+			const island = tile.island;
+
 			// penalty for creatures on or near the tile
 			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
 				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
-					const point = island.ensureValidPoint({ x: x + x, y: y + y, z: z });
+					const point = island.ensureValidPoint({ x: tile.x + x, y: tile.y + y, z: tile.z });
 					if (point) {
 						const creature = island.getTileFromPoint(point).creature;
 
 						// only apply the penalty if the creature can actually go this tile
-						if (creature && !creature.isTamed() && creature.checkCreatureMove(true, x, y, z, tile, creature.getMoveType(), true) === 0) {
+						if (creature && !creature.isTamed() && creature.checkCreatureMove(true, tile, creature.getMoveType(), true) === 0) {
 							penalty += 10;
 
 							if (x === 0 && y === 0) {
@@ -517,22 +512,24 @@ export default class Navigation {
 			}
 		}
 
-		if (terrainDescription.gather) {
-			// rocks - large penalty
-			penalty += 230;
+		if (terrainDescription) {
+			if (terrainDescription.gather) {
+				// rocks - large penalty
+				penalty += 230;
 
-		} else if (terrainDescription.shallowWater) {
-			// stay away from coasts
-			penalty += 6;
+			} else if (terrainDescription.shallowWater) {
+				// stay away from coasts
+				penalty += 6;
 
-		} else if (terrainDescription.water && !this.sailingMode) {
-			// stay out of water
-			penalty += 20;
-		}
+			} else if (terrainDescription.water && !this.sailingMode) {
+				// stay out of water
+				penalty += 20;
+			}
 
-		if (this.sailingMode && !terrainDescription.water && !terrainDescription.shallowWater) {
-			// try to stay in water while sailing
-			penalty += 200;
+			if (this.sailingMode && !terrainDescription.water && !terrainDescription.shallowWater) {
+				// try to stay in water while sailing
+				penalty += 200;
+			}
 		}
 
 		return Math.min(penalty, 255);

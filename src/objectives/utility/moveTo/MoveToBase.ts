@@ -20,15 +20,15 @@ export default class MoveToBase extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const position = context.getPosition();
-		const basePosition = context.utilities.base.getBasePosition(context);
-		if (position.z === basePosition.z && Vector2.squaredDistance(position, basePosition) <= returnToBaseDistanceSq) {
+		const tile = context.getTile();
+		const baseTile = context.utilities.base.getBaseTile(context);
+		if (tile.z === baseTile.z && Vector2.squaredDistance(tile, baseTile) <= returnToBaseDistanceSq) {
 			return ObjectiveResult.Ignore;
 		}
 
 		this.log.info("Returning to base");
 
-		return new MoveToTarget(basePosition, true);
+		return new MoveToTarget(baseTile, true);
 	}
 
 }

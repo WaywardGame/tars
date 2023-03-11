@@ -1,19 +1,19 @@
+import Rename from "game/entity/action/actions/Rename";
+import { promptGameRenameGeneric } from "game/meta/prompt/PromptDescriptions";
 import type Translation from "language/Translation";
 import { CheckButton } from "ui/component/CheckButton";
 import ChoiceList, { Choice } from "ui/component/ChoiceList";
 import Divider from "ui/component/Divider";
-import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Decorators";
-import Rename from "game/entity/action/actions/Rename";
-import { promptGameRenameGeneric } from "game/meta/prompt/PromptDescriptions";
+import Enums from "utilities/enum/Enums";
 
-import TarsPanel from "../components/TarsPanel";
-import { TarsMode } from "../../core/ITars";
-import { getTarsTranslation, TarsTranslation } from "../../ITarsMod";
-import Tars from "../../core/Tars";
-import Button from "ui/component/Button";
 import Prompts from "game/meta/prompt/Prompts";
 import { TextContext } from "language/ITranslation";
+import Button from "ui/component/Button";
+import { TarsMode } from "../../core/ITars";
+import Tars from "../../core/Tars";
+import { getTarsTranslation, TarsTranslation } from "../../ITarsMod";
+import TarsPanel from "../components/TarsPanel";
 
 export default class GeneralPanel extends TarsPanel {
 
@@ -75,7 +75,7 @@ export default class GeneralPanel extends TarsPanel {
                 } else {
                     choice
                         .setText(getTarsTranslation(`DialogMode${TarsMode[mode]}`))
-                        .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(`DialogMode${TarsMode[mode]}Tooltip`))))
+                        .setTooltip(tooltip => tooltip.setText(getTarsTranslation(`DialogMode${TarsMode[mode]}Tooltip`)))
                 }
 
                 return choice;

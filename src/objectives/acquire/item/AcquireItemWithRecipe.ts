@@ -1,4 +1,4 @@
-import type { IRecipe } from "game/item/IItem";
+import type { IContainer, IRecipe } from "game/item/IItem";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type { IRequirementInfo } from "game/item/IItemManager";
 import { WeightType } from "game/item/IItemManager";
@@ -168,8 +168,8 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item) {
-							if (context.island.items.isContainableInContainer(item, intermediateChest)) {
-								objectives.push(new MoveItemIntoInventory(item, intermediateChest));
+							if (context.island.items.isContainableInContainer(item, intermediateChest as IContainer)) {
+								objectives.push(new MoveItemIntoInventory(item, intermediateChest.tile));
 							}
 						}
 					};

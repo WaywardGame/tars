@@ -1,42 +1,41 @@
-import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import type CommandManager from "command/CommandManager";
+import { EventBus } from "event/EventBuses";
 import { IEventEmitter, Priority } from "event/EventEmitter";
-import type { Source } from "game/entity/player/IMessageManager";
+import { EventHandler, OwnEventHandler } from "event/EventManager";
+import Human from "game/entity/Human";
 import CreateControllableNPC from "game/entity/action/actions/CreateControllableNPC";
+import type { Source } from "game/entity/player/IMessageManager";
 import { MessageType } from "game/entity/player/IMessageManager";
 import type Player from "game/entity/player/Player";
+import { Prompt } from "game/meta/prompt/IPrompt";
 import type Dictionary from "language/Dictionary";
-import type Message from "language/dictionary/Message";
 import Translation from "language/Translation";
+import type Message from "language/dictionary/Message";
+import TranslationImpl from "language/impl/TranslationImpl";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import Bind from "ui/input/Bind";
 import type Bindable from "ui/input/Bindable";
 import { IInput } from "ui/input/IInput";
 import type { DialogId } from "ui/screen/screens/game/Dialogs";
+import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import type { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
 import { MenuBarButtonGroup } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import Log from "utilities/Log";
-import { EventBus } from "event/EventBuses";
-import { EventHandler, OwnEventHandler } from "event/EventManager";
-import TranslationImpl from "language/impl/TranslationImpl";
-import TileHelpers from "utilities/game/TileHelpers";
-import Human from "game/entity/Human";
-import { Prompt } from "game/meta/prompt/IPrompt";
 import Files from "utilities/Files";
+import Log from "utilities/Log";
 import SearchParams from "utilities/SearchParams";
 
-import TarsDialog from "./ui/TarsDialog";
-import { logSourceName } from "./utilities/Logger";
-import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
-import type { ITarsModEvents, ISaveData, IGlobalSaveData, ISaveDataContainer } from "./ITarsMod";
-import { TarsTranslation, setTarsMod, TarsUiSaveDataKey, TARS_ID } from "./ITarsMod";
-import Tars, { TarsNPC } from "./core/Tars";
-import { NavigationSystemState, QuantumBurstStatus, TarsMode, tarsUniqueNpcType } from "./core/ITars";
-import { TarsOverlay } from "./ui/TarsOverlay";
-import { ITarsOptions, createOptions } from "./core/ITarsOptions";
 import NPC from "game/entity/npc/NPC";
+import type { IGlobalSaveData, ISaveData, ISaveDataContainer, ITarsModEvents } from "./ITarsMod";
+import { TARS_ID, TarsTranslation, TarsUiSaveDataKey, setTarsMod } from "./ITarsMod";
+import { NavigationSystemState, QuantumBurstStatus, TarsMode, tarsUniqueNpcType } from "./core/ITars";
+import { ITarsOptions, createOptions } from "./core/ITarsOptions";
+import Tars, { TarsNPC } from "./core/Tars";
 import { NavigationKdTrees } from "./core/navigation/NavigationKdTrees";
+import TarsDialog from "./ui/TarsDialog";
+import { TarsOverlay } from "./ui/TarsOverlay";
+import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
+import { logSourceName } from "./utilities/Logger";
 
 export default class TarsMod extends Mod {
 
@@ -118,7 +117,8 @@ export default class TarsMod extends Mod {
 		}),
 		group: MenuBarButtonGroup.Meta,
 		bindable: Registry<TarsMod>().get("bindableToggleDialog"),
-		tooltip: tooltip => tooltip.dump().addText(text => text.setText(Translation.get(TarsMod.INSTANCE.dictionary, TarsTranslation.Name))),
+		tooltip: tooltip => tooltip.schedule(tooltip => tooltip.getLastBlock().dump())
+			.setText(Translation.get(TarsMod.INSTANCE.dictionary, TarsTranslation.Name)),
 	})
 	public readonly menuBarButton: MenuBarButtonType;
 
@@ -216,7 +216,7 @@ export default class TarsMod extends Mod {
 	public importDataSlot(fileData: Uint8Array) {
 		const unserializedContainer: { container?: ISaveDataContainer } = {};
 
-		const serializer = saveManager.getSerializer();
+		const serializer = game.saveManager.getSerializer();
 		serializer.loadFromUint8Array(unserializedContainer, "container", fileData);
 
 		if (unserializedContainer.container) {
@@ -225,7 +225,7 @@ export default class TarsMod extends Mod {
 	}
 
 	public exportDataSlot(container: ISaveDataContainer) {
-		const serializer = saveManager.getSerializer();
+		const serializer = game.saveManager.getSerializer();
 		const serializedData = serializer.saveToUint8Array({ container }, "container");
 		if (!serializedData) {
 			return;
@@ -342,7 +342,7 @@ export default class TarsMod extends Mod {
 			for (const islandId of islandsToLoad) {
 				const island = game.islands.getIfExists(islandId);
 				if (island && !island.isLoaded) {
-					await island.load();
+					await island.load({ isSynced: true });
 				}
 			}
 
@@ -476,7 +476,7 @@ export default class TarsMod extends Mod {
 	}
 
 	public spawnNpc() {
-		const spawnPosition = TileHelpers.findMatchingTile(localIsland, localPlayer, TileHelpers.isSuitableSpawnPointTileForMultiplayer);
+		const spawnPosition = localPlayer.tile.findMatchingTile(tile => tile.isSuitableSpawnPointTileForMultiplayer());
 		if (!spawnPosition) {
 			throw new Error("Invalid spawn position");
 		}

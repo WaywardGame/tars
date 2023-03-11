@@ -24,7 +24,7 @@ export default class HarvestDoodad extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const growingStage = this.doodad.getGrowingStage();
+        const growingStage = this.doodad.growth;
 
         const harvestLoot = growingStage !== undefined ? this.doodad.description()?.harvest?.[growingStage] : growingStage;
         if (harvestLoot === undefined) {
@@ -35,7 +35,7 @@ export default class HarvestDoodad extends Objective {
 
         return [
             new MoveToTarget(this.doodad, true),
-            new ClearTile(this.doodad, { skipDoodad: true }),
+            new ClearTile(this.doodad.tile, { skipDoodad: true }),
             new ExecuteActionForItem(
                 ExecuteActionType.Doodad,
                 itemTypes,

@@ -1,6 +1,6 @@
-import { IOverlayInfo, ITile, OverlayType } from "game/tile/ITerrain";
+import { IOverlayInfo, OverlayType } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import { IColorFul } from "utilities/Color";
-import TileHelpers from "utilities/game/TileHelpers";
 
 export class TarsOverlay {
 
@@ -16,12 +16,12 @@ export class TarsOverlay {
         this.updateAlpha(0);
     }
 
-    public addOrUpdate(tile: ITile, tileX: number, tileY: number, tileZ: number, isBaseTile: boolean, isDisabled: boolean, penalty: number) {
-        const key = `${tileX},${tileY},${tileZ}`;
+    public addOrUpdate(tile: Tile, isBaseTile: boolean, isDisabled: boolean, penalty: number) {
+        const key = `${tile.x},${tile.y},${tile.z}`;
 
         let overlay = this.overlay.get(key);
         if (overlay) {
-            TileHelpers.Overlay.remove(tile, overlay);
+            tile.removeOverlay(overlay);
         }
 
         if (isBaseTile || isDisabled || penalty !== 0) {
@@ -53,7 +53,7 @@ export class TarsOverlay {
 
             this.overlay.set(key, overlay);
 
-            TileHelpers.Overlay.add(tile, overlay);
+            tile.addOverlay(overlay);
 
         } else if (overlay) {
             this.overlay.delete(key);
@@ -64,7 +64,7 @@ export class TarsOverlay {
         if (localIsland) {
             for (const [key, overlay] of this.overlay.entries()) {
                 const [x, y, z] = key.split(",");
-                TileHelpers.Overlay.remove(localIsland.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)), overlay);
+                localIsland.getTile(parseInt(x, 10), parseInt(y, 10), parseInt(z, 10)).removeOverlay(overlay);
             }
         }
 

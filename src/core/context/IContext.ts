@@ -9,7 +9,7 @@ export interface IContext {
 }
 
 export enum ContextDataType {
-	Position = "Position",
+	Tile = "Position",
 	LastAcquiredItem = "LastAcquiredItem",
 	LastBuiltDoodad = "LastBuiltDoodad",
 

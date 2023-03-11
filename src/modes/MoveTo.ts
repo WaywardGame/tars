@@ -96,7 +96,7 @@ export class MoveToMode implements ITarsMode {
 
                 if (tileLocations.length > 0) {
                     return tileLocations.map(tileLocation => ([
-                        new MoveToTarget(tileLocation.point, true),
+                        new MoveToTarget(tileLocation.tile, true),
                         new Lambda(async () => {
                             this.finished(true);
                             return ObjectiveResult.Complete;
@@ -186,7 +186,7 @@ export class MoveToMode implements ITarsMode {
                 break;
 
             case MoveToType.Player:
-                const player = playerManager.getByIdentifier(this.target.playerIdentifier);
+                const player = game.playerManager.getByIdentifier(this.target.playerIdentifier);
 
                 if (player) {
                     if (player === context.human) {

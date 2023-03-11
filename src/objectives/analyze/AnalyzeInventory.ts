@@ -1,3 +1,4 @@
+import { IContainer } from "game/item/IItem";
 import type Item from "game/item/Item";
 
 import type Context from "../../core/context/Context";
@@ -187,7 +188,7 @@ export default class AnalyzeInventory extends Objective {
 			return true;
 		}
 
-		if (itemInfo.allowInChests && (context.base.chest.concat(context.base.intermediateChest).some(chest => context.island.items.isContainableInContainer(item, chest)))) {
+		if (itemInfo.allowInChests && (context.base.chest.concat(context.base.intermediateChest).some(chest => context.island.items.isContainableInContainer(item, chest as IContainer)))) {
 			return true;
 		}
 

@@ -192,7 +192,7 @@ export class ItemUtilities {
 		if (this.baseItemCache === undefined) {
 			const baseTileItems = Array.from(this.getBaseTileItems(context));
 			const baseChestItems = context.base.chest
-				.map(chest => this.getItemsInContainer(context, chest))
+				.map(chest => this.getItemsInContainer(context, chest as IContainer))
 				.flat();
 			const inventoryItems = this.getItemsInInventory(context);
 
@@ -339,7 +339,7 @@ export class ItemUtilities {
 
 		if (useIntermediateChest && context.base.intermediateChest[0] && !checker.requirementsMet()) {
 			// process with the intermediate chest in mind
-			checker.processContainer(context.base.intermediateChest[0]);
+			checker.processContainer(context.base.intermediateChest[0] as IContainer);
 		}
 
 		return checker;
@@ -509,7 +509,7 @@ export class ItemUtilities {
 
 		let tool: Item | undefined;
 
-		const stage = doodad.getGrowingStage();
+		const stage = doodad.growth;
 		if (stage !== undefined && description.harvest && description.harvest[stage]) {
 			tool = this.getBestTool(context, ActionType.Harvest);
 
@@ -641,7 +641,7 @@ export class ItemUtilities {
 						if (point) {
 							const tile = context.island.getTileFromPoint(point);
 							if (tile.creature && !tile.creature.isTamed()) {
-								const distance = Vector2.squaredDistance(context.human, tile.creature.getPoint());
+								const distance = Vector2.squaredDistance(context.human, tile.creature.tile);
 								if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
 									closestCreatureDistance = distance;
 									closestCreature = tile.creature;
