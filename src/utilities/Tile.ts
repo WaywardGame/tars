@@ -1,7 +1,6 @@
 import { IContainer } from "game/item/IItem";
 import type { ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
 import type { IVector3 } from "utilities/math/IVector";
 import Dig from "game/entity/action/actions/Dig";
 import Butcher from "game/entity/action/actions/Butcher";
@@ -63,7 +62,7 @@ export class TileUtilities {
 
 	public isSwimmingOrOverWater(context: Context) {
 		const tile = context.getTile();
-		return context.human.isSwimming() || (tile && Terrains[tile.type]?.water === true);
+		return context.human.isSwimming() || tile?.description()?.water === true;
 	}
 
 	public isOverDeepSeaWater(context: Context) {
@@ -91,15 +90,15 @@ export class TileUtilities {
 			return false;
 		}
 
-		const terrainInfo = Terrains[terrainType];
-		if (terrainInfo) {
-			if (!terrainInfo.passable && !terrainInfo.water) {
+		const terrainDescription = tile.description();
+		if (terrainDescription) {
+			if (!terrainDescription.passable && !terrainDescription.water) {
 				return false;
 			}
 
 			if (options?.requireInfiniteShallowWater) {
 				// don't make solar still over fresh or swap water
-				if (!terrainInfo.shallowWater || terrainInfo.freshWater || terrainInfo.swampWater) {
+				if (!terrainDescription.shallowWater || terrainDescription.freshWater || terrainDescription.swampWater) {
 					return false;
 				}
 
@@ -107,7 +106,7 @@ export class TileUtilities {
 					return false;
 				}
 
-			} else if (options?.disallowWater && (terrainInfo.water || terrainInfo.shallowWater)) {
+			} else if (options?.disallowWater && (terrainDescription.water || terrainDescription.shallowWater)) {
 				return false;
 			}
 		}
@@ -129,7 +128,7 @@ export class TileUtilities {
 	}
 
 	public canGather(context: Context, tile: Tile, skipDoodadCheck?: boolean) {
-		if (!skipDoodadCheck && !Terrains[tile.type]?.gather && (tile.doodad || this.hasItems(tile))) {
+		if (!skipDoodadCheck && !tile.description()?.gather && (tile.doodad || this.hasItems(tile))) {
 			return false;
 		}
 

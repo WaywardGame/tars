@@ -1,5 +1,3 @@
-import Terrains from "game/tile/Terrains";
-
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
@@ -25,8 +23,7 @@ export default class MoveToLand extends Objective {
 		const navigation = context.utilities.navigation;
 
 		const target = context.getTile().findMatchingTile((tile) => {
-			const tileType = tile.type;
-			const terrainDescription = Terrains[tileType];
+			const terrainDescription = tile.description();
 			if (terrainDescription && !terrainDescription.water &&
 				!navigation.isDisabled(tile) && navigation.getPenalty(tile) === 0) {
 				// find the safest point to land on

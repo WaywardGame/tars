@@ -3,7 +3,6 @@ import type { AnyActionDescription } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
@@ -93,7 +92,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 		const tile = context.human.facingTile;
 		const tileType = tile.type;
 
-		const terrainDescription = Terrains[tileType];
+		const terrainDescription = tile.description();
 		if (!terrainDescription) {
 			return ObjectiveResult.Impossible;
 		}

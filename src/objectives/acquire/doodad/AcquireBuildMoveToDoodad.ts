@@ -1,6 +1,6 @@
 import type Doodad from "game/doodad/Doodad";
 import DoodadManager from "game/doodad/DoodadManager";
-import Doodads from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
@@ -55,7 +55,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 				const description = doodad.description();
 				if (description && description.lit !== undefined) {
 					if (DoodadManager.isGroup(this.doodadTypeOrGroup)) {
-						const litDescription = Doodads[description.lit];
+						const litDescription = doodadDescriptions[description.lit];
 						if (litDescription && DoodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {
 							requiresFire = true;
 						}

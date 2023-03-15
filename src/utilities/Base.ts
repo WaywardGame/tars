@@ -12,7 +12,7 @@ import type { BaseInfoKey, IBaseInfo } from "../core/ITars";
 import { baseInfo } from "../core/ITars";
 import { FindObjectType } from "./Object";
 import DoodadManager from "game/doodad/DoodadManager";
-import doodadDescriptions from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import Tile from "game/tile/Tile";

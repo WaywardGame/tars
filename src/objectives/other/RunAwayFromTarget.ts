@@ -1,6 +1,5 @@
 import Entity from "game/entity/Entity";
 import { Stat } from "game/entity/IStats";
-import terrainDescriptions from "game/tile/Terrains";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import type Context from "../../core/context/Context";
@@ -38,8 +37,7 @@ export default class RunAwayFromTarget extends Objective {
 		// get a list of all nearby tiles that are open
 		const nearbyOpenTiles = context.human.tile.findMatchingTiles(
 			(tile) => {
-				const terrainType = tile.type;
-				const terrainDescription = terrainDescriptions[terrainType];
+				const terrainDescription = tile.description();
 				if (terrainDescription &&
 					((!terrainDescription.passable && !terrainDescription.water) || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
 					return false;
@@ -89,8 +87,7 @@ export default class RunAwayFromTarget extends Objective {
 						pointScore += 2000;
 					}
 
-					const terrainType = tile.type;
-					const terrainDescription = terrainDescriptions[terrainType];
+					const terrainDescription = tile.description();
 					if (terrainDescription) {
 						if (!terrainDescription.passable && !terrainDescription.water) {
 							pointScore += 2000;

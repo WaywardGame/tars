@@ -1,5 +1,5 @@
 import type Doodad from "game/doodad/Doodad";
-import doodadDescriptions from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "game/doodad/IDoodad";
 import { GrowingStage } from "game/doodad/IDoodad";
 import { ActionType } from "game/entity/action/IAction";
@@ -10,11 +10,11 @@ import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import type { IContainer, IRecipe } from "game/item/IItem";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import { terrainDescriptions } from "game/tile/Terrains";
 import type Item from "game/item/Item";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import type { TerrainType } from "game/tile/ITerrain";
-import terrainDescriptions from "game/tile/Terrains";
 import Enums from "utilities/enum/Enums";
 
 import { IGetItemsOptions } from "game/item/IItemManager";

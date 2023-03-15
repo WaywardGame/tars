@@ -1,7 +1,7 @@
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import ItemManager from "game/item/ItemManager";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
+import { terrainDescriptions } from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 
@@ -66,7 +66,7 @@ export default class GatherFromTerrainResource extends Objective {
 	}
 
 	private processTerrainLocation(context: Context, objectivePipelines: IObjective[][], terrainSearch: ITerrainResourceSearch, tileLocation: ITileLocation, skipSmartCheck?: boolean) {
-		const terrainDescription = Terrains[terrainSearch.type];
+		const terrainDescription = terrainDescriptions[terrainSearch.type];
 		if (!terrainDescription) {
 			return;
 		}

@@ -1,6 +1,5 @@
 import type { IOverlayInfo } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
 import { RenderSource } from "renderer/IRenderer";
 import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOverlayFootPrints";
 import { Direction } from "utilities/math/Direction";
@@ -196,7 +195,7 @@ export class MovementUtilities {
                     const nextTile = context.human.island.getTile(nextPosition.x, nextPosition.y, target.z);
                     const doodad = nextTile.doodad;
                     const tileType = nextTile.type;
-                    const terrainDescription = Terrains[tileType];
+                    const terrainDescription = nextTile.description();
 
                     if (nextTile.creature) {
                         // walking into a creature
@@ -288,9 +287,7 @@ export class MovementUtilities {
                     for (let i = 2; i < path.length; i++) {
                         const position = path[i];
                         const tile = context.human.island.getTile(position.x, position.y, target.z);
-                        const tileType = tile.type;
-                        const terrainDescription = Terrains[tileType];
-
+                        const terrainDescription = tile.description();
                         if (tile.doodad?.blocksMove() || (terrainDescription && !terrainDescription.passable && !terrainDescription.water)) {
                             path = path.slice(0, i);
                             break;

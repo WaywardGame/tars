@@ -1,4 +1,3 @@
-import Terrains from "game/tile/Terrains";
 import Mine from "game/entity/action/actions/Mine";
 import Chop from "game/entity/action/actions/Chop";
 import Tile from "game/tile/Tile";
@@ -45,7 +44,7 @@ export default class ClearTile extends Objective {
         }
 
         const tileType = tile.type;
-        const terrainDescription = Terrains[tileType];
+        const terrainDescription = tile.description();
         if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
             objectives.push(
                 new ExecuteAction(Mine, [context.utilities.item.getBestToolForTerrainGather(context, tileType)]).setStatus("Destroying terrain"),

@@ -2,7 +2,6 @@ import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@cplusplus/index"
 import type { ITerrainDescription } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
-import terrainDescriptions from "game/tile/Terrains";
 import { WorldZ } from "game/WorldZ";
 import type { IVector3 } from "utilities/math/IVector";
 import { TileUpdateType } from "game/IGame";
@@ -217,7 +216,7 @@ export default class Navigation {
 
 	public refreshOverlay(tile: Tile, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {
 		tileType ??= tile.type;
-		terrainDescription ??= terrainDescriptions[tileType];
+		terrainDescription ??= tile.description();
 
 		if (!terrainDescription) {
 			return;
@@ -242,7 +241,7 @@ export default class Navigation {
 			return;
 		}
 
-		const terrainDescription = terrainDescriptions[tileType];
+		const terrainDescription = tile.description();
 		if (!terrainDescription) {
 			return;
 		}
@@ -309,7 +308,7 @@ export default class Navigation {
 
 	public getPenaltyFromPoint(island: Island, point: IVector3, tile: Tile = island.getTileFromPoint(point)): number {
 		const tileType = tile.type;
-		const terrainDescription = terrainDescriptions[tileType];
+		const terrainDescription = tile.description();
 		if (!terrainDescription) {
 			return 0;
 		}

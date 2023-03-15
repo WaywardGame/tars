@@ -3,11 +3,10 @@ import { Debounce } from "utilities/Decorators";
 import { OwnEventHandler } from "event/EventManager";
 import Renderer from "renderer/Renderer";
 import Component from "ui/component/Component";
-import { RenderSource } from "renderer/IRenderer";
+import { RenderSource, ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "renderer/IRenderer";
 import { Priority } from "event/EventEmitter";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
-import { ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "game/IGame";
 
 import TarsPanel from "../components/TarsPanel";
 import { TarsTranslation } from "../../ITarsMod";

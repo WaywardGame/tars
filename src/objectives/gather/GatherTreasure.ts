@@ -1,6 +1,5 @@
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import DrawnMap from "game/mapping/DrawnMap";
-import Terrains from "game/tile/Terrains";
 import Lockpick from "game/entity/action/actions/Lockpick";
 import Cast from "game/entity/action/actions/Cast";
 
@@ -87,7 +86,7 @@ export default class GatherTreasure extends Objective {
                 // dig/cast the treasure out
                 objectives = [];
 
-                const needFishingRod = Terrains[tile.type]?.water ? true : false;
+                const needFishingRod = tile.description()?.water ? true : false;
                 if (needFishingRod) {
                     objectives.push(new AcquireInventoryItem("fishing"));
                 }

@@ -6,7 +6,6 @@ import Creature from "game/entity/creature/Creature";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import Item from "game/item/Item";
-import terrainDescriptions from "game/tile/Terrains";
 import TileEvent from "game/tile/TileEvent";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
@@ -241,8 +240,7 @@ export default class MoveToTarget extends Objective {
 				for (let i = 4; i < path.length; i++) {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, context.human.z);
-					const tileType = tile.type;
-					const terrainDescription = terrainDescriptions[tileType];
+					const terrainDescription = tile.description();
 					if (terrainDescription && terrainDescription.water) {
 						swimTiles++;
 					}
@@ -264,8 +262,7 @@ export default class MoveToTarget extends Objective {
 
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
-			const tileType = tile.type;
-			const terrainDescription = terrainDescriptions[tileType];
+			const terrainDescription = tile.description();
 			if (terrainDescription && terrainDescription.water) {
 				return [
 					new UseItem(Ride, context.inventory.sailboat),
@@ -279,8 +276,7 @@ export default class MoveToTarget extends Objective {
 				for (let i = 0; i < path.length - 1; i++) {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, this.target.z);
-					const tileType = tile.type;
-					const terrainDescription = terrainDescriptions[tileType];
+					const terrainDescription = tile.description();
 					if (terrainDescription && terrainDescription.water) {
 						firstWaterTile = tile;
 						break;
@@ -423,8 +419,7 @@ export default class MoveToTarget extends Objective {
 
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
-			const tileType = tile.type;
-			const terrainDescription = terrainDescriptions[tileType];
+			const terrainDescription = tile.description();
 			if (terrainDescription && terrainDescription.water) {
 				this.log.warn("Interrupting to use sail boat");
 				return true;

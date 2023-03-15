@@ -3,7 +3,7 @@ import EventManager, { EventHandler } from "event/EventManager";
 import { TileUpdateType } from "game/IGame";
 import Island from "game/island/Island";
 import { TerrainType } from "game/tile/ITerrain";
-import terrainDescriptions from "game/tile/Terrains";
+import { terrainDescriptions } from "game/tile/Terrains";
 import Tile from "game/tile/Tile";
 import { WorldZ } from "game/WorldZ";
 import { KdTree } from "utilities/collection/tree/KdTree";

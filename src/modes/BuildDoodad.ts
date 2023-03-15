@@ -4,7 +4,7 @@ import type Doodad from "game/doodad/Doodad";
 import type DoodadManager from "game/doodad/DoodadManager";
 import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 import type Human from "game/entity/Human";
-import Doodads from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
@@ -49,7 +49,7 @@ export class BuildDoodadMode implements ITarsMode {
 			const description = doodad.description();
 			if (description && description.lit !== undefined) {
 				if (context.human.island.doodads.isGroup(this.doodadTypeOrGroup)) {
-					const litDescription = Doodads[description.lit];
+					const litDescription = doodadDescriptions[description.lit];
 					if (litDescription && context.human.island.doodads.isInGroup(description.lit, this.doodadTypeOrGroup)) {
 						requiresFire = true;
 					}

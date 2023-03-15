@@ -1,7 +1,7 @@
 import { TerrainType } from "game/tile/ITerrain";
 import { ItemTypeGroup, ItemType } from "game/item/IItem";
 import ItemManager from "game/item/ItemManager";
-import Terrains from "game/tile/Terrains";
+import { terrainDescriptions } from "game/tile/Terrains";
 import GatherLiquid from "game/entity/action/actions/GatherLiquid";
 
 import type Context from "../../core/context/Context";
@@ -31,7 +31,7 @@ export default class GatherFromTerrainWater extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const terrainSearch of this.search) {
-			const terrainDescription = Terrains[terrainSearch.type];
+			const terrainDescription = terrainDescriptions[terrainSearch.type];
 			if (!terrainDescription) {
 				continue;
 			}
