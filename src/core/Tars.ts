@@ -485,7 +485,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     @EventHandler(EventBus.Prompt, "queue", Priority.High)
     public onPrompt(host: Prompts.Events, prompt: IPrompt<IPromptDescriptionBase<any[]>>): string | boolean | void | InterruptChoice | undefined {
-        if (this.isRunning() && (prompt.type === Prompt.GameDangerousStep || prompt.type === Prompt.GameIslandTravelConfirmation)) {
+        if (this.isRunning() && (prompt.type === Prompt.GameIslandTravelConfirmation)) {
             this.log.info(`Resolving true for prompt ${Prompt[prompt.type]}`);
             prompt.resolve(InterruptChoice.Yes as any);
         }
