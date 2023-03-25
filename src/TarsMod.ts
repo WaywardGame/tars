@@ -476,12 +476,12 @@ export default class TarsMod extends Mod {
 	}
 
 	public spawnNpc() {
-		const spawnPosition = localPlayer.tile.findMatchingTile(tile => tile.isSuitableSpawnPointTileForMultiplayer());
-		if (!spawnPosition) {
+		const spawnTile = localPlayer.tile.findMatchingTile(tile => tile.isSuitableSpawnPointTileForMultiplayer());
+		if (!spawnTile) {
 			throw new Error("Invalid spawn position");
 		}
 
-		CreateControllableNPC.execute(localPlayer, tarsUniqueNpcType, spawnPosition);
+		CreateControllableNPC.execute(localPlayer, tarsUniqueNpcType, spawnTile);
 	}
 
 	/**
