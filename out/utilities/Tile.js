@@ -1,4 +1,4 @@
-define(["require", "exports", "game/tile/ITerrain", "game/entity/action/actions/Dig", "game/entity/action/actions/Butcher", "game/entity/action/actions/Till", "game/island/IIsland"], function (require, exports, ITerrain_1, Dig_1, Butcher_1, Till_1, IIsland_1) {
+define(["require", "exports", "game/entity/action/actions/Butcher", "game/entity/action/actions/Dig", "game/entity/action/actions/Till", "game/tile/ITerrain", "game/island/IIsland"], function (require, exports, Butcher_1, Dig_1, Till_1, ITerrain_1, IIsland_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.TileUtilities = void 0;

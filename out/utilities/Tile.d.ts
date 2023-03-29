@@ -1,10 +1,10 @@
 import { TerrainType } from "game/tile/ITerrain";
 import type { IVector3 } from "utilities/math/IVector";
-import Context from "../core/context/Context";
-import type { ITileLocation } from "../core/ITars";
 import Item from "game/item/Item";
 import Tile from "game/tile/Tile";
-import { ExtendedTerrainType } from "src/core/navigation/INavigation";
+import type { ITileLocation } from "../core/ITars";
+import Context from "../core/context/Context";
+import { ExtendedTerrainType } from "../core/navigation/INavigation";
 export interface IOpenTileOptions {
     requireNoItemsOnTile: boolean;
     disallowWater: boolean;

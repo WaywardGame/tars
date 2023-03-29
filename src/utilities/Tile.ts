@@ -1,18 +1,18 @@
+import Butcher from "game/entity/action/actions/Butcher";
+import Dig from "game/entity/action/actions/Dig";
+import Till from "game/entity/action/actions/Till";
 import { IContainer } from "game/item/IItem";
 import type { ITileContainer } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import type { IVector3 } from "utilities/math/IVector";
-import Dig from "game/entity/action/actions/Dig";
-import Butcher from "game/entity/action/actions/Butcher";
-import Till from "game/entity/action/actions/Till";
 
-import Context from "../core/context/Context";
-import type { ITileLocation } from "../core/ITars";
-import Item from "game/item/Item";
-import { Direction } from "utilities/math/Direction";
 import { WaterType } from "game/island/IIsland";
+import Item from "game/item/Item";
 import Tile from "game/tile/Tile";
-import { ExtendedTerrainType } from "src/core/navigation/INavigation";
+import { Direction } from "utilities/math/Direction";
+import type { ITileLocation } from "../core/ITars";
+import Context from "../core/context/Context";
+import { ExtendedTerrainType } from "../core/navigation/INavigation";
 
 export interface IOpenTileOptions {
 	requireNoItemsOnTile: boolean;
