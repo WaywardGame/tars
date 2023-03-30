@@ -10,10 +10,6 @@ export class TarsOverlay extends GenericOverlay<IOverlayInfo, [isBaseTile: boole
     }
 
     protected override generateOverlayInfo(tile: Tile, isBaseTile: boolean, isDisabled: boolean, penalty: number): IOverlayInfo | undefined {
-        if (!isBaseTile && !isDisabled && penalty === 0) {
-            return undefined;
-        }
-
         let color: IColorFul;
 
         if (isBaseTile) {

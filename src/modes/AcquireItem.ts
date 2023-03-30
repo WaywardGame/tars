@@ -21,7 +21,7 @@ export class AcquireItemMode implements ITarsMode {
 	}
 
 	public async determineObjectives(_: Context): Promise<Array<IObjective | IObjective[]>> {
-		return [new AcquireItem(this.itemType)];
+		return [new AcquireItem(this.itemType, { allowCraftingForUnmetRequiredDoodads: true })];
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")

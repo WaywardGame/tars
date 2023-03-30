@@ -117,7 +117,11 @@ export default class AcquireItem extends AcquireBase {
 
 		if (itemDescription) {
 			if (itemDescription.recipe) {
-				objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);
+				if (this.options.allowCraftingForUnmetRequiredDoodads ||
+					!itemDescription.recipe.requiredDoodads ||
+					(itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
+					objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);
+				}
 			}
 
 			if (itemDescription.revert !== undefined) {

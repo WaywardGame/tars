@@ -129,7 +129,7 @@ export default class TarsMod extends Mod {
 
 	private readonly tarsInstances: Set<Tars> = new Set();
 
-	private readonly tarsOverlay: TarsOverlay = new TarsOverlay();
+	private readonly tarsOverlay: TarsOverlay = new TarsOverlay(true);
 
 	private readonly tarsNavigationKdTrees: NavigationKdTrees = new NavigationKdTrees();
 

@@ -76,7 +76,6 @@ export default class Navigation {
 
 		this.maps.clear();
 
-		this.overlay.clear();
 		this.nodePenaltyCache.clear();
 		this.nodeDisableCache.clear();
 

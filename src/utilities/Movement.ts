@@ -78,7 +78,7 @@ export class MovementUtilities {
             if (overlay) {
                 const tile = context.island.getTile(pos.x, pos.y, pos.z);
 
-                tile.addOverlay(overlay);
+                tile.addOrUpdateOverlay(overlay);
                 this.movementOverlays.push({
                     tile,
                     overlay,
