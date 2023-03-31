@@ -162,7 +162,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		}
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
-			context.base.waterStill.length > 0 && context.base.waterStill[0].description()!.providesFire;
+			context.base.waterStill.length > 0 && context.base.waterStill[0].description!.providesFire;
 
 		if (!waitingForWater && context.options.allowBackpacks) {
 			// get a backpack before continuing. it will make things easier

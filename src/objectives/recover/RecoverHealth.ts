@@ -49,7 +49,7 @@ export default class RecoverHealth extends Objective {
 			const healthRecoveryFoodItems = Array.from(context.utilities.item.foodItemTypes)
 				.map(foodItemType => context.utilities.item.getItemsInContainerByType(context, context.human.inventory, foodItemType))
 				.flat()
-				.sort((a, b) => (b.description()?.onUse?.[ActionType.Eat]?.[0] ?? -99) - (a.description()?.onUse?.[ActionType.Eat]?.[0] ?? -99));
+				.sort((a, b) => (b.description?.onUse?.[ActionType.Eat]?.[0] ?? -99) - (a.description?.onUse?.[ActionType.Eat]?.[0] ?? -99));
 			if (healthRecoveryFoodItems.length > 0) {
 				return new UseItem(Eat, healthRecoveryFoodItems[0]);
 			}

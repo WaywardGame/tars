@@ -42,7 +42,7 @@ export default class GatherFromDoodad extends Objective {
 				return false;
 			}
 
-			const description = doodad.description();
+			const description = doodad.description;
 			if (!description) {
 				return false;
 			}

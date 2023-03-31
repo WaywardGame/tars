@@ -318,7 +318,7 @@ export default class CompleteQuestRequirement extends Objective {
                 const objectivePipelines: IObjective[][] = [];
 
                 for (const waterStill of context.base.waterStill) {
-                    if (!waterStill.description()?.providesFire) {
+                    if (!waterStill.description?.providesFire) {
                         objectivePipelines.push([
                             new StartWaterStillDesalination(waterStill, { forceStoke: true }),
                         ]);
@@ -332,7 +332,7 @@ export default class CompleteQuestRequirement extends Objective {
                 const objectivePipelines: IObjective[][] = [];
 
                 for (const waterStill of context.base.waterStill) {
-                    if (waterStill.description()?.providesFire) {
+                    if (waterStill.description?.providesFire) {
                         objectivePipelines.push([
                             new StartWaterStillDesalination(waterStill, { forceStoke: true }),
                         ]);

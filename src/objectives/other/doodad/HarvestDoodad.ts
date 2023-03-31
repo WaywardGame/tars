@@ -26,7 +26,7 @@ export default class HarvestDoodad extends Objective {
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         const growingStage = this.doodad.growth;
 
-        const harvestLoot = growingStage !== undefined ? this.doodad.description()?.harvest?.[growingStage] : growingStage;
+        const harvestLoot = growingStage !== undefined ? this.doodad.description?.harvest?.[growingStage] : growingStage;
         if (harvestLoot === undefined) {
             return ObjectiveResult.Impossible;
         }

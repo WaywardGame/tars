@@ -33,7 +33,7 @@ export default class UpgradeInventoryItem extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-		const description = item.description();
+		const description = item.description;
 		if (!description) {
 			return ObjectiveResult.Complete;
 		}
@@ -64,7 +64,7 @@ export default class UpgradeInventoryItem extends Objective {
 					break;
 
 				case InventoryItemFlag.PreferHigherTier:
-					const currentItemTier = item.description()?.tier?.[flags.option];
+					const currentItemTier = item.description?.tier?.[flags.option];
 
 					isUpgrade = (itemType: ItemType) => {
 						const tier = itemDescriptions[itemType]?.tier?.[flags.option];

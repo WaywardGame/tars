@@ -70,7 +70,7 @@ export default class GatherFromChest extends Objective {
 						}
 
 						if (this.options.requirePlayerCreatedIfCraftable) {
-							const canCraft = item.description()?.recipe;
+							const canCraft = item.description?.recipe;
 							if (canCraft && !item.crafterIdentifier) {
 								return false;
 							}

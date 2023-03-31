@@ -51,7 +51,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 			const doodadInfos = ([context.base.campfire, context.base.kiln, context.base.furnace]
 				.map(doodads => {
 					for (const doodad of doodads) {
-						const description = doodad.description();
+						const description = doodad.description;
 						if (!description) {
 							return undefined;
 						}

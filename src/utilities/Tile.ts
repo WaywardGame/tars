@@ -62,7 +62,7 @@ export class TileUtilities {
 
 	public isSwimmingOrOverWater(context: Context) {
 		const tile = context.getTile();
-		return context.human.isSwimming() || tile?.description()?.water === true;
+		return context.human.isSwimming() || tile?.description?.water === true;
 	}
 
 	public isOverDeepSeaWater(context: Context) {
@@ -90,7 +90,7 @@ export class TileUtilities {
 			return false;
 		}
 
-		const terrainDescription = tile.description();
+		const terrainDescription = tile.description;
 		if (terrainDescription) {
 			if (!terrainDescription.passable && !terrainDescription.water) {
 				return false;
@@ -128,7 +128,7 @@ export class TileUtilities {
 	}
 
 	public canGather(context: Context, tile: Tile, skipDoodadCheck?: boolean) {
-		if (!skipDoodadCheck && !tile.description()?.gather && (tile.doodad || this.hasItems(tile))) {
+		if (!skipDoodadCheck && !tile.description?.gather && (tile.doodad || this.hasItems(tile))) {
 			return false;
 		}
 

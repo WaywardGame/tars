@@ -240,7 +240,7 @@ export default class MoveToTarget extends Objective {
 				for (let i = 4; i < path.length; i++) {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, context.human.z);
-					const terrainDescription = tile.description();
+					const terrainDescription = tile.description;
 					if (terrainDescription && terrainDescription.water) {
 						swimTiles++;
 					}
@@ -262,7 +262,7 @@ export default class MoveToTarget extends Objective {
 
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
-			const terrainDescription = tile.description();
+			const terrainDescription = tile.description;
 			if (terrainDescription && terrainDescription.water) {
 				return [
 					new UseItem(Ride, context.inventory.sailboat),
@@ -276,7 +276,7 @@ export default class MoveToTarget extends Objective {
 				for (let i = 0; i < path.length - 1; i++) {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, this.target.z);
-					const terrainDescription = tile.description();
+					const terrainDescription = tile.description;
 					if (terrainDescription && terrainDescription.water) {
 						firstWaterTile = tile;
 						break;
@@ -419,7 +419,7 @@ export default class MoveToTarget extends Objective {
 
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
-			const terrainDescription = tile.description();
+			const terrainDescription = tile.description;
 			if (terrainDescription && terrainDescription.water) {
 				this.log.warn("Interrupting to use sail boat");
 				return true;

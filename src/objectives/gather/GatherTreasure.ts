@@ -86,7 +86,7 @@ export default class GatherTreasure extends Objective {
                 // dig/cast the treasure out
                 objectives = [];
 
-                const needFishingRod = tile.description()?.water ? true : false;
+                const needFishingRod = tile.description?.water ? true : false;
                 if (needFishingRod) {
                     objectives.push(new AcquireInventoryItem("fishing"));
                 }
@@ -95,7 +95,7 @@ export default class GatherTreasure extends Objective {
 
                 if (needFishingRod) {
                     // if (context.inventory.fishing) {
-                    //     const ranged = context.inventory.fishing.description()?.ranged ?? { range: 1 };
+                    //     const ranged = context.inventory.fishing.description?.ranged ?? { range: 1 };
                     //     const itemRange = ranged.range + (context.inventory.fishing?.magic.get(MagicalPropertyType.Range) ?? 0);
                     //     const minRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "min");
                     //     const maxRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "max");

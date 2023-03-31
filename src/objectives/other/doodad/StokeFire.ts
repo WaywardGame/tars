@@ -40,7 +40,7 @@ export default class StokeFire extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const description = doodad.description();
+		const description = doodad.description;
 		if (description && !description.providesFire) {
 			objectives.push(new StartFire(doodad));
 		}

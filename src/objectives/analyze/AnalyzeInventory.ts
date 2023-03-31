@@ -64,8 +64,8 @@ export default class AnalyzeInventory extends Objective {
 				const flagOption = typeof (flags) === "object" ? flags.option : undefined;
 
 				const sortedItems = Array.from(items).sort((itemA, itemB) => {
-					const descriptionA = itemA.description();
-					const descriptionB = itemB.description();
+					const descriptionA = itemA.description;
+					const descriptionB = itemB.description;
 
 					if (!descriptionA || !descriptionB) {
 						return -1;
@@ -152,7 +152,7 @@ export default class AnalyzeInventory extends Objective {
 
 		if (itemInfo.cureStatus !== undefined) {
 			for (const item of Array.from(items)) {
-				if (!item.description()?.canCureStatus?.includes(itemInfo.cureStatus)) {
+				if (!item.description?.canCureStatus?.includes(itemInfo.cureStatus)) {
 					items.delete(item);
 				}
 			}
@@ -180,7 +180,7 @@ export default class AnalyzeInventory extends Objective {
 			return false;
 		}
 
-		if (itemInfo.cureStatus !== undefined && !item.description()?.canCureStatus?.includes(itemInfo.cureStatus)) {
+		if (itemInfo.cureStatus !== undefined && !item.description?.canCureStatus?.includes(itemInfo.cureStatus)) {
 			return false;
 		}
 

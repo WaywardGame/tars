@@ -215,7 +215,7 @@ export default class Navigation {
 
 	public refreshOverlay(tile: Tile, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {
 		tileType ??= tile.type;
-		terrainDescription ??= tile.description();
+		terrainDescription ??= tile.description;
 
 		if (!terrainDescription) {
 			return;
@@ -240,7 +240,7 @@ export default class Navigation {
 			return;
 		}
 
-		const terrainDescription = tile.description();
+		const terrainDescription = tile.description;
 		if (!terrainDescription) {
 			return;
 		}
@@ -307,7 +307,7 @@ export default class Navigation {
 
 	public getPenaltyFromPoint(island: Island, point: IVector3, tile: Tile = island.getTileFromPoint(point)): number {
 		const tileType = tile.type;
-		const terrainDescription = tile.description();
+		const terrainDescription = tile.description;
 		if (!terrainDescription) {
 			return 0;
 		}
@@ -407,7 +407,7 @@ export default class Navigation {
 
 		const doodad = tile.doodad;
 		if (doodad !== undefined) {
-			const description = doodad.description();
+			const description = doodad.description;
 			if (!description) {
 				return true;
 			}
@@ -438,7 +438,7 @@ export default class Navigation {
 		return false;
 	}
 
-	public getPenalty(tile: Tile, tileType: TerrainType = tile.type, terrainDescription: ITerrainDescription | undefined = tile.description(), tileUpdateType?: TileUpdateType, skipCache?: boolean): number {
+	public getPenalty(tile: Tile, tileType: TerrainType = tile.type, terrainDescription: ITerrainDescription | undefined = tile.description, tileUpdateType?: TileUpdateType, skipCache?: boolean): number {
 		if (!skipCache) {
 			const cacheId = `${tile.x},${tile.y},${tile.z}`;
 			const result = this.nodePenaltyCache.get(cacheId);
@@ -494,7 +494,7 @@ export default class Navigation {
 		}
 
 		if (tile.doodad !== undefined) {
-			const description = tile.doodad.description();
+			const description = tile.doodad.description;
 			if (description && !description.isDoor && !description.isGate) {
 				if (description.isWall) {
 					// walls are hard to pick up and we don't want to

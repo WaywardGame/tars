@@ -38,7 +38,7 @@ export default class StartFire extends Objective {
 
 		const objectives: IObjective[] = [];
 
-		const description = doodad.description();
+		const description = doodad.description;
 		if (!description || description.lit === undefined || description.providesFire) {
 			// it's already lit
 			objectives.push(new MoveToTarget(doodad, true));
@@ -80,7 +80,7 @@ export default class StartFire extends Objective {
 			}).setStatus(this));
 
 			objectives.push(new Lambda(async context => {
-				const description = doodad.description();
+				const description = doodad.description;
 				if (!description || description.lit === undefined || description.providesFire) {
 					return ObjectiveResult.Complete;
 				}

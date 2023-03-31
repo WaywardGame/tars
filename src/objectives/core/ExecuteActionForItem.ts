@@ -92,7 +92,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 		const tile = context.human.facingTile;
 		const tileType = tile.type;
 
-		const terrainDescription = tile.description();
+		const terrainDescription = tile.description;
 		if (!terrainDescription) {
 			return ObjectiveResult.Impossible;
 		}
@@ -106,7 +106,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 					return ObjectiveResult.Restart;
 				}
 
-				const description = doodad.description();
+				const description = doodad.description;
 				if (!description) {
 					return ObjectiveResult.Restart;
 				}

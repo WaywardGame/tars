@@ -318,7 +318,7 @@ export class BaseUtilities {
 
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.human.z) {
-				const description = doodad.description();
+				const description = doodad.description;
 				if (description && description.isTree && await this.isGoodTargetOrigin(context, doodad)) {
 					for (let x = -6; x <= 6; x++) {
 						for (let y = -6; y <= 6; y++) {
@@ -416,7 +416,7 @@ export class BaseUtilities {
 
 				const tile = context.island.getTileFromPoint(point);
 				if (tile.doodad) {
-					const description = tile.doodad.description();
+					const description = tile.doodad.description;
 					if (description && description.isTree) {
 						nearbyTrees++;
 					}

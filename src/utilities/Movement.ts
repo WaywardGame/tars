@@ -195,7 +195,7 @@ export class MovementUtilities {
                     const nextTile = context.human.island.getTile(nextPosition.x, nextPosition.y, target.z);
                     const doodad = nextTile.doodad;
                     const tileType = nextTile.type;
-                    const terrainDescription = nextTile.description();
+                    const terrainDescription = nextTile.description;
 
                     if (nextTile.creature) {
                         // walking into a creature
@@ -242,7 +242,7 @@ export class MovementUtilities {
                         }
 
                         if (doodad.canPickUp(context.human)) {
-                            const doodadDescription = doodad.description();
+                            const doodadDescription = doodad.description;
                             if (doodadDescription && (doodadDescription.isDoor || doodadDescription.isGate) && doodadDescription.isClosed) {
                                 context.log.info("Opening doodad blocking the path", Direction[direction]);
 
@@ -287,7 +287,7 @@ export class MovementUtilities {
                     for (let i = 2; i < path.length; i++) {
                         const position = path[i];
                         const tile = context.human.island.getTile(position.x, position.y, target.z);
-                        const terrainDescription = tile.description();
+                        const terrainDescription = tile.description;
                         if (tile.doodad?.blocksMove() || (terrainDescription && !terrainDescription.passable && !terrainDescription.water)) {
                             path = path.slice(0, i);
                             break;

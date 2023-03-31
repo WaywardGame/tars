@@ -70,7 +70,7 @@ export class DoodadUtilities {
 			&& waterStill.decay > 0
 			&& waterStill.gatherReady !== undefined
 			&& waterStill.gatherReady > 0
-			&& waterStill.description()?.providesFire) ? true : false;
+			&& waterStill.description?.providesFire) ? true : false;
 	}
 
 	public isWaterStillDrinkable(waterStill: Doodad) {

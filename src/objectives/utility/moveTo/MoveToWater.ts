@@ -58,7 +58,7 @@ export default class MoveToWater extends Objective {
 			}
 
 			const tileType = tile.type;
-			const terrainDescription = tile.description();
+			const terrainDescription = tile.description;
 			if (!terrainDescription) {
 				return false;
 			}
@@ -102,7 +102,7 @@ export default class MoveToWater extends Objective {
 					const standableNearbyPoints: IVector3[] = [];
 
 					for (const nearbyTile of tile.getTilesAround()) {
-						const nearbyTerrainDescription = nearbyTile.description();
+						const nearbyTerrainDescription = nearbyTile.description;
 						if ((nearbyTerrainDescription?.shallowWater || !nearbyTerrainDescription?.water) && !navigation.isDisabled(nearbyTile)) {
 							standableNearbyPoints.push(nearbyTile);
 						}
@@ -123,7 +123,7 @@ export default class MoveToWater extends Objective {
 						const targetY = standableNearbyPoint.y + (direction.y * (this.options?.fishingRange ?? 1));
 
 						const targetTile = context.island.getTile(targetX, targetY, tile.z);
-						const targetTerrainDescription = targetTile.description();
+						const targetTerrainDescription = targetTile.description;
 						if (targetTerrainDescription?.shallowWater || !targetTerrainDescription?.water) {
 							return false;
 						}

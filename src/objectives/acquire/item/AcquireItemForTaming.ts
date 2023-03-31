@@ -41,7 +41,7 @@ export default class AcquireItemForTaming extends Objective {
 		if (result === undefined) {
 			result = [];
 
-			const acceptedItems = creature.description()?.acceptedItems;
+			const acceptedItems = creature.description?.acceptedItems;
 			if (acceptedItems) {
 				for (const itemTypeOrGroup of acceptedItems) {
 					if (context.island.items.isGroup(itemTypeOrGroup)) {

@@ -23,7 +23,7 @@ export default class MoveToLand extends Objective {
 		const navigation = context.utilities.navigation;
 
 		const target = context.getTile().findMatchingTile((tile) => {
-			const terrainDescription = tile.description();
+			const terrainDescription = tile.description;
 			if (terrainDescription && !terrainDescription.water &&
 				!navigation.isDisabled(tile) && navigation.getPenalty(tile) === 0) {
 				// find the safest point to land on

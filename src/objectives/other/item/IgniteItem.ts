@@ -33,7 +33,7 @@ export default class IgniteItem extends Objective {
             return ObjectiveResult.Restart;
         }
 
-        const description = item.description();
+        const description = item.description;
         if (!description || !description.lit || !description.use?.includes(ActionType.Ignite)) {
             this.log.error(`Invalid ignite item. ${item}`);
             return ObjectiveResult.Impossible;

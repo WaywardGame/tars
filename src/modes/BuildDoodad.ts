@@ -46,7 +46,7 @@ export class BuildDoodadMode implements ITarsMode {
 		let requiresFire = false;
 
 		if (doodad) {
-			const description = doodad.description();
+			const description = doodad.description;
 			if (description && description.lit !== undefined) {
 				if (context.human.island.doodads.isGroup(this.doodadTypeOrGroup)) {
 					const litDescription = doodadDescriptions[description.lit];

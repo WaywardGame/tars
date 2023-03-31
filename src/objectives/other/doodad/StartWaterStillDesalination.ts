@@ -55,7 +55,7 @@ export default class StartWaterStillDesalination extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		const waterStillDescription = this.waterStill.description();
+		const waterStillDescription = this.waterStill.description;
 		if (!waterStillDescription) {
 			return ObjectiveResult.Impossible;
 		}

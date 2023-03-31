@@ -240,7 +240,7 @@ export class ItemUtilities {
 					continue;
 				}
 
-				const description = item.description();
+				const description = item.description;
 				if (!description || !description.disassemble) {
 					continue;
 				}
@@ -362,7 +362,7 @@ export class ItemUtilities {
 
 	public getEquipmentItemsInInventory(context: Context) {
 		return context.island.items.getItemsInContainer(context.human.inventory, defaultGetItemOptions)
-			.filter(item => item.description()?.equip !== undefined && this.isAllowedToUseEquipItem(context, item));
+			.filter(item => item.description?.equip !== undefined && this.isAllowedToUseEquipItem(context, item));
 	}
 
 	public getItemsInInventory(context: Context) {
@@ -479,13 +479,13 @@ export class ItemUtilities {
 	}
 
 	public hasUseActionType(item: Item, actionType: ActionType) {
-		return item.description()?.use?.includes(actionType) ? true : false;
+		return item.description?.use?.includes(actionType) ? true : false;
 	}
 
 	public getTools(context: Context, actionType: ActionType, preferredDamageType?: DamageType): Item[] {
 		return this.getInventoryItemsWithUse(context, actionType)
 			.filter(item => {
-				const description = item.description();
+				const description = item.description;
 				return description && (preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
 			})
 			.sort((itemA, itemB) => itemB.getItemUseBonus(actionType) - itemA.getItemUseBonus(actionType));
@@ -502,7 +502,7 @@ export class ItemUtilities {
 	}
 
 	public getBestToolForDoodadGather(context: Context, doodad: Doodad): Item | undefined {
-		const description = doodad.description();
+		const description = doodad.description;
 		if (!description) {
 			return undefined;
 		}
@@ -548,7 +548,7 @@ export class ItemUtilities {
 					return false;
 				}
 
-				const description = item.description();
+				const description = item.description;
 				return description && description.equip === equip;
 			}));
 
@@ -565,7 +565,7 @@ export class ItemUtilities {
 	}
 
 	public calculateEquipItemScore(item: Item): number {
-		const description = item.description();
+		const description = item.description;
 		if (!description || !description.defense) {
 			return 0;
 		}
@@ -593,7 +593,7 @@ export class ItemUtilities {
 	public estimateWeaponDamage(context: Context, weapon: Item, target: Creature): number {
 		let damageAmount = context.human.calculateDamageAmount(AttackType.MeleeWeapon, weapon);
 
-		const damageType = weapon.description()?.damageType;
+		const damageType = weapon.description?.damageType;
 		if (damageType !== undefined) {
 			const attackOutcome = context.island.calculateDamageOutcome({
 				human: context.human,
@@ -714,7 +714,7 @@ export class ItemUtilities {
 	public getPossibleHandEquips(context: Context, actionType: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[] {
 		const items = this.getInventoryItemsWithUse(context, actionType, filterEquipped)
 			.filter(item => {
-				const description = item.description();
+				const description = item.description;
 				return description && description.equip === EquipType.Held &&
 					(preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
 			});
@@ -728,7 +728,7 @@ export class ItemUtilities {
 	public getInventoryItemsWithEquipType(context: Context, equipType: EquipType): Item[] {
 		return this.getItemsInInventory(context)
 			.filter(item => {
-				const description = item.description();
+				const description = item.description;
 				return description && description.equip === equipType;
 			});
 	}
@@ -740,7 +740,7 @@ export class ItemUtilities {
 					return false;
 				}
 
-				const description = item.description();
+				const description = item.description;
 				if (!description) {
 					return false;
 				}
@@ -753,8 +753,8 @@ export class ItemUtilities {
 			})
 			.sort((a, b) => {
 				if (use === ActionType.Attack) {
-					const descriptionA = a.description();
-					const descriptionB = b.description();
+					const descriptionA = a.description;
+					const descriptionB = b.description;
 					if (descriptionA !== undefined && descriptionB !== undefined &&
 						descriptionA.attack !== undefined && descriptionB.attack !== undefined &&
 						descriptionA.damageType !== undefined && descriptionB.damageType !== undefined) {
@@ -820,7 +820,7 @@ export class ItemUtilities {
 					return false;
 				}
 
-				// const description = item.description();
+				// const description = item.description;
 				// if (description?.use && (description.use.includes(ActionType.GatherWater) || (description.use.includes(ActionType.DrinkItem) && !description.tier?.[ItemTypeGroup.FrozenWater]))) {
 				// 	return false;
 				// }

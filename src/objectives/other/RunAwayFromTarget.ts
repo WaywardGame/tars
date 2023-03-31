@@ -37,7 +37,7 @@ export default class RunAwayFromTarget extends Objective {
 		// get a list of all nearby tiles that are open
 		const nearbyOpenTiles = context.human.tile.findMatchingTiles(
 			(tile) => {
-				const terrainDescription = tile.description();
+				const terrainDescription = tile.description;
 				if (terrainDescription &&
 					((!terrainDescription.passable && !terrainDescription.water) || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
 					return false;
@@ -87,7 +87,7 @@ export default class RunAwayFromTarget extends Objective {
 						pointScore += 2000;
 					}
 
-					const terrainDescription = tile.description();
+					const terrainDescription = tile.description;
 					if (terrainDescription) {
 						if (!terrainDescription.passable && !terrainDescription.water) {
 							pointScore += 2000;
