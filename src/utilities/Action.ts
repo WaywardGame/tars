@@ -19,6 +19,10 @@ export class ActionUtilities {
         args: GetActionArguments<T>,
         expectedMessages?: Set<Message>,
         expectedCannotUseResult: ObjectiveResult = ObjectiveResult.Restart): Promise<ObjectiveResult> {
+        if (!game.playing) {
+            return ObjectiveResult.Restart;
+        }
+
         if (context.options.freeze) {
             return ObjectiveResult.Pending;
         }
@@ -38,6 +42,10 @@ export class ActionUtilities {
 
                 checker();
             });
+        }
+
+        if (!game.playing) {
+            return ObjectiveResult.Restart;
         }
 
         const actionType = action.type!;

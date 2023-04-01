@@ -32,7 +32,7 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
+		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed() && !context.utilities.creature.isScaredOfCreature(context, creature))
 			.map(creature => {
 				const objectives: IObjective[] = [];
 

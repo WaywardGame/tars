@@ -1,8 +1,6 @@
 import { WaterType } from "game/island/IIsland";
 import { TerrainType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
-import { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -49,6 +47,8 @@ export default class MoveToWater extends Objective {
 		// ? context.utilities.tile.isOverDeepSeaWater(context) :
 
 		const navigation = context.utilities.navigation;
+
+		const fishingRange = this.options?.fishingRange ?? 1;
 
 		const disabledTiles: Set<Tile> = new Set();
 
@@ -99,30 +99,31 @@ export default class MoveToWater extends Objective {
 
 					// fishing involves a range trace infront of the player
 					// determine where the player is going to end up when moving to this fishable tile
-					const standableNearbyPoints: IVector3[] = [];
+					const standableNearbyTiles: Tile[] = [];
 
 					for (const nearbyTile of tile.getTilesAround()) {
-						const nearbyTerrainDescription = nearbyTile.description;
-						if ((nearbyTerrainDescription?.shallowWater || !nearbyTerrainDescription?.water) && !navigation.isDisabled(nearbyTile)) {
-							standableNearbyPoints.push(nearbyTile);
+						// const nearbyTerrainDescription = nearbyTile.description;
+						if (!navigation.isDisabled(nearbyTile) && (!nearbyTile.doodad || (!nearbyTile.doodad.blocksMove() && !nearbyTile.doodad.isDangerous(context.human)))) {
+							standableNearbyTiles.push(nearbyTile);
 						}
 					}
 
-					if (standableNearbyPoints.length === 0) {
+					if (standableNearbyTiles.length === 0) {
 						return false;
 					}
 
 					// verify that fishing will work for each possible neighbor position
 					const targetTiles: Tile[] = [];
 
-					for (const standableNearbyPoint of standableNearbyPoints) {
-						const direction = Vector2.DIRECTIONS[context.island.getDirectionFromMovement(tile.x - standableNearbyPoint.x, tile.y - standableNearbyPoint.y)];
+					for (const standableNearbyTile of standableNearbyTiles) {
+						const direction = context.island.getDirectionFromMovement(tile.x - standableNearbyTile.x, tile.y - standableNearbyTile.y);
 
-						// act like we are fishing from this tile
-						const targetX = standableNearbyPoint.x + (direction.x * (this.options?.fishingRange ?? 1));
-						const targetY = standableNearbyPoint.y + (direction.y * (this.options?.fishingRange ?? 1));
+						const mobCheck = context.island.checkForTargetInRange(standableNearbyTile, direction, fishingRange);
+						if (mobCheck.noTile || mobCheck.obstacle || (mobCheck.creature && !mobCheck.creature.description?.fishable)) {
+							return false;
+						}
 
-						const targetTile = context.island.getTile(targetX, targetY, tile.z);
+						const targetTile = mobCheck.tile;
 						const targetTerrainDescription = targetTile.description;
 						if (targetTerrainDescription?.shallowWater || !targetTerrainDescription?.water) {
 							return false;

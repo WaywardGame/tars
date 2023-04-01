@@ -96,6 +96,10 @@ export class TileUtilities {
 				return false;
 			}
 
+			if (terrainDescription.preventBuilding) {
+				return false;
+			}
+
 			if (options?.requireInfiniteShallowWater) {
 				// don't make solar still over fresh or swap water
 				if (!terrainDescription.shallowWater || terrainDescription.freshWater || terrainDescription.swampWater) {

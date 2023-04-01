@@ -49,6 +49,7 @@ export class CreatureUtilities {
 				return !this.hasDecentEquipment(context);
 
 			case CreatureType.Kraken:
+			case CreatureType.Coyote:
 				return !this.hasDecentEquipment(context) ||
 					context.human.getEquippedItem(EquipType.Legs)?.type === ItemType.BarkLeggings ||
 					context.human.getEquippedItem(EquipType.Chest)?.type === ItemType.BarkTunic;
