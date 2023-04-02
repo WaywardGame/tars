@@ -29,12 +29,9 @@ export class CreatureUtilities {
 
 		for (let x = -this.nearbyCreatureRadius; x <= this.nearbyCreatureRadius; x++) {
 			for (let y = -this.nearbyCreatureRadius; y <= this.nearbyCreatureRadius; y++) {
-				const validPoint = context.island.ensureValidPoint({ x: point.x + x, y: point.y + y, z: point.z });
-				if (validPoint) {
-					const tile = context.island.getTileFromPoint(validPoint);
-					if (tile.creature && !tile.creature.isTamed() && tile.creature.hitchedTo === undefined) {
-						creatures.push(tile.creature);
-					}
+				const tile = context.island.getTileSafe(point.x + x, point.y + y, point.z);
+				if (tile?.creature && !tile.creature.isTamed() && tile.creature.hitchedTo === undefined) {
+					creatures.push(tile.creature);
 				}
 			}
 		}

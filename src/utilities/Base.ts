@@ -102,16 +102,11 @@ export class BaseUtilities {
 						continue;
 					}
 
-					const nearbyPoint = context.island.ensureValidPoint({
-						x: tile.x + x,
-						y: tile.y + y,
-						z: tile.z,
-					});
-					if (!nearbyPoint) {
+					const nearbyTile = context.island.getTileSafe(tile.x + x, tile.y + y, tile.z);
+					if (!nearbyTile) {
 						continue;
 					}
 
-					const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
 					if (!context.utilities.tile.isOpenTile(context, nearbyTile, { disallowWater: !requireShallowWater, requireNoItemsOnTile: false })) {
 						return false;
 					}
@@ -326,16 +321,10 @@ export class BaseUtilities {
 								continue;
 							}
 
-							const point = context.island.ensureValidPoint({
-								x: doodad.x + x,
-								y: doodad.y + y,
-								z: doodad.z,
-							});
-							if (!point) {
+							const tile = context.island.getTileSafe(doodad.x + x, doodad.y + y, doodad.z);
+							if (!tile) {
 								continue;
 							}
-
-							const tile = context.island.getTileFromPoint(point);
 
 							if (context.utilities.base.isGoodBuildTile(context, tile)) {
 								return tile;
@@ -405,16 +394,11 @@ export class BaseUtilities {
 					continue;
 				}
 
-				const point = context.island.ensureValidPoint({
-					x: origin.x + x,
-					y: origin.y + y,
-					z: origin.z,
-				});
-				if (!point) {
+				const tile = context.island.getTileSafe(origin.x + x, origin.y + y, origin.z);
+				if (!tile) {
 					continue;
 				}
 
-				const tile = context.island.getTileFromPoint(point);
 				if (tile.doodad) {
 					const description = tile.doodad.description;
 					if (description && description.isTree) {

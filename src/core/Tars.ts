@@ -507,9 +507,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             if (updateNeighbors) {
                 for (let x = -tileUpdateRadius; x <= tileUpdateRadius; x++) {
                     for (let y = -tileUpdateRadius; y <= tileUpdateRadius; y++) {
-                        const point = island.ensureValidPoint({ x: tile.x + x, y: tile.y + y, z: tile.z });
-                        if (point) {
-                            const otherTile = island.getTileFromPoint(point);
+                        const otherTile = island.getTileSafe(tile.x + x, tile.y + y, tile.z);
+                        if (otherTile) {
                             this.utilities.navigation.onTileUpdate(
                                 island,
                                 otherTile,
@@ -1649,13 +1648,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private checkNearbyCreature(context: Context, direction: Direction.Cardinal): Creature | undefined {
         const point = Vector2.DIRECTIONS[direction];
-        const validPoint = context.island.ensureValidPoint({ x: context.human.x + point.x, y: context.human.y + point.y, z: context.human.z });
-        if (validPoint) {
-            const tile = context.island.getTileFromPoint(validPoint);
-            if (tile && tile.creature && !tile.creature.isTamed()) {
-                //  && (tile.creature.ai & AiType.Hostile) !== 0
-                return tile.creature;
-            }
+        const tile = context.island.getTileSafe(context.human.x + point.x, context.human.y + point.y, context.human.z);
+        if (tile && tile.creature && !tile.creature.isTamed()) {
+            //  && (tile.creature.ai & AiType.Hostile) !== 0
+            return tile.creature;
         }
     }
 

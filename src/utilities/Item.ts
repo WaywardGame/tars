@@ -637,15 +637,12 @@ export class ItemUtilities {
 
 				for (let x = -2; x <= 2; x++) {
 					for (let y = -2; y <= 2; y++) {
-						const point = context.human.island.ensureValidPoint({ x: context.human.x + x, y: context.human.y + y, z: context.human.z });
-						if (point) {
-							const tile = context.island.getTileFromPoint(point);
-							if (tile.creature && !tile.creature.isTamed()) {
-								const distance = Vector2.squaredDistance(context.human, tile.creature.tile);
-								if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
-									closestCreatureDistance = distance;
-									closestCreature = tile.creature;
-								}
+						const tile = context.human.island.getTileSafe(context.human.x + x, context.human.y + y, context.human.z);
+						if (tile?.creature && !tile.creature.isTamed()) {
+							const distance = Vector2.squaredDistance(context.human, tile.creature.tile);
+							if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
+								closestCreatureDistance = distance;
+								closestCreature = tile.creature;
 							}
 						}
 					}

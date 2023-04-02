@@ -295,11 +295,11 @@ export default class Navigation {
 	}
 
 	public isDisabledFromPoint(island: Island, point: IVector3): boolean {
-		if (!island.ensureValidPoint(point)) {
+		const tile = island.getTileSafe(point.x, point.y, point.z);
+		if (!tile) {
 			return true;
 		}
 
-		const tile = island.getTileFromPoint(point);
 		const tileType = tile.type;
 
 		return this.isDisabled(tile, tileType);
@@ -468,10 +468,8 @@ export default class Navigation {
 			// penalty for creatures on or near the tile
 			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
 				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
-					const point = island.ensureValidPoint({ x: tile.x + x, y: tile.y + y, z: tile.z });
-					if (point) {
-						const creature = island.getTileFromPoint(point).creature;
-
+					const creature = island.getTileSafe(tile.x + x, tile.y + y, tile.z)?.creature;
+					if (creature) {
 						// only apply the penalty if the creature can actually go this tile
 						if (creature && !creature.isTamed() && creature.checkCreatureMove(true, tile, creature.getMoveType(), true) === 0) {
 							penalty += 10;
