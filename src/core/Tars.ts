@@ -1637,7 +1637,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         for (const creature of nearbyCreatures) {
             if (shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature)) {
                 // only run away if the creature can path to us
-                const path = creature.findPath(context.human.tile, 16, context.human);
+                const path = creature.findPath(context.human.tile, creature.getMoveType(), 16, context.human);
                 if (path) {
                     this.log.info(`Run away from ${creature.getName().getString()}`);
                     return new RunAwayFromTarget(creature);
