@@ -5,7 +5,7 @@ import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDi
 import TabDialog from "ui/screen/screens/game/component/TabDialog";
 import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { Edge } from "ui/screen/screens/game/Dialogs";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Vector2 from "utilities/math/Vector2";
 import Tars from "../core/Tars";
 import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../ITarsMod";
