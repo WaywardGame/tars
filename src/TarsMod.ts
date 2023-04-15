@@ -367,7 +367,7 @@ export default class TarsMod extends Mod {
 						const tarsInstance = Array.from(this.tarsInstances)
 							.find(tarsInstance => game.islands.getIfExists(tarsInstance.human.islandId) && tarsInstance.dialogSubId === subId);
 						if (tarsInstance) {
-							gameScreen.dialogs.open<TarsDialog>(dialogId, subId)?.initialize(tarsInstance);
+							gameScreen.dialogs.open<TarsDialog>(dialogId, undefined, subId)?.initialize(tarsInstance);
 						}
 					}
 				}
@@ -546,7 +546,7 @@ export default class TarsMod extends Mod {
 		}
 
 		if (openDialog) {
-			gameScreen?.dialogs.open<TarsDialog>(this.dialogMain, tarsNpc.tarsInstance.dialogSubId)?.initialize(tarsNpc.tarsInstance);
+			gameScreen?.dialogs.open<TarsDialog>(this.dialogMain, undefined, tarsNpc.tarsInstance.dialogSubId)?.initialize(tarsNpc.tarsInstance);
 		}
 	}
 

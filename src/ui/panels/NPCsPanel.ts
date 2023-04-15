@@ -98,7 +98,7 @@ export default class NPCsPanel extends TarsPanel {
                     .classes.add("button-gear")
                     .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonConfigurationTooltip)))
                     .event.subscribe("activate", () => {
-                        gameScreen?.dialogs.open<TarsDialog>(this.TarsMod.dialogMain, tarsInstance.dialogSubId)?.initialize(tarsInstance);
+                        gameScreen?.dialogs.open<TarsDialog>(this.TarsMod.dialogMain, undefined, tarsInstance.dialogSubId)?.initialize(tarsInstance);
                     }))
                 .addButton(button => button
                     .classes.add("button-delete")
