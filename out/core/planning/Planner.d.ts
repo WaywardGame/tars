@@ -8,7 +8,7 @@ export declare class Planner implements IPlanner {
     debug: boolean;
     private readonly calculateDifficultyCache;
     private calculatingDifficultyDepth;
-    private calculationLog;
+    private readonly calculationLog;
     private objectivesCounter;
     private readonly log;
     constructor(loggerUtilities: LoggerUtilities, debug?: boolean);
@@ -21,4 +21,5 @@ export declare class Planner implements IPlanner {
     private checkAndMergeDifficultyCache;
     private calculateDifficulty;
     private writeCalculationLog;
+    private writeCalculationLogToConsoleAndReset;
 }

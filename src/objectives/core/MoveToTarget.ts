@@ -89,7 +89,7 @@ export default class MoveToTarget extends Objective {
 		}
 
 		// no point in including z here
-		status += ` ${this.target.x},${this.target.y}`;
+		status += ` ${this.target.x},${this.target.y},${this.target.z}`;
 
 		return status;
 	}
