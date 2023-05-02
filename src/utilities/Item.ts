@@ -2,28 +2,27 @@ import type Doodad from "game/doodad/Doodad";
 import { doodadDescriptions } from "game/doodad/Doodads";
 import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "game/doodad/IDoodad";
 import { GrowingStage } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
-import type Creature from "game/entity/creature/Creature";
 import { AttackType, DamageType } from "game/entity/IEntity";
 import { EquipType, SkillType } from "game/entity/IHuman";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
-import type { IContainer, IRecipe } from "game/item/IItem";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import { terrainDescriptions } from "game/tile/Terrains";
+import { ActionType } from "game/entity/action/IAction";
+import type Creature from "game/entity/creature/Creature";
+import { ConsumeItemStats, IContainer, IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import type { TerrainType } from "game/tile/ITerrain";
+import { terrainDescriptions } from "game/tile/Terrains";
 import Enums from "utilities/enum/Enums";
 
 import { IGetItemsOptions } from "game/item/IItemManager";
 import ItemManager from "game/item/ItemManager";
 import Vector2 from "utilities/math/Vector2";
-import type Context from "../core/context/Context";
-import { ContextDataType } from "../core/context/IContext";
 import { IDisassemblySearch, inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
+import type Context from "../core/context/Context";
+import { ContextDataType } from "../core/context/IContext";
 // import { IslandId } from "game/island/IIsland";
 
 export const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>> = { includeSubContainers: true };
@@ -959,9 +958,8 @@ export class ItemUtilities {
 	}
 
 	private isEdible(itemType: ItemType): boolean {
-		const onEat = itemDescriptions[itemType]?.onUse?.[ActionType.Eat];
-		return onEat !== undefined &&
-			onEat[0] >= 1 && // hp. note: must be greater than or equal to 1 for Pemmican
-			onEat[2] > 1; // hunger. don't continously dig for grass seeds
+		const onEat = ConsumeItemStats.resolve(itemDescriptions[itemType]?.onUse?.[ActionType.Eat]);
+		return (onEat.get(Stat.Health) ?? 0) >= 1 && // hp. note: must be greater than or equal to 1 for Pemmican
+			(onEat.get(Stat.Hunger) ?? 0) > 1; // hunger. don't continously dig for grass seeds
 	}
 }
