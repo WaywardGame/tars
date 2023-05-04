@@ -503,6 +503,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             });
 
         } else if (this.navigationSystemState === NavigationSystemState.Initialized) {
+            const baseTiles = this.utilities.base.getBaseTiles(this.getContext());
+
             const updateNeighbors = tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn;
             if (updateNeighbors) {
                 for (let x = -tileUpdateRadius; x <= tileUpdateRadius; x++) {
@@ -510,10 +512,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         const otherTile = island.getTileSafe(tile.x + x, tile.y + y, tile.z);
                         if (otherTile) {
                             this.utilities.navigation.onTileUpdate(
-                                island,
                                 otherTile,
                                 otherTile.type,
-                                this.utilities.base.isBaseTile(this.getContext(), otherTile),
+                                baseTiles.has(otherTile),
                                 tileUpdateType);
                         }
                     }
@@ -521,10 +522,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
             } else {
                 this.utilities.navigation.onTileUpdate(
-                    island,
                     tile,
                     tile.type,
-                    this.utilities.base.isBaseTile(this.getContext(), tile),
+                    baseTiles.has(tile),
                     tileUpdateType);
             }
         }
@@ -725,6 +725,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         if (this.saveData.enabled) {
             if (this.saveData.options.navigationOverlays) {
+                this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.context));
                 this.overlay.show();
                 this.human.updateView(RenderSource.Mod, false);
             }
@@ -797,6 +798,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         shouldInterrupt = false;
 
                         if (this.saveData.options.navigationOverlays) {
+                            this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.getContext()));
                             this.overlay.show();
 
                         } else {
@@ -1026,9 +1028,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         if (options?.delete || options?.resetBase) {
             if (this.base && typeof (localIsland) !== "undefined") {
-                const baseDoodads = this.utilities.base.getBaseDoodads(this.getContext());
-                for (const doodad of baseDoodads) {
-                    this.utilities.navigation.refreshOverlay(doodad.tile, false);
+                const baseTiles = this.utilities.base.getBaseTiles(this.getContext());
+                for (const baseTile of baseTiles) {
+                    this.utilities.navigation.refreshOverlay(baseTile, false);
                 }
             }
 
@@ -1628,8 +1630,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     continue;
                 }
 
-                this.log.info(`Defend against ${creature.getName().getString()}`);
-                return new DefendAgainstCreature(creature, shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature));
+                const shouldRunAway = shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature);
+
+                this.log.info(`Defend against ${creature.getName().getString()}. Should run away: ${shouldRunAway}`);
+
+                return new DefendAgainstCreature(creature, shouldRunAway);
             }
         }
 

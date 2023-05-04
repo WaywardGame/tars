@@ -19,8 +19,7 @@ export declare class BaseUtilities {
     isGoodBuildTile(context: Context, tile: Tile, options?: Partial<IBuildTileOptions>): boolean;
     isGoodWellBuildTile(context: Context, tile: Tile, onlyUnlimited: boolean): boolean;
     isOpenArea(context: Context, tile: Tile, radius?: number, allowWater?: boolean, requireShallowWater?: boolean): boolean;
-    getBaseDoodads(context: Context): Doodad[];
-    isBaseTile(context: Context, tile: Tile): boolean;
+    getBaseTiles(context: Context): Set<Tile>;
     isBaseDoodad(context: Context, doodad: Doodad): boolean;
     getBaseTile(context: Context): Tile;
     hasBase(context: Context): boolean;

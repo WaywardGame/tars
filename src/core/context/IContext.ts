@@ -56,7 +56,7 @@ export enum ContextDataType {
 	/**
 	 * Set when TARS is near the base so it remembers that it should do "near base" things, even if it moves further away from the base while doing said things
 	 */
-	IsNearBase = "IsNearBase",
+	NearBase = "NearBase",
 }
 
 export enum MovingToNewIslandState {

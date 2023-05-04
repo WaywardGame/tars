@@ -1,4 +1,3 @@
-import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { AiType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
@@ -14,7 +13,6 @@ import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import AcquireFood from "../objectives/acquire/item/AcquireFood";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
 import AcquireWaterContainer from "../objectives/acquire/item/specific/AcquireWaterContainer";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import Lambda from "../objectives/core/Lambda";
@@ -138,10 +136,6 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			}
 		});
 
-		if (context.base.kiln.length === 0) {
-			objectives.push([new AcquireInventoryItem("kiln"), new BuildItem()]);
-		}
-
 		objectives.push(new AcquireInventoryItem("heal"));
 
 		if (context.options.survivalMaintainLowDifficulty && context.utilities.creature.hasDecentEquipment(context)) {
@@ -209,6 +203,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			}
 		}
 
+		if (context.base.kiln.length === 0) {
+			objectives.push([new AcquireInventoryItem("kiln"), new BuildItem()]);
+		}
+
 		/*
 			Extra objectives
 		*/
@@ -240,7 +238,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		await this.runWhileNearBase(context, objectives, async (context, objectives) => {
 			// build a second water still
 			if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
-				objectives.push([new AcquireItemForDoodad(DoodadTypeGroup.LitWaterStill), new BuildItem()]);
+				objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
 			}
 
 			// carry food with you
@@ -571,7 +569,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		objectives: Array<IObjective | IObjective[]>,
 		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>) {
 		return this.runWhile(context, objectives,
-			"NearBase",
+			ContextDataType.NearBase,
 			async (context) => context.utilities.base.isNearBase(context),
 			determineObjectives);
 	}

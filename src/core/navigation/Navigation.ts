@@ -28,8 +28,8 @@ export default class Navigation {
 
 	private readonly maps: Map<number, INavigationMapData> = new Map();
 
-	private readonly nodePenaltyCache: Map<string, number> = new Map();
-	private readonly nodeDisableCache: Map<string, boolean> = new Map();
+	private readonly nodePenaltyCache: Map<number, number> = new Map();
+	private readonly nodeDisableCache: Map<number, boolean> = new Map();
 
 	private origin: IVector3 | undefined;
 	private originUpdateTimeout: number | undefined;
@@ -37,6 +37,8 @@ export default class Navigation {
 	private oppositeOrigin: IVector3 | undefined;
 
 	private sailingMode: boolean;
+
+	private addedOverlays = false;
 
 	constructor(private readonly log: Log, private readonly human: Human, private readonly overlay: TarsOverlay, private readonly kdTrees: NavigationKdTrees) {
 	}
@@ -100,13 +102,22 @@ export default class Navigation {
 
 		const start = performance.now();
 
-		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
-			const mapData = this.maps.get(z);
+		for (const tile of Object.values(island.tiles)) {
+			if (tile) {
+				this.onTileUpdate(tile, tile.type, false);
+			}
+		}
 
-			for (let x = 0; x < island.mapSize; x++) {
-				for (let y = 0; y < island.mapSize; y++) {
-					const tile = island.getTile(x, y, z);
-					this.onTileUpdate(island, tile, tile.type, false, undefined, mapData);
+		// update tiles around creatures
+		for (const creature of island.creatures) {
+			if (creature) {
+				for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
+					for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
+						const tile = island.getTileSafe(creature.x + x, creature.y + y, creature.z);
+						if (tile) {
+							this.onTileUpdate(tile, tile.type, false, TileUpdateType.Creature);
+						}
+					}
 				}
 			}
 		}
@@ -114,6 +125,22 @@ export default class Navigation {
 		const time = performance.now() - start;
 
 		this.log.info(`Updated navigation in ${time}ms`);
+	}
+
+	public async ensureOverlays(getBaseTiles: () => Set<Tile>) {
+		if (this.addedOverlays) {
+			return;
+		}
+
+		this.addedOverlays = true;
+
+		const baseTiles = getBaseTiles();
+
+		for (const tile of Object.values(this.human.island.tiles)) {
+			if (tile) {
+				this.refreshOverlay(tile, baseTiles.has(tile));
+			}
+		}
 	}
 
 	public getOrigin() {
@@ -213,11 +240,14 @@ export default class Navigation {
 		return undefined;
 	}
 
-	public refreshOverlay(tile: Tile, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType) {
-		tileType ??= tile.type;
-		terrainDescription ??= tile.description;
-
-		if (!terrainDescription) {
+	public refreshOverlay(tile: Tile,
+		isBaseTile: boolean,
+		isDisabled?: boolean,
+		penalty?: number,
+		tileType: TerrainType | undefined = tile.type,
+		terrainDescription: ITerrainDescription | undefined = tile.description,
+		tileUpdateType?: TileUpdateType) {
+		if (!this.addedOverlays && this.overlay.isHidden) {
 			return;
 		}
 
@@ -229,12 +259,10 @@ export default class Navigation {
 	}
 
 	public onTileUpdate(
-		island: Island,
 		tile: Tile,
 		tileType: TerrainType,
 		isBaseTile: boolean,
-		tileUpdateType?: TileUpdateType,
-		mapData?: INavigationMapData): void {
+		tileUpdateType?: TileUpdateType): void {
 		const mapInfo = this.maps.get(tile.z);
 		if (!mapInfo) {
 			return;
@@ -245,13 +273,11 @@ export default class Navigation {
 			return;
 		}
 
-		const cacheId = `${tile.x},${tile.y},${tile.z}`;
-
 		const isDisabled = this.isDisabled(tile, tileType, true);
 		const penalty = this.getPenalty(tile, tileType, terrainDescription, tileUpdateType, true);
 
-		this.nodeDisableCache.set(cacheId, isDisabled);
-		this.nodePenaltyCache.set(cacheId, penalty);
+		this.nodeDisableCache.set(tile.id, isDisabled);
+		this.nodePenaltyCache.set(tile.id, penalty);
 
 		this.refreshOverlay(tile, isBaseTile ?? false, isDisabled, penalty, tileType, terrainDescription, tileUpdateType);
 
@@ -262,9 +288,7 @@ export default class Navigation {
 			this.log.trace("invalid node", tile.x, tile.y, penalty, isDisabled);
 		}
 
-		if (!mapData) {
-			this.queueUpdateOrigin();
-		}
+		this.queueUpdateOrigin();
 	}
 
 	public getNearestTileLocation(island: Island, tileType: ExtendedTerrainType, point: IVector3): ITileLocation[] {
@@ -390,8 +414,7 @@ export default class Navigation {
 
 	public isDisabled(tile: Tile, tileType: TerrainType = tile.type, skipCache?: boolean): boolean {
 		if (!skipCache) {
-			const cacheId = `${tile.x},${tile.y},${tile.z}`;
-			const result = this.nodeDisableCache.get(cacheId);
+			const result = this.nodeDisableCache.get(tile.id);
 			if (result !== undefined) {
 				return result;
 			}
@@ -440,8 +463,7 @@ export default class Navigation {
 
 	public getPenalty(tile: Tile, tileType: TerrainType = tile.type, terrainDescription: ITerrainDescription | undefined = tile.description, tileUpdateType?: TileUpdateType, skipCache?: boolean): number {
 		if (!skipCache) {
-			const cacheId = `${tile.x},${tile.y},${tile.z}`;
-			const result = this.nodePenaltyCache.get(cacheId);
+			const result = this.nodePenaltyCache.get(tile.id);
 			if (result !== undefined) {
 				return result;
 			}
@@ -457,7 +479,7 @@ export default class Navigation {
 			penalty += 255;
 		}
 
-		if (tileUpdateType === undefined || tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
+		if (tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
 			if (tile.creature) {
 				// the penalty has to be high enough for non-tamed creatures to make the player not want to nav to it to avoid simple other obstacles
 				penalty += tile.creature.isTamed() ? 10 : 120;

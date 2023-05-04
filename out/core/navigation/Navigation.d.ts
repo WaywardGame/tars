@@ -1,4 +1,3 @@
-import type { IDijkstraMap } from "@cplusplus/index";
 import type { ITerrainDescription } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
@@ -12,10 +11,6 @@ import { ExtendedTerrainType, NavigationPath } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
 import { NavigationKdTrees } from "./NavigationKdTrees";
 import Tile from "game/tile/Tile";
-interface INavigationMapData {
-    dijkstraMap: IDijkstraMap;
-    dirtyDijkstra: boolean;
-}
 export declare const tileUpdateRadius = 2;
 export declare const creaturePenaltyRadius = 2;
 export default class Navigation {
@@ -30,11 +25,13 @@ export default class Navigation {
     private originUpdateTimeout;
     private oppositeOrigin;
     private sailingMode;
+    private addedOverlays;
     constructor(log: Log, human: Human, overlay: TarsOverlay, kdTrees: NavigationKdTrees);
     load(): void;
     unload(): void;
     shouldUpdateSailingMode(sailingMode: boolean): boolean;
     updateAll(sailingMode: boolean): Promise<void>;
+    ensureOverlays(getBaseTiles: () => Set<Tile>): Promise<void>;
     getOrigin(): IVector3 | undefined;
     queueUpdateOrigin(origin?: IVector3): void;
     updateOrigin(origin?: IVector3): void;
@@ -42,8 +39,8 @@ export default class Navigation {
     getOppositeOrigin(): IVector3 | undefined;
     calculateOppositeOrigin(z: WorldZ): IVector3 | undefined;
     calculateOppositeZ(z: WorldZ): WorldZ | undefined;
-    refreshOverlay(tile: Tile, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: number, terrainDescription?: ITerrainDescription, tileUpdateType?: TileUpdateType): void;
-    onTileUpdate(island: Island, tile: Tile, tileType: TerrainType, isBaseTile: boolean, tileUpdateType?: TileUpdateType, mapData?: INavigationMapData): void;
+    refreshOverlay(tile: Tile, isBaseTile: boolean, isDisabled?: boolean, penalty?: number, tileType?: TerrainType | undefined, terrainDescription?: ITerrainDescription | undefined, tileUpdateType?: TileUpdateType): void;
+    onTileUpdate(tile: Tile, tileType: TerrainType, isBaseTile: boolean, tileUpdateType?: TileUpdateType): void;
     getNearestTileLocation(island: Island, tileType: ExtendedTerrainType, point: IVector3): ITileLocation[];
     isDisabledFromPoint(island: Island, point: IVector3): boolean;
     getPenaltyFromPoint(island: Island, point: IVector3, tile?: Tile): number;
@@ -53,4 +50,3 @@ export default class Navigation {
     getPenalty(tile: Tile, tileType?: TerrainType, terrainDescription?: ITerrainDescription | undefined, tileUpdateType?: TileUpdateType, skipCache?: boolean): number;
     private _updateOrigin;
 }
-export {};

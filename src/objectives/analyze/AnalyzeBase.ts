@@ -99,9 +99,9 @@ export default class AnalyzeBase extends Objective {
 		if (changed) {
 			let availableUnlimitedWellLocation: IVector3 | undefined;
 
-			const baseDoodads = context.utilities.base.getBaseDoodads(context);
-			for (const baseDoodad of baseDoodads) {
-				const unlimitedWellTile = baseDoodad.tile.findMatchingTile(tile => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: 50 });
+			const baseTiles = context.utilities.base.getBaseTiles(context);
+			for (const baseTile of baseTiles) {
+				const unlimitedWellTile = baseTile.findMatchingTile(tile => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: 50 });
 				if (unlimitedWellTile) {
 					availableUnlimitedWellLocation = unlimitedWellTile;
 					break;

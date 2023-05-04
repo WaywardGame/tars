@@ -82,14 +82,11 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public getStatus(context: Context): string | undefined {
-		let status = `Moving to`;
+		let status = `Moving to ${this.target.getName()}`;
 
-		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {
-			status += ` ${this.target.getName()}`;
+		if (!Tile.is(this.target)) {
+			status += ` (${this.target.x},${this.target.y},${this.target.z})`;
 		}
-
-		// no point in including z here
-		status += ` ${this.target.x},${this.target.y},${this.target.z}`;
 
 		return status;
 	}
@@ -353,18 +350,19 @@ export default class MoveToTarget extends Objective {
 	 * Called when the context human or creature moves
 	 */
 	public override async onMove(context: Context) {
-		if (this.trackedCreature && this.trackedPosition) {
-			if (!this.trackedCreature.isValid()) {
+		const trackedCreature = this.trackedCreature;
+		if (trackedCreature && this.trackedPosition) {
+			if (!trackedCreature.isValid()) {
 				this.log.info("Creature died");
 				return true;
 			}
 
-			if (this.trackedCreature.isTamed()) {
+			if (trackedCreature.isTamed()) {
 				this.log.info("Creature became tamed");
 				return true;
 			}
 
-			if (Vector2.distance(context.human, this.trackedCreature) > 5) {
+			if (Vector2.distance(context.human, trackedCreature) > 5) {
 				// track once it's closer
 				return false;
 			}
@@ -382,20 +380,18 @@ export default class MoveToTarget extends Objective {
 				}
 			}
 
-			const trackedCreaturePosition = this.trackedCreature;
-
-			if (trackedCreaturePosition.x !== this.trackedPosition.x ||
-				trackedCreaturePosition.y !== this.trackedPosition.y ||
-				trackedCreaturePosition.z !== this.trackedPosition.z) {
+			if (trackedCreature.x !== this.trackedPosition.x ||
+				trackedCreature.y !== this.trackedPosition.y ||
+				trackedCreature.z !== this.trackedPosition.z) {
 				this.log.info("Moving with tracked creature");
 
-				this.trackedPosition = trackedCreaturePosition;
+				this.trackedPosition = trackedCreature.point;
 
 				// ensure a new path is used
 				context.utilities.movement.clearCache();
 
 				// move to it's latest location
-				const moveResult = await context.utilities.movement.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);
+				const moveResult = await context.utilities.movement.move(context, trackedCreature, this.moveAdjacentToTarget, true, true);
 
 				switch (moveResult) {
 					case MoveResult.NoTarget:
@@ -403,7 +399,7 @@ export default class MoveToTarget extends Objective {
 						return true;
 
 					case MoveResult.NoPath:
-						this.log.info(`No path to target ${this.trackedCreature.toString()}`);
+						this.log.info(`No path to target ${trackedCreature}`);
 						return true;
 
 					case MoveResult.Moving:

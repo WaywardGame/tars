@@ -118,6 +118,10 @@ export default class ContextState {
 		this.data = undefined;
 	}
 
+	public has(type: string): boolean {
+		return this.data?.has(type) ?? false;
+	}
+
 	public get<T = any>(type: string): T | undefined {
 		return this.data?.get(type);
 	}

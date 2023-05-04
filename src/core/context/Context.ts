@@ -123,6 +123,10 @@ export default class Context implements IContext {
 		return objectiveHashCodes !== undefined && (!objectiveHashCode || objectiveHashCodes?.has(objectiveHashCode));
 	}
 
+	public hasData(type: string): boolean {
+		return this.state.has(type);
+	}
+
 	public getData<T = any>(type: string): T | undefined {
 		return this.state.get(type);
 	}

@@ -101,19 +101,18 @@ export default class BuildItem extends Objective {
 				}
 
 				if (!this.target) {
-					const baseDoodads = context.utilities.base.getBaseDoodads(context);
-
-					for (const baseDoodad of baseDoodads) {
+					const baseTiles = context.utilities.base.getBaseTiles(context);
+					for (const baseTile of baseTiles) {
 						if (isWell) {
 							// look for unlimited wells first
-							this.target = baseDoodad.tile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+							this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 							if (this.target === undefined) {
 								this.log.info("Couldn't find unlimited well tile");
-								this.target = baseDoodad.tile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+								this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 							}
 
 						} else {
-							this.target = baseDoodad.tile.findMatchingTile((tile) => {
+							this.target = baseTile.findMatchingTile((tile) => {
 								if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, tile)) {
 									// AnalyzeBase won't like a doodad at this position
 									return false;

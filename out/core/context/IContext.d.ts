@@ -18,7 +18,7 @@ export declare enum ContextDataType {
     DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
     TamingCreature = "TamingCreature",
     KeepInInventoryItems = "KeepInInventoryItems",
-    IsNearBase = "IsNearBase"
+    NearBase = "NearBase"
 }
 export declare enum MovingToNewIslandState {
     None = 0,

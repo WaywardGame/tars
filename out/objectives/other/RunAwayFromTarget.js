@@ -4,7 +4,7 @@ define(["require", "exports", "game/entity/Entity", "game/entity/IStats", "utili
     const safetyCheckDistance = 5;
     const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
     class RunAwayFromTarget extends Objective_1.default {
-        constructor(target, maxRunAwayDistance = 20) {
+        constructor(target, maxRunAwayDistance = 30) {
             super();
             this.target = target;
             this.maxRunAwayDistance = maxRunAwayDistance;

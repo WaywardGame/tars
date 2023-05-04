@@ -16,6 +16,7 @@ import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import Tile from "game/tile/Tile";
+import { ContextDataType } from "../core/context/IContext";
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
@@ -117,29 +118,24 @@ export class BaseUtilities {
 		return true;
 	}
 
-	public getBaseDoodads(context: Context): Doodad[] {
-		let doodads: Doodad[] = [];
+	public getBaseTiles(context: Context): Set<Tile> {
+		const tiles = new Set<Tile>();
 
 		const keys = Object.keys(baseInfo) as BaseInfoKey[];
 		for (const key of keys) {
-			const baseDoodadOrDoodads: Doodad | Doodad[] = context.base[key];
+			const baseDoodadOrDoodads = context.base[key];
 			if (Array.isArray(baseDoodadOrDoodads)) {
-				doodads = doodads.concat(baseDoodadOrDoodads);
-
-			} else {
-				doodads.push(baseDoodadOrDoodads);
+				for (const doodad of baseDoodadOrDoodads) {
+					tiles.add(doodad.tile);
+				}
 			}
 		}
 
-		return doodads;
-	}
-
-	public isBaseTile(context: Context, tile: Tile): boolean {
-		return tile.doodad ? this.isBaseDoodad(context, tile.doodad) : false;
+		return tiles;
 	}
 
 	public isBaseDoodad(context: Context, doodad: Doodad): boolean {
-		return this.getBaseDoodads(context).includes(doodad);
+		return this.getBaseTiles(context).has(doodad.tile);
 	}
 
 	public getBaseTile(context: Context): Tile {
@@ -151,14 +147,18 @@ export class BaseUtilities {
 	}
 
 	public isNearBase(context: Context, point: IVector3 = context.human, distanceSq: number = nearBaseDistanceSq): boolean {
+		if (context.hasData(ContextDataType.NearBase)) {
+			// we were doing some near base stuff, keep at it!
+			return true;
+		}
+
 		if (!this.hasBase(context)) {
 			return false;
 		}
 
-		const baseDoodads = this.getBaseDoodads(context);
-
-		for (const doodad of baseDoodads) {
-			if (doodad.z === point.z && (distanceSq === Infinity || Vector2.squaredDistance(doodad, point) <= distanceSq)) {
+		const baseTiles = this.getBaseTiles(context);
+		for (const baseTile of baseTiles) {
+			if (baseTile.z === point.z && (distanceSq === Infinity || Vector2.squaredDistance(baseTile, point) <= distanceSq)) {
 				return true;
 			}
 		}

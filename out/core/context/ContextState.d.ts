@@ -15,6 +15,7 @@ export default class ContextState {
     get shouldIncludeHashCode(): boolean;
     merge(state: ContextState): void;
     reset(): void;
+    has(type: string): boolean;
     get<T = any>(type: string): T | undefined;
     set<T = any>(type: string, value: T | undefined, trackUndefined?: boolean): void;
     addReservedItemTypeForObjectiveHashCode(itemType: ItemType, objectiveHashCode?: string): void;

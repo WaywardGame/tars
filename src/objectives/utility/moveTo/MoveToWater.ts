@@ -148,6 +148,14 @@ export default class MoveToWater extends Objective {
 						}
 					}
 
+					// verify there's no dangerous creatures nearby
+					const nearbyTiles = tile.tilesInRange(16, true);
+					for (const tile of nearbyTiles) {
+						if (tile.creature && context.utilities.creature.isScaredOfCreature(context, tile.creature)) {
+							return false;
+						}
+					}
+
 					break;
 			}
 

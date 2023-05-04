@@ -12,7 +12,7 @@ const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
 
 export default class RunAwayFromTarget extends Objective {
 
-	constructor(private readonly target: Entity | IVector3, private readonly maxRunAwayDistance = 20) {
+	constructor(private readonly target: Entity | IVector3, private readonly maxRunAwayDistance = 30) {
 		super();
 	}
 
