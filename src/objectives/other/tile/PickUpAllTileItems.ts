@@ -1,15 +1,14 @@
-import type { IVector3 } from "utilities/math/IVector";
+import Tile from "game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-
 import MoveItemIntoInventory from "../item/MoveItemIntoInventory";
 
 export default class PickUpAllTileItems extends Objective {
 
-    constructor(private readonly target: IVector3) {
+    constructor(private readonly target: Tile) {
         super();
     }
 
@@ -22,7 +21,7 @@ export default class PickUpAllTileItems extends Objective {
     }
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const targetTile = context.island.getTileFromPoint(this.target);
+        const targetTile = this.target;
         if (targetTile.containedItems === undefined || targetTile.containedItems.length === 0) {
             return ObjectiveResult.Complete;
         }

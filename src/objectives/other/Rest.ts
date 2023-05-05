@@ -32,7 +32,7 @@ export default class Rest extends Objective {
 			return new MoveToLand();
 		}
 
-		const nearbyCreatures = context.utilities.creature.getNearbyCreatures(context);
+		const nearbyCreatures = context.utilities.creature.getNearbyCreatures(context, 10);
 		if (nearbyCreatures.length > 0) {
 			const nearbyCreature = nearbyCreatures[0];
 

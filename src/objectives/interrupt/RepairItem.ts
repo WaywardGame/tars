@@ -34,7 +34,7 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		const description = this.item.description();
+		const description = this.item.description;
 		if (!description || description.durability === undefined || description.repairable === false) {
 			// this.log.warn("item isn't repariable", this.item, description);
 			return ObjectiveResult.Ignore;

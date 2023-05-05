@@ -1,13 +1,12 @@
-import Doodads from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
 import { ActionArguments, ActionType } from "game/entity/action/IAction";
-import Corpses from "game/entity/creature/corpse/Corpses";
+import { corpseDescriptions } from "game/entity/creature/corpse/Corpses";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import { TerrainType } from "game/tile/ITerrain";
 import TerrainResources from "game/tile/TerrainResources";
-import terrainDescriptions from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Enums from "utilities/enum/Enums";
@@ -40,6 +39,7 @@ import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 import AddDifficulty from "../../core/AddDifficulty";
+import { terrainDescriptions } from "game/tile/Terrains";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -117,7 +117,11 @@ export default class AcquireItem extends AcquireBase {
 
 		if (itemDescription) {
 			if (itemDescription.recipe) {
-				objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);
+				if (this.options.allowCraftingForUnmetRequiredDoodads ||
+					!itemDescription.recipe.requiredDoodads ||
+					(itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
+					objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);
+				}
 			}
 
 			if (itemDescription.revert !== undefined) {
@@ -368,7 +372,7 @@ export default class AcquireItem extends AcquireBase {
 			while (unresolvedTypes.length > 0) {
 				const doodadType = unresolvedTypes.shift()!;
 
-				const doodadDescription = Doodads[doodadType];
+				const doodadDescription = doodadDescriptions[doodadType];
 				if (!doodadDescription) {
 					continue;
 				}
@@ -469,7 +473,7 @@ export default class AcquireItem extends AcquireBase {
 
 			for (const creatureType of Enums.values(CreatureType)) {
 				if (creatureType !== CreatureType.Shark) {
-					const corpseDescription = Corpses[creatureType];
+					const corpseDescription = corpseDescriptions[creatureType];
 					if (corpseDescription && corpseDescription.resource) {
 						for (const resource of corpseDescription.resource) {
 							if (resource.item === this.itemType) {

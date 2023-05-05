@@ -32,7 +32,7 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed())
+		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed() && !context.utilities.creature.isScaredOfCreature(context, creature))
 			.map(creature => {
 				const objectives: IObjective[] = [];
 
@@ -54,7 +54,7 @@ export default class GatherFromCreature extends Objective {
 				objectives.push(new HuntCreature(creature, true));
 
 				objectives.push(new Lambda(async context => {
-					const corpses = context.human.getFacingTile().corpses;
+					const corpses = context.human.facingTile.corpses;
 					if (corpses && corpses.length > 0) {
 						this.log.info("Carving corpse");
 						return new ExecuteActionForItem(ExecuteActionType.Corpse, this.search.map.get(creature.type)!)

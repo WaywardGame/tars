@@ -37,7 +37,7 @@ export default class TameCreature extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        const acceptedItems = this.creature.description()?.acceptedItems;
+        const acceptedItems = this.creature.description?.acceptedItems;
         if (!acceptedItems || acceptedItems.length === 0) {
             return ObjectiveResult.Impossible;
         }

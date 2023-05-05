@@ -1,7 +1,7 @@
 import type Translation from "language/Translation";
-import TarsPanel from "../components/TarsPanel";
-import { TarsTranslation } from "../../ITarsMod";
 import Tars from "../../core/Tars";
+import { TarsTranslation } from "../../ITarsMod";
+import TarsPanel from "../components/TarsPanel";
 export default class GeneralPanel extends TarsPanel {
     private readonly buttonEnable;
     private readonly choiceListMode;

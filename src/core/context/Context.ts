@@ -1,8 +1,7 @@
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
+import Tile from "game/tile/Tile";
 import Log from "utilities/Log";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector3 from "utilities/math/Vector3";
 
 import { IBase, IInventoryItems, IUtilities, ReserveType } from "../ITars";
 import { ITarsOptions } from "../ITarsOptions";
@@ -122,6 +121,10 @@ export default class Context implements IContext {
 	public isReservedItemType(itemType: ItemType, objectiveHashCode?: string): boolean {
 		const objectiveHashCodes = this.state.reservedItemTypesPerObjectiveHashCode?.get(itemType);
 		return objectiveHashCodes !== undefined && (!objectiveHashCode || objectiveHashCodes?.has(objectiveHashCode));
+	}
+
+	public hasData(type: string): boolean {
+		return this.state.has(type);
 	}
 
 	public getData<T = any>(type: string): T | undefined {
@@ -295,7 +298,7 @@ export default class Context implements IContext {
 	}
 
 	public resetPosition() {
-		this.setData(ContextDataType.Position, new Vector3(this.human));
+		this.setData(ContextDataType.Tile, this.human.tile);
 	}
 
 	public getHashCode(): string {
@@ -333,17 +336,12 @@ export default class Context implements IContext {
 	///////////////////////////
 	// Helper methods
 
-	public getPosition(): IVector3 {
-		// not needed?
-		// if (!this.calculatingDifficulty) {
-		// 	return this.human.getPoint();
-		// }
-
-		const position = this.getData(ContextDataType.Position);
-		if (position && (position.x === undefined || position.y === undefined || position.z === undefined)) {
-			console.error(`[TARS] getPosition - Invalid value ${position}`);
+	public getTile(): Tile {
+		const tile = this.getData(ContextDataType.Tile);
+		if (tile && (tile.x === undefined || tile.y === undefined || tile.z === undefined)) {
+			console.error(`[TARS] getTile - Invalid value ${tile}`);
 		}
 
-		return position || this.human.getPoint();
+		return tile ?? this.human.tile;
 	}
 }

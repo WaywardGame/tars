@@ -1,7 +1,7 @@
 import type { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
+import Tile from "game/tile/Tile";
 import Log from "utilities/Log";
-import type { IVector3 } from "utilities/math/IVector";
 import { IBase, IInventoryItems, IUtilities } from "../ITars";
 import { ITarsOptions } from "../ITarsOptions";
 import { HashCodeFiltering } from "../objective/IObjective";
@@ -18,7 +18,7 @@ export default class Context implements IContext {
     private initialState?;
     private changes;
     constructor(tars: Tars, base: IBase, inventory: IInventoryItems, utilities: IUtilities, state?: ContextState, calculatingDifficulty?: boolean, initialState?: ContextState | undefined);
-    get human(): import("../../../node_modules/@wayward/types/definitions/game/game/entity/Human").default;
+    get human(): import("../../../node_modules/@wayward/types/definitions/game/game/entity/Human").default<number>;
     get island(): import("../../../node_modules/@wayward/types/definitions/game/game/island/Island").default;
     get log(): Log;
     get options(): Readonly<ITarsOptions>;
@@ -31,6 +31,7 @@ export default class Context implements IContext {
     isSoftReservedItem(item: Item): boolean;
     isHardReservedItem(item: Item): boolean;
     isReservedItemType(itemType: ItemType, objectiveHashCode?: string): boolean;
+    hasData(type: string): boolean;
     getData<T = any>(type: string): T | undefined;
     getDataOrDefault<T = any>(type: string, defaultValue: T): T;
     setData<T = any>(type: string, value: T | undefined): void;
@@ -48,5 +49,5 @@ export default class Context implements IContext {
     getFilteredHashCode(filter: HashCodeFiltering): string;
     markShouldIncludeHashCode(): void;
     isPlausible(difficulty: number, requireMinimumAcceptedDifficulty?: boolean): boolean;
-    getPosition(): IVector3;
+    getTile(): Tile;
 }

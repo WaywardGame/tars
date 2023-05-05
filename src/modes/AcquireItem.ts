@@ -21,14 +21,14 @@ export class AcquireItemMode implements ITarsMode {
 	}
 
 	public async determineObjectives(_: Context): Promise<Array<IObjective | IObjective[]>> {
-		return [new AcquireItem(this.itemType)];
+		return [new AcquireItem(this.itemType, { allowCraftingForUnmetRequiredDoodads: true })];
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemUpdate")
-	public onInventoryItemAddOrUpdate(_: Human, item: Item) {
+	public onInventoryItemAddOrUpdate(_: Human, items: Item[]) {
 		// todo: compare player with context.player?
-		if (item.type === this.itemType) {
+		if (items.some(item => item.type === this.itemType)) {
 			this.finished(true);
 		}
 		// todo: analyze inventory?

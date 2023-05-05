@@ -205,7 +205,7 @@ export default class MoveToPanel extends TarsPanel {
     }
 
     protected onSwitchTo() {
-        const events = playerManager.event.until(this, "switchAway", "remove");
+        const events = game.playerManager.event.until(this, "switchAway", "remove");
         events.subscribe("join", this.refresh);
         events.subscribe("leave", this.refresh);
     }

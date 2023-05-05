@@ -25,9 +25,9 @@ export default class Fish extends Objective {
 
         objectives.push(new AcquireInventoryItem("fishing"));
 
-        const ranged = context.inventory.fishing?.description()?.ranged;
+        const ranged = context.inventory.fishing?.description?.ranged;
         if (ranged !== undefined) {
-            const itemRange = ranged.range + (context.inventory.fishing!.magic.get(MagicalPropertyType.Range) ?? 0);
+            const itemRange = ranged.range + (context.inventory.fishing!.magic?.get(MagicalPropertyType.Range) ?? 0);
             const range = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "max");
 
             objectives.push(new MoveToWater(

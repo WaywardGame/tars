@@ -20,6 +20,11 @@ export interface IAcquireItemOptions extends IGatherItemOptions {
 	disallowTerrain: boolean;
 	disallowWell: boolean;
 
+	/**
+	 * Allow crafting for items when we don't have the required doodad in the base
+	 */
+	allowCraftingForUnmetRequiredDoodads: boolean;
+
 	allowStartingWaterStill: boolean;
 	allowWaitingForWater: boolean;
 	onlyIdleWhenWaitingForWaterStill?: boolean;

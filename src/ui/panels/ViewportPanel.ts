@@ -3,13 +3,10 @@ import { Debounce } from "utilities/Decorators";
 import { OwnEventHandler } from "event/EventManager";
 import Renderer from "renderer/Renderer";
 import Component from "ui/component/Component";
-import Vector2 from "utilities/math/Vector2";
-import WebGlContext from "renderer/WebGlContext";
-import { RenderSource } from "renderer/IRenderer";
+import { RenderSource, ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "renderer/IRenderer";
 import { Priority } from "event/EventEmitter";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
-import { ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "game/IGame";
 
 import TarsPanel from "../components/TarsPanel";
 import { TarsTranslation } from "../../ITarsMod";
@@ -19,10 +16,7 @@ export default class ViewportPanel extends TarsPanel {
 
     private canvas: Component<HTMLCanvasElement> | undefined;
 
-    private webGlContext?: WebGlContext;
     private renderer?: Renderer;
-
-    private disposed = false;
 
     private zoomLevel: number = 2;
 
@@ -32,24 +26,19 @@ export default class ViewportPanel extends TarsPanel {
 
     @OwnEventHandler(ViewportPanel, "remove")
     protected onDispose() {
-        this.disposed = true;
-
-        this.disposeCanvas();
+        this.disposeRendererAndCanvas();
     }
 
-    private disposeCanvas() {
-        this.disposeGl();
+    private disposeRendererAndCanvas() {
+        this.disposeRenderer();
 
         this.canvas?.remove();
         this.canvas = undefined;
     }
 
-    private disposeGl() {
+    private disposeRenderer() {
         this.renderer?.delete();
         this.renderer = undefined;
-
-        this.webGlContext?.delete();
-        this.webGlContext = undefined;
     }
 
     public getTranslation(): TarsTranslation | Translation {
@@ -77,63 +66,44 @@ export default class ViewportPanel extends TarsPanel {
         this.getDialog()?.event.until(this, "switchAway", "remove")
             .subscribe("resize", () => this.resize());
 
-        this.disposeCanvas();
+        this.disposeRendererAndCanvas();
 
         const box = this.getCanvasBox();
         if (!box) {
             return;
-
         }
+
         this.canvas = new Component<HTMLCanvasElement>("canvas")
             .attributes.set("width", box[0].toString())
             .attributes.set("height", box[1].toString())
-            // .hide()
             .appendTo(this);
 
-        Renderer.createWebGlContext(this.canvas.element).then(async (context) => {
-            if (this.disposed) {
-                context.delete();
-                return;
-            }
+        const human = this.tarsInstance.getContext().human;
 
-            await context.load(true);
+        this.renderer = new Renderer(this.canvas.element);
+        this.renderer.fieldOfView.disabled = true;
+        this.renderer.event.subscribe("getZoomLevel", () => this.zoomLevel);
+        this.renderer.setOrigin(human);
+        this.renderer.setViewportSize(box[0], box[1]);
 
-            if (this.disposed) {
-                context.delete();
-                return;
-            }
+        this.resize();
 
-            // ensure any existing gl resources are deleted
-            this.disposeGl();
+        human.event.until(this, "switchAway", "remove")
+            .subscribe("tickStart", () => this.rerender());
 
-            this.webGlContext = context;
+        // ensures animations show correctly
+        human.event.until(this, "switchAway", "remove")
+            .subscribe("turnEnd", () => {
+                this.renderer?.updateView(RenderSource.Mod, false);
+            });
 
-            const human = this.tarsInstance.getContext().human;
-
-            this.renderer = new Renderer(context, human);
-            this.renderer.fieldOfView.disabled = true;
-            this.renderer.event.subscribe("getZoomLevel", () => this.zoomLevel);
-            this.renderer.setViewport(new Vector2(box[0], box[1]));
-
-            this.resize();
-
-            human.event.until(this, "switchAway", "remove")
-                .subscribe("tickStart", () => this.rerender());
-
-            // ensures animations show correctly
-            human.event.until(this, "switchAway", "remove")
-                .subscribe("turnEnd", () => {
-                    this.renderer?.updateView(RenderSource.Mod, false);
-                });
-
-            human.event.until(this, "switchAway", "remove")
-                .subscribe("postMove", () => this.rerender());
-        });
+        human.event.until(this, "switchAway", "remove")
+            .subscribe("postMove", () => this.rerender());
     }
 
     @Debounce(250)
     private resize() {
-        if (!this.canvas) {
+        if (!this.canvas || !this.renderer) {
             return;
         }
 
@@ -144,7 +114,7 @@ export default class ViewportPanel extends TarsPanel {
 
         const width = this.canvas.element.width = box[0];
         const height = this.canvas.element.height = box[1];
-        this.renderer?.setViewport(new Vector2(width, height));
+        this.renderer.setViewportSize(width, height);
 
         this.rerender(RenderSource.Resize);
     }

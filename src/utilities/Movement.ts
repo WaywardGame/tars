@@ -1,10 +1,7 @@
-import { getDirectionFromMovement } from "game/entity/player/IPlayer";
-import type { IOverlayInfo, ITile } from "game/tile/ITerrain";
+import type { IOverlayInfo } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
 import { RenderSource } from "renderer/IRenderer";
 import PathOverlayFootPrints from "ui/screen/screens/game/util/movement/PathOverlayFootPrints";
-import TileHelpers from "utilities/game/TileHelpers";
 import { Direction } from "utilities/math/Direction";
 import type { IVector3 } from "utilities/math/IVector";
 import Dig from "game/entity/action/actions/Dig";
@@ -20,6 +17,7 @@ import Butcher from "game/entity/action/actions/Butcher";
 import PickUp from "game/entity/action/actions/PickUp";
 import Chop from "game/entity/action/actions/Chop";
 import Equip from "game/entity/action/actions/Equip";
+import Tile from "game/tile/Tile";
 
 export enum MoveResult {
     NoTarget,
@@ -29,7 +27,7 @@ export enum MoveResult {
 }
 
 interface ITrackedOverlay {
-    tile: ITile;
+    tile: Tile;
     overlay: IOverlayInfo;
 }
 
@@ -47,20 +45,20 @@ export class MovementUtilities {
 
     public resetMovementOverlays() {
         for (const trackedOverlay of this.movementOverlays) {
-            TileHelpers.Overlay.remove(trackedOverlay.tile, trackedOverlay.overlay);
+            trackedOverlay.tile.removeOverlay(trackedOverlay.overlay);
         }
 
         this.movementOverlays.length = 0;
 
         if (game.playing) {
-            renderers.updateView(RenderSource.Mod, false);
+            renderers.updateView(undefined, RenderSource.Mod, false);
         }
     }
 
-    public clearOverlay(tile: ITile) {
+    public clearOverlay(tile: Tile) {
         const trackedOverlay = this.movementOverlays.find(tracked => tracked.tile === tile);
         if (trackedOverlay !== undefined) {
-            TileHelpers.Overlay.remove(tile, trackedOverlay.overlay);
+            tile.removeOverlay(trackedOverlay.overlay);
         }
     }
 
@@ -80,7 +78,7 @@ export class MovementUtilities {
             if (overlay) {
                 const tile = context.island.getTile(pos.x, pos.y, pos.z);
 
-                TileHelpers.Overlay.add(tile, overlay);
+                tile.addOrUpdateOverlay(overlay);
                 this.movementOverlays.push({
                     tile,
                     overlay,
@@ -94,7 +92,7 @@ export class MovementUtilities {
 
         const origin = navigation.getOrigin();
         if (!origin || (origin.x !== context.human.x || origin.y !== context.human.y || origin.z !== context.human.z)) {
-            context.log.warn("Updating origin immediately due to mismatch", origin, context.human.getPoint());
+            context.log.warn("Updating origin immediately due to mismatch", origin, context.human.point);
             navigation.updateOrigin(context.human);
         }
     }
@@ -192,12 +190,12 @@ export class MovementUtilities {
             if (!atEnd) {
                 const nextPosition: IVector3 | undefined = movementPath.path[1];
                 if (nextPosition) {
-                    const direction = getDirectionFromMovement(nextPosition.x - context.human.x, nextPosition.y - context.human.y);
+                    const direction = context.island.getDirectionFromMovement(nextPosition.x - context.human.x, nextPosition.y - context.human.y);
 
                     const nextTile = context.human.island.getTile(nextPosition.x, nextPosition.y, target.z);
                     const doodad = nextTile.doodad;
-                    const tileType = TileHelpers.getType(nextTile);
-                    const terrainDescription = Terrains[tileType];
+                    const tileType = nextTile.type;
+                    const terrainDescription = nextTile.description;
 
                     if (nextTile.creature) {
                         // walking into a creature
@@ -244,7 +242,7 @@ export class MovementUtilities {
                         }
 
                         if (doodad.canPickUp(context.human)) {
-                            const doodadDescription = doodad.description();
+                            const doodadDescription = doodad.description;
                             if (doodadDescription && (doodadDescription.isDoor || doodadDescription.isGate) && doodadDescription.isClosed) {
                                 context.log.info("Opening doodad blocking the path", Direction[direction]);
 
@@ -289,9 +287,7 @@ export class MovementUtilities {
                     for (let i = 2; i < path.length; i++) {
                         const position = path[i];
                         const tile = context.human.island.getTile(position.x, position.y, target.z);
-                        const tileType = TileHelpers.getType(tile);
-                        const terrainDescription = Terrains[tileType];
-
+                        const terrainDescription = tile.description;
                         if (tile.doodad?.blocksMove() || (terrainDescription && !terrainDescription.passable && !terrainDescription.water)) {
                             path = path.slice(0, i);
                             break;
@@ -319,7 +315,7 @@ export class MovementUtilities {
         }
 
         if (moveAdjacentToTarget) {
-            const direction = getDirectionFromMovement(target.x - context.human.x, target.y - context.human.y);
+            const direction = context.island.getDirectionFromMovement(target.x - context.human.x, target.y - context.human.y);
             if (direction !== context.human.facingDirection) {
                 await context.utilities.action.executeAction(context, UpdateDirection, [direction]);
             }

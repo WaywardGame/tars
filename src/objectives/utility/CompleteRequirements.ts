@@ -88,11 +88,11 @@ export default class CompleteRequirements extends Objective {
 			if (kiln && anvil) {
 				objectives.push(new StartFire(kiln));
 
-				objectives.push(new MoveToTarget({
+				objectives.push(new MoveToTarget(kiln.island.getTileFromPoint({
 					x: (kiln.x + anvil.x) / 2,
 					y: (kiln.y + anvil.y) / 2,
 					z: anvil.z,
-				}, false));
+				}), false));
 			}
 
 		} else if (requiresDoodads) {

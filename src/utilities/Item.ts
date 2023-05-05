@@ -1,29 +1,28 @@
 import type Doodad from "game/doodad/Doodad";
-import doodadDescriptions from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "game/doodad/IDoodad";
 import { GrowingStage } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
-import type Creature from "game/entity/creature/Creature";
 import { AttackType, DamageType } from "game/entity/IEntity";
 import { EquipType, SkillType } from "game/entity/IHuman";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
-import type { IContainer, IRecipe } from "game/item/IItem";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
+import { ActionType } from "game/entity/action/IAction";
+import type Creature from "game/entity/creature/Creature";
+import { ConsumeItemStats, IContainer, IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
 import type { TerrainType } from "game/tile/ITerrain";
-import terrainDescriptions from "game/tile/Terrains";
+import { terrainDescriptions } from "game/tile/Terrains";
 import Enums from "utilities/enum/Enums";
 
 import { IGetItemsOptions } from "game/item/IItemManager";
 import ItemManager from "game/item/ItemManager";
 import Vector2 from "utilities/math/Vector2";
-import type Context from "../core/context/Context";
-import { ContextDataType } from "../core/context/IContext";
 import { IDisassemblySearch, inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
+import type Context from "../core/context/Context";
+import { ContextDataType } from "../core/context/IContext";
 // import { IslandId } from "game/island/IIsland";
 
 export const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>> = { includeSubContainers: true };
@@ -192,7 +191,7 @@ export class ItemUtilities {
 		if (this.baseItemCache === undefined) {
 			const baseTileItems = Array.from(this.getBaseTileItems(context));
 			const baseChestItems = context.base.chest
-				.map(chest => this.getItemsInContainer(context, chest))
+				.map(chest => this.getItemsInContainer(context, chest as IContainer))
 				.flat();
 			const inventoryItems = this.getItemsInInventory(context);
 
@@ -240,7 +239,7 @@ export class ItemUtilities {
 					continue;
 				}
 
-				const description = item.description();
+				const description = item.description;
 				if (!description || !description.disassemble) {
 					continue;
 				}
@@ -339,7 +338,7 @@ export class ItemUtilities {
 
 		if (useIntermediateChest && context.base.intermediateChest[0] && !checker.requirementsMet()) {
 			// process with the intermediate chest in mind
-			checker.processContainer(context.base.intermediateChest[0]);
+			checker.processContainer(context.base.intermediateChest[0] as IContainer);
 		}
 
 		return checker;
@@ -362,7 +361,7 @@ export class ItemUtilities {
 
 	public getEquipmentItemsInInventory(context: Context) {
 		return context.island.items.getItemsInContainer(context.human.inventory, defaultGetItemOptions)
-			.filter(item => item.description()?.equip !== undefined && this.isAllowedToUseEquipItem(context, item));
+			.filter(item => item.description?.equip !== undefined && this.isAllowedToUseEquipItem(context, item));
 	}
 
 	public getItemsInInventory(context: Context) {
@@ -479,13 +478,13 @@ export class ItemUtilities {
 	}
 
 	public hasUseActionType(item: Item, actionType: ActionType) {
-		return item.description()?.use?.includes(actionType) ? true : false;
+		return item.description?.use?.includes(actionType) ? true : false;
 	}
 
 	public getTools(context: Context, actionType: ActionType, preferredDamageType?: DamageType): Item[] {
 		return this.getInventoryItemsWithUse(context, actionType)
 			.filter(item => {
-				const description = item.description();
+				const description = item.description;
 				return description && (preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
 			})
 			.sort((itemA, itemB) => itemB.getItemUseBonus(actionType) - itemA.getItemUseBonus(actionType));
@@ -502,14 +501,14 @@ export class ItemUtilities {
 	}
 
 	public getBestToolForDoodadGather(context: Context, doodad: Doodad): Item | undefined {
-		const description = doodad.description();
+		const description = doodad.description;
 		if (!description) {
 			return undefined;
 		}
 
 		let tool: Item | undefined;
 
-		const stage = doodad.getGrowingStage();
+		const stage = doodad.growth;
 		if (stage !== undefined && description.harvest && description.harvest[stage]) {
 			tool = this.getBestTool(context, ActionType.Harvest);
 
@@ -548,7 +547,7 @@ export class ItemUtilities {
 					return false;
 				}
 
-				const description = item.description();
+				const description = item.description;
 				return description && description.equip === equip;
 			}));
 
@@ -565,7 +564,7 @@ export class ItemUtilities {
 	}
 
 	public calculateEquipItemScore(item: Item): number {
-		const description = item.description();
+		const description = item.description;
 		if (!description || !description.defense) {
 			return 0;
 		}
@@ -593,7 +592,7 @@ export class ItemUtilities {
 	public estimateWeaponDamage(context: Context, weapon: Item, target: Creature): number {
 		let damageAmount = context.human.calculateDamageAmount(AttackType.MeleeWeapon, weapon);
 
-		const damageType = weapon.description()?.damageType;
+		const damageType = weapon.description?.damageType;
 		if (damageType !== undefined) {
 			const attackOutcome = context.island.calculateDamageOutcome({
 				human: context.human,
@@ -637,15 +636,12 @@ export class ItemUtilities {
 
 				for (let x = -2; x <= 2; x++) {
 					for (let y = -2; y <= 2; y++) {
-						const point = context.human.island.ensureValidPoint({ x: context.human.x + x, y: context.human.y + y, z: context.human.z });
-						if (point) {
-							const tile = context.island.getTileFromPoint(point);
-							if (tile.creature && !tile.creature.isTamed()) {
-								const distance = Vector2.squaredDistance(context.human, tile.creature.getPoint());
-								if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
-									closestCreatureDistance = distance;
-									closestCreature = tile.creature;
-								}
+						const tile = context.human.island.getTileSafe(context.human.x + x, context.human.y + y, context.human.z);
+						if (tile?.creature && !tile.creature.isTamed()) {
+							const distance = Vector2.squaredDistance(context.human, tile.creature.tile);
+							if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
+								closestCreatureDistance = distance;
+								closestCreature = tile.creature;
 							}
 						}
 					}
@@ -714,7 +710,7 @@ export class ItemUtilities {
 	public getPossibleHandEquips(context: Context, actionType: ActionType, preferredDamageType?: DamageType, filterEquipped?: boolean): Item[] {
 		const items = this.getInventoryItemsWithUse(context, actionType, filterEquipped)
 			.filter(item => {
-				const description = item.description();
+				const description = item.description;
 				return description && description.equip === EquipType.Held &&
 					(preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
 			});
@@ -728,7 +724,7 @@ export class ItemUtilities {
 	public getInventoryItemsWithEquipType(context: Context, equipType: EquipType): Item[] {
 		return this.getItemsInInventory(context)
 			.filter(item => {
-				const description = item.description();
+				const description = item.description;
 				return description && description.equip === equipType;
 			});
 	}
@@ -740,7 +736,7 @@ export class ItemUtilities {
 					return false;
 				}
 
-				const description = item.description();
+				const description = item.description;
 				if (!description) {
 					return false;
 				}
@@ -753,8 +749,8 @@ export class ItemUtilities {
 			})
 			.sort((a, b) => {
 				if (use === ActionType.Attack) {
-					const descriptionA = a.description();
-					const descriptionB = b.description();
+					const descriptionA = a.description;
+					const descriptionB = b.description;
 					if (descriptionA !== undefined && descriptionB !== undefined &&
 						descriptionA.attack !== undefined && descriptionB.attack !== undefined &&
 						descriptionA.damageType !== undefined && descriptionB.damageType !== undefined) {
@@ -820,7 +816,7 @@ export class ItemUtilities {
 					return false;
 				}
 
-				// const description = item.description();
+				// const description = item.description;
 				// if (description?.use && (description.use.includes(ActionType.GatherWater) || (description.use.includes(ActionType.DrinkItem) && !description.tier?.[ItemTypeGroup.FrozenWater]))) {
 				// 	return false;
 				// }
@@ -962,9 +958,8 @@ export class ItemUtilities {
 	}
 
 	private isEdible(itemType: ItemType): boolean {
-		const onEat = itemDescriptions[itemType]?.onUse?.[ActionType.Eat];
-		return onEat !== undefined &&
-			onEat[0] >= 1 && // hp. note: must be greater than or equal to 1 for Pemmican
-			onEat[2] > 1; // hunger. don't continously dig for grass seeds
+		const onEat = ConsumeItemStats.resolve(itemDescriptions[itemType]?.onUse?.[ActionType.Eat]);
+		return (onEat.get(Stat.Health) ?? 0) >= 1 && // hp. note: must be greater than or equal to 1 for Pemmican
+			(onEat.get(Stat.Hunger) ?? 0) > 1; // hunger. don't continously dig for grass seeds
 	}
 }

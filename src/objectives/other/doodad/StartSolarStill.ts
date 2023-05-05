@@ -53,7 +53,7 @@ export default class StartSolarStill extends Objective {
 
             objectives.push(new MoveToTarget(this.solarStill, true));
 
-            objectives.push(new PickUpAllTileItems(this.solarStill));
+            objectives.push(new PickUpAllTileItems(this.solarStill.tile));
 
             this.log.info("Moving to attach container");
 

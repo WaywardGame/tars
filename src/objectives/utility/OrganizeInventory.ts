@@ -1,7 +1,6 @@
 import type Doodad from "game/doodad/Doodad";
 import type { IContainer } from "game/item/IItem";
 import type Item from "game/item/Item";
-import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
 import Drop from "game/entity/action/actions/Drop";
 
@@ -143,7 +142,7 @@ export default class OrganizeInventory extends Objective {
 				.sort((a, b) => context.island.items.computeContainerWeight(a as IContainer) - context.island.items.computeContainerWeight(b as IContainer));
 
 			// prioritize the current facing chest
-			const facingDoodad = context.human.getFacingTile().doodad;
+			const facingDoodad = context.human.facingTile.doodad;
 			if (facingDoodad && context.island.items.isContainer(facingDoodad)) {
 				const chestIndex = chests.indexOf(facingDoodad);
 				if (chestIndex !== undefined) {
@@ -168,7 +167,7 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = TileHelpers.findMatchingTile(context.island, context.human, (_, point, tile) => context.utilities.tile.isOpenTile(context, point, tile), { maxTilesChecked: defaultMaxTilesChecked });
+		const target = context.human.tile.findMatchingTile(tile => context.utilities.tile.isOpenTile(context, tile), { maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}

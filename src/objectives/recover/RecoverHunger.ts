@@ -12,6 +12,7 @@ import Objective from "../../core/objective/Objective";
 import AcquireFood from "../acquire/item/AcquireFood";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 import UseItem from "../other/item/UseItem";
+import { IContainer } from "game/item/IItem";
 
 const decayingSoonThreshold = 50;
 
@@ -105,7 +106,7 @@ export default class RecoverHunger extends Objective {
 	private getFoodItemsInBase(context: Context): Item[] {
 		// prioritize ones that will decay sooner
 		return context.base.chest
-			.map(chest => context.utilities.item.getItemsInContainer(context, chest)
+			.map(chest => context.utilities.item.getItemsInContainer(context, chest as IContainer)
 				.filter(item => context.utilities.item.foodItemTypes.has(item.type)))
 			.flat()
 			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));

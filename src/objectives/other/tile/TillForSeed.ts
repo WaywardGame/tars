@@ -1,13 +1,12 @@
-import doodadDescriptions from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
-import { ITile, TerrainType } from "game/tile/ITerrain";
-import TileHelpers from "utilities/game/TileHelpers";
+import { TerrainType } from "game/tile/ITerrain";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import { itemDescriptions } from "game/item/ItemDescriptions";
 import Till from "game/entity/action/actions/Till";
-import { IVector3 } from "utilities/math/IVector";
+import Tile from "game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -58,13 +57,11 @@ export default class TillForSeed extends Objective {
             return undefined;
         }
 
-        const emptyTilledTile = TileHelpers.findMatchingTile(
-            context.island,
-            context.utilities.base.getBasePosition(context),
-            (island, point, tile) => this.allowedTilesSet.has(TileHelpers.getType(tile)) &&
-                island.isTilled(point.x, point.y, point.z) &&
-                island.isTileEmpty(tile) &&
-                TileHelpers.isOpenTile(island, point, tile),
+        const emptyTilledTile = context.utilities.base.getBaseTile(context).findMatchingTile(
+            (tile) => this.allowedTilesSet.has(tile.type) &&
+                tile.isTilled &&
+                tile.isEmpty &&
+                tile.isOpenTile,
             {
                 maxTilesChecked: this.maxTilesChecked
             });
@@ -75,20 +72,15 @@ export default class TillForSeed extends Objective {
             ];
         }
 
-        let tile: ITile | undefined;
-        let point: IVector3 | undefined;
+        let tile: Tile | undefined;
 
-        const facingTile = context.human.getFacingTile();
-        const facingPoint = context.human.getFacingPoint();
-        if (context.utilities.tile.canTill(context, facingPoint, facingTile, context.inventory.hoe, this.allowedTilesSet)) {
+        const facingTile = context.human.facingTile;
+        if (context.utilities.tile.canTill(context, facingTile, context.inventory.hoe, this.allowedTilesSet)) {
             tile = facingTile;
-            point = facingPoint;
 
         } else {
-            const nearbyTillableTile = TileHelpers.findMatchingTile(
-                context.island,
-                context.utilities.base.getBasePosition(context),
-                (_, point, tile) => context.utilities.tile.canTill(context, point, tile, context.inventory.hoe, this.allowedTilesSet),
+            const nearbyTillableTile = context.utilities.base.getBaseTile(context).findMatchingTile(
+                (tile) => context.utilities.tile.canTill(context, tile, context.inventory.hoe, this.allowedTilesSet),
                 {
                     maxTilesChecked: gardenMaxTilesChecked,
                 }
@@ -98,24 +90,22 @@ export default class TillForSeed extends Objective {
                 return undefined;
             }
 
-            const target = nearbyTillableTile;
-            point = target;
-            tile = context.island.getTileFromPoint(target);
+            tile = nearbyTillableTile;
         }
 
         let objectives: IObjective[] = [];
 
-        if (TileHelpers.getType(tile) === TerrainType.Grass) {
-            objectives.push(new DigTile(point, { digUntilTypeIsNot: TerrainType.Grass }));
+        if (tile.type === TerrainType.Grass) {
+            objectives.push(new DigTile(tile, { digUntilTypeIsNot: TerrainType.Grass }));
         }
 
         objectives.push(
-            new MoveToTarget(point, true),
+            new MoveToTarget(tile, true),
             new UseItem(Till, "hoe"),
             new Lambda(async context => {
-                const facingPoint = context.human.getFacingPoint();
+                const facingPoint = context.human.facingTile;
 
-                if (context.human.island.isTilled(facingPoint.x, facingPoint.y, facingPoint.z)) {
+                if (facingPoint.isTilled) {
                     return ObjectiveResult.Complete;
                 }
 

@@ -1,5 +1,5 @@
 import type Doodad from "game/doodad/Doodad";
-import Doodads from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import type { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { DoodadType } from "game/doodad/IDoodad";
 import Enums from "utilities/enum/Enums";
@@ -11,7 +11,7 @@ export class DoodadUtilities {
 		const doodadTypes: Set<DoodadType> = new Set();
 		if (DoodadManager.isGroup(doodadTypeOrGroup)) {
 			for (const dt of Enums.values(DoodadType)) {
-				const doodadDescription = Doodads[dt];
+				const doodadDescription = doodadDescriptions[dt];
 				if (!doodadDescription) {
 					continue;
 				}
@@ -22,7 +22,7 @@ export class DoodadUtilities {
 
 				const lit = doodadDescription.lit;
 				if (lit !== undefined) {
-					const litDoodadDescription = Doodads[lit];
+					const litDoodadDescription = doodadDescriptions[lit];
 					if (litDoodadDescription && DoodadManager.isInGroup(lit, doodadTypeOrGroup)) {
 						doodadTypes.add(dt);
 					}
@@ -30,7 +30,7 @@ export class DoodadUtilities {
 
 				const revert = doodadDescription.revert;
 				if (revert !== undefined) {
-					const revertDoodadDescription = Doodads[revert];
+					const revertDoodadDescription = doodadDescriptions[revert];
 					if (revertDoodadDescription && DoodadManager.isInGroup(revert, doodadTypeOrGroup)) {
 						doodadTypes.add(dt);
 					}
@@ -41,11 +41,11 @@ export class DoodadUtilities {
 			doodadTypes.add(doodadTypeOrGroup);
 
 			if (includeLitAndRevert) {
-				const doodadDescription = Doodads[doodadTypeOrGroup];
+				const doodadDescription = doodadDescriptions[doodadTypeOrGroup];
 				if (doodadDescription) {
 					const lit = doodadDescription.lit;
 					if (lit !== undefined) {
-						const litDoodadDescription = Doodads[lit];
+						const litDoodadDescription = doodadDescriptions[lit];
 						if (litDoodadDescription) {
 							doodadTypes.add(lit);
 						}
@@ -53,7 +53,7 @@ export class DoodadUtilities {
 
 					const revert = doodadDescription.revert;
 					if (revert !== undefined) {
-						const revertDoodadDescription = Doodads[revert];
+						const revertDoodadDescription = doodadDescriptions[revert];
 						if (revertDoodadDescription) {
 							doodadTypes.add(revert);
 						}
@@ -70,7 +70,7 @@ export class DoodadUtilities {
 			&& waterStill.decay > 0
 			&& waterStill.gatherReady !== undefined
 			&& waterStill.gatherReady > 0
-			&& waterStill.description()?.providesFire) ? true : false;
+			&& waterStill.description?.providesFire) ? true : false;
 	}
 
 	public isWaterStillDrinkable(waterStill: Doodad) {
@@ -78,10 +78,10 @@ export class DoodadUtilities {
 	}
 
 	public requiresFire(doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
-		const description = Doodads[doodadTypeOrGroup];
+		const description = doodadDescriptions[doodadTypeOrGroup];
 		if (description && description.lit !== undefined) {
 			if (DoodadManager.isGroup(doodadTypeOrGroup)) {
-				const litDescription = Doodads[description.lit];
+				const litDescription = doodadDescriptions[description.lit];
 				if (litDescription && DoodadManager.isInGroup(description.lit, doodadTypeOrGroup)) {
 					return true;
 				}

@@ -31,10 +31,10 @@ export default class EmptyWaterContainer extends Objective {
 
 		const targets = context.utilities.tile.getNearestTileLocation(context, anyWaterTileLocation);
 
-		for (const { point } of targets) {
+		for (const { tile } of targets) {
 			const objectives: IObjective[] = [];
 
-			objectives.push(new MoveToTarget(point, true));
+			objectives.push(new MoveToTarget(tile, true));
 
 			objectives.push(new UseItem(Pour, this.item));
 

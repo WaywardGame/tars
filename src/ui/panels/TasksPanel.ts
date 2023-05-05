@@ -1,23 +1,23 @@
-import type Translation from "language/Translation";
-import { ItemType } from "game/item/IItem";
-import Button from "ui/component/Button";
-import ItemDropdown from "ui/component/dropdown/ItemDropdown";
-import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
-import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import Divider from "ui/component/Divider";
 import { DoodadType } from "game/doodad/IDoodad";
-import { Bound } from "utilities/Decorators";
 import { CreatureType } from "game/entity/creature/ICreature";
+import { ItemType } from "game/item/IItem";
+import type Translation from "language/Translation";
+import Button from "ui/component/Button";
+import Divider from "ui/component/Divider";
+import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
+import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
+import ItemDropdown from "ui/component/dropdown/ItemDropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { Bound } from "utilities/Decorators";
 
-import { AcquireItemMode } from "../../modes/AcquireItem";
-import TarsPanel from "../components/TarsPanel";
-import { BuildDoodadMode } from "../../modes/BuildDoodad";
-import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
-import { ExecuteObjectivesMode } from "../../modes/ExecuteObjectives";
-import SailToCivilization from "../../objectives/utility/SailToCivilization";
-import { TameCreatureMode } from "../../modes/TameCreature";
 import Tars from "../../core/Tars";
+import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
+import { AcquireItemMode } from "../../modes/AcquireItem";
+import { BuildDoodadMode } from "../../modes/BuildDoodad";
+import { ExecuteObjectivesMode } from "../../modes/ExecuteObjectives";
+import { TameCreatureMode } from "../../modes/TameCreature";
+import SailToCivilization from "../../objectives/utility/SailToCivilization";
+import TarsPanel from "../components/TarsPanel";
 
 export default class TasksPanel extends TarsPanel {
 
@@ -39,7 +39,7 @@ export default class TasksPanel extends TarsPanel {
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonAquireItem))
-            .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonAquireItemTooltip))))
+            .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonAquireItemTooltip)))
             .event.subscribe("activate", async () => {
                 await this.tarsInstance.activateManualMode(new AcquireItemMode(this.dropdownItemType.selection as ItemType));
                 return true;
@@ -59,7 +59,7 @@ export default class TasksPanel extends TarsPanel {
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodad))
-            .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodadTooltip))))
+            .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonBuildDoodadTooltip)))
             .event.subscribe("activate", async () => {
                 await this.tarsInstance.activateManualMode(new BuildDoodadMode(this.dropdownDoodadType.selection as DoodadType));
                 return true;
@@ -79,7 +79,7 @@ export default class TasksPanel extends TarsPanel {
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonTameCreature))
-            .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonTameCreatureTooltip))))
+            .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonTameCreatureTooltip)))
             .event.subscribe("activate", async () => {
                 await this.tarsInstance.activateManualMode(new TameCreatureMode(this.dropdownCreature.selection as CreatureType));
                 return true;
@@ -90,7 +90,7 @@ export default class TasksPanel extends TarsPanel {
 
         new Button()
             .setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilization))
-            .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilizationTooltip))))
+            .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonSailToCivilizationTooltip)))
             .event.subscribe("activate", async () => {
                 await this.tarsInstance.activateManualMode(new ExecuteObjectivesMode([new SailToCivilization()]));
                 return true;

@@ -1,10 +1,10 @@
 import { ActionType } from "game/entity/action/IAction";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import DrinkInFront from "game/entity/action/actions/DrinkInFront";
 import DrinkItem from "game/entity/action/actions/DrinkItem";
 import Heal from "game/entity/action/actions/Heal";
+import { DoodadType } from "game/doodad/IDoodad";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -18,16 +18,14 @@ import BuildItem from "../other/item/BuildItem";
 import Idle from "../other/Idle";
 import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import UseItem from "../other/item/UseItem";
-import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
 import RecoverStamina from "./RecoverStamina";
-import AcquireItem from "../acquire/item/AcquireItem";
 import StartSolarStill from "../other/doodad/StartSolarStill";
-import { DoodadType } from "game/doodad/IDoodad";
 import AcquireWater from "../acquire/item/specific/AcquireWater";
 import AddDifficulty from "../core/AddDifficulty";
 import Restart from "../core/Restart";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import { freshWaterTileLocation } from "../../core/navigation/INavigation";
+import MoveToBase from "../utility/moveTo/MoveToBase";
 
 export interface IRecoverThirstOptions {
 	onlyUseAvailableItems: boolean;
@@ -80,10 +78,10 @@ export default class RecoverThirst extends Objective {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = context.utilities.tile.getNearestTileLocation(context, freshWaterTileLocation);
 
-			for (const { point } of nearestFreshWater) {
+			for (const { tile } of nearestFreshWater) {
 				const objectives: IObjective[] = [];
 
-				objectives.push(new MoveToTarget(point, true));
+				objectives.push(new MoveToTarget(tile, true));
 
 				objectives.push(new ExecuteAction(DrinkInFront, []));
 
@@ -112,11 +110,13 @@ export default class RecoverThirst extends Objective {
 					if (context.human.stat.get<IStatMax>(Stat.Stamina).value > 2) {
 						this.log.info("Building another water still while waiting");
 
+						if (!context.utilities.base.isNearBase(context)) {
+							objectivePipelines.push([new MoveToBase()]);
+						}
+
 						// build a water still while waiting
-						objectivePipelines.push([
-							new AcquireItemByGroup(ItemTypeGroup.WaterStill),
-							new BuildItem(),
-						]);
+						objectivePipelines.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+
 
 					} else {
 						// run back to the waterstill and wait
@@ -223,10 +223,13 @@ export default class RecoverThirst extends Objective {
 				const changeTimer = thirst.changeTimer;
 				const nextChangeTimer = thirst.nextChangeTimer;
 				if (changeTimer !== undefined && nextChangeTimer !== undefined) {
-					const pathResult = context.utilities.navigation.findPath(context.utilities.base.getBasePosition(context));
+					const pathResult = context.utilities.navigation.findPath(context.utilities.base.getBaseTile(context));
 					if (pathResult) {
 						// note: assuming walk path is taking us away from the base
-						const pathLength = pathResult.path.length + (context.human.walkPath?.path?.length ?? 0);
+						let pathLength = pathResult.path.length + (context.human.walkPath?.path?.length ?? 0);
+
+						// assume it takes twice as long to come back to the base
+						pathLength *= 2;
 
 						const turnsUntilThirstHitsZero = ((thirst.value - 1) * nextChangeTimer) + changeTimer - 50; // reduce count by 50 turns as a buffer
 						if (turnsUntilThirstHitsZero >= pathLength) {
@@ -255,10 +258,7 @@ export default class RecoverThirst extends Objective {
 			}
 
 			if (context.base.waterStill.length === 0) {
-				const waterStillObjectives: IObjective[] = [
-					new AcquireInventoryItem("waterStill"),
-					new BuildItem(),
-				];
+				const waterStillObjectives: IObjective[] = [new AcquireInventoryItem("waterStill"), new BuildItem()];
 
 				if (context.inventory.waterContainer === undefined) {
 					waterStillObjectives.push(new AcquireWaterContainer().keepInInventory());
@@ -272,38 +272,26 @@ export default class RecoverThirst extends Objective {
 			} else {
 				const isWaitingForAll = waterAndSolarStills.every(doodad => context.utilities.doodad.isWaterStillDesalinating(doodad));
 				if (isWaitingForAll) {
-					if (context.utilities.player.isHealthy(context)) {
+					if (context.utilities.player.isHealthy(context) && context.utilities.base.isNearBase(context)) {
 						if (context.base.waterStill.length < 3) {
 							this.log.info("Building another water still while waiting");
 
 							// build a water still while waiting
-							objectivePipelines.push([
-								new AcquireItemByGroup(ItemTypeGroup.WaterStill),
-								new BuildItem(),
-							]);
+							objectivePipelines.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
 
 						} else if (context.base.solarStill.length < 2) {
 							this.log.info("Building a solar still while waiting");
 
 							// build a solar still while waiting
-							objectivePipelines.push([
-								new AcquireItem(ItemType.SolarStill),
-								new BuildItem(),
-							]);
+							objectivePipelines.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
 
 						} else {
 							// todo: option for this?
 
 							// build another of whichever is easier
-							objectivePipelines.push([
-								new AcquireItem(ItemType.SolarStill),
-								new BuildItem(),
-							]);
+							objectivePipelines.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
 
-							objectivePipelines.push([
-								new AcquireItemByGroup(ItemTypeGroup.WaterStill),
-								new BuildItem(),
-							]);
+							objectivePipelines.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
 						}
 					}
 

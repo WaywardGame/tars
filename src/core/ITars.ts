@@ -9,8 +9,9 @@ import type Island from "game/island/Island";
 import type { IContainer, IItemDisassembly } from "game/item/IItem";
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import type Item from "game/item/Item";
-import type { ITile, TerrainType } from "game/tile/ITerrain";
+import type { TerrainType } from "game/tile/ITerrain";
 import type { ITerrainLoot } from "game/tile/TerrainResources";
+import Tile from "game/tile/Tile";
 import { IVector3 } from "utilities/math/IVector";
 
 import { TarsOverlay } from "../ui/TarsOverlay";
@@ -619,8 +620,7 @@ export interface IDisassemblySearch {
 
 export interface ITileLocation {
     type: TerrainType;
-    tile: ITile;
-    point: IVector3;
+    tile: Tile;
 }
 
 export enum TarsMode {

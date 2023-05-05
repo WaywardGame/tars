@@ -6,12 +6,11 @@ import Creature from "game/entity/creature/Creature";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import Item from "game/item/Item";
-import terrainDescriptions from "game/tile/Terrains";
 import TileEvent from "game/tile/TileEvent";
-import TileHelpers from "utilities/game/TileHelpers";
-import type { IVector2, IVector3 } from "utilities/math/IVector";
+import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
+import Human from "game/entity/Human";
+import Tile from "game/tile/Tile";
 
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
@@ -61,7 +60,7 @@ export default class MoveToTarget extends Objective {
 	public override readonly includePositionInHashCode: boolean = true;
 
 	constructor(
-		protected target: IVector3,
+		protected target: Human | Creature | TileEvent | Doodad | Corpse | Tile,
 		protected readonly moveAdjacentToTarget: boolean,
 		protected readonly options?: Partial<IMoveToTargetOptions>) {
 		super();
@@ -69,7 +68,7 @@ export default class MoveToTarget extends Objective {
 		if (!options?.disableTracking) {
 			if (target instanceof Creature) {
 				this.trackedCreature = target;
-				this.trackedPosition = target.getPoint();
+				this.trackedPosition = target.point;
 
 			} else if (target instanceof Corpse) {
 				this.trackedCorpse = target;
@@ -83,14 +82,11 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public getStatus(context: Context): string | undefined {
-		let status = `Moving to`;
+		let status = `Moving to ${this.target.getName()}`;
 
-		if (Doodad.is(this.target) || Creature.is(this.target) || TileEvent.is(this.target) || Corpse.is(this.target)) {
-			status += ` ${this.target.getName()}`;
+		if (!Tile.is(this.target)) {
+			status += ` (${this.target.x},${this.target.y},${this.target.z})`;
 		}
-
-		// no point in including z here
-		status += ` ${this.target.x},${this.target.y}`;
 
 		return status;
 	}
@@ -104,13 +100,13 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const position = context.getPosition();
+		const tile = context.getTile();
 
-		if (!context.options.allowCaves && position.z !== this.target.z) {
+		if (!context.options.allowCaves && tile.z !== this.target.z) {
 			return ObjectiveResult.Impossible;
 		}
 
-		if (this.options?.skipIfAlreadyThere && this.target.x === position.x && this.target.y === position.y && this.target.z === position.z) {
+		if (this.options?.skipIfAlreadyThere && this.target.x === tile.x && this.target.y === tile.y && this.target.z === tile.z) {
 			return ObjectiveResult.Complete;
 		}
 
@@ -122,22 +118,22 @@ export default class MoveToTarget extends Objective {
 		const defaultEndPosition = endPositions[0];
 
 		if (context.calculatingDifficulty) {
-			if (position.x !== context.human.x || position.y !== context.human.y || position.z !== context.human.z) {
-				context.setData(ContextDataType.Position, new Vector3(defaultEndPosition.x, defaultEndPosition.y, this.options?.changeZ ?? defaultEndPosition.z));
+			if (tile.x !== context.human.x || tile.y !== context.human.y || tile.z !== context.human.z) {
+				context.setData(ContextDataType.Tile, context.island.getTile(defaultEndPosition.x, defaultEndPosition.y, this.options?.changeZ ?? defaultEndPosition.z));
 
 				// squared distance makes the diff very large. other diffs would have to be modified to compensate
-				const diff = Math.ceil(Vector2.distance(position, defaultEndPosition) + (position.z !== defaultEndPosition.z ? zChangeDifficulty : 0));
+				const diff = Math.ceil(Vector2.distance(tile, defaultEndPosition) + (tile.z !== defaultEndPosition.z ? zChangeDifficulty : 0));
 
 				return diff;
 			}
 		}
 
-		if (this.options?.changeZ === position.z) {
+		if (this.options?.changeZ === tile.z) {
 			// this objective runs dynamically so it's possible it's already in the correct z
 			return ObjectiveResult.Complete;
 		}
 
-		if (!this.options?.skipZCheck && position.z !== this.target.z) {
+		if (!this.options?.skipZCheck && tile.z !== this.target.z) {
 			const origin = context.utilities.navigation.getOrigin();
 			const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
 			if (!origin || !oppositeZOrigin) {
@@ -155,7 +151,7 @@ export default class MoveToTarget extends Objective {
 						new AddDifficulty(zChangeDifficulty),
 
 						// move to cave entrance
-						new MoveToTarget({ x: oppositeZOrigin.x, y: oppositeZOrigin.y, z: position.z }, false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+						new MoveToTarget(context.island.getTile(oppositeZOrigin.x, oppositeZOrigin.y, tile.z), false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
 
 						// move to target
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }).passOverriddenDifficulty(this),
@@ -217,16 +213,16 @@ export default class MoveToTarget extends Objective {
 				const oppositeZOrigin = context.utilities.navigation.getOppositeOrigin();
 				if (origin && origin.z === this.target.z) {
 					// console.warn("set reversed origin to ", origin);
-					context.setData(ContextDataType.Position, new Vector3(origin.x, origin.y, this.options?.changeZ ?? origin.z));
+					context.setData(ContextDataType.Tile, context.island.getTile(origin.x, origin.y, this.options?.changeZ ?? origin.z));
 
 				} else if (oppositeZOrigin) {
 					// console.warn("set reversed origin to opposite ", oppositeZOrigin);
-					context.setData(ContextDataType.Position, new Vector3(oppositeZOrigin.x, oppositeZOrigin.y, this.options?.changeZ ?? oppositeZOrigin.z));
+					context.setData(ContextDataType.Tile, context.island.getTile(oppositeZOrigin.x, oppositeZOrigin.y, this.options?.changeZ ?? oppositeZOrigin.z));
 				}
 
 			} else {
 				const realEndPosition = movementPath.path[movementPath.path.length - 1];
-				context.setData(ContextDataType.Position, new Vector3(realEndPosition.x, realEndPosition.y, this.options?.changeZ ?? realEndPosition.z));
+				context.setData(ContextDataType.Tile, context.island.getTile(realEndPosition.x, realEndPosition.y, this.options?.changeZ ?? realEndPosition.z));
 			}
 
 			return movementPath.score;
@@ -241,8 +237,7 @@ export default class MoveToTarget extends Objective {
 				for (let i = 4; i < path.length; i++) {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, context.human.z);
-					const tileType = TileHelpers.getType(tile);
-					const terrainDescription = terrainDescriptions[tileType];
+					const terrainDescription = tile.description;
 					if (terrainDescription && terrainDescription.water) {
 						swimTiles++;
 					}
@@ -263,9 +258,8 @@ export default class MoveToTarget extends Objective {
 		}
 
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
-			const tile = context.human.getTile();
-			const tileType = TileHelpers.getType(tile);
-			const terrainDescription = terrainDescriptions[tileType];
+			const tile = context.human.tile;
+			const terrainDescription = tile.description;
 			if (terrainDescription && terrainDescription.water) {
 				return [
 					new UseItem(Ride, context.inventory.sailboat),
@@ -274,22 +268,21 @@ export default class MoveToTarget extends Objective {
 			}
 
 			if (path) {
-				let firstWaterTile: IVector2 | undefined;
+				let firstWaterTile: Tile | undefined;
 
 				for (let i = 0; i < path.length - 1; i++) {
 					const point = path[i];
-					const tile = context.island.getTile(point.x, point.y, context.human.z);
-					const tileType = TileHelpers.getType(tile);
-					const terrainDescription = terrainDescriptions[tileType];
+					const tile = context.island.getTile(point.x, point.y, this.target.z);
+					const terrainDescription = tile.description;
 					if (terrainDescription && terrainDescription.water) {
-						firstWaterTile = point;
+						firstWaterTile = tile;
 						break;
 					}
 				}
 
 				if (firstWaterTile) {
 					return [
-						new MoveToTarget({ ...firstWaterTile, z: this.target.z }, false),
+						new MoveToTarget(firstWaterTile, false),
 						new UseItem(Ride, context.inventory.sailboat),
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
 					];
@@ -322,7 +315,7 @@ export default class MoveToTarget extends Objective {
 
 			case MoveResult.Complete:
 				this.log.info(`Finished moving to target (${this.target.x},${this.target.y},${this.target.z})`);
-				context.setData(ContextDataType.Position, new Vector3(context.human.getPoint()));
+				context.setData(ContextDataType.Tile, context.human.tile);
 
 				if (movementPath === ObjectiveResult.Complete && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
 					return new Idle({ force: true, canMoveToIdle: false });
@@ -357,18 +350,19 @@ export default class MoveToTarget extends Objective {
 	 * Called when the context human or creature moves
 	 */
 	public override async onMove(context: Context) {
-		if (this.trackedCreature && this.trackedPosition) {
-			if (!this.trackedCreature.isValid()) {
+		const trackedCreature = this.trackedCreature;
+		if (trackedCreature && this.trackedPosition) {
+			if (!trackedCreature.isValid()) {
 				this.log.info("Creature died");
 				return true;
 			}
 
-			if (this.trackedCreature.isTamed()) {
+			if (trackedCreature.isTamed()) {
 				this.log.info("Creature became tamed");
 				return true;
 			}
 
-			if (Vector2.distance(context.human, this.trackedCreature) > 5) {
+			if (Vector2.distance(context.human, trackedCreature) > 5) {
 				// track once it's closer
 				return false;
 			}
@@ -386,20 +380,18 @@ export default class MoveToTarget extends Objective {
 				}
 			}
 
-			const trackedCreaturePosition = this.trackedCreature.getPoint();
-
-			if (trackedCreaturePosition.x !== this.trackedPosition.x ||
-				trackedCreaturePosition.y !== this.trackedPosition.y ||
-				trackedCreaturePosition.z !== this.trackedPosition.z) {
+			if (trackedCreature.x !== this.trackedPosition.x ||
+				trackedCreature.y !== this.trackedPosition.y ||
+				trackedCreature.z !== this.trackedPosition.z) {
 				this.log.info("Moving with tracked creature");
 
-				this.trackedPosition = trackedCreaturePosition;
+				this.trackedPosition = trackedCreature.point;
 
 				// ensure a new path is used
 				context.utilities.movement.clearCache();
 
 				// move to it's latest location
-				const moveResult = await context.utilities.movement.move(context, trackedCreaturePosition, this.moveAdjacentToTarget, true, true);
+				const moveResult = await context.utilities.movement.move(context, trackedCreature, this.moveAdjacentToTarget, true, true);
 
 				switch (moveResult) {
 					case MoveResult.NoTarget:
@@ -407,7 +399,7 @@ export default class MoveToTarget extends Objective {
 						return true;
 
 					case MoveResult.NoPath:
-						this.log.info(`No path to target ${this.trackedCreature.toString()}`);
+						this.log.info(`No path to target ${trackedCreature}`);
 						return true;
 
 					case MoveResult.Moving:
@@ -422,9 +414,8 @@ export default class MoveToTarget extends Objective {
 		}
 
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
-			const tile = context.human.getTile();
-			const tileType = TileHelpers.getType(tile);
-			const terrainDescription = terrainDescriptions[tileType];
+			const tile = context.human.tile;
+			const terrainDescription = tile.description;
 			if (terrainDescription && terrainDescription.water) {
 				this.log.warn("Interrupting to use sail boat");
 				return true;

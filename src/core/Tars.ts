@@ -28,13 +28,12 @@ import type { IPromptDescriptionBase } from "game/meta/prompt/IPrompt";
 import { Prompt } from "game/meta/prompt/IPrompt";
 import type Prompts from "game/meta/prompt/Prompts";
 import type { IPrompt } from "game/meta/prompt/Prompts";
-import { ITile, TerrainType } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
 import { WorldZ } from "game/WorldZ";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { RenderSource } from "renderer/IRenderer";
 import { Bound } from "utilities/Decorators";
-import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
 import Vector2 from "utilities/math/Vector2";
@@ -90,6 +89,7 @@ import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
 import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
+import Tile from "game/tile/Tile";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -416,7 +416,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     @EventHandler(EventBus.Creatures, "postMove")
-    public async onCreaturePostMove(creature: Creature, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+    public async onCreaturePostMove(creature: Creature, fromTile: Tile, toTile: Tile) {
         if (!this.isRunning()) {
             return;
         }
@@ -443,7 +443,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     @EventHandler(EventBus.Humans, "postMove")
-    public async onHumanPostMove(human: Human, fromX: number, fromY: number, fromZ: number, fromTile: ITile, toX: number, toY: number, toZ: number, toTile: ITile) {
+    public async onHumanPostMove(human: Human, fromTile: Tile, toTile: Tile) {
         if (this.human !== human) {
             return;
         }
@@ -480,42 +480,41 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             return;
         }
 
-        this.utilities.movement.clearOverlay(human.getTile());
+        this.utilities.movement.clearOverlay(human.tile);
     }
 
     @EventHandler(EventBus.Prompt, "queue", Priority.High)
     public onPrompt(host: Prompts.Events, prompt: IPrompt<IPromptDescriptionBase<any[]>>): string | boolean | void | InterruptChoice | undefined {
-        if (this.isRunning() && (prompt.type === Prompt.GameDangerousStep || prompt.type === Prompt.GameIslandTravelConfirmation)) {
+        if (this.isRunning() && (prompt.type === Prompt.GameIslandTravelConfirmation)) {
             this.log.info(`Resolving true for prompt ${Prompt[prompt.type]}`);
             prompt.resolve(InterruptChoice.Yes as any);
         }
     }
 
     @EventHandler(EventBus.Island, "tileUpdate")
-    public onTileUpdate(island: Island, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void {
+    public onTileUpdate(island: Island, tile: Tile, tileUpdateType: TileUpdateType): void {
         if (island !== this.human.island) {
             return;
         }
 
         if (this.navigationSystemState === NavigationSystemState.Initializing || this.human.isResting()) {
             this.navigationQueuedUpdates.push(() => {
-                this.onTileUpdate(island, tile, tileX, tileY, tileZ, tileUpdateType);
+                this.onTileUpdate(island, tile, tileUpdateType);
             });
 
         } else if (this.navigationSystemState === NavigationSystemState.Initialized) {
+            const baseTiles = this.utilities.base.getBaseTiles(this.getContext());
+
             const updateNeighbors = tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn;
             if (updateNeighbors) {
                 for (let x = -tileUpdateRadius; x <= tileUpdateRadius; x++) {
                     for (let y = -tileUpdateRadius; y <= tileUpdateRadius; y++) {
-                        const point = island.ensureValidPoint({ x: tileX + x, y: tileY + y, z: tileZ });
-                        if (point) {
-                            const otherTile = island.getTileFromPoint(point);
+                        const otherTile = island.getTileSafe(tile.x + x, tile.y + y, tile.z);
+                        if (otherTile) {
                             this.utilities.navigation.onTileUpdate(
-                                island,
                                 otherTile,
-                                TileHelpers.getType(otherTile),
-                                point.x, point.y, point.z,
-                                this.utilities.base.isBaseTile(this.getContext(), otherTile),
+                                otherTile.type,
+                                baseTiles.has(otherTile),
                                 tileUpdateType);
                         }
                     }
@@ -523,11 +522,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
             } else {
                 this.utilities.navigation.onTileUpdate(
-                    island,
                     tile,
-                    TileHelpers.getType(tile),
-                    tileX, tileY, tileZ,
-                    this.utilities.base.isBaseTile(this.getContext(), tile),
+                    tile.type,
+                    baseTiles.has(tile),
                     tileUpdateType);
             }
         }
@@ -569,12 +566,12 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     }
 
     @EventHandler(EventBus.Humans, "preMove")
-    public onPreMove(human: Human, prevX: number, prevY: number, prevZ: number, prevTile: ITile, nextX: number, nextY: number, nextZ: number, nextTile: ITile) {
+    public onPreMove(human: Human, prevTile: Tile, nextTile: Tile) {
         if (this.human !== human || !this.isRunning() || !human.hasWalkPath()) {
             return;
         }
 
-        if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad && nextTile.doodad.blocksMove()) || human.island.isPlayerAtTile(nextTile, false, true)) {
+        if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad && nextTile.doodad.blocksMove()) || nextTile.isPlayerOnTile(false, true)) {
             this.interrupt("Interrupting due to blocked movement");
         }
     }
@@ -728,8 +725,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         if (this.saveData.enabled) {
             if (this.saveData.options.navigationOverlays) {
+                this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.context));
                 this.overlay.show();
-                renderers.updateView(RenderSource.Mod, false);
+                this.human.updateView(RenderSource.Mod, false);
             }
 
             this.utilities.navigation.queueUpdateOrigin(this.human);
@@ -800,6 +798,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         shouldInterrupt = false;
 
                         if (this.saveData.options.navigationOverlays) {
+                            this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.getContext()));
                             this.overlay.show();
 
                         } else {
@@ -1029,9 +1028,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         if (options?.delete || options?.resetBase) {
             if (this.base && typeof (localIsland) !== "undefined") {
-                const baseDoodads = this.utilities.base.getBaseDoodads(this.getContext());
-                for (const doodad of baseDoodads) {
-                    this.utilities.navigation.refreshOverlay(localIsland, doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+                const baseTiles = this.utilities.base.getBaseTiles(this.getContext());
+                for (const baseTile of baseTiles) {
+                    this.utilities.navigation.refreshOverlay(baseTile, false);
                 }
             }
 
@@ -1271,6 +1270,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                         this.interruptContext = savedContext;
 
                         this.log.debug(`Restored saved context from ${i}. ${this.interruptContext.getHashCode()}`);
+                    }
+
+                    if (!this.interruptContext) {
+                        // tars was disabled mid run
+                        return;
                     }
 
                     const result = await this.executor.executeObjectives(this.interruptContext, [interruptObjectives], true);
@@ -1626,8 +1630,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                     continue;
                 }
 
-                this.log.info(`Defend against ${creature.getName().getString()}`);
-                return new DefendAgainstCreature(creature, shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature));
+                const shouldRunAway = shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature);
+
+                this.log.info(`Defend against ${creature.getName().getString()}. Should run away: ${shouldRunAway}`);
+
+                return new DefendAgainstCreature(creature, shouldRunAway);
             }
         }
 
@@ -1635,7 +1642,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         for (const creature of nearbyCreatures) {
             if (shouldRunAwayFromAllCreatures || context.utilities.creature.isScaredOfCreature(context, creature)) {
                 // only run away if the creature can path to us
-                const path = creature.findPath(context.human, 16, context.human);
+                const path = creature.findPath(context.human.tile, creature.getMoveType(), 16, context.human);
                 if (path) {
                     this.log.info(`Run away from ${creature.getName().getString()}`);
                     return new RunAwayFromTarget(creature);
@@ -1646,13 +1653,10 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     private checkNearbyCreature(context: Context, direction: Direction.Cardinal): Creature | undefined {
         const point = Vector2.DIRECTIONS[direction];
-        const validPoint = context.island.ensureValidPoint({ x: context.human.x + point.x, y: context.human.y + point.y, z: context.human.z });
-        if (validPoint) {
-            const tile = context.island.getTileFromPoint(validPoint);
-            if (tile && tile.creature && !tile.creature.isTamed()) {
-                //  && (tile.creature.ai & AiType.Hostile) !== 0
-                return tile.creature;
-            }
+        const tile = context.island.getTileSafe(context.human.x + point.x, context.human.y + point.y, context.human.z);
+        if (tile && tile.creature && !tile.creature.isTamed()) {
+            //  && (tile.creature.ai & AiType.Hostile) !== 0
+            return tile.creature;
         }
     }
 
@@ -1670,7 +1674,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         const objectives: IObjective[] = [];
 
         for (const target of targets) {
-            const tile = context.island.getTileFromPoint(target);
+            const tile = target.tile;
             const corpses = tile.corpses;
             if (corpses && corpses.length > 0) {
                 for (const corpse of corpses) {
@@ -1744,7 +1748,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         const target = walkPath[walkPath.length - 1];
         const point = { x: target.x, y: target.y, z: context.human.z };
         if (this.utilities.base.isNearBase(context, point) &&
-            TileHelpers.getType(context.island.getTileFromPoint(point)) !== TerrainType.CaveEntrance) {
+            context.island.getTileFromPoint(point).type !== TerrainType.CaveEntrance) {
             return undefined;
         }
 

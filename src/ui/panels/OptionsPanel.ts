@@ -1,17 +1,17 @@
 import type Translation from "language/Translation";
 import { CheckButton } from "ui/component/CheckButton";
+import type Component from "ui/component/Component";
 import Divider from "ui/component/Divider";
 import { RangeRow } from "ui/component/RangeRow";
 import type { IRefreshable } from "ui/component/Refreshable";
-import type Component from "ui/component/Component";
 import { Heading } from "ui/component/Text";
-import { TooltipLocation } from "ui/component/IComponent";
 import { Bound } from "utilities/Decorators";
 
-import TarsPanel from "../components/TarsPanel";
-import { getTarsTranslation, TarsTranslation, TarsOptionSectionType, TarsOptionSection } from "../../ITarsMod";
 import ChoiceList, { Choice } from "ui/component/ChoiceList";
+import Dialog from "ui/screen/screens/game/component/Dialog";
+import { TarsOptionSection, TarsOptionSectionType, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
 import Tars from "../../core/Tars";
+import TarsPanel from "../components/TarsPanel";
 
 export default abstract class OptionsPanel extends TarsPanel {
 
@@ -42,7 +42,7 @@ export default abstract class OptionsPanel extends TarsPanel {
                 case TarsOptionSectionType.Checkbox:
                     optionComponent = new CheckButton()
                         .setText(getTarsTranslation(uiOption.title))
-                        .setTooltip(tooltip => tooltip.addText(text => text.setText(getTarsTranslation(uiOption.tooltip))))
+                        .setTooltip(tooltip => tooltip.setText(getTarsTranslation(uiOption.tooltip)))
                         .setRefreshMethod(() => this.tarsInstance.saveData.options[uiOption.option] as boolean)
                         .event.subscribe("willToggle", (_, checked) => {
                             this.tarsInstance.updateOptions({ [uiOption.option]: checked });
@@ -59,8 +59,8 @@ export default abstract class OptionsPanel extends TarsPanel {
                             .setText(getTarsTranslation(uiOption.title))
                         )
                         .setTooltip(tooltip => tooltip
-                            .addText(text => text.setText(getTarsTranslation(uiOption.tooltip)))
-                            .setLocation(TooltipLocation.TopRight))
+                            .setText(getTarsTranslation(uiOption.tooltip))
+                            .setLocation(Dialog.TooltipLocation))
                         .setDisplayValue(() => getTarsTranslation(TarsTranslation.DialogLabel).get(this.tarsInstance.saveData.options[uiOption.option] as number))
                         .event.subscribe("change", (_, value) => {
                             this.tarsInstance.updateOptions({ [uiOption.option]: value });
@@ -85,8 +85,10 @@ export default abstract class OptionsPanel extends TarsPanel {
                             new Choice(value)
                                 .setText(getTarsTranslation(textTranslation))
                                 .setTooltip(tooltip => tooltip
-                                    .addText(text => text.setText(getTarsTranslation(tooltipTranslation)))
-                                    .setLocation(TooltipLocation.TopRight))
+                                    .setText(getTarsTranslation(tooltipTranslation))
+                                    .setLocation(handler => handler
+                                        .add("off right", ".dialog", "sticky center")
+                                        .add("off left", ".dialog", "sticky center")))
                         ))
                         .setRefreshMethod(list => list.choices(choice => choice.id === this.tarsInstance.saveData.options[uiOption.option]).first()!)
                         .event.subscribe("choose", (_, choice) => {

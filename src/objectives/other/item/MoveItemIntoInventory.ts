@@ -1,6 +1,6 @@
 import { IContainer } from "game/item/IItem";
 import type Item from "game/item/Item";
-import { IVector3 } from "utilities/math/IVector";
+import Tile from "game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -11,7 +11,7 @@ import MoveItem from "./MoveItem";
 
 export default class MoveItemIntoInventory extends Objective {
 
-    constructor(private readonly item?: Item, private readonly point?: IVector3, private readonly targetContainer?: IContainer) {
+    constructor(private readonly item?: Item, private readonly tile?: Tile, private readonly targetContainer?: IContainer) {
         super();
     }
 
@@ -34,15 +34,15 @@ export default class MoveItemIntoInventory extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        const point = this.point ?? item.getPoint();
-        if (!point) {
+        const tile = this.tile ?? item.tile;
+        if (!tile) {
             return ObjectiveResult.Impossible;
         }
 
         return [
             // todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
-            new MoveToTarget(point, true, { skipIfAlreadyThere: true }).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
-            new MoveItem(item, this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, item), point),
+            new MoveToTarget(tile, true, { skipIfAlreadyThere: true }).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
+            new MoveItem(item, this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, item), tile),
         ];
     }
 

@@ -1,7 +1,11 @@
+import Doodad from "game/doodad/Doodad";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
 import Item from "game/item/Item";
+import TileEvent from "game/tile/TileEvent";
 import type { IVector3 } from "utilities/math/IVector";
+import Human from "game/entity/Human";
+import Tile from "game/tile/Tile";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
@@ -20,7 +24,7 @@ export interface IMoveToTargetOptions {
     reverse: boolean;
 }
 export default class MoveToTarget extends Objective {
-    protected target: IVector3;
+    protected target: Human | Creature | TileEvent | Doodad | Corpse | Tile;
     protected readonly moveAdjacentToTarget: boolean;
     protected readonly options?: Partial<IMoveToTargetOptions> | undefined;
     private trackedCreature;
@@ -28,7 +32,7 @@ export default class MoveToTarget extends Objective {
     private trackedItem;
     private trackedPosition;
     readonly includePositionInHashCode: boolean;
-    constructor(target: IVector3, moveAdjacentToTarget: boolean, options?: Partial<IMoveToTargetOptions> | undefined);
+    constructor(target: Human | Creature | TileEvent | Doodad | Corpse | Tile, moveAdjacentToTarget: boolean, options?: Partial<IMoveToTargetOptions> | undefined);
     getIdentifier(context: Context | undefined): string;
     getStatus(context: Context): string | undefined;
     getPosition(): IVector3;

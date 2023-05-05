@@ -38,7 +38,7 @@ export class TreasureHunterMode extends BaseMode implements ITarsMode {
         } else {
             drawnMaps =
                 context.utilities.item.getBaseItemsByType(context, ItemType.TatteredMap)
-                    .map(item => item.map.get())
+                    .map(item => item.map?.get())
                     .filter(drawnMap => drawnMap !== undefined) as DrawnMap[];
         }
 

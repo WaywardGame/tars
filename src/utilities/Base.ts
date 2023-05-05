@@ -1,7 +1,5 @@
 import type Doodad from "game/doodad/Doodad";
-import type { ITile } from "game/tile/ITerrain";
 import { TerrainType } from "game/tile/ITerrain";
-import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import type Creature from "game/entity/creature/Creature";
@@ -14,9 +12,11 @@ import type { BaseInfoKey, IBaseInfo } from "../core/ITars";
 import { baseInfo } from "../core/ITars";
 import { FindObjectType } from "./Object";
 import DoodadManager from "game/doodad/DoodadManager";
-import doodadDescriptions from "game/doodad/Doodads";
+import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
+import Tile from "game/tile/Tile";
+import { ContextDataType } from "../core/context/IContext";
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
@@ -34,7 +34,7 @@ export interface IBuildTileOptions {
 
 export class BaseUtilities {
 
-	private tilesNearBaseCache: Array<{ point: IVector3; tile: ITile }> | undefined;
+	private tilesNearBaseCache: Tile[] | undefined;
 
 	public clearCache() {
 		this.tilesNearBaseCache = undefined;
@@ -44,21 +44,21 @@ export class BaseUtilities {
 		return context.island.biomeType !== BiomeType.IceCap;
 	}
 
-	public isGoodBuildTile(context: Context, point: IVector3, tile: ITile, options?: Partial<IBuildTileOptions>): boolean {
-		const tileType = TileHelpers.getType(tile);
+	public isGoodBuildTile(context: Context, tile: Tile, options?: Partial<IBuildTileOptions>): boolean {
+		const tileType = tile.type;
 		if (tileType === TerrainType.Swamp) {
 			// don't build on swamp tiles
 			return false;
 		}
 
-		if (!this.isOpenArea(context, point, tile, options?.openAreaRadius, options?.allowWater, options?.requireShallowWater)) {
+		if (!this.isOpenArea(context, tile, options?.openAreaRadius, options?.allowWater, options?.requireShallowWater)) {
 			return false;
 		}
 
 		let good = false;
 
 		if (this.hasBase(context)) {
-			good = this.isNearBase(context, point, options?.nearBaseDistanceSq);
+			good = this.isNearBase(context, tile, options?.nearBaseDistanceSq);
 
 		} else {
 			// this is the first base item. don't make it on beach sand or gravel
@@ -69,7 +69,7 @@ export class BaseUtilities {
 			good = true;
 		}
 
-		if (good && this.isTreasureChestLocation(context, point)) {
+		if (good && this.isTreasureChestLocation(context, tile)) {
 			// these are cursed spots
 			good = false;
 		}
@@ -77,12 +77,12 @@ export class BaseUtilities {
 		return good;
 	}
 
-	public isGoodWellBuildTile(context: Context, point: IVector3, tile: ITile, onlyUnlimited: boolean): boolean {
-		if (!this.isGoodBuildTile(context, point, tile)) {
+	public isGoodWellBuildTile(context: Context, tile: Tile, onlyUnlimited: boolean): boolean {
+		if (!this.isGoodBuildTile(context, tile)) {
 			return false;
 		}
 
-		const well = context.island.calculateWell(point);
+		const well = context.island.calculateWell(tile);
 		if (well.waterType !== WaterType.FreshWater && well.waterType !== WaterType.Seawater) {
 			return false;
 		}
@@ -90,8 +90,8 @@ export class BaseUtilities {
 		return onlyUnlimited ? well.quantity === -1 : false;
 	}
 
-	public isOpenArea(context: Context, point: IVector3, tile: ITile, radius: number = 1, allowWater: boolean = false, requireShallowWater: boolean = false): boolean {
-		if (!context.utilities.tile.isOpenTile(context, point, tile, { disallowWater: !allowWater, requireNoItemsOnTile: true, requireInfiniteShallowWater: requireShallowWater }) ||
+	public isOpenArea(context: Context, tile: Tile, radius: number = 1, allowWater: boolean = false, requireShallowWater: boolean = false): boolean {
+		if (!context.utilities.tile.isOpenTile(context, tile, { disallowWater: !allowWater, requireNoItemsOnTile: true, requireInfiniteShallowWater: requireShallowWater }) ||
 			context.utilities.tile.hasCorpses(tile)) {
 			return false;
 		}
@@ -103,17 +103,12 @@ export class BaseUtilities {
 						continue;
 					}
 
-					const nearbyPoint = context.island.ensureValidPoint({
-						x: point.x + x,
-						y: point.y + y,
-						z: point.z,
-					});
-					if (!nearbyPoint) {
+					const nearbyTile = context.island.getTileSafe(tile.x + x, tile.y + y, tile.z);
+					if (!nearbyTile) {
 						continue;
 					}
 
-					const nearbyTile = context.island.getTileFromPoint(nearbyPoint);
-					if (!context.utilities.tile.isOpenTile(context, nearbyPoint, nearbyTile, { disallowWater: !requireShallowWater, requireNoItemsOnTile: false })) {
+					if (!context.utilities.tile.isOpenTile(context, nearbyTile, { disallowWater: !requireShallowWater, requireNoItemsOnTile: false })) {
 						return false;
 					}
 				}
@@ -123,33 +118,28 @@ export class BaseUtilities {
 		return true;
 	}
 
-	public getBaseDoodads(context: Context): Doodad[] {
-		let doodads: Doodad[] = [];
+	public getBaseTiles(context: Context): Set<Tile> {
+		const tiles = new Set<Tile>();
 
 		const keys = Object.keys(baseInfo) as BaseInfoKey[];
 		for (const key of keys) {
-			const baseDoodadOrDoodads: Doodad | Doodad[] = context.base[key];
+			const baseDoodadOrDoodads = context.base[key];
 			if (Array.isArray(baseDoodadOrDoodads)) {
-				doodads = doodads.concat(baseDoodadOrDoodads);
-
-			} else {
-				doodads.push(baseDoodadOrDoodads);
+				for (const doodad of baseDoodadOrDoodads) {
+					tiles.add(doodad.tile);
+				}
 			}
 		}
 
-		return doodads;
-	}
-
-	public isBaseTile(context: Context, tile: ITile): boolean {
-		return tile.doodad ? this.isBaseDoodad(context, tile.doodad) : false;
+		return tiles;
 	}
 
 	public isBaseDoodad(context: Context, doodad: Doodad): boolean {
-		return this.getBaseDoodads(context).includes(doodad);
+		return this.getBaseTiles(context).has(doodad.tile);
 	}
 
-	public getBasePosition(context: Context): IVector3 {
-		return context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0] || context.human.getPoint();
+	public getBaseTile(context: Context): Tile {
+		return (context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0])?.tile ?? context.human.tile;
 	}
 
 	public hasBase(context: Context): boolean {
@@ -157,14 +147,18 @@ export class BaseUtilities {
 	}
 
 	public isNearBase(context: Context, point: IVector3 = context.human, distanceSq: number = nearBaseDistanceSq): boolean {
+		if (context.hasData(ContextDataType.NearBase)) {
+			// we were doing some near base stuff, keep at it!
+			return true;
+		}
+
 		if (!this.hasBase(context)) {
 			return false;
 		}
 
-		const baseDoodads = this.getBaseDoodads(context);
-
-		for (const doodad of baseDoodads) {
-			if (doodad.z === point.z && (distanceSq === Infinity || Vector2.squaredDistance(doodad, point) <= distanceSq)) {
+		const baseTiles = this.getBaseTiles(context);
+		for (const baseTile of baseTiles) {
+			if (baseTile.z === point.z && (distanceSq === Infinity || Vector2.squaredDistance(baseTile, point) <= distanceSq)) {
 				return true;
 			}
 		}
@@ -173,34 +167,32 @@ export class BaseUtilities {
 	}
 
 	public getTilesNearBase(context: Context) {
-		const basePosition = this.getBasePosition(context);
+		const baseTile = this.getBaseTile(context);
 
-		this.tilesNearBaseCache ??= TileHelpers.findMatchingTiles(
-			context.island,
-			basePosition,
+		this.tilesNearBaseCache ??= baseTile.findMatchingTiles(
 			() => true,
 			{
-				canVisitTile: (island, point) => this.isNearBase(context, point),
+				canVisitTile: (tile) => this.isNearBase(context, tile),
 			},
 		);
 
 		return this.tilesNearBaseCache;
 	}
 
-	public getTilesWithItemsNearBase(context: Context): { tiles: IVector3[]; totalCount: number } {
-		const result: { tiles: IVector3[]; totalCount: number } = {
+	public getTilesWithItemsNearBase(context: Context): { tiles: Tile[]; totalCount: number } {
+		const result: { tiles: Tile[]; totalCount: number } = {
 			tiles: [],
 			totalCount: 0,
 		};
 
-		for (const { point, tile } of this.getTilesNearBase(context)) {
+		for (const tile of this.getTilesNearBase(context)) {
 			const containedItems = tile.containedItems;
 			if (!containedItems || containedItems.length === 0) {
 				continue;
 			}
 
 			result.totalCount += containedItems.length;
-			result.tiles.push(point);
+			result.tiles.push(tile);
 		}
 
 		return result;
@@ -209,7 +201,7 @@ export class BaseUtilities {
 	public getTileItemsNearBase(context: Context): Item[] {
 		let result: Item[] = [];
 
-		for (const { tile } of this.getTilesNearBase(context)) {
+		for (const tile of this.getTilesNearBase(context)) {
 			const containedItems = tile.containedItems;
 			if (!containedItems || containedItems.length === 0) {
 				continue;
@@ -221,12 +213,12 @@ export class BaseUtilities {
 		return result;
 	}
 
-	public getSwampTilesNearBase(context: Context): IVector3[] {
-		const result: IVector3[] = [];
+	public getSwampTilesNearBase(context: Context): Tile[] {
+		const result: Tile[] = [];
 
-		for (const { point, tile } of this.getTilesNearBase(context)) {
-			if (TileHelpers.getType(tile) === TerrainType.Swamp) {
-				result.push(point);
+		for (const tile of this.getTilesNearBase(context)) {
+			if (tile.type === TerrainType.Swamp) {
+				result.push(tile);
 			}
 		}
 
@@ -236,7 +228,7 @@ export class BaseUtilities {
 	public getNonTamedCreaturesNearBase(context: Context): Creature[] {
 		const result: Creature[] = [];
 
-		for (const { tile } of this.getTilesNearBase(context)) {
+		for (const tile of this.getTilesNearBase(context)) {
 			if (tile.creature && !tile.creature.isTamed()) {
 				result.push(tile.creature);
 			}
@@ -271,7 +263,7 @@ export class BaseUtilities {
 						return true;
 					}
 
-					if (context.utilities.base.isOpenArea(context, point, tile, 0)) {
+					if (context.utilities.base.isOpenArea(context, tile, 0)) {
 						// there is an open spot for the other doodad
 						return true;
 					}
@@ -310,19 +302,18 @@ export class BaseUtilities {
 		return false;
 	}
 
-	public async findInitialBuildTile(context: Context): Promise<IVector3 | undefined> {
-		const facingPoint = context.human.getFacingPoint();
-		const facingTile = context.human.getFacingTile();
+	public async findInitialBuildTile(context: Context): Promise<Tile | undefined> {
+		const facingTile = context.human.facingTile;
 
-		if (await this.isGoodTargetOrigin(context, facingPoint) && context.utilities.base.isGoodBuildTile(context, facingPoint, facingTile)) {
-			return facingPoint;
+		if (await this.isGoodTargetOrigin(context, facingTile) && context.utilities.base.isGoodBuildTile(context, facingTile)) {
+			return facingTile;
 		}
 
 		const sortedObjects = context.utilities.object.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[]);
 
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.human.z) {
-				const description = doodad.description();
+				const description = doodad.description;
 				if (description && description.isTree && await this.isGoodTargetOrigin(context, doodad)) {
 					for (let x = -6; x <= 6; x++) {
 						for (let y = -6; y <= 6; y++) {
@@ -330,19 +321,13 @@ export class BaseUtilities {
 								continue;
 							}
 
-							const point = context.island.ensureValidPoint({
-								x: doodad.x + x,
-								y: doodad.y + y,
-								z: doodad.z,
-							});
-							if (!point) {
+							const tile = context.island.getTileSafe(doodad.x + x, doodad.y + y, doodad.z);
+							if (!tile) {
 								continue;
 							}
 
-							const tile = context.island.getTileFromPoint(point);
-
-							if (context.utilities.base.isGoodBuildTile(context, point, tile)) {
-								return point;
+							if (context.utilities.base.isGoodBuildTile(context, tile)) {
+								return tile;
 							}
 						}
 					}
@@ -409,24 +394,19 @@ export class BaseUtilities {
 					continue;
 				}
 
-				const point = context.island.ensureValidPoint({
-					x: origin.x + x,
-					y: origin.y + y,
-					z: origin.z,
-				});
-				if (!point) {
+				const tile = context.island.getTileSafe(origin.x + x, origin.y + y, origin.z);
+				if (!tile) {
 					continue;
 				}
 
-				const tile = context.island.getTileFromPoint(point);
 				if (tile.doodad) {
-					const description = tile.doodad.description();
+					const description = tile.doodad.description;
 					if (description && description.isTree) {
 						nearbyTrees++;
 					}
 
-				} else if (context.utilities.base.isGoodBuildTile(context, point, tile)) {
-					if (TileHelpers.getType(tile) === commonTerrainType) {
+				} else if (context.utilities.base.isGoodBuildTile(context, tile)) {
+					if (tile.type === commonTerrainType) {
 						nearbyCommonTiles++;
 					}
 				}
@@ -441,7 +421,7 @@ export class BaseUtilities {
 		let foundRock = false;
 		for (const rockType of rockTypes) {
 			const rockTileLocations = context.utilities.tile.getNearestTileLocation(context, rockType, origin);
-			if (rockTileLocations.some(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) <= nearRocksDistance)) {
+			if (rockTileLocations.some(tileLocation => Vector2.squaredDistance(origin, tileLocation.tile) <= nearRocksDistance)) {
 				foundRock = true;
 				break;
 			}
@@ -453,7 +433,7 @@ export class BaseUtilities {
 
 		// buiuld close to a water source
 		const shallowSeawaterTileLocations = context.utilities.tile.getNearestTileLocation(context, waterType, origin);
-		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.point) > nearWaterDistance)) {
+		if (shallowSeawaterTileLocations.every(tileLocation => Vector2.squaredDistance(origin, tileLocation.tile) > nearWaterDistance)) {
 			return false;
 		}
 

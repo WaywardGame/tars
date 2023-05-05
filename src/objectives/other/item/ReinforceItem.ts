@@ -86,7 +86,7 @@ export default class ReinforceItem extends Objective {
 		}
 
 		if (this.options.minWorth !== undefined) {
-			const worth = this.item.description()?.worth;
+			const worth = this.item.description?.worth;
 			if (worth === undefined || worth < this.options.minWorth) {
 				return false;
 			}

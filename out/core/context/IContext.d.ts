@@ -7,7 +7,7 @@ export interface IContext {
     readonly utilities: IUtilities;
 }
 export declare enum ContextDataType {
-    Position = "Position",
+    Tile = "Position",
     LastAcquiredItem = "LastAcquiredItem",
     LastBuiltDoodad = "LastBuiltDoodad",
     AllowOrganizingReservedItemsIntoIntermediateChest = "AllowOrganizingReservedItemsIntoIntermediateChest",
@@ -18,7 +18,7 @@ export declare enum ContextDataType {
     DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
     TamingCreature = "TamingCreature",
     KeepInInventoryItems = "KeepInInventoryItems",
-    IsNearBase = "IsNearBase"
+    NearBase = "NearBase"
 }
 export declare enum MovingToNewIslandState {
     None = 0,

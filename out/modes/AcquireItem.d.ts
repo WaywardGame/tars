@@ -10,5 +10,5 @@ export declare class AcquireItemMode implements ITarsMode {
     constructor(itemType: ItemType);
     initialize(_: Context, finished: (success: boolean) => void): Promise<void>;
     determineObjectives(_: Context): Promise<Array<IObjective | IObjective[]>>;
-    onInventoryItemAddOrUpdate(_: Human, item: Item): void;
+    onInventoryItemAddOrUpdate(_: Human, items: Item[]): void;
 }

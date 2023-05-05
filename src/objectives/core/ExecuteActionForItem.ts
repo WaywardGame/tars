@@ -3,11 +3,9 @@ import type { AnyActionDescription } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
 import { ItemType } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import { ListEnder } from "language/ITranslation";
 import Translation from "language/Translation";
-import TileHelpers from "utilities/game/TileHelpers";
 import Item from "game/item/Item";
 import MoveItem from "game/entity/action/actions/MoveItem";
 import Harvest from "game/entity/action/actions/Harvest";
@@ -91,11 +89,10 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			return 0;
 		}
 
-		const tile = context.human.getFacingTile();
-		const facingPoint = context.human.getFacingPoint();
-		const tileType = TileHelpers.getType(tile);
+		const tile = context.human.facingTile;
+		const tileType = tile.type;
 
-		const terrainDescription = Terrains[tileType];
+		const terrainDescription = tile.description;
 		if (!terrainDescription) {
 			return ObjectiveResult.Impossible;
 		}
@@ -109,7 +106,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 					return ObjectiveResult.Restart;
 				}
 
-				const description = doodad.description();
+				const description = doodad.description;
 				if (!description) {
 					return ObjectiveResult.Restart;
 				}
@@ -141,7 +138,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 				const action = terrainDescription.gather ? Mine : Dig;
 
-				if (action === Dig && !context.utilities.tile.canDig(context, facingPoint)) {
+				if (action === Dig && !context.utilities.tile.canDig(context, tile)) {
 					return ObjectiveResult.Restart;
 				}
 
@@ -154,7 +151,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 			case ExecuteActionType.Corpse:
 				const tool = context.inventory.butcher;
-				if (tool === undefined || !context.utilities.tile.canButcherCorpse(context, facingPoint, tool)) {
+				if (tool === undefined || !context.utilities.tile.canButcherCorpse(context, tile, tool)) {
 					return ObjectiveResult.Restart;
 				}
 
@@ -204,7 +201,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			return ObjectiveResult.Complete;
 		}
 
-		const matchingTileItems = context.human.getTile().containedItems?.filter(item => itemTypes.has(item.type));
+		const matchingTileItems = context.human.tile.containedItems?.filter(item => itemTypes.has(item.type));
 		if (matchingTileItems !== undefined && matchingTileItems.length > 0) {
 			const matchingNewItems: Item[] = [];
 

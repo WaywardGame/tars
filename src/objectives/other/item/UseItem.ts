@@ -45,7 +45,7 @@ export default class UseItem<T extends UseItemActionDescriptions> extends Object
 			return ObjectiveResult.Restart;
 		}
 
-		const description = item.description();
+		const description = item.description;
 		if (!description || !description.use || !description.use.includes(actionType)) {
 			this.log.warn(`Invalid use item for action ${ActionType[actionType]}. Item ${item} is missing that action type`);
 			return ObjectiveResult.Restart;

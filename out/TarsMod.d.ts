@@ -1,21 +1,21 @@
-import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import type CommandManager from "command/CommandManager";
 import { IEventEmitter } from "event/EventEmitter";
+import Human from "game/entity/Human";
 import type { Source } from "game/entity/player/IMessageManager";
 import type Player from "game/entity/player/Player";
+import { Prompt } from "game/meta/prompt/IPrompt";
 import type Dictionary from "language/Dictionary";
-import type Message from "language/dictionary/Message";
 import Translation from "language/Translation";
+import type Message from "language/dictionary/Message";
 import Mod from "mod/Mod";
 import type Bindable from "ui/input/Bindable";
 import type { DialogId } from "ui/screen/screens/game/Dialogs";
+import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
 import type { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import Human from "game/entity/Human";
-import { Prompt } from "game/meta/prompt/IPrompt";
-import type { ITarsModEvents, ISaveData, IGlobalSaveData, ISaveDataContainer } from "./ITarsMod";
+import NPC from "game/entity/npc/NPC";
+import type { IGlobalSaveData, ISaveData, ISaveDataContainer, ITarsModEvents } from "./ITarsMod";
 import { TarsTranslation } from "./ITarsMod";
 import Tars from "./core/Tars";
-import NPC from "game/entity/npc/NPC";
 export default class TarsMod extends Mod {
     static readonly INSTANCE: TarsMod;
     event: IEventEmitter<this, ITarsModEvents>;

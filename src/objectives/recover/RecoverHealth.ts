@@ -1,11 +1,12 @@
-import { ActionType } from "game/entity/action/IAction";
 import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
-import { WeightStatus } from "game/entity/player/IPlayer";
-import Heal from "game/entity/action/actions/Heal";
+import { ActionType } from "game/entity/action/IAction";
 import Cure from "game/entity/action/actions/Cure";
 import Eat from "game/entity/action/actions/Eat";
+import Heal from "game/entity/action/actions/Heal";
+import { WeightStatus } from "game/entity/player/IPlayer";
 
+import { ConsumeItemStats } from "game/item/IItem";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -49,7 +50,7 @@ export default class RecoverHealth extends Objective {
 			const healthRecoveryFoodItems = Array.from(context.utilities.item.foodItemTypes)
 				.map(foodItemType => context.utilities.item.getItemsInContainerByType(context, context.human.inventory, foodItemType))
 				.flat()
-				.sort((a, b) => (b.description()?.onUse?.[ActionType.Eat]?.[0] ?? -99) - (a.description()?.onUse?.[ActionType.Eat]?.[0] ?? -99));
+				.sort((a, b) => (ConsumeItemStats.resolve(b.description?.onUse?.[ActionType.Eat]).get(Stat.Health) ?? -99) - (ConsumeItemStats.resolve(a.description?.onUse?.[ActionType.Eat]).get(Stat.Health) ?? -99));
 			if (healthRecoveryFoodItems.length > 0) {
 				return new UseItem(Eat, healthRecoveryFoodItems[0]);
 			}

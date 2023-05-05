@@ -31,7 +31,7 @@ export class Planner implements IPlanner {
 	private readonly calculateDifficultyCache = new Map<string, ObjectivePipeline>();
 
 	private calculatingDifficultyDepth = 0;
-	private calculationLog: string[];
+	private readonly calculationLog: string[] = [];
 	private objectivesCounter: Map<string, number>;
 
 	private readonly log: Log;
@@ -231,12 +231,11 @@ export class Planner implements IPlanner {
 			if (time >= 1000) {
 				this.log.warn(`Took ${time.toFixed(2)}ms to determine the easiest objective. ${objectivesSets.map(set => set.map(o => o.getHashCode(context)).join(" -> ")).join(", ")} (context: ${clonedContext.getHashCode()})`);
 
-				if (time >= 2000) {
-					if (this.debug) {
-						this.log.warn(this.calculationLog.join(""));
-						// throw new Error("Took too long!");
-					}
-				}
+				// if (time >= 2000) {
+				// 	if (this.debug) {
+				// 		this.writeCalculationLogToConsoleAndReset();
+				// 	}
+				// }
 			}
 
 			if (includeHashCode) {
@@ -411,7 +410,7 @@ export class Planner implements IPlanner {
 
 	private async calculateDifficulty(context: Context, objective: IObjective): Promise<ObjectivePipeline> {
 		if (this.calculatingDifficultyDepth === 0) {
-			this.calculationLog = [];
+			this.calculationLog.length = 0;
 			this.objectivesCounter = new Map();
 		}
 
@@ -754,8 +753,7 @@ export class Planner implements IPlanner {
 
 		if (this.calculatingDifficultyDepth === 0) {
 			if (this.debug) {
-				const logString = this.calculationLog.join("");
-				this.log.debug(logString);
+				this.writeCalculationLogToConsoleAndReset();
 				// this.log.info("Objectives", context.state.objectives.map(({ depth, objective }) => `Depth ${depth}: ${objective.getHashCode()}`).join("\n"));
 			}
 
@@ -774,5 +772,20 @@ export class Planner implements IPlanner {
 
 	private writeCalculationLog(message: string): void {
 		this.calculationLog.push(`${"\t".repeat(this.calculatingDifficultyDepth)}${message}\n`);
+	}
+
+	private writeCalculationLogToConsoleAndReset(): void {
+		let consoleMessage: string;
+
+		try {
+			consoleMessage = this.calculationLog.join("")
+
+		} catch (ex) {
+			consoleMessage = `BUFFERTOOLARGE:${this.calculationLog.length},${ex}`;
+		}
+
+		this.calculationLog.length = 0;
+
+		this.log.debug(consoleMessage);
 	}
 }

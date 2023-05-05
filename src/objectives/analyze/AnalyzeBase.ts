@@ -1,5 +1,4 @@
 import type Doodad from "game/doodad/Doodad";
-import TileHelpers from "utilities/game/TileHelpers";
 import type { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 
@@ -41,7 +40,7 @@ export default class AnalyzeBase extends Objective {
 						changed = true;
 						this.log.info(`"${key}" was removed`);
 
-						context.utilities.navigation.refreshOverlay(context.island, doodad.getTile(), doodad.x, doodad.y, doodad.z, false);
+						context.utilities.navigation.refreshOverlay(doodad.tile, false);
 
 						return false;
 					}
@@ -76,7 +75,7 @@ export default class AnalyzeBase extends Objective {
 
 				for (const target of targets) {
 					if (!info.canAdd || info.canAdd(context, target)) {
-						const distance = Vector2.squaredDistance(context.getPosition(), target);
+						const distance = Vector2.squaredDistance(context.getTile(), target);
 						if (distance < (info.nearBaseDistanceSq ?? baseDoodadDistanceSq) && !context.base[key].includes(target)) {
 							changed = true;
 
@@ -86,7 +85,7 @@ export default class AnalyzeBase extends Objective {
 
 							info.onAdd?.(context, target);
 
-							context.utilities.navigation.refreshOverlay(context.island, target.getTile(), target.x, target.y, target.z, true);
+							context.utilities.navigation.refreshOverlay(target.tile, true);
 
 							if (!info.allowMultiple) {
 								break;
@@ -100,9 +99,9 @@ export default class AnalyzeBase extends Objective {
 		if (changed) {
 			let availableUnlimitedWellLocation: IVector3 | undefined;
 
-			const baseDoodads = context.utilities.base.getBaseDoodads(context);
-			for (const baseDoodad of baseDoodads) {
-				const unlimitedWellTile = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: 50 });
+			const baseTiles = context.utilities.base.getBaseTiles(context);
+			for (const baseTile of baseTiles) {
+				const unlimitedWellTile = baseTile.findMatchingTile(tile => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: 50 });
 				if (unlimitedWellTile) {
 					availableUnlimitedWellLocation = unlimitedWellTile;
 					break;

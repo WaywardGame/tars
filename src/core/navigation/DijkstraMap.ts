@@ -26,10 +26,10 @@ export class DijkstraMap {
 
     private origin: IDijkstraMapNode | undefined;
 
-    constructor() {
-        for (let x = 0; x < game.mapSize; x++) {
-            for (let y = 0; y < game.mapSize; y++) {
-                this.nodes[(y * game.mapSize) + x] = {
+    constructor(private readonly mapSize: number) {
+        for (let x = 0; x < mapSize; x++) {
+            for (let y = 0; y < mapSize; y++) {
+                this.nodes[(y * mapSize) + x] = {
                     x,
                     y,
                     penalty: 0,
@@ -41,15 +41,15 @@ export class DijkstraMap {
             }
         }
 
-        for (let x = 0; x < game.mapSize; x++) {
-            for (let y = 0; y < game.mapSize; y++) {
+        for (let x = 0; x < mapSize; x++) {
+            for (let y = 0; y < mapSize; y++) {
                 const node = this.getNode(x, y);
 
                 if (x != 0) {
                     node.connections.set(Direction.West, this.getNode(x - 1, y));
                 }
 
-                if (x != game.mapSize - 1) {
+                if (x != mapSize - 1) {
                     node.connections.set(Direction.East, this.getNode(x + 1, y));
                 }
 
@@ -57,7 +57,7 @@ export class DijkstraMap {
                     node.connections.set(Direction.North, this.getNode(x, y - 1));
                 }
 
-                if (y != game.mapSize - 1) {
+                if (y != mapSize - 1) {
                     node.connections.set(Direction.South, this.getNode(x, y + 1));
                 }
             }
@@ -65,7 +65,7 @@ export class DijkstraMap {
     }
 
     public getNode(x: number, y: number) {
-        return this.nodes[(y * game.mapSize) + x];
+        return this.nodes[(y * this.mapSize) + x];
     }
 
     public updateNode(x: number, y: number, penalty: number, disabled: boolean) {

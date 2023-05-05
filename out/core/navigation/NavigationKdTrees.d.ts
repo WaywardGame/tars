@@ -1,10 +1,11 @@
 import { TileUpdateType } from "game/IGame";
 import Island from "game/island/Island";
-import { ITile, TerrainType } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import { KdTree } from "utilities/collection/tree/KdTree";
+import { ExtendedTerrainType } from "./INavigation";
 interface INavigationMapData {
     kdTreeTileTypes: Uint8Array;
-    kdTrees: Map<TerrainType, KdTree>;
+    kdTrees: Map<ExtendedTerrainType, KdTree>;
 }
 export declare class NavigationKdTrees {
     private maps;
@@ -14,8 +15,8 @@ export declare class NavigationKdTrees {
     load(): void;
     unload(): void;
     initializeIsland(island: Island): void;
-    getKdTree(island: Island, z: number, tileType: TerrainType): KdTree | undefined;
-    onTileUpdate(island: Island, tile: ITile, tileX: number, tileY: number, tileZ: number, tileUpdateType: TileUpdateType): void;
+    getKdTree(island: Island, z: number, tileType: ExtendedTerrainType): KdTree | undefined;
+    onTileUpdate(island: Island, tile: Tile, tileUpdateType: TileUpdateType): void;
     updateKdTree(island: Island, x: number, y: number, z: number, tileType: number, navigationMapData?: INavigationMapData | undefined): void;
     private updateKdTreeSpecialTileTypes;
 }

@@ -4,9 +4,9 @@ import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import UpdateWalkPath from "game/entity/action/actions/UpdateWalkPath";
 import { ActionType } from "game/entity/action/IAction";
 import type Item from "game/item/Item";
-import TileHelpers from "utilities/game/TileHelpers";
-import type { IVector3 } from "utilities/math/IVector";
 import Build from "game/entity/action/actions/Build";
+import Tile from "game/tile/Tile";
+import { ItemType } from "game/item/IItem";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -21,14 +21,13 @@ import MoveToTarget from "../../core/MoveToTarget";
 import PickUpAllTileItems from "../tile/PickUpAllTileItems";
 import UseItem from "./UseItem";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
-import { ItemType } from "game/item/IItem";
 import MoveToWater, { MoveToWaterType } from "../../utility/moveTo/MoveToWater";
 
 const recalculateMovements = 40;
 
 export default class BuildItem extends Objective {
 
-	private target: IVector3 | undefined;
+	private target: Tile | undefined;
 	private movements = 0;
 
 	constructor(private readonly item?: Item) {
@@ -50,7 +49,7 @@ export default class BuildItem extends Objective {
 			return ObjectiveResult.Restart;
 		}
 
-		const description = item.description();
+		const description = item.description;
 		if (!description || !description.use || !description.use.includes(ActionType.Build)) {
 			this.log.error(`Invalid build item. ${item}`);
 			return ObjectiveResult.Impossible;
@@ -89,8 +88,9 @@ export default class BuildItem extends Objective {
 						const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
 
 						for (const point of possiblePoints) {
-							if (context.utilities.base.isGoodBuildTile(context, point, context.island.getTileFromPoint(point), { openAreaRadius: 0 })) {
-								this.target = point;
+							const tile = context.island.getTileFromPoint(point);
+							if (context.utilities.base.isGoodBuildTile(context, tile, { openAreaRadius: 0 })) {
+								this.target = tile;
 								break;
 							}
 						}
@@ -101,25 +101,24 @@ export default class BuildItem extends Objective {
 				}
 
 				if (!this.target) {
-					const baseDoodads = context.utilities.base.getBaseDoodads(context);
-
-					for (const baseDoodad of baseDoodads) {
+					const baseTiles = context.utilities.base.getBaseTiles(context);
+					for (const baseTile of baseTiles) {
 						if (isWell) {
 							// look for unlimited wells first
-							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+							this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 							if (this.target === undefined) {
 								this.log.info("Couldn't find unlimited well tile");
-								this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => context.utilities.base.isGoodWellBuildTile(context, point, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+								this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 							}
 
 						} else {
-							this.target = TileHelpers.findMatchingTile(context.island, baseDoodad, (_, point, tile) => {
-								if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, point)) {
+							this.target = baseTile.findMatchingTile((tile) => {
+								if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, tile)) {
 									// AnalyzeBase won't like a doodad at this position
 									return false;
 								}
 
-								return context.utilities.base.isGoodBuildTile(context, point, tile, baseInfo);
+								return context.utilities.base.isGoodBuildTile(context, tile, baseInfo);
 							}, { maxTilesChecked: defaultMaxTilesChecked });
 						}
 
@@ -150,7 +149,7 @@ export default class BuildItem extends Objective {
 			...moveToTargetObjectives,
 			new UseItem(Build, item),
 			new Lambda(async context => {
-				const tile = context.human.getFacingTile();
+				const tile = context.human.facingTile;
 				if (tile.doodad) {
 					context.setData(ContextDataType.LastBuiltDoodad, tile.doodad);
 				}

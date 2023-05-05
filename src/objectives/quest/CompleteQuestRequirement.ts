@@ -244,7 +244,7 @@ export default class CompleteQuestRequirement extends Objective {
                     let itemToSlot: Item | undefined;
 
                     for (const item of context.utilities.item.getItemsInInventory(context)) {
-                        if ((gameScreen?.actionBar.getSlottedIn(item)?.size ?? 0) === 0) {
+                        if ((gameScreen?.actionBar?.getSlottedIn(item)?.size ?? 0) === 0) {
                             itemToSlot = item;
                             break;
                         }
@@ -318,7 +318,7 @@ export default class CompleteQuestRequirement extends Objective {
                 const objectivePipelines: IObjective[][] = [];
 
                 for (const waterStill of context.base.waterStill) {
-                    if (!waterStill.description()?.providesFire) {
+                    if (!waterStill.description?.providesFire) {
                         objectivePipelines.push([
                             new StartWaterStillDesalination(waterStill, { forceStoke: true }),
                         ]);
@@ -332,7 +332,7 @@ export default class CompleteQuestRequirement extends Objective {
                 const objectivePipelines: IObjective[][] = [];
 
                 for (const waterStill of context.base.waterStill) {
-                    if (waterStill.description()?.providesFire) {
+                    if (waterStill.description?.providesFire) {
                         objectivePipelines.push([
                             new StartWaterStillDesalination(waterStill, { forceStoke: true }),
                         ]);

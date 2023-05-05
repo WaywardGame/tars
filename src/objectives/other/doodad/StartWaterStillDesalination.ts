@@ -55,7 +55,7 @@ export default class StartWaterStillDesalination extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		const waterStillDescription = this.waterStill.description();
+		const waterStillDescription = this.waterStill.description;
 		if (!waterStillDescription) {
 			return ObjectiveResult.Impossible;
 		}
@@ -130,7 +130,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 				objectives.push(new MoveToTarget(this.waterStill, true));
 
-				objectives.push(new PickUpAllTileItems(this.waterStill));
+				objectives.push(new PickUpAllTileItems(this.waterStill.tile));
 
 				this.log.info("Moving to attach container");
 
@@ -142,7 +142,7 @@ export default class StartWaterStillDesalination extends Objective {
 				// reattach it after pouring water in
 				objectives.push(new MoveToTarget(this.waterStill, true));
 
-				objectives.push(new PickUpAllTileItems(this.waterStill));
+				objectives.push(new PickUpAllTileItems(this.waterStill.tile));
 
 				this.log.info("Moving to attach container");
 

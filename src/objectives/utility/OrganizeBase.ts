@@ -1,6 +1,7 @@
 import { ItemType } from "game/item/IItem";
 import type Item from "game/item/Item";
-import type { IVector3 } from "utilities/math/IVector";
+import Tile from "game/tile/Tile";
+
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -10,7 +11,7 @@ import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 
 export default class OrganizeBase extends Objective {
 
-	constructor(private readonly tiles: IVector3[]) {
+	constructor(private readonly tiles: Tile[]) {
 		super();
 	}
 
@@ -41,8 +42,7 @@ export default class OrganizeBase extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
-		for (const position of this.tiles) {
-			const tile = context.island.getTileFromPoint(position);
+		for (const tile of this.tiles) {
 			if (tile.containedItems && tile.containedItems.length > 0) {
 				let weight = context.utilities.player.getWeight(context);
 				const maxWeight = context.utilities.player.getMaxWeight(context);
@@ -69,7 +69,7 @@ export default class OrganizeBase extends Objective {
 
 				// pick up items from tile
 				for (const item of itemsToMove) {
-					objectives.push(new MoveItemIntoInventory(item, position));
+					objectives.push(new MoveItemIntoInventory(item, tile));
 				}
 
 				// restart now

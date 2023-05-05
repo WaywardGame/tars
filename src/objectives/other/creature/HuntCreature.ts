@@ -34,7 +34,7 @@ export default class HuntCreature extends Objective {
             return ObjectiveResult.Complete;
         }
 
-        const isPassable = this.creature.description()?.passable ?? false;
+        const isPassable = this.creature.description?.passable ?? false;
         if (isPassable && context.human.x === this.creature.x && context.human.y === this.creature.y && context.human.z === this.creature.z) {
             // we're ontop of the creature
             // instead of trying to move next to it, idle and let it move

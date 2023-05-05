@@ -39,7 +39,7 @@ export default class GatherFromBuilt extends Objective {
         }, 5)
             .map(target => ([
                 new MoveToTarget(target, true),
-                new ClearTile(target),
+                new ClearTile(target.tile),
                 new ExecuteActionForItem(
                     ExecuteActionType.Generic,
                     [this.itemType],

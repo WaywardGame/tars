@@ -36,20 +36,17 @@ export default class MoveToTargetRange extends Objective {
 
             for (let i = 0; i <= rangeDelta; i++) {
                 const targetPoint = new Vector2(this.target).add(new Vector2(point).multiply(this.minRange + i));
-                console.log(`checking ${this.target.x},${this.target.y},${this.target.z}, ${targetPoint.toString()}`);
 
-                const validPoint = context.island.ensureValidPoint(targetPoint);
-                if (!validPoint) {
+                const targetTile = context.island.getTileSafe(targetPoint.x, targetPoint.y, this.target.z);
+                if (!targetTile) {
                     continue;
                 }
 
-                const targetPointZ = { x: validPoint.x, y: validPoint.y, z: this.target.z };
-
-                if (navigation.isDisabledFromPoint(context.island, targetPointZ)) {
+                if (navigation.isDisabled(targetTile)) {
                     continue;
                 }
 
-                objectivePipelines.push([new MoveToTarget(targetPointZ, false)]);
+                objectivePipelines.push([new MoveToTarget(targetTile, false)]);
             }
         }
 

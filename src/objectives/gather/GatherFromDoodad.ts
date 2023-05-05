@@ -42,12 +42,12 @@ export default class GatherFromDoodad extends Objective {
 				return false;
 			}
 
-			const description = doodad.description();
+			const description = doodad.description;
 			if (!description) {
 				return false;
 			}
 
-			const growingStage = doodad.getGrowingStage();
+			const growingStage = doodad.growth;
 			if (growingStage === undefined || (description.gather?.[growingStage] === undefined && description.harvest?.[growingStage] === undefined)) {
 				return false;
 			}
@@ -59,7 +59,7 @@ export default class GatherFromDoodad extends Objective {
 
 			// todo: use difficulty
 
-			return context.utilities.tile.canGather(context, doodad.getTile(), true);
+			return context.utilities.tile.canGather(context, doodad.tile, true);
 		}, 5)
 			.map(target => ([
 				new MoveToTarget(target, true),

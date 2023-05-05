@@ -1,7 +1,7 @@
 import { ItemType, ItemTypeGroup } from "game/item/IItem";
 import ItemManager from "game/item/ItemManager";
 import { TerrainType } from "game/tile/ITerrain";
-import Terrains from "game/tile/Terrains";
+import { terrainDescriptions } from "game/tile/Terrains";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 
@@ -66,7 +66,7 @@ export default class GatherFromTerrainResource extends Objective {
 	}
 
 	private processTerrainLocation(context: Context, objectivePipelines: IObjective[][], terrainSearch: ITerrainResourceSearch, tileLocation: ITileLocation, skipSmartCheck?: boolean) {
-		const terrainDescription = Terrains[terrainSearch.type];
+		const terrainDescription = terrainDescriptions[terrainSearch.type];
 		if (!terrainDescription) {
 			return;
 		}
@@ -78,8 +78,9 @@ export default class GatherFromTerrainResource extends Objective {
 
 		let step = 0;
 
-		const point = tileLocation.point;
-		const tileData = context.island.getTileData(point.x, point.y, point.z);
+		const tile = tileLocation.tile;
+
+		const tileData = tile.getTileData();
 		if (tileData && tileData.length > 0) {
 			const tileDataStep = tileData[0].step;
 			if (tileDataStep !== undefined) {
@@ -143,7 +144,7 @@ export default class GatherFromTerrainResource extends Objective {
 
 		objectivePipelines.push([
 			new AddDifficulty(difficulty),
-			new MoveToTarget(point, true),
+			new MoveToTarget(tile, true),
 			new ExecuteActionForItem(ExecuteActionType.Terrain, this.search.map(search => search.itemType), { expectedTerrainType: terrainSearch.type })
 				.passAcquireData(this)
 				.setStatus(() => `Gathering ${Translation.nameOf(Dictionary.Item, terrainSearch.itemType).getString()} from ${Translation.nameOf(Dictionary.Terrain, terrainSearch.type).getString()}`),

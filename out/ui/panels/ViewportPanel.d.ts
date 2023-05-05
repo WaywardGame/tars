@@ -5,14 +5,12 @@ import { TarsTranslation } from "../../ITarsMod";
 import Tars from "../../core/Tars";
 export default class ViewportPanel extends TarsPanel {
     private canvas;
-    private webGlContext?;
     private renderer?;
-    private disposed;
     private zoomLevel;
     constructor(tarsInstance: Tars);
     protected onDispose(): void;
-    private disposeCanvas;
-    private disposeGl;
+    private disposeRendererAndCanvas;
+    private disposeRenderer;
     getTranslation(): TarsTranslation | Translation;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
