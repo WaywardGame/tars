@@ -203,10 +203,6 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			}
 		}
 
-		if (context.base.kiln.length === 0) {
-			objectives.push([new AcquireInventoryItem("kiln"), new BuildItem()]);
-		}
-
 		/*
 			Extra objectives
 		*/
@@ -218,6 +214,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		if (context.base.well.length === 0 && context.base.availableUnlimitedWellLocation !== undefined) {
 			// todo: only build a well if we find a good tile?
 			objectives.push([new AcquireInventoryItem("well"), new BuildItem()]);
+		}
+
+		if (context.base.kiln.length === 0) {
+			objectives.push([new AcquireInventoryItem("kiln"), new BuildItem()]);
 		}
 
 		if (context.base.furnace.length === 0) {
