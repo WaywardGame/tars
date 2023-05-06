@@ -56,8 +56,18 @@ export enum ContextDataType {
 	/**
 	 * Set when TARS is near the base so it remembers that it should do "near base" things, even if it moves further away from the base while doing said things
 	 */
-	NearBase = "NearBase",
+	NearBase1 = "NearBase1",
+	NearBase2 = "NearBase2",
+	NearBase3 = "NearBase3",
+	NearBase4 = "NearBase4",
 }
+
+export const nearBaseDataKeys: ContextDataType[] = [
+	ContextDataType.NearBase1,
+	ContextDataType.NearBase2,
+	ContextDataType.NearBase3,
+	ContextDataType.NearBase4,
+];
 
 export enum MovingToNewIslandState {
 	None,

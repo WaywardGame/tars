@@ -18,8 +18,12 @@ export declare enum ContextDataType {
     DisableMoveAwayFromBaseItemOrganization = "DisableMoveAwayFromBaseItemOrganization",
     TamingCreature = "TamingCreature",
     KeepInInventoryItems = "KeepInInventoryItems",
-    NearBase = "NearBase"
+    NearBase1 = "NearBase1",
+    NearBase2 = "NearBase2",
+    NearBase3 = "NearBase3",
+    NearBase4 = "NearBase4"
 }
+export declare const nearBaseDataKeys: ContextDataType[];
 export declare enum MovingToNewIslandState {
     None = 0,
     Preparing = 1,

@@ -20,7 +20,7 @@ export class CreatureUtilities {
 	}
 
 	/**
-	 * Returns nearby untamed & unhitched creatures
+	 * Returns nearby untamed & unhitched creatures that could move to the player
 	 */
 	public getNearbyCreatures(context: Context, radius = this.nearbyCreatureRadius): Creature[] {
 		const point = context.human;
@@ -29,9 +29,9 @@ export class CreatureUtilities {
 
 		for (let x = -radius; x <= radius; x++) {
 			for (let y = -radius; y <= radius; y++) {
-				const tile = context.island.getTileSafe(point.x + x, point.y + y, point.z);
-				if (tile?.creature && !tile.creature.isTamed() && tile.creature.hitchedTo === undefined) {
-					creatures.push(tile.creature);
+				const creature = context.island.getTileSafe(point.x + x, point.y + y, point.z)?.creature;
+				if (creature && !creature.isTamed() && creature.hitchedTo === undefined && creature.findPath(context.human.tile, creature.getMoveType(), 256, context.human) !== undefined) {
+					creatures.push(creature);
 				}
 			}
 		}

@@ -16,7 +16,7 @@ import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import Tile from "game/tile/Tile";
-import { ContextDataType } from "../core/context/IContext";
+import { nearBaseDataKeys } from "../core/context/IContext";
 
 const nearBaseDistance = 14;
 const nearBaseDistanceSq = Math.pow(nearBaseDistance, 2);
@@ -147,7 +147,7 @@ export class BaseUtilities {
 	}
 
 	public isNearBase(context: Context, point: IVector3 = context.human, distanceSq: number = nearBaseDistanceSq): boolean {
-		if (context.hasData(ContextDataType.NearBase)) {
+		if (nearBaseDataKeys.some(nearBaseDataKey => context.hasData(nearBaseDataKey))) {
 			// we were doing some near base stuff, keep at it!
 			return true;
 		}
@@ -214,15 +214,7 @@ export class BaseUtilities {
 	}
 
 	public getSwampTilesNearBase(context: Context): Tile[] {
-		const result: Tile[] = [];
-
-		for (const tile of this.getTilesNearBase(context)) {
-			if (tile.type === TerrainType.Swamp) {
-				result.push(tile);
-			}
-		}
-
-		return result;
+		return this.getTilesNearBase(context).filter(tile => tile.type === TerrainType.Swamp);
 	}
 
 	public getNonTamedCreaturesNearBase(context: Context): Creature[] {

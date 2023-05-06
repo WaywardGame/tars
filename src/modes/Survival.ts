@@ -109,7 +109,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
 
-		await this.runWhileNearBase(context, objectives, async (context, objectives) => {
+		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase1, async (context, objectives) => {
 			// ensure solar stills are solar stilling
 			for (const solarStill of context.base.solarStill) {
 				if (!solarStill.stillContainer) {
@@ -139,7 +139,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		objectives.push(new AcquireInventoryItem("heal"));
 
 		if (context.options.survivalMaintainLowDifficulty && context.utilities.creature.hasDecentEquipment(context)) {
-			// trigger once rep is below 5k
+			// trigger once rep is below some limit
 			await this.runWhile(context, objectives,
 				"LoweringMalignity",
 				async (context) => context.island.getReputation() < 5000,
@@ -153,6 +153,20 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 					objectives.push(new Restart());
 				});
+
+			// await this.runWhile(context, objectives,
+			// 	"LoweringMalignity",
+			// 	async (context) => context.island.getReputation() < -7500,
+			// 	async (context, objectives) => {
+			// 		// stop once rep is above 0
+			// 		if (context.island.getReputation() >= 0) {
+			// 			return;
+			// 		}
+
+			// 		objectives.push(new Fish());
+
+			// 		objectives.push(new Restart());
+			// 	});
 		}
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
@@ -235,7 +249,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		const { safeToDrinkWaterContainers, availableWaterContainers } = context.utilities.item.getWaterContainers(context);
 
 		// run a few extra things before running upgrade objectives if we're near a base
-		await this.runWhileNearBase(context, objectives, async (context, objectives) => {
+		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase2, async (context, objectives) => {
 			// build a second water still
 			if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
 				objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
@@ -304,7 +318,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		}
 
 		// go on a killing spree once you have a good sword and shield
-		await this.runWhileNearBase(context, objectives, async (context, objectives) => {
+		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase3, async (context, objectives) => {
 			const creatures = context.utilities.base.getNonTamedCreaturesNearBase(context)
 				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
 			if (creatures.length > 0) {
@@ -402,7 +416,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		*/
 
 		if (moveToNewIslandState === MovingToNewIslandState.None) {
-			await this.runWhileNearBase(context, objectives, async (context, objectives) => {
+			await this.runWhileNearBase(context, objectives, ContextDataType.NearBase4, async (context, objectives) => {
 				objectives.push(new CheckDecayingItems());
 			});
 		}
@@ -567,9 +581,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 	private async runWhileNearBase(
 		context: Context,
 		objectives: Array<IObjective | IObjective[]>,
+		id: ContextDataType,
 		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>) {
 		return this.runWhile(context, objectives,
-			ContextDataType.NearBase,
+			id,
 			async (context) => context.utilities.base.isNearBase(context),
 			determineObjectives);
 	}
