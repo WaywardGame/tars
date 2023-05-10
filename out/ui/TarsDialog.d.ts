@@ -1,7 +1,7 @@
 import Translation from "language/Translation";
+import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import TabDialog from "ui/screen/screens/game/component/TabDialog";
-import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import Tars from "../core/Tars";
 import type TarsPanel from "./components/TarsPanel";
 export type TabDialogPanelClass = new (tarsInstance: Tars) => TarsPanel;

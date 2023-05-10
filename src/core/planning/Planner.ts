@@ -772,6 +772,11 @@ export class Planner implements IPlanner {
 
 	private writeCalculationLog(message: string): void {
 		this.calculationLog.push(`${"\t".repeat(this.calculatingDifficultyDepth)}${message}\n`);
+
+		// if (this.calculationLog.length > 100000) {
+		// 	this.writeCalculationLogToConsoleAndReset();
+		// 	throw new Error("Stop");
+		// }
 	}
 
 	private writeCalculationLogToConsoleAndReset(): void {

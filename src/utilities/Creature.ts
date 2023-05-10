@@ -5,6 +5,7 @@ import { ItemType } from "game/item/IItem";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import { WeightStatus } from "game/entity/player/IPlayer";
+import { CombatDangerLevel, CombatStrength } from "game/entity/CombatStrengthManager";
 
 import type Context from "../core/context/Context";
 
@@ -40,6 +41,21 @@ export class CreatureUtilities {
 	}
 
 	public isScaredOfCreature(context: Context, creature: Creature): boolean {
+		const combatStrength = context.island.creatures.combatStrength;
+
+		const creatureTypeStrength = combatStrength.getCreature(creature.type, creature.aberrant);
+		const creatureTier = combatStrength.getTier(creatureTypeStrength);
+		if (creatureTier <= CombatStrength.Tier4) {
+			return false;
+		}
+
+		const creatureDifficulty = combatStrength.getCreatureDifficultyAgainstHuman(creature, context.human);
+		const creatureDangerLevel = combatStrength.getDangerLevel(creatureDifficulty);
+		if (creatureDangerLevel === CombatDangerLevel.VeryHigh || creatureDangerLevel === CombatDangerLevel.Extreme) {
+			return true;
+		}
+
+		// todo: remove this logic once we trust the stuff above
 		switch (creature.type) {
 			case CreatureType.Shark:
 			case CreatureType.Zombie:
