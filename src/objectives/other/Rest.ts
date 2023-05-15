@@ -12,6 +12,7 @@ import ReduceWeight from "../interrupt/ReduceWeight";
 import MoveToLand from "../utility/moveTo/MoveToLand";
 import Idle from "./Idle";
 import RunAwayFromTarget from "./RunAwayFromTarget";
+import Restart from "../core/Restart";
 
 export default class Rest extends Objective {
 
@@ -44,11 +45,11 @@ export default class Rest extends Objective {
 
 			if (context.human.getWeightStatus() === WeightStatus.Overburdened) {
 				if (this.force) {
-					objectivePipelines.push([new ReduceWeight({ allowReservedItems: true }), new RunAwayFromTarget(nearbyCreature)]);
+					objectivePipelines.push([new ReduceWeight({ allowReservedItems: true }), new RunAwayFromTarget(nearbyCreature), new Restart()]);
 				}
 
 			} else {
-				objectivePipelines.push([new RunAwayFromTarget(nearbyCreature, 8)]);
+				objectivePipelines.push([new RunAwayFromTarget(nearbyCreature, 8), new Restart()]);
 			}
 
 			// either run away or idle

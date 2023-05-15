@@ -425,7 +425,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
         if (objective !== undefined) {
             const result = await objective.onMove(this.context);
             if (result === true) {
-                this.fullInterrupt("Target creature moved");
+                // this could happen if a creature moves into our walkpath
+                // if we use fullInterrupt, it would clear the NearBase flag, which could end up causing loops
+                this.interrupt("OnMove interrupt");
 
             } else if (result) {
                 this.interrupt("Target creature moved", result);
@@ -1102,6 +1104,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
     // todo: make this the default?
     private fullInterrupt(reason: string) {
+        this.log.info(`Full interrupt: ${reason}`);
+
         this.interrupt(reason);
 
         this.interruptObjectivePipeline = undefined;

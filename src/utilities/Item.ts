@@ -223,6 +223,11 @@ export class ItemUtilities {
 					item !== undefined &&
 					item.type === itemType &&
 					context.island.items.isTileContainer(item.containedWithin)) as Item[];
+			if (cachedItems.length > 500) {
+				// limit to the first 500 items on the ground
+				cachedItems = cachedItems.slice(0, 500);
+			}
+
 			this.groundItemCache.set(itemType, cachedItems);
 		}
 

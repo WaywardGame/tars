@@ -1,14 +1,14 @@
 import { OwnEventHandler } from "event/EventManager";
-import Message from "language/dictionary/Message";
 import Translation from "language/Translation";
-import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import TabDialog from "ui/screen/screens/game/component/TabDialog";
+import Message from "language/dictionary/Message";
 import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { Edge } from "ui/screen/screens/game/Dialogs";
+import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
+import TabDialog from "ui/screen/screens/game/component/TabDialog";
 import { Tuple } from "utilities/collection/Tuple";
 import Vector2 from "utilities/math/Vector2";
+import { TarsTranslation, TarsUiSaveDataKey, getTarsTranslation } from "../ITarsMod";
 import Tars from "../core/Tars";
-import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../ITarsMod";
 import type TarsPanel from "./components/TarsPanel";
 import DataPanel from "./panels/DataPanel";
 import GeneralPanel from "./panels/GeneralPanel";
