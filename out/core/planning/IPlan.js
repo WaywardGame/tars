@@ -19,6 +19,6 @@ define(["require", "exports"], function (require, exports) {
         ExecuteResultType[ExecuteResultType["Restart"] = 2] = "Restart";
         ExecuteResultType[ExecuteResultType["Ignored"] = 3] = "Ignored";
         ExecuteResultType[ExecuteResultType["ContinuingNextTick"] = 4] = "ContinuingNextTick";
-    })(ExecuteResultType = exports.ExecuteResultType || (exports.ExecuteResultType = {}));
+    })(ExecuteResultType || (exports.ExecuteResultType = ExecuteResultType = {}));
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSVBsYW4uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvY29yZS9wbGFubmluZy9JUGxhbi50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7O0dBU0c7Ozs7O0lBK0NILElBQVksaUJBTVg7SUFORCxXQUFZLGlCQUFpQjtRQUM1QixtRUFBUyxDQUFBO1FBQ1QsK0RBQU8sQ0FBQTtRQUNQLCtEQUFPLENBQUE7UUFDUCwrREFBTyxDQUFBO1FBQ1AscUZBQWtCLENBQUE7SUFDbkIsQ0FBQyxFQU5XLGlCQUFpQixHQUFqQix5QkFBaUIsS0FBakIseUJBQWlCLFFBTTVCIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSVBsYW4uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvY29yZS9wbGFubmluZy9JUGxhbi50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7O0dBU0c7Ozs7O0lBK0NILElBQVksaUJBTVg7SUFORCxXQUFZLGlCQUFpQjtRQUM1QixtRUFBUyxDQUFBO1FBQ1QsK0RBQU8sQ0FBQTtRQUNQLCtEQUFPLENBQUE7UUFDUCwrREFBTyxDQUFBO1FBQ1AscUZBQWtCLENBQUE7SUFDbkIsQ0FBQyxFQU5XLGlCQUFpQixpQ0FBakIsaUJBQWlCLFFBTTVCIn0=
