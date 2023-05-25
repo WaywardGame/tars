@@ -154,7 +154,7 @@ export default class MoveToWater extends Objective {
 					for (const targetTile of targetTiles) {
 						const checkTiles = 16;
 						const fillCount = context.island.checkWaterFill(targetTile, checkTiles, WaterType.None);
-						if (fillCount < checkTiles) {
+						if (fillCount.count < checkTiles) {
 							return false;
 						}
 					}

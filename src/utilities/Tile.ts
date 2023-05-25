@@ -117,7 +117,7 @@ export class TileUtilities {
 					return false;
 				}
 
-				if (context.island.checkWaterFill(tile, 50, WaterType.None) < 50) {
+				if (context.island.checkWaterFill(tile, 50, WaterType.None).count < 50) {
 					return false;
 				}
 

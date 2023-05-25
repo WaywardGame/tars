@@ -23,10 +23,12 @@ import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import type Creature from "game/entity/creature/Creature";
 import CreatureManager from "game/entity/creature/CreatureManager";
 import Human from "game/entity/Human";
+import { AttackType } from "game/entity/IEntity";
 import { EquipType, MovingClientSide } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import NPC from "game/entity/npc/NPC";
+import ControllableNPC from "game/entity/npc/npcs/Controllable";
 import { WeightStatus } from "game/entity/player/IPlayer";
 import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
@@ -47,14 +49,13 @@ import { RenderSource } from "renderer/IRenderer";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
+import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
-import { AttackType } from "game/entity/IEntity";
-import ControllableNPC from "game/entity/npc/npcs/Controllable";
-import { IVector2 } from "utilities/math/IVector";
 
+import Tile from "game/tile/Tile";
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
@@ -95,12 +96,11 @@ import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
+import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
 import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
-import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
-import Tile from "game/tile/Tile";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -196,7 +196,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         return {
             name: this.getName().toString(),
-            version: getTarsMod().getVersion(),
+            version: getTarsMod().version,
             saveData: this.saveData,
         };
     }
