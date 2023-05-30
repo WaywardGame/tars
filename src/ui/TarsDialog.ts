@@ -64,14 +64,8 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 		super(id, subId, false);
 	}
 
-	protected override getDefaultSubpanelInformation(): SubpanelInformation {
-		for (const subpanelInformation of this.subpanelInformations) {
-			if (subpanelInformation[0] === this.tarsInstance!.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
-				return subpanelInformation;
-			}
-		}
-
-		return super.getDefaultSubpanelInformation();
+	protected override getDefaultSubpanelInformation(): SubpanelInformation | undefined {
+		return this.subpanelInformations.find(spi => spi[0] === this.tarsInstance!.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) ?? super.getDefaultSubpanelInformation();
 	}
 
 	@OwnEventHandler(TarsDialog, "changeSubpanel")

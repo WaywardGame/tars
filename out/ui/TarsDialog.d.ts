@@ -19,7 +19,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
     static description: IDialogDescription;
     private tarsInstance;
     constructor(id: DialogId, subId?: string);
-    protected getDefaultSubpanelInformation(): SubpanelInformation;
+    protected getDefaultSubpanelInformation(): SubpanelInformation | undefined;
     protected onChangeSubpanel(activeSubpanel: SubpanelInformation): void;
     getName(): Translation;
     initialize(tarsInstance: Tars): void;
