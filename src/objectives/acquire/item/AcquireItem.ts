@@ -442,7 +442,7 @@ export default class AcquireItem extends AcquireBase {
 
 				if (doodadDescription.harvest) {
 					for (const key of Object.keys(doodadDescription.harvest)) {
-						const growingStage = parseInt(key, 10);
+						const growingStage = parseInt(key, 10) as GrowingStage;
 						const resourceItems = doodadDescription.harvest[growingStage];
 						if (!resourceItems) {
 							continue;
