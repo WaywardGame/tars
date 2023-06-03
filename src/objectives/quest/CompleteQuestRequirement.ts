@@ -38,7 +38,7 @@ import Lambda from "../core/Lambda";
 import Restart from "../core/Restart";
 import HuntCreatures from "../other/creature/HuntCreatures";
 import TameCreatures from "../other/creature/TameCreatures";
-import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
+import StartWaterStillDesalination from "../other/doodad/waterSource/StartWaterStillDesalination";
 import StokeFire from "../other/doodad/StokeFire";
 import EquipItem from "../other/item/EquipItem";
 import UnequipItem from "../other/item/UnequipItem";
@@ -368,7 +368,7 @@ export default class CompleteQuestRequirement extends Objective {
                     disallowTerrain: true,
                     disallowWell: true,
 
-                    allowStartingWaterStill: true,
+                    allowStartingWaterSourceDoodads: true,
                     allowWaitingForWater: true,
                     onlyIdleWhenWaitingForWaterStill: true,
                 }));

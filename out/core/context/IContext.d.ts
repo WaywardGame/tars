@@ -31,7 +31,8 @@ export declare enum ContextDataType {
     NearBase1 = "NearBase1",
     NearBase2 = "NearBase2",
     NearBase3 = "NearBase3",
-    NearBase4 = "NearBase4"
+    NearBase4 = "NearBase4",
+    RecoverStamina = "RecoverStamina"
 }
 export declare const nearBaseDataKeys: ContextDataType[];
 export declare enum MovingToNewIslandState {

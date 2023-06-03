@@ -13,7 +13,7 @@ import type { DoodadTypeGroup } from "game/doodad/IDoodad";
 import { DoodadType } from "game/doodad/IDoodad";
 export declare class DoodadUtilities {
     getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup, includeLitAndRevert?: boolean): Set<DoodadType>;
-    isWaterStillDesalinating(waterStill: Doodad): boolean;
-    isWaterStillDrinkable(waterStill: Doodad): boolean;
+    isWaterSourceDoodadBusy(waterSource: Doodad): boolean;
+    isWaterSourceDoodadDrinkable(waterStill: Doodad): boolean;
     requiresFire(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): boolean;
 }

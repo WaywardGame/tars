@@ -36,7 +36,7 @@ export interface IAcquireItemOptions extends IGatherItemOptions {
 	 */
 	allowCraftingForUnmetRequiredDoodads: boolean;
 
-	allowStartingWaterStill: boolean;
+	allowStartingWaterSourceDoodads: boolean;
 	allowWaitingForWater: boolean;
 	onlyIdleWhenWaitingForWaterStill?: boolean;
 }

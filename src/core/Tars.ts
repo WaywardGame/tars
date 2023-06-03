@@ -1051,6 +1051,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 anvil: [],
                 campfire: [],
                 chest: [],
+                dripStone: [],
                 furnace: [],
                 intermediateChest: [],
                 kiln: [],
@@ -1499,7 +1500,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             objectives.push(new RecoverHealth(onlyUseAvailableItems));
         }
 
-        if (allowWaiting && exceededStaminaThreshold) {
+        if (allowWaiting && (exceededStaminaThreshold || context.getData(ContextDataType.RecoverStamina) === true)) {
+            // new SetContextData(ContextDataType.RecoverStamina, true), 
             objectives.push(new RecoverStamina());
         }
 

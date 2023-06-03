@@ -25,7 +25,7 @@ export interface IBuildTileOptions {
 export declare class BaseUtilities {
     private tilesNearBaseCache;
     clearCache(): void;
-    shouldBuildWaterStills(context: Context): boolean;
+    canBuildWaterDesalinators(context: Context): boolean;
     isGoodBuildTile(context: Context, tile: Tile, options?: Partial<IBuildTileOptions>): boolean;
     isGoodWellBuildTile(context: Context, tile: Tile, onlyUnlimited: boolean): boolean;
     isOpenArea(context: Context, tile: Tile, radius?: number, allowWater?: boolean, requireShallowWater?: boolean): boolean;
@@ -42,6 +42,7 @@ export declare class BaseUtilities {
     getTileItemsNearBase(context: Context): Item[];
     getSwampTilesNearBase(context: Context): Tile[];
     getNonTamedCreaturesNearBase(context: Context): Creature[];
+    getWaterSourceDoodads(context: Context): Doodad[];
     isTreasureChestLocation(context: Context, point: IVector3): boolean;
     matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean;
     findInitialBuildTile(context: Context): Promise<Tile | undefined>;

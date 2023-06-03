@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 import type Doodad from "game/doodad/Doodad";
-import type Context from "../../../core/context/Context";
-import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
-import Objective from "../../../core/objective/Objective";
+import type Context from "../../../../core/context/Context";
+import type { ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import Objective from "../../../../core/objective/Objective";
 export interface IStartWaterStillDesalinationOptions {
     disableAttaching: boolean;
     disablePouring: boolean;

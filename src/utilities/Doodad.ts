@@ -76,15 +76,26 @@ export class DoodadUtilities {
 		return doodadTypes;
 	}
 
-	public isWaterStillDesalinating(waterStill: Doodad) {
-		return (waterStill.decay !== undefined
-			&& waterStill.decay > 0
-			&& waterStill.gatherReady !== undefined
-			&& waterStill.gatherReady > 0
-			&& waterStill.description?.providesFire) ? true : false;
+	/**
+	 * Checks if a drip stone is dripping / a water still is stilling
+	 */
+	public isWaterSourceDoodadBusy(waterSource: Doodad) {
+		if (waterSource.hasWater?.top) {
+			return true;
+		}
+
+		if (waterSource.decay !== undefined &&
+			waterSource.decay > 0 &&
+			waterSource.gatherReady !== undefined &&
+			waterSource.gatherReady > 0 &&
+			waterSource.description?.providesFire) {
+			return true;
+		}
+
+		return false;
 	}
 
-	public isWaterStillDrinkable(waterStill: Doodad) {
+	public isWaterSourceDoodadDrinkable(waterStill: Doodad) {
 		return waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0;
 	}
 

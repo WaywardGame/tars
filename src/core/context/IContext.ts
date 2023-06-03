@@ -71,6 +71,11 @@ export enum ContextDataType {
 	NearBase2 = "NearBase2",
 	NearBase3 = "NearBase3",
 	NearBase4 = "NearBase4",
+
+	/**
+	 * Remember that we want to recover stamina
+	 */
+	RecoverStamina = "RecoverStamina",
 }
 
 export const nearBaseDataKeys: ContextDataType[] = [

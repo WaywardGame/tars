@@ -113,6 +113,7 @@ export interface IBase {
     anvil: Doodad[];
     campfire: Doodad[];
     chest: Doodad[];
+    dripStone: Doodad[];
     furnace: Doodad[];
     intermediateChest: Doodad[];
     kiln: Doodad[];
@@ -172,6 +173,9 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
         onAdd: (context: Context) => {
             context.base.buildAnotherChest = false;
         },
+    },
+    dripStone: {
+        doodadTypes: [DoodadTypeGroup.Dripstone],
     },
     furnace: {
         doodadTypes: [DoodadTypeGroup.LitFurnace],
@@ -233,6 +237,7 @@ export interface IInventoryItems {
     campfire?: Item;
     chest?: Item;
     curePoison?: Item;
+    dripStone?: Item;
     equipBack?: Item;
     equipChest?: Item;
     equipFeet?: Item;
@@ -358,6 +363,13 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             option: ActionType.Sleep,
         },
     },
+    butcher: {
+        actionTypes: [ActionType.Butcher],
+        flags: {
+            flag: InventoryItemFlag.PreferHigherActionBonus,
+            option: ActionType.Butcher,
+        },
+    },
     campfire: {
         itemTypes: [ItemTypeGroup.Campfire],
         requiredMinDur: 1,
@@ -366,15 +378,12 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         actionTypes: [ActionType.Cure],
         cureStatus: StatusType.Poisoned,
     },
-    butcher: {
-        actionTypes: [ActionType.Butcher],
-        flags: {
-            flag: InventoryItemFlag.PreferHigherActionBonus,
-            option: ActionType.Butcher,
-        },
-    },
     chest: {
         itemTypes: Array.from(chestTypes.keys()),
+        requiredMinDur: 1,
+    },
+    dripStone: {
+        itemTypes: [ItemTypeGroup.Dripstone],
         requiredMinDur: 1,
     },
     equipBack: {
@@ -587,6 +596,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 
 export const inventoryBuildItems: Array<keyof IInventoryItems> = [
     "campfire",
+    "dripStone",
     "waterStill",
     "chest",
     "kiln",

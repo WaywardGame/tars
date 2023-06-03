@@ -80,6 +80,7 @@ export interface IBase {
     anvil: Doodad[];
     campfire: Doodad[];
     chest: Doodad[];
+    dripStone: Doodad[];
     furnace: Doodad[];
     intermediateChest: Doodad[];
     kiln: Doodad[];
@@ -117,6 +118,7 @@ export interface IInventoryItems {
     campfire?: Item;
     chest?: Item;
     curePoison?: Item;
+    dripStone?: Item;
     equipBack?: Item;
     equipChest?: Item;
     equipFeet?: Item;

@@ -51,7 +51,7 @@ export class BaseUtilities {
 		this.tilesNearBaseCache = undefined;
 	}
 
-	public shouldBuildWaterStills(context: Context) {
+	public canBuildWaterDesalinators(context: Context) {
 		return context.island.biomeType !== BiomeType.IceCap;
 	}
 
@@ -150,11 +150,11 @@ export class BaseUtilities {
 	}
 
 	public getBaseTile(context: Context): Tile {
-		return (context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0])?.tile ?? context.human.tile;
+		return (context.base.campfire[0] || context.base.dripStone[0] || context.base.waterStill[0] || context.base.kiln[0])?.tile ?? context.human.tile;
 	}
 
 	public hasBase(context: Context): boolean {
-		return context.base.campfire.length > 0 || context.base.waterStill.length > 0;
+		return context.base.campfire.length > 0 || context.base.dripStone.length > 0 || context.base.waterStill.length > 0;
 	}
 
 	public isNearBase(context: Context, point: IVector3 = context.human, distanceSq: number = nearBaseDistanceSq): boolean {
@@ -238,6 +238,10 @@ export class BaseUtilities {
 		}
 
 		return result;
+	}
+
+	public getWaterSourceDoodads(context: Context) {
+		return context.base.dripStone.concat(context.base.waterStill).concat(context.base.solarStill);
 	}
 
 	public isTreasureChestLocation(context: Context, point: IVector3): boolean {

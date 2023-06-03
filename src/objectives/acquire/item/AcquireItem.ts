@@ -40,8 +40,6 @@ import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
 import GatherFromTerrainWater from "../../gather/GatherFromTerrainWater";
-import StartSolarStill from "../../other/doodad/StartSolarStill";
-import StartWaterStillDesalination from "../../other/doodad/StartWaterStillDesalination";
 import Idle from "../../other/Idle";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
@@ -51,6 +49,7 @@ import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 import AddDifficulty from "../../core/AddDifficulty";
 import { terrainDescriptions } from "game/tile/Terrains";
+import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -182,11 +181,11 @@ export default class AcquireItem extends AcquireBase {
 								continue;
 							}
 
-						} else if (!context.utilities.doodad.isWaterStillDrinkable(doodad)) {
-							if (this.options?.allowStartingWaterStill) {
+						} else if (!context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
+							if (this.options?.allowStartingWaterSourceDoodads) {
 								// start desalination and run back to the waterstill and wait
 								const objectives: IObjective[] = [
-									doodad.type === DoodadType.SolarStill ? new StartSolarStill(doodad) : new StartWaterStillDesalination(doodad),
+									new StartWaterSourceDoodad(doodad),
 								];
 
 								if (this.options?.allowWaitingForWater) {
