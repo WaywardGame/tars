@@ -13,3 +13,8 @@
 :root:where(.is-fullscreen, .platform-darwin.is-maximized, :not(.is-electron, .has-custom-title-bar)) .tars-quadrant-component[data-quadrant=BottomRight] {
 	margin-bottom: calc(16px * max(1, var(--scale)));
 }
+
+[data-dialog-id="ModTARSMain"] .dialog-title {
+	display: block;
+    flex-basis: 0;
+}
