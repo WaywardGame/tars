@@ -15,7 +15,7 @@ import Translation from "language/Translation";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { ItemUtilities, RelatedItemType } from "../../../utilities/Item";
+import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import IgniteItem from "../../other/item/IgniteItem";
 import AcquireItem from "./AcquireItem";
 

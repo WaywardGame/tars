@@ -15,7 +15,7 @@ import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { GetActionArguments } from "../../utilities/Action";
+import { GetActionArguments } from "../../utilities/ActionUtilities";
 import Message from "language/dictionary/Message";
 export declare enum ExecuteActionType {
     Generic = 0,

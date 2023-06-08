@@ -18,7 +18,7 @@ import { ContextDataType } from "../context/IContext";
 import { ReserveType } from "../ITars";
 import type { HashCodeFiltering, IObjective, ObjectiveExecutionResult } from "./IObjective";
 import type Item from "game/item/Item";
-import { LoggerUtilities } from "../../utilities/Logger";
+import { LoggerUtilities } from "../../utilities/LoggerUtilities";
 import { PlanningAccuracy } from "../ITarsOptions";
 
 export default abstract class Objective implements IObjective {

@@ -13,7 +13,7 @@ import type { DamageType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
 import type { ILog, ILogLine } from "utilities/Log";
 import { IVector3 } from "utilities/math/IVector";
-import { LoggerUtilities } from "../../utilities/Logger";
+import { LoggerUtilities } from "../../utilities/LoggerUtilities";
 import type Context from "../context/Context";
 import type ContextState from "../context/ContextState";
 import type { IExecutionTree } from "../planning/IPlan";

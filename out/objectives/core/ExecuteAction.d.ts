@@ -13,7 +13,7 @@ import Message from "language/dictionary/Message";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { GetActionArguments } from "../../utilities/Action";
+import { GetActionArguments } from "../../utilities/ActionUtilities";
 export default class ExecuteAction<T extends AnyActionDescription> extends Objective {
     private readonly action;
     private readonly args;

@@ -46,7 +46,7 @@ import { NavigationKdTrees } from "./core/navigation/NavigationKdTrees";
 import TarsDialog from "./ui/TarsDialog";
 import { TarsOverlay } from "./ui/TarsOverlay";
 import TarsQuadrantComponent from "./ui/components/TarsQuadrantComponent";
-import { logSourceName } from "./utilities/Logger";
+import { logSourceName } from "./utilities/LoggerUtilities";
 
 export default class TarsMod extends Mod {
 

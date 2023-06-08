@@ -13,7 +13,7 @@ import type { ItemType } from "game/item/IItem";
 import { ItemTypeGroup } from "game/item/IItem";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
-import { ItemUtilities } from "../../../utilities/Item";
+import { ItemUtilities } from "../../../utilities/ItemUtilities";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";

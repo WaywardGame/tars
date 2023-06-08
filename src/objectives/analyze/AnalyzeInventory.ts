@@ -17,7 +17,7 @@ import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemIn
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { defaultGetItemOptions } from "../../utilities/Item";
+import { defaultGetItemOptions } from "../../utilities/ItemUtilities";
 
 export default class AnalyzeInventory extends Objective {
 

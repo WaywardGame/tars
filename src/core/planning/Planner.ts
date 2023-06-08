@@ -11,7 +11,7 @@
 
 import type Log from "utilities/Log";
 import { MemoryLog } from "utilities/Log";
-import { LoggerUtilities } from "../../utilities/Logger";
+import { LoggerUtilities } from "../../utilities/LoggerUtilities";
 
 import type Context from "../context/Context";
 import ContextState from "../context/ContextState";

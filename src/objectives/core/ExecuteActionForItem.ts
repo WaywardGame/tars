@@ -30,7 +30,7 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
-import { GetActionArguments } from "../../utilities/Action";
+import { GetActionArguments } from "../../utilities/ActionUtilities";
 import Message from "language/dictionary/Message";
 
 export enum ExecuteActionType {

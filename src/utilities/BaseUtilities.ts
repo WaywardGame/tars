@@ -21,7 +21,7 @@ import { WaterType } from "game/island/IIsland";
 import type Context from "../core/context/Context";
 import type { BaseInfoKey, IBaseInfo } from "../core/ITars";
 import { baseInfo } from "../core/ITars";
-import { FindObjectType } from "./Object";
+import { FindObjectType } from "./ObjectUtilities";
 import DoodadManager from "game/doodad/DoodadManager";
 import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";

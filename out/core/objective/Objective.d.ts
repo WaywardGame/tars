@@ -14,7 +14,7 @@ import type Context from "../context/Context";
 import { ReserveType } from "../ITars";
 import type { HashCodeFiltering, IObjective, ObjectiveExecutionResult } from "./IObjective";
 import type Item from "game/item/Item";
-import { LoggerUtilities } from "../../utilities/Logger";
+import { LoggerUtilities } from "../../utilities/LoggerUtilities";
 export default abstract class Objective implements IObjective {
     private static uuid;
     static reset(): void;

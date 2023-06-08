@@ -23,7 +23,7 @@ import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { ItemUtilities, RelatedItemType } from "../../../utilities/Item";
+import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ReserveItems from "../../core/ReserveItems";

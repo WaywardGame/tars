@@ -22,7 +22,7 @@ import type Context from "../../../core/context/Context";
 import type { IDisassemblySearch } from "../../../core/ITars";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { ItemUtilities, RelatedItemType } from "../../../utilities/Item";
+import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ProvideItems from "../../core/ProvideItems";

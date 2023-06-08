@@ -27,7 +27,7 @@ import { ContextDataType } from "../../core/context/IContext";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { MoveResult } from "../../utilities/Movement";
+import { MoveResult } from "../../utilities/MovementUtilities";
 import Idle from "../other/Idle";
 import EquipItem from "../other/item/EquipItem";
 import UseItem from "../other/item/UseItem";
