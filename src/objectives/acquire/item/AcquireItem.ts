@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
 import { ActionArguments, ActionType } from "game/entity/action/IAction";
@@ -15,7 +26,7 @@ import GatherLiquid from "game/entity/action/actions/GatherLiquid";
 import type Context from "../../../core/context/Context";
 import { ITerrainResourceSearch, DoodadSearchMap, CreatureSearch, ITerrainWaterSearch } from "../../../core/ITars";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
-import { ItemUtilities, RelatedItemType } from "../../../utilities/Item";
+import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
@@ -29,8 +40,6 @@ import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
 import GatherFromTerrainWater from "../../gather/GatherFromTerrainWater";
-import StartSolarStill from "../../other/doodad/StartSolarStill";
-import StartWaterStillDesalination from "../../other/doodad/StartWaterStillDesalination";
 import Idle from "../../other/Idle";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
@@ -40,6 +49,7 @@ import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 import AddDifficulty from "../../core/AddDifficulty";
 import { terrainDescriptions } from "game/tile/Terrains";
+import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -171,11 +181,11 @@ export default class AcquireItem extends AcquireBase {
 								continue;
 							}
 
-						} else if (!context.utilities.doodad.isWaterStillDrinkable(doodad)) {
-							if (this.options?.allowStartingWaterStill) {
+						} else if (!context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
+							if (this.options?.allowStartingWaterSourceDoodads) {
 								// start desalination and run back to the waterstill and wait
 								const objectives: IObjective[] = [
-									doodad.type === DoodadType.SolarStill ? new StartSolarStill(doodad) : new StartWaterStillDesalination(doodad),
+									new StartWaterSourceDoodad(doodad),
 								];
 
 								if (this.options?.allowWaitingForWater) {
@@ -431,7 +441,7 @@ export default class AcquireItem extends AcquireBase {
 
 				if (doodadDescription.harvest) {
 					for (const key of Object.keys(doodadDescription.harvest)) {
-						const growingStage = parseInt(key, 10);
+						const growingStage = parseInt(key, 10) as GrowingStage;
 						const resourceItems = doodadDescription.harvest[growingStage];
 						if (!resourceItems) {
 							continue;

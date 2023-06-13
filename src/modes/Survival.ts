@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { AiType } from "game/entity/IEntity";
 import { EquipType } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
@@ -22,7 +33,6 @@ import EquipItem from "../objectives/other/item/EquipItem";
 import Idle from "../objectives/other/Idle";
 import ReinforceItem from "../objectives/other/item/ReinforceItem";
 import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
-import StartWaterStillDesalination from "../objectives/other/doodad/StartWaterStillDesalination";
 import UpgradeInventoryItem from "../objectives/other/UpgradeInventoryItem";
 import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
@@ -37,13 +47,13 @@ import PlantSeeds from "../objectives/utility/PlantSeeds";
 import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
 import type { ITarsMode } from "../core/mode/IMode";
 import { IInventoryItems } from "../core/ITars";
-import StartSolarStill from "../objectives/other/doodad/StartSolarStill";
 import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
 import { BaseMode } from "./BaseMode";
 import Fish from "../objectives/other/tile/Fish";
+import StartWaterSourceDoodad from "../objectives/other/doodad/StartWaterSourceDoodad";
 
 /**
  * Survival mode
@@ -100,8 +110,14 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(...await this.getCommonInitialObjectives(context));
 
-		if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length === 0) {
-			objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+		if (context.utilities.base.canBuildWaterDesalinators(context)) {
+			if (context.base.dripStone.length === 0) {
+				objectives.push([new AcquireInventoryItem("dripStone"), new BuildItem()]);
+			}
+
+			// if (context.base.waterStill.length === 0) {
+			// 	objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+			// }
 		}
 
 		objectives.push(...await this.getBuildAnotherChestObjectives(context));
@@ -110,16 +126,8 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		objectives.push(new AcquireInventoryItem("tongs"));
 
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase1, async (context, objectives) => {
-			// ensure solar stills are solar stilling
-			for (const solarStill of context.base.solarStill) {
-				if (!solarStill.stillContainer) {
-					objectives.push(new StartSolarStill(solarStill));
-				}
-			}
-
-			// ensure water stills are water stilling
-			for (const waterStill of context.base.waterStill) {
-				objectives.push(new StartWaterStillDesalination(waterStill));
+			for (const doodad of context.utilities.base.getWaterSourceDoodads(context)) {
+				objectives.push(new StartWaterSourceDoodad(doodad));
 			}
 
 			const seeds = context.utilities.item.getSeeds(context, true);
@@ -170,7 +178,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		}
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
-			context.base.waterStill.length > 0 && context.base.waterStill[0].description!.providesFire;
+			(
+				(context.base.dripStone.length > 0 && context.base.dripStone.some(dripStone => context.utilities.doodad.isWaterSourceDoodadBusy(dripStone))) ||
+				(context.base.waterStill.length > 0 && context.base.waterStill.some(waterStill => context.utilities.doodad.isWaterSourceDoodadBusy(waterStill)))
+			);
 
 		if (!waitingForWater && context.options.allowBackpacks) {
 			// get a backpack before continuing. it will make things easier
@@ -250,10 +261,15 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		// run a few extra things before running upgrade objectives if we're near a base
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase2, async (context, objectives) => {
-			// build a second water still
-			if (context.utilities.base.shouldBuildWaterStills(context) && context.base.waterStill.length < 2) {
-				objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+			// build a second drip stone
+			if (context.utilities.base.canBuildWaterDesalinators(context) && context.base.dripStone.length < 2) {
+				objectives.push([new AcquireInventoryItem("dripStone"), new BuildItem()]);
 			}
+
+			// build a second water still
+			// if (context.utilities.base.canBuildWaterDesalinators(context) && context.base.waterStill.length < 2) {
+			// 	objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+			// }
 
 			// carry food with you
 			if (context.inventory.food === undefined) {
@@ -304,7 +320,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 			if (safeToDrinkWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
+				objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterSourceDoodads: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
 			}
 		});
 
@@ -471,7 +487,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 						for (let i = 0; i < waterItemsNeeded; i++) {
 							// we are looking for something drinkable
 							// if there is a well, starting the water still will use it
-							objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterStill: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
+							objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterSourceDoodads: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
 						}
 					}
 

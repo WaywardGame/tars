@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { EventBus } from "event/EventBuses";
 import EventEmitter, { Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
@@ -12,10 +23,12 @@ import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import type Creature from "game/entity/creature/Creature";
 import CreatureManager from "game/entity/creature/CreatureManager";
 import Human from "game/entity/Human";
+import { AttackType } from "game/entity/IEntity";
 import { EquipType, MovingClientSide } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import NPC from "game/entity/npc/NPC";
+import ControllableNPC from "game/entity/npc/npcs/Controllable";
 import { WeightStatus } from "game/entity/player/IPlayer";
 import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
@@ -36,14 +49,13 @@ import { RenderSource } from "renderer/IRenderer";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
+import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Objects from "utilities/object/Objects";
 import { sleep } from "utilities/promise/Async";
 import ResolvablePromise from "utilities/promise/ResolvablePromise";
-import { AttackType } from "game/entity/IEntity";
-import ControllableNPC from "game/entity/npc/npcs/Controllable";
-import { IVector2 } from "utilities/math/IVector";
 
+import Tile from "game/tile/Tile";
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
@@ -66,16 +78,16 @@ import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import { TarsOverlay } from "../ui/TarsOverlay";
-import { ActionUtilities } from "../utilities/Action";
-import { BaseUtilities } from "../utilities/Base";
-import { CreatureUtilities } from "../utilities/Creature";
-import { DoodadUtilities } from "../utilities/Doodad";
-import { ItemUtilities } from "../utilities/Item";
-import { LoggerUtilities } from "../utilities/Logger";
-import { MovementUtilities } from "../utilities/Movement";
-import { ObjectUtilities } from "../utilities/Object";
-import { PlayerUtilities } from "../utilities/Player";
-import { TileUtilities } from "../utilities/Tile";
+import { ActionUtilities } from "../utilities/ActionUtilities";
+import { BaseUtilities } from "../utilities/BaseUtilities";
+import { CreatureUtilities } from "../utilities/CreatureUtilities";
+import { DoodadUtilities } from "../utilities/DoodadUtilities";
+import { ItemUtilities } from "../utilities/ItemUtilities";
+import { LoggerUtilities } from "../utilities/LoggerUtilities";
+import { MovementUtilities } from "../utilities/MovementUtilities";
+import { ObjectUtilities } from "../utilities/ObjectUtilities";
+import { PlayerUtilities } from "../utilities/PlayerUtilities";
+import { TileUtilities } from "../utilities/TileUtilities";
 import Context from "./context/Context";
 import { ContextDataType, MovingToNewIslandState } from "./context/IContext";
 import { ExecuteObjectivesResultType, Executor } from "./Executor";
@@ -84,12 +96,11 @@ import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
+import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
 import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
-import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
-import Tile from "game/tile/Tile";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -185,7 +196,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
         return {
             name: this.getName().toString(),
-            version: getTarsMod().getVersion(),
+            version: getTarsMod().version,
             saveData: this.saveData,
         };
     }
@@ -1040,6 +1051,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 anvil: [],
                 campfire: [],
                 chest: [],
+                dripStone: [],
                 furnace: [],
                 intermediateChest: [],
                 kiln: [],
@@ -1488,7 +1500,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
             objectives.push(new RecoverHealth(onlyUseAvailableItems));
         }
 
-        if (allowWaiting && exceededStaminaThreshold) {
+        if (allowWaiting && (exceededStaminaThreshold || context.getData(ContextDataType.RecoverStamina) === true)) {
+            // new SetContextData(ContextDataType.RecoverStamina, true), 
             objectives.push(new RecoverStamina());
         }
 

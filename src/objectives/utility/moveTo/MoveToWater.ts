@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { WaterType } from "game/island/IIsland";
 import { TerrainType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
@@ -143,7 +154,7 @@ export default class MoveToWater extends Objective {
 					for (const targetTile of targetTiles) {
 						const checkTiles = 16;
 						const fillCount = context.island.checkWaterFill(targetTile, checkTiles, WaterType.None);
-						if (fillCount < checkTiles) {
+						if (fillCount.count < checkTiles) {
 							return false;
 						}
 					}

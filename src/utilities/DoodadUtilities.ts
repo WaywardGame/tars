@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import type Doodad from "game/doodad/Doodad";
 import { doodadDescriptions } from "game/doodad/Doodads";
 import type { DoodadTypeGroup } from "game/doodad/IDoodad";
@@ -65,15 +76,26 @@ export class DoodadUtilities {
 		return doodadTypes;
 	}
 
-	public isWaterStillDesalinating(waterStill: Doodad) {
-		return (waterStill.decay !== undefined
-			&& waterStill.decay > 0
-			&& waterStill.gatherReady !== undefined
-			&& waterStill.gatherReady > 0
-			&& waterStill.description?.providesFire) ? true : false;
+	/**
+	 * Checks if a drip stone is dripping / a water still is stilling
+	 */
+	public isWaterSourceDoodadBusy(waterSource: Doodad) {
+		if (waterSource.hasWater?.top) {
+			return true;
+		}
+
+		if (waterSource.decay !== undefined &&
+			waterSource.decay > 0 &&
+			waterSource.gatherReady !== undefined &&
+			waterSource.gatherReady > 0 &&
+			waterSource.description?.providesFire) {
+			return true;
+		}
+
+		return false;
 	}
 
-	public isWaterStillDrinkable(waterStill: Doodad) {
+	public isWaterSourceDoodadDrinkable(waterStill: Doodad) {
 		return waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0;
 	}
 

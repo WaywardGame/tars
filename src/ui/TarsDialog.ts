@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { OwnEventHandler } from "event/EventManager";
 import Translation from "language/Translation";
 import Message from "language/dictionary/Message";
@@ -53,14 +64,8 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 		super(id, subId, false);
 	}
 
-	protected override getDefaultSubpanelInformation(): SubpanelInformation {
-		for (const subpanelInformation of this.subpanelInformations) {
-			if (subpanelInformation[0] === this.tarsInstance!.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) {
-				return subpanelInformation;
-			}
-		}
-
-		return super.getDefaultSubpanelInformation();
+	protected override getDefaultSubpanelInformation(): SubpanelInformation | undefined {
+		return this.subpanelInformations.find(spi => spi[0] === this.tarsInstance!.saveData.ui[TarsUiSaveDataKey.ActivePanelId]) ?? super.getDefaultSubpanelInformation();
 	}
 
 	@OwnEventHandler(TarsDialog, "changeSubpanel")

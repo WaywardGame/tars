@@ -1,3 +1,13 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
 import EventEmitter from "event/EventEmitter";
 import type { IActionApi } from "game/entity/action/IAction";
 import { ActionType } from "game/entity/action/IAction";
@@ -6,8 +16,10 @@ import CorpseManager from "game/entity/creature/corpse/CorpseManager";
 import type Creature from "game/entity/creature/Creature";
 import CreatureManager from "game/entity/creature/CreatureManager";
 import Human from "game/entity/Human";
+import { AttackType } from "game/entity/IEntity";
 import type { IStat } from "game/entity/IStats";
 import NPC from "game/entity/npc/NPC";
+import ControllableNPC from "game/entity/npc/npcs/Controllable";
 import type { INote } from "game/entity/player/note/NoteManager";
 import type Player from "game/entity/player/Player";
 import { TileUpdateType } from "game/IGame";
@@ -20,9 +32,8 @@ import type { IPrompt } from "game/meta/prompt/Prompts";
 import { WorldZ } from "game/WorldZ";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
-import { AttackType } from "game/entity/IEntity";
-import ControllableNPC from "game/entity/npc/npcs/Controllable";
 import { IVector2 } from "utilities/math/IVector";
+import Tile from "game/tile/Tile";
 import { ISaveData, ISaveDataContainer } from "../ITarsMod";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Context from "./context/Context";
@@ -30,7 +41,6 @@ import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
 import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
-import Tile from "game/tile/Tile";
 export type TarsNPC = ControllableNPC<ISaveData> & {
     tarsInstance?: Tars;
 };

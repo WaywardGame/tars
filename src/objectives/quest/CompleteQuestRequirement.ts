@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { DoodadTypeGroup } from "game/doodad/IDoodad";
 import StartFire from "game/entity/action/actions/StartFire";
 import { ActionType } from "game/entity/action/IAction";
@@ -27,12 +38,12 @@ import Lambda from "../core/Lambda";
 import Restart from "../core/Restart";
 import HuntCreatures from "../other/creature/HuntCreatures";
 import TameCreatures from "../other/creature/TameCreatures";
-import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import StokeFire from "../other/doodad/StokeFire";
 import EquipItem from "../other/item/EquipItem";
 import UnequipItem from "../other/item/UnequipItem";
 import UseItem from "../other/item/UseItem";
 import SailToCivilization from "../utility/SailToCivilization";
+import StartDripStone from "../other/doodad/waterSource/StartDripStone";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -281,16 +292,13 @@ export default class CompleteQuestRequirement extends Objective {
                     new StokeFire(context.base.campfire[0]),
                 ];
 
-            case "ModStarterQuestFillStill": {
+            case "ModStarterQuestFillDripstone": {
                 const objectivePipelines: IObjective[][] = [];
 
-                for (const waterStill of context.base.waterStill) {
-                    if (waterStill.gatherReady === undefined) {
+                for (const dripStone of context.base.dripStone) {
+                    if (dripStone.gatherReady === undefined) {
                         objectivePipelines.push([
-                            new StartWaterStillDesalination(waterStill, {
-                                disableAttaching: true,
-                                disableStarting: true,
-                            }),
+                            new StartDripStone(dripStone),
                         ]);
                     }
                 }
@@ -298,58 +306,10 @@ export default class CompleteQuestRequirement extends Objective {
                 return objectivePipelines;
             }
 
-            case "ModStarterQuestAttachContainer": {
-                const objectivePipelines: IObjective[][] = [];
-
-                for (const waterStill of context.base.waterStill) {
-                    if (waterStill.stillContainer === undefined) {
-                        objectivePipelines.push([
-                            new StartWaterStillDesalination(waterStill, {
-                                disableStarting: true,
-                            }),
-                        ]);
-                    }
-                }
-
-                return objectivePipelines;
-            }
-
-            case "ModStarterQuestLightWaterStill": {
-                const objectivePipelines: IObjective[][] = [];
-
-                for (const waterStill of context.base.waterStill) {
-                    if (!waterStill.description?.providesFire) {
-                        objectivePipelines.push([
-                            new StartWaterStillDesalination(waterStill, { forceStoke: true }),
-                        ]);
-                    }
-                }
-
-                return objectivePipelines;
-            }
-
-            case "ModStarterQuestStokeWaterStill": {
-                const objectivePipelines: IObjective[][] = [];
-
-                for (const waterStill of context.base.waterStill) {
-                    if (waterStill.description?.providesFire) {
-                        objectivePipelines.push([
-                            new StartWaterStillDesalination(waterStill, { forceStoke: true }),
-                        ]);
-                    }
-                }
-
-                return objectivePipelines;
-            }
-
-            case "ModStarterQuestGatherFromWaterStill": {
+            case "ModStarterQuestGatherFromDripstone": {
                 const objectivePipelines: IObjective[][] = [];
 
                 const objectives: IObjective[] = [];
-
-                // if (context.inventory.waterContainer === undefined) {
-                //     objectives.push(new AcquireWaterContainer());
-                // }
 
                 objectives.push(new AcquireWater({
                     disallowCreatureSearch: true,
@@ -357,7 +317,7 @@ export default class CompleteQuestRequirement extends Objective {
                     disallowTerrain: true,
                     disallowWell: true,
 
-                    allowStartingWaterStill: true,
+                    allowStartingWaterSourceDoodads: true,
                     allowWaitingForWater: true,
                     onlyIdleWhenWaitingForWaterStill: true,
                 }));

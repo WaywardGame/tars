@@ -1,3 +1,13 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
 
 import Doodad from "game/doodad/Doodad";
 import Ride from "game/entity/action/actions/Ride";
@@ -17,7 +27,7 @@ import { ContextDataType } from "../../core/context/IContext";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { MoveResult } from "../../utilities/Movement";
+import { MoveResult } from "../../utilities/MovementUtilities";
 import Idle from "../other/Idle";
 import EquipItem from "../other/item/EquipItem";
 import UseItem from "../other/item/UseItem";

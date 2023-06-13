@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import type Doodad from "game/doodad/Doodad";
 import AttachContainer from "game/entity/action/actions/AttachContainer";
 import DetachContainer from "game/entity/action/actions/DetachContainer";
@@ -5,23 +16,23 @@ import Pour from "game/entity/action/actions/Pour";
 import type { IStat } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 
-import type Context from "../../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
-import { ObjectiveResult } from "../../../core/objective/IObjective";
-import Objective from "../../../core/objective/Objective";
-import AcquireWaterContainer from "../../acquire/item/specific/AcquireWaterContainer";
-import ExecuteAction from "../../core/ExecuteAction";
-import MoveToTarget from "../../core/MoveToTarget";
-import Restart from "../../core/Restart";
-import RepairItem from "../../interrupt/RepairItem";
+import type Context from "../../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../../core/objective/IObjective";
+import Objective from "../../../../core/objective/Objective";
+import AcquireWaterContainer from "../../../acquire/item/specific/AcquireWaterContainer";
+import ExecuteAction from "../../../core/ExecuteAction";
+import MoveToTarget from "../../../core/MoveToTarget";
+import Restart from "../../../core/Restart";
+import RepairItem from "../../../interrupt/RepairItem";
 
-import { inventoryItemInfo } from "../../../core/ITars";
-import AcquireWater from "../../acquire/item/specific/AcquireWater";
-import AnalyzeInventory from "../../analyze/AnalyzeInventory";
-import EmptyWaterContainer from "../EmptyWaterContainer";
-import UseItem from "../item/UseItem";
-import PickUpAllTileItems from "../tile/PickUpAllTileItems";
-import StokeFire from "./StokeFire";
+import { inventoryItemInfo } from "../../../../core/ITars";
+import AcquireWater from "../../../acquire/item/specific/AcquireWater";
+import AnalyzeInventory from "../../../analyze/AnalyzeInventory";
+import EmptyWaterContainer from "../../EmptyWaterContainer";
+import UseItem from "../../item/UseItem";
+import PickUpAllTileItems from "../../tile/PickUpAllTileItems";
+import StokeFire from "../StokeFire";
 
 export interface IStartWaterStillDesalinationOptions {
 	disableAttaching: boolean;
@@ -50,7 +61,7 @@ export default class StartWaterStillDesalination extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!this.options.forceStoke && context.utilities.doodad.isWaterStillDrinkable(this.waterStill)) {
+		if (!this.options.forceStoke && context.utilities.doodad.isWaterSourceDoodadDrinkable(this.waterStill)) {
 			// water is ready
 			return ObjectiveResult.Ignore;
 		}

@@ -1,31 +1,40 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { ActionType } from "game/entity/action/IAction";
 import type { IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import DrinkInFront from "game/entity/action/actions/DrinkInFront";
 import DrinkItem from "game/entity/action/actions/DrinkItem";
 import Heal from "game/entity/action/actions/Heal";
-import { DoodadType } from "game/doodad/IDoodad";
+import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import AcquireWaterContainer from "../acquire/item/specific/AcquireWaterContainer";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import BuildItem from "../other/item/BuildItem";
 import Idle from "../other/Idle";
-import StartWaterStillDesalination from "../other/doodad/StartWaterStillDesalination";
 import UseItem from "../other/item/UseItem";
 import RecoverStamina from "./RecoverStamina";
-import StartSolarStill from "../other/doodad/StartSolarStill";
 import AcquireWater from "../acquire/item/specific/AcquireWater";
 import AddDifficulty from "../core/AddDifficulty";
 import Restart from "../core/Restart";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import { freshWaterTileLocation } from "../../core/navigation/INavigation";
 import MoveToBase from "../utility/moveTo/MoveToBase";
+import StartWaterSourceDoodad from "../other/doodad/StartWaterSourceDoodad";
 
 export interface IRecoverThirstOptions {
 	onlyUseAvailableItems: boolean;
@@ -37,7 +46,7 @@ export default class RecoverThirst extends Objective {
 
 	public static isEmergency(context: Context) {
 		const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
-		return thirstStat.value <= 3 && context.base.waterStill.concat(context.base.solarStill).every(waterStill => !context.utilities.doodad.isWaterStillDrinkable(waterStill));
+		return thirstStat.value <= 3 && context.utilities.base.getWaterSourceDoodads(context).every(doodad => !context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad));
 	}
 
 	constructor(private readonly options: IRecoverThirstOptions) {
@@ -73,8 +82,10 @@ export default class RecoverThirst extends Objective {
 			objectivePipelines.push([new AcquireWater({ onlySafeToDrink: true, disallowTerrain: true })]);
 		}
 
+		const waterSourceDoodads = context.utilities.base.getWaterSourceDoodads(context);
+
 		const health = context.human.stat.get<IStatMax>(Stat.Health);
-		if (health.value > 4 || ((health.value / health.max) >= 0.7 && context.base.waterStill.length === 0)) {
+		if (health.value > 4 || ((health.value / health.max) >= 0.7 && waterSourceDoodads.length === 0)) {
 			// only risk drinking unpurified water if we have a lot of health or in an emergency
 			const nearestFreshWater = context.utilities.tile.getNearestTileLocation(context, freshWaterTileLocation);
 
@@ -89,64 +100,64 @@ export default class RecoverThirst extends Objective {
 			}
 		}
 
-		if (context.base.waterStill.length > 0) {
-			const isWaitingForAll = context.base.waterStill.every(doodad => context.utilities.doodad.isWaterStillDesalinating(doodad));
+		if (waterSourceDoodads.length > 0) {
+			const isWaitingForAll = waterSourceDoodads.every(doodad => context.utilities.doodad.isWaterSourceDoodadBusy(doodad));
 			if (isWaitingForAll) {
 				if ((health.value / health.max) <= 0.3) {
 					this.log.info("Making health items");
 
-					for (const waterStill of context.base.waterStill) {
+					for (const doodad of waterSourceDoodads) {
 						objectivePipelines.push([
-							new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
+							new StartWaterSourceDoodad(doodad),
 							new AcquireItemForAction(ActionType.Heal).keepInInventory(),
 							new UseItem(Heal),
 						]);
 					}
 
 				} else {
-					this.log.info("Running back to wait for water still");
+					this.log.info("Running back to wait for water");
 
 					// todo: add max water still option? context.base.waterStill.length < 3 && 
 					if (context.human.stat.get<IStatMax>(Stat.Stamina).value > 2) {
-						this.log.info("Building another water still while waiting");
+						this.log.info("Building another water source while waiting");
 
 						if (!context.utilities.base.isNearBase(context)) {
 							objectivePipelines.push([new MoveToBase()]);
 						}
 
-						// build a water still while waiting
-						objectivePipelines.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+						// build a dripstone while waiting
+						objectivePipelines.push([new AcquireInventoryItem("dripStone"), new BuildItem()]);
 
 
 					} else {
-						// run back to the waterstill and wait
-						for (const waterStill of context.base.waterStill) {
+						// run back to the water source and wait
+						for (const doodad of waterSourceDoodads) {
 							objectivePipelines.push([
-								// new MoveToTarget(waterStill, true, { range: 5 }),
-								new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
-								new Idle().setStatus("Waiting for water still due to emergency"),
+								// new MoveToTarget(doodad, true, { range: 5 }),
+								new StartWaterSourceDoodad(doodad),
+								new Idle().setStatus(`Waiting for ${doodad.getName()} due to emergency`),
 							]);
 						}
 					}
 				}
 
 			} else {
-				for (const waterStill of context.base.waterStill) {
-					if (context.utilities.doodad.isWaterStillDesalinating(waterStill) || context.utilities.doodad.isWaterStillDrinkable(waterStill)) {
+				for (const doodad of waterSourceDoodads) {
+					if (context.utilities.doodad.isWaterSourceDoodadBusy(doodad) || context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
 						continue;
 					}
 
-					if (!context.utilities.doodad.isWaterStillDrinkable(waterStill)) {
+					if (!context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
 						const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
 						if ((stamina.value / stamina.max) < 0.9) {
 							objectivePipelines.push([new RecoverStamina()]);
 
 						} else {
-							// wait for water still to finish
+							// wait for water source to finish
 							objectivePipelines.push([
-								// new MoveToTarget(waterStill, true, { range: 5 }),
-								new StartWaterStillDesalination(waterStill), // ensure the water still has enough fire to desalinate
-								new Idle().setStatus("Waiting for water still due to emergency"),
+								// new MoveToTarget(doodad, true, { range: 5 }),
+								new StartWaterSourceDoodad(doodad),
+								new Idle().setStatus(`Waiting for ${doodad.getName()} due to emergency`),
 							]);
 						}
 					}
@@ -165,26 +176,17 @@ export default class RecoverThirst extends Objective {
 			if (context.utilities.base.isNearBase(context)) {
 				const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
 
-				for (const waterStill of context.base.waterStill) {
-					// if we're near our base, the water still is ready, and we're thirsty, go drink
-					if (context.utilities.doodad.isWaterStillDrinkable(waterStill) && (thirstStat.max - thirstStat.value) >= 10) {
-						this.log.info("Near base, going to drink from water still");
-
-						objectivePipelines.push([
-							new MoveToTarget(waterStill, true),
-							new ExecuteAction(DrinkInFront, []),
-						]);
-					}
-				}
-
-				for (const solarStill of context.base.solarStill) {
+				const waterSourceDoodads = context.utilities.base.getWaterSourceDoodads(context);
+				for (const doodad of waterSourceDoodads) {
 					// if we're near our base, the solar still is ready, and we're thirsty, go drink
-					if (context.utilities.doodad.isWaterStillDrinkable(solarStill) && (thirstStat.max - thirstStat.value) >= 10) {
-						this.log.info("Near base, going to drink from solar still");
+					if (context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad) && (thirstStat.max - thirstStat.value) >= 10) {
+						this.log.info(`Near base, going to drink from a ${doodad}`);
+
+						const difficulty = (doodad.type === DoodadType.SolarStill && doodad.isInGroup(DoodadTypeGroup.Dripstone)) ? -100 : 0;
 
 						objectivePipelines.push([
-							new AddDifficulty(-100), // make this preferable over water still
-							new MoveToTarget(solarStill, true),
+							new AddDifficulty(difficulty),
+							new MoveToTarget(doodad, true),
 							new ExecuteAction(DrinkInFront, []),
 						]);
 					}
@@ -212,10 +214,10 @@ export default class RecoverThirst extends Objective {
 	}
 
 	private async getExceededThresholdObjectives(context: Context) {
-		const waterAndSolarStills = context.base.waterStill.concat(context.base.solarStill);
+		const waterSourceDoodads = context.utilities.base.getWaterSourceDoodads(context);
 
 		if (!RecoverThirst.isEmergency(context) && !context.utilities.base.isNearBase(context)) {
-			const isDrinkableWaterAvailable = waterAndSolarStills.some(solarOrWaterStill => !context.utilities.doodad.isWaterStillDesalinating(solarOrWaterStill) && context.utilities.doodad.isWaterStillDrinkable(solarOrWaterStill));
+			const isDrinkableWaterAvailable = waterSourceDoodads.some(waterSourceDoodad => !context.utilities.doodad.isWaterSourceDoodadBusy(waterSourceDoodad) && context.utilities.doodad.isWaterSourceDoodadDrinkable(waterSourceDoodad));
 			if (isDrinkableWaterAvailable) {
 				// drinkable water is available at the base
 				// don't go back to the base until we have too
@@ -257,61 +259,59 @@ export default class RecoverThirst extends Objective {
 				objectivePipelines.push([new AcquireWater({ onlySafeToDrink: true })]);
 			}
 
-			if (context.base.waterStill.length === 0) {
-				const waterStillObjectives: IObjective[] = [new AcquireInventoryItem("waterStill"), new BuildItem()];
+			if (context.base.dripStone.length === 0) {
+				const waterSourceObjectives: IObjective[] = [new AcquireInventoryItem("dripStone"), new BuildItem()];
 
-				if (context.inventory.waterContainer === undefined) {
-					waterStillObjectives.push(new AcquireWaterContainer().keepInInventory());
-				}
+				// restart now in order to trigger StartWaterSourceDoodad next time 
+				waterSourceObjectives.push(new Restart());
 
-				// restart now in order to trigger StartWaterStillDesalination next time 
-				waterStillObjectives.push(new Restart());
-
-				objectivePipelines.push(waterStillObjectives);
+				objectivePipelines.push(waterSourceObjectives);
 
 			} else {
-				const isWaitingForAll = waterAndSolarStills.every(doodad => context.utilities.doodad.isWaterStillDesalinating(doodad));
+				const isWaitingForAll = waterSourceDoodads.every(doodad => context.utilities.doodad.isWaterSourceDoodadBusy(doodad));
 				if (isWaitingForAll) {
 					if (context.utilities.player.isHealthy(context) && context.utilities.base.isNearBase(context)) {
-						if (context.base.waterStill.length < 3) {
+						if (context.base.dripStone.length < 3) {
+							this.log.info("Building another drip stone while waiting");
+
+							objectivePipelines.push([new AcquireInventoryItem("dripStone"), new BuildItem()]);
+
+						} else if (context.base.waterStill.length < 3) {
 							this.log.info("Building another water still while waiting");
 
-							// build a water still while waiting
 							objectivePipelines.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
 
 						} else if (context.base.solarStill.length < 2) {
 							this.log.info("Building a solar still while waiting");
 
-							// build a solar still while waiting
 							objectivePipelines.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
 
 						} else {
 							// todo: option for this?
-
 							// build another of whichever is easier
+							objectivePipelines.push([new AcquireInventoryItem("dripStone"), new BuildItem()]);
 							objectivePipelines.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
-
 							objectivePipelines.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
 						}
 					}
 
 				} else {
-					for (const solarOrWaterStill of waterAndSolarStills) {
-						if (context.utilities.doodad.isWaterStillDesalinating(solarOrWaterStill)) {
+					for (const doodad of waterSourceDoodads) {
+						if (context.utilities.doodad.isWaterSourceDoodadBusy(doodad)) {
 							continue;
 						}
 
-						const stillObjectives: IObjective[] = [];
+						const waterSourceObjectives: IObjective[] = [];
 
-						if (context.utilities.doodad.isWaterStillDrinkable(solarOrWaterStill)) {
-							stillObjectives.push(new MoveToTarget(solarOrWaterStill, true));
-							stillObjectives.push(new ExecuteAction(DrinkInFront, []));
+						if (context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
+							waterSourceObjectives.push(new MoveToTarget(doodad, true));
+							waterSourceObjectives.push(new ExecuteAction(DrinkInFront, []));
 
 						} else {
-							stillObjectives.push(solarOrWaterStill.type === DoodadType.SolarStill ? new StartSolarStill(solarOrWaterStill) : new StartWaterStillDesalination(solarOrWaterStill));
+							waterSourceObjectives.push(new StartWaterSourceDoodad(doodad));
 						}
 
-						objectivePipelines.push(stillObjectives);
+						objectivePipelines.push(waterSourceObjectives);
 					}
 				}
 			}

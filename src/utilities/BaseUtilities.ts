@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import type Doodad from "game/doodad/Doodad";
 import { TerrainType } from "game/tile/ITerrain";
 import type { IVector3 } from "utilities/math/IVector";
@@ -10,7 +21,7 @@ import { WaterType } from "game/island/IIsland";
 import type Context from "../core/context/Context";
 import type { BaseInfoKey, IBaseInfo } from "../core/ITars";
 import { baseInfo } from "../core/ITars";
-import { FindObjectType } from "./Object";
+import { FindObjectType } from "./ObjectUtilities";
 import DoodadManager from "game/doodad/DoodadManager";
 import { doodadDescriptions } from "game/doodad/Doodads";
 import { DoodadType } from "game/doodad/IDoodad";
@@ -40,7 +51,7 @@ export class BaseUtilities {
 		this.tilesNearBaseCache = undefined;
 	}
 
-	public shouldBuildWaterStills(context: Context) {
+	public canBuildWaterDesalinators(context: Context) {
 		return context.island.biomeType !== BiomeType.IceCap;
 	}
 
@@ -139,11 +150,11 @@ export class BaseUtilities {
 	}
 
 	public getBaseTile(context: Context): Tile {
-		return (context.base.campfire[0] || context.base.waterStill[0] || context.base.kiln[0])?.tile ?? context.human.tile;
+		return (context.base.campfire[0] || context.base.dripStone[0] || context.base.waterStill[0] || context.base.kiln[0])?.tile ?? context.human.tile;
 	}
 
 	public hasBase(context: Context): boolean {
-		return context.base.campfire.length > 0 || context.base.waterStill.length > 0;
+		return context.base.campfire.length > 0 || context.base.dripStone.length > 0 || context.base.waterStill.length > 0;
 	}
 
 	public isNearBase(context: Context, point: IVector3 = context.human, distanceSq: number = nearBaseDistanceSq): boolean {
@@ -227,6 +238,10 @@ export class BaseUtilities {
 		}
 
 		return result;
+	}
+
+	public getWaterSourceDoodads(context: Context) {
+		return context.base.dripStone.concat(context.base.waterStill).concat(context.base.solarStill);
 	}
 
 	public isTreasureChestLocation(context: Context, point: IVector3): boolean {

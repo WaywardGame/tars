@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import type Doodad from "game/doodad/Doodad";
 import type { GrowingStage } from "game/doodad/IDoodad";
 import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
@@ -15,16 +26,16 @@ import Tile from "game/tile/Tile";
 import { IVector3 } from "utilities/math/IVector";
 
 import { TarsOverlay } from "../ui/TarsOverlay";
-import { ActionUtilities } from "../utilities/Action";
-import { BaseUtilities } from "../utilities/Base";
-import { CreatureUtilities } from "../utilities/Creature";
-import { DoodadUtilities } from "../utilities/Doodad";
-import { ItemUtilities } from "../utilities/Item";
-import { LoggerUtilities } from "../utilities/Logger";
-import { MovementUtilities } from "../utilities/Movement";
-import { ObjectUtilities } from "../utilities/Object";
-import { PlayerUtilities } from "../utilities/Player";
-import { TileUtilities } from "../utilities/Tile";
+import { ActionUtilities } from "../utilities/ActionUtilities";
+import { BaseUtilities } from "../utilities/BaseUtilities";
+import { CreatureUtilities } from "../utilities/CreatureUtilities";
+import { DoodadUtilities } from "../utilities/DoodadUtilities";
+import { ItemUtilities } from "../utilities/ItemUtilities";
+import { LoggerUtilities } from "../utilities/LoggerUtilities";
+import { MovementUtilities } from "../utilities/MovementUtilities";
+import { ObjectUtilities } from "../utilities/ObjectUtilities";
+import { PlayerUtilities } from "../utilities/PlayerUtilities";
+import { TileUtilities } from "../utilities/TileUtilities";
 import Context from "./context/Context";
 import { IContext } from "./context/IContext";
 import { ITarsOptions } from "./ITarsOptions";
@@ -102,6 +113,7 @@ export interface IBase {
     anvil: Doodad[];
     campfire: Doodad[];
     chest: Doodad[];
+    dripStone: Doodad[];
     furnace: Doodad[];
     intermediateChest: Doodad[];
     kiln: Doodad[];
@@ -161,6 +173,9 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
         onAdd: (context: Context) => {
             context.base.buildAnotherChest = false;
         },
+    },
+    dripStone: {
+        doodadTypes: [DoodadTypeGroup.Dripstone],
     },
     furnace: {
         doodadTypes: [DoodadTypeGroup.LitFurnace],
@@ -222,6 +237,7 @@ export interface IInventoryItems {
     campfire?: Item;
     chest?: Item;
     curePoison?: Item;
+    dripStone?: Item;
     equipBack?: Item;
     equipChest?: Item;
     equipFeet?: Item;
@@ -347,6 +363,13 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
             option: ActionType.Sleep,
         },
     },
+    butcher: {
+        actionTypes: [ActionType.Butcher],
+        flags: {
+            flag: InventoryItemFlag.PreferHigherActionBonus,
+            option: ActionType.Butcher,
+        },
+    },
     campfire: {
         itemTypes: [ItemTypeGroup.Campfire],
         requiredMinDur: 1,
@@ -355,15 +378,12 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
         actionTypes: [ActionType.Cure],
         cureStatus: StatusType.Poisoned,
     },
-    butcher: {
-        actionTypes: [ActionType.Butcher],
-        flags: {
-            flag: InventoryItemFlag.PreferHigherActionBonus,
-            option: ActionType.Butcher,
-        },
-    },
     chest: {
         itemTypes: Array.from(chestTypes.keys()),
+        requiredMinDur: 1,
+    },
+    dripStone: {
+        itemTypes: [ItemTypeGroup.Dripstone],
         requiredMinDur: 1,
     },
     equipBack: {
@@ -576,6 +596,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 
 export const inventoryBuildItems: Array<keyof IInventoryItems> = [
     "campfire",
+    "dripStone",
     "waterStill",
     "chest",
     "kiln",
