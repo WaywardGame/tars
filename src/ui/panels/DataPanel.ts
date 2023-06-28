@@ -9,8 +9,6 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { PromptPriority } from "game/meta/prompt/IPrompt";
-import { promptDescriptionFactory } from "game/meta/prompt/PromptDescriptionFactory";
 import { promptGameRenameGeneric } from "game/meta/prompt/PromptDescriptions";
 import Prompts from "game/meta/prompt/Prompts";
 import type Translation from "language/Translation";
@@ -127,9 +125,7 @@ export default class DataPanel extends TarsPanel {
                     .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonDeleteTooltip)))
                     .event.subscribe("activate", async () => {
                         if (!await Prompts.queue(
-                            promptDescriptionFactory
-                                .priority(PromptPriority.Default)
-                                .confirm<[npcName: string]>(this.TarsMod.promptDeleteConfirmation),
+                            this.TarsMod.promptDeleteConfirmation,
                             container.name)) {
                             return;
                         }

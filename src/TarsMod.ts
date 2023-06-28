@@ -18,7 +18,7 @@ import CreateControllableNPC from "game/entity/action/actions/CreateControllable
 import type { Source } from "game/entity/player/IMessageManager";
 import { MessageType } from "game/entity/player/IMessageManager";
 import type Player from "game/entity/player/Player";
-import { Prompt } from "game/meta/prompt/IPrompt";
+import { IPromptConfirmDescription } from "game/meta/prompt/IPrompt";
 import type Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import type Message from "language/dictionary/Message";
@@ -37,6 +37,7 @@ import Log from "utilities/Log";
 import SearchParams from "utilities/SearchParams";
 
 import NPC from "game/entity/npc/NPC";
+import { TranslationArg } from "language/ITranslation";
 import type { IGlobalSaveData, ISaveData, ISaveDataContainer, ITarsModEvents } from "./ITarsMod";
 import { TARS_ID, TarsTranslation, TarsUiSaveDataKey, setTarsMod } from "./ITarsMod";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode, tarsUniqueNpcType } from "./core/ITars";
@@ -109,8 +110,8 @@ export default class TarsMod extends Mod {
 
 	////////////////////////////////////
 
-	@Register.prompt("TarsDeleteConfirm")
-	public readonly promptDeleteConfirmation: Prompt;
+	@Register.prompt("TarsDeleteConfirm", (type, prompt) => prompt.confirm<[deleteName: TranslationArg]>(type))
+	public readonly promptDeleteConfirmation: IPromptConfirmDescription<[deleteName: TranslationArg]>;
 
 	@Register.dialog("Main", TarsDialog.description, TarsDialog)
 	public readonly dialogMain: DialogId;
