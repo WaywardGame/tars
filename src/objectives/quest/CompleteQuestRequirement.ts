@@ -23,6 +23,7 @@ import ItemManager from "game/item/ItemManager";
 import Enums from "utilities/enum/Enums";
 
 import Item from "game/item/Item";
+import { ActionSlotUpdateReason } from "ui/screen/screens/game/static/actions/IActionBar";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -39,11 +40,11 @@ import Restart from "../core/Restart";
 import HuntCreatures from "../other/creature/HuntCreatures";
 import TameCreatures from "../other/creature/TameCreatures";
 import StokeFire from "../other/doodad/StokeFire";
+import StartDripStone from "../other/doodad/waterSource/StartDripStone";
 import EquipItem from "../other/item/EquipItem";
 import UnequipItem from "../other/item/UnequipItem";
 import UseItem from "../other/item/UseItem";
 import SailToCivilization from "../utility/SailToCivilization";
-import StartDripStone from "../other/doodad/waterSource/StartDripStone";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -61,7 +62,7 @@ export default class CompleteQuestRequirement extends Objective {
 
     public async execute(context: Context): Promise<ObjectiveExecutionResult> {
         if (Enums.isModded(QuestRequirementType, this.requirement.type)) {
-            return this.getObjectivesForModdedQuestRequirement(context, QuestRequirementType[this.requirement.type]);
+            return this.getObjectivesForModdedQuestRequirement(context, QuestRequirementType[this.requirement.type], this.requirement);
 
         }
 
@@ -247,15 +248,28 @@ export default class CompleteQuestRequirement extends Objective {
         }
     }
 
-    private getObjectivesForModdedQuestRequirement(context: Context, requirementTypeString: string): ObjectiveExecutionResult {
+    private getObjectivesForModdedQuestRequirement(context: Context, requirementTypeString: string, requirement: IQuestRequirement): ObjectiveExecutionResult {
         switch (requirementTypeString) {
 
             case "ModStarterQuestActionSlots":
                 return new Lambda(async () => {
+                    const slots = gameScreen?.actionBar?.getSlots().toArray();
+                    const slot = slots?.[0];
+                    if (!slot) {
+                        return ObjectiveResult.Impossible;
+                    }
+
+                    if (!requirement.options[0]) {
+                        // needs to slot an action or anything
+                        slot.slotData.actionId = `${ActionType.Chop}`;
+                        slot.event.emit("update", undefined, undefined, ActionSlotUpdateReason.Replace);
+                        return ObjectiveResult.Complete;
+                    }
+
                     let itemToSlot: Item | undefined;
 
                     for (const item of context.utilities.item.getItemsInInventory(context)) {
-                        if ((gameScreen?.actionBar?.getSlottedIn(item)?.size ?? 0) === 0) {
+                        if (item.description?.use && (gameScreen?.actionBar?.getSlottedIn(item)?.size ?? 0) === 0) {
                             itemToSlot = item;
                             break;
                         }
@@ -265,14 +279,13 @@ export default class CompleteQuestRequirement extends Objective {
                         return ObjectiveResult.Impossible;
                     }
 
-                    const slots = gameScreen?.actionBar?.getSlots();
-                    if (slots) {
-                        console.log(itemToSlot);
-                        Array.from(slots)[0].equipItem(itemToSlot, false);
-                        return ObjectiveResult.Complete;
+                    console.log(itemToSlot);
+                    slot.equipItem(itemToSlot, false);
+                    if (!slot.slotData.actionId) {
+                        return ObjectiveResult.Impossible;
                     }
 
-                    return ObjectiveResult.Impossible;
+                    return ObjectiveResult.Complete;
                 }).setStatus(this);
 
             case "ModStarterQuestLightCampfire":
