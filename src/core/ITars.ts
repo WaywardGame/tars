@@ -149,6 +149,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	campfire: {
 		doodadTypes: [DoodadTypeGroup.LitCampfire],
 		litType: DoodadTypeGroup.LitCampfire,
+		allowMultiple: true,
 	},
 	chest: {
 		doodadTypes: Array.from(chestTypes.values()),
@@ -181,6 +182,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	furnace: {
 		doodadTypes: [DoodadTypeGroup.LitFurnace],
 		litType: DoodadTypeGroup.LitFurnace,
+		allowMultiple: true,
 	},
 	intermediateChest: {
 		doodadTypes: Array.from(chestTypes.values()),
@@ -207,6 +209,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 	sailboat: {
 		doodadTypes: [DoodadType.Sailboat],
 		nearBaseDistanceSq: Infinity,
+		allowMultiple: true,
 	},
 	solarStill: {
 		doodadTypes: [DoodadType.SolarStill],
