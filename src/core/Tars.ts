@@ -24,7 +24,7 @@ import type Creature from "game/entity/creature/Creature";
 import CreatureManager from "game/entity/creature/CreatureManager";
 import Human from "game/entity/Human";
 import { AttackType } from "game/entity/IEntity";
-import { EquipType, MovingClientSide } from "game/entity/IHuman";
+import { EquipType, MovingClientSide, WalkPathChangeReason } from "game/entity/IHuman";
 import type { IStat, IStatMax } from "game/entity/IStats";
 import { Stat } from "game/entity/IStats";
 import NPC from "game/entity/npc/NPC";
@@ -485,6 +485,20 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
                 this.interrupt("Target moved", result);
             }
         }
+    }
+
+    @EventHandler(EventBus.Humans, "canChangeWalkPath")
+    public onCanChangeWalkPath(human: Human, path: IVector2[] | undefined, reason: WalkPathChangeReason) {
+        if (this.human !== human || !this.isRunning()) {
+            return undefined;
+        }
+
+        if (reason === "Damage" || reason === "Overburdened") {
+            // don't stop walk path movement in these scenarios
+            return false;
+        }
+
+        return undefined;
     }
 
     @EventHandler(EventBus.Humans, "moveComplete")

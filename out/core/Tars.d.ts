@@ -17,6 +17,7 @@ import type Creature from "game/entity/creature/Creature";
 import CreatureManager from "game/entity/creature/CreatureManager";
 import Human from "game/entity/Human";
 import { AttackType } from "game/entity/IEntity";
+import { WalkPathChangeReason } from "game/entity/IHuman";
 import type { IStat } from "game/entity/IStats";
 import NPC from "game/entity/npc/NPC";
 import ControllableNPC from "game/entity/npc/npcs/Controllable";
@@ -91,6 +92,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     onCreaturePostMove(creature: Creature, fromTile: Tile, toTile: Tile): Promise<void>;
     onNpcRenamed(npc: NPC): void;
     onHumanPostMove(human: Human, fromTile: Tile, toTile: Tile): Promise<void>;
+    onCanChangeWalkPath(human: Human, path: IVector2[] | undefined, reason: WalkPathChangeReason): false | undefined;
     onMoveComplete(human: Human): void;
     onPrompt(host: Prompts.Events, prompt: IPrompt<IPromptDescriptionBase<any[]>>): string | boolean | void | InterruptChoice | undefined;
     onTileUpdate(island: Island, tile: Tile, tileUpdateType: TileUpdateType): void;
