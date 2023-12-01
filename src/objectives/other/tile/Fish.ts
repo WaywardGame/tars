@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Cast from "game/entity/action/actions/Cast";
-import { SkillType } from "game/entity/IHuman";
-import { MagicalPropertyType } from "game/magic/MagicalPropertyType";
+import Cast from "@wayward/game/game/entity/action/actions/Cast";
+import { SkillType } from "@wayward/game/game/entity/IHuman";
+import { MagicalPropertyType } from "@wayward/game/game/magic/MagicalPropertyType";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";

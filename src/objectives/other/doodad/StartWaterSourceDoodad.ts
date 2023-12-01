@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Doodad from "game/doodad/Doodad";
+import Doodad from "@wayward/game/game/doodad/Doodad";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 import StartDripStone from "./waterSource/StartDripStone";
 import StartSolarStill from "./waterSource/StartSolarStill";
 import StartWaterStillDesalination from "./waterSource/StartWaterStillDesalination";

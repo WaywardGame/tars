@@ -9,25 +9,27 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { doodadDescriptions } from "game/doodad/Doodads";
-import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
-import { ActionArguments, ActionType } from "game/entity/action/IAction";
-import { corpseDescriptions } from "game/entity/creature/corpse/Corpses";
-import { CreatureType } from "game/entity/creature/ICreature";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import { TerrainType } from "game/tile/ITerrain";
-import TerrainResources from "game/tile/TerrainResources";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
-import Enums from "utilities/enum/Enums";
-import GatherLiquid from "game/entity/action/actions/GatherLiquid";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import { DoodadType, GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import { ActionArgumentsOf, ActionType } from "@wayward/game/game/entity/action/IAction";
+import GatherLiquid from "@wayward/game/game/entity/action/actions/GatherLiquid";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { corpseDescriptions } from "@wayward/game/game/entity/creature/corpse/Corpses";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import TerrainResources from "@wayward/game/game/tile/TerrainResources";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
+import Enums from "@wayward/game/utilities/enum/Enums";
 
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
+import { CreatureSearch, DoodadSearchMap, ITerrainResourceSearch, ITerrainWaterSearch } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
-import { ITerrainResourceSearch, DoodadSearchMap, CreatureSearch, ITerrainWaterSearch } from "../../../core/ITars";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
+import AddDifficulty from "../../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
@@ -41,15 +43,13 @@ import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
 import GatherFromTerrainWater from "../../gather/GatherFromTerrainWater";
 import Idle from "../../other/Idle";
+import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
 import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
-import AddDifficulty from "../../core/AddDifficulty";
-import { terrainDescriptions } from "game/tile/Terrains";
-import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -229,12 +229,12 @@ export default class AcquireItem extends AcquireBase {
 										action: GatherLiquid,
 										args: (context) => {
 											const item = context.getData(itemContextDataKey);
-											if (!item?.isValid()) {
+											if (!item?.isValid) {
 												this.log.warn("Invalid water container");
 												return ObjectiveResult.Restart;
 											}
 
-											return [item] as ActionArguments<typeof GatherLiquid>;
+											return [item] as ActionArgumentsOf<typeof GatherLiquid>;
 										},
 									},
 								})

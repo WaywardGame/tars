@@ -14,7 +14,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "ui/screen/screens/game/component/TabDialogPanel", "event/EventManager"], function (require, exports, TabDialogPanel_1, EventManager_1) {
+define(["require", "exports", "@wayward/utilities/event/EventManager", "@wayward/game/ui/screen/screens/game/component/TabDialogPanel"], function (require, exports, EventManager_1, TabDialogPanel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class TarsPanel extends TabDialogPanel_1.default {
@@ -32,4 +32,4 @@ define(["require", "exports", "ui/screen/screens/game/component/TabDialogPanel",
         (0, EventManager_1.OwnEventHandler)(TarsPanel, "switchTo")
     ], TarsPanel.prototype, "_onSwitchTo", null);
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGFyc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudHMvVGFyc1BhbmVsLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7R0FTRzs7Ozs7Ozs7OztJQVNILE1BQThCLFNBQVUsU0FBUSx3QkFBYztRQVExRCxZQUErQixZQUFrQjtZQUM3QyxLQUFLLEVBQUUsQ0FBQztZQURtQixpQkFBWSxHQUFaLFlBQVksQ0FBTTtRQUVqRCxDQUFDO1FBR1MsV0FBVztZQUNqQixJQUFJLENBQUMsVUFBVSxFQUFFLENBQUM7WUFDbEIsSUFBSSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ25CLENBQUM7S0FDSjtJQWpCRCw0QkFpQkM7SUFKYTtRQURULElBQUEsOEJBQWUsRUFBQyxTQUFTLEVBQUUsVUFBVSxDQUFDO2dEQUl0QyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGFyc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudHMvVGFyc1BhbmVsLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7R0FTRzs7Ozs7Ozs7OztJQVNILE1BQThCLFNBQVUsU0FBUSx3QkFBYztRQVE3RCxZQUErQixZQUFrQjtZQUNoRCxLQUFLLEVBQUUsQ0FBQztZQURzQixpQkFBWSxHQUFaLFlBQVksQ0FBTTtRQUVqRCxDQUFDO1FBR1MsV0FBVztZQUNwQixJQUFJLENBQUMsVUFBVSxFQUFFLENBQUM7WUFDbEIsSUFBSSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ2hCLENBQUM7S0FDRDtJQWpCRCw0QkFpQkM7SUFKVTtRQURULElBQUEsOEJBQWUsRUFBQyxTQUFTLEVBQUUsVUFBVSxDQUFDO2dEQUl0QyJ9

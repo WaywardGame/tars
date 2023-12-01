@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { WeightStatus } from "game/entity/player/IPlayer";
+import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";

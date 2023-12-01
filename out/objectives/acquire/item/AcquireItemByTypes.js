@@ -8,7 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-define(["require", "exports", "game/item/IItem", "language/Dictionary", "language/ITranslation", "language/Translation", "./AcquireBase", "./AcquireItem"], function (require, exports, IItem_1, Dictionary_1, ITranslation_1, Translation_1, AcquireBase_1, AcquireItem_1) {
+define(["require", "exports", "@wayward/game/game/item/IItem", "@wayward/game/language/Dictionary", "@wayward/game/language/ITranslation", "@wayward/game/language/Translation", "./AcquireBase", "./AcquireItem"], function (require, exports, IItem_1, Dictionary_1, ITranslation_1, Translation_1, AcquireBase_1, AcquireItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AcquireItemByTypes extends AcquireBase_1.default {

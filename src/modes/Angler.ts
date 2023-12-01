@@ -20,7 +20,7 @@ import Fish from "../objectives/other/tile/Fish";
  */
 export class AnglerMode extends BaseMode implements ITarsMode {
 
-	public async initialize(_: Context, finished: (success: boolean) => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void): Promise<void> {
 	}
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {

@@ -10,16 +10,16 @@
  */
 
 import Stream from "@wayward/goodstream/Stream";
-import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
-import Dictionary from "language/Dictionary";
-import { ListEnder } from "language/ITranslation";
-import Translation from "language/Translation";
-import Disassemble from "game/entity/action/actions/Disassemble";
-import { ActionArguments } from "game/entity/action/IAction";
+import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import Disassemble from "@wayward/game/game/entity/action/actions/Disassemble";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { ListEnder } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
 
-import type Context from "../../../core/context/Context";
 import type { IDisassemblySearch } from "../../../core/ITars";
+import type Context from "../../../core/context/Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
@@ -27,12 +27,12 @@ import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ProvideItems from "../../core/ProvideItems";
 import ReserveItems from "../../core/ReserveItems";
+import UseProvidedItem from "../../core/UseProvidedItem";
 import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
-import UseProvidedItem from "../../core/UseProvidedItem";
 
 /**
  * Disassembles one of the items.
@@ -119,7 +119,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				}
 			}
 
-			if (context.human.isSwimming()) {
+			if (context.human.isSwimming) {
 				objectives.push(new MoveToLand());
 			}
 
@@ -133,7 +133,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 						action: Disassemble,
 						args: (context) => {
 							const item = context.getData<Item | undefined>(itemContextDataKey);
-							if (!item?.isValid()) {
+							if (!item?.isValid) {
 								// treat this as an expected case
 								// the item was likely broken earlier in the execution tree
 								// this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
@@ -145,7 +145,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 							if (requiredItemHashCodes) {
 								for (const requiredItemHashCode of requiredItemHashCodes) {
 									const item = context.getData<Item>(requiredItemHashCode);
-									if (!item?.isValid()) {
+									if (!item?.isValid) {
 										// treat this as an expected case
 										// the item was likely broken earlier in the execution tree
 										// this.log.warn(`Missing required item "${item}" for disassembly. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
@@ -156,7 +156,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 								}
 							}
 
-							return [item, requiredItems] as ActionArguments<typeof Disassemble>;
+							return [item, requiredItems] as ActionArgumentsOf<typeof Disassemble>;
 						},
 					},
 				}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));

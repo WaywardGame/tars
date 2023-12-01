@@ -9,21 +9,21 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import type { GrowingStage } from "game/doodad/IDoodad";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
-import type { CreatureType } from "game/entity/creature/ICreature";
-import { StatusType } from "game/entity/IEntity";
-import { EquipType } from "game/entity/IHuman";
-import type Island from "game/island/Island";
-import type { IContainer, IItemDisassembly } from "game/item/IItem";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import type Item from "game/item/Item";
-import type { TerrainType } from "game/tile/ITerrain";
-import type { ITerrainLoot } from "game/tile/TerrainResources";
-import Tile from "game/tile/Tile";
-import { IVector3 } from "utilities/math/IVector";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { StatusType } from "@wayward/game/game/entity/IEntity";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import type Island from "@wayward/game/game/island/Island";
+import type { IContainer, IItemDisassembly } from "@wayward/game/game/item/IItem";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type { ITerrainLoot } from "@wayward/game/game/tile/TerrainResources";
+import Tile from "@wayward/game/game/tile/Tile";
+import { IVector3 } from "@wayward/game/utilities/math/IVector";
 
 import { TarsOverlay } from "../ui/TarsOverlay";
 import { ActionUtilities } from "../utilities/ActionUtilities";
@@ -98,7 +98,7 @@ export interface IUtilities {
 	player: PlayerUtilities;
 	tile: TileUtilities;
 
-	ensureSailingMode(sailingMode: boolean): Promise<void>;
+	ensureSailingMode?(sailingMode: boolean): Promise<void>;
 }
 
 export const chestTypes: Map<ItemType, DoodadType> = new Map([
@@ -159,12 +159,12 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 				return false;
 			}
 
-			if (context.options.goodCitizen && multiplayer.isConnected() && target.getBuilder() !== context.human) {
+			if (context.options.goodCitizen && multiplayer.isConnected && target.getBuilder() !== context.human) {
 				// prevent using chests placed by others
 				return false;
 			}
 
-			if (context.utilities.base.isTreasureChestLocation(context, target)) {
+			if (context.utilities.base.isTreasureChestLocation(context, target.tile)) {
 				// don't allow treasure chests to be base chests
 				return false;
 			}

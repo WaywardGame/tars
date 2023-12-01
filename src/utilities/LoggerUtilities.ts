@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { ILog, LogSource } from "utilities/Log";
-import Log, { LogLineType } from "utilities/Log";
-import { Bound } from "utilities/Decorators";
+import type { ILog } from "@wayward/utilities/Log";
+import Log, { LogLineType } from "@wayward/utilities/Log";
+import { Bound } from "@wayward/utilities/Decorators";
 
 export const logSourceName = "TARS";
 
@@ -29,16 +29,16 @@ export class LoggerUtilities {
 		this.log = this.createLog();
 	}
 
-	public reloadLogSources() {
+	public reloadLogSources(): void {
 		this.logSources = ["MOD", logSourceName, this.tarsInstanceName()];
 	}
 
 	@Bound
-	public preConsoleCallback() {
+	public preConsoleCallback(): void {
 		this.processQueuedMessages();
 	}
 
-	public queueMessage(logOrType: ILog | LogLineType, args: any[]) {
+	public queueMessage(logOrType: ILog | LogLineType, args: any[]): void {
 		if (!this.queuedMessages) {
 			this.queuedMessages = [];
 		}
@@ -46,11 +46,11 @@ export class LoggerUtilities {
 		this.queuedMessages.push({ logOrType, args });
 	}
 
-	public discardQueuedMessages() {
+	public discardQueuedMessages(): void {
 		this.queuedMessages = undefined;
 	}
 
-	public processQueuedMessages() {
+	public processQueuedMessages(): void {
 		if (!this.queuedMessages) {
 			return;
 		}
@@ -75,7 +75,7 @@ export class LoggerUtilities {
 	public createLog(...name: string[]): Log {
 		const log = new Log();
 
-		const sources: Array<LogSource | string> = [...this.logSources, ...name];
+		const sources: string[] = [...this.logSources, ...name];
 
 		log.info = (...args: any[]) => {
 			this.processQueuedMessages();

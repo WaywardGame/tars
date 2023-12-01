@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Human from "game/entity/Human";
-import type { IOptions } from "save/data/ISaveDataGlobal";
-import { DropLocation } from "save/data/ISaveDataGlobal";
-import Objects from "utilities/object/Objects";
+import Human from "@wayward/game/game/entity/Human";
+import type { IOptions } from "@wayward/game/save/data/ISaveDataGlobal";
+import { DropLocation } from "@wayward/game/save/data/ISaveDataGlobal";
+import Objects from "@wayward/utilities/object/Objects";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -40,7 +40,7 @@ export default class OptionsInterrupt extends Objective {
 	/**
 	 * Restores options to the original state before starting TARS
 	 */
-	public static restore(human: Human) {
+	public static restore(human: Human): void {
 		const referenceId = human.referenceId;
 		if (referenceId === undefined) {
 			return;
@@ -74,7 +74,7 @@ export default class OptionsInterrupt extends Objective {
 	 */
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (context.human.referenceId !== undefined && !OptionsInterrupt.previousOptions.has(context.human.referenceId)) {
-			OptionsInterrupt.previousOptions.set(context.human.referenceId, Objects.deepClone(context.human.options));
+			OptionsInterrupt.previousOptions.set(context.human.referenceId, Objects.deepClone(context.human.options as IOptions));
 		}
 
 		const updated: string[] = [];

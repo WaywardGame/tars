@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Tile from "game/tile/Tile";
+import Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ItemType } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Enums from "utilities/enum/Enums";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import Enums from "@wayward/game/utilities/enum/Enums";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -21,7 +21,7 @@ import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
 import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import Item from "game/item/Item";
+import Item from "@wayward/game/game/item/Item";
 
 export default class UpgradeInventoryItem extends Objective {
 
@@ -128,7 +128,7 @@ export default class UpgradeInventoryItem extends Objective {
 		return objectivePipelines;
 	}
 
-	private addUpgradeObjectives(objectives: IObjective[][], itemType: ItemType, currentItem: Item, isUpgrade: (itemType: ItemType) => boolean) {
+	private addUpgradeObjectives(objectives: IObjective[][], itemType: ItemType, currentItem: Item, isUpgrade: (itemType: ItemType) => boolean): void {
 		if (currentItem.type !== itemType && !this.fromItemTypes.has(itemType) && isUpgrade(itemType)) {
 			objectives.push([new AcquireItem(itemType)]);
 		}

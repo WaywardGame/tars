@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import { doodadDescriptions } from "game/doodad/Doodads";
-import type { DoodadTypeGroup } from "game/doodad/IDoodad";
-import { DoodadType } from "game/doodad/IDoodad";
-import Enums from "utilities/enum/Enums";
-import DoodadManager from "game/doodad/DoodadManager";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import type { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
 
 export class DoodadUtilities {
 
@@ -79,7 +79,7 @@ export class DoodadUtilities {
 	/**
 	 * Checks if a drip stone is dripping / a water still is stilling
 	 */
-	public isWaterSourceDoodadBusy(waterSource: Doodad) {
+	public isWaterSourceDoodadBusy(waterSource: Doodad): boolean {
 		if (waterSource.hasWater?.top) {
 			return true;
 		}
@@ -95,11 +95,11 @@ export class DoodadUtilities {
 		return false;
 	}
 
-	public isWaterSourceDoodadDrinkable(waterStill: Doodad) {
+	public isWaterSourceDoodadDrinkable(waterStill: Doodad): boolean {
 		return waterStill.gatherReady !== undefined && waterStill.gatherReady <= 0;
 	}
 
-	public requiresFire(doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
+	public requiresFire(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): boolean {
 		const description = doodadDescriptions[doodadTypeOrGroup];
 		if (description && description.lit !== undefined) {
 			if (DoodadManager.isGroup(doodadTypeOrGroup)) {

@@ -9,11 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import type { IRequirementInfo } from "game/item/IItemManager";
-import { RequirementStatus } from "game/item/IItemManager";
-import PickUp from "game/entity/action/actions/PickUp";
+import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import PickUp from "@wayward/game/game/entity/action/actions/PickUp";
+import type { IRequirementInfo } from "@wayward/game/game/item/IItemManager";
+import { RequirementStatus } from "@wayward/game/game/item/IItemManager";
 
+import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -24,7 +25,6 @@ import AnalyzeBase from "../analyze/AnalyzeBase";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import StartFire from "../other/doodad/StartFire";
-import { ActionArguments } from "game/entity/action/IAction";
 
 export default class CompleteRequirements extends Objective {
 
@@ -85,7 +85,7 @@ export default class CompleteRequirements extends Objective {
 						// the anvil we went to is not our base anvil
 						// it was probably not placed correctly
 						// pick it up. the object will be then built in the correct spot
-						return [] as ActionArguments<typeof PickUp>;
+						return [] as ActionArgumentsOf<typeof PickUp>;
 					}
 
 					return ObjectiveResult.Complete;

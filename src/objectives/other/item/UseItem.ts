@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionArgument, ActionType, IActionDescription } from "game/entity/action/IAction";
-import type Item from "game/item/Item";
-import Dictionary from "language/Dictionary";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
+import { ActionArgument, ActionType, IActionDescription } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../../core/context/Context";
 import { IInventoryItems } from "../../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -26,6 +26,7 @@ export type UseItemActionDescriptions =
 	IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory]> |
 	IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]> |
 	IActionDescription<[[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]]> |
+	IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemNearby, ActionArgument.Doodad]]> |
 	IActionDescription<[[ActionArgument.ItemNearby, ActionArgument.Doodad, ActionArgument.Undefined]]> |
 	IActionDescription<[ActionArgument.ItemInventory, [ActionArgument.ItemInventory, ActionArgument.Undefined], [ActionArgument.ItemNearby, ActionArgument.Undefined], [ActionArgument.ItemNearby, ActionArgument.Undefined], [ActionArgument.ItemNearby, ActionArgument.Undefined]]>;
 
@@ -51,7 +52,7 @@ export default class UseItem<T extends UseItemActionDescriptions> extends Object
 			item = item[0];
 		}
 
-		if (!item?.isValid()) {
+		if (!item?.isValid) {
 			this.log.warn(`Invalid use item for action ${ActionType[actionType]}`);
 			return ObjectiveResult.Restart;
 		}

@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Translation from "language/Translation";
+import type Translation from "@wayward/game/language/Translation";
 import Tars from "../../core/Tars";
 
 import { TarsTranslation, uiConfigurableModeOptions } from "../../ITarsMod";

@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { QuestInstance } from "game/entity/player/quest/QuestManager";
+import type { QuestInstance } from "@wayward/game/game/entity/player/quest/QuestManager";
 
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult} from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import Lambda from "../core/Lambda";
@@ -21,41 +21,41 @@ import CompleteQuestRequirement from "./CompleteQuestRequirement";
 
 export default class CompleteQuest extends Objective {
 
-    constructor(private readonly quest: QuestInstance) {
-        super();
-    }
+	constructor(private readonly quest: QuestInstance) {
+		super();
+	}
 
-    public getIdentifier(): string {
-        return `CompleteQuest:${this.quest.id}`;
-    }
+	public getIdentifier(): string {
+		return `CompleteQuest:${this.quest.id}`;
+	}
 
-    public getStatus(): string | undefined {
-        return `Completing quest: ${this.quest.getTitle()?.getString()}`;
-    }
+	public getStatus(): string | undefined {
+		return `Completing quest: ${this.quest.getTitle()?.getString()}`;
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const objectivePipelines: IObjective[][] = [];
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const objectivePipelines: IObjective[][] = [];
 
-        const pendingRequirements = this.quest.data.requirements.filter(requirement => !requirement.completed);
-        const isCompleted = this.quest.data.complete || pendingRequirements.length === 0;
+		const pendingRequirements = this.quest.data.requirements.filter(requirement => !requirement.completed);
+		const isCompleted = this.quest.data.complete || pendingRequirements.length === 0;
 
-        if (isCompleted) {
-            if (this.quest.data.complete || !this.quest.needsManualCompletion()) {
-                return ObjectiveResult.Complete;
-            }
+		if (isCompleted) {
+			if (this.quest.data.complete || !this.quest.needsManualCompletion()) {
+				return ObjectiveResult.Complete;
+			}
 
-            objectivePipelines.push([new Lambda(async () => {
-                this.quest.complete();
-                return ObjectiveResult.Complete;
-            }).setStatus(this)]);
+			objectivePipelines.push([new Lambda(async () => {
+				this.quest.complete();
+				return ObjectiveResult.Complete;
+			}).setStatus(this)]);
 
-        } else {
-            for (const requirement of pendingRequirements) {
-                objectivePipelines.push([new CompleteQuestRequirement(this.quest, requirement), new Restart()]);
-            }
-        }
+		} else {
+			for (const requirement of pendingRequirements) {
+				objectivePipelines.push([new CompleteQuestRequirement(this.quest, requirement), new Restart()]);
+			}
+		}
 
-        return objectivePipelines;
-    }
+		return objectivePipelines;
+	}
 
 }

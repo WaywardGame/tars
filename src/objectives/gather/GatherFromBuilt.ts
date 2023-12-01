@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { DoodadType } from "game/doodad/IDoodad";
-import PickUp from "game/entity/action/actions/PickUp";
-import { ItemType } from "game/item/IItem";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import PickUp from "@wayward/game/game/entity/action/actions/PickUp";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
@@ -41,7 +41,7 @@ export default class GatherFromBuilt extends Objective {
                 return false;
             }
 
-            if (context.options.goodCitizen && multiplayer.isConnected() && doodad.getBuilder() !== context.human) {
+            if (context.options.goodCitizen && multiplayer.isConnected && doodad.getBuilder() !== context.human) {
                 // prevent picking up doodads placed by others
                 return false;
             }

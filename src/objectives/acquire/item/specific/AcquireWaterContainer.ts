@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionArguments } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import OpenBottle from "game/entity/action/actions/OpenBottle";
+import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import OpenBottle from "@wayward/game/game/entity/action/actions/OpenBottle";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../../core/context/Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";
@@ -53,12 +53,12 @@ export default class AcquireWaterContainer extends Objective {
 					action: OpenBottle,
 					args: (context) => {
 						const item = context.getData(itemContextDataKey);
-						if (!item?.isValid()) {
+						if (!item?.isValid) {
 							this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
 							return ObjectiveResult.Restart;
 						}
 
-						return [item] as ActionArguments<typeof OpenBottle>;
+						return [item] as ActionArgumentsOf<typeof OpenBottle>;
 					},
 				},
 			}).setStatus("Opening glass bottle"));

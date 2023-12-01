@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { BookType, ItemType } from "game/item/IItem";
-import Read from "game/entity/action/actions/Read";
-import OpenBottle from "game/entity/action/actions/OpenBottle";
+import { BookType, ItemType } from "@wayward/game/game/item/IItem";
+import Read from "@wayward/game/game/entity/action/actions/Read";
+import OpenBottle from "@wayward/game/game/entity/action/actions/OpenBottle";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

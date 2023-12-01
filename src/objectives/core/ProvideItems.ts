@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ItemType } from "game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -21,27 +21,27 @@ import Objective from "../../core/objective/Objective";
  */
 export default class ProvideItems extends Objective {
 
-    public override readonly includePositionInHashCode: boolean = false;
+	public override readonly includePositionInHashCode: boolean = false;
 
-    public itemTypes: ItemType[];
+	public itemTypes: ItemType[];
 
-    constructor(...itemTypes: ItemType[]) {
-        super();
+	constructor(...itemTypes: ItemType[]) {
+		super();
 
-        this.itemTypes = itemTypes;
-    }
+		this.itemTypes = itemTypes;
+	}
 
-    public getIdentifier(): string {
-        return `ProvideItems:${this.itemTypes.map(itemType => ItemType[itemType]).join(",")}`;
-    }
+	public getIdentifier(): string {
+		return `ProvideItems:${this.itemTypes.map(itemType => ItemType[itemType]).join(",")}`;
+	}
 
-    public getStatus(): string | undefined {
-        return undefined;
-    }
+	public getStatus(): string | undefined {
+		return undefined;
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        context.addProvidedItems(this.itemTypes);
-        return ObjectiveResult.Complete;
-    }
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		context.addProvidedItems(this.itemTypes);
+		return ObjectiveResult.Complete;
+	}
 
 }

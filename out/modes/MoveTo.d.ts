@@ -8,15 +8,15 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import type { NPCType } from "game/entity/npc/INPCs";
-import type NPC from "game/entity/npc/NPC";
-import type { DoodadType } from "game/doodad/IDoodad";
-import type { IslandId } from "game/island/IIsland";
-import type { TerrainType } from "game/tile/ITerrain";
+import type { NPCType } from "@wayward/game/game/entity/npc/INPCs";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import type { IslandId } from "@wayward/game/game/island/IIsland";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type { ITarsMode } from "../core/mode/IMode";
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
-import { CreatureType } from "game/entity/creature/ICreature";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 export declare enum MoveToType {
     Island = 0,
     Terrain = 1,

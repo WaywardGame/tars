@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Pour from "game/entity/action/actions/Pour";
-import type Item from "game/item/Item";
+import Pour from "@wayward/game/game/entity/action/actions/Pour";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";

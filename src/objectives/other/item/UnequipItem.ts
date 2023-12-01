@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Item from "game/item/Item";
-import Unequip from "game/entity/action/actions/Unequip";
+import type Item from "@wayward/game/game/item/Item";
+import Unequip from "@wayward/game/game/entity/action/actions/Unequip";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -37,7 +37,7 @@ export default class UnequipItem extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? this.getAcquiredItem(context);
-		if (!item?.isValid()) {
+		if (!item?.isValid) {
 			this.log.error("Invalid unequip item");
 			return ObjectiveResult.Restart;
 		}

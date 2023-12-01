@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { IContainer } from "game/item/IItem";
-import { ItemType } from "game/item/IItem";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";

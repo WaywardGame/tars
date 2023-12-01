@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { CreatureType } from "game/entity/creature/ICreature";
-import type { ItemType } from "game/item/IItem";
-import type Creature from "game/entity/creature/Creature";
+import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import type { ItemType } from "@wayward/game/game/item/IItem";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

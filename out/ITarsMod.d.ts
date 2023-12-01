@@ -8,11 +8,11 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import type { Events } from "event/EventEmitter";
-import type { IslandId } from "game/island/IIsland";
-import type Translation from "language/Translation";
-import type Mod from "mod/Mod";
-import { Reference } from "game/reference/IReferenceManager";
+import type { Events } from "@wayward/utilities/event/EventEmitter";
+import type { IslandId } from "@wayward/game/game/island/IIsland";
+import type Translation from "@wayward/game/language/Translation";
+import type Mod from "@wayward/game/mod/Mod";
+import { Reference } from "@wayward/game/game/reference/IReferenceManager";
 import type { IContext } from "./core/context/IContext";
 import { ITarsOptions } from "./core/ITarsOptions";
 import type TarsMod from "./TarsMod";

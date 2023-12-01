@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Item from "game/item/Item";
-import type { ILogLine } from "utilities/Log";
-import type Log from "utilities/Log";
+import type Item from "@wayward/game/game/item/Item";
+import type { ILogLine } from "@wayward/utilities/Log";
+import type Log from "@wayward/utilities/Log";
 // @ts-ignore
-import Vector2 from "utilities/math/Vector2";
-import { IVector3 } from "utilities/math/IVector";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { IVector3 } from "@wayward/game/utilities/math/IVector";
 
 import type Context from "../context/Context";
 import type { IObjective, IObjectiveInfo, IObjectivePriority } from "../objective/IObjective";
@@ -887,7 +887,7 @@ export default class Plan implements IPlan {
 		return rootTree;
 	}
 
-	private getObjectiveResults(chain: IObjective[] = [], objectiveStack: IObjectiveInfo[], currentObjectiveInfo: IObjectiveInfo, includeCurrent: boolean = true) {
+	private getObjectiveResults(chain: IObjective[] = [], objectiveStack: IObjectiveInfo[], currentObjectiveInfo: IObjectiveInfo, includeCurrent: boolean = true): IObjective[] {
 		// probably not needed?
 		// if (!this.objectiveInfo.objective.canSaveChildObjectives()) {
 		// 	return [this.objectiveInfo.objective];

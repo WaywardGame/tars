@@ -8,17 +8,17 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import type Doodad from "game/doodad/Doodad";
-import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import { DamageType } from "game/entity/IEntity";
-import { EquipType } from "game/entity/IHuman";
-import { ActionType } from "game/entity/action/IAction";
-import type Creature from "game/entity/creature/Creature";
-import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
-import type Item from "game/item/Item";
-import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
-import type { TerrainType } from "game/tile/ITerrain";
-import { IGetItemsOptions } from "game/item/IItemManager";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import { DamageType } from "@wayward/game/game/entity/IEntity";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import { IContainer, IRecipe, ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import ItemRecipeRequirementChecker from "@wayward/game/game/item/ItemRecipeRequirementChecker";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { IGetItemsOptions } from "@wayward/game/game/item/IItemManager";
 import { IDisassemblySearch } from "../core/ITars";
 import type Context from "../core/context/Context";
 export declare const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>>;

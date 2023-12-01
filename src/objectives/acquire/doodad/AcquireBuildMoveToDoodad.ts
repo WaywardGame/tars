@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import DoodadManager from "game/doodad/DoodadManager";
-import { doodadDescriptions } from "game/doodad/Doodads";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";

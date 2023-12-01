@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Repair from "game/entity/action/actions/Repair";
-import { ActionArguments } from "game/entity/action/IAction";
-import type Item from "game/item/Item";
+import Repair from "@wayward/game/game/entity/action/actions/Repair";
+import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -51,7 +51,7 @@ export default class RepairItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		if (context.human.isSwimming()) {
+		if (context.human.isSwimming) {
 			return ObjectiveResult.Ignore;
 		}
 
@@ -65,7 +65,7 @@ export default class RepairItem extends Objective {
 					return ObjectiveResult.Restart;
 				}
 
-				return [hammer, this.item] as ActionArguments<typeof Repair>;
+				return [hammer, this.item] as ActionArgumentsOf<typeof Repair>;
 			}).setStatus(this),
 		];
 	}

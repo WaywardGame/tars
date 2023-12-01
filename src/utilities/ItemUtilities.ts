@@ -9,32 +9,32 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import { doodadDescriptions } from "game/doodad/Doodads";
-import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "game/doodad/IDoodad";
-import { GrowingStage } from "game/doodad/IDoodad";
-import { AttackType, DamageType } from "game/entity/IEntity";
-import { EquipType, SkillType } from "game/entity/IHuman";
-import type { IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
-import { ActionType } from "game/entity/action/IAction";
-import type Creature from "game/entity/creature/Creature";
-import { ConsumeItemStats, IContainer, IRecipe, ItemType, ItemTypeGroup } from "game/item/IItem";
-import type Item from "game/item/Item";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
-import type { TerrainType } from "game/tile/ITerrain";
-import { terrainDescriptions } from "game/tile/Terrains";
-import Enums from "utilities/enum/Enums";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "@wayward/game/game/doodad/IDoodad";
+import { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import { AttackType, DamageType } from "@wayward/game/game/entity/IEntity";
+import { EquipType, SkillType } from "@wayward/game/game/entity/IHuman";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import { ConsumeItemStats, IContainer, IRecipe, ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import ItemRecipeRequirementChecker from "@wayward/game/game/item/ItemRecipeRequirementChecker";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
+import Enums from "@wayward/game/utilities/enum/Enums";
 
-import { IGetItemsOptions } from "game/item/IItemManager";
-import ItemManager from "game/item/ItemManager";
-import Vector2 from "utilities/math/Vector2";
+import { IGetItemsOptions } from "@wayward/game/game/item/IItemManager";
+import ItemManager from "@wayward/game/game/item/ItemManager";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { IDisassemblySearch, inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
 import type Context from "../core/context/Context";
 import { ContextDataType } from "../core/context/IContext";
-// import { IslandId } from "game/island/IIsland";
+// import { IslandId } from "@wayward/game/game/island/IIsland";
 
 export const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>> = { includeSubContainers: true };
 
@@ -184,13 +184,13 @@ export class ItemUtilities {
 		return search;
 	}
 
-	public initialize(context: Context) {
+	public initialize(context: Context): void {
 		this.foodItemTypes = this.getFoodItemTypes();
 		this.allSeedItemTypes = this.getSeedItemTypes(false);
 		this.edibleSeedItemTypes = this.getSeedItemTypes(true);
 	}
 
-	public clearCache() {
+	public clearCache(): void {
 		this.availableInventoryWeightCache = undefined;
 		this.baseItemCache = undefined;
 		this.baseTileItemCache = undefined;
@@ -283,7 +283,7 @@ export class ItemUtilities {
 		return search;
 	}
 
-	public isAllowedToUseItem(context: Context, item: Item, allowProtectedInventoryItems = true) {
+	public isAllowedToUseItem(context: Context, item: Item, allowProtectedInventoryItems = true): boolean {
 		if (context.options.useProtectedItems !== TarsUseProtectedItems.Yes && item.isProtected()) {
 			if (allowProtectedInventoryItems && this.isInventoryItem(context, item)) {
 				return true;
@@ -301,7 +301,7 @@ export class ItemUtilities {
 		return true;
 	}
 
-	public isAllowedToUseEquipItem(context: Context, item: Item) {
+	public isAllowedToUseEquipItem(context: Context, item: Item): boolean {
 		if (context.options.useProtectedItems !== TarsUseProtectedItems.Yes && item.isProtected()) {
 			if (this.isInventoryItem(context, item)) {
 				return true;
@@ -348,7 +348,7 @@ export class ItemUtilities {
 
 		const container: IContainer = {
 			containedItems: items,
-			itemOrders: items.map(i => i.id),
+			addOrder: items.map(i => i.id),
 		};
 		checker.processContainer(container);
 
@@ -360,27 +360,27 @@ export class ItemUtilities {
 		return checker;
 	}
 
-	public getItemsInContainer(context: Context, container: IContainer) {
+	public getItemsInContainer(context: Context, container: IContainer): Item[] {
 		return context.island.items.getItemsInContainer(container, defaultGetItemOptions)
 			.filter(item => this.isAllowedToUseItem(context, item));
 	}
 
-	public getItemsInContainerByType(context: Context, container: IContainer, itemType: ItemType) {
+	public getItemsInContainerByType(context: Context, container: IContainer, itemType: ItemType): Item[] {
 		return context.island.items.getItemsInContainerByType(container, itemType, defaultGetItemOptions)
 			.filter(item => this.isAllowedToUseItem(context, item));
 	}
 
-	public getItemsInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup) {
+	public getItemsInContainerByGroup(context: Context, container: IContainer, itemTypeGroup: ItemTypeGroup): Item[] {
 		return context.island.items.getItemsInContainerByGroup(container, itemTypeGroup, defaultGetItemOptions)
 			.filter(item => this.isAllowedToUseItem(context, item));
 	}
 
-	public getEquipmentItemsInInventory(context: Context) {
+	public getEquipmentItemsInInventory(context: Context): Item[] {
 		return context.island.items.getItemsInContainer(context.human.inventory, defaultGetItemOptions)
 			.filter(item => item.description?.equip !== undefined && this.isAllowedToUseEquipItem(context, item));
 	}
 
-	public getItemsInInventory(context: Context) {
+	public getItemsInInventory(context: Context): Item[] {
 		return this.getItemsInContainer(context, context.human.inventory);
 	}
 
@@ -450,7 +450,7 @@ export class ItemUtilities {
 		return undefined;
 	}
 
-	public isInventoryItem(context: Context, item: Item, options?: Partial<IGetItemOptions>) {
+	public isInventoryItem(context: Context, item: Item, options?: Partial<IGetItemOptions>): boolean {
 		for (const [key, inventoryItem] of Object.entries(context.inventory)) {
 			if (Array.isArray(inventoryItem) ? inventoryItem.includes(item) : inventoryItem === item) {
 				if (key === "waterContainer" && options?.allowUnsafeWaterContainers) {
@@ -464,8 +464,8 @@ export class ItemUtilities {
 		return false;
 	}
 
-	public canDestroyItem(context: Context, item: Item) {
-		if (context.options.goodCitizen && multiplayer.isConnected() &&
+	public canDestroyItem(context: Context, item: Item): boolean {
+		if (context.options.goodCitizen && multiplayer.isConnected &&
 			item.crafterIdentifier !== undefined && item.crafterIdentifier !== context.human.identifier) {
 			// prevent destroying other peoples items
 			return false;
@@ -474,26 +474,26 @@ export class ItemUtilities {
 		return true;
 	}
 
-	public isSafeToDrinkItem(context: Context, item: Item) {
+	public isSafeToDrinkItem(context: Context, item: Item): boolean {
 		return this.isSafeToDrinkItemType(context, item.type);
 	}
 
-	public isSafeToDrinkItemType(context: Context, itemType: ItemType) {
+	public isSafeToDrinkItemType(context: Context, itemType: ItemType): boolean {
 		return context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfMedicinalWater) ||
 			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfDesalinatedWater) ||
 			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfPurifiedFreshWater) ||
 			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfFilteredWater);
 	}
 
-	public isDrinkableItem(item: Item) {
+	public isDrinkableItem(item: Item): boolean {
 		return this.hasUseActionType(item, ActionType.DrinkItem);
 	}
 
-	public canGatherWater(item: Item) {
+	public canGatherWater(item: Item): boolean {
 		return this.hasUseActionType(item, ActionType.GatherLiquid);
 	}
 
-	public hasUseActionType(item: Item, actionType: ActionType) {
+	public hasUseActionType(item: Item, actionType: ActionType): boolean {
 		return item.description?.use?.includes(actionType) ? true : false;
 	}
 
@@ -653,7 +653,7 @@ export class ItemUtilities {
 				for (let x = -2; x <= 2; x++) {
 					for (let y = -2; y <= 2; y++) {
 						const tile = context.human.island.getTileSafe(context.human.x + x, context.human.y + y, context.human.z);
-						if (tile?.creature && !tile.creature.isTamed()) {
+						if (tile?.creature && !tile.creature.isTamed) {
 							const distance = Vector2.squaredDistance(context.human, tile.creature.tile);
 							if (closestCreatureDistance === undefined || closestCreatureDistance > distance) {
 								closestCreatureDistance = distance;
@@ -790,7 +790,7 @@ export class ItemUtilities {
 	 * @param context Context
 	 * @param includeKeepInInventoryItems True to include items marked with KeepInInventoryItem in the result
 	 */
-	public getReservedItems(context: Context, includeKeepInInventoryItems: boolean) {
+	public getReservedItems(context: Context, includeKeepInInventoryItems: boolean): Item[] {
 		const keepInInventoryItems = context.getDataOrDefault<Set<Item>>(ContextDataType.KeepInInventoryItems, new Set());
 
 		let reservedItems = this.getItemsInInventory(context)
@@ -806,7 +806,7 @@ export class ItemUtilities {
 	 * Returns items to build items
 	 * @param context Context
 	 */
-	public getItemsToBuild(context: Context) {
+	public getItemsToBuild(context: Context): Item[] {
 		const items: Item[] = [];
 
 		for (const key of inventoryBuildItems) {
@@ -822,7 +822,7 @@ export class ItemUtilities {
 	/**
 	 * Returns unused items sorted by oldest to newest
 	 */
-	public getUnusedItems(context: Context, options: Partial<{ allowReservedItems: boolean }> = {}) {
+	public getUnusedItems(context: Context, options: Partial<{ allowReservedItems: boolean }> = {}): Item[] {
 		const items = this.getItemsInInventory(context);
 		return items
 			.filter(item => {
@@ -842,7 +842,7 @@ export class ItemUtilities {
 			.sort((a, b) => items.indexOf(a) - items.indexOf(b));
 	}
 
-	public getAvailableInventoryWeight(context: Context) {
+	public getAvailableInventoryWeight(context: Context): number {
 		if (this.availableInventoryWeightCache === undefined) {
 			const items = this.getItemsInInventory(context)
 				.filter(item => this.isInventoryItem(context, item));
@@ -899,7 +899,7 @@ export class ItemUtilities {
 		return context.human.inventory;
 	}
 
-	public getWaterContainers(context: Context) {
+	public getWaterContainers(context: Context): { safeToDrinkWaterContainers: Item[]; availableWaterContainers: Item[]; } {
 		const safeToDrinkWaterContainers: Item[] = [];
 		const availableWaterContainers: Item[] = [];
 

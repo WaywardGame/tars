@@ -1,2 +1,4 @@
 node_modules
-tsconfig.tsbuildinfo
+*.tsbuildinfo
+tsconfig.watch.json
+tsconfig.production.json

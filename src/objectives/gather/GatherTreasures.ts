@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import DrawnMap from "game/mapping/DrawnMap";
+import DrawnMap from "@wayward/game/game/mapping/DrawnMap";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -21,20 +21,20 @@ import GatherTreasure, { IGatherTreasureOptions } from "./GatherTreasure";
  */
 export default class GatherTreasures extends Objective {
 
-    constructor(private readonly drawnMaps: DrawnMap[], private readonly options?: Partial<IGatherTreasureOptions>) {
-        super();
-    }
+	constructor(private readonly drawnMaps: DrawnMap[], private readonly options?: Partial<IGatherTreasureOptions>) {
+		super();
+	}
 
-    public getIdentifier(): string {
-        return `GatherTreasures:${this.drawnMaps.join(",")}`;
-    }
+	public getIdentifier(): string {
+		return `GatherTreasures:${this.drawnMaps.join(",")}`;
+	}
 
-    public getStatus(): string | undefined {
-        return "Gathering treasure";
-    }
+	public getStatus(): string | undefined {
+		return "Gathering treasure";
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        return this.drawnMaps.map(drawnMap => [new GatherTreasure(drawnMap, this.options)]);
-    }
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		return this.drawnMaps.map(drawnMap => [new GatherTreasure(drawnMap, this.options)]);
+	}
 
 }

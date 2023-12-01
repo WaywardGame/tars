@@ -9,29 +9,29 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
 import type Context from "../core/context/Context";
 
 export class PlayerUtilities {
 
-	public getWeight(context: Context) {
+	public getWeight(context: Context): number {
 		return context.human.stat.get<IStatMax>(Stat.Weight).value;
 	}
 
-	public getMaxWeight(context: Context) {
+	public getMaxWeight(context: Context): number {
 		return context.human.stat.get<IStatMax>(Stat.Weight).max;
 	}
 
-	public isUsingVehicle(context: Context) {
+	public isUsingVehicle(context: Context): boolean {
 		return !!context.human.vehicleItemReference;
 	}
 
-	public isHealthy(context: Context) {
+	public isHealthy(context: Context): boolean {
 		return context.human.stat.get<IStatMax>(Stat.Health).value > 8 && context.human.stat.get<IStatMax>(Stat.Hunger).value > 8;
 	}
 
-	public getRecoverThreshold(context: Context, stat: Stat) {
+	public getRecoverThreshold(context: Context, stat: Stat): number {
 		let recoverThreshold: number | number[];
 
 		switch (stat) {
@@ -64,7 +64,7 @@ export class PlayerUtilities {
 		return recoverThreshold;
 	}
 
-	private parseThreshold(context: Context, stat: Stat, threshold: number) {
+	private parseThreshold(context: Context, stat: Stat, threshold: number): number {
 		return threshold > 0 ? threshold : context.human.stat.get<IStatMax>(stat).max + threshold;
 	}
 }

@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 import type Context from "../core/context/Context";
-import type { IObjective } from "../core/objective/IObjective";
 import type { ITarsMode } from "../core/mode/IMode";
+import type { IObjective } from "../core/objective/IObjective";
 import { BaseMode } from "./BaseMode";
 export declare class SurvivalMode extends BaseMode implements ITarsMode {
     private finished;

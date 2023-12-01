@@ -8,14 +8,13 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import type Doodad from "game/doodad/Doodad";
-import type { IVector3 } from "utilities/math/IVector";
-import type Creature from "game/entity/creature/Creature";
-import type Item from "game/item/Item";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type Item from "@wayward/game/game/item/Item";
 import type Context from "../core/context/Context";
 import type { IBaseInfo } from "../core/ITars";
-import { DoodadType } from "game/doodad/IDoodad";
-import Tile from "game/tile/Tile";
+import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import Tile from "@wayward/game/game/tile/Tile";
 export interface IBuildTileOptions {
     openAreaRadius: number;
     allowWater: boolean;
@@ -33,7 +32,7 @@ export declare class BaseUtilities {
     isBaseDoodad(context: Context, doodad: Doodad): boolean;
     getBaseTile(context: Context): Tile;
     hasBase(context: Context): boolean;
-    isNearBase(context: Context, point?: IVector3, distanceSq?: number): boolean;
+    isNearBase(context: Context, tile?: Tile, distanceSq?: number): boolean;
     getTilesNearBase(context: Context): Tile[];
     getTilesWithItemsNearBase(context: Context): {
         tiles: Tile[];
@@ -43,8 +42,8 @@ export declare class BaseUtilities {
     getSwampTilesNearBase(context: Context): Tile[];
     getNonTamedCreaturesNearBase(context: Context): Creature[];
     getWaterSourceDoodads(context: Context): Doodad[];
-    isTreasureChestLocation(context: Context, point: IVector3): boolean;
-    matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean;
+    isTreasureChestLocation(context: Context, tile: Tile): boolean;
+    matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, tile?: Tile): boolean;
     findInitialBuildTile(context: Context): Promise<Tile | undefined>;
     private isGoodTargetOrigin;
 }

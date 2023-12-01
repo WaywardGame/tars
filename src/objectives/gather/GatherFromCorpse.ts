@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Corpse from "game/entity/creature/corpse/Corpse";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import type { CreatureSearch } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";

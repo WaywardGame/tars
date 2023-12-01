@@ -8,10 +8,10 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { TileUpdateType } from "game/IGame";
-import Island from "game/island/Island";
-import Tile from "game/tile/Tile";
-import { KdTree } from "utilities/collection/tree/KdTree";
+import { TileUpdateType } from "@wayward/game/game/IGame";
+import Island from "@wayward/game/game/island/Island";
+import Tile from "@wayward/game/game/tile/Tile";
+import { KdTree } from "@wayward/game/utilities/collection/kdtree/KdTree";
 import { ExtendedTerrainType } from "./INavigation";
 interface INavigationMapData {
     kdTreeTileTypes: Uint8Array;

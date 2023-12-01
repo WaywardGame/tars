@@ -25,7 +25,7 @@ export class TidyUpMode extends BaseMode implements ITarsMode {
 
 	// private finished: (success: boolean) => void;
 
-	public async initialize(_: Context, finished: (success: boolean) => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void): Promise<void> {
 		// this.finished = finished;
 	}
 
@@ -45,7 +45,7 @@ export class TidyUpMode extends BaseMode implements ITarsMode {
 
 		objectives.push(new Lambda(async () => ObjectiveResult.Complete).setStatus("Waiting"));
 
-		// if (!multiplayer.isConnected()) {
+		// if (!multiplayer.isConnected) {
 		// 	if (game.getTurnMode() !== TurnMode.RealTime) {
 		// 		objectives.push(new Lambda(async () => {
 		// 			this.finished(true);

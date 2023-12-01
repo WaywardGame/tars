@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Creature from "game/entity/creature/Creature";
-import type { IStat } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type { IStat } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -36,7 +36,7 @@ export default class DefendAgainstCreature extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const creature = this.creature;
-		if (creature.stat.get<IStat>(Stat.Health).value <= 0 || !creature.isValid() || creature.isTamed()) {
+		if (creature.stat.get<IStat>(Stat.Health).value <= 0 || !creature.isValid || creature.isTamed) {
 			return ObjectiveResult.Restart;
 		}
 

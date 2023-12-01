@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { WaterType } from "game/island/IIsland";
-import { TerrainType } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
+import { WaterType } from "@wayward/game/game/island/IIsland";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -114,7 +114,7 @@ export default class MoveToWater extends Objective {
 
 					for (const nearbyTile of tile.getTilesAround()) {
 						// const nearbyTerrainDescription = nearbyTile.description;
-						if (!navigation.isDisabled(nearbyTile) && (!nearbyTile.doodad || (!nearbyTile.doodad.blocksMove() && !nearbyTile.doodad.isDangerous(context.human)))) {
+						if (!navigation.isDisabled(nearbyTile) && (!nearbyTile.doodad || (!nearbyTile.doodad.blocksMove && !nearbyTile.doodad.isDangerous(context.human)))) {
 							standableNearbyTiles.push(nearbyTile);
 						}
 					}
@@ -162,7 +162,7 @@ export default class MoveToWater extends Objective {
 					// verify there's no dangerous creatures nearby
 					const nearbyTiles = tile.tilesInRange(16, true);
 					for (const tile of nearbyTiles) {
-						if (tile.creature && context.utilities.creature.isScaredOfCreature(context, tile.creature)) {
+						if (tile.creature && context.utilities.creature.isScaredOfCreature(context.human, tile.creature)) {
 							return false;
 						}
 					}

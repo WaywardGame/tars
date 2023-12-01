@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Vector2 from "utilities/math/Vector2";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

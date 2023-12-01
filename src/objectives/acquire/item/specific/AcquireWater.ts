@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ItemTypeGroup } from "game/item/IItem";
+import { ItemTypeGroup } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../../core/objective/IObjective";

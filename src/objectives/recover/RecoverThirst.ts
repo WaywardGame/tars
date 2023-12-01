@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionType } from "game/entity/action/IAction";
-import type { IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
-import DrinkInFront from "game/entity/action/actions/DrinkInFront";
-import DrinkItem from "game/entity/action/actions/DrinkItem";
-import Heal from "game/entity/action/actions/Heal";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import DrinkInFront from "@wayward/game/game/entity/action/actions/DrinkInFront";
+import DrinkItem from "@wayward/game/game/entity/action/actions/DrinkItem";
+import Heal from "@wayward/game/game/entity/action/actions/Heal";
+import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -44,7 +44,7 @@ export interface IRecoverThirstOptions {
 
 export default class RecoverThirst extends Objective {
 
-	public static isEmergency(context: Context) {
+	public static isEmergency(context: Context): boolean {
 		const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
 		return thirstStat.value <= 3 && context.utilities.base.getWaterSourceDoodads(context).every(doodad => !context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad));
 	}
@@ -73,7 +73,7 @@ export default class RecoverThirst extends Objective {
 		return this.options.exceededThreshold ? this.getExceededThresholdObjectives(context) : this.getAboveThresholdObjectives(context);
 	}
 
-	private async getEmergencyObjectives(context: Context) {
+	private async getEmergencyObjectives(context: Context): Promise<IObjective[][]> {
 		const objectivePipelines: IObjective[][] = [];
 
 		const { availableWaterContainers } = context.utilities.item.getWaterContainers(context);
@@ -168,7 +168,7 @@ export default class RecoverThirst extends Objective {
 		return objectivePipelines;
 	}
 
-	private getAboveThresholdObjectives(context: Context) {
+	private getAboveThresholdObjectives(context: Context): IObjective[][] | ObjectiveResult.Ignore {
 		const objectivePipelines: IObjective[][] = [];
 
 		if (!this.options.onlyUseAvailableItems) {
@@ -213,7 +213,7 @@ export default class RecoverThirst extends Objective {
 		return objectivePipelines.length > 0 ? objectivePipelines : ObjectiveResult.Ignore;
 	}
 
-	private async getExceededThresholdObjectives(context: Context) {
+	private async getExceededThresholdObjectives(context: Context): Promise<IObjective[][] | ObjectiveResult.Ignore> {
 		const waterSourceDoodads = context.utilities.base.getWaterSourceDoodads(context);
 
 		if (!RecoverThirst.isEmergency(context) && !context.utilities.base.isNearBase(context)) {

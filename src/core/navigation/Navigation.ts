@@ -9,22 +9,23 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@cplusplus/index";
-import type { ITerrainDescription } from "game/tile/ITerrain";
-import { TerrainType } from "game/tile/ITerrain";
-import { TileEventType } from "game/tile/ITileEvent";
-import { WorldZ } from "game/WorldZ";
-import type { IVector3 } from "utilities/math/IVector";
-import { TileUpdateType } from "game/IGame";
-import Human from "game/entity/Human";
-import Log from "utilities/Log";
-import Island from "game/island/Island";
+import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@wayward/cplusplus/index";
+import type { ITerrainDescription } from "@wayward/game/game/tile/ITerrain";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
+import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
+import { TileUpdateType } from "@wayward/game/game/IGame";
+import Human from "@wayward/game/game/entity/Human";
+import Log from "@wayward/utilities/Log";
+import Island from "@wayward/game/game/island/Island";
 
 import type { ITileLocation } from "../ITars";
 import { ExtendedTerrainType, NavigationPath } from "./INavigation";
 import { TarsOverlay } from "../../ui/TarsOverlay";
 import { NavigationKdTrees } from "./NavigationKdTrees";
-import Tile from "game/tile/Tile";
+import Tile from "@wayward/game/game/tile/Tile";
+import { CreatureUtilities } from "src/utilities/CreatureUtilities";
 
 interface INavigationMapData {
 	dijkstraMap: IDijkstraMap;
@@ -42,19 +43,24 @@ export default class Navigation {
 	private readonly nodePenaltyCache: Map<number, number> = new Map();
 	private readonly nodeDisableCache: Map<number, boolean> = new Map();
 
-	private origin: IVector3 | undefined;
+	private origin: Tile | undefined;
 	private originUpdateTimeout: number | undefined;
 
-	private oppositeOrigin: IVector3 | undefined;
+	private oppositeOrigin: Tile | undefined;
 
 	private sailingMode: boolean;
 
 	private addedOverlays = false;
 
-	constructor(private readonly log: Log, private readonly human: Human, private readonly overlay: TarsOverlay, private readonly kdTrees: NavigationKdTrees) {
+	constructor(
+		private readonly log: Log,
+		private readonly human: Human,
+		private readonly creatureUtilities: CreatureUtilities,
+		private readonly overlay: TarsOverlay,
+		private readonly kdTrees: NavigationKdTrees) {
 	}
 
-	public load() {
+	public load(): void {
 		this.unload();
 
 		this.origin = undefined;
@@ -77,7 +83,7 @@ export default class Navigation {
 		}
 	}
 
-	public unload() {
+	public unload(): void {
 		for (const mapInfo of this.maps.values()) {
 			try {
 				mapInfo.dijkstraMap.delete();
@@ -98,11 +104,11 @@ export default class Navigation {
 		}
 	}
 
-	public shouldUpdateSailingMode(sailingMode: boolean) {
+	public shouldUpdateSailingMode(sailingMode: boolean): boolean {
 		return this.sailingMode !== sailingMode;
 	}
 
-	public async updateAll(sailingMode: boolean) {
+	public updateAll(sailingMode: boolean): void {
 		this.log.info("Updating navigation. Please wait...");
 
 		this.sailingMode = sailingMode;
@@ -138,7 +144,7 @@ export default class Navigation {
 		this.log.info(`Updated navigation in ${time}ms`);
 	}
 
-	public async ensureOverlays(getBaseTiles: () => Set<Tile>) {
+	public async ensureOverlays(getBaseTiles: () => Set<Tile>): Promise<void> {
 		if (this.addedOverlays) {
 			return;
 		}
@@ -154,13 +160,13 @@ export default class Navigation {
 		}
 	}
 
-	public getOrigin() {
+	public getOrigin(): Tile | undefined {
 		return this.origin;
 	}
 
-	public queueUpdateOrigin(origin?: IVector3) {
+	public queueUpdateOrigin(origin?: Tile): void {
 		if (origin) {
-			this.origin = { x: origin.x, y: origin.y, z: origin.z };
+			this.origin = origin;
 		}
 
 		if (this.originUpdateTimeout === undefined) {
@@ -171,9 +177,9 @@ export default class Navigation {
 		}
 	}
 
-	public updateOrigin(origin?: IVector3) {
+	public updateOrigin(origin?: Tile): void {
 		if (origin) {
-			this.origin = { x: origin.x, y: origin.y, z: origin.z };
+			this.origin = origin;
 		}
 
 		if (!this.origin) {
@@ -199,7 +205,7 @@ export default class Navigation {
 				return;
 			}
 
-			this.oppositeOrigin = { x, y, z: oppositeZ };
+			this.oppositeOrigin = this.human.island.getTile(x, y, oppositeZ);
 
 			this._updateOrigin(x, y, oppositeZ);
 
@@ -216,14 +222,14 @@ export default class Navigation {
 		return this.calculateOppositeZ(this.origin.z);
 	}
 
-	public getOppositeOrigin(): IVector3 | undefined {
+	public getOppositeOrigin(): Tile | undefined {
 		return this.oppositeOrigin;
 	}
 
 	/**
 	 * Returns the origin for the opposite the provided z
 	 */
-	public calculateOppositeOrigin(z: WorldZ): IVector3 | undefined {
+	public calculateOppositeOrigin(z: WorldZ): Tile | undefined {
 		const oppositeZ = this.calculateOppositeZ(z);
 
 		if (oppositeZ !== undefined) {
@@ -257,7 +263,7 @@ export default class Navigation {
 		penalty?: number,
 		tileType: TerrainType | undefined = tile.type,
 		terrainDescription: ITerrainDescription | undefined = tile.description,
-		tileUpdateType?: TileUpdateType) {
+		tileUpdateType?: TileUpdateType): void {
 		if (!this.addedOverlays && this.overlay.isHidden) {
 			return;
 		}
@@ -450,17 +456,17 @@ export default class Navigation {
 				!description.isGate &&
 				!description.isWall &&
 				!description.isTree &&
-				(doodad.blocksMove() || doodad.isDangerous(this.human)) &&
-				!doodad.isVehicle()) {
+				(doodad.blocksMove || doodad.isDangerous(this.human)) &&
+				!doodad.isVehicle) {
 				return true;
 			}
 		}
 
-		if (tile.creature && tile.creature.isTamed() && !tile.creature.canSwapWith(this.human, undefined)) {
+		if (tile.creature && tile.creature.isTamed && !tile.creature.canSwapWith(this.human, undefined)) {
 			return true;
 		}
 
-		const players = tile.getPlayersOnTile(false, true);
+		const players = tile.getPlayersOnTile();
 		if (players.length > 0) {
 			for (const player of players) {
 				if (player !== this.human) {
@@ -493,31 +499,32 @@ export default class Navigation {
 		if (tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn) {
 			if (tile.creature) {
 				// the penalty has to be high enough for non-tamed creatures to make the player not want to nav to it to avoid simple other obstacles
-				penalty += tile.creature.isTamed() ? 10 : 120;
+				penalty += tile.creature.isTamed ? 10 : 120;
 			}
 
-			const island = tile.island;
-
 			// penalty for creatures on or near the tile
-			for (let x = -creaturePenaltyRadius; x <= creaturePenaltyRadius; x++) {
-				for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
-					const creature = island.getTileSafe(tile.x + x, tile.y + y, tile.z)?.creature;
-					if (creature) {
-						// only apply the penalty if the creature can actually go this tile
-						if (creature && !creature.isTamed() && creature.checkCreatureMove(true, tile, creature.getMoveType(), true) === 0) {
-							penalty += 10;
+			const otherTiles = tile.tilesInRange(creaturePenaltyRadius, true);
+			for (const otherTile of otherTiles) {
+				const creature = otherTile.creature;
+				if (creature) {
+					// only apply the penalty if the creature can actually go this tile
+					if (creature && !creature.isTamed && creature.checkCreatureMove(true, tile, creature.getMoveType(), true) === 0) {
+						penalty += 10;
 
-							if (x === 0 && y === 0) {
-								penalty += 8;
-							}
+						if (tile === otherTile) {
+							penalty += 8;
+						}
 
-							if (Math.abs(x) <= 1 && Math.abs(y) <= 1) {
-								penalty += 8;
-							}
+						if (Math.abs(tile.x - otherTile.x) <= 1 && Math.abs(tile.y - otherTile.y) <= 1) {
+							penalty += 8;
+						}
 
-							if (creature.aberrant) {
-								penalty += 100;
-							}
+						if (creature.aberrant) {
+							penalty += 100;
+						}
+
+						if (this.creatureUtilities.isScaredOfCreature(this.human, creature)) {
+							penalty += 255;
 						}
 					}
 				}
@@ -531,7 +538,7 @@ export default class Navigation {
 					// walls are hard to pick up and we don't want to
 					penalty += 200;
 
-				} else if (tile.doodad.blocksMove()) {
+				} else if (tile.doodad.blocksMove) {
 					// a gather doodad - large penalty
 					penalty += 50;
 
@@ -564,7 +571,7 @@ export default class Navigation {
 		return Math.min(penalty, 255);
 	}
 
-	private _updateOrigin(x: number, y: number, z: number) {
+	private _updateOrigin(x: number, y: number, z: number): void {
 		const mapInfo = this.maps.get(z);
 		if (!mapInfo) {
 			return;

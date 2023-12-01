@@ -9,22 +9,22 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Doodad from "game/doodad/Doodad";
-import Ride from "game/entity/action/actions/Ride";
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Creature from "game/entity/creature/Creature";
-import type { IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
-import Item from "game/item/Item";
-import TileEvent from "game/tile/TileEvent";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
-import Human from "game/entity/Human";
-import Tile from "game/tile/Tile";
+import Doodad from "@wayward/game/game/doodad/Doodad";
+import Ride from "@wayward/game/game/entity/action/actions/Ride";
+import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import Creature from "@wayward/game/game/entity/creature/Creature";
+import Human from "@wayward/game/game/entity/Human";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import Item from "@wayward/game/game/item/Item";
+import Tile from "@wayward/game/game/tile/Tile";
+import TileEvent from "@wayward/game/game/tile/TileEvent";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
-import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { MoveResult } from "../../utilities/MovementUtilities";
@@ -192,7 +192,7 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.trackedCreature && !this.trackedCreature.isValid()) {
+		if (this.trackedCreature && !this.trackedCreature.isValid) {
 			return ObjectiveResult.Complete;
 		}
 
@@ -211,7 +211,7 @@ export default class MoveToTarget extends Objective {
 			}
 
 			if (this.trackedCorpse || this.trackedItem) {
-				const decay = this.trackedCorpse?.decay ?? this.trackedItem?.decay;
+				const decay = this.trackedCorpse?.decay ?? this.trackedItem?.getDecayTime();
 				if (decay !== undefined && decay <= movementPath.path.length) {
 					// assuming manual turn mode, the corpse / item will decay by the time we arrive
 					return ObjectiveResult.Impossible;
@@ -338,36 +338,36 @@ export default class MoveToTarget extends Objective {
 	/**
 	 * Causes an interrupt if the item decays before we arrive.
 	 */
-	public trackItem(item: Item | undefined) {
+	public trackItem(item: Item | undefined): this {
 		this.trackedItem = item;
 
 		return this;
 	}
 
-	public onItemRemoved(context: Context, item: Item) {
+	public onItemRemoved(context: Context, item: Item): boolean {
 		return this.trackedItem === item;
 	}
 
-	public onCreatureRemoved(context: Context, creature: Creature) {
+	public onCreatureRemoved(context: Context, creature: Creature): boolean {
 		return this.trackedCreature === creature;
 	}
 
-	public onCorpseRemoved(context: Context, corpse: Corpse) {
+	public onCorpseRemoved(context: Context, corpse: Corpse): boolean {
 		return this.trackedCorpse === corpse;
 	}
 
 	/**
 	 * Called when the context human or creature moves
 	 */
-	public override async onMove(context: Context) {
+	public override async onMove(context: Context): Promise<boolean | IObjective | EquipItem> {
 		const trackedCreature = this.trackedCreature;
 		if (trackedCreature && this.trackedPosition) {
-			if (!trackedCreature.isValid()) {
+			if (!trackedCreature.isValid) {
 				this.log.info("Creature died");
 				return true;
 			}
 
-			if (trackedCreature.isTamed()) {
+			if (trackedCreature.isTamed) {
 				this.log.info("Creature became tamed");
 				return true;
 			}

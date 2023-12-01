@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Creature from "game/entity/creature/Creature";
-import { EquipType } from "game/entity/IHuman";
-import { ItemType } from "game/item/IItem";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import type { CreatureSearch } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -43,7 +43,7 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed() && !context.utilities.creature.isScaredOfCreature(context, creature))
+		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed && !context.utilities.creature.isScaredOfCreature(context.human, creature))
 			.map(creature => {
 				const objectives: IObjective[] = [];
 

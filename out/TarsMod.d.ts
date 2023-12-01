@@ -8,22 +8,22 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import type CommandManager from "command/CommandManager";
-import { IEventEmitter } from "event/EventEmitter";
-import Human from "game/entity/Human";
-import type { Source } from "game/entity/player/IMessageManager";
-import type Player from "game/entity/player/Player";
-import { IPromptConfirmDescription } from "game/meta/prompt/IPrompt";
-import type Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
-import type Message from "language/dictionary/Message";
-import Mod from "mod/Mod";
-import type Bindable from "ui/input/Bindable";
-import type { DialogId } from "ui/screen/screens/game/Dialogs";
-import type { QuadrantComponentId } from "ui/screen/screens/game/IGameScreenApi";
-import type { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import NPC from "game/entity/npc/NPC";
-import { TranslationArg } from "language/ITranslation";
+import type CommandManager from "@wayward/game/command/CommandManager";
+import { IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import Human from "@wayward/game/game/entity/Human";
+import type { Source } from "@wayward/game/game/entity/player/IMessageManager";
+import type Player from "@wayward/game/game/entity/player/Player";
+import { IPromptConfirmDescription } from "@wayward/game/game/meta/prompt/IPrompt";
+import type Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
+import type Message from "@wayward/game/language/dictionary/Message";
+import Mod from "@wayward/game/mod/Mod";
+import type Bindable from "@wayward/game/ui/input/Bindable";
+import type { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import type { QuadrantComponentId } from "@wayward/game/ui/screen/screens/game/IGameScreenApi";
+import { type MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import NPC from "@wayward/game/game/entity/npc/NPC";
+import { TranslationArg } from "@wayward/game/language/ITranslation";
 import type { IGlobalSaveData, ISaveData, ISaveDataContainer, ITarsModEvents } from "./ITarsMod";
 import { TarsTranslation } from "./ITarsMod";
 import Tars from "./core/Tars";

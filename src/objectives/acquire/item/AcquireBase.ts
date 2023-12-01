@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { ItemType } from "game/item/IItem";
+import type { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../core/context/Context";
 import type { IExecutionTree } from "../../../core/planning/IPlan";
@@ -104,7 +104,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 		return result;
 	}
 
-	private addResult(source: IObjectivePriority, destination: IObjectivePriority) {
+	private addResult(source: IObjectivePriority, destination: IObjectivePriority): void {
 		for (const key of Object.keys(source) as Array<keyof IObjectivePriority>) {
 			if (typeof (source[key]) === "number") {
 				(destination as any)[key] += source[key] as number;
@@ -120,7 +120,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	/**
 	 * Higher number = higher priority = it will be executed first
 	 */
-	private addGatherObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree) {
+	private addGatherObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree): void {
 		if (tree.objective instanceof GatherFromCreature) {
 			result.totalGatherObjectives++;
 			result.gatherObjectives.GatherFromCreature++;
@@ -152,7 +152,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	/**
 	 * Higher number = higher priority = it will be executed first
 	 */
-	private addAcquireObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree) {
+	private addAcquireObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree): void {
 		if (tree.objective.getName() === "UseProvidedItem") {
 			result.useProvidedItemObjectives++;
 		}

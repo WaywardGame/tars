@@ -8,8 +8,8 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Island from "game/island/Island";
-import type Translation from "language/Translation";
+import Island from "@wayward/game/game/island/Island";
+import type Translation from "@wayward/game/language/Translation";
 import { TarsTranslation } from "../../ITarsMod";
 import TarsMod from "../../TarsMod";
 import Tars from "../../core/Tars";

@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
 
 import type Context from "../../../../core/context/Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";
@@ -20,7 +20,7 @@ import MoveToTarget from "../../../core/MoveToTarget";
 import UseItem from "../../item/UseItem";
 import AnalyzeInventory from "../../../analyze/AnalyzeInventory";
 import { inventoryItemInfo } from "../../../../core/ITars";
-import Pour from "game/entity/action/actions/Pour";
+import Pour from "@wayward/game/game/entity/action/actions/Pour";
 import AcquireWater from "../../../acquire/item/specific/AcquireWater";
 import RepairItem from "../../../interrupt/RepairItem";
 
@@ -63,7 +63,7 @@ export default class StartDripStone extends Objective {
 
             if (availableWaterContainer.durability !== undefined &&
                 availableWaterContainer.durabilityMax !== undefined &&
-                (availableWaterContainer.durability / availableWaterContainer.durabilityMax) < 0.6) {
+                (availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
                 // repair our container
                 objectives.push(new RepairItem(availableWaterContainer));
             }

@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EquipType } from "game/entity/IHuman";
-import { IContainer, ItemType } from "game/item/IItem";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
 import Context from "../core/context/Context";
 import { IObjective } from "../core/objective/IObjective";
 import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";

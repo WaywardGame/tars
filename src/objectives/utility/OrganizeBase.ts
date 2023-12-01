@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
-import Tile from "game/tile/Tile";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";

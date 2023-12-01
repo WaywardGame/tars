@@ -9,13 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionType } from "game/entity/action/IAction";
-import type { IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
-import type Item from "game/item/Item";
-import Eat from "game/entity/action/actions/Eat";
-import { WeightStatus } from "game/entity/player/IPlayer";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import { ActionArgument, ActionType } from "@wayward/game/game/entity/action/IAction";
+import Eat from "@wayward/game/game/entity/action/actions/Eat";
+import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
+import type Item from "@wayward/game/game/item/Item";
 
+import { IContainer } from "@wayward/game/game/item/IItem";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -23,7 +24,10 @@ import Objective from "../../core/objective/Objective";
 import AcquireFood from "../acquire/item/AcquireFood";
 import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
 import UseItem from "../other/item/UseItem";
-import { IContainer } from "game/item/IItem";
+import Human from "@wayward/game/game/entity/Human";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { IConsumeItemCanUse } from "@wayward/game/game/entity/action/actions/ConsumeItem";
+import { ReferenceType } from "@wayward/game/game/reference/IReferenceManager";
 
 const decayingSoonThreshold = 50;
 
@@ -66,10 +70,10 @@ export default class RecoverHunger extends Objective {
 						}
 					}
 
-					decayingSoonFoodItems = decayingSoonFoodItems.concat(foodItemsInBase.filter(item => item.decay === undefined || item.decay <= decayingSoonThreshold));
+					decayingSoonFoodItems = decayingSoonFoodItems.concat(foodItemsInBase.filter(item => item.getDecayTime() === undefined || item.getDecayTime()! <= decayingSoonThreshold));
 				}
 
-				decayingSoonFoodItems = decayingSoonFoodItems.concat(this.getFoodItemsInInventory(context).filter(item => item.decay === undefined || item.decay <= decayingSoonThreshold));
+				decayingSoonFoodItems = decayingSoonFoodItems.concat(this.getFoodItemsInInventory(context).filter(item => item.getDecayTime() === undefined || item.getDecayTime()! <= decayingSoonThreshold));
 
 				if (decayingSoonFoodItems.length > 0) {
 					return this.eatItem(context, decayingSoonFoodItems[0]);
@@ -106,12 +110,12 @@ export default class RecoverHunger extends Objective {
 		];
 	}
 
-	private getFoodItemsInInventory(context: Context) {
+	private getFoodItemsInInventory(context: Context): Item[] {
 		// prioritize ones that will decay sooner
 		return Array.from(context.utilities.item.foodItemTypes)
 			.map(foodItemType => context.utilities.item.getItemsInContainerByType(context, context.human.inventory, foodItemType))
 			.flat()
-			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
+			.sort((a, b) => (a.getDecayTime() ?? 999999) - (b.getDecayTime() ?? 999999));
 	}
 
 	private getFoodItemsInBase(context: Context): Item[] {
@@ -120,10 +124,10 @@ export default class RecoverHunger extends Objective {
 			.map(chest => context.utilities.item.getItemsInContainer(context, chest as IContainer)
 				.filter(item => context.utilities.item.foodItemTypes.has(item.type)))
 			.flat()
-			.sort((a, b) => (a.decay ?? 999999) - (b.decay ?? 999999));
+			.sort((a, b) => (a.getDecayTime() ?? 999999) - (b.getDecayTime() ?? 999999));
 	}
 
-	private eatItem(context: Context, item: Item) {
+	private eatItem(context: Context, item: Item): (MoveItemIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human<number, ReferenceType.NPC | ReferenceType.Player>, void, IConsumeItemCanUse, [Item]>>)[] {
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
 			new MoveItemIntoInventory(item).keepInInventory(),

@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Item from "game/item/Item";
+import Item from "@wayward/game/game/item/Item";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
@@ -18,29 +18,29 @@ import PlantSeed from "../other/item/PlantSeed";
 
 export default class PlantSeeds extends Objective {
 
-    constructor(private readonly seeds: Item[]) {
-        super()
-    }
+	constructor(private readonly seeds: Item[]) {
+		super()
+	}
 
-    public getIdentifier(): string {
-        return `PlantSeeds:${this.seeds.join(",")}`;
-    }
+	public getIdentifier(): string {
+		return `PlantSeeds:${this.seeds.join(",")}`;
+	}
 
-    public getStatus(): string | undefined {
-        return "Planting seeds";
-    }
+	public getStatus(): string | undefined {
+		return "Planting seeds";
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const objectivePipelines: IObjective[][] = [];
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const objectivePipelines: IObjective[][] = [];
 
-        for (const seed of this.seeds) {
-            objectivePipelines.push([
-                new PlantSeed(seed),
-                new Restart(), // there might be more seeds to plant, so restart after
-            ]);
-        }
+		for (const seed of this.seeds) {
+			objectivePipelines.push([
+				new PlantSeed(seed),
+				new Restart(), // there might be more seeds to plant, so restart after
+			]);
+		}
 
-        return objectivePipelines;
-    }
+		return objectivePipelines;
+	}
 
 }

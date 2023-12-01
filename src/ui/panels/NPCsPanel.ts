@@ -9,18 +9,18 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventHandler } from "event/EventManager";
-import RemoveControllableNPC from "game/entity/action/actions/RemoveControllableNPC";
-import Island from "game/island/Island";
-import Prompts from "game/meta/prompt/Prompts";
-import type Translation from "language/Translation";
-import Button from "ui/component/Button";
-import Component from "ui/component/Component";
-import Divider from "ui/component/Divider";
-import { LabeledButtonRow } from "ui/component/LabeledButtonRow";
-import { Bound } from "utilities/Decorators";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import RemoveControllableNPC from "@wayward/game/game/entity/action/actions/RemoveControllableNPC";
+import Island from "@wayward/game/game/island/Island";
+import Prompts from "@wayward/game/game/meta/prompt/Prompts";
+import type Translation from "@wayward/game/language/Translation";
+import Button from "@wayward/game/ui/component/Button";
+import Component from "@wayward/game/ui/component/Component";
+import Divider from "@wayward/game/ui/component/Divider";
+import { LabeledButtonRow } from "@wayward/game/ui/component/LabeledButtonRow";
+import { Bound } from "@wayward/utilities/Decorators";
 
-import Mod from "mod/Mod";
+import Mod from "@wayward/game/mod/Mod";
 import { TARS_ID, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
 import TarsMod from "../../TarsMod";
 import Tars, { TarsNPC } from "../../core/Tars";
@@ -29,104 +29,104 @@ import TarsPanel from "../components/TarsPanel";
 
 export default class NPCsPanel extends TarsPanel {
 
-    @Mod.instance<TarsMod>(TARS_ID)
-    public readonly TarsMod: TarsMod;
+	@Mod.instance<TarsMod>(TARS_ID)
+	public readonly TarsMod: TarsMod;
 
-    private readonly rows: Component;
+	private readonly rows: Component;
 
-    constructor(tarsInstance: Tars) {
-        super(tarsInstance);
+	constructor(tarsInstance: Tars) {
+		super(tarsInstance);
 
-        new Button()
-            .setText(getTarsTranslation(TarsTranslation.DialogButtonSpawnNPC))
-            .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonSpawnNPCTooltip)))
-            .event.subscribe("activate", async () => {
-                this.TarsMod.spawnNpc();
-                return true;
-            })
-            .appendTo(this);
+		new Button()
+			.setText(getTarsTranslation(TarsTranslation.DialogButtonSpawnNPC))
+			.setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonSpawnNPCTooltip)))
+			.event.subscribe("activate", async () => {
+				this.TarsMod.spawnNpc();
+				return true;
+			})
+			.appendTo(this);
 
-        new Divider().appendTo(this);
+		new Divider().appendTo(this);
 
-        this.rows = new Component()
-            .setStyle("display", "grid")
-            .setStyle("row-gap", "5px")
-            .setStyle("column-count", "1")
-            .appendTo(this);
-    }
+		this.rows = new Component()
+			.setStyle("display", "grid")
+			.setStyle("row-gap", "5px")
+			.setStyle("column-count", "1")
+			.appendTo(this);
+	}
 
-    public getTranslation(): TarsTranslation | Translation {
-        return TarsTranslation.DialogPanelNPCs;
-    }
+	public getTranslation(): TarsTranslation | Translation {
+		return TarsTranslation.DialogPanelNPCs;
+	}
 
-    protected onSwitchTo() {
-        for (const island of game.islands.active) {
-            this.onIslandActivated(island);
-        }
-    }
+	protected onSwitchTo(): void {
+		for (const island of game.islands.active) {
+			this.onIslandActivated(island);
+		}
+	}
 
-    @EventHandler(Island, "activated")
-    protected onIslandActivated(island: Island) {
-        const events = island.npcs.event.until(this, "switchAway", "remove");
-        events.subscribe("spawn", this.refresh);
-        events.subscribe("remove", this.refresh);
+	@EventHandler(Island, "activated")
+	protected onIslandActivated(island: Island): void {
+		const events = island.npcs.event.until(this, "switchAway", "remove");
+		events.subscribe("create", this.refresh);
+		events.subscribe("remove", this.refresh);
 
-        this.refresh();
-    }
+		this.refresh();
+	}
 
-    @EventHandler(Island, "deactivated")
-    protected onIslandDeactivated(island: Island) {
-        island.npcs.event.unsubscribe("spawn", this.refresh);
-        island.npcs.event.unsubscribe("remove", this.refresh);
+	@EventHandler(Island, "deactivated")
+	protected onIslandDeactivated(island: Island): void {
+		island.npcs.event.unsubscribe("create", this.refresh);
+		island.npcs.event.unsubscribe("remove", this.refresh);
 
-        this.refresh();
-    }
+		this.refresh();
+	}
 
-    @Bound
-    protected async refresh() {
-        // ensure the refresh occurs after the npc is removed from the manager
-        await this.sleep(10);
+	@Bound
+	protected async refresh(): Promise<void> {
+		// ensure the refresh occurs after the npc is removed from the manager
+		await this.sleep(10);
 
-        this.rows.dump();
+		this.rows.dump();
 
-        const nonPlayerHumans = game.getNonPlayerHumans();
-        for (const human of nonPlayerHumans) {
-            const npc = human.asNPC;
-            if (!npc) {
-                continue;
-            }
+		const nonPlayerHumans = game.getNonPlayerHumans();
+		for (const human of nonPlayerHumans) {
+			const npc = human.asNPC;
+			if (!npc) {
+				continue;
+			}
 
-            const tarsInstance = (npc as TarsNPC).tarsInstance;
-            if (tarsInstance === undefined) {
-                continue;
-            }
+			const tarsInstance = (npc as TarsNPC).tarsInstance;
+			if (tarsInstance === undefined) {
+				continue;
+			}
 
-            const blockRow = new LabeledButtonRow()
-                .setLabel(label => label.setText(human.getName()))
-                .addButton(button => button
-                    .classes.add("button-gear")
-                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonConfigurationTooltip)))
-                    .event.subscribe("activate", () => {
-                        gameScreen?.dialogs.open<TarsDialog>(this.TarsMod.dialogMain, undefined, tarsInstance.dialogSubId)?.initialize(tarsInstance);
-                    }))
-                .addButton(button => button
-                    .classes.add("button-delete")
-                    .setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonDeleteTooltip)))
-                    .event.subscribe("activate", async () => {
-                        if (!await Prompts.queue(
-                            this.TarsMod.promptDeleteConfirmation,
-                            human.getName())) {
-                            return;
-                        }
+			const blockRow = new LabeledButtonRow()
+				.setLabel(label => label.setText(human.getName()))
+				.addButton(button => button
+					.classes.add("button-gear")
+					.setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonConfigurationTooltip)))
+					.event.subscribe("activate", () => {
+						gameScreen?.dialogs.open<TarsDialog>(this.TarsMod.dialogMain, undefined, tarsInstance.dialogSubId)?.initialize(tarsInstance);
+					}))
+				.addButton(button => button
+					.classes.add("button-delete")
+					.setTooltip(tooltip => tooltip.setText(getTarsTranslation(TarsTranslation.DialogButtonDeleteTooltip)))
+					.event.subscribe("activate", async () => {
+						if (!await Prompts.queue(
+							this.TarsMod.promptDeleteConfirmation,
+							human.getName())) {
+							return;
+						}
 
-                        RemoveControllableNPC.execute(localPlayer, npc);
-                    }))
-                .appendTo(this.rows);
+						RemoveControllableNPC.execute(localPlayer, npc);
+					}))
+				.appendTo(this.rows);
 
-            human.event.until(blockRow.label, "remove")
-                .subscribe("renamed", () => {
-                    blockRow.label.setText(human.getName());
-                });
-        }
-    }
+			human.event.until(blockRow.label, "remove")
+				.subscribe("renamed", () => {
+					blockRow.label.setText(human.getName());
+				});
+		}
+	}
 }

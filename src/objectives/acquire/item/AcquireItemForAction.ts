@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionType } from "game/entity/action/IAction";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Dictionary from "language/Dictionary";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
-import Enums from "utilities/enum/Enums";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import Enums from "@wayward/game/utilities/enum/Enums";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";

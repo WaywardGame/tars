@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Log from "utilities/Log";
-import { MemoryLog } from "utilities/Log";
+import type Log from "@wayward/utilities/Log";
+import { MemoryLog } from "@wayward/utilities/Log";
 import { LoggerUtilities } from "../../utilities/LoggerUtilities";
 
 import type Context from "../context/Context";
@@ -35,6 +35,11 @@ import Plan from "./Plan";
  * Or ask Spacetech about it
  */
 export class Planner implements IPlanner {
+
+	/**
+	 * Number of await's things in flight
+	 */
+	public pendingTasks = 0;
 
 	/**
 	 * Objective hash code -> calculated difficulty
@@ -65,7 +70,7 @@ export class Planner implements IPlanner {
 	/**
 	 * Reset the cached difficulties for objectives
 	 */
-	public reset() {
+	public reset(): void {
 		this.calculateDifficultyCache.clear();
 	}
 
@@ -86,7 +91,9 @@ export class Planner implements IPlanner {
 
 		// the plan should be executed with the same context state it was created for
 		// calculate the difficulty of the cloned context
+		this.pendingTasks++;
 		const result = await this.calculateDifficulty(context.clone(true, false), objective);
+		this.pendingTasks--;
 
 		if (result.status === CalculatedDifficultyStatus.Impossible ||
 			result.status === CalculatedDifficultyStatus.NotCalculatedYet ||
@@ -141,7 +148,9 @@ export class Planner implements IPlanner {
 				// this.log.debug(`Checking status for ${objectivesSet.map(o => o.getHashCode()).join(" -> ")}...`);
 
 				const objectiveStartTime = performance.now();
+				this.pendingTasks++;
 				const objectivePipeline = await this.getObjectivePipeline(clonedContext, objectivesSet);
+				this.pendingTasks--;
 				const objectiveDeltaTime = performance.now() - objectiveStartTime;
 
 				if (this.debug) {
@@ -289,7 +298,9 @@ export class Planner implements IPlanner {
 		// note: looping through objectives and trying to fast fail based on cached calculated difficulties does not make these faster
 
 		for (const objective of objectives) {
+			this.pendingTasks++;
 			let calculatedDifficulty = await this.calculateDifficulty(clonedContext, objective);
+			this.pendingTasks--;
 
 			// this.log.info(`\tObjective ${objective.getHashCode()}. Difficulty: ${difficulty} ${objectives.length}`);
 
@@ -317,7 +328,9 @@ export class Planner implements IPlanner {
 
 				this.calculateDifficultyCache.delete(calculatedDifficulty.hashCode);
 
+				this.pendingTasks++;
 				calculatedDifficulty = await this.calculateDifficulty(clonedContext, objective);
+				this.pendingTasks--;
 
 				// this.log.info(`\tObjective ${objective.getHashCode()}. Difficulty: ${difficulty} ${objectives.length}`);
 
@@ -538,7 +551,9 @@ export class Planner implements IPlanner {
 
 		const changes = context.watchForChanges();
 
+		this.pendingTasks++;
 		let executionResult = await objective.execute(context, impossibleObjectiveHashCode ?? objectiveHashCode);
+		this.pendingTasks--;
 
 		if (this.debug) {
 			objective.setLogger(undefined);
@@ -575,14 +590,18 @@ export class Planner implements IPlanner {
 						this.writeCalculationLog(`Found ${executionResult.length} objective pipelines.`);
 					}
 
+					this.pendingTasks++;
 					pipelineResult = await this.pickEasiestObjectivePipeline(context, executionResult as IObjective[][]);
+					this.pendingTasks--;
 
 				} else {
 					if (this.debug) {
 						this.writeCalculationLog(`Found objective pipeline with ${executionResult.length} objectives.`);
 					}
 
+					this.pendingTasks++;
 					pipelineResult = await this.getObjectivePipeline(context, executionResult as IObjective[]);
+					this.pendingTasks--;
 				}
 
 				if (pipelineResult.changes) {

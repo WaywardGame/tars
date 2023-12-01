@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
-import Tile from "game/tile/Tile";
-import Log from "utilities/Log";
+import type { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import Tile from "@wayward/game/game/tile/Tile";
+import Log from "@wayward/utilities/Log";
 
 import { IBase, IInventoryItems, IUtilities, ReserveType } from "../ITars";
 import { ITarsOptions } from "../ITarsOptions";
@@ -52,7 +52,7 @@ export default class Context implements IContext {
 		return this.tars.saveData.options;
 	}
 
-	public toString() {
+	public toString(): string {
 		return `Context: ${this.getHashCode()}. Initial state: ${this.initialState ? this.initialState.getHashCode() : ""}. Data: ${this.state.data ? Array.from(this.state.data.keys()).join(",") : undefined}`;
 	}
 
@@ -85,14 +85,14 @@ export default class Context implements IContext {
 		return this.changes;
 	}
 
-	public unwatch() {
+	public unwatch(): void {
 		this.changes = undefined;
 	}
 
 	/**
 	 * Checks if the item is reserved by another objective
 	 */
-	public isReservedItem(item: Item) {
+	public isReservedItem(item: Item): boolean {
 		if (this.state.reservedItems?.has(item)) {
 			this.markShouldIncludeHashCode();
 			return true;
@@ -104,7 +104,7 @@ export default class Context implements IContext {
 	/**
 	 * Checks if the item is reserved by another objective and is not going to be consumed
 	 */
-	public isSoftReservedItem(item: Item) {
+	public isSoftReservedItem(item: Item): boolean {
 		if (this.state.reservedItems?.get(item) === ReserveType.Soft) {
 			this.markShouldIncludeHashCode();
 			return true;
@@ -116,7 +116,7 @@ export default class Context implements IContext {
 	/**
 	 * Checks if the item is reserved by another objective and is going to be consumed
 	 */
-	public isHardReservedItem(item: Item) {
+	public isHardReservedItem(item: Item): boolean {
 		if (this.state.reservedItems?.get(item) === ReserveType.Hard) {
 			this.markShouldIncludeHashCode();
 			return true;
@@ -146,7 +146,7 @@ export default class Context implements IContext {
 		return this.getData(type) ?? defaultValue;
 	}
 
-	public setData<T = any>(type: string, value: T | undefined) {
+	public setData<T = any>(type: string, value: T | undefined): void {
 		this.state.set(type, value);
 
 		if (this.changes) {
@@ -154,7 +154,7 @@ export default class Context implements IContext {
 		}
 	}
 
-	public addSoftReservedItems(...items: Item[]) {
+	public addSoftReservedItems(...items: Item[]): void {
 		this.state.reservedItems ??= new Map();
 
 		for (const item of items) {
@@ -179,7 +179,7 @@ export default class Context implements IContext {
 		}
 	}
 
-	public addSoftReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
+	public addSoftReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]): void {
 		this.state.reservedItems ??= new Map();
 
 		for (const item of items) {
@@ -206,7 +206,7 @@ export default class Context implements IContext {
 		}
 	}
 
-	public addHardReservedItems(...items: Item[]) {
+	public addHardReservedItems(...items: Item[]): void {
 		this.state.reservedItems ??= new Map();
 		if (this.changes) {
 			this.changes.reservedItems ??= new Map();
@@ -223,7 +223,7 @@ export default class Context implements IContext {
 		}
 	}
 
-	public addHardReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]) {
+	public addHardReservedItemsForObjectiveHashCode(objectiveHashCode: string, ...items: Item[]): void {
 		this.state.reservedItems ??= new Map();
 		if (this.changes) {
 			this.changes.reservedItems ??= new Map();
@@ -240,7 +240,7 @@ export default class Context implements IContext {
 		}
 	}
 
-	public addProvidedItems(itemTypes: ItemType[]) {
+	public addProvidedItems(itemTypes: ItemType[]): void {
 		this.state.providedItems ??= new Map();
 		if (this.changes) {
 			this.changes.providedItems ??= new Map();
@@ -279,11 +279,11 @@ export default class Context implements IContext {
 		return false;
 	}
 
-	public setInitialState(state: ContextState = this.state.clone(false)) {
+	public setInitialState(state: ContextState = this.state.clone(false)): void {
 		this.initialState = state;
 	}
 
-	public setInitialStateData<T = any>(type: string, value: T | undefined) {
+	public setInitialStateData<T = any>(type: string, value: T | undefined): void {
 		if (!this.initialState) {
 			if (value === undefined) {
 				return;
@@ -295,7 +295,7 @@ export default class Context implements IContext {
 		this.initialState.set(type, value);
 	}
 
-	public reset() {
+	public reset(): void {
 		this.changes = undefined;
 
 		if (this.initialState) {
@@ -308,7 +308,7 @@ export default class Context implements IContext {
 		this.resetPosition();
 	}
 
-	public resetPosition() {
+	public resetPosition(): void {
 		this.setData(ContextDataType.Tile, this.human.tile);
 	}
 
@@ -324,7 +324,7 @@ export default class Context implements IContext {
 	 * Mark that we should include the hash code when caching this objective and it's parents
 	 * This is called when we try to use a reserved items
 	 */
-	public markShouldIncludeHashCode() {
+	public markShouldIncludeHashCode(): void {
 		this.state.includeHashCode = true;
 
 		if (this.changes) {
@@ -336,7 +336,7 @@ export default class Context implements IContext {
 	 * Check if the given difficulty is plausible
 	 * @returns True if the easiest objective in the parents list is not easier than this one
 	 */
-	public isPlausible(difficulty: number, requireMinimumAcceptedDifficulty: boolean = false) {
+	public isPlausible(difficulty: number, requireMinimumAcceptedDifficulty: boolean = false): boolean {
 		if (requireMinimumAcceptedDifficulty && this.state.minimumAcceptedDifficulty === undefined) {
 			return true;
 		}

@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import type { IContainer } from "game/item/IItem";
-import { ItemType } from "game/item/IItem";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -37,7 +37,7 @@ export default class GatherFromChest extends Objective {
 		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a chest`;
 	}
 
-	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
+	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string): { objectiveHashCode: string; itemTypes: Set<ItemType>; } {
 		return {
 			objectiveHashCode,
 			itemTypes: new Set([this.itemType]),

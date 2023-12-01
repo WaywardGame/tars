@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionType } from "game/entity/action/IAction";
-import { IContainer, ItemType } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Eat from "game/entity/action/actions/Eat";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import Eat from "@wayward/game/game/entity/action/actions/Eat";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -88,7 +88,7 @@ export default class AcquireFood extends Objective {
 		return objectivePipelines;
 	}
 
-	public static getFoodRecipeObjectivePipelines(context: Context, eatFood: boolean) {
+	public static getFoodRecipeObjectivePipelines(context: Context, eatFood: boolean): IObjective[][] {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const itemType of context.utilities.item.foodItemTypes) {

@@ -10,20 +10,20 @@
  */
 
 import Stream from "@wayward/goodstream/Stream";
-import type { AnyActionDescription } from "game/entity/action/IAction";
-import { ActionType } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import { TerrainType } from "game/tile/ITerrain";
-import Dictionary from "language/Dictionary";
-import { ListEnder } from "language/ITranslation";
-import Translation from "language/Translation";
-import Item from "game/item/Item";
-import MoveItem from "game/entity/action/actions/MoveItem";
-import Harvest from "game/entity/action/actions/Harvest";
-import Butcher from "game/entity/action/actions/Butcher";
-import Chop from "game/entity/action/actions/Chop";
-import Dig from "game/entity/action/actions/Dig";
-import Mine from "game/entity/action/actions/Mine";
+import type { AnyActionDescription } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { ListEnder } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import Item from "@wayward/game/game/item/Item";
+import MoveItem from "@wayward/game/game/entity/action/actions/MoveItem";
+import Harvest from "@wayward/game/game/entity/action/actions/Harvest";
+import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
+import Chop from "@wayward/game/game/entity/action/actions/Chop";
+import Dig from "@wayward/game/game/entity/action/actions/Dig";
+import Mine from "@wayward/game/game/entity/action/actions/Mine";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -31,7 +31,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
 import { GetActionArguments } from "../../utilities/ActionUtilities";
-import Message from "language/dictionary/Message";
+import Message from "@wayward/game/language/dictionary/Message";
 
 export enum ExecuteActionType {
 	Generic,

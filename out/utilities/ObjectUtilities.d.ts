@@ -8,13 +8,13 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import type Doodad from "game/doodad/Doodad";
-import type Corpse from "game/entity/creature/corpse/Corpse";
-import type Creature from "game/entity/creature/Creature";
-import type { IVector3 } from "utilities/math/IVector";
-import type NPC from "game/entity/npc/NPC";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
 import type Context from "../core/context/Context";
-import { CreatureType } from "game/entity/creature/ICreature";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import Entity from "@wayward/types/definitions/game/game/entity/Entity";
 export declare enum FindObjectType {
     Creature = 0,
     Doodad = 1,
@@ -25,7 +25,7 @@ export declare class ObjectUtilities {
     private readonly cachedSorts;
     private readonly cachedObjects;
     clearCache(): void;
-    getSortedObjects<T>(context: Context, type: FindObjectType, allObjects: SaferArray<T>, getPoint?: (object: T) => IVector3): T[];
+    getSortedObjects<T extends Entity>(context: Context, type: FindObjectType, allObjects: SaferArray<T>): T[];
     private findObjects;
     findDoodads(context: Context, id: string, isTarget: (doodad: Doodad) => boolean, top?: number): Doodad[];
     findCreatures(context: Context, id: string, isTarget: (creature: Creature) => boolean, top?: number): Creature[];

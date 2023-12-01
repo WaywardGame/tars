@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import AttachContainer from "game/entity/action/actions/AttachContainer";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import AttachContainer from "@wayward/game/game/entity/action/actions/AttachContainer";
 
 import type Context from "../../../../core/context/Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";

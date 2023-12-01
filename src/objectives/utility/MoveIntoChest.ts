@@ -10,11 +10,11 @@
  */
 
 import Stream from "@wayward/goodstream/Stream";
-import type { IContainer } from "game/item/IItem";
-import type Item from "game/item/Item";
-import { ListEnder } from "language/ITranslation";
-import Translation from "language/Translation";
-import Vector2 from "utilities/math/Vector2";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import { ListEnder } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -49,7 +49,7 @@ export default class MoveIntoChest extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const itemsToMove = this.itemsToMove ?? [this.getAcquiredItem(context)];
 		const firstItem = itemsToMove[0];
-		if (!firstItem?.isValid()) {
+		if (!firstItem?.isValid) {
 			this.log.warn("Invalid item to move");
 			return ObjectiveResult.Restart;
 		}

@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Doodad from "game/doodad/Doodad";
+import Doodad from "@wayward/game/game/doodad/Doodad";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

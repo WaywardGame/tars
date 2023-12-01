@@ -9,21 +9,20 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Entity from "game/entity/Entity";
-import { Stat } from "game/entity/IStats";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
+import Entity from "@wayward/game/game/entity/Entity";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import type Context from "../../core/context/Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
-import Tile from "game/tile/Tile";
+import Tile from "@wayward/game/game/tile/Tile";
 const safetyCheckDistance = 5;
 const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
 
 export default class RunAwayFromTarget extends Objective {
 
-	constructor(private readonly target: Entity | IVector3, private readonly maxRunAwayDistance = 30) {
+	constructor(private readonly target: Entity, private readonly maxRunAwayDistance = 30) {
 		super();
 	}
 
@@ -32,7 +31,7 @@ export default class RunAwayFromTarget extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return `Running away from ${this.target instanceof Entity ? this.target.getName() : `(${this.target.x},${this.target.y},${this.target.z})`}`;
+		return `Running away from ${this.target.getName()}`;
 	}
 
 	public override isDynamic(): boolean {
@@ -83,7 +82,7 @@ export default class RunAwayFromTarget extends Objective {
 			score -= distance * 200;
 
 			for (const point of movementPath.path) {
-				const index = `${point.x},${point.y}`;
+				const index = `${point.x},${point.y} `;
 
 				let pointScore = scoreCache.get(index);
 				if (pointScore === undefined) {
@@ -94,7 +93,7 @@ export default class RunAwayFromTarget extends Objective {
 					pointScore += navigation.getPenalty(tile) * 10;
 
 					// try to avoid paths that has blocking things
-					if (tile.doodad?.blocksMove()) {
+					if (tile.doodad?.blocksMove) {
 						pointScore += 2000;
 					}
 
@@ -116,7 +115,7 @@ export default class RunAwayFromTarget extends Objective {
 							// }
 
 							// // add score for doodads and terrains because we would rather end up in an open area
-							// if (tile.doodad?.blocksMove()) {
+							// if (tile.doodad?.blocksMove) {
 							// 	pointScore! += 100;
 							// }
 

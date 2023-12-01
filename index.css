@@ -15,6 +15,6 @@
 }
 
 [data-dialog-id="ModTARSMain"] .dialog-title {
-	display: block;
-    flex-basis: 0;
+	display: grid;
+	grid-template-columns: repeat(3, auto) 1fr;
 }

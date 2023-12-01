@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Dig from "game/entity/action/actions/Dig";
-import { TerrainType } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
+import Dig from "@wayward/game/game/entity/action/actions/Dig";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";

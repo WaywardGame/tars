@@ -9,22 +9,22 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import { TileEventType } from "game/tile/ITileEvent";
-import StartFireAction from "game/entity/action/actions/StartFire";
-import { ActionArguments } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import StartFireAction from "@wayward/game/game/entity/action/actions/StartFire";
+import Item from "@wayward/game/game/item/Item";
+import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
 
+import { ReserveType } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import MoveToTarget from "../../core/MoveToTarget";
-import { ReserveType } from "../../../core/ITars";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
+import MoveToTarget from "../../core/MoveToTarget";
 
 export default class StartFire extends Objective {
 
@@ -70,24 +70,24 @@ export default class StartFire extends Objective {
 			objectives.push(new MoveToTarget(doodad, true));
 
 			objectives.push(new ExecuteAction(StartFireAction, (context) => {
-				if (!context.inventory.fireStarter?.isValid()) {
+				if (!context.inventory.fireStarter?.isValid) {
 					this.log.warn("Invalid fireStarter");
 					return ObjectiveResult.Restart;
 				}
 
 				const kindling = context.getData<Item>(kindlingDataKey);
-				if (!kindling?.isValid()) {
+				if (!kindling?.isValid) {
 					this.log.warn("Invalid StartFireKindling");
 					return ObjectiveResult.Restart;
 				}
 
 				const tinder = context.getData<Item>(tinderDataKey);
-				if (!tinder?.isValid()) {
+				if (!tinder?.isValid) {
 					this.log.warn("Invalid StartFireTinder");
 					return ObjectiveResult.Restart;
 				}
 
-				return [context.inventory.fireStarter, undefined, kindling, tinder, undefined] as ActionArguments<typeof StartFireAction>;
+				return [context.inventory.fireStarter, undefined, kindling, tinder, undefined] as ActionArgumentsOf<typeof StartFireAction>;
 			}).setStatus(this));
 
 			objectives.push(new Lambda(async context => {

@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
-import type { ITileContainer } from "game/tile/ITerrain";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import type { ITileContainer } from "@wayward/game/game/tile/ITerrain";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -52,7 +52,7 @@ export default class GatherFromGround extends Objective {
 	// 	return true;
 	// }
 
-	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
+	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string): { objectiveHashCode: string; itemTypes: Set<ItemType>; } {
 		return {
 			objectiveHashCode,
 			itemTypes: new Set([this.itemType]),

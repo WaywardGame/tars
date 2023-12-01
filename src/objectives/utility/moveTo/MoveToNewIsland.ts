@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { IslandId } from "game/island/IIsland";
-import { IslandPosition } from "game/island/IIsland";
-import { Direction } from "utilities/math/Direction";
-import Vector2 from "utilities/math/Vector2";
+import type { IslandId } from "@wayward/game/game/island/IIsland";
+import { IslandPosition } from "@wayward/game/game/island/IIsland";
+import { Direction } from "@wayward/game/utilities/math/Direction";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";

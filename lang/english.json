@@ -170,7 +170,7 @@
 			"dialogRangeRecoverThirstThreshold": "Thirst",
 			"dialogRangeRecoverThirstThresholdTooltip": "TARS will recover thirst once it hits this value.",
 			"dialogStatusNavigatingInitializing": "Initializing navigation system",
-			"dialogTitleMain": "TARS{0? / {0}}: {1}"
+			"dialogTitleMain": "TARS{0? / {0}}: {.TARS-TASK:{1}}"
 		}
 	}
 }

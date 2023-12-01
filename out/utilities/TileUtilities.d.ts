@@ -8,10 +8,9 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { TerrainType } from "game/tile/ITerrain";
-import type { IVector3 } from "utilities/math/IVector";
-import Item from "game/item/Item";
-import Tile from "game/tile/Tile";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Item from "@wayward/game/game/item/Item";
+import Tile from "@wayward/game/game/tile/Tile";
 import type { ITileLocation } from "../core/ITars";
 import Context from "../core/context/Context";
 import { ExtendedTerrainType } from "../core/navigation/INavigation";
@@ -24,7 +23,7 @@ export declare class TileUtilities {
     private readonly tileLocationCache;
     private readonly canUseArgsCache;
     clearCache(): void;
-    getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, positionOverride?: IVector3): ITileLocation[];
+    getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, tileOverride?: Tile): ITileLocation[];
     private _getNearestTileLocation;
     isSwimmingOrOverWater(context: Context): boolean;
     isOverDeepSeaWater(context: Context): boolean;

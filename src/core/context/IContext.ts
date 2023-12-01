@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Human from "game/entity/Human";
+import Human from "@wayward/game/game/entity/Human";
 import type { IBase, IInventoryItems, IUtilities } from "../ITars";
 
 export interface IContext {

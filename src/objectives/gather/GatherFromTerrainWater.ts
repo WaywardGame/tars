@@ -9,20 +9,20 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { TerrainType } from "game/tile/ITerrain";
-import { ItemTypeGroup, ItemType } from "game/item/IItem";
-import ItemManager from "game/item/ItemManager";
-import { terrainDescriptions } from "game/tile/Terrains";
-import GatherLiquid from "game/entity/action/actions/GatherLiquid";
+import GatherLiquid from "@wayward/game/game/entity/action/actions/GatherLiquid";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import ItemManager from "@wayward/game/game/item/ItemManager";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
 
+import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import { ITerrainWaterSearch } from "../../core/ITars";
 import type Context from "../../core/context/Context";
 import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
 import PickUpAllTileItems from "../other/tile/PickUpAllTileItems";
-import { ITerrainWaterSearch } from "../../core/ITars";
-import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
-import { ActionArguments } from "game/entity/action/IAction";
 
 export default class GatherFromTerrainWater extends Objective {
 
@@ -65,12 +65,12 @@ export default class GatherFromTerrainWater extends Objective {
 								action: GatherLiquid,
 								args: (context) => {
 									const item = context.getData(this.waterContainerContextDataKey);
-									if (!item?.isValid()) {
+									if (!item?.isValid) {
 										this.log.warn(`Invalid water container ${item}`, this.waterContainerContextDataKey);
 										return ObjectiveResult.Restart;
 									}
 
-									return [item] as ActionArguments<typeof GatherLiquid>;
+									return [item] as ActionArgumentsOf<typeof GatherLiquid>;
 								},
 							},
 						})

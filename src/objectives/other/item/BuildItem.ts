@@ -9,15 +9,15 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import DoodadManager from "game/doodad/DoodadManager";
-import { DoodadType } from "game/doodad/IDoodad";
-import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import UpdateWalkPath from "game/entity/action/actions/UpdateWalkPath";
-import { ActionType } from "game/entity/action/IAction";
-import type Item from "game/item/Item";
-import Build from "game/entity/action/actions/Build";
-import Tile from "game/tile/Tile";
-import { ItemType } from "game/item/IItem";
+import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
+import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import UpdateWalkPath from "@wayward/game/game/entity/action/actions/UpdateWalkPath";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
+import Build from "@wayward/game/game/entity/action/actions/Build";
+import Tile from "@wayward/game/game/tile/Tile";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -55,7 +55,7 @@ export default class BuildItem extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? this.getAcquiredItem(context);
-		if (!item?.isValid()) {
+		if (!item?.isValid) {
 			this.log.warn("Invalid build item");
 			return ObjectiveResult.Restart;
 		}
@@ -96,10 +96,8 @@ export default class BuildItem extends Objective {
 				if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
 					const nearDoodads = context.base[baseInfo.tryPlaceNear];
 					if (nearDoodads.length > 0) {
-						const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
-
-						for (const point of possiblePoints) {
-							const tile = context.island.getTileFromPoint(point);
+						const possibleTiles = AnalyzeBase.getNearTilesFromDoodads(context, nearDoodads);
+						for (const tile of possibleTiles) {
 							if (context.utilities.base.isGoodBuildTile(context, tile, { openAreaRadius: 0 })) {
 								this.target = tile;
 								break;
@@ -172,7 +170,7 @@ export default class BuildItem extends Objective {
 		];
 	}
 
-	public override async onMove(context: Context) {
+	public override async onMove(context: Context): Promise<boolean | IObjective> {
 		this.movements++;
 
 		if (this.movements >= recalculateMovements) {

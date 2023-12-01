@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Enums from "utilities/enum/Enums";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import Enums from "@wayward/game/utilities/enum/Enums";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";

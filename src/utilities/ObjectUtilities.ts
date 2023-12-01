@@ -9,16 +9,16 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import type Corpse from "game/entity/creature/corpse/Corpse";
-import type Creature from "game/entity/creature/Creature";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
-import type NPC from "game/entity/npc/NPC";
-import { AiType, MoveType } from "game/entity/IEntity";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import { AiType, MoveType } from "@wayward/game/game/entity/IEntity";
 
 import type Context from "../core/context/Context";
-import { CreatureType } from "game/entity/creature/ICreature";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import Entity from "@wayward/types/definitions/game/game/entity/Entity";
 
 export enum FindObjectType {
 	Creature,
@@ -33,26 +33,26 @@ export class ObjectUtilities {
 	private readonly cachedSorts: Map<string, any> = new Map();
 	private readonly cachedObjects: Map<string, any> = new Map();
 
-	public clearCache() {
+	public clearCache(): void {
 		this.cachedSorts.clear();
 		this.cachedObjects.clear();
 	}
 
-	public getSortedObjects<T>(context: Context, type: FindObjectType, allObjects: SaferArray<T>, getPoint?: (object: T) => IVector3): T[] {
+	public getSortedObjects<T extends Entity>(context: Context, type: FindObjectType, allObjects: SaferArray<T>): T[] {
 		const sortedCacheId = FindObjectType[type];
 		let sortedObjects = this.cachedSorts.get(sortedCacheId);
 		if (sortedObjects === undefined) {
 			sortedObjects = allObjects
 				.slice()
 				.filter(a => a !== undefined)
-				.sort((a, b) => Vector2.squaredDistance(context.human, getPoint?.(a!) ?? a as any as IVector3) - Vector2.squaredDistance(context.human, getPoint?.(b!) ?? b as any as IVector3));
+				.sort((a, b) => Vector2.squaredDistance(context.human, a!) - Vector2.squaredDistance(context.human, b!));
 			this.cachedSorts.set(sortedCacheId, sortedObjects);
 		}
 
 		return sortedObjects;
 	}
 
-	private findObjects<T>(context: Context, type: FindObjectType, id: string, allObjects: SaferArray<T>, isTarget: (object: T) => boolean, top?: number, getPoint?: (object: T) => IVector3): T[] {
+	private findObjects<T extends Entity>(context: Context, type: FindObjectType, id: string, allObjects: SaferArray<T>, isTarget: (object: T) => boolean, top?: number): T[] {
 		const cacheId = top === undefined ? `${type}-${id}` : `${type}-${id}-${top}`;
 
 		const cachedResults = this.cachedObjects.get(id) || this.cachedObjects.get(cacheId);
@@ -66,7 +66,6 @@ export class ObjectUtilities {
 		const sortedObjects = this.getSortedObjects(context, type, allObjects);
 
 		for (const object of sortedObjects) {
-			// if ((getPoint?.(object) ?? object as any as IVector3).z === context.human.z && isTarget(object)) {
 			if (isTarget(object)) {
 				results.push(object);
 				matches++;
@@ -104,9 +103,9 @@ export class ObjectUtilities {
 		});
 	}
 
-	public findHuntableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; onlyHostile: boolean; top: number; skipWaterCreatures: boolean }>) {
+	public findHuntableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; onlyHostile: boolean; top: number; skipWaterCreatures: boolean }>): Creature[] {
 		return context.utilities.object.findCreatures(context, id, creature => {
-			if (creature.isTamed()) {
+			if (creature.isTamed) {
 				return false;
 			}
 
@@ -126,9 +125,9 @@ export class ObjectUtilities {
 		}, options?.top);
 	}
 
-	public findTamableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; hostile: boolean; top: number }>) {
+	public findTamableCreatures(context: Context, id: string, options?: Partial<{ type: CreatureType; hostile: boolean; top: number }>): Creature[] {
 		return context.utilities.object.findCreatures(context, id, creature => {
-			if (creature.isTamed()) {
+			if (creature.isTamed) {
 				return false;
 			}
 

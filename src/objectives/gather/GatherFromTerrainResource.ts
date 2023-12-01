@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import ItemManager from "game/item/ItemManager";
-import { TerrainType } from "game/tile/ITerrain";
-import { terrainDescriptions } from "game/tile/Terrains";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import ItemManager from "@wayward/game/game/item/ItemManager";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 
 import type Context from "../../core/context/Context";
 import { ITerrainResourceSearch, ITileLocation } from "../../core/ITars";
@@ -76,7 +76,7 @@ export default class GatherFromTerrainResource extends Objective {
 		return 10;
 	}
 
-	private processTerrainLocation(context: Context, objectivePipelines: IObjective[][], terrainSearch: ITerrainResourceSearch, tileLocation: ITileLocation, skipSmartCheck?: boolean) {
+	private processTerrainLocation(context: Context, objectivePipelines: IObjective[][], terrainSearch: ITerrainResourceSearch, tileLocation: ITileLocation, skipSmartCheck?: boolean): void {
 		const terrainDescription = terrainDescriptions[terrainSearch.type];
 		if (!terrainDescription) {
 			return;

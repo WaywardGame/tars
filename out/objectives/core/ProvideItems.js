@@ -8,7 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-define(["require", "exports", "game/item/IItem", "../../core/objective/IObjective", "../../core/objective/Objective"], function (require, exports, IItem_1, IObjective_1, Objective_1) {
+define(["require", "exports", "@wayward/game/game/item/IItem", "../../core/objective/IObjective", "../../core/objective/Objective"], function (require, exports, IItem_1, IObjective_1, Objective_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ProvideItems extends Objective_1.default {
@@ -30,4 +30,4 @@ define(["require", "exports", "game/item/IItem", "../../core/objective/IObjectiv
     }
     exports.default = ProvideItems;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUHJvdmlkZUl0ZW1zLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL29iamVjdGl2ZXMvY29yZS9Qcm92aWRlSXRlbXMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7OztHQVNHOzs7O0lBWUgsTUFBcUIsWUFBYSxTQUFRLG1CQUFTO1FBTS9DLFlBQVksR0FBRyxTQUFxQjtZQUNoQyxLQUFLLEVBQUUsQ0FBQztZQUxhLDhCQUF5QixHQUFZLEtBQUssQ0FBQztZQU9oRSxJQUFJLENBQUMsU0FBUyxHQUFHLFNBQVMsQ0FBQztRQUMvQixDQUFDO1FBRU0sYUFBYTtZQUNoQixPQUFPLGdCQUFnQixJQUFJLENBQUMsU0FBUyxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUMsRUFBRSxDQUFDLGdCQUFRLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FBQztRQUMxRixDQUFDO1FBRU0sU0FBUztZQUNaLE9BQU8sU0FBUyxDQUFDO1FBQ3JCLENBQUM7UUFFTSxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQWdCO1lBQ2pDLE9BQU8sQ0FBQyxnQkFBZ0IsQ0FBQyxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUM7WUFDekMsT0FBTyw0QkFBZSxDQUFDLFFBQVEsQ0FBQztRQUNwQyxDQUFDO0tBRUo7SUF6QkQsK0JBeUJDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUHJvdmlkZUl0ZW1zLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL29iamVjdGl2ZXMvY29yZS9Qcm92aWRlSXRlbXMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7OztHQVNHOzs7O0lBWUgsTUFBcUIsWUFBYSxTQUFRLG1CQUFTO1FBTWxELFlBQVksR0FBRyxTQUFxQjtZQUNuQyxLQUFLLEVBQUUsQ0FBQztZQUxnQiw4QkFBeUIsR0FBWSxLQUFLLENBQUM7WUFPbkUsSUFBSSxDQUFDLFNBQVMsR0FBRyxTQUFTLENBQUM7UUFDNUIsQ0FBQztRQUVNLGFBQWE7WUFDbkIsT0FBTyxnQkFBZ0IsSUFBSSxDQUFDLFNBQVMsQ0FBQyxHQUFHLENBQUMsUUFBUSxDQUFDLEVBQUUsQ0FBQyxnQkFBUSxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxFQUFFLENBQUM7UUFDdkYsQ0FBQztRQUVNLFNBQVM7WUFDZixPQUFPLFNBQVMsQ0FBQztRQUNsQixDQUFDO1FBRU0sS0FBSyxDQUFDLE9BQU8sQ0FBQyxPQUFnQjtZQUNwQyxPQUFPLENBQUMsZ0JBQWdCLENBQUMsSUFBSSxDQUFDLFNBQVMsQ0FBQyxDQUFDO1lBQ3pDLE9BQU8sNEJBQWUsQ0FBQyxRQUFRLENBQUM7UUFDakMsQ0FBQztLQUVEO0lBekJELCtCQXlCQyJ9

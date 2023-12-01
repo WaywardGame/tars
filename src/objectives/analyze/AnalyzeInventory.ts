@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { IContainer } from "game/item/IItem";
-import type Item from "game/item/Item";
+import { IContainer } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../core/context/Context";
 import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../core/ITars";
@@ -96,7 +96,7 @@ export default class AnalyzeInventory extends Objective {
 							return (itemB.durability ?? 999999) - (itemA.durability ?? 999999);
 
 						case InventoryItemFlag.PreferHigherDecay:
-							return (itemB.decay ?? 999999) - (itemA.decay ?? 999999);
+							return (itemB.getDecayTime() ?? 999999) - (itemA.getDecayTime() ?? 999999);
 
 						case InventoryItemFlag.PreferLowerWeight:
 							return itemA.getTotalWeight() - itemB.getTotalWeight();
@@ -127,7 +127,7 @@ export default class AnalyzeInventory extends Objective {
 		return ObjectiveResult.Ignore;
 	}
 
-	public static getItems(context: Context, itemInfo: IInventoryItemInfo) {
+	public static getItems(context: Context, itemInfo: IInventoryItemInfo): Set<Item> {
 		const items: Set<Item> = new Set();
 
 		if (itemInfo.itemTypes) {
@@ -178,8 +178,8 @@ export default class AnalyzeInventory extends Objective {
 		return items;
 	}
 
-	private isValid(context: Context, itemInfo: IInventoryItemInfo, item: Item) {
-		if (!item.isValid()) {
+	private isValid(context: Context, itemInfo: IInventoryItemInfo, item: Item): boolean {
+		if (!item.isValid) {
 			return false;
 		}
 

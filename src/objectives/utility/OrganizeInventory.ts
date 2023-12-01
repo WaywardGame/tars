@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type Doodad from "game/doodad/Doodad";
-import type { IContainer } from "game/item/IItem";
-import type Item from "game/item/Item";
-import Vector2 from "utilities/math/Vector2";
-import Drop from "game/entity/action/actions/Drop";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Drop from "@wayward/game/game/entity/action/actions/Drop";
 
 import { ContextDataType } from "../../core/context/IContext";
 import type Context from "../../core/context/Context";
@@ -193,7 +193,7 @@ export default class OrganizeInventory extends Objective {
 		];
 	}
 
-	public static moveIntoChestsObjectives(context: Context, itemsToMove: Item[]) {
+	public static moveIntoChestsObjectives(context: Context, itemsToMove: Item[]): IObjective[] | undefined {
 		const chests = context.base.chest.slice().concat(context.base.intermediateChest);
 
 		for (const chest of chests) {
@@ -206,7 +206,7 @@ export default class OrganizeInventory extends Objective {
 		return undefined;
 	}
 
-	private static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]) {
+	private static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]): IObjective[] | undefined {
 		const objectives: IObjective[] = [];
 
 		const targetContainer = chest as IContainer;

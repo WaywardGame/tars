@@ -16,6 +16,7 @@ import Plan from "./Plan";
 export declare class Planner implements IPlanner {
     private readonly loggerUtilities;
     debug: boolean;
+    pendingTasks: number;
     private readonly calculateDifficultyCache;
     private calculatingDifficultyDepth;
     private readonly calculationLog;

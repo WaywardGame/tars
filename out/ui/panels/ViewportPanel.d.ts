@@ -8,8 +8,8 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import type Translation from "language/Translation";
-import { IBindHandlerApi } from "ui/input/Bind";
+import type Translation from "@wayward/game/language/Translation";
+import { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
 import TarsPanel from "../components/TarsPanel";
 import { TarsTranslation } from "../../ITarsMod";
 import Tars from "../../core/Tars";
@@ -24,7 +24,7 @@ export default class ViewportPanel extends TarsPanel {
     getTranslation(): TarsTranslation | Translation;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
-    protected onAppend(): void;
+    protected onAppend(): Promise<void>;
     private resize;
     onZoomIn(api: IBindHandlerApi): boolean;
     private rerender;

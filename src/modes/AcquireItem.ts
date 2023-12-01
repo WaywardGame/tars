@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventBus } from "event/EventBuses";
-import { EventHandler } from "event/EventManager";
-import type Human from "game/entity/Human";
-import type { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import type Human from "@wayward/game/game/entity/Human";
+import type { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
 
 import type { ITarsMode } from "../core/mode/IMode";
 import type Context from "../core/context/Context";
@@ -27,7 +27,7 @@ export class AcquireItemMode implements ITarsMode {
 	constructor(private readonly itemType: ItemType) {
 	}
 
-	public async initialize(_: Context, finished: (success: boolean) => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void): Promise<void> {
 		this.finished = finished;
 	}
 
@@ -37,7 +37,7 @@ export class AcquireItemMode implements ITarsMode {
 
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemUpdate")
-	public onInventoryItemAddOrUpdate(_: Human, items: Item[]) {
+	public onInventoryItemAddOrUpdate(_: Human, items: Item[]): void {
 		// todo: compare player with context.player?
 		if (items.some(item => item.type === this.itemType)) {
 			this.finished(true);

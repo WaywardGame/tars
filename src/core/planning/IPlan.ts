@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { ILogLine } from "utilities/Log";
+import type { ILogLine } from "@wayward/utilities/Log";
 
 import type { IObjective, IObjectiveInfo, IObjectivePriority } from "../objective/IObjective";
 
