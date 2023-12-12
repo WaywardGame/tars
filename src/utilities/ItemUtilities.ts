@@ -36,6 +36,12 @@ import type Context from "../core/context/Context";
 import { ContextDataType } from "../core/context/IContext";
 // import { IslandId } from "@wayward/game/game/island/IIsland";
 
+// item limit when limitGroundItemSearch is enabled
+const groundItemLimit = 500;
+
+// item limit when limitDisassembleItemSearch is enabled
+const disassembleItemLimit = 50;
+
 export const defaultGetItemOptions: Readonly<Partial<IGetItemsOptions>> = { includeSubContainers: true };
 
 export enum RelatedItemType {
@@ -234,9 +240,9 @@ export class ItemUtilities {
 					item !== undefined &&
 					item.type === itemType &&
 					context.island.items.isTileContainer(item.containedWithin)) as Item[];
-			if (cachedItems.length > 500) {
-				// limit to the first 500 items on the ground
-				cachedItems = cachedItems.slice(0, 500);
+			if (context.options.limitGroundItemSearch && cachedItems.length > groundItemLimit) {
+				// limit to the first X items on the ground
+				cachedItems = cachedItems.slice(0, groundItemLimit);
 			}
 
 			this.groundItemCache.set(itemType, cachedItems);
@@ -253,6 +259,10 @@ export class ItemUtilities {
 			for (const item of this.getBaseItems(context)) {
 				if (!item.disassembly) {
 					continue;
+				}
+
+				if (context.options.limitDisassembleItemSearch && search.length >= disassembleItemLimit) {
+					break;
 				}
 
 				const description = item.description;
@@ -272,6 +282,7 @@ export class ItemUtilities {
 							disassemblyItems: disassemblyResult.items,
 							requiredForDisassembly: description.requiredForDisassembly,
 						});
+
 						break;
 					}
 				}

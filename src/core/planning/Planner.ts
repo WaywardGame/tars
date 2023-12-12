@@ -813,7 +813,7 @@ export class Planner implements IPlanner {
 		let consoleMessage: string;
 
 		try {
-			consoleMessage = this.calculationLog.join("")
+			consoleMessage = this.calculationLog.join("");
 
 		} catch (ex) {
 			consoleMessage = `BUFFERTOOLARGE:${this.calculationLog.length},${ex}`;

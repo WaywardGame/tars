@@ -146,6 +146,10 @@ export enum TarsTranslation {
 	DialogButtonPrecognitionTooltip,
 	DialogButtonQuantumBurst,
 	DialogButtonQuantumBurstTooltip,
+	DialogButtonLimitGroundItemSearch,
+	DialogButtonLimitGroundItemSearchTooltip,
+	DialogButtonLimitDisassembleItemSearch,
+	DialogButtonLimitDisassembleItemSearchTooltip,
 	DialogButtonAllowCaves,
 	DialogButtonAllowCavesTooltip,
 	DialogButtonLockInventory,
@@ -401,6 +405,18 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		type: TarsOptionSectionType.Checkbox,
 		title: TarsTranslation.DialogButtonQuantumBurst,
 		tooltip: TarsTranslation.DialogButtonQuantumBurstTooltip,
+	},
+	{
+		option: "limitGroundItemSearch",
+		type: TarsOptionSectionType.Checkbox,
+		title: TarsTranslation.DialogButtonLimitGroundItemSearch,
+		tooltip: TarsTranslation.DialogButtonLimitGroundItemSearchTooltip,
+	},
+	{
+		option: "limitDisassembleItemSearch",
+		type: TarsOptionSectionType.Checkbox,
+		title: TarsTranslation.DialogButtonLimitDisassembleItemSearch,
+		tooltip: TarsTranslation.DialogButtonLimitDisassembleItemSearchTooltip,
 	},
 ];
 

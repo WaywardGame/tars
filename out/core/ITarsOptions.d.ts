@@ -37,6 +37,8 @@ export interface ITarsOptions {
     treasureHunterType: TreasureHunterType;
     planningAccuracy: PlanningAccuracy;
     quantumBurst: boolean;
+    limitGroundItemSearch: boolean;
+    limitDisassembleItemSearch: boolean;
     debugLogging: boolean;
     navigationOverlays: boolean;
     freeze: boolean;

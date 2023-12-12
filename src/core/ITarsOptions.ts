@@ -16,100 +16,108 @@ import { TarsMode } from "./ITars";
  * List of options
  */
 export interface ITarsOptions {
-    mode: TarsMode;
+	mode: TarsMode;
 
-    stayHealthy: boolean;
-    allowCaves: boolean;
-    allowBackpacks: boolean;
+	stayHealthy: boolean;
+	allowCaves: boolean;
+	allowBackpacks: boolean;
 
-    lockInventory: boolean;
-    lockEquipment: boolean;
-    useProtectedItems: TarsUseProtectedItems;
-    useProtectedItemsForEquipment: boolean;
+	lockInventory: boolean;
+	lockEquipment: boolean;
+	useProtectedItems: TarsUseProtectedItems;
+	useProtectedItemsForEquipment: boolean;
 
-    goodCitizen: boolean;
+	goodCitizen: boolean;
 
-    recoverThresholdHealth: number;
-    recoverThresholdStamina: number;
-    recoverThresholdHunger: number;
-    recoverThresholdThirst: number;
-    recoverThresholdThirstFromMax: number;
+	recoverThresholdHealth: number;
+	recoverThresholdStamina: number;
+	recoverThresholdHunger: number;
+	recoverThresholdThirst: number;
+	recoverThresholdThirstFromMax: number;
 
-    survivalExploreIslands: boolean;
-    survivalUseOrbsOfInfluence: boolean;
-    survivalReadBooks: boolean;
-    survivalClearSwamps: boolean;
-    survivalOrganizeBase: boolean;
-    survivalMaintainLowDifficulty: boolean;
+	survivalExploreIslands: boolean;
+	survivalUseOrbsOfInfluence: boolean;
+	survivalReadBooks: boolean;
+	survivalClearSwamps: boolean;
+	survivalOrganizeBase: boolean;
+	survivalMaintainLowDifficulty: boolean;
 
-    gardenerOnlyEdiblePlants: boolean;
+	gardenerOnlyEdiblePlants: boolean;
 
-    harvesterOnlyUseHands: boolean;
+	harvesterOnlyUseHands: boolean;
 
-    treasureHunterPrecognition: boolean;
-    treasureHunterType: TreasureHunterType;
+	treasureHunterPrecognition: boolean;
+	treasureHunterType: TreasureHunterType;
 
-    planningAccuracy: PlanningAccuracy;
+	planningAccuracy: PlanningAccuracy;
 
-    quantumBurst: boolean;
-    debugLogging: boolean;
-    navigationOverlays: boolean;
-    freeze: boolean;
+	quantumBurst: boolean;
+
+	limitGroundItemSearch: boolean;
+	limitDisassembleItemSearch: boolean;
+
+	debugLogging: boolean;
+	navigationOverlays: boolean;
+	freeze: boolean;
 }
 
 export enum TarsUseProtectedItems {
-    No,
-    Yes,
-    YesWithBreakCheck,
+	No,
+	Yes,
+	YesWithBreakCheck,
 }
 
 export enum PlanningAccuracy {
-    Simple,
-    Accurate,
+	Simple,
+	Accurate,
 }
 
 export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITarsOptions {
-    return {
-        mode: TarsMode.Survival,
+	return {
+		mode: TarsMode.Survival,
 
-        stayHealthy: true,
-        allowCaves: false,
-        allowBackpacks: true,
+		stayHealthy: true,
+		allowCaves: false,
+		allowBackpacks: true,
 
-        lockInventory: false,
-        lockEquipment: false,
-        useProtectedItems: TarsUseProtectedItems.No,
-        useProtectedItemsForEquipment: true,
+		lockInventory: false,
+		lockEquipment: false,
+		useProtectedItems: TarsUseProtectedItems.No,
+		useProtectedItemsForEquipment: true,
 
-        goodCitizen: isWebWorker ? false : true,
+		goodCitizen: isWebWorker ? false : true,
 
-        recoverThresholdHealth: 30,
-        recoverThresholdStamina: 20,
-        recoverThresholdHunger: 8,
-        recoverThresholdThirst: 10,
-        recoverThresholdThirstFromMax: -10,
+		recoverThresholdHealth: 30,
+		recoverThresholdStamina: 20,
+		recoverThresholdHunger: 8,
+		recoverThresholdThirst: 10,
+		recoverThresholdThirstFromMax: -10,
 
-        survivalExploreIslands: true,
-        survivalUseOrbsOfInfluence: true,
-        survivalReadBooks: true,
-        survivalClearSwamps: true,
-        survivalOrganizeBase: true,
-        survivalMaintainLowDifficulty: false,
+		survivalExploreIslands: true,
+		survivalUseOrbsOfInfluence: true,
+		survivalReadBooks: true,
+		survivalClearSwamps: true,
+		survivalOrganizeBase: true,
+		survivalMaintainLowDifficulty: false,
 
-        gardenerOnlyEdiblePlants: true,
+		gardenerOnlyEdiblePlants: true,
 
-        harvesterOnlyUseHands: false,
+		harvesterOnlyUseHands: false,
 
-        treasureHunterPrecognition: false,
-        treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
+		treasureHunterPrecognition: false,
+		treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
 
-        planningAccuracy: PlanningAccuracy.Accurate,
+		planningAccuracy: PlanningAccuracy.Accurate,
 
-        quantumBurst: false,
-        debugLogging: false,
-        navigationOverlays: false,
-        freeze: false,
+		limitGroundItemSearch: true,
+		limitDisassembleItemSearch: true,
 
-        ...initialOptions,
-    };
+		quantumBurst: false,
+
+		debugLogging: false,
+		navigationOverlays: false,
+		freeze: false,
+
+		...initialOptions,
+	};
 }
