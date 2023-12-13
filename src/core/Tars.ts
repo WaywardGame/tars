@@ -1068,6 +1068,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			}
 
 			this.base = {
+				altar: [],
 				anvil: [],
 				campfire: [],
 				chest: [],

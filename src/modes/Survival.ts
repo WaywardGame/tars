@@ -17,6 +17,7 @@ import { TurnMode } from "@wayward/game/game/IGame";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { BiomeType } from "@wayward/game/game/biome/IBiome";
+import { Deity } from "@wayward/game/game/deity/Deity";
 
 import { IInventoryItems } from "../core/ITars";
 import type Context from "../core/context/Context";
@@ -42,7 +43,6 @@ import CheckDecayingItems from "../objectives/other/item/CheckDecayingItems";
 import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
 import EquipItem from "../objectives/other/item/EquipItem";
 import ReinforceItem from "../objectives/other/item/ReinforceItem";
-import Fish from "../objectives/other/tile/Fish";
 import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
 import DrainSwamp from "../objectives/utility/DrainSwamp";
@@ -53,6 +53,7 @@ import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
 import MoveToNewIsland from "../objectives/utility/moveTo/MoveToNewIsland";
 import { BaseMode } from "./BaseMode";
+import DeitySacrifice from "../objectives/utility/DeitySacrifice";
 
 /**
  * Survival mode
@@ -121,6 +122,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(...await this.getBuildAnotherChestObjectives(context));
 
+		if (context.base.altar.length === 0) {
+			objectives.push([new AcquireInventoryItem("altar"), new BuildItem()]);
+		}
+
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
 
@@ -145,35 +150,8 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(new AcquireInventoryItem("heal"));
 
-		if (context.options.survivalMaintainLowDifficulty && context.utilities.creature.hasDecentEquipment(context.human)) {
-			// trigger once rep is below some limit
-			await this.runWhile(context, objectives,
-				"LoweringMalignity",
-				async (context) => context.island.communalAlignment.value < 5000,
-				async (context, objectives) => {
-					// stop once rep is above 15k
-					if (context.island.communalAlignment.value >= 15000) {
-						return;
-					}
-
-					objectives.push(new Fish());
-
-					objectives.push(new Restart());
-				});
-
-			// await this.runWhile(context, objectives,
-			// 	"LoweringMalignity",
-			// 	async (context) => context.island.getReputation() < -7500,
-			// 	async (context, objectives) => {
-			// 		// stop once rep is above 0
-			// 		if (context.island.getReputation() >= 0) {
-			// 			return;
-			// 		}
-
-			// 		objectives.push(new Fish());
-
-			// 		objectives.push(new Restart());
-			// 	});
+		if (context.options.survivalMaintainLowDifficulty) {
+			objectives.push(new DeitySacrifice(Deity.Neutral));
 		}
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&

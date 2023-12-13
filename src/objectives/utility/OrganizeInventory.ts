@@ -224,7 +224,7 @@ export default class OrganizeInventory extends Objective {
 
 				chestWeight += itemWeight;
 
-				objectives.push(new MoveItem(item, targetContainer, chest));
+				objectives.push(new MoveItem(item, targetContainer));
 			}
 
 			// restart in case there's more to move

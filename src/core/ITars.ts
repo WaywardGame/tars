@@ -110,6 +110,7 @@ export const chestTypes: Map<ItemType, DoodadType> = new Map([
 ]);
 
 export interface IBase {
+	altar: Doodad[];
 	anvil: Doodad[];
 	campfire: Doodad[];
 	chest: Doodad[];
@@ -142,6 +143,10 @@ export interface IBaseInfo {
 export type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "availableUnlimitedWellLocation">;
 
 export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
+	altar: {
+		doodadTypes: [DoodadTypeGroup.Altar],
+		allowMultiple: true,
+	},
 	anvil: {
 		doodadTypes: [DoodadTypeGroup.Anvil],
 		tryPlaceNear: "kiln",
@@ -232,6 +237,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
  * Note: knife is our sharpened
  */
 export interface IInventoryItems {
+	altar?: Item;
 	anvil?: Item;
 	axe?: Item;
 	backpack?: Item[];
@@ -322,6 +328,10 @@ export enum InventoryItemFlag {
 }
 
 export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo> = {
+	altar: {
+		itemTypes: [ItemTypeGroup.Altar],
+		requiredMinDur: 1,
+	},
 	anvil: {
 		itemTypes: [ItemTypeGroup.Anvil],
 		requiredMinDur: 1,
@@ -609,6 +619,7 @@ export const inventoryBuildItems: Array<keyof IInventoryItems> = [
 	"anvil",
 	"solarStill",
 	"sailboat",
+	"altar",
 ];
 
 export interface IBaseItemSearch {

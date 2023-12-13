@@ -24,7 +24,7 @@ import ExecuteAction from "../../core/ExecuteAction";
 
 export default class MoveItem extends Objective {
 
-	constructor(private readonly item: Item | undefined, private readonly targetContainer: IContainer, private readonly source: Doodad | IVector3) {
+	constructor(private readonly item: Item | undefined, private readonly targetContainer: IContainer, private readonly source?: Doodad | IVector3) {
 		super();
 	}
 
@@ -33,11 +33,15 @@ export default class MoveItem extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		if (Doodad.is(this.source)) {
-			return `Moving ${this.item?.getName()} into the inventory from ${this.source.getName()}`;
+		const targetContainerName = Doodad.is(this.targetContainer) ? this.targetContainer.getName() : undefined;
+
+		if (this.source) {
+			const sourceName = Doodad.is(this.source) ? this.source.getName() : `(${this.source.x},${this.source.y},${this.source.z})`;
+
+			return `Moving ${this.item?.getName()} into ${targetContainerName} from ${sourceName}`;
 		}
 
-		return `Moving ${this.item?.getName()} into the inventory from (${this.source.x},${this.source.y},${this.source.z})`;
+		return `Moving ${this.item?.getName()} into ${targetContainerName}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

@@ -77,6 +77,7 @@ export interface IUtilities {
 }
 export declare const chestTypes: Map<ItemType, DoodadType>;
 export interface IBase {
+    altar: Doodad[];
     anvil: Doodad[];
     campfire: Doodad[];
     chest: Doodad[];
@@ -109,6 +110,7 @@ export interface IBaseInfo {
 export type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "availableUnlimitedWellLocation">;
 export declare const baseInfo: Record<BaseInfoKey, IBaseInfo>;
 export interface IInventoryItems {
+    altar?: Item;
     anvil?: Item;
     axe?: Item;
     backpack?: Item[];
