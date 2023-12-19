@@ -456,6 +456,20 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		}
 	}
 
+	@EventHandler(EventBus.Humans, "canInteract")
+	public onInteract(human: Human, npc: NPC): boolean | undefined {
+		if (this.human !== human) {
+			return;
+		}
+
+		if (!this.isRunning()) {
+			return;
+		}
+
+		// prevent NPC interactions, like trade dialogs, when TARS is running
+		return false;
+	}
+
 	@EventHandler(EventBus.NPCs, "renamed")
 	public onNpcRenamed(npc: NPC): void {
 		if (this.human !== npc) {

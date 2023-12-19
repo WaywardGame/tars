@@ -91,6 +91,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
     onCorpseRemove(_: CorpseManager, corpse: Corpse): void;
     onRestEnd(human: Human): void;
     onCreaturePostMove(creature: Creature, fromTile: Tile, toTile: Tile): Promise<void>;
+    onInteract(human: Human, npc: NPC): boolean | undefined;
     onNpcRenamed(npc: NPC): void;
     onHumanPostMove(human: Human, fromTile: Tile, toTile: Tile): Promise<void>;
     onCanChangeWalkPath(human: Human, path: IVector2[] | undefined, reason: WalkPathChangeReason): false | undefined;
