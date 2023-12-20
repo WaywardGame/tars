@@ -87,7 +87,7 @@ export default class MoveToWater extends Objective {
 						return false;
 					}
 
-					const result = tile.canSailAwayFrom();
+					const result = tile.canSailAwayFrom(context.human);
 					if (!result.canSailAway) {
 						if (result.blockedTilesChecked) {
 							disabledTiles.addFrom(result.blockedTilesChecked);

@@ -49,7 +49,7 @@ export default class MoveToIsland extends Objective {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const sailboat of context.base.sailboat) {
-			const result = sailboat.tile.canSailAwayFrom();
+			const result = sailboat.tile.canSailAwayFrom(context.human);
 			if (result.canSailAway) {
 				objectivePipelines.push([
 					new MoveToTarget(sailboat, false),
