@@ -123,8 +123,8 @@ export default class ViewportPanel extends TarsPanel {
 			return;
 		}
 
-		const width = this.canvas.element.width = box[0];
-		const height = this.canvas.element.height = box[1];
+		const width = this.canvas.element.width = Math.round(box[0]);
+		const height = this.canvas.element.height = Math.round(box[1]);
 		this.renderer.setViewportSize(width, height);
 
 		this.rerender(RenderSource.Resize);
