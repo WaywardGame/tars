@@ -59,6 +59,7 @@ export interface ITarsOptions {
 	debugLogging: boolean;
 	navigationOverlays: boolean;
 	freeze: boolean;
+	preventNotes: boolean;
 }
 
 export enum TarsUseProtectedItems {
@@ -117,6 +118,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
 		debugLogging: false,
 		navigationOverlays: false,
 		freeze: false,
+		preventNotes: true,
 
 		...initialOptions,
 	};

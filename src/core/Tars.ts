@@ -10,7 +10,6 @@
  */
 
 import { EventBus } from "@wayward/game/event/EventBuses";
-import EventEmitter, { Priority } from "@wayward/utilities/event/EventEmitter";
 import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
 import MoveItemAction from "@wayward/game/game/entity/action/actions/MoveItem";
 import Rename from "@wayward/game/game/entity/action/actions/Rename";
@@ -42,20 +41,22 @@ import { Prompt } from "@wayward/game/game/meta/prompt/IPrompt";
 import type Prompts from "@wayward/game/game/meta/prompt/Prompts";
 import type { IPrompt } from "@wayward/game/game/meta/prompt/Prompts";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import Tile from "@wayward/game/game/tile/Tile";
 import InterruptChoice from "@wayward/game/language/dictionary/InterruptChoice";
 import Translation from "@wayward/game/language/Translation";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
-import Log from "@wayward/utilities/Log";
 import { Direction } from "@wayward/game/utilities/math/Direction";
 import { IVector2 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
-import Objects from "@wayward/utilities/object/Objects";
 import { Bound } from "@wayward/utilities/Decorators";
-import ResolvablePromise from "@wayward/utilities/promise/ResolvablePromise";
-import Tile from "@wayward/game/game/tile/Tile";
+import EventEmitter, { Priority } from "@wayward/utilities/event/EventEmitter";
+import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import Log from "@wayward/utilities/Log";
+import Objects from "@wayward/utilities/object/Objects";
 import { sleep } from "@wayward/utilities/promise/Async";
+import ResolvablePromise from "@wayward/utilities/promise/ResolvablePromise";
 
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
@@ -101,7 +102,6 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -320,7 +320,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 	@EventHandler(EventBus.Players, "writeNote")
 	public onWriteNote(player: Player, note: INote): false | void {
-		if (this.human !== player || !this.isRunning()) {
+		if (this.human !== player || !this.isRunning() || !this.saveData.options.preventNotes) {
 			return;
 		}
 

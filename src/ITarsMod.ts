@@ -9,18 +9,18 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import type { Events } from "@wayward/utilities/event/EventEmitter";
 import type { IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import type { IslandId } from "@wayward/game/game/island/IIsland";
 import type Translation from "@wayward/game/language/Translation";
 import type Mod from "@wayward/game/mod/Mod";
+import type { Events } from "@wayward/utilities/event/EventEmitter";
 
 import { Reference } from "@wayward/game/game/reference/IReferenceManager";
-import type { IContext } from "./core/context/IContext";
-import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
-import { TreasureHunterType } from "./modes/TreasureHunter";
 import type TarsMod from "./TarsMod";
+import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
+import type { IContext } from "./core/context/IContext";
+import { TreasureHunterType } from "./modes/TreasureHunter";
 
 export const TARS_ID = "TARS";
 
@@ -120,6 +120,8 @@ export enum TarsTranslation {
 	DialogButtonDebugLoggingTooltip,
 	DialogButtonNavigationOverlays,
 	DialogButtonNavigationOverlaysTooltip,
+	DialogButtonPreventNotes,
+	DialogButtonPreventNotesTooltip,
 	DialogButtonDisallowProtectedItems,
 	DialogButtonDisallowProtectedItemsTooltip,
 	DialogButtonAllowProtectedItemsForEquipment,
@@ -357,6 +359,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		type: TarsOptionSectionType.Checkbox,
 		title: TarsTranslation.DialogButtonNavigationOverlays,
 		tooltip: TarsTranslation.DialogButtonNavigationOverlaysTooltip,
+	},
+	{
+		option: "preventNotes",
+		type: TarsOptionSectionType.Checkbox,
+		title: TarsTranslation.DialogButtonPreventNotes,
+		tooltip: TarsTranslation.DialogButtonPreventNotesTooltip,
 	},
 	TarsTranslation.DialogLabelRecoverThresholds,
 	{

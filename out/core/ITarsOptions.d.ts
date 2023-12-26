@@ -42,6 +42,7 @@ export interface ITarsOptions {
     debugLogging: boolean;
     navigationOverlays: boolean;
     freeze: boolean;
+    preventNotes: boolean;
 }
 export declare enum TarsUseProtectedItems {
     No = 0,

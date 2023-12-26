@@ -8,7 +8,6 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import EventEmitter from "@wayward/utilities/event/EventEmitter";
 import type { IActionApi } from "@wayward/game/game/entity/action/IAction";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
@@ -30,11 +29,13 @@ import ItemManager from "@wayward/game/game/item/ItemManager";
 import type { IPromptDescriptionBase } from "@wayward/game/game/meta/prompt/IPrompt";
 import type Prompts from "@wayward/game/game/meta/prompt/Prompts";
 import type { IPrompt } from "@wayward/game/game/meta/prompt/Prompts";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import Tile from "@wayward/game/game/tile/Tile";
 import InterruptChoice from "@wayward/game/language/dictionary/InterruptChoice";
 import Translation from "@wayward/game/language/Translation";
 import { IVector2 } from "@wayward/game/utilities/math/IVector";
-import Tile from "@wayward/game/game/tile/Tile";
+import EventEmitter from "@wayward/utilities/event/EventEmitter";
+import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import { ISaveData, ISaveDataContainer } from "../ITarsMod";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import Context from "./context/Context";
@@ -42,7 +43,6 @@ import { ITarsEvents } from "./ITars";
 import { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
 import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 export type TarsNPC = ControllableNPC<ISaveData> & {
     tarsInstance?: Tars;
 };

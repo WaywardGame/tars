@@ -69,6 +69,8 @@
 			"dialogButtonFreezeTooltip": "Prevent TARS from executing actions.",
 			"dialogButtonNavigationOverlays": "Navigation Overlay",
 			"dialogButtonNavigationOverlaysTooltip": "Show navigation overlay over tiles.",
+			"dialogButtonPreventNotes": "Prevent Writing Notes",
+			"dialogButtonPreventNotesTooltip": "Disables notes being written while TARS is running.",
 			"dialogButtonStayHealthy": "Stay Healthy",
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
 			"dialogButtonGoodCitizen": "Good Citizen",
