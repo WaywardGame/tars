@@ -23,7 +23,7 @@ import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 import AddDifficulty from "../../core/AddDifficulty";
-import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
 
 export interface IAcquireFoodOptions {
 	onlyAllowBaseItems: boolean;
@@ -56,7 +56,7 @@ export default class AcquireFood extends Objective {
 				if (!context.island.items.isContainableInContainer(item, context.human.inventory)) {
 					if (context.utilities.item.foodItemTypes.has(item.type)) {
 						objectivePipelines.push([
-							new MoveItemIntoInventory(item).passAcquireData(this),
+							new MoveItemsIntoInventory(item).passAcquireData(this),
 						]);
 					}
 				}

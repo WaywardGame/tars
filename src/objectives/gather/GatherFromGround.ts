@@ -23,7 +23,7 @@ import SetContextData from "../contextData/SetContextData";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class GatherFromGround extends Objective {
 
@@ -78,7 +78,7 @@ export default class GatherFromGround extends Objective {
 					.overrideDifficulty((prioritizeBaseItems && context.utilities.item.getBaseTileItems(context).has(item)) ? 5 : undefined)
 					.trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
-				new MoveItemIntoInventory(item, tile),
+				new MoveItemsIntoInventory(item, tile),
 			];
 		}
 
@@ -100,7 +100,7 @@ export default class GatherFromGround extends Objective {
 							if (item) {
 								objectives.push(new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode));
 								objectives.push(new SetContextData(this.contextDataKey, item));
-								objectives.push(new MoveItemIntoInventory(item, tile));
+								objectives.push(new MoveItemsIntoInventory(item, tile));
 							}
 
 							return objectives;

@@ -23,7 +23,7 @@ import AcquireItem from "../acquire/item/AcquireItem";
 import SetContextData from "../contextData/SetContextData";
 import ExecuteAction from "../core/ExecuteAction";
 import ReserveItems from "../core/ReserveItems";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 import CompleteQuest from "../quest/CompleteQuest";
 import MoveToWater, { MoveToWaterType } from "./moveTo/MoveToWater";
 
@@ -78,13 +78,13 @@ export default class SailToCivilization extends Objective {
 			for (const itemType of requiredItems) {
 				const items = context.utilities.item.getBaseItemsByType(context, itemType);
 				if (items.length === 0) {
-					objectives.push(new ReserveItems(items[0]).keepInInventory(), new MoveItemIntoInventory(items[0]));
+					objectives.push(new ReserveItems(items[0]).keepInInventory(), new MoveItemsIntoInventory(items[0]));
 				}
 			}
 		}
 
 		objectives.push(
-			new MoveItemIntoInventory(context.inventory.sailboat),
+			new MoveItemsIntoInventory(context.inventory.sailboat),
 			new MoveToWater(MoveToWaterType.SailAwayWater),
 			new ExecuteAction(SailToCivilizationAction, [context.inventory.sailboat, true]).setStatus(this)
 		);

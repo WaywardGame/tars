@@ -18,34 +18,42 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import MoveToTarget from "../../core/MoveToTarget";
-import MoveItem from "./MoveItem";
+import MoveItems from "./MoveItems";
 
-export default class MoveItemIntoInventory extends Objective {
+/**
+ * This assumes all the items are on the same tile!
+ */
+export default class MoveItemsIntoInventory extends Objective {
 
-	constructor(private readonly item?: Item, private readonly tile?: Tile, private readonly targetContainer?: IContainer) {
+	private readonly items: Item[] | undefined;
+
+	constructor(itemOrItems: Item | Item[] | undefined, private readonly tile?: Tile, private readonly targetContainer?: IContainer) {
 		super();
+
+		this.items = itemOrItems ? (Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems]) : undefined;
 	}
 
 	public getIdentifier(): string {
-		return `MoveItemIntoInventory:${this.item}`;
+		return `MoveItemsIntoInventory:${this.items?.join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
-		return `Moving ${this.item?.getName()} into inventory`;
+		return `Moving ${this.items?.join(",")} into inventory`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = this.item ?? this.getAcquiredItem(context);
-		if (!item?.isValid) {
-			this.log.warn(`Unable to move item "${item}" into the inventory`);
+		const items = this.items ?? [this.getAcquiredItem(context)];
+		if (items.some(item => !item?.isValid)) {
+			this.log.warn(`Unable to move item "${items}" into the inventory`);
 			return ObjectiveResult.Restart;
 		}
 
-		if (context.island.items.isContainableInContainer(item, context.human.inventory)) {
+		if (items.every(item => context.island.items.isContainableInContainer(item as Item, context.human.inventory))) {
 			return ObjectiveResult.Complete;
 		}
 
-		const tile = this.tile ?? item.tile;
+
+		const tile = this.tile ?? (items[0] as Item).tile;
 		if (!tile) {
 			return ObjectiveResult.Impossible;
 		}
@@ -53,7 +61,7 @@ export default class MoveItemIntoInventory extends Objective {
 		return [
 			// todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
 			new MoveToTarget(tile, true, { skipIfAlreadyThere: true }).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
-			new MoveItem(item, this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, item), tile),
+			new MoveItems(items as Item[], this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, items[0] as Item), tile),
 		];
 	}
 

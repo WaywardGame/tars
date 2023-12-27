@@ -20,55 +20,55 @@ import Objective from "../../../core/objective/Objective";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ReserveItems from "../../core/ReserveItems";
 import ExecuteAction from "../../core/ExecuteAction";
-import MoveItemIntoInventory from "./MoveItemIntoInventory";
+import MoveItemsIntoInventory from "./MoveItemsIntoInventory";
 
 /**
  * Looks for items that are special and try to use them
  */
 export default class CheckSpecialItems extends Objective {
 
-    public getIdentifier(): string {
-        return "CheckSpecialItems";
-    }
+	public getIdentifier(): string {
+		return "CheckSpecialItems";
+	}
 
-    public getStatus(): string | undefined {
-        return "Checking for special items";
-    }
+	public getStatus(): string | undefined {
+		return "Checking for special items";
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const baseItems = context.utilities.item.getBaseItems(context);
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const baseItems = context.utilities.item.getBaseItems(context);
 
-        const messageInABottles = baseItems
-            .filter(item => item.type === ItemType.MessageInABottle);
-        if (messageInABottles.length > 0) {
-            return messageInABottles.map(item => ([
-                new ReserveItems(item).keepInInventory(),
-                new MoveItemIntoInventory(item),
-                new ExecuteActionForItem(
-                    ExecuteActionType.Generic,
-                    [ItemType.GlassBottle],
-                    {
-                        genericAction: {
-                            action: OpenBottle,
-                            args: [item],
-                        },
-                    }).setStatus("Opening glass bottle")
-            ]));
-        }
+		const messageInABottles = baseItems
+			.filter(item => item.type === ItemType.MessageInABottle);
+		if (messageInABottles.length > 0) {
+			return messageInABottles.map(item => ([
+				new ReserveItems(item).keepInInventory(),
+				new MoveItemsIntoInventory(item),
+				new ExecuteActionForItem(
+					ExecuteActionType.Generic,
+					[ItemType.GlassBottle],
+					{
+						genericAction: {
+							action: OpenBottle,
+							args: [item],
+						},
+					}).setStatus("Opening glass bottle")
+			]));
+		}
 
-        if (context.options.survivalReadBooks) {
-            const books = baseItems
-                .filter(item => item.book === BookType.RandomEvent);
-            if (books.length > 0) {
-                return books.map(item => ([
-                    new ReserveItems(item).keepInInventory(),
-                    new MoveItemIntoInventory(item),
-                    new ExecuteAction(Read, [item]).setStatus(`Reading ${item.getName()}`),
-                ]));
-            }
-        }
+		if (context.options.survivalReadBooks) {
+			const books = baseItems
+				.filter(item => item.book === BookType.RandomEvent);
+			if (books.length > 0) {
+				return books.map(item => ([
+					new ReserveItems(item).keepInInventory(),
+					new MoveItemsIntoInventory(item),
+					new ExecuteAction(Read, [item]).setStatus(`Reading ${item.getName()}`),
+				]));
+			}
+		}
 
-        return ObjectiveResult.Ignore;
-    }
+		return ObjectiveResult.Ignore;
+	}
 
 }

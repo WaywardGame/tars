@@ -20,7 +20,7 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import UseItem from "./UseItem";
 import ReserveItems from "../../core/ReserveItems";
-import MoveItemIntoInventory from "./MoveItemIntoInventory";
+import MoveItemsIntoInventory from "./MoveItemsIntoInventory";
 import Item from "@wayward/game/game/item/Item";
 import TillForSeed from "../tile/TillForSeed";
 
@@ -49,7 +49,7 @@ export default class PlantSeed extends Objective {
 
 		return [
 			new ReserveItems(item).keepInInventory(),
-			new MoveItemIntoInventory(item),
+			new MoveItemsIntoInventory(item),
 			new TillForSeed(item.type, this.maxTilesChecked),
 			new UseItem(Plant, item),
 		];

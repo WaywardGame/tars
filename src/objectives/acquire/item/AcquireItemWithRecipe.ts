@@ -31,7 +31,7 @@ import AddDifficulty from "../../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
-import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireBase from "./AcquireBase";
@@ -180,7 +180,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item) {
 							if (context.island.items.isContainableInContainer(item, intermediateChest as IContainer)) {
-								objectives.push(new MoveItemIntoInventory(item, intermediateChest.tile));
+								objectives.push(new MoveItemsIntoInventory(item, intermediateChest.tile));
 							}
 						}
 					};

@@ -18,7 +18,7 @@ import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import Restart from "../core/Restart";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class OrganizeBase extends Objective {
 
@@ -79,9 +79,7 @@ export default class OrganizeBase extends Objective {
 				const objectives: IObjective[] = [];
 
 				// pick up items from tile
-				for (const item of itemsToMove) {
-					objectives.push(new MoveItemIntoInventory(item, tile));
-				}
+				objectives.push(new MoveItemsIntoInventory(itemsToMove, tile));
 
 				// restart now
 				// the ReduceWeight interrupt will eventually handle moving items into chests

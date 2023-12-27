@@ -21,7 +21,7 @@ import Objective from "../../core/objective/Objective";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import ReserveItems from "../core/ReserveItems";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class GatherFromChest extends Objective {
 
@@ -98,7 +98,7 @@ export default class GatherFromChest extends Objective {
 					return [
 						new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
 						new SetContextData(this.contextDataKey, item),
-						new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseItems ? 5 : undefined),
+						new MoveItemsIntoInventory(item).overrideDifficulty(prioritizeBaseItems ? 5 : undefined),
 					];
 				}
 

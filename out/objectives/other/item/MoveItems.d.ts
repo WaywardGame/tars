@@ -8,18 +8,20 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { IContainer } from "@wayward/game/game/item/IItem";
+import Doodad from "@wayward/game/game/doodad/Doodad";
+import type { IContainer } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
-import Tile from "@wayward/game/game/tile/Tile";
+import { IVector3 } from "@wayward/game/utilities/math/IVector";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-export default class MoveItemIntoInventory extends Objective {
-    private readonly item?;
-    private readonly tile?;
-    private readonly targetContainer?;
-    constructor(item?: Item | undefined, tile?: Tile | undefined, targetContainer?: IContainer | undefined);
+export default class MoveItems extends Objective {
+    private readonly targetContainer;
+    private readonly source?;
+    private readonly items;
+    constructor(itemOrItems: Item | Item[] | undefined, targetContainer: IContainer, source?: IVector3 | Doodad | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;
+    protected getBaseDifficulty(): number;
 }

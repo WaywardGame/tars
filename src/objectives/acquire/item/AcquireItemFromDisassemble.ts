@@ -28,7 +28,7 @@ import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActio
 import ProvideItems from "../../core/ProvideItems";
 import ReserveItems from "../../core/ReserveItems";
 import UseProvidedItem from "../../core/UseProvidedItem";
-import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireItem from "./AcquireItem";
@@ -90,7 +90,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				new ReserveItems(item),
 				new ProvideItems(...disassemblyItems.map(item => item.type)),
 				new SetContextData(itemContextDataKey, item),
-				new MoveItemIntoInventory(item),
+				new MoveItemsIntoInventory(item),
 			];
 
 			let requiredItemHashCodes: string[] | undefined;

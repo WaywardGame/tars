@@ -22,7 +22,7 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AcquireFood from "../acquire/item/AcquireFood";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 import UseItem from "../other/item/UseItem";
 import Human from "@wayward/game/game/entity/Human";
 import { Action } from "@wayward/game/game/entity/action/Action";
@@ -127,10 +127,10 @@ export default class RecoverHunger extends Objective {
 			.sort((a, b) => (a.getDecayTime() ?? 999999) - (b.getDecayTime() ?? 999999));
 	}
 
-	private eatItem(context: Context, item: Item): (MoveItemIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human<number, ReferenceType.NPC | ReferenceType.Player>, void, IConsumeItemCanUse, [Item]>>)[] {
+	private eatItem(context: Context, item: Item): (MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human<number, ReferenceType.NPC | ReferenceType.Player>, void, IConsumeItemCanUse, [Item]>>)[] {
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
-			new MoveItemIntoInventory(item).keepInInventory(),
+			new MoveItemsIntoInventory(item).keepInInventory(),
 			new UseItem(Eat, item),
 		];
 	}

@@ -22,14 +22,18 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
 
-export default class MoveItem extends Objective {
+export default class MoveItems extends Objective {
 
-	constructor(private readonly item: Item | undefined, private readonly targetContainer: IContainer, private readonly source?: Doodad | IVector3) {
+	private readonly items: Item[] | undefined;
+
+	constructor(itemOrItems: Item | Item[] | undefined, private readonly targetContainer: IContainer, private readonly source?: Doodad | IVector3) {
 		super();
+
+		this.items = itemOrItems ? (Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems]) : undefined;
 	}
 
 	public getIdentifier(): string {
-		return `MoveItem:${this.item}`;
+		return `MoveItems:${this.items?.join(",")}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -38,21 +42,21 @@ export default class MoveItem extends Objective {
 		if (this.source) {
 			const sourceName = Doodad.is(this.source) ? this.source.getName() : `(${this.source.x},${this.source.y},${this.source.z})`;
 
-			return `Moving ${this.item?.getName()} into ${targetContainerName} from ${sourceName}`;
+			return `Moving ${this.items?.join(",")} into ${targetContainerName} from ${sourceName}`;
 		}
 
-		return `Moving ${this.item?.getName()} into ${targetContainerName}`;
+		return `Moving ${this.items?.join(",")} into ${targetContainerName}`;
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const item = this.item ?? this.getAcquiredItem(context);
-		if (!item?.isValid) {
-			this.log.warn(`Invalid move item ${item}`);
+		const items = this.items ?? [this.getAcquiredItem(context)];
+		if (items.some(item => !item?.isValid)) {
+			this.log.warn(`Invalid move item ${items}`);
 			return ObjectiveResult.Restart;
 		}
 
 		return new ExecuteAction(MoveItemAction, () => {
-			if (item.containedWithin === this.targetContainer) {
+			if (items.every(item => item?.containedWithin === this.targetContainer)) {
 				return ObjectiveResult.Complete;
 			}
 
@@ -64,7 +68,11 @@ export default class MoveItem extends Objective {
 			// 	return ObjectiveResult.Restart;
 			// }
 
-			return [item, this.targetContainer] as ActionArgumentsOf<typeof MoveItemAction>;
+			// if (items.length > 1) {
+			// 	console.warn("moving more than 1 item", items);
+			// }
+
+			return [items, this.targetContainer] as ActionArgumentsOf<typeof MoveItemAction>;
 		}).setStatus(this);
 	}
 

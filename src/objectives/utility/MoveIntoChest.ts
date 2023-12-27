@@ -22,7 +22,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import BuildItem from "../other/item/BuildItem";
-import MoveItem from "../other/item/MoveItem";
+import MoveItems from "../other/item/MoveItems";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export default class MoveIntoChest extends Objective {
@@ -67,15 +67,10 @@ export default class MoveIntoChest extends Objective {
 			const targetContainer = chest as IContainer;
 			if (context.island.items.hasRoomInContainer(targetContainer, firstItem)) {
 				// at least 1 item fits in the chest
-				const objectives: IObjective[] = [];
-
-				objectives.push(new MoveToTarget(chest, true));
-
-				for (const item of itemsToMove) {
-					objectives.push(new MoveItem(item, targetContainer, chest));
-				}
-
-				objectivePipelines.push(objectives);
+				objectivePipelines.push([
+					new MoveToTarget(chest, true),
+					new MoveItems(itemsToMove as Item[], targetContainer, chest),
+				]);
 			}
 		}
 

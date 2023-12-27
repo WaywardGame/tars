@@ -22,7 +22,7 @@ import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
 import Restart from "../core/Restart";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 import UseItem from "../other/item/UseItem";
 import DigTile from "../other/tile/DigTile";
 
@@ -85,7 +85,7 @@ export default class GatherTreasure extends Objective {
 					for (const item of doodad.containedItems) {
 						objectives.push(
 							new ReserveItems(item),
-							new MoveItemIntoInventory(item),
+							new MoveItemsIntoInventory(item),
 						);
 					}
 

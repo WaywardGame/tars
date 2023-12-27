@@ -23,7 +23,7 @@ import Objective from "../../core/objective/Objective";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
-import MoveItem from "../other/item/MoveItem";
+import MoveItems from "../other/item/MoveItems";
 import { defaultMaxTilesChecked } from "../../core/ITars";
 
 const maxChestDistance = 128;
@@ -216,6 +216,8 @@ export default class OrganizeInventory extends Objective {
 			// at least 1 item fits in the chest. move to it and start moving items
 			objectives.push(new MoveToTarget(chest, true));
 
+			let itemsToMoveWithinWeight: Item[] = [];
+
 			for (const item of itemsToMove) {
 				const itemWeight = item.getTotalWeight(undefined, targetContainer);
 				if (chestWeight + itemWeight > chestWeightCapacity) {
@@ -224,11 +226,15 @@ export default class OrganizeInventory extends Objective {
 
 				chestWeight += itemWeight;
 
-				objectives.push(new MoveItem(item, targetContainer));
+				itemsToMoveWithinWeight.push(item);
 			}
 
-			// restart in case there's more to move
-			objectives.push(new Restart());
+			if (itemsToMoveWithinWeight.length > 0) {
+				objectives.push(new MoveItems(itemsToMoveWithinWeight, targetContainer));
+
+				// restart in case there's more to move
+				objectives.push(new Restart());
+			}
 		}
 
 		return objectives.length > 0 ? objectives : undefined;

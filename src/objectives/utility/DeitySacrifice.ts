@@ -21,9 +21,9 @@ import Objective from "../../core/objective/Objective";
 import Restart from "../core/Restart";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import BuildItem from "../other/item/BuildItem";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 import MoveToTarget from "../core/MoveToTarget";
-import MoveItem from "../other/item/MoveItem";
+import MoveItems from "../other/item/MoveItems";
 import ExecuteAction from "../core/ExecuteAction";
 import ReserveItems from "../core/ReserveItems";
 
@@ -62,13 +62,13 @@ export default class DeitySacrifice extends Objective {
 			objectives.push(new ReserveItems(...runes));
 
 			for (const item of runes) {
-				objectives.push(new MoveItemIntoInventory(item));
+				objectives.push(new MoveItemsIntoInventory(item));
 			}
 
 			objectives.push(new MoveToTarget(context.base.altar[0], true));
 
 			for (const item of runes) {
-				objectives.push(new MoveItem(item, altar as IContainer));
+				objectives.push(new MoveItems(item, altar as IContainer));
 			}
 
 			objectives.push(new ExecuteAction(Sacrifice, () => {
