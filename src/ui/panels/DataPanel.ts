@@ -18,8 +18,8 @@ import Button from "@wayward/game/ui/component/Button";
 import Component from "@wayward/game/ui/component/Component";
 import Divider from "@wayward/game/ui/component/Divider";
 import { LabeledButtonRow } from "@wayward/game/ui/component/LabeledButtonRow";
-import { Bound } from "@wayward/utilities/Decorators";
 import Files from "@wayward/game/utilities/Files";
+import { Bound } from "@wayward/utilities/Decorators";
 
 import { TARS_ID, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
 import TarsMod from "../../TarsMod";
@@ -71,9 +71,10 @@ export default class DataPanel extends TarsPanel {
 		new Divider().appendTo(this);
 
 		this.rows = new Component()
-			.setStyle("display", "grid")
-			.setStyle("row-gap", "5px")
-			.setStyle("column-count", "1")
+			// spacetech why? -love, chiri
+			.style.set("display", "grid")
+			.style.set("row-gap", "5px")
+			.style.set("column-count", "1")
 			.appendTo(this);
 	}
 

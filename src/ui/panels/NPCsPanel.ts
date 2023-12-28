@@ -49,9 +49,10 @@ export default class NPCsPanel extends TarsPanel {
 		new Divider().appendTo(this);
 
 		this.rows = new Component()
-			.setStyle("display", "grid")
-			.setStyle("row-gap", "5px")
-			.setStyle("column-count", "1")
+			// spacetech why? -love, chiri
+			.style.set("display", "grid")
+			.style.set("row-gap", "5px")
+			.style.set("column-count", "1")
 			.appendTo(this);
 	}
 
