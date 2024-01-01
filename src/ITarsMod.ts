@@ -164,6 +164,8 @@ export enum TarsTranslation {
 	DialogButtonClearSwampsTooltip,
 	DialogButtonOrganizeBase,
 	DialogButtonOrganizeBaseTooltip,
+	DialogButtonStartWaterSources,
+	DialogButtonStartWaterSourcesTooltip,
 	DialogButtonAllowBackpacks,
 	DialogButtonAllowBackpacksTooltip,
 	DialogButtonMaintainLowDifficulty,
@@ -459,6 +461,12 @@ export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslatio
 		type: TarsOptionSectionType.Checkbox,
 		title: TarsTranslation.DialogButtonOrganizeBase,
 		tooltip: TarsTranslation.DialogButtonOrganizeBaseTooltip,
+	},
+	{
+		option: "survivalStartWaterSources",
+		type: TarsOptionSectionType.Checkbox,
+		title: TarsTranslation.DialogButtonStartWaterSources,
+		tooltip: TarsTranslation.DialogButtonStartWaterSourcesTooltip,
 	},
 	{
 		option: "survivalMaintainLowDifficulty",

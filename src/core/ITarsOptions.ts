@@ -40,6 +40,7 @@ export interface ITarsOptions {
 	survivalReadBooks: boolean;
 	survivalClearSwamps: boolean;
 	survivalOrganizeBase: boolean;
+	survivalStartWaterSources: boolean;
 	survivalMaintainLowDifficulty: boolean;
 
 	gardenerOnlyEdiblePlants: boolean;
@@ -99,6 +100,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
 		survivalReadBooks: true,
 		survivalClearSwamps: true,
 		survivalOrganizeBase: true,
+		survivalStartWaterSources: true,
 		survivalMaintainLowDifficulty: false,
 
 		gardenerOnlyEdiblePlants: true,

@@ -16,7 +16,6 @@ export declare const gardenMaxTilesChecked = 1536;
 export default class TillForSeed extends Objective {
     private readonly itemType;
     private readonly maxTilesChecked;
-    private readonly allowedTilesSet;
     constructor(itemType: ItemType, maxTilesChecked?: number | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;

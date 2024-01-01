@@ -50,6 +50,8 @@
 			"dialogButtonRename": "Rename",
 			"dialogButtonExploreIslands": "Explore Islands",
 			"dialogButtonExploreIslandsTooltip": "Allow TARS to explore other islandsafter it makes a base, equipment, and has enough resources for traveling.\nNote: This has no effect when in a multiplayer game.",
+			"dialogButtonStartWaterSources": "Start Waterstills",
+			"dialogButtonStartWaterSourcesTooltip": "Enables TARS to start all water stills & drip stones when near the base.",
 			"dialogButtonMoveToBase": "Move to Base",
 			"dialogButtonMoveToDoodad": "Move to Doodad",
 			"dialogButtonMoveToIsland": "Move to Island",

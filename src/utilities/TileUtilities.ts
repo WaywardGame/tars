@@ -12,7 +12,7 @@
 import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
 import Dig from "@wayward/game/game/entity/action/actions/Dig";
 import Till from "@wayward/game/game/entity/action/actions/Till";
-import { IContainer } from "@wayward/game/game/item/IItem";
+import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
 import type { ITileContainer } from "@wayward/game/game/tile/ITerrain";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
@@ -21,6 +21,12 @@ import { WaterType } from "@wayward/game/game/island/IIsland";
 import Item from "@wayward/game/game/item/Item";
 import Tile from "@wayward/game/game/tile/Tile";
 import { Direction } from "@wayward/game/utilities/math/Direction";
+import { ActionType, IActionNotUsable } from "@wayward/game/game/entity/action/IAction";
+import { ITillCanUse } from "@wayward/game/game/entity/action/actions/ToggleTilled";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+
+import { gardenMaxTilesChecked } from "../objectives/other/tile/TillForSeed";
 import type { ITileLocation } from "../core/ITars";
 import Context from "../core/context/Context";
 import { ExtendedTerrainType } from "../core/navigation/INavigation";
@@ -33,12 +39,18 @@ export interface IOpenTileOptions {
 
 export class TileUtilities {
 
+	private readonly seedAllowedTileSet: Map<ItemType, Set<TerrainType>> = new Map();
 	private readonly tileLocationCache: Map<string, ITileLocation[]> = new Map();
 	private readonly canUseArgsCache: Map<number, { point: IVector3; direction: Direction.Cardinal } | null> = new Map();
+	private readonly canUseResultCache: Map<number, IActionNotUsable | ITillCanUse> = new Map();
+	private readonly nearbyTillableTile: Map<ItemType, Tile | undefined | null> = new Map();
 
 	public clearCache(): void {
+		this.seedAllowedTileSet.clear();
 		this.tileLocationCache.clear();
 		this.canUseArgsCache.clear();
+		this.canUseResultCache.clear();
+		this.nearbyTillableTile.clear();
 	}
 
 	public getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, tileOverride?: Tile): ITileLocation[] {
@@ -142,6 +154,33 @@ export class TileUtilities {
 		return true;
 	}
 
+	public getSeedAllowedTileSet(seedItemType: ItemType): Set<TerrainType> {
+		let tileSet = this.seedAllowedTileSet.get(seedItemType);
+		if (tileSet === undefined) {
+			tileSet = new Set(doodadDescriptions[itemDescriptions[seedItemType]?.onUse?.[ActionType.Plant]!]?.allowedTiles ?? []);
+			this.seedAllowedTileSet.set(seedItemType, tileSet);
+		}
+
+		return tileSet;
+	}
+
+	public getNearbyTillableTile(context: Context, seedItemType: ItemType, allowedTilesSet: Set<TerrainType>): Tile | undefined {
+		let result = this.nearbyTillableTile.get(seedItemType);
+		if (result === undefined) {
+			console.log("findMatchingTile getNearbyTillableTile", seedItemType);
+			result = context.utilities.base.getBaseTile(context).findMatchingTile(
+				(tile) => context.utilities.tile.canTill(context, tile, context.inventory.hoe, allowedTilesSet),
+				{
+					maxTilesChecked: gardenMaxTilesChecked,
+				}
+			);
+
+			this.nearbyTillableTile.set(seedItemType, result ? result : null);
+		}
+
+		return result ? result : undefined;
+	}
+
 	public canGather(context: Context, tile: Tile, skipDoodadCheck?: boolean): boolean {
 		if (!skipDoodadCheck && !tile.description?.gather && (tile.doodad || this.hasItems(tile))) {
 			return false;
@@ -168,7 +207,12 @@ export class TileUtilities {
 		// default to any item in the inventory just so ItemNearby is satisfied
 		tool ??= context.human.inventory.containedItems[0];
 
-		const canUse = Till.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool);
+		let canUse = this.canUseResultCache.get(tile.id);
+		if (canUse === undefined) {
+			canUse = Till.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool);
+			this.canUseResultCache.set(tile.id, canUse);
+		}
+
 		if (!canUse.usable) {
 			return false;
 		}

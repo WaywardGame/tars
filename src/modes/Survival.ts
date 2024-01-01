@@ -130,8 +130,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		objectives.push(new AcquireInventoryItem("tongs"));
 
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase1, async (context, objectives) => {
-			for (const doodad of context.utilities.base.getWaterSourceDoodads(context)) {
-				objectives.push(new StartWaterSourceDoodad(doodad));
+			if (context.options.survivalStartWaterSources) {
+				for (const doodad of context.utilities.base.getWaterSourceDoodads(context)) {
+					objectives.push(new StartWaterSourceDoodad(doodad));
+				}
 			}
 
 			const seeds = context.utilities.item.getSeeds(context, true);
@@ -298,7 +300,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 			if (safeToDrinkWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterSourceDoodads: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
+				objectives.push([
+					new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterSourceDoodads: true, allowWaitingForWater: true })
+						.setStatus("Gathering water before upgrade objectives"),
+					new AnalyzeInventory()]);
 			}
 		});
 

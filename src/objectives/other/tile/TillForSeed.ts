@@ -9,13 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
-import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Dictionary from "@wayward/game/language/Dictionary";
 import Translation from "@wayward/game/language/Translation";
-import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
 import Till from "@wayward/game/game/entity/action/actions/Till";
 import Tile from "@wayward/game/game/tile/Tile";
 
@@ -34,17 +31,12 @@ export const gardenMaxTilesChecked = 1536;
 
 export default class TillForSeed extends Objective {
 
-	private readonly allowedTilesSet: Set<TerrainType>;
-
 	constructor(private readonly itemType: ItemType, private readonly maxTilesChecked: number | undefined = gardenMaxTilesChecked) {
 		super();
-
-
-		this.allowedTilesSet = new Set(doodadDescriptions[itemDescriptions[this.itemType]?.onUse?.[ActionType.Plant]!]?.allowedTiles ?? []);
 	}
 
 	public getIdentifier(): string {
-		return `TillForSeed:${Array.from(this.allowedTilesSet).join(",")}`;
+		return `TillForSeed:${this.itemType}`;
 	}
 
 	public getStatus(): string | undefined {
@@ -64,12 +56,13 @@ export default class TillForSeed extends Objective {
 	}
 
 	private getTillObjectives(context: Context): IObjective[] | undefined {
-		if (this.allowedTilesSet.size === 0) {
+		const allowedTilesSet = context.utilities.tile.getSeedAllowedTileSet(this.itemType);
+		if (allowedTilesSet.size === 0) {
 			return undefined;
 		}
 
 		const emptyTilledTile = context.utilities.base.getBaseTile(context).findMatchingTile(
-			(tile) => this.allowedTilesSet.has(tile.type) &&
+			(tile) => allowedTilesSet.has(tile.type) &&
 				tile.isTilled &&
 				tile.isEmpty &&
 				tile.isOpen,
@@ -86,22 +79,16 @@ export default class TillForSeed extends Objective {
 		let tile: Tile | undefined;
 
 		const facingTile = context.human.facingTile;
-		if (context.utilities.tile.canTill(context, facingTile, context.inventory.hoe, this.allowedTilesSet)) {
+
+		if (context.utilities.tile.canTill(context, facingTile, context.inventory.hoe, allowedTilesSet)) {
 			tile = facingTile;
 
 		} else {
-			const nearbyTillableTile = context.utilities.base.getBaseTile(context).findMatchingTile(
-				(tile) => context.utilities.tile.canTill(context, tile, context.inventory.hoe, this.allowedTilesSet),
-				{
-					maxTilesChecked: gardenMaxTilesChecked,
-				}
-			);
+			tile = context.utilities.tile.getNearbyTillableTile(context, this.itemType, allowedTilesSet);
+		}
 
-			if (!nearbyTillableTile) {
-				return undefined;
-			}
-
-			tile = nearbyTillableTile;
+		if (!tile) {
+			return undefined;
 		}
 
 		let objectives: IObjective[] = [];
