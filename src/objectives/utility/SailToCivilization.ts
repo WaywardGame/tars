@@ -28,7 +28,7 @@ import CompleteQuest from "../quest/CompleteQuest";
 import MoveToWater, { MoveToWaterType } from "./moveTo/MoveToWater";
 
 const requiredItems: ItemType[] = [
-	ItemType.GoldSword,
+	ItemType.GoldShortSword,
 	ItemType.GoldenSextant,
 	ItemType.GoldCoins,
 	ItemType.GoldenChalice,

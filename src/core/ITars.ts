@@ -437,11 +437,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	equipSword: {
 		itemTypes: [
 			// ItemType.BronzeSword,
-			ItemType.CopperSword,
-			ItemType.GoldSword,
-			ItemType.IronSword,
-			ItemType.WoodenSword,
-			ItemType.WroughtIronSword,
+			ItemType.CopperShortSword,
+			ItemType.GoldShortSword,
+			ItemType.IronShortSword,
+			ItemType.WoodenShortSword,
+			ItemType.WroughtIronShortSword,
 		],
 	},
 	fireKindling: {

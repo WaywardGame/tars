@@ -53,7 +53,7 @@ export default class GatherFromCreature extends Objective {
 
 				// require a sword and shield before engaging with a creature
 				if (context.inventory.equipSword === undefined && !context.options.lockEquipment) {
-					objectives.push(new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.MainHand));
+					objectives.push(new AcquireItem(ItemType.WoodenShortSword), new AnalyzeInventory(), new EquipItem(EquipType.MainHand));
 				}
 
 				if (context.inventory.equipShield === undefined && !context.options.lockEquipment) {

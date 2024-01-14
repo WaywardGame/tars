@@ -386,7 +386,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			objectives.push(new AcquireInventoryItem("backpack", { desiredCount: 2 }));
 		}
 
-		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenSword, ItemType.TinSword]));
+		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenShortSword, ItemType.TinShortSword]));
 		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.BarkShield, ItemType.TinShield]));
 		this.addUpgradeItemObjectives(context, objectives, "equipWaist", new Set([ItemType.LeatherBelt]));
 		this.addUpgradeItemObjectives(context, objectives, "equipNeck", new Set([ItemType.LeatherGorget, ItemType.TinBevor]));
