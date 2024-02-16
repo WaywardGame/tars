@@ -19,7 +19,7 @@ import type { IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import type Creature from "@wayward/game/game/entity/creature/Creature";
-import { ConsumeItemStats, IContainer, IRecipe, ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import { ConsumeItemStats, IContainer, IRecipe, IUncastableContainer, ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
 import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
 import ItemRecipeRequirementChecker from "@wayward/game/game/item/ItemRecipeRequirementChecker";
@@ -357,7 +357,7 @@ export class ItemUtilities {
 				return a === context.inventory.knife ? -1 : 1;
 			});
 
-		const container: IContainer = {
+		const container: IUncastableContainer = {
 			containedItems: items,
 			addOrder: items.map(i => i.id),
 		};
