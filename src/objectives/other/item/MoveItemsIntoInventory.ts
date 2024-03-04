@@ -60,7 +60,7 @@ export default class MoveItemsIntoInventory extends Objective {
 
 		return [
 			// todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
-			new MoveToTarget(tile, true, { skipIfAlreadyThere: true }).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
+			new MoveToTarget(tile, true).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
 			new MoveItems(items as Item[], this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, items[0] as Item), tile),
 		];
 	}

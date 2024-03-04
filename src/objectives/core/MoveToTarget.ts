@@ -116,9 +116,10 @@ export default class MoveToTarget extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		if (this.options?.skipIfAlreadyThere && this.target.x === tile.x && this.target.y === tile.y && this.target.z === tile.z) {
-			return ObjectiveResult.Complete;
-		}
+		// this doesn't take into account moveAdjacentToTarget
+		// if (this.options?.skipIfAlreadyThere && this.target.x === tile.x && this.target.y === tile.y && this.target.z === tile.z) {
+		// 	return ObjectiveResult.Complete;
+		// }
 
 		const endPositions = context.utilities.movement.getMovementEndPositions(context, this.target, this.moveAdjacentToTarget);
 		if (endPositions.length === 0) {

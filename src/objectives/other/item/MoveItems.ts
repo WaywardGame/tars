@@ -21,6 +21,7 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import ExecuteAction from "../../core/ExecuteAction";
+import PickUpItem from "@wayward/game/game/entity/action/actions/PickUpItem";
 
 export default class MoveItems extends Objective {
 
@@ -53,6 +54,17 @@ export default class MoveItems extends Objective {
 		if (items.some(item => !item?.isValid)) {
 			this.log.warn(`Invalid move item ${items}`);
 			return ObjectiveResult.Restart;
+		}
+
+		// !game.getGameOptions().items.tileContainersEnabled && 
+		if (this.items?.some(item => item.containedWithin?.asTile)) {
+			return new ExecuteAction(PickUpItem, () => {
+				if (items.every(item => item?.containedWithin === this.targetContainer)) {
+					return ObjectiveResult.Complete;
+				}
+
+				return [] as ActionArgumentsOf<typeof PickUpItem>;
+			}).setStatus(this);
 		}
 
 		return new ExecuteAction(MoveItemAction, () => {

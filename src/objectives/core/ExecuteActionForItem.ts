@@ -18,7 +18,7 @@ import Dictionary from "@wayward/game/language/Dictionary";
 import { ListEnder } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import Item from "@wayward/game/game/item/Item";
-import MoveItem from "@wayward/game/game/entity/action/actions/MoveItem";
+// import MoveItem from "@wayward/game/game/entity/action/actions/MoveItem";
 import Harvest from "@wayward/game/game/entity/action/actions/Harvest";
 import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
 import Chop from "@wayward/game/game/entity/action/actions/Chop";
@@ -216,20 +216,20 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 		if (matchingTileItems !== undefined && matchingTileItems.length > 0) {
 			const matchingNewItems: Item[] = [];
 
-			for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
-				const itemToMove = matchingTileItems[i];
-				const targetContainer = context.utilities.item.getMoveItemToInventoryTarget(context, itemToMove);
+			// for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
+			// 	const itemToMove = matchingTileItems[i];
+			// 	const targetContainer = context.utilities.item.getMoveItemToInventoryTarget(context, itemToMove);
 
-				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, targetContainer] });
-				if (typeof (matchingItem) === "number") {
-					this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
-					return matchingItem;
-				}
+			// 	const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, targetContainer] });
+			// 	if (typeof (matchingItem) === "number") {
+			// 		this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
+			// 		return matchingItem;
+			// 	}
 
-				if (matchingItem !== undefined) {
-					matchingNewItems.push(matchingItem);
-				}
-			}
+			// 	if (matchingItem !== undefined) {
+			// 		matchingNewItems.push(matchingItem);
+			// 	}
+			// }
 
 			if (matchingNewItems.length > 0) {
 				const matchingNewItem = matchingNewItems[0];
