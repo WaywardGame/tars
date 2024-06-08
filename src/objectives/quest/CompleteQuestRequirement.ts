@@ -162,7 +162,12 @@ export default class CompleteQuestRequirement extends Objective {
 					}
 
 					for (const itemType of itemTypes) {
-						const recipe = itemDescriptions[itemType]?.recipe;
+						const itemDescription = itemDescriptions[itemType];
+						if (!itemDescription || itemDescription.craftable === false) {
+							continue;
+						}
+
+						const recipe = itemDescription.recipe;
 						if (recipe === undefined) {
 							continue;
 						}

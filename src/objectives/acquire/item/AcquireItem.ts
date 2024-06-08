@@ -126,7 +126,7 @@ export default class AcquireItem extends AcquireBase {
 		}
 
 		if (itemDescription) {
-			if (itemDescription.recipe) {
+			if (itemDescription.recipe && itemDescription.craftable !== false) {
 				if (this.options.allowCraftingForUnmetRequiredDoodads ||
 					!itemDescription.recipe.requiredDoodads ||
 					(itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {

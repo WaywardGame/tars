@@ -50,16 +50,16 @@ export default class MoveItems extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		const items = this.items ?? [this.getAcquiredItem(context)];
+		const items = this.items ?? [this.getAcquiredItem(context)] as Item[];
 		if (items.some(item => !item?.isValid)) {
 			this.log.warn(`Invalid move item ${items}`);
 			return ObjectiveResult.Restart;
 		}
 
 		// !game.getGameOptions().items.tileContainersEnabled && 
-		if (this.items?.some(item => item.containedWithin?.asTile)) {
+		if (items.some(item => item.containedWithin?.asTile)) {
 			return new ExecuteAction(PickUpItem, () => {
-				if (items.every(item => item?.containedWithin === this.targetContainer)) {
+				if (items.every(item => item.containedWithin === this.targetContainer)) {
 					return ObjectiveResult.Complete;
 				}
 
@@ -67,8 +67,20 @@ export default class MoveItems extends Objective {
 			}).setStatus(this);
 		}
 
-		return new ExecuteAction(MoveItemAction, () => {
-			if (items.every(item => item?.containedWithin === this.targetContainer)) {
+		const itemsByContainer = new Map<IContainer | undefined, Item[]>();
+
+		for (const item of items) {
+			let containerItems = itemsByContainer.get(item.containedWithin);
+			if (!containerItems) {
+				containerItems = []
+				itemsByContainer.set(item.containedWithin, containerItems);
+			}
+
+			containerItems.push(item);
+		}
+
+		return Array.from(itemsByContainer.values()).map(containerItems => new ExecuteAction(MoveItemAction, () => {
+			if (containerItems.every(item => item.containedWithin === this.targetContainer)) {
 				return ObjectiveResult.Complete;
 			}
 
@@ -84,8 +96,8 @@ export default class MoveItems extends Objective {
 			// 	console.warn("moving more than 1 item", items);
 			// }
 
-			return [items, this.targetContainer] as ActionArgumentsOf<typeof MoveItemAction>;
-		}).setStatus(this);
+			return [containerItems, this.targetContainer] as ActionArgumentsOf<typeof MoveItemAction>;
+		}).setStatus(this));
 	}
 
 	protected override getBaseDifficulty(): number {

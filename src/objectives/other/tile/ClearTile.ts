@@ -56,7 +56,7 @@ export default class ClearTile extends Objective {
 
 		const tileType = tile.type;
 		const terrainDescription = tile.description;
-		if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
+		if (terrainDescription && !terrainDescription.passable && !terrainDescription.water && !tile.isDeepHole) {
 			objectives.push(
 				new ExecuteAction(Mine, [context.utilities.item.getBestToolForTerrainGather(context, tileType)]).setStatus("Destroying terrain"),
 				new Restart());

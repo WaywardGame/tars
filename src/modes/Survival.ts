@@ -17,7 +17,6 @@ import { TurnMode } from "@wayward/game/game/IGame";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { BiomeType } from "@wayward/game/game/biome/IBiome";
-import { Deity } from "@wayward/game/game/deity/Deity";
 
 import { IInventoryItems } from "../core/ITars";
 import type Context from "../core/context/Context";
@@ -152,8 +151,9 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(new AcquireInventoryItem("heal"));
 
-		if (context.options.survivalMaintainLowDifficulty) {
-			objectives.push(new DeitySacrifice(Deity.Neutral));
+		const deity = context.options.deity;
+		if (deity !== undefined && deity !== null) {
+			objectives.push(new DeitySacrifice(deity));
 		}
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&

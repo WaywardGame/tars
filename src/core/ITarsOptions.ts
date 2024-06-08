@@ -9,6 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
+import { Deity } from "@wayward/game/game/deity/Deity";
 import { TreasureHunterType } from "../modes/TreasureHunter";
 import { TarsMode } from "./ITars";
 
@@ -26,6 +27,8 @@ export interface ITarsOptions {
 	lockEquipment: boolean;
 	useProtectedItems: TarsUseProtectedItems;
 	useProtectedItemsForEquipment: boolean;
+
+	deity: Deity | null;
 
 	goodCitizen: boolean;
 
@@ -86,6 +89,8 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
 		lockEquipment: false,
 		useProtectedItems: TarsUseProtectedItems.No,
 		useProtectedItemsForEquipment: true,
+
+		deity: Deity.Neutral,
 
 		goodCitizen: isWebWorker ? false : true,
 

@@ -19,7 +19,7 @@ export default class MoveItems extends Objective {
     private readonly targetContainer;
     private readonly source?;
     private readonly items;
-    constructor(itemOrItems: Item | Item[] | undefined, targetContainer: IContainer, source?: IVector3 | Doodad | undefined);
+    constructor(itemOrItems: Item | Item[] | undefined, targetContainer: IContainer, source?: (Doodad | IVector3) | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;

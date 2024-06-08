@@ -8,6 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
+import { Deity } from "@wayward/game/game/deity/Deity";
 import { TreasureHunterType } from "../modes/TreasureHunter";
 import { TarsMode } from "./ITars";
 export interface ITarsOptions {
@@ -19,6 +20,7 @@ export interface ITarsOptions {
     lockEquipment: boolean;
     useProtectedItems: TarsUseProtectedItems;
     useProtectedItemsForEquipment: boolean;
+    deity: Deity | null;
     goodCitizen: boolean;
     recoverThresholdHealth: number;
     recoverThresholdStamina: number;

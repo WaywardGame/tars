@@ -27,6 +27,8 @@ import MoveItems from "../other/item/MoveItems";
 import ExecuteAction from "../core/ExecuteAction";
 import ReserveItems from "../core/ReserveItems";
 
+const deityItemLimit = 5
+
 export default class DeitySacrifice extends Objective {
 
 	constructor(private readonly deity: Deity) {
@@ -54,21 +56,28 @@ export default class DeitySacrifice extends Objective {
 		} else {
 			const altar = context.base.altar[0];
 
-			let runes = context.utilities.item.getBaseItems(context).filter(item => item.isInGroup(ItemTypeGroup.ArtifactOfInvocation));
+			if (altar.containedItems!.length < deityItemLimit) {
+				// try putting more items on the alter before sacrificing
+				let runes = context.utilities.item.getBaseItems(context).filter(item => item.isInGroup(ItemTypeGroup.ArtifactOfInvocation));
 
-			// test limit
-			runes = runes.slice(0, 5);
+				// test limit
+				runes = runes.slice(0, deityItemLimit);
 
-			objectives.push(new ReserveItems(...runes));
+				if (runes.length === 0) {
+					return ObjectiveResult.Impossible;
+				}
 
-			for (const item of runes) {
-				objectives.push(new MoveItemsIntoInventory(item));
-			}
+				objectives.push(new ReserveItems(...runes));
 
-			objectives.push(new MoveToTarget(context.base.altar[0], true));
+				for (const item of runes) {
+					objectives.push(new MoveItemsIntoInventory(item));
+				}
 
-			for (const item of runes) {
-				objectives.push(new MoveItems(item, altar as IContainer));
+				objectives.push(new MoveToTarget(context.base.altar[0], true));
+
+				for (const item of runes) {
+					objectives.push(new MoveItems(item, altar as IContainer));
+				}
 			}
 
 			objectives.push(new ExecuteAction(Sacrifice, () => {

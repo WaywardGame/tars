@@ -52,7 +52,6 @@ export default class MoveItemsIntoInventory extends Objective {
 			return ObjectiveResult.Complete;
 		}
 
-
 		const tile = this.tile ?? (items[0] as Item).tile;
 		if (!tile) {
 			return ObjectiveResult.Impossible;

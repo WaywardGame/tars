@@ -225,6 +225,11 @@ export class MovementUtilities {
 
 						return MoveResult.Moving;
 
+					} else if (nextTile.isDeepHole) {
+
+						context.log.info("Hole is blocking movement", TerrainType[tileType]);
+						return MoveResult.NoPath;
+
 					} else if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
 						// some terrain is blocking our path
 						if (terrainDescription.gather) {
@@ -299,7 +304,7 @@ export class MovementUtilities {
 						const position = path[i];
 						const tile = context.human.island.getTile(position.x, position.y, target.z);
 						const terrainDescription = tile.description;
-						if (tile.doodad?.blocksMove || (terrainDescription && !terrainDescription.passable && !terrainDescription.water)) {
+						if (tile.doodad?.blocksMove || tile.isDeepHole || (terrainDescription && !terrainDescription.passable && !terrainDescription.water)) {
 							path = path.slice(0, i);
 							break;
 						}

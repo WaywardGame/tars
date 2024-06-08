@@ -18,7 +18,7 @@ export type UseItemActionDescriptions = IActionDescription<[ActionArgument.ItemN
 export default class UseItem<T extends UseItemActionDescriptions> extends Objective {
     private readonly action;
     private readonly item?;
-    constructor(action: T, item?: Item | keyof IInventoryItems | undefined);
+    constructor(action: T, item?: (Item | keyof IInventoryItems) | undefined);
     getIdentifier(): string;
     getStatus(): string | undefined;
     execute(context: Context): Promise<ObjectiveExecutionResult>;

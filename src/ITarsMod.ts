@@ -21,6 +21,7 @@ import type TarsMod from "./TarsMod";
 import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
 import type { IContext } from "./core/context/IContext";
 import { TreasureHunterType } from "./modes/TreasureHunter";
+import { Deity } from "@wayward/game/game/deity/Deity";
 
 export const TARS_ID = "TARS";
 
@@ -219,6 +220,7 @@ export enum TarsTranslation {
 	DialogLabelItem,
 	DialogLabelItemProtection,
 	DialogLabelMultiplayer,
+	DialogLabelDeity,
 	DialogLabelNPC,
 	DialogLabelPlayer,
 	DialogLabelRecoverThresholds,
@@ -241,6 +243,14 @@ export enum TarsTranslation {
 	DialogModeAnglerTooltip,
 	DialogModeTreasureHunter,
 	DialogModeTreasureHunterTooltip,
+	DialogButtonNone,
+	DialogButtonDeityNoneTooltip,
+	DialogButtonGood,
+	DialogButtonDeityGoodTooltip,
+	DialogButtonNeutral,
+	DialogButtonDeityNeutralTooltip,
+	DialogButtonEvil,
+	DialogButtonDeityEvilTooltip,
 }
 
 export enum TarsOptionSectionType {
@@ -326,6 +336,17 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		type: TarsOptionSectionType.Checkbox,
 		title: TarsTranslation.DialogButtonAllowProtectedItemsForEquipment,
 		tooltip: TarsTranslation.DialogButtonAllowProtectedItemsForEquipmentTooltip,
+	},
+	TarsTranslation.DialogLabelDeity,
+	{
+		option: "deity",
+		type: TarsOptionSectionType.Choice,
+		choices: [
+			[TarsTranslation.DialogButtonNone, TarsTranslation.DialogButtonDeityNoneTooltip, null],
+			[TarsTranslation.DialogButtonGood, TarsTranslation.DialogButtonDeityGoodTooltip, Deity.Good],
+			[TarsTranslation.DialogButtonNeutral, TarsTranslation.DialogButtonDeityNeutralTooltip, Deity.Neutral],
+			[TarsTranslation.DialogButtonEvil, TarsTranslation.DialogButtonDeityEvilTooltip, Deity.Evil],
+		],
 	},
 	TarsTranslation.DialogLabelMultiplayer,
 	{
@@ -468,12 +489,12 @@ export const uiConfigurableModeOptions: Array<TarsOptionSection | TarsTranslatio
 		title: TarsTranslation.DialogButtonStartWaterSources,
 		tooltip: TarsTranslation.DialogButtonStartWaterSourcesTooltip,
 	},
-	{
-		option: "survivalMaintainLowDifficulty",
-		type: TarsOptionSectionType.Checkbox,
-		title: TarsTranslation.DialogButtonMaintainLowDifficulty,
-		tooltip: TarsTranslation.DialogButtonMaintainLowDifficultyTooltip,
-	},
+	// {
+	// 	option: "survivalMaintainLowDifficulty",
+	// 	type: TarsOptionSectionType.Checkbox,
+	// 	title: TarsTranslation.DialogButtonMaintainLowDifficulty,
+	// 	tooltip: TarsTranslation.DialogButtonMaintainLowDifficultyTooltip,
+	// },
 	TarsTranslation.DialogModeGardener,
 	{
 		option: "gardenerOnlyEdiblePlants",

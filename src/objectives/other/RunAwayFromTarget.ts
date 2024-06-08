@@ -49,7 +49,7 @@ export default class RunAwayFromTarget extends Objective {
 			(tile) => {
 				const terrainDescription = tile.description;
 				if (terrainDescription &&
-					((!terrainDescription.passable && !terrainDescription.water) || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
+					((!terrainDescription.passable && !terrainDescription.water) || tile.isDeepHole || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
 					return false;
 				}
 
@@ -93,7 +93,7 @@ export default class RunAwayFromTarget extends Objective {
 					pointScore += navigation.getPenalty(tile) * 10;
 
 					// try to avoid paths that has blocking things
-					if (tile.doodad?.blocksMove) {
+					if (tile.doodad?.blocksMove || tile.isDeepHole) {
 						pointScore += 2000;
 					}
 
