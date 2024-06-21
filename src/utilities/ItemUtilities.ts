@@ -266,7 +266,7 @@ export class ItemUtilities {
 				}
 
 				const description = item.description;
-				if (!description || !description.disassemble) {
+				if (!description || !description.storeDisassemblyItems) {
 					continue;
 				}
 
