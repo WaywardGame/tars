@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -43,7 +43,7 @@ export default class MoveToZ extends Objective {
 
 		for (const tileLocation of tileLocations) {
 			objectivePipelines.push([
-				new MoveToTarget(tileLocation.tile, false, { idleIfAlreadyThere: true, changeZ: tileLocation.tile.z === WorldZ.Overworld ? WorldZ.Cave : WorldZ.Overworld }),
+				new MoveToTarget(tileLocation.tile, false, { idleIfAlreadyThere: true, changeZ: tileLocation.tile.z === WorldZ.Surface ? WorldZ.Cave : WorldZ.Surface }),
 			]);
 		}
 

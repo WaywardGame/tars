@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -16,12 +16,12 @@ import type Translation from "@wayward/game/language/Translation";
 import type Mod from "@wayward/game/mod/Mod";
 import type { Events } from "@wayward/utilities/event/EventEmitter";
 
+import { Deity } from "@wayward/game/game/deity/Deity";
 import { Reference } from "@wayward/game/game/reference/IReferenceManager";
 import type TarsMod from "./TarsMod";
 import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
 import type { IContext } from "./core/context/IContext";
 import { TreasureHunterType } from "./modes/TreasureHunter";
-import { Deity } from "@wayward/game/game/deity/Deity";
 
 export const TARS_ID = "TARS";
 
@@ -344,7 +344,7 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		choices: [
 			[TarsTranslation.DialogButtonNone, TarsTranslation.DialogButtonDeityNoneTooltip, null],
 			[TarsTranslation.DialogButtonGood, TarsTranslation.DialogButtonDeityGoodTooltip, Deity.Good],
-			[TarsTranslation.DialogButtonNeutral, TarsTranslation.DialogButtonDeityNeutralTooltip, Deity.Neutral],
+			[TarsTranslation.DialogButtonNeutral, TarsTranslation.DialogButtonDeityNeutralTooltip, Deity.Chaos],
 			[TarsTranslation.DialogButtonEvil, TarsTranslation.DialogButtonDeityEvilTooltip, Deity.Evil],
 		],
 	},

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -218,7 +218,7 @@ export default abstract class Objective implements IObjective {
 	 * Called when the player moves while this objective is running
 	 */
 	public async onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean> {
-		const walkPath = context.human.walkPath;
+		const walkPath = context.human.walkToInProgress;
 		if (walkPath) {
 			// interrupt if an npc or creature moved along our walk path (only close point)
 			for (let i = 0; i < Math.min(10, walkPath.path.length); i++) {

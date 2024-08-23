@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -18,7 +18,8 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import MoveToTarget from "../../core/MoveToTarget";
-import MoveItems from "./MoveItems";
+import MoveItemsFromContainer from "./MoveItemsFromContainer";
+import MoveItemsFromTileContainer from "./MoveItemsFromTileContainer";
 
 /**
  * This assumes all the items are on the same tile!
@@ -57,10 +58,26 @@ export default class MoveItemsIntoInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
+		if (items.some(item => item?.containedWithin?.asTile)) {
+			// items are in a tile container
+			// we can pickup items from the current tile or facing tile. plan/pick the best case
+			return [
+				[
+					// todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
+					new MoveToTarget(tile, true).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
+					new MoveItemsFromTileContainer(items as Item[], this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, items[0] as Item), tile),
+				],
+				[
+					new MoveToTarget(tile, false).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
+					new MoveItemsFromTileContainer(items as Item[], this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, items[0] as Item), tile),
+				],
+			];
+		}
+
 		return [
 			// todo: should planner be smart enough to make this happen automatically? this is required to avoid NotPlausible issues with GatherFromChest
 			new MoveToTarget(tile, true).overrideDifficulty(this.isDifficultyOverridden() ? 0 : undefined),
-			new MoveItems(items as Item[], this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, items[0] as Item), tile),
+			new MoveItemsFromContainer(items as Item[], this.targetContainer ?? context.utilities.item.getMoveItemToInventoryTarget(context, items[0] as Item), tile),
 		];
 	}
 

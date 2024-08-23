@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -14,7 +14,6 @@ import type { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
 import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
-import { StatusType } from "@wayward/game/game/entity/IEntity";
 import { EquipType } from "@wayward/game/game/entity/IHuman";
 import type Island from "@wayward/game/game/island/Island";
 import type { IContainer, IItemDisassembly } from "@wayward/game/game/item/IItem";
@@ -25,6 +24,7 @@ import type { ITerrainLoot } from "@wayward/game/game/tile/TerrainResources";
 import Tile from "@wayward/game/game/tile/Tile";
 import { IVector3 } from "@wayward/game/utilities/math/IVector";
 
+import { StatusType } from "@wayward/game/game/entity/status/IStatus";
 import { TarsOverlay } from "../ui/TarsOverlay";
 import { ActionUtilities } from "../utilities/ActionUtilities";
 import { BaseUtilities } from "../utilities/BaseUtilities";

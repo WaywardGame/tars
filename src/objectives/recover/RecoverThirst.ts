@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -225,10 +225,10 @@ export default class RecoverThirst extends Objective {
 				const changeTimer = thirst.changeTimer;
 				const nextChangeTimer = thirst.nextChangeTimer;
 				if (changeTimer !== undefined && nextChangeTimer !== undefined) {
-					const pathResult = context.utilities.navigation.findPath(context.utilities.base.getBaseTile(context));
+					const pathResult = context.utilities.navigation.findPath(context.utilities.base.getBaseTile(context), false);
 					if (pathResult) {
 						// note: assuming walk path is taking us away from the base
-						let pathLength = pathResult.path.length + (context.human.walkPath?.path?.length ?? 0);
+						let pathLength = pathResult.path.length + (context.human.walkToInProgress?.path?.length ?? 0);
 
 						// assume it takes twice as long to come back to the base
 						pathLength *= 2;

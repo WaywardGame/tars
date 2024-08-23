@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -12,13 +12,14 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
 import type Creature from "@wayward/game/game/entity/creature/Creature";
-import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { MoveType } from "@wayward/game/game/entity/IEntity";
 import type NPC from "@wayward/game/game/entity/npc/NPC";
-import { AiType, MoveType } from "@wayward/game/game/entity/IEntity";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
-import type Context from "../core/context/Context";
+import { AiType } from "@wayward/game/game/entity/AI";
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import Entity from "@wayward/types/definitions/game/game/entity/Entity";
+import type Context from "../core/context/Context";
 
 export enum FindObjectType {
 	Creature,

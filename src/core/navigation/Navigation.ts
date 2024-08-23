@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -10,22 +10,23 @@
  */
 
 import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@wayward/cplusplus/index";
+import { TileUpdateType } from "@wayward/game/game/IGame";
+import Human from "@wayward/game/game/entity/Human";
+import Island from "@wayward/game/game/island/Island";
 import type { ITerrainDescription } from "@wayward/game/game/tile/ITerrain";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import Tile from "@wayward/game/game/tile/Tile";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
-import { TileUpdateType } from "@wayward/game/game/IGame";
-import Human from "@wayward/game/game/entity/Human";
 import Log from "@wayward/utilities/Log";
-import Island from "@wayward/game/game/island/Island";
+import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import { sleep } from "@wayward/utilities/promise/Async";
 
+import { TarsOverlay } from "../../ui/TarsOverlay";
+import { CreatureUtilities } from "../../utilities/CreatureUtilities";
 import type { ITileLocation } from "../ITars";
 import { ExtendedTerrainType, NavigationPath } from "./INavigation";
-import { TarsOverlay } from "../../ui/TarsOverlay";
 import { NavigationKdTrees } from "./NavigationKdTrees";
-import Tile from "@wayward/game/game/tile/Tile";
-import { CreatureUtilities } from "src/utilities/CreatureUtilities";
 
 interface INavigationMapData {
 	dijkstraMap: IDijkstraMap;
@@ -108,20 +109,27 @@ export default class Navigation {
 		return this.sailingMode !== sailingMode;
 	}
 
-	public updateAll(sailingMode: boolean): void {
+	public async updateAll(sailingMode: boolean): Promise<void> {
 		this.log.info("Updating navigation. Please wait...");
 
 		this.sailingMode = sailingMode;
 
 		const island = this.human.island;
 
-		this.kdTrees.initializeIsland(island);
-
 		const start = performance.now();
+
+		await this.kdTrees.initializeIsland(island);
+
+		let count = 0;
 
 		for (const tile of Object.values(island.tiles)) {
 			if (tile) {
 				this.onTileUpdate(tile, tile.type, false);
+			}
+
+			// prevent freezing while this is being initialized
+			if (++count % 10000 === 0) {
+				await sleep(0);
 			}
 		}
 
@@ -183,7 +191,9 @@ export default class Navigation {
 		}
 
 		if (!this.origin) {
-			throw new Error("Invalid origin");
+			// throw new Error("Invalid origin");
+			// this.queueUpdateOrigin();
+			return;
 		}
 
 		this._updateOrigin(this.origin.x, this.origin.y, this.origin.z);
@@ -247,11 +257,11 @@ export default class Navigation {
 
 	public calculateOppositeZ(z: WorldZ): WorldZ | undefined {
 		switch (z) {
-			case WorldZ.Overworld:
+			case WorldZ.Surface:
 				return WorldZ.Cave;
 
 			case WorldZ.Cave:
-				return WorldZ.Overworld;
+				return WorldZ.Surface;
 		}
 
 		return undefined;
@@ -387,7 +397,7 @@ export default class Navigation {
 		return points.sort((a, b) => this.getPenaltyFromPoint(island, a) - this.getPenaltyFromPoint(island, b));
 	}
 
-	public findPath(end: IVector3): NavigationPath | undefined {
+	public findPath(end: IVector3, moveAdjacentToTarget: boolean): NavigationPath | undefined {
 		const mapInfo = this.maps.get(end.z);
 		if (!mapInfo) {
 			return undefined;
@@ -409,6 +419,7 @@ export default class Navigation {
 			score: 0,
 			endX: end.x,
 			endY: end.y,
+			moveAdjacentToTarget,
 		};
 
 		mapInfo.dijkstraMap.findPath2(response);
@@ -463,6 +474,10 @@ export default class Navigation {
 		}
 
 		if (tile.creature && tile.creature.isTamed && !tile.creature.canSwapWith(this.human, undefined)) {
+			return true;
+		}
+
+		if (tile.isDeepHole) {
 			return true;
 		}
 

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,25 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Sacrifice from "@wayward/game/game/entity/action/actions/Sacrifice";
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
-import { IContainer, ItemTypeGroup } from "@wayward/game/game/item/IItem";
 import { Deity } from "@wayward/game/game/deity/Deity";
 
 import type Context from "../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Restart from "../core/Restart";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import BuildItem from "../other/item/BuildItem";
-import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
-import MoveToTarget from "../core/MoveToTarget";
-import MoveItems from "../other/item/MoveItems";
-import ExecuteAction from "../core/ExecuteAction";
-import ReserveItems from "../core/ReserveItems";
 
-const deityItemLimit = 5
+// const deityItemLimit = 5
 
 export default class DeitySacrifice extends Objective {
 
@@ -44,48 +33,49 @@ export default class DeitySacrifice extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (context.human.alignment.invoked) {
-			return ObjectiveResult.Ignore;
-		}
+		return ObjectiveResult.Ignore;
 
-		const objectives: IObjective[] = [];
+		// if (context.human.alignment.invoked) {
+		// }
 
-		if (context.base.altar.length === 0) {
-			objectives.push(new AcquireInventoryItem("altar"), new BuildItem(), new Restart());
+		// const objectives: IObjective[] = [];
 
-		} else {
-			const altar = context.base.altar[0];
+		// if (context.base.altar.length === 0) {
+		// 	objectives.push(new AcquireInventoryItem("altar"), new BuildItem(), new Restart());
 
-			if (altar.containedItems!.length < deityItemLimit) {
-				// try putting more items on the alter before sacrificing
-				let runes = context.utilities.item.getBaseItems(context).filter(item => item.isInGroup(ItemTypeGroup.ArtifactOfInvocation));
+		// } else {
+		// 	const altar = context.base.altar[0];
 
-				// test limit
-				runes = runes.slice(0, deityItemLimit);
+		// 	if (altar.containedItems!.length < deityItemLimit) {
+		// 		// try putting more items on the alter before sacrificing
+		// 		let runes = context.utilities.item.getBaseItems(context).filter(item => item.isInGroup(ItemTypeGroup.AncientRune));
 
-				if (runes.length === 0) {
-					return ObjectiveResult.Impossible;
-				}
+		// 		// test limit
+		// 		runes = runes.slice(0, deityItemLimit);
 
-				objectives.push(new ReserveItems(...runes));
+		// 		if (runes.length === 0) {
+		// 			return ObjectiveResult.Impossible;
+		// 		}
 
-				for (const item of runes) {
-					objectives.push(new MoveItemsIntoInventory(item));
-				}
+		// 		objectives.push(new ReserveItems(...runes));
 
-				objectives.push(new MoveToTarget(context.base.altar[0], true));
+		// 		for (const item of runes) {
+		// 			objectives.push(new MoveItemsIntoInventory(item));
+		// 		}
 
-				for (const item of runes) {
-					objectives.push(new MoveItems(item, altar as IContainer));
-				}
-			}
+		// 		objectives.push(new MoveToTarget(context.base.altar[0], true));
 
-			objectives.push(new ExecuteAction(Sacrifice, () => {
-				return [{ deity: this.deity, altar }] as ActionArgumentsOf<typeof Sacrifice>;
-			}).setStatus(this));
-		}
+		// 		for (const item of runes) {
+		// 			objectives.push(new MoveItemsFromContainer(item, altar as IContainer));
+		// 		}
+		// 	}
 
-		return objectives;
+		// 	objectives.push(new ExecuteAction(Sacrifice, () => {
+		// 		return [{ deity: this.deity, altar }] as ActionArgumentsOf<typeof Sacrifice>;
+		// 	}).setStatus(this));
+		// }
+
+		// return objectives;
 	}
 
 }

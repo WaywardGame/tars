@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -11,6 +11,7 @@
 
 import Mod from "@wayward/game/mod/Mod";
 import Text from "@wayward/game/ui/component/Text";
+import Bindable from "@wayward/game/ui/input/Bindable";
 import type { QuadrantComponentId } from "@wayward/game/ui/screen/screens/game/IGameScreenApi";
 import { Quadrant } from "@wayward/game/ui/screen/screens/game/component/IQuadrantComponent";
 import QuadrantComponent from "@wayward/game/ui/screen/screens/game/component/QuadrantComponent";
@@ -42,6 +43,10 @@ export default class TarsQuadrantComponent extends QuadrantComponent {
 		this.TarsMod.event.until(this, "remove").subscribe("statusChange", this.refresh);
 
 		this.refresh();
+	}
+
+	public override getBindable(): Bindable {
+		return this.TarsMod.bindableToggleQuadrantComponent;
 	}
 
 	@Bound

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -14,7 +14,7 @@ import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
 import MoveItemAction from "@wayward/game/game/entity/action/actions/MoveItem";
 import Rename from "@wayward/game/game/entity/action/actions/Rename";
 import Respawn from "@wayward/game/game/entity/action/actions/Respawn";
-import UpdateWalkPath from "@wayward/game/game/entity/action/actions/UpdateWalkPath";
+import UpdateWalkTo from "@wayward/game/game/entity/action/actions/UpdateWalkTo";
 import type { IActionApi } from "@wayward/game/game/entity/action/IAction";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
@@ -23,12 +23,12 @@ import type Creature from "@wayward/game/game/entity/creature/Creature";
 import CreatureManager from "@wayward/game/game/entity/creature/CreatureManager";
 import Human from "@wayward/game/game/entity/Human";
 import { AttackType } from "@wayward/game/game/entity/IEntity";
-import { EquipType, WalkPathChangeReason } from "@wayward/game/game/entity/IHuman";
+import { EquipType, WalkToChangeReason } from "@wayward/game/game/entity/IHuman";
 import type { IStat, IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import NPC from "@wayward/game/game/entity/npc/NPC";
 import ControllableNPC from "@wayward/game/game/entity/npc/npcs/Controllable";
-import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
+import { WalkTo, WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 import type { INote } from "@wayward/game/game/entity/player/note/NoteManager";
 import type Player from "@wayward/game/game/entity/player/Player";
 import { TileUpdateType } from "@wayward/game/game/IGame";
@@ -43,6 +43,7 @@ import type { IPrompt } from "@wayward/game/game/meta/prompt/Prompts";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
 import InterruptChoice from "@wayward/game/language/dictionary/InterruptChoice";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Translation from "@wayward/game/language/Translation";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import { Direction } from "@wayward/game/utilities/math/Direction";
@@ -53,10 +54,8 @@ import EventEmitter, { Priority } from "@wayward/utilities/event/EventEmitter";
 import { WorldZ } from "@wayward/utilities/game/WorldZ";
 import Log from "@wayward/utilities/Log";
 import Objects from "@wayward/utilities/object/Objects";
-import { sleep } from "@wayward/utilities/promise/Async";
 import ResolvablePromise from "@wayward/utilities/promise/ResolvablePromise";
 
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
@@ -288,7 +287,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		this.utilities.movement.resetMovementOverlays();
 
 		multiplayer.executeClientside(() => {
-			UpdateWalkPath.execute(this.human, undefined);
+			UpdateWalkTo.execute(this.human, undefined);
 
 			OptionsInterrupt.restore(this.human);
 		});
@@ -511,8 +510,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		}
 	}
 
-	@EventHandler(EventBus.Humans, "canChangeWalkPath")
-	public onCanChangeWalkPath(human: Human, path: IVector2[] | undefined, reason: WalkPathChangeReason): false | undefined {
+	@EventHandler(EventBus.Humans, "canChangeWalkTo")
+	public oncanChangeWalkTo(human: Human, walkTo: WalkTo | undefined, reason: WalkToChangeReason): false | undefined {
 		if (this.human !== human || !this.isRunning()) {
 			return undefined;
 		}
@@ -614,7 +613,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 	@EventHandler(EventBus.Humans, "preMove")
 	public onPreMove(human: Human, prevTile: Tile, nextTile: Tile): void {
-		if (this.human !== human || !this.isRunning() || !human.hasWalkPath()) {
+		if (this.human !== human || !this.isRunning() || !human.isWalkingTo) {
 			return;
 		}
 
@@ -630,9 +629,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		}
 
 		// we are attacking something. cancel and pending walk path
-		if (this.human.hasWalkPath()) {
+		if (this.human.isWalkingTo) {
 			multiplayer.executeClientside(() => {
-				UpdateWalkPath.execute(this.human, undefined);
+				UpdateWalkTo.execute(this.human, undefined);
 			});
 		}
 
@@ -874,7 +873,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		} else {
 			multiplayer.executeClientside(() => {
-				UpdateWalkPath.execute(this.human, path, true);
+				UpdateWalkTo.execute(this.human, { type: "path", path: path, force: true });
 			});
 		}
 	}
@@ -938,9 +937,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			this.log.info(`Status: ${statusMessage}`);
 		}
 
-		const walkPath = this.context.human.walkPath;
-		if (walkPath && walkPath.path.length > 0) {
-			const tilesAway = Math.ceil(Vector2.distance(this.human, walkPath.path[walkPath.path.length - 1]));
+		const walkToInProgress = this.context.human.walkToInProgress;
+		if (walkToInProgress && walkToInProgress.type === "path" && walkToInProgress.path.length > 0) {
+			const tilesAway = Math.ceil(Vector2.distance(this.human, walkToInProgress.path[walkToInProgress.path.length - 1]));
 			if (tilesAway > 0) {
 				statusMessage += ` (${tilesAway} tile${tilesAway > 1 ? "s" : ""} away)`;
 			}
@@ -989,10 +988,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 			this.event.emit("navigationChange", this.navigationSystemState);
 
-			// give a chance for the message to show up on screen before starting nav update
-			await sleep(100);
-
-			this.utilities.navigation.updateAll(sailingMode);
+			await this.utilities.navigation.updateAll(sailingMode);
 
 			this.utilities.navigation.queueUpdateOrigin(this.human.tile);
 
@@ -1145,7 +1141,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		this.utilities.movement.resetMovementOverlays();
 
 		multiplayer.executeClientside(() => {
-			UpdateWalkPath.execute(this.human, undefined);
+			UpdateWalkTo.execute(this.human, undefined);
 		});
 	}
 
@@ -1773,7 +1769,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 	private escapeCavesInterrupt(context: Context): MoveToZ | undefined {
 		if (!context.options.allowCaves && context.human.z === WorldZ.Cave) {
-			return new MoveToZ(WorldZ.Overworld);
+			return new MoveToZ(WorldZ.Surface);
 		}
 	}
 
@@ -1787,7 +1783,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			return undefined;
 		}
 
-		walkPath ??= context.human.walkPath?.path;
+		walkPath ??= context.human.walkToInProgress?.type === "path" ? context.human.walkToInProgress.path : undefined;
 
 		if (walkPath === undefined || walkPath.length === 0) {
 			return undefined;

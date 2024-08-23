@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,19 +9,20 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Dig from "@wayward/game/game/entity/action/actions/Dig";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
 
+import Dig from "@wayward/game/game/entity/action/actions/Dig";
+import { ActionArgument, IActionDescription } from "@wayward/game/game/entity/action/IAction";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
+import UseItem from "../../../objectives/other/item/UseItem";
+import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 import Lambda from "../../core/Lambda";
 import MoveToTarget from "../../core/MoveToTarget";
-import UseItem from "../item/UseItem";
 import ClearTile from "./ClearTile";
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 
 export interface IDigTileOptions {
 	digUntilTypeIsNot: TerrainType;
@@ -50,7 +51,7 @@ export default class DigTile extends Objective {
 
 		objectives.push(new ClearTile(this.target));
 
-		objectives.push(new UseItem(Dig, context.inventory.shovel));
+		objectives.push(new UseItem(Dig as IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemInventory]]>, context.inventory.shovel));
 
 		const digUntilTypeIsNot = this.options?.digUntilTypeIsNot;
 		if (digUntilTypeIsNot !== undefined) {

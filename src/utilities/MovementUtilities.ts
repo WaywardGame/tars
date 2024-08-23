@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -149,34 +149,49 @@ export class MovementUtilities {
 		// ensure sailing mode is up to date
 		await context.utilities.ensureSailingMode?.(!!context.human.vehicleItemReference);
 
-		const ends = this.getMovementEndPositions(context, target, moveAdjacentToTarget);
-		if (ends.length === 0) {
-			return ObjectiveResult.Impossible;
-		}
-
-		for (const end of ends) {
-			if (context.human.x === end.x && context.human.y === end.y && context.human.z === end.z) {
+		// short circuit if we're already there
+		if (moveAdjacentToTarget) {
+			if (context.human.tile.isAdjacent(target)) {
 				return ObjectiveResult.Complete;
 			}
+
+			if (context.human.tile.isAt(target)) {
+				// we're at the target tile but we want to be at an adjacent tile
+				// this is a problem. we should path to the best adjacent tile
+				const ends = this.getMovementEndPositions(context, target, moveAdjacentToTarget);
+				if (ends.length === 0) {
+					return ObjectiveResult.Impossible;
+				}
+
+				let results = ends.map(end => navigation.findPath(end, false))
+					.filter(result => result !== undefined) as NavigationPath[];
+
+				for (const result of results) {
+					const pathLength = result.path.length;
+
+					// the score is length of path + penalty per node
+					// remove the base difficulty and add in our own
+					// take into account that longer paths are worse
+					result.score = Math.round(result.score - pathLength + Math.pow(pathLength, 1.1));
+				}
+
+				results = results.sort((a, b) => a.score - b.score);
+
+				if (results.length > 0) {
+					return results[0];
+				}
+
+				return ObjectiveResult.Impossible;
+			}
+
+		} else if (context.human.tile.isAt(target)) {
+			return ObjectiveResult.Complete;
 		}
 
 		// pick the easiest path
-		let results = ends.map(end => navigation.findPath(end))
-			.filter(result => result !== undefined) as NavigationPath[];
-
-		for (const result of results) {
-			const pathLength = result.path.length;
-
-			// the score is length of path + penalty per node
-			// remove the base difficulty and add in our own
-			// take into account that longer paths are worse
-			result.score = Math.round(result.score - pathLength + Math.pow(pathLength, 1.1));
-		}
-
-		results = results.sort((a, b) => a.score - b.score);
-
-		if (results.length > 0) {
-			return results[0];
+		const result = navigation.findPath(target, moveAdjacentToTarget);
+		if (result) {
+			return result;
 		}
 
 		return ObjectiveResult.Impossible;
@@ -295,7 +310,7 @@ export class MovementUtilities {
 					}
 				}
 
-				if (force || !context.human.hasWalkPath()) {
+				if (force || !context.human.isWalkingTo) {
 					// walk along the path up to the first obstacle. we don't want to let the Move action automatically gather (it uses tools poorly)
 					this.updateOverlay(context, movementPath.path);
 

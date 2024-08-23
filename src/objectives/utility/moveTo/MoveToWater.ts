@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -129,7 +129,8 @@ export default class MoveToWater extends Objective {
 					for (const standableNearbyTile of standableNearbyTiles) {
 						const direction = context.island.getDirectionFromMovement(tile.x - standableNearbyTile.x, tile.y - standableNearbyTile.y);
 
-						const mobCheck = context.island.checkForTargetInRange(standableNearbyTile, direction, fishingRange);
+						const rangedResolved = context.island.applyRangedAccuracy(standableNearbyTile, direction, fishingRange);
+						const mobCheck = context.island.checkForTargetInRange(standableNearbyTile, rangedResolved);
 						if (mobCheck.noTile || mobCheck.obstacle || (mobCheck.creature && !mobCheck.creature.description?.fishable)) {
 							return false;
 						}

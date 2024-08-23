@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -90,7 +90,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
 		useProtectedItems: TarsUseProtectedItems.No,
 		useProtectedItemsForEquipment: true,
 
-		deity: Deity.Neutral,
+		deity: Deity.Chaos,
 
 		goodCitizen: isWebWorker ? false : true,
 

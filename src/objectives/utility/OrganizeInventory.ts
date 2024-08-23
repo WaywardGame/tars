@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -23,7 +23,7 @@ import Objective from "../../core/objective/Objective";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
-import MoveItems from "../other/item/MoveItems";
+import MoveItemsFromContainer from "../other/item/MoveItemsFromContainer";
 import { defaultMaxTilesChecked } from "../../core/ITars";
 
 const maxChestDistance = 128;
@@ -178,12 +178,15 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = context.human.tile.findMatchingTile(tile => context.utilities.tile.isOpenTile(context, tile), { maxTilesChecked: defaultMaxTilesChecked });
+		const itemToDrop = unusedItems[0];
+
+		const target = context.human.tile.findMatchingTile(tile =>
+			context.utilities.tile.isOpenTile(context, tile) &&
+			Drop.canUseAt(context.human, { fromTile: tile, targetTile: tile }, itemToDrop).usable,
+			{ maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}
-
-		const itemToDrop = unusedItems[0];
 
 		this.log.info(`Dropping ${itemToDrop}`);
 
@@ -212,11 +215,8 @@ export default class OrganizeInventory extends Objective {
 		const targetContainer = chest as IContainer;
 		let chestWeight = context.island.items.computeContainerWeight(targetContainer);
 		const chestWeightCapacity = context.island.items.getWeightCapacity(targetContainer);
-		if (chestWeightCapacity !== undefined && chestWeight + itemsToMove[0].getTotalWeight(undefined, targetContainer) <= chestWeightCapacity) {
-			// at least 1 item fits in the chest. move to it and start moving items
-			objectives.push(new MoveToTarget(chest, true));
-
-			let itemsToMoveWithinWeight: Item[] = [];
+		if (chestWeightCapacity !== undefined) {
+			const itemsToMoveWithinWeight: Item[] = [];
 
 			for (const item of itemsToMove) {
 				const itemWeight = item.getTotalWeight(undefined, targetContainer);
@@ -230,7 +230,10 @@ export default class OrganizeInventory extends Objective {
 			}
 
 			if (itemsToMoveWithinWeight.length > 0) {
-				objectives.push(new MoveItems(itemsToMoveWithinWeight, targetContainer));
+				// at least 1 item fits in the chest. move to it and start moving items
+				objectives.push(new MoveToTarget(chest, true));
+
+				objectives.push(new MoveItemsFromContainer(itemsToMoveWithinWeight, targetContainer));
 
 				// restart in case there's more to move
 				objectives.push(new Restart());

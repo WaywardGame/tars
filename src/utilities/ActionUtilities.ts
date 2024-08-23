@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -68,11 +68,12 @@ export class ActionUtilities {
 
 		const canUseResult = action.canUse(context.human, ...actionArgs);
 		if (!canUseResult.usable) {
-			if (canUseResult.message !== undefined && expectedMessages?.has(canUseResult.message)) {
+			const message = typeof canUseResult.message === "object" ? canUseResult.message.message : canUseResult.message;
+			if (message !== undefined && expectedMessages?.has(message)) {
 				return expectedCannotUseResult;
 			}
 
-			context.log.warn(`Tried to use an action that is not usable. Action: ${ActionType[actionType]}. Arguments: ${actionArgs.join(", ")}. Message: ${Message[canUseResult.message!]}`);
+			context.log.warn(`Tried to use an action that is not usable. Action: ${ActionType[actionType]}. Arguments: ${actionArgs.join(", ")}. Message: ${Message[message!]}`);
 
 			return ObjectiveResult.Restart;
 		}

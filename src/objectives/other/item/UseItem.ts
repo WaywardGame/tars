@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -23,6 +23,7 @@ import ExecuteAction from "../../core/ExecuteAction";
 import ReserveItems from "../../core/ReserveItems";
 
 export type UseItemActionDescriptions =
+	IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemInventory]]> |
 	IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory]> |
 	IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]> |
 	IActionDescription<[[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]]> |

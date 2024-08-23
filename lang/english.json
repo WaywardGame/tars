@@ -3,7 +3,8 @@
 	"dictionaries": {
 		"bindable": {
 			"modTARSToggleDialog": "Toggle TARS Dialog",
-			"modTARSToggleTars": "Toggle TARS"
+			"modTARSToggleTars": "Toggle TARS",
+			"modTARSToggleQuadrantComponent": "Toggle TARS Status"
 		},
 		"source": {
 			"modTARSTARS": "TARS"

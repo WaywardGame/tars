@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -16,6 +16,9 @@ import Eat from "@wayward/game/game/entity/action/actions/Eat";
 import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 import type Item from "@wayward/game/game/item/Item";
 
+import Human from "@wayward/game/game/entity/Human";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { IConsumeItemCanUse } from "@wayward/game/game/entity/action/actions/ConsumeItem";
 import { IContainer } from "@wayward/game/game/item/IItem";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -24,10 +27,6 @@ import Objective from "../../core/objective/Objective";
 import AcquireFood from "../acquire/item/AcquireFood";
 import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 import UseItem from "../other/item/UseItem";
-import Human from "@wayward/game/game/entity/Human";
-import { Action } from "@wayward/game/game/entity/action/Action";
-import { IConsumeItemCanUse } from "@wayward/game/game/entity/action/actions/ConsumeItem";
-import { ReferenceType } from "@wayward/game/game/reference/IReferenceManager";
 
 const decayingSoonThreshold = 50;
 
@@ -127,7 +126,7 @@ export default class RecoverHunger extends Objective {
 			.sort((a, b) => (a.getDecayTime() ?? 999999) - (b.getDecayTime() ?? 999999));
 	}
 
-	private eatItem(context: Context, item: Item): (MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human<number, ReferenceType.NPC | ReferenceType.Player>, void, IConsumeItemCanUse, [Item]>>)[] {
+	private eatItem(context: Context, item: Item): (MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human, void, IConsumeItemCanUse, [Item]>>)[] {
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
 			new MoveItemsIntoInventory(item).keepInInventory(),

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -74,7 +74,7 @@ export default class GatherFromGround extends Objective {
 
 			return [
 				new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
-				new MoveToTarget(tile, true)
+				new MoveToTarget(tile, false)
 					.overrideDifficulty((prioritizeBaseItems && context.utilities.item.getBaseTileItems(context).has(item)) ? 5 : undefined)
 					.trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),

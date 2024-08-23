@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -12,7 +12,7 @@
 import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
 import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
 import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
-import UpdateWalkPath from "@wayward/game/game/entity/action/actions/UpdateWalkPath";
+import UpdateWalkTo from "@wayward/game/game/entity/action/actions/UpdateWalkTo";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import type Item from "@wayward/game/game/item/Item";
 import Build from "@wayward/game/game/entity/action/actions/Build";
@@ -183,7 +183,7 @@ export default class BuildItem extends Objective {
 			context.utilities.movement.resetMovementOverlays();
 
 			multiplayer.executeClientside(() => {
-				UpdateWalkPath.execute(context.human, undefined);
+				UpdateWalkTo.execute(context.human, undefined);
 			});
 		}
 

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -20,6 +20,7 @@ import { WorldZ } from "@wayward/utilities/game/WorldZ";
 import { KdTree } from "@wayward/game/utilities/collection/kdtree/KdTree";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { IVector2 } from "@wayward/game/utilities/math/IVector";
+import { sleep } from "@wayward/utilities/promise/Async";
 
 import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation, ExtendedTerrainType } from "./INavigation";
 
@@ -79,7 +80,7 @@ export class NavigationKdTrees {
 	 * Initializes kdtrees for the provided island.
 	 * No-ops if the island was already initialized
 	 */
-	public initializeIsland(island: Island): void {
+	public async initializeIsland(island: Island): Promise<void> {
 		let islandMaps = this.maps.get(island);
 		if (islandMaps) {
 			return;
@@ -111,6 +112,11 @@ export class NavigationKdTrees {
 						const y2 = halfMapSize - offsetY;
 						this.updateKdTree(island, x2, y2, z, island.getTile(x2, y2, z).type, data);
 					}
+				}
+
+				// prevent freezing while this is being initialized
+				if (offsetX % 10 === 0) {
+					await sleep(0);
 				}
 			}
 

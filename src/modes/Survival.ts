@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,15 +9,15 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { AiType } from "@wayward/game/game/entity/IEntity";
+import { TurnMode } from "@wayward/game/game/IGame";
+import { BiomeType } from "@wayward/game/game/biome/IBiome";
 import { EquipType } from "@wayward/game/game/entity/IHuman";
 import type { IStat, IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
-import { TurnMode } from "@wayward/game/game/IGame";
-import { ItemType } from "@wayward/game/game/item/IItem";
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
-import { BiomeType } from "@wayward/game/game/biome/IBiome";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
+import { AiType } from "@wayward/game/game/entity/AI";
 import { IInventoryItems } from "../core/ITars";
 import type Context from "../core/context/Context";
 import { ContextDataType, MovingToNewIslandState } from "../core/context/IContext";
@@ -52,7 +52,6 @@ import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
 import MoveToNewIsland from "../objectives/utility/moveTo/MoveToNewIsland";
 import { BaseMode } from "./BaseMode";
-import DeitySacrifice from "../objectives/utility/DeitySacrifice";
 
 /**
  * Survival mode
@@ -151,10 +150,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(new AcquireInventoryItem("heal"));
 
-		const deity = context.options.deity;
-		if (deity !== undefined && deity !== null) {
-			objectives.push(new DeitySacrifice(deity));
-		}
+		// const deity = context.options.deity;
+		// if (deity !== undefined && deity !== null) {
+		// 	objectives.push(new DeitySacrifice(deity));
+		// }
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			(

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -32,6 +32,8 @@ import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
 import { GetActionArguments } from "../../utilities/ActionUtilities";
 import Message from "@wayward/game/language/dictionary/Message";
+import PickUpItem from "@wayward/game/game/entity/action/actions/PickUpItem";
+import Tile from "@wayward/game/game/tile/Tile";
 
 export enum ExecuteActionType {
 	Generic,
@@ -212,41 +214,14 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			return ObjectiveResult.Complete;
 		}
 
-		const matchingTileItems = context.human.tile.containedItems?.filter(item => itemTypes.has(item.type));
-		if (matchingTileItems !== undefined && matchingTileItems.length > 0) {
-			const matchingNewItems: Item[] = [];
+		const pickedUpOnCurrentTile = await this.tryPickUpItem(context, itemTypes, context.human.tile);
+		if (pickedUpOnCurrentTile !== undefined) {
+			return pickedUpOnCurrentTile;
+		}
 
-			// for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
-			// 	const itemToMove = matchingTileItems[i];
-			// 	const targetContainer = context.utilities.item.getMoveItemToInventoryTarget(context, itemToMove);
-
-			// 	const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, targetContainer] });
-			// 	if (typeof (matchingItem) === "number") {
-			// 		this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
-			// 		return matchingItem;
-			// 	}
-
-			// 	if (matchingItem !== undefined) {
-			// 		matchingNewItems.push(matchingItem);
-			// 	}
-			// }
-
-			if (matchingNewItems.length > 0) {
-				const matchingNewItem = matchingNewItems[0];
-
-				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}, data key: ${this.contextDataKey}) (via MoveItem)`);
-
-				if (this.reserveType === ReserveType.Soft) {
-					context.addSoftReservedItems(...matchingNewItems);
-
-				} else {
-					context.addHardReservedItems(...matchingNewItems);
-				}
-
-				context.setData(this.contextDataKey, matchingNewItem);
-
-				return ObjectiveResult.Complete;
-			}
+		const pickedUpOnFacingTile = await this.tryPickUpItem(context, itemTypes, context.human.facingTile);
+		if (pickedUpOnFacingTile !== undefined) {
+			return pickedUpOnFacingTile;
 		}
 
 		context.setData(this.contextDataKey, undefined);
@@ -269,5 +244,42 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 		});
 
 		return newOrChangedItems.find(item => itemTypes.has(item.type));
+	}
+
+	private async tryPickUpItem(context: Context, itemTypes: Set<ItemType>, tile: Tile): Promise<ObjectiveResult | undefined> {
+		const lastTileItem = tile.containedItems && tile.containedItems.length > 0 ?
+			tile.containedItems[tile.containedItems.length - 1] : undefined;
+		if (lastTileItem !== undefined && itemTypes.has(lastTileItem.type)) {
+			const matchingNewItems: Item[] = [];
+
+			const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: PickUpItem, args: [context.human.tile === tile] });
+			if (typeof (matchingItem) === "number") {
+				this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
+				return matchingItem;
+			}
+
+			if (matchingItem !== undefined) {
+				matchingNewItems.push(matchingItem);
+			}
+
+			if (matchingNewItems.length > 0) {
+				const matchingNewItem = matchingNewItems[0];
+
+				this.log.info(`Acquired matching item ${ItemType[matchingNewItem.type]} (id: ${matchingNewItem.id}, data key: ${this.contextDataKey}) (via MoveItem)`);
+
+				if (this.reserveType === ReserveType.Soft) {
+					context.addSoftReservedItems(...matchingNewItems);
+
+				} else {
+					context.addHardReservedItems(...matchingNewItems);
+				}
+
+				context.setData(this.contextDataKey, matchingNewItem);
+
+				return ObjectiveResult.Complete;
+			}
+		}
+
+		return undefined;
 	}
 }

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -99,6 +99,7 @@ export default class TillForSeed extends Objective {
 
 		objectives.push(
 			new MoveToTarget(tile, true),
+			new ClearTile(tile),
 			new UseItem(Till, "hoe"),
 			new Lambda(async context => {
 				const facingPoint = context.human.facingTile;

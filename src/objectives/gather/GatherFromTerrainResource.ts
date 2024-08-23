@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -82,7 +82,7 @@ export default class GatherFromTerrainResource extends Objective {
 			return;
 		}
 
-		// todo: debug solar still blocking wateR?
+		// todo: debug solar still blocking water?
 		if (!context.utilities.tile.canGather(context, tileLocation.tile)) {
 			return;
 		}

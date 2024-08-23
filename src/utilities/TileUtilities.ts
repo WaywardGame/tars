@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -186,7 +186,7 @@ export class TileUtilities {
 			return false;
 		}
 
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.isPlayerOnTile();
+		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.isPlayerOnTile() && !tile.isDeepHole;
 	}
 
 	public canDig(context: Context, tile: Tile): boolean {

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -22,7 +22,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import BuildItem from "../other/item/BuildItem";
-import MoveItems from "../other/item/MoveItems";
+import MoveItemsFromContainer from "../other/item/MoveItemsFromContainer";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export default class MoveIntoChest extends Objective {
@@ -69,7 +69,7 @@ export default class MoveIntoChest extends Objective {
 				// at least 1 item fits in the chest
 				objectivePipelines.push([
 					new MoveToTarget(chest, true),
-					new MoveItems(itemsToMove as Item[], targetContainer, chest),
+					new MoveItemsFromContainer(itemsToMove as Item[], targetContainer, chest),
 				]);
 			}
 		}

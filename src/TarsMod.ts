@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -11,8 +11,6 @@
 
 import type CommandManager from "@wayward/game/command/CommandManager";
 import { EventBus } from "@wayward/game/event/EventBuses";
-import { IEventEmitter, Priority } from "@wayward/utilities/event/EventEmitter";
-import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import { EventHandler } from "@wayward/game/event/EventManager";
 import Human from "@wayward/game/game/entity/Human";
 import CreateControllableNPC from "@wayward/game/game/entity/action/actions/CreateControllableNPC";
@@ -35,6 +33,8 @@ import { MenuBarButtonGroup, type MenuBarButtonType } from "@wayward/game/ui/scr
 import Files from "@wayward/game/utilities/Files";
 import Log from "@wayward/utilities/Log";
 import SearchParams from "@wayward/utilities/SearchParams";
+import { IEventEmitter, Priority } from "@wayward/utilities/event/EventEmitter";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 
 import NPC from "@wayward/game/game/entity/npc/NPC";
 import { TranslationArg } from "@wayward/game/language/ITranslation";
@@ -56,7 +56,7 @@ export default class TarsMod extends Mod {
 
 	////////////////////////////////////
 
-	public override event: IEventEmitter<this, ITarsModEvents>;
+	declare public event: IEventEmitter<this, ITarsModEvents>;
 
 	////////////////////////////////////
 
@@ -73,6 +73,9 @@ export default class TarsMod extends Mod {
 
 	@Register.bindable("ToggleTars", IInput.key("Period"))
 	public readonly bindableToggleTars: Bindable;
+
+	@Register.bindable("ToggleQuadrantComponent")
+	public readonly bindableToggleQuadrantComponent: Bindable;
 
 	////////////////////////////////////
 
@@ -392,7 +395,7 @@ export default class TarsMod extends Mod {
 	}
 
 	// this must run before the game screen is removed
-	@EventHandler(EventBus.Game, "stoppingPlay", Priority.Highest)
+	@EventHandler(EventBus.Game, "stoppingPlayPreSave", Priority.Highest)
 	public onGameEnd(): void {
 		this.saveDialogState();
 

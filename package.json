@@ -1,0 +1,14 @@
+{
+	"name": "@wayward/tars",
+	"version": "1.0.0",
+	"main": "out/Tars.js",
+	"types": "out/Tars.d.ts",
+	"scripts": {
+		"clean": "rimraf ./out ./tsconfig.*tsbuildinfo",
+		"build": "tsc --build --pretty",
+		"watch": "tsc --build --watch --pretty --preserveWatchOutput"
+	},
+	"devDependencies": {
+		"@wayward/types": "^2.14.0-beta.dev.20240823.7"
+	}
+}
