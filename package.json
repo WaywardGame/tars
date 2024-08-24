@@ -9,6 +9,7 @@
 		"watch": "tsc --build --watch --pretty --preserveWatchOutput"
 	},
 	"devDependencies": {
-		"@wayward/types": "^2.14.0-beta.dev.20240823.9"
+		"@wayward/types": "^2.14.0-beta.dev.20240823.10",
+		"typescript": "^5.5.4"
 	}
 }
