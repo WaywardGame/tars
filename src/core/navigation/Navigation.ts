@@ -522,24 +522,36 @@ export default class Navigation {
 			for (const otherTile of otherTiles) {
 				const creature = otherTile.creature;
 				if (creature) {
-					// only apply the penalty if the creature can actually go this tile
-					if (creature && !creature.isTamed && creature.checkCreatureMove(true, tile, creature.getMoveType(), true) === 0) {
+					if (creature && !creature.isTamed) {
 						penalty += 10;
 
-						if (tile === otherTile) {
-							penalty += 8;
+						// check if the creature can move to this tile or the adjacent one
+						let creatureCanMoveToAdjacentTile = false;
+
+						const adjacentTiles = tile.getTilesAround();
+						for (const adjacentTile of adjacentTiles) {
+							if (creature.findPath(undefined, adjacentTile, creature.getMoveType(), creaturePenaltyRadius * 2, this.human) !== undefined) {
+								creatureCanMoveToAdjacentTile = true;
+								break;
+							}
 						}
 
-						if (Math.abs(tile.x - otherTile.x) <= 1 && Math.abs(tile.y - otherTile.y) <= 1) {
-							penalty += 8;
-						}
+						if (creatureCanMoveToAdjacentTile) {
+							if (tile === otherTile) {
+								penalty += 8;
+							}
 
-						if (creature.aberrant) {
-							penalty += 100;
-						}
+							if (Math.abs(tile.x - otherTile.x) <= 1 && Math.abs(tile.y - otherTile.y) <= 1) {
+								penalty += 8;
+							}
 
-						if (this.creatureUtilities.isScaredOfCreature(this.human, creature)) {
-							penalty += 255;
+							if (creature.aberrant) {
+								penalty += 100;
+							}
+
+							if (this.creatureUtilities.isScaredOfCreature(this.human, creature)) {
+								penalty += 255;
+							}
 						}
 					}
 				}

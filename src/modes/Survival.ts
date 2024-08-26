@@ -17,7 +17,7 @@ import { Stat } from "@wayward/game/game/entity/IStats";
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { ItemType } from "@wayward/game/game/item/IItem";
 
-import { AiType } from "@wayward/game/game/entity/AI";
+import { AiType } from "@wayward/game/game/entity/ai/AI";
 import { IInventoryItems } from "../core/ITars";
 import type Context from "../core/context/Context";
 import { ContextDataType, MovingToNewIslandState } from "../core/context/IContext";
@@ -318,7 +318,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		// go on a killing spree once you have a good sword and shield
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase3, async (context, objectives) => {
 			const creatures = context.utilities.base.getNonTamedCreaturesNearBase(context)
-				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
+				.filter(creature => creature.ai.has(AiType.Hostile) || creature.ai.has(AiType.Hidden));
 			if (creatures.length > 0) {
 				objectives.push(new HuntCreatures(creatures));
 			}

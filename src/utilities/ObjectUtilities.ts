@@ -16,7 +16,7 @@ import { MoveType } from "@wayward/game/game/entity/IEntity";
 import type NPC from "@wayward/game/game/entity/npc/NPC";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 
-import { AiType } from "@wayward/game/game/entity/AI";
+import { AiType } from "@wayward/game/game/entity/ai/AI";
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import Entity from "@wayward/types/definitions/game/game/entity/Entity";
 import type Context from "../core/context/Context";
@@ -114,7 +114,7 @@ export class ObjectUtilities {
 				return false;
 			}
 
-			if (options?.onlyHostile && !creature.hasAi(AiType.Hostile)) {
+			if (options?.onlyHostile && !creature.ai.has(AiType.Hostile)) {
 				return false;
 			}
 
@@ -137,7 +137,7 @@ export class ObjectUtilities {
 			}
 
 			if (options?.hostile !== undefined) {
-				return options.hostile === creature.hasAi(AiType.Hostile);
+				return options.hostile === creature.ai.has(AiType.Hostile);
 			}
 
 			return true;
