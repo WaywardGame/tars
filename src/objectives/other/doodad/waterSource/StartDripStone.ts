@@ -1,14 +1,3 @@
-/*!
- * Copyright 2011-2024 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 
 import type Context from "../../../../core/context/Context";
@@ -30,59 +19,59 @@ import RepairItem from "../../../interrupt/RepairItem";
  */
 export default class StartDripStone extends Objective {
 
-    constructor(private readonly dripStone: Doodad) {
-        super();
-    }
+	constructor(private readonly dripStone: Doodad) {
+		super();
+	}
 
-    public getIdentifier(): string {
-        return `StartDripStone:${this.dripStone}`;
-    }
+	public getIdentifier(): string {
+		return `StartDripStone:${this.dripStone}`;
+	}
 
-    public getStatus(): string | undefined {
-        return `Starting drip stone process for ${this.dripStone.getName()}`;
-    }
+	public getStatus(): string | undefined {
+		return `Starting drip stone process for ${this.dripStone.getName()}`;
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        if (this.dripStone.hasWater?.top) {
-            return ObjectiveResult.Ignore;
-        }
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		if (this.dripStone.hasWater?.top) {
+			return ObjectiveResult.Ignore;
+		}
 
-        const objectives: IObjective[] = [];
+		const objectives: IObjective[] = [];
 
-        this.log.info("No water at the top");
+		this.log.info("No water at the top");
 
-        let isWaterInContainer = false;
+		let isWaterInContainer = false;
 
-        const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
+		const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
 
-        const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(context, waterContainer));
+		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(context, waterContainer));
 
-        // check if we need a water container
-        if (availableWaterContainer) {
-            isWaterInContainer = context.utilities.item.isDrinkableItem(availableWaterContainer);
+		// check if we need a water container
+		if (availableWaterContainer) {
+			isWaterInContainer = context.utilities.item.isDrinkableItem(availableWaterContainer);
 
-            if (availableWaterContainer.durability !== undefined &&
-                availableWaterContainer.durabilityMax !== undefined &&
-                (availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
-                // repair our container
-                objectives.push(new RepairItem(availableWaterContainer));
-            }
+			if (availableWaterContainer.durability !== undefined &&
+				availableWaterContainer.durabilityMax !== undefined &&
+				(availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
+				// repair our container
+				objectives.push(new RepairItem(availableWaterContainer));
+			}
 
-        } else {
-            objectives.push(new AcquireWaterContainer().keepInInventory());
-        }
+		} else {
+			objectives.push(new AcquireWaterContainer().keepInInventory());
+		}
 
-        if (!isWaterInContainer) {
-            // gather water for our container
-            // objectives.push(new GatherWater(availableWaterContainer, { disallowWaterStill: true }));
-            objectives.push(new AcquireWater({ onlyForDesalination: true }).keepInInventory());
-        }
+		if (!isWaterInContainer) {
+			// gather water for our container
+			// objectives.push(new GatherWater(availableWaterContainer, { disallowWaterStill: true }));
+			objectives.push(new AcquireWater({ onlyForDesalination: true }).keepInInventory());
+		}
 
-        objectives.push(new MoveToTarget(this.dripStone, true));
+		objectives.push(new MoveToTarget(this.dripStone, true));
 
-        objectives.push(new UseItem(Pour, availableWaterContainer));
+		objectives.push(new UseItem(Pour, availableWaterContainer));
 
-        return objectives;
-    }
+		return objectives;
+	}
 
 }
