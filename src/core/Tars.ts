@@ -40,7 +40,7 @@ import { IVector2 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Bound } from "@wayward/utilities/Decorators";
 import EventEmitter, { Priority } from "@wayward/utilities/event/EventEmitter";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import WorldZ from "@wayward/utilities/game/WorldZ";
 import Log from "@wayward/utilities/Log";
 import Objects from "@wayward/utilities/object/Objects";
 import ResolvablePromise from "@wayward/utilities/promise/ResolvablePromise";

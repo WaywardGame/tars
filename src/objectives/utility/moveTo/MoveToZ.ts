@@ -1,5 +1,5 @@
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import WorldZ from "@wayward/utilities/game/WorldZ";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";

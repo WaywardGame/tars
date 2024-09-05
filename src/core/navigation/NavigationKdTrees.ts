@@ -5,7 +5,7 @@ import Island from "@wayward/game/game/island/Island";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
 import Tile from "@wayward/game/game/tile/Tile";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import WorldZ from "@wayward/utilities/game/WorldZ";
 import { KdTree } from "@wayward/game/utilities/collection/kdtree/KdTree";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { IVector2 } from "@wayward/game/utilities/math/IVector";

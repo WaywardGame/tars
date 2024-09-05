@@ -8,7 +8,7 @@ import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
 import Tile from "@wayward/game/game/tile/Tile";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Log from "@wayward/utilities/Log";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import WorldZ from "@wayward/utilities/game/WorldZ";
 import { sleep } from "@wayward/utilities/promise/Async";
 
 import { TarsOverlay } from "../../ui/TarsOverlay";
