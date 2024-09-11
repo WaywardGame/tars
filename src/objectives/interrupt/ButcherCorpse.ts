@@ -42,11 +42,11 @@ export default class ButcherCorpse extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		// NothingHereToButcher is expected because we the amount of times a corpse can be carved is random
+		// CannotAnythingHere is expected because we the amount of times a corpse can be carved is random
 		// TARS tries to carve the maximum amount of times
 		return [
 			new MoveToTarget(this.corpse, true),
-			new ExecuteAction(Butcher, [tool], new Set([Message.NothingHereToButcher]), ObjectiveResult.Complete).setStatus(this),
+			new ExecuteAction(Butcher, [tool], new Set([Message.CannotAnythingHere]), ObjectiveResult.Complete).setStatus(this),
 		];
 	}
 
