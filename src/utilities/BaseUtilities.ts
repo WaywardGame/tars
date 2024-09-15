@@ -57,7 +57,7 @@ export class BaseUtilities {
 		let good = false;
 
 		if (this.hasBase(context)) {
-			good = this.isNearBase(context, tile, options?.nearBaseDistanceSq);
+			good = this.isNearBase(context, tile, options?.nearBaseDistanceSq, true);
 
 		} else {
 			// this is the first base item. don't make it on beach sand or gravel
@@ -145,8 +145,8 @@ export class BaseUtilities {
 		return context.base.campfire.length > 0 || context.base.dripStone.length > 0 || context.base.waterStill.length > 0;
 	}
 
-	public isNearBase(context: Context, tile: Tile = context.human.tile, distanceSq: number = nearBaseDistanceSq): boolean {
-		if (nearBaseDataKeys.some(nearBaseDataKey => context.hasData(nearBaseDataKey))) {
+	public isNearBase(context: Context, tile: Tile = context.human.tile, distanceSq: number = nearBaseDistanceSq, skipNearBaseOverride = false): boolean {
+		if (!skipNearBaseOverride && nearBaseDataKeys.some(nearBaseDataKey => context.hasData(nearBaseDataKey))) {
 			// we were doing some near base stuff, keep at it!
 			return true;
 		}
@@ -171,7 +171,7 @@ export class BaseUtilities {
 		this.tilesNearBaseCache ??= baseTile.findMatchingTiles(
 			() => true,
 			{
-				canVisitTile: (tile) => this.isNearBase(context, tile),
+				canVisitTile: (tile) => this.isNearBase(context, tile, undefined, true),
 			},
 		);
 

@@ -18,7 +18,7 @@ export type UseItemActionDescriptions =
 	IActionDescription<[[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]]> |
 	IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemNearby, ActionArgument.Doodad]]> |
 	IActionDescription<[[ActionArgument.ItemNearby, ActionArgument.Doodad, ActionArgument.Undefined]]> |
-	IActionDescription<[ActionArgument.ItemInventory, [ActionArgument.ItemInventory, ActionArgument.Undefined], [ActionArgument.ItemNearby, ActionArgument.Undefined], [ActionArgument.ItemNearby, ActionArgument.Undefined], [ActionArgument.ItemNearby, ActionArgument.Undefined]]>;
+	IActionDescription<[ActionArgument.ItemInventory, [ActionArgument.Undefined, ActionArgument.ItemInventory], [ActionArgument.Undefined, ActionArgument.ItemNearby], [ActionArgument.Undefined, ActionArgument.ItemNearby], [ActionArgument.Undefined, ActionArgument.ItemNearby]]>;
 
 export default class UseItem<T extends UseItemActionDescriptions> extends Objective {
 

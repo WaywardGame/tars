@@ -1,4 +1,3 @@
-import Stream from "@wayward/goodstream/Stream";
 import type { IContainer } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
 import { ListEnder } from "@wayward/game/language/ITranslation";
@@ -29,7 +28,7 @@ export default class MoveIntoChest extends Objective {
 			return "Moving items into chests";
 		}
 
-		const translation = Stream.values(this.itemsToMove.map(item => item.getName()))
+		const translation = this.itemsToMove.map(item => item.getName())
 			.collect(Translation.formatList, ListEnder.And);
 
 		return `Moving ${translation.getString()} into chests`;

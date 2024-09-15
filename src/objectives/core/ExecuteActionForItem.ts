@@ -1,4 +1,3 @@
-import Stream from "@wayward/goodstream/Stream";
 import type { AnyActionDescription } from "@wayward/game/game/entity/action/IAction";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import { ItemType } from "@wayward/game/game/item/IItem";
@@ -70,7 +69,8 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 	}
 
 	public getStatus(): string | undefined {
-		const translation = Stream.values(Array.from(this.itemTypes).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+		const translation = Array.from(this.itemTypes)
+			.map(itemType => Translation.nameOf(Dictionary.Item, itemType))
 			.collect(Translation.formatList, ListEnder.Or);
 
 		return `Acquiring ${translation.getString()}`;

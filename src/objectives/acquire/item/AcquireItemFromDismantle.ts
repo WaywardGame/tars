@@ -1,4 +1,3 @@
-import Stream from "@wayward/goodstream/Stream";
 import { ActionArgumentsOf, ActionType } from "@wayward/game/game/entity/action/IAction";
 import Dismantle from "@wayward/game/game/entity/action/actions/Dismantle";
 import { ItemType } from "@wayward/game/game/item/IItem";
@@ -36,7 +35,8 @@ export default class AcquireItemFromDismantle extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		const translation = Stream.values(Array.from(this.dismantleItemTypes).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+		const translation = Array.from(this.dismantleItemTypes)
+			.map(itemType => Translation.nameOf(Dictionary.Item, itemType))
 			.collect(Translation.formatList, ListEnder.Or);
 
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;

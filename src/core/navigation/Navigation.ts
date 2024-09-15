@@ -98,7 +98,7 @@ export default class Navigation {
 		return this.sailingMode !== sailingMode;
 	}
 
-	public async updateAll(sailingMode: boolean): Promise<void> {
+	public async updateAll(sailingMode: boolean, getBaseTiles: () => Set<Tile>): Promise<void> {
 		this.log.info("Updating navigation. Please wait...");
 
 		this.sailingMode = sailingMode;
@@ -109,11 +109,13 @@ export default class Navigation {
 
 		await this.kdTrees.initializeIsland(island);
 
+		const baseTiles = getBaseTiles();
+
 		let count = 0;
 
 		for (const tile of Object.values(island.tiles)) {
 			if (tile) {
-				this.onTileUpdate(tile, tile.type, false);
+				this.onTileUpdate(tile, tile.type, baseTiles.has(tile));
 			}
 
 			// prevent freezing while this is being initialized
@@ -129,7 +131,7 @@ export default class Navigation {
 					for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
 						const tile = island.getTileSafe(creature.x + x, creature.y + y, creature.z);
 						if (tile) {
-							this.onTileUpdate(tile, tile.type, false, TileUpdateType.Creature);
+							this.onTileUpdate(tile, tile.type, baseTiles.has(tile), TileUpdateType.Creature);
 						}
 					}
 				}

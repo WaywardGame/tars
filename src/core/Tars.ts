@@ -977,7 +977,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 			this.event.emit("navigationChange", this.navigationSystemState);
 
-			await this.utilities.navigation.updateAll(sailingMode);
+			await this.utilities.navigation.updateAll(sailingMode, () => this.utilities.base.getBaseTiles(this.context));
 
 			this.utilities.navigation.queueUpdateOrigin(this.human.tile);
 

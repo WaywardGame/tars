@@ -156,7 +156,6 @@ export class TileUtilities {
 	public getNearbyTillableTile(context: Context, seedItemType: ItemType, allowedTilesSet: Set<TerrainType>): Tile | undefined {
 		let result = this.nearbyTillableTile.get(seedItemType);
 		if (result === undefined) {
-			console.log("findMatchingTile getNearbyTillableTile", seedItemType);
 			result = context.utilities.base.getBaseTile(context).findMatchingTile(
 				(tile) => context.utilities.tile.canTill(context, tile, context.inventory.hoe, allowedTilesSet),
 				{

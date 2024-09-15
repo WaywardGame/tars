@@ -109,9 +109,9 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(...await this.getBuildAnotherChestObjectives(context));
 
-		if (context.base.altar.length === 0) {
-			objectives.push([new AcquireInventoryItem("altar"), new BuildItem()]);
-		}
+		// if (context.base.altar.length === 0) {
+		// 	objectives.push([new AcquireInventoryItem("altar"), new BuildItem()]);
+		// }
 
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
