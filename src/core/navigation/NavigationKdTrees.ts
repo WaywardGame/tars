@@ -9,7 +9,7 @@ import WorldZ from "@wayward/utilities/game/WorldZ";
 import { KdTree } from "@wayward/game/utilities/collection/kdtree/KdTree";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { IVector2 } from "@wayward/game/utilities/math/IVector";
-import { sleep } from "@wayward/utilities/promise/Async";
+import { yieldTask } from "@wayward/utilities/promise/Async";
 
 import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation, ExtendedTerrainType } from "./INavigation";
 
@@ -105,7 +105,7 @@ export class NavigationKdTrees {
 
 				// prevent freezing while this is being initialized
 				if (offsetX % 10 === 0) {
-					await sleep(0);
+					await yieldTask();
 				}
 			}
 

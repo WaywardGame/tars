@@ -9,7 +9,7 @@ import Tile from "@wayward/game/game/tile/Tile";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Log from "@wayward/utilities/Log";
 import WorldZ from "@wayward/utilities/game/WorldZ";
-import { sleep } from "@wayward/utilities/promise/Async";
+import { yieldTask } from "@wayward/utilities/promise/Async";
 
 import { TarsOverlay } from "../../ui/TarsOverlay";
 import { CreatureUtilities } from "../../utilities/CreatureUtilities";
@@ -120,7 +120,7 @@ export default class Navigation {
 
 			// prevent freezing while this is being initialized
 			if (++count % 10000 === 0) {
-				await sleep(0);
+				await yieldTask();
 			}
 		}
 

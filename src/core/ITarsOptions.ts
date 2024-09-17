@@ -1,4 +1,4 @@
-import { Deity } from "@wayward/game/game/deity/Deity";
+import Deity from "@wayward/game/game/deity/Deity";
 import { TreasureHunterType } from "../modes/TreasureHunter";
 import { TarsMode } from "./ITars";
 
