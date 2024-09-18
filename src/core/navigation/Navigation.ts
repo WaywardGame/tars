@@ -9,13 +9,13 @@ import Tile from "@wayward/game/game/tile/Tile";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Log from "@wayward/utilities/Log";
 import WorldZ from "@wayward/utilities/game/WorldZ";
-import { yieldTask } from "@wayward/utilities/promise/Async";
 
 import { TarsOverlay } from "../../ui/TarsOverlay";
 import { CreatureUtilities } from "../../utilities/CreatureUtilities";
 import type { ITileLocation } from "../ITars";
 import { ExtendedTerrainType, NavigationPath } from "./INavigation";
 import { NavigationKdTrees } from "./NavigationKdTrees";
+import Task from "@wayward/utilities/promise/Task";
 
 interface INavigationMapData {
 	dijkstraMap: IDijkstraMap;
@@ -111,17 +111,14 @@ export default class Navigation {
 
 		const baseTiles = getBaseTiles();
 
-		let count = 0;
-
+		const task = new Task();
 		for (const tile of Object.values(island.tiles)) {
 			if (tile) {
 				this.onTileUpdate(tile, tile.type, baseTiles.has(tile));
 			}
 
 			// prevent freezing while this is being initialized
-			if (++count % 10000 === 0) {
-				await yieldTask();
-			}
+			task.yield();
 		}
 
 		// update tiles around creatures

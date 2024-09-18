@@ -9,9 +9,9 @@ import WorldZ from "@wayward/utilities/game/WorldZ";
 import { KdTree } from "@wayward/game/utilities/collection/kdtree/KdTree";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { IVector2 } from "@wayward/game/utilities/math/IVector";
-import { yieldTask } from "@wayward/utilities/promise/Async";
 
 import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation, ExtendedTerrainType } from "./INavigation";
+import Task from "@wayward/utilities/promise/Task";
 
 interface INavigationMapData {
 	kdTreeTileTypes: Uint8Array;
@@ -77,6 +77,7 @@ export class NavigationKdTrees {
 
 		islandMaps = new Map();
 
+		const task = new Task();
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			const data: INavigationMapData = {
 				kdTrees: new Map(),
@@ -104,9 +105,7 @@ export class NavigationKdTrees {
 				}
 
 				// prevent freezing while this is being initialized
-				if (offsetX % 10 === 0) {
-					await yieldTask();
-				}
+				task.yield();
 			}
 
 			islandMaps.set(z, data);
