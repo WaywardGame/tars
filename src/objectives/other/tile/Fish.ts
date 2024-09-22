@@ -1,6 +1,6 @@
 import Cast from "@wayward/game/game/entity/action/actions/Cast";
 import { SkillType } from "@wayward/game/game/entity/IHuman";
-import { MagicalPropertyType } from "@wayward/game/game/magic/MagicalPropertyType";
+import MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
