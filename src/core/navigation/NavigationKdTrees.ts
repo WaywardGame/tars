@@ -29,8 +29,12 @@ export class NavigationKdTrees {
 	private readonly seaWaterTypes: Set<TerrainType> = new Set();
 	private readonly gatherableTypes: Set<TerrainType> = new Set();
 
+	private loaded = false;
+
 	public load(): void {
 		this.unload();
+
+		this.loaded = true;
 
 		for (const tileType of Enums.values(TerrainType)) {
 			const tileTypeName = TerrainType[tileType];
@@ -56,6 +60,12 @@ export class NavigationKdTrees {
 	}
 
 	public unload(): void {
+		if (!this.loaded) {
+			return;
+		}
+
+		this.loaded = false;
+
 		eventManager.deregisterEventBusSubscriber(this);
 
 		this.maps = new WeakMap();
