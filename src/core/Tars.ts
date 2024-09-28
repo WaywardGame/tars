@@ -760,8 +760,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		if (this.saveData.enabled) {
 			if (this.saveData.options.navigationOverlays) {
-				this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.context));
 				this.overlay.show();
+				this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.context));
 				this.human.updateView(RenderSource.Mod, false);
 			}
 
@@ -833,8 +833,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 						shouldInterrupt = false;
 
 						if (this.saveData.options.navigationOverlays) {
-							this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.getContext()));
 							this.overlay.show();
+							this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.getContext()));
 
 						} else {
 							this.overlay.hide();
