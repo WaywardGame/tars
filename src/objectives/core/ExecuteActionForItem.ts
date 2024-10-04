@@ -236,12 +236,11 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 	}
 
 	private async tryPickUpItem(context: Context, itemTypes: Set<ItemType>, tile: Tile): Promise<ObjectiveResult | undefined> {
-		const lastTileItem = tile.containedItems && tile.containedItems.length > 0 ?
-			tile.containedItems[tile.containedItems.length - 1] : undefined;
-		if (lastTileItem !== undefined && itemTypes.has(lastTileItem.type)) {
+		const matchingTileItem = tile.containedItems?.filter(item => itemTypes.has(item.type))?.[0];
+		if (matchingTileItem) {
 			const matchingNewItems: Item[] = [];
 
-			const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: PickUpItem, args: [context.human.tile === tile] });
+			const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: PickUpItem, args: [context.human.tile === tile, [matchingTileItem]] });
 			if (typeof (matchingItem) === "number") {
 				this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
 				return matchingItem;

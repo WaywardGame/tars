@@ -529,7 +529,7 @@ export class ItemUtilities {
 			tool = this.getBestTool(context, ActionType.Harvest);
 
 		} else {
-			const skillType = description.gatherSkillUse ?? description.skillUse; // ?? SkillType.Mining;
+			const skillType = description.gatherSkillUse ?? doodad.getSkillUse();
 			// const prefersBlunt = skillType === SkillType.Mining;
 			tool = this.getBestTool(context, skillType === SkillType.Lumberjacking ? ActionType.Chop : ActionType.Mine); // prefersBlunt ? DamageType.Blunt : DamageType.Slashing);
 		}

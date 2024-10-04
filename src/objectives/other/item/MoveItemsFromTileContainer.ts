@@ -53,7 +53,7 @@ export default class MoveItemsFromTileContainer extends Objective {
 				return ObjectiveResult.Complete;
 			}
 
-			return [context.human.tile === this.source] as ActionArgumentsOf<typeof PickUpItem>;
+			return [context.human.tile === this.source, items] as ActionArgumentsOf<typeof PickUpItem>;
 		}).setStatus(this);
 	}
 
