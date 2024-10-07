@@ -79,7 +79,7 @@ export class NavigationKdTrees {
 	 * Initializes kdtrees for the provided island.
 	 * No-ops if the island was already initialized
 	 */
-	public async initializeIsland(island: Island): Promise<void> {
+	public async initializeIsland(task: Task, island: Island): Promise<void> {
 		let islandMaps = this.maps.get(island);
 		if (islandMaps) {
 			return;
@@ -87,7 +87,6 @@ export class NavigationKdTrees {
 
 		islandMaps = new Map();
 
-		const task = new Task();
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			const data: INavigationMapData = {
 				kdTrees: new Map(),
@@ -115,7 +114,7 @@ export class NavigationKdTrees {
 				}
 
 				// prevent freezing while this is being initialized
-				task.yield();
+				await task.yield();
 			}
 
 			islandMaps.set(z, data);

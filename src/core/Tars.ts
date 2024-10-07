@@ -44,6 +44,7 @@ import WorldZ from "@wayward/utilities/game/WorldZ";
 import Log from "@wayward/utilities/Log";
 import Objects from "@wayward/utilities/object/Objects";
 import ResolvablePromise from "@wayward/utilities/promise/ResolvablePromise";
+import Task from "@wayward/utilities/promise/Task";
 
 import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
@@ -977,7 +978,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 			this.event.emit("navigationChange", this.navigationSystemState);
 
-			await this.utilities.navigation.updateAll(sailingMode, () => this.utilities.base.getBaseTiles(this.context));
+			await Task.post(async () => this.utilities.navigation.updateAll(sailingMode, () => this.utilities.base.getBaseTiles(this.context)), "background");
 
 			this.utilities.navigation.queueUpdateOrigin(this.human.tile);
 
@@ -1150,7 +1151,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 				this.processQuantumBurst();
 			}
 
-			await this.onTick();
+			await Task.post(async () => this.onTick(), "background");
 
 			this.updateStatus();
 

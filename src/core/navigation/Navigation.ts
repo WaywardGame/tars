@@ -105,20 +105,21 @@ export default class Navigation {
 
 		const island = this.human.island;
 
+		const task = new Task();
+
 		const start = performance.now();
 
-		await this.kdTrees.initializeIsland(island);
+		await this.kdTrees.initializeIsland(task, island);
 
 		const baseTiles = getBaseTiles();
 
-		const task = new Task();
 		for (const tile of Object.values(island.tiles)) {
 			if (tile) {
 				this.onTileUpdate(tile, tile.type, baseTiles.has(tile));
 			}
 
 			// prevent freezing while this is being initialized
-			task.yield();
+			await task.yield();
 		}
 
 		// update tiles around creatures
