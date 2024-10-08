@@ -564,6 +564,10 @@ export default class Navigation {
 			}
 		}
 
+		if (tile.vehicle !== undefined) {
+			penalty += 50;
+		}
+
 		if (terrainDescription) {
 			if (terrainDescription.gather) {
 				// rocks - large penalty
