@@ -1,17 +1,18 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
-import { TileUpdateType } from "@wayward/game/game/IGame";
-import Island from "@wayward/game/game/island/Island";
+import type { TileUpdateType } from "@wayward/game/game/IGame";
+import type Island from "@wayward/game/game/island/Island";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import WorldZ from "@wayward/utilities/game/WorldZ";
 import { KdTree } from "@wayward/game/utilities/collection/kdtree/KdTree";
 import Enums from "@wayward/game/utilities/enum/Enums";
-import { IVector2 } from "@wayward/game/utilities/math/IVector";
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
 
-import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation, ExtendedTerrainType } from "./INavigation";
-import Task from "@wayward/utilities/promise/Task";
+import type { ExtendedTerrainType } from "./INavigation";
+import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation } from "./INavigation";
+import type Task from "@wayward/utilities/promise/Task";
 
 interface INavigationMapData {
 	kdTreeTileTypes: Uint8Array;
@@ -25,9 +26,9 @@ export class NavigationKdTrees {
 
 	private maps: WeakMap<Island, Map<number, INavigationMapData>> = new Map();
 
-	private readonly freshWaterTypes: Set<TerrainType> = new Set();
-	private readonly seaWaterTypes: Set<TerrainType> = new Set();
-	private readonly gatherableTypes: Set<TerrainType> = new Set();
+	private readonly freshWaterTypes = new Set<TerrainType>();
+	private readonly seaWaterTypes = new Set<TerrainType>();
+	private readonly gatherableTypes = new Set<TerrainType>();
 
 	private loaded = false;
 
@@ -113,8 +114,10 @@ export class NavigationKdTrees {
 					}
 				}
 
-				// prevent freezing while this is being initialized
-				await task.yield();
+				if (task.shouldYield) {
+					// prevent freezing while this is being initialized
+					await task.forceYield();
+				}
 			}
 
 			islandMaps.set(z, data);

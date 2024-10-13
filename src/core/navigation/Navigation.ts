@@ -1,20 +1,20 @@
 import type { IDijkstraMap, IDijkstraMapFindPathResult } from "@wayward/cplusplus/index";
 import { TileUpdateType } from "@wayward/game/game/IGame";
-import Human from "@wayward/game/game/entity/Human";
-import Island from "@wayward/game/game/island/Island";
+import type Human from "@wayward/game/game/entity/Human";
+import type Island from "@wayward/game/game/island/Island";
 import type { ITerrainDescription } from "@wayward/game/game/tile/ITerrain";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
-import Log from "@wayward/utilities/Log";
+import type Log from "@wayward/utilities/Log";
 import WorldZ from "@wayward/utilities/game/WorldZ";
 
-import { TarsOverlay } from "../../ui/TarsOverlay";
-import { CreatureUtilities } from "../../utilities/CreatureUtilities";
+import type { TarsOverlay } from "../../ui/TarsOverlay";
+import type { CreatureUtilities } from "../../utilities/CreatureUtilities";
 import type { ITileLocation } from "../ITars";
-import { ExtendedTerrainType, NavigationPath } from "./INavigation";
-import { NavigationKdTrees } from "./NavigationKdTrees";
+import type { ExtendedTerrainType, NavigationPath } from "./INavigation";
+import type { NavigationKdTrees } from "./NavigationKdTrees";
 import Task from "@wayward/utilities/promise/Task";
 
 interface INavigationMapData {
@@ -28,10 +28,10 @@ export const creaturePenaltyRadius = 2;
 
 export default class Navigation {
 
-	private readonly maps: Map<number, INavigationMapData> = new Map();
+	private readonly maps = new Map<number, INavigationMapData>();
 
-	private readonly nodePenaltyCache: Map<number, number> = new Map();
-	private readonly nodeDisableCache: Map<number, boolean> = new Map();
+	private readonly nodePenaltyCache = new Map<number, number>();
+	private readonly nodeDisableCache = new Map<number, boolean>();
 
 	private origin: Tile | undefined;
 	private originUpdateTimeout: number | undefined;
@@ -118,8 +118,10 @@ export default class Navigation {
 				this.onTileUpdate(tile, tile.type, baseTiles.has(tile));
 			}
 
-			// prevent freezing while this is being initialized
-			await task.yield();
+			if (task.shouldYield) {
+				// prevent freezing while this is being initialized
+				await task.forceYield();
+			}
 		}
 
 		// update tiles around creatures
