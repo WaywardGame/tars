@@ -7,7 +7,7 @@ on:
 
 env:
   REPO_NAME: ${{ github.event.repository.name }}
-  EXTRA_ARGS: ${{ github.ref == 'refs/heads/development' && '--prerelease' || '' }}
+  EXTRA_RELEASE_ARGS: ${{ github.ref == 'refs/heads/development' && '--prerelease' || '' }}
 
 jobs:
   build_and_release:
@@ -63,5 +63,5 @@ jobs:
               --target="${{ github.sha }}" \
               --title="v$TYPES_VERSION" \
               --generate-notes \
-              $EXTRA_ARGS \
+              $EXTRA_RELEASE_ARGS \
               "../$REPO_NAME.zip#$REPO_NAME.zip"
