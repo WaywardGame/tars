@@ -9,6 +9,7 @@ import Objective from "./objective/Objective";
 import type { IPlan } from "./planning/IPlan";
 import { ExecuteResultType } from "./planning/IPlan";
 import { IPlanner } from "./planning/IPlanner";
+import { sleep } from "@wayward/utilities/promise/Async";
 
 export enum ExecuteObjectivesResultType {
 	Completed,
@@ -222,6 +223,10 @@ export class Executor {
 
 			// the plan finished
 			this.latestExecutingPlan = undefined;
+		}
+
+		if (context.tars.saveData.options.slowMode) {
+			await sleep(250);
 		}
 
 		return {

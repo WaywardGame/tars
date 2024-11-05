@@ -14,6 +14,7 @@ import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
 import MoveItemsFromContainer from "../other/item/MoveItemsFromContainer";
 import { defaultMaxTilesChecked } from "../../core/ITars";
+import { sleep } from "@wayward/utilities/promise/Async";
 
 const maxChestDistance = 128;
 
@@ -178,6 +179,10 @@ export default class OrganizeInventory extends Objective {
 		}
 
 		this.log.info(`Dropping ${itemToDrop}`);
+
+		if (context.tars.saveData.options.slowMode) {
+			await sleep(500);
+		}
 
 		return [
 			new MoveToTarget(target, false),

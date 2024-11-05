@@ -163,6 +163,8 @@ export enum TarsTranslation {
 	DialogButtonSailToCivilizationTooltip,
 	DialogButtonStayHealthy,
 	DialogButtonStayHealthyTooltip,
+	DialogButtonSlowMode,
+	DialogButtonSlowModeTooltip,
 	DialogButtonTameCreature,
 	DialogButtonTameCreatureTooltip,
 	DialogButtonUseOrbsOfInfluence,
@@ -376,6 +378,12 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		type: TarsOptionSectionType.Checkbox,
 		title: TarsTranslation.DialogButtonPreventNotes,
 		tooltip: TarsTranslation.DialogButtonPreventNotesTooltip,
+	},
+	{
+		option: "slowMode",
+		type: TarsOptionSectionType.Checkbox,
+		title: TarsTranslation.DialogButtonSlowMode,
+		tooltip: TarsTranslation.DialogButtonSlowModeTooltip,
 	},
 	TarsTranslation.DialogLabelRecoverThresholds,
 	{

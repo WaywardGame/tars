@@ -91,6 +91,7 @@ import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
+import { sleep } from "@wayward/utilities/promise/Async";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -1429,6 +1430,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		const objectives = await modeInstance.determineObjectives(this.context);
 
 		const result = await this.executor.executeObjectives(this.context, objectives, true, true);
+
+		if (this.saveData.options.slowMode) {
+			await sleep(750);
+		}
+
 		switch (result.type) {
 			case ExecuteObjectivesResultType.Pending:
 			case ExecuteObjectivesResultType.ContinuingNextTick:
