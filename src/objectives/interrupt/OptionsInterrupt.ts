@@ -1,4 +1,4 @@
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 import type { IOptions } from "@wayward/game/save/data/ISaveDataGlobal";
 import { DropLocation } from "@wayward/game/save/data/ISaveDataGlobal";
 import Objects from "@wayward/utilities/object/Objects";
@@ -10,7 +10,7 @@ import Objective from "../../core/objective/Objective";
 
 export default class OptionsInterrupt extends Objective {
 
-	public static previousOptions: Map<number, IOptions | undefined> = new Map();
+	public static previousOptions = new Map<number, IOptions | undefined>();
 
 	private static readonly desiredOptions: Partial<IOptions> = {
 		autoAttack: true, // todo: I think this should be false
@@ -22,9 +22,10 @@ export default class OptionsInterrupt extends Objective {
 		dropOnGatherHarvest: true,
 		useAdjacentContainers: false,
 		warnOnDangerousActions: false,
+		warnOnDestructiveActions: false,
 		warnWhenBreakingItems: false,
 		warnWhenBreakingItemsOnCraft: false,
-	}
+	};
 
 	/**
 	 * Restores options to the original state before starting TARS
