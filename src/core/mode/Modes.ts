@@ -9,9 +9,9 @@ import { TreasureHunterMode } from "../../modes/TreasureHunter";
 import { TarsMode } from "../ITars";
 import type { ITarsMode } from "./IMode";
 
-type TarsModeConstructor = new () => ITarsMode
+type TarsModeConstructor = new () => ITarsMode;
 
-export const modes: Map<TarsMode, TarsModeConstructor> = new Map();
+export const modes = new Map<TarsMode, TarsModeConstructor>();
 
 modes.set(TarsMode.Survival, SurvivalMode);
 modes.set(TarsMode.TidyUp, TidyUpMode);

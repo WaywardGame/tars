@@ -9,13 +9,13 @@ import type Tile from "@wayward/game/game/tile/Tile";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import type Log from "@wayward/utilities/Log";
 import WorldZ from "@wayward/utilities/game/WorldZ";
+import Task from "@wayward/utilities/promise/Task";
 
 import type { TarsOverlay } from "../../ui/TarsOverlay";
 import type { CreatureUtilities } from "../../utilities/CreatureUtilities";
 import type { ITileLocation } from "../ITars";
 import type { ExtendedTerrainType, NavigationPath } from "./INavigation";
 import type { NavigationKdTrees } from "./NavigationKdTrees";
-import Task from "@wayward/utilities/promise/Task";
 
 interface INavigationMapData {
 	dijkstraMap: IDijkstraMap;
@@ -302,6 +302,29 @@ export default class Navigation {
 		try {
 			mapInfo.dirtyDijkstra = true;
 			mapInfo.dijkstraMap.updateNode(tile.x, tile.y, penalty, isDisabled);
+
+			// for (const direction of Direction.CARDINALS) {
+			// 	const neighborTile = tile.getTileInDirection(direction);
+			// 	if (!neighborTile?.canSlip(undefined, true, true)) {
+			// 		continue;
+			// 	}
+
+			// 	let nextNoSlipTile: Tile | undefined = neighborTile;
+
+			// 	// if the entity can slip on this tile, we will assume they will and take that into account
+			// 	while (nextNoSlipTile?.canSlip(undefined, true, true)) {
+			// 		// direction ??= tile.getDirectionToTile(nextNoSlipTile);
+			// 		nextNoSlipTile = nextNoSlipTile.getTileInDirection(direction);
+			// 	}
+
+			// 	if (nextNoSlipTile) {
+			// 		const currentTileNode = mapInfo.dijkstraMap.getNode(tile.x, tile.y);
+			// 		const nextNoSlipTileNode = mapInfo.dijkstraMap.getNode(nextNoSlipTile.x, nextNoSlipTile.y);
+			// 		currentTileNode.connectTo(nextNoSlipTileNode, direction);
+			// 		// nextNoSlipTileNode.connectTo(currentTileNode, Direction.OPPOSITES[direction]);
+			// 	}
+			// }
+
 		} catch (ex) {
 			this.log.trace("invalid node", tile.x, tile.y, penalty, isDisabled);
 		}

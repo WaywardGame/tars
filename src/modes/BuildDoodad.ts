@@ -47,7 +47,7 @@ export class BuildDoodadMode implements ITarsMode {
 
 		if (doodad) {
 			const description = doodad.description;
-			if (description && description.lit !== undefined) {
+			if (description?.lit !== undefined) {
 				if (context.human.island.doodads.isGroup(this.doodadTypeOrGroup)) {
 					const litDescription = doodadDescriptions[description.lit];
 					if (litDescription && context.human.island.doodads.isInGroup(description.lit, this.doodadTypeOrGroup)) {
@@ -74,8 +74,7 @@ export class BuildDoodadMode implements ITarsMode {
 					return ObjectiveResult.Complete;
 				}));
 			}
-		}
-		else {
+		} else {
 			const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 			if (inventoryItem) {
 				objectives.push(new BuildItem(inventoryItem));

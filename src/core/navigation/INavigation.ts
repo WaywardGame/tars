@@ -1,4 +1,4 @@
-import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 
 export interface NavigationPath { path: IVector3[]; score: number }

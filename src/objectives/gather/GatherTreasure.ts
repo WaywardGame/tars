@@ -1,7 +1,7 @@
 import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 import Cast from "@wayward/game/game/entity/action/actions/Cast";
 import Lockpick from "@wayward/game/game/entity/action/actions/Lockpick";
-import DrawnMap from "@wayward/game/game/mapping/DrawnMap";
+import type DrawnMap from "@wayward/game/game/mapping/DrawnMap";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -31,7 +31,7 @@ export default class GatherTreasure extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return `Gathering treasure`;
+		return "Gathering treasure";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
@@ -119,7 +119,6 @@ export default class GatherTreasure extends Objective {
 
 			objectivePipelines.push(objectives);
 		}
-
 
 		return objectivePipelines;
 	}

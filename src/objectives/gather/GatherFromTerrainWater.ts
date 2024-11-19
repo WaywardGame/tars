@@ -4,10 +4,11 @@ import ItemManager from "@wayward/game/game/item/ItemManager";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
 
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
-import { ITerrainWaterSearch } from "../../core/ITars";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ITerrainWaterSearch } from "../../core/ITars";
 import type Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
 import MoveToTarget from "../core/MoveToTarget";
@@ -52,7 +53,7 @@ export default class GatherFromTerrainWater extends Objective {
 						{
 							genericAction: {
 								action: GatherLiquid,
-								args: (context) => {
+								args: context => {
 									const item = context.getData(this.waterContainerContextDataKey);
 									if (!item?.isValid) {
 										this.log.warn(`Invalid water container ${item}`, this.waterContainerContextDataKey);

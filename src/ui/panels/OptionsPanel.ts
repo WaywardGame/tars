@@ -9,8 +9,9 @@ import { Bound } from "@wayward/utilities/Decorators";
 
 import ChoiceList, { Choice } from "@wayward/game/ui/component/ChoiceList";
 import Dialog from "@wayward/game/ui/screen/screens/game/component/Dialog";
-import { TarsOptionSection, TarsOptionSectionType, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
-import Tars from "../../core/Tars";
+import type { TarsOptionSection } from "../../ITarsMod";
+import { TarsOptionSectionType, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
+import type Tars from "../../core/Tars";
 import TarsPanel from "../components/TarsPanel";
 
 export default abstract class OptionsPanel extends TarsPanel {
@@ -56,7 +57,7 @@ export default abstract class OptionsPanel extends TarsPanel {
 
 					const range = new RangeRow()
 						.setLabel(label => label
-							.setText(getTarsTranslation(uiOption.title))
+							.setText(getTarsTranslation(uiOption.title)),
 						)
 						.setTooltip(tooltip => tooltip
 							.setText(getTarsTranslation(uiOption.tooltip))
@@ -71,8 +72,8 @@ export default abstract class OptionsPanel extends TarsPanel {
 						.setMin(typeof (slider.min) === "number" ? slider.min : slider.min(this.tarsInstance.getContext()))
 						.setMax(typeof (slider.max) === "number" ? slider.max : slider.max(this.tarsInstance.getContext()))
 						.setRefreshMethod(() => {
-							range.setMin(typeof (slider.min) === "number" ? slider.min : slider.min(this.tarsInstance.getContext()))
-							range.setMax(typeof (slider.max) === "number" ? slider.max : slider.max(this.tarsInstance.getContext()))
+							range.setMin(typeof (slider.min) === "number" ? slider.min : slider.min(this.tarsInstance.getContext()));
+							range.setMax(typeof (slider.max) === "number" ? slider.max : slider.max(this.tarsInstance.getContext()));
 							return this.tarsInstance.saveData.options[uiOption.option] as number;
 						}));
 
@@ -88,7 +89,7 @@ export default abstract class OptionsPanel extends TarsPanel {
 									.setText(getTarsTranslation(tooltipTranslation))
 									.setLocation(handler => handler
 										.add("off right", ".dialog", "sticky center")
-										.add("off left", ".dialog", "sticky center")))
+										.add("off left", ".dialog", "sticky center"))),
 						))
 						.setRefreshMethod(list => list.choices(choice => choice.id === this.tarsInstance.saveData.options[uiOption.option]).first()!)
 						.event.subscribe("choose", (_, choice) => {

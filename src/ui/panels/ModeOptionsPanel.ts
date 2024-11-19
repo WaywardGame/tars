@@ -1,5 +1,5 @@
 import type Translation from "@wayward/game/language/Translation";
-import Tars from "../../core/Tars";
+import type Tars from "../../core/Tars";
 
 import { TarsTranslation, uiConfigurableModeOptions } from "../../ITarsMod";
 import OptionsPanel from "./OptionsPanel";

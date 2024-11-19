@@ -14,7 +14,7 @@ import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
 import Chop from "@wayward/game/game/entity/action/actions/Chop";
 import Equip from "@wayward/game/game/entity/action/actions/Equip";
 import PickUp from "@wayward/game/game/entity/action/actions/PickUp";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import type Context from "../core/context/Context";
 import type { NavigationPath } from "../core/navigation/INavigation";
 import { ObjectiveResult } from "../core/objective/IObjective";
@@ -33,10 +33,10 @@ interface ITrackedOverlay {
 
 export class MovementUtilities {
 
-	private movementOverlays: ITrackedOverlay[] = [];
+	private readonly movementOverlays: ITrackedOverlay[] = [];
 
-	private readonly cachedPaths: Map<string, NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible> = new Map();
-	private readonly cachedEnds: Map<string, IVector3[]> = new Map();
+	private readonly cachedPaths = new Map<string, NavigationPath | ObjectiveResult.Complete | ObjectiveResult.Impossible>();
+	private readonly cachedEnds = new Map<string, IVector3[]>();
 
 	public clearCache(): void {
 		this.cachedPaths.clear();

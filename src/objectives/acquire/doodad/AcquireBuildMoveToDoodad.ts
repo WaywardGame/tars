@@ -53,7 +53,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 				let requiresFire = false;
 
 				const description = doodad.description;
-				if (description && description.lit !== undefined) {
+				if (description?.lit !== undefined) {
 					if (DoodadManager.isGroup(this.doodadTypeOrGroup)) {
 						const litDescription = doodadDescriptions[description.lit];
 						if (litDescription && DoodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {

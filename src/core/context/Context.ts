@@ -1,12 +1,15 @@
 import type { ItemType } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
-import Tile from "@wayward/game/game/tile/Tile";
-import Log from "@wayward/utilities/Log";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type Log from "@wayward/utilities/Log";
+import type Island from "@wayward/game/game/island/Island";
+import type Human from "@wayward/game/game/entity/Human";
 
-import { IBase, IInventoryItems, IUtilities, ReserveType } from "../ITars";
-import { ITarsOptions } from "../ITarsOptions";
-import { HashCodeFiltering } from "../objective/IObjective";
-import Tars from "../Tars";
+import type { IBase, IInventoryItems, IUtilities } from "../ITars";
+import { ReserveType } from "../ITars";
+import type { ITarsOptions } from "../ITarsOptions";
+import type { HashCodeFiltering } from "../objective/IObjective";
+import type Tars from "../Tars";
 import ContextState from "./ContextState";
 import type { IContext } from "./IContext";
 import { ContextDataType } from "./IContext";
@@ -25,11 +28,11 @@ export default class Context implements IContext {
 		private initialState?: ContextState) {
 	}
 
-	public get human() {
+	public get human(): Human {
 		return this.tars.human;
 	}
 
-	public get island() {
+	public get island(): Island {
 		return this.tars.human.island;
 	}
 
@@ -338,9 +341,9 @@ export default class Context implements IContext {
 
 	public getTile(): Tile {
 		const tile = this.getData(ContextDataType.Tile);
-		if (tile && (tile.x === undefined || tile.y === undefined || tile.z === undefined)) {
-			console.error(`[TARS] getTile - Invalid value ${tile}`);
-		}
+		// if (tile && (tile.x === undefined || tile.y === undefined || tile.z === undefined)) {
+		// 	console.error(`[TARS] getTile - Invalid value ${tile}`);
+		// }
 
 		return tile ?? this.human.tile;
 	}

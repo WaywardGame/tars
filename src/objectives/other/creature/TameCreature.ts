@@ -1,4 +1,4 @@
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import Offer from "@wayward/game/game/entity/action/actions/Offer";
 import type Creature from "@wayward/game/game/entity/creature/Creature";
 
@@ -61,7 +61,7 @@ export default class TameCreature extends Objective {
 
 		objectives.push(new MoveToTarget(this.creature, true));
 
-		objectives.push(new ExecuteAction(Offer, (context) => {
+		objectives.push(new ExecuteAction(Offer, context => {
 			const item = context.getData(itemContextDataKey);
 			if (!item?.isValid) {
 				this.log.error("Invalid offer item");

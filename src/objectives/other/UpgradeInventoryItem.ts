@@ -10,7 +10,7 @@ import { inventoryItemInfo, InventoryItemFlag } from "../../core/ITars";
 import Objective from "../../core/objective/Objective";
 import AcquireItem from "../acquire/item/AcquireItem";
 import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 
 export default class UpgradeInventoryItem extends Objective {
 

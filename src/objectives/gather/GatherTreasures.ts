@@ -1,9 +1,10 @@
-import DrawnMap from "@wayward/game/game/mapping/DrawnMap";
+import type DrawnMap from "@wayward/game/game/mapping/DrawnMap";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import GatherTreasure, { IGatherTreasureOptions } from "./GatherTreasure";
+import type { IGatherTreasureOptions } from "./GatherTreasure";
+import GatherTreasure from "./GatherTreasure";
 
 /**
  * Gathers treasure from the easiest drawn map

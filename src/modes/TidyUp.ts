@@ -1,5 +1,6 @@
 import type Context from "../core/context/Context";
-import { IObjective, ObjectiveResult } from "../core/objective/IObjective";
+import type { IObjective } from "../core/objective/IObjective";
+import { ObjectiveResult } from "../core/objective/IObjective";
 import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import OrganizeBase from "../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";

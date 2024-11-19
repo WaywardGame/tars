@@ -8,7 +8,7 @@ import TabDialog from "@wayward/game/ui/screen/screens/game/component/TabDialog"
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { TarsTranslation, TarsUiSaveDataKey, getTarsTranslation } from "../ITarsMod";
-import Tars from "../core/Tars";
+import type Tars from "../core/Tars";
 import type TarsPanel from "./components/TarsPanel";
 import DataPanel from "./panels/DataPanel";
 import GeneralPanel from "./panels/GeneralPanel";
@@ -64,7 +64,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 
 	public override getName(): Translation {
 		if (!this.tarsInstance) {
-			return Translation.message(Message.None)
+			return Translation.message(Message.None);
 		}
 
 		return getTarsTranslation(TarsTranslation.DialogTitleMain)
@@ -95,7 +95,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 			return [];
 		}
 
-		let panels: TarsPanel[] = [];
+		const panels: TarsPanel[] = [];
 
 		for (const panelClass of subpanelClasses) {
 			if (panelClass === NPCsPanel && (this.subId.length !== 0 || !localPlayer.isHost)) {

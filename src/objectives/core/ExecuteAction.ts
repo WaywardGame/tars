@@ -1,13 +1,13 @@
 import type { AnyActionDescription } from "@wayward/game/game/entity/action/IAction";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import Dictionary from "@wayward/game/language/Dictionary";
-import Message from "@wayward/game/language/dictionary/Message";
+import type Message from "@wayward/game/language/dictionary/Message";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import { GetActionArguments } from "../../utilities/ActionUtilities";
+import type { GetActionArguments } from "../../utilities/ActionUtilities";
 
 export default class ExecuteAction<T extends AnyActionDescription> extends Objective {
 

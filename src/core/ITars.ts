@@ -10,25 +10,25 @@ import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
 import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type { ITerrainLoot } from "@wayward/game/game/tile/TerrainResources";
-import Tile from "@wayward/game/game/tile/Tile";
-import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 
 import { StatusType } from "@wayward/game/game/entity/status/IStatus";
-import { TarsOverlay } from "../ui/TarsOverlay";
-import { ActionUtilities } from "../utilities/ActionUtilities";
-import { BaseUtilities } from "../utilities/BaseUtilities";
-import { CreatureUtilities } from "../utilities/CreatureUtilities";
-import { DoodadUtilities } from "../utilities/DoodadUtilities";
-import { ItemUtilities } from "../utilities/ItemUtilities";
-import { LoggerUtilities } from "../utilities/LoggerUtilities";
-import { MovementUtilities } from "../utilities/MovementUtilities";
-import { ObjectUtilities } from "../utilities/ObjectUtilities";
-import { PlayerUtilities } from "../utilities/PlayerUtilities";
-import { TileUtilities } from "../utilities/TileUtilities";
-import Context from "./context/Context";
-import { IContext } from "./context/IContext";
-import { ITarsOptions } from "./ITarsOptions";
-import Navigation from "./navigation/Navigation";
+import type { TarsOverlay } from "../ui/TarsOverlay";
+import type { ActionUtilities } from "../utilities/ActionUtilities";
+import type { BaseUtilities } from "../utilities/BaseUtilities";
+import type { CreatureUtilities } from "../utilities/CreatureUtilities";
+import type { DoodadUtilities } from "../utilities/DoodadUtilities";
+import type { ItemUtilities } from "../utilities/ItemUtilities";
+import type { LoggerUtilities } from "../utilities/LoggerUtilities";
+import type { MovementUtilities } from "../utilities/MovementUtilities";
+import type { ObjectUtilities } from "../utilities/ObjectUtilities";
+import type { PlayerUtilities } from "../utilities/PlayerUtilities";
+import type { TileUtilities } from "../utilities/TileUtilities";
+import type Context from "./context/Context";
+import type { IContext } from "./context/IContext";
+import type { ITarsOptions } from "./ITarsOptions";
+import type Navigation from "./navigation/Navigation";
 
 export const tickSpeed = 333;
 
@@ -90,7 +90,7 @@ export interface IUtilities {
 	ensureSailingMode?(sailingMode: boolean): Promise<void>;
 }
 
-export const chestTypes: Map<ItemType, DoodadType> = new Map([
+export const chestTypes = new Map<ItemType, DoodadType>([
 	[ItemType.CopperChest, DoodadType.CopperChest],
 	[ItemType.IronChest, DoodadType.IronChest],
 	[ItemType.OrnateWoodenChest, DoodadType.OrnateWoodenChest],
@@ -461,7 +461,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		},
 	},
 	food: {
-		itemTypes: (context) => Array.from(context.utilities.item.foodItemTypes),
+		itemTypes: context => Array.from(context.utilities.item.foodItemTypes),
 		flags: InventoryItemFlag.PreferHigherDecay,
 		allowMultiple: 5,
 	},
@@ -666,7 +666,7 @@ export enum ReserveType {
 	/**
 	 * Hard means the item will be consumed
 	 */
-	Hard
+	Hard,
 }
 
 export interface IResetOptions {

@@ -1,9 +1,9 @@
-import { ItemType } from "@wayward/game/game/item/IItem";
+import type { ItemType } from "@wayward/game/game/item/IItem";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Dictionary from "@wayward/game/language/Dictionary";
 import Translation from "@wayward/game/language/Translation";
 import Till from "@wayward/game/game/entity/action/actions/Till";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -51,12 +51,12 @@ export default class TillForSeed extends Objective {
 		}
 
 		const emptyTilledTile = context.utilities.base.getBaseTile(context).findMatchingTile(
-			(tile) => allowedTilesSet.has(tile.type) &&
+			tile => allowedTilesSet.has(tile.type) &&
 				tile.isTilled &&
 				tile.isEmpty &&
 				tile.isOpen,
 			{
-				maxTilesChecked: this.maxTilesChecked
+				maxTilesChecked: this.maxTilesChecked,
 			});
 		if (emptyTilledTile !== undefined) {
 			return [
@@ -80,7 +80,7 @@ export default class TillForSeed extends Objective {
 			return undefined;
 		}
 
-		let objectives: IObjective[] = [];
+		const objectives: IObjective[] = [];
 
 		if (tile.type === TerrainType.Grass) {
 			objectives.push(new DigTile(tile, { digUntilTypeIsNot: TerrainType.Grass }));

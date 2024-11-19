@@ -1,5 +1,5 @@
 import Repair from "@wayward/game/game/entity/action/actions/Repair";
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../core/context/Context";
@@ -35,7 +35,7 @@ export default class RepairItem extends Objective {
 		}
 
 		const description = this.item.description;
-		if (!description || description.durability === undefined || description.repairable === false) {
+		if (description?.durability === undefined || description.repairable === false) {
 			// this.log.warn("item isn't repariable", this.item, description);
 			return ObjectiveResult.Ignore;
 		}
@@ -47,7 +47,7 @@ export default class RepairItem extends Objective {
 		return [
 			new AcquireInventoryItem("hammer"),
 			new CompleteRequirements(context.island.items.hasAdditionalRequirements(context.human, this.item.type, undefined, true)),
-			new ExecuteAction(Repair, (context) => {
+			new ExecuteAction(Repair, context => {
 				const hammer = context.inventory.hammer;
 				if (!hammer) {
 					this.log.error("Invalid hammer");

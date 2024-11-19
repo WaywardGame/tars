@@ -1,7 +1,8 @@
 import { EquipType } from "@wayward/game/game/entity/IHuman";
-import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
-import Context from "../core/context/Context";
-import { IObjective } from "../core/objective/IObjective";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Context from "../core/context/Context";
+import type { IObjective } from "../core/objective/IObjective";
 import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";

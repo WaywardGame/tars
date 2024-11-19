@@ -1,4 +1,5 @@
-import { ActionArgumentsOf, ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import Dismantle from "@wayward/game/game/entity/action/actions/Dismantle";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
@@ -9,7 +10,8 @@ import Translation from "@wayward/game/language/Translation";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
@@ -61,7 +63,7 @@ export default class AcquireItemFromDismantle extends Objective {
 
 		for (const itemType of this.dismantleItemTypes) {
 			const description = itemDescriptions[itemType];
-			if (!description || !description.dismantle) {
+			if (!description?.dismantle) {
 				continue;
 			}
 
@@ -117,7 +119,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				{
 					genericAction: {
 						action: Dismantle,
-						args: (context) => {
+						args: context => {
 							const item = context.getData<Item>(itemContextDataKey);
 							if (!item?.isValid) {
 								// treat this as an expected case

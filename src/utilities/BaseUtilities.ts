@@ -12,9 +12,9 @@ import { baseInfo } from "../core/ITars";
 import { FindObjectType } from "./ObjectUtilities";
 import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
 import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
-import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { nearBaseDataKeys } from "../core/context/IContext";
 
 const nearBaseDistance = 14;
@@ -171,7 +171,7 @@ export class BaseUtilities {
 		this.tilesNearBaseCache ??= baseTile.findMatchingTiles(
 			() => true,
 			{
-				canVisitTile: (tile) => this.isNearBase(context, tile, undefined, true),
+				canVisitTile: tile => this.isNearBase(context, tile, undefined, true),
 			},
 		);
 
@@ -249,7 +249,7 @@ export class BaseUtilities {
 
 			// reject doodads that won't be able to be near the desired type
 			const isValid = AnalyzeBase.getNearTiles(context, tile)
-				.some((nearTile) => {
+				.some(nearTile => {
 					// check if the nearby doodad matches desired one
 					if (nearTile.doodad && (placeNearDoodads.includes(nearTile.doodad) || this.matchesBaseInfo(context, baseInfo[info.tryPlaceNear!], nearTile.doodad.type))) {
 						// nearby doodad is there
@@ -275,7 +275,7 @@ export class BaseUtilities {
 						return true;
 					}
 
-					if (doodadDescription.group && doodadDescription.group.includes(doodadTypeOrGroup)) {
+					if (doodadDescription.group?.includes(doodadTypeOrGroup)) {
 						return true;
 					}
 
@@ -394,7 +394,7 @@ export class BaseUtilities {
 
 				if (tile.doodad) {
 					const description = tile.doodad.description;
-					if (description && description.isTree) {
+					if (description?.isTree) {
 						nearbyTrees++;
 					}
 

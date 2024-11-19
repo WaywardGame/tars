@@ -1,11 +1,11 @@
 import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
-import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
 import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 import UpdateWalkTo from "@wayward/game/game/entity/action/actions/UpdateWalkTo";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import type Item from "@wayward/game/game/item/Item";
 import Build from "@wayward/game/game/entity/action/actions/Build";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../core/context/Context";
@@ -50,7 +50,7 @@ export default class BuildItem extends Objective {
 		}
 
 		const description = item.description;
-		if (!description || !description.use || !description.use.includes(ActionType.Build)) {
+		if (!description?.use?.includes(ActionType.Build)) {
 			this.log.error(`Invalid build item. ${item}`);
 			return ObjectiveResult.Impossible;
 		}
@@ -82,7 +82,7 @@ export default class BuildItem extends Objective {
 			}
 
 			if (context.utilities.base.hasBase(context)) {
-				if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
+				if (baseInfo?.tryPlaceNear !== undefined) {
 					const nearDoodads = context.base[baseInfo.tryPlaceNear];
 					if (nearDoodads.length > 0) {
 						const possibleTiles = AnalyzeBase.getNearTilesFromDoodads(context, nearDoodads);
@@ -103,14 +103,14 @@ export default class BuildItem extends Objective {
 					for (const baseTile of baseTiles) {
 						if (isWell) {
 							// look for unlimited wells first
-							this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+							this.target = baseTile.findMatchingTile(tile => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 							if (this.target === undefined) {
 								this.log.info("Couldn't find unlimited well tile");
-								this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+								this.target = baseTile.findMatchingTile(tile => context.utilities.base.isGoodWellBuildTile(context, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 							}
 
 						} else {
-							this.target = baseTile.findMatchingTile((tile) => {
+							this.target = baseTile.findMatchingTile(tile => {
 								if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, tile)) {
 									// AnalyzeBase won't like a doodad at this position
 									return false;
@@ -172,7 +172,7 @@ export default class BuildItem extends Objective {
 			context.utilities.movement.resetMovementOverlays();
 
 			multiplayer.executeClientside(() => {
-				UpdateWalkTo.execute(context.human, undefined);
+				void UpdateWalkTo.execute(context.human, undefined);
 			});
 		}
 
@@ -188,6 +188,5 @@ export default class BuildItem extends Objective {
 
 		return undefined;
 	}
-
 
 }

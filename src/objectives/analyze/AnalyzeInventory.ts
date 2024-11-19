@@ -1,8 +1,9 @@
-import { IContainer } from "@wayward/game/game/item/IItem";
+import type { IContainer } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../core/context/Context";
-import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../core/ITars";
+import type { IInventoryItemInfo, IInventoryItems } from "../../core/ITars";
+import { InventoryItemFlag, inventoryItemInfo } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
@@ -117,7 +118,7 @@ export default class AnalyzeInventory extends Objective {
 	}
 
 	public static getItems(context: Context, itemInfo: IInventoryItemInfo): Set<Item> {
-		const items: Set<Item> = new Set();
+		const items = new Set<Item>();
 
 		if (itemInfo.itemTypes) {
 			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;

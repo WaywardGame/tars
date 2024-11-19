@@ -1,9 +1,9 @@
 import Doodad from "@wayward/game/game/doodad/Doodad";
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import MoveItemAction from "@wayward/game/game/entity/action/actions/MoveItem";
 import type { IContainer } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
-import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -53,7 +53,7 @@ export default class MoveItemsFromContainer extends Objective {
 		for (const item of items) {
 			let containerItems = itemsByContainer.get(item.containedWithin);
 			if (!containerItems) {
-				containerItems = []
+				containerItems = [];
 				itemsByContainer.set(item.containedWithin, containerItems);
 			}
 

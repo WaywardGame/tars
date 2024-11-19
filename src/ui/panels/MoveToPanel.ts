@@ -1,5 +1,6 @@
 import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
-import { DEFAULT_ISLAND_ID, IslandId } from "@wayward/game/game/island/IIsland";
+import type { IslandId } from "@wayward/game/game/island/IIsland";
+import { DEFAULT_ISLAND_ID } from "@wayward/game/game/island/IIsland";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type Translation from "@wayward/game/language/Translation";
 import { BlockRow } from "@wayward/game/ui/component/BlockRow";
@@ -16,7 +17,7 @@ import { Bound } from "@wayward/utilities/Decorators";
 
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { TarsTranslation, TarsUiSaveDataKey, getTarsTranslation } from "../../ITarsMod";
-import Tars from "../../core/Tars";
+import type Tars from "../../core/Tars";
 import { MoveToMode, MoveToType } from "../../modes/MoveTo";
 import TarsPanel from "../components/TarsPanel";
 

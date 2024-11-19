@@ -1,6 +1,6 @@
 import { TurnMode } from "@wayward/game/game/IGame";
 import { ItemType } from "@wayward/game/game/item/IItem";
-import DrawnMap from "@wayward/game/game/mapping/DrawnMap";
+import type DrawnMap from "@wayward/game/game/mapping/DrawnMap";
 
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";

@@ -1,7 +1,7 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import StartFireAction from "@wayward/game/game/entity/action/actions/StartFire";
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
 
 import { ReserveType } from "../../../core/ITars";
@@ -39,7 +39,7 @@ export default class StartFire extends Objective {
 		const objectives: IObjective[] = [];
 
 		const description = doodad.description;
-		if (!description || description.lit === undefined || description.providesFire) {
+		if (description?.lit === undefined || description.providesFire) {
 			// it's already lit
 			objectives.push(new MoveToTarget(doodad, true));
 
@@ -58,7 +58,7 @@ export default class StartFire extends Objective {
 
 			objectives.push(new MoveToTarget(doodad, true));
 
-			objectives.push(new ExecuteAction(StartFireAction, (context) => {
+			objectives.push(new ExecuteAction(StartFireAction, context => {
 				if (!context.inventory.fireStarter?.isValid) {
 					this.log.warn("Invalid fireStarter");
 					return ObjectiveResult.Restart;
@@ -81,7 +81,7 @@ export default class StartFire extends Objective {
 
 			objectives.push(new Lambda(async context => {
 				const description = doodad.description;
-				if (!description || description.lit === undefined || description.providesFire) {
+				if (description?.lit === undefined || description.providesFire) {
 					return ObjectiveResult.Complete;
 				}
 

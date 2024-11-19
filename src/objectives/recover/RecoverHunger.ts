@@ -1,14 +1,15 @@
 import type { IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
-import { ActionArgument, ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import Eat from "@wayward/game/game/entity/action/actions/Eat";
 import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 import type Item from "@wayward/game/game/item/Item";
 
-import Human from "@wayward/game/game/entity/Human";
-import { Action } from "@wayward/game/game/entity/action/Action";
-import { IConsumeItemCanUse } from "@wayward/game/game/entity/action/actions/ConsumeItem";
-import { IContainer } from "@wayward/game/game/item/IItem";
+import type Human from "@wayward/game/game/entity/Human";
+import type { Action } from "@wayward/game/game/entity/action/Action";
+import type { IConsumeItemCanUse } from "@wayward/game/game/entity/action/actions/ConsumeItem";
+import type { IContainer } from "@wayward/game/game/item/IItem";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -115,7 +116,7 @@ export default class RecoverHunger extends Objective {
 			.sort((a, b) => (a.getDecayTime() ?? 999999) - (b.getDecayTime() ?? 999999));
 	}
 
-	private eatItem(context: Context, item: Item): (MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human, void, IConsumeItemCanUse, [Item]>>)[] {
+	private eatItem(context: Context, item: Item): Array<MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human, void, IConsumeItemCanUse, [Item]>>> {
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
 			new MoveItemsIntoInventory(item).keepInInventory(),

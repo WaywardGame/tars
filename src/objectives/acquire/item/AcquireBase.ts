@@ -9,7 +9,7 @@ import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
-import { IObjective, IObjectivePriority } from "../../../core/objective/IObjective";
+import type { IObjective, IObjectivePriority } from "../../../core/objective/IObjective";
 
 export interface IAcquireItemOptions extends IGatherItemOptions {
 	disallowCreatureSearch: boolean;

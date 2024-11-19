@@ -11,7 +11,7 @@ import Prompts from "@wayward/game/game/meta/prompt/Prompts";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Button from "@wayward/game/ui/component/Button";
 import { TarsMode } from "../../core/ITars";
-import Tars from "../../core/Tars";
+import type Tars from "../../core/Tars";
 import { getTarsTranslation, TarsTranslation } from "../../ITarsMod";
 import TarsPanel from "../components/TarsPanel";
 
@@ -28,7 +28,7 @@ export default class GeneralPanel extends TarsPanel {
 			.setRefreshMethod(() => this.tarsInstance.isEnabled() ?? false)
 			.event.subscribe("willToggle", (_, checked) => {
 				if (this.tarsInstance.canToggle() && this.tarsInstance.isEnabled() !== checked) {
-					this.tarsInstance.toggle();
+					void this.tarsInstance.toggle();
 					return true;
 				}
 
@@ -55,7 +55,7 @@ export default class GeneralPanel extends TarsPanel {
 								newName = placeholder.getString();
 							}
 
-							Rename.execute(localPlayer, npc, newName);
+							void Rename.execute(localPlayer, npc, newName);
 						});
 
 					return true;
@@ -75,7 +75,7 @@ export default class GeneralPanel extends TarsPanel {
 				} else {
 					choice
 						.setText(getTarsTranslation(`DialogMode${TarsMode[mode]}`))
-						.setTooltip(tooltip => tooltip.setText(getTarsTranslation(`DialogMode${TarsMode[mode]}Tooltip`)))
+						.setTooltip(tooltip => tooltip.setText(getTarsTranslation(`DialogMode${TarsMode[mode]}Tooltip`)));
 				}
 
 				return choice;

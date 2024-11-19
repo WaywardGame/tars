@@ -1,6 +1,6 @@
 import Mod from "@wayward/game/mod/Mod";
 import Text from "@wayward/game/ui/component/Text";
-import Bindable from "@wayward/game/ui/input/Bindable";
+import type Bindable from "@wayward/game/ui/input/Bindable";
 import type { QuadrantComponentId } from "@wayward/game/ui/screen/screens/game/IGameScreenApi";
 import { Quadrant } from "@wayward/game/ui/screen/screens/game/component/IQuadrantComponent";
 import QuadrantComponent from "@wayward/game/ui/screen/screens/game/component/QuadrantComponent";

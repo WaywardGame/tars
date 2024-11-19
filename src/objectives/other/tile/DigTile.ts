@@ -1,8 +1,8 @@
-import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import Tile from "@wayward/game/game/tile/Tile";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import Dig from "@wayward/game/game/entity/action/actions/Dig";
-import { ActionArgument, IActionDescription } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgument, IActionDescription } from "@wayward/game/game/entity/action/IAction";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";

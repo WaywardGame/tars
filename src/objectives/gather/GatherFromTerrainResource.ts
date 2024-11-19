@@ -6,7 +6,7 @@ import Dictionary from "@wayward/game/language/Dictionary";
 import Translation from "@wayward/game/language/Translation";
 
 import type Context from "../../core/context/Context";
-import { ITerrainResourceSearch, ITileLocation } from "../../core/ITars";
+import type { ITerrainResourceSearch, ITileLocation } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AddDifficulty from "../core/AddDifficulty";

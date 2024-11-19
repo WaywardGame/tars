@@ -1,16 +1,17 @@
 import type Translation from "@wayward/game/language/Translation";
+// eslint-disable-next-line import/no-deprecated
 import { Debounce } from "@wayward/utilities/Decorators";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import { Renderer } from "@wayward/game/renderer/Renderer";
 import Component from "@wayward/game/ui/component/Component";
 import { RenderSource, ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "@wayward/game/renderer/IRenderer";
 import { Priority } from "@wayward/utilities/event/EventEmitter";
-import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import type { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bind from "@wayward/game/ui/input/Bind";
 import Bindable from "@wayward/game/ui/input/Bindable";
 
 import TarsPanel from "../components/TarsPanel";
 import { TarsTranslation } from "../../ITarsMod";
-import Tars from "../../core/Tars";
 
 export default class ViewportPanel extends TarsPanel {
 
@@ -18,11 +19,7 @@ export default class ViewportPanel extends TarsPanel {
 
 	private renderer?: Renderer;
 
-	private zoomLevel: number = 2;
-
-	constructor(tarsInstance: Tars) {
-		super(tarsInstance);
-	}
+	private zoomLevel = 2;
 
 	@OwnEventHandler(ViewportPanel, "remove")
 	protected onDispose(): void {
@@ -37,7 +34,7 @@ export default class ViewportPanel extends TarsPanel {
 	}
 
 	private disposeRenderer(): void {
-		this.renderer?.delete();
+		void this.renderer?.delete();
 		this.renderer = undefined;
 	}
 
@@ -101,6 +98,7 @@ export default class ViewportPanel extends TarsPanel {
 			.subscribe("postMove", () => this.rerender());
 	}
 
+	// eslint-disable-next-line import/no-deprecated
 	@Debounce(250)
 	private resize(): void {
 		if (!this.canvas || !this.renderer) {

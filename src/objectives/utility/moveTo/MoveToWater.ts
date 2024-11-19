@@ -1,6 +1,6 @@
 import { WaterType } from "@wayward/game/game/island/IIsland";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -50,9 +50,9 @@ export default class MoveToWater extends Objective {
 
 		const fishingRange = this.options?.fishingRange ?? 1;
 
-		const disabledTiles: Set<Tile> = new Set();
+		const disabledTiles = new Set<Tile>();
 
-		const target = context.getTile().findMatchingTile((tile) => {
+		const target = context.getTile().findMatchingTile(tile => {
 			if (disabledTiles.has(tile)) {
 				return false;
 			}

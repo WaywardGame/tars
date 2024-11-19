@@ -75,7 +75,7 @@ export default class SailToCivilization extends Objective {
 		objectives.push(
 			new MoveItemsIntoInventory(context.inventory.sailboat),
 			new MoveToWater(MoveToWaterType.SailAwayWater),
-			new ExecuteAction(SailToCivilizationAction, [context.inventory.sailboat, true]).setStatus(this)
+			new ExecuteAction(SailToCivilizationAction, [context.inventory.sailboat, true]).setStatus(this),
 		);
 
 		return objectives;

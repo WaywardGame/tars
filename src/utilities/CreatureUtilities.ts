@@ -8,7 +8,7 @@ import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 import { CombatDangerLevel } from "@wayward/game/game/entity/CombatStrengthManager";
 
 import type Context from "../core/context/Context";
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 
 export class CreatureUtilities {
 

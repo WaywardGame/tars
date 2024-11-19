@@ -1,5 +1,5 @@
 import { Direction } from "@wayward/game/utilities/math/Direction";
-import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../../core/context/Context";

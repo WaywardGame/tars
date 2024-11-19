@@ -1,6 +1,6 @@
 import Mine from "@wayward/game/game/entity/action/actions/Mine";
 import Chop from "@wayward/game/game/entity/action/actions/Chop";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";

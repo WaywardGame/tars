@@ -5,7 +5,7 @@ import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { ListEnder } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 // import MoveItem from "@wayward/game/game/entity/action/actions/MoveItem";
 import Harvest from "@wayward/game/game/entity/action/actions/Harvest";
 import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
@@ -18,10 +18,10 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
-import { GetActionArguments } from "../../utilities/ActionUtilities";
-import Message from "@wayward/game/language/dictionary/Message";
+import type { GetActionArguments } from "../../utilities/ActionUtilities";
+import type Message from "@wayward/game/language/dictionary/Message";
 import PickUpItem from "@wayward/game/game/entity/action/actions/PickUpItem";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 export enum ExecuteActionType {
 	Generic,
@@ -46,7 +46,7 @@ export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
 
 	genericAction: IExecuteActioGenericAction<T>;
 
-	preRetry: (context: Context) => ObjectiveResult | undefined,
+	preRetry: (context: Context) => ObjectiveResult | undefined;
 }
 
 export default class ExecuteActionForItem<T extends AnyActionDescription> extends Objective {
@@ -125,7 +125,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 				result = await this.executeActionForItem(context, this.itemTypes, {
 					action,
-					args: [this.options?.onlyGatherWithHands ? undefined : context.utilities.item.getBestToolForDoodadGather(context, doodad)]
+					args: [this.options?.onlyGatherWithHands ? undefined : context.utilities.item.getBestToolForDoodadGather(context, doodad)],
 				});
 
 				break;
@@ -146,7 +146,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 				result = await this.executeActionForItem(context, this.itemTypes, {
 					action,
-					args: [context.utilities.item.getBestToolForTerrainGather(context, tileType)]
+					args: [context.utilities.item.getBestToolForTerrainGather(context, tileType)],
 				});
 
 				break;
@@ -183,7 +183,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 	}
 
 	private async executeActionForItem<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult> {
-		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, action);
+		const matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, action);
 		if (typeof (matchingNewItem) === "number") {
 			return matchingNewItem;
 		}
@@ -220,7 +220,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 	private async executeActionCompareInventoryItems<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult | Item | undefined> {
 		// map item ids to types. some items might change types due to an action
-		const itemsBefore: Map<number, ItemType> = new Map(context.utilities.item.getItemsInInventory(context).map(item => ([item.id, item.type])));
+		const itemsBefore = new Map<number, ItemType>(context.utilities.item.getItemsInInventory(context).map(item => ([item.id, item.type])));
 
 		const result = await context.utilities.action.executeAction(context, action.action, action.args, action.expectedMessages);
 		if (result !== ObjectiveResult.Complete) {

@@ -3,7 +3,7 @@ import PickUp from "@wayward/game/game/entity/action/actions/PickUp";
 import type { IRequirementInfo } from "@wayward/game/game/item/IItemManager";
 import { RequirementStatus } from "@wayward/game/game/item/IItemManager";
 
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
@@ -69,7 +69,7 @@ export default class CompleteRequirements extends Objective {
 			if (!anvil) {
 				objectives.push(new AcquireBuildMoveToDoodad(primaryDoodad));
 				objectives.push(new AnalyzeBase());
-				objectives.push(new ExecuteAction(PickUp, (context) => {
+				objectives.push(new ExecuteAction(PickUp, context => {
 					if (!context.base.anvil[0]) {
 						// the anvil we went to is not our base anvil
 						// it was probably not placed correctly

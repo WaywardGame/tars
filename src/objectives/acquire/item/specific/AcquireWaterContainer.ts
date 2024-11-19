@@ -1,9 +1,10 @@
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import OpenBottle from "@wayward/game/game/entity/action/actions/OpenBottle";
 import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../../core/ExecuteActionForItem";
@@ -40,7 +41,7 @@ export default class AcquireWaterContainer extends Objective {
 			{
 				genericAction: {
 					action: OpenBottle,
-					args: (context) => {
+					args: context => {
 						const item = context.getData(itemContextDataKey);
 						if (!item?.isValid) {
 							this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);

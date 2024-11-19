@@ -1,8 +1,8 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
-import Creature from "@wayward/game/game/entity/creature/Creature";
-import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
-import Human from "@wayward/game/game/entity/Human";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import type Human from "@wayward/game/game/entity/Human";
 import { EquipType } from "@wayward/game/game/entity/IHuman";
 
 import type Context from "../core/context/Context";

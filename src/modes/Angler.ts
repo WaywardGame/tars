@@ -1,5 +1,5 @@
 import type Context from "../core/context/Context";
-import { IObjective } from "../core/objective/IObjective";
+import type { IObjective } from "../core/objective/IObjective";
 import type { ITarsMode } from "../core/mode/IMode";
 import { BaseMode } from "./BaseMode";
 import Fish from "../objectives/other/tile/Fish";

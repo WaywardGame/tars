@@ -41,7 +41,7 @@ export default class GatherFromGround extends Objective {
 	// 	return true;
 	// }
 
-	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string): { objectiveHashCode: string; itemTypes: Set<ItemType>; } {
+	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string): { objectiveHashCode: string; itemTypes: Set<ItemType> } {
 		return {
 			objectiveHashCode,
 			itemTypes: new Set([this.itemType]),

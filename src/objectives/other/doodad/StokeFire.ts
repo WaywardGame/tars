@@ -8,8 +8,8 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import MoveToTarget from "../../core/MoveToTarget";
 
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
-import Item from "@wayward/game/game/item/Item";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
 import { ReserveType } from "../../../core/ITars";
 import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 import ExecuteAction from "../../core/ExecuteAction";
@@ -49,7 +49,7 @@ export default class StokeFire extends Objective {
 
 		objectives.push(new MoveToTarget(doodad, true));
 
-		objectives.push(new ExecuteAction(StokeFireAction, (context) => {
+		objectives.push(new ExecuteAction(StokeFireAction, context => {
 			const kindling = context.getData<Item>(itemContextDataKey);
 			if (!kindling?.isValid) {
 				this.log.warn("Invalid StokeFire kindling");

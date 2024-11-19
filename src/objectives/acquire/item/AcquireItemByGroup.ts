@@ -9,7 +9,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemByGroup extends AcquireBase {
 
-	private static readonly cache: Map<ItemTypeGroup, ItemType[]> = new Map();
+	private static readonly cache = new Map<ItemTypeGroup, ItemType[]>();
 
 	constructor(private readonly itemTypeGroup: ItemTypeGroup, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();

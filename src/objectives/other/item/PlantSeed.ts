@@ -10,7 +10,7 @@ import Objective from "../../../core/objective/Objective";
 import UseItem from "./UseItem";
 import ReserveItems from "../../core/ReserveItems";
 import MoveItemsIntoInventory from "./MoveItemsIntoInventory";
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 import TillForSeed from "../tile/TillForSeed";
 
 export const gardenMaxTilesChecked = 1536;

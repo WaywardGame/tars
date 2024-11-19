@@ -1,4 +1,5 @@
-import { ActionArgumentsOf, ActionType, AnyActionDescription } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf, AnyActionDescription } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import Message from "@wayward/game/language/dictionary/Message";
 
 import type Context from "../core/context/Context";

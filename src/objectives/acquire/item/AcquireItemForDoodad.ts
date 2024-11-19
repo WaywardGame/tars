@@ -13,7 +13,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForDoodad extends Objective {
 
-	private static readonly cache: Map<DoodadType | DoodadTypeGroup, ItemType[]> = new Map();
+	private static readonly cache = new Map<DoodadType | DoodadTypeGroup, ItemType[]>();
 
 	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
 		super();
@@ -50,7 +50,7 @@ export default class AcquireItemForDoodad extends Objective {
 			for (const doodadType of doodadTypes) {
 				for (const itemType of Enums.values(ItemType)) {
 					const itemDescription = itemDescriptions[itemType];
-					if (itemDescription && itemDescription.onUse &&
+					if (itemDescription?.onUse &&
 						(itemDescription.onUse[ActionType.Build]?.type === doodadType || itemDescription.onUse[ActionType.PlaceDown]?.type === doodadType)) {
 						result.push(itemType);
 					}

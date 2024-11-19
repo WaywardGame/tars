@@ -5,38 +5,41 @@ import Rename from "@wayward/game/game/entity/action/actions/Rename";
 import Respawn from "@wayward/game/game/entity/action/actions/Respawn";
 import UpdateWalkTo from "@wayward/game/game/entity/action/actions/UpdateWalkTo";
 import type { IActionApi } from "@wayward/game/game/entity/action/IAction";
-import { ActionType } from "@wayward/game/game/entity/action/IAction";
-import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
-import CorpseManager from "@wayward/game/game/entity/creature/corpse/CorpseManager";
+import type { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import type CorpseManager from "@wayward/game/game/entity/creature/corpse/CorpseManager";
 import type Creature from "@wayward/game/game/entity/creature/Creature";
-import CreatureManager from "@wayward/game/game/entity/creature/CreatureManager";
-import Human from "@wayward/game/game/entity/Human";
-import { AttackType } from "@wayward/game/game/entity/IEntity";
-import { EquipType, WalkToChangeReason } from "@wayward/game/game/entity/IHuman";
+import type CreatureManager from "@wayward/game/game/entity/creature/CreatureManager";
+import type Human from "@wayward/game/game/entity/Human";
+import type { AttackType } from "@wayward/game/game/entity/IEntity";
+import type { WalkToChangeReason } from "@wayward/game/game/entity/IHuman";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
 import type { IStat, IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
-import NPC from "@wayward/game/game/entity/npc/NPC";
-import ControllableNPC from "@wayward/game/game/entity/npc/npcs/Controllable";
-import { WalkTo, WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type ControllableNPC from "@wayward/game/game/entity/npc/npcs/Controllable";
+import type { WalkTo } from "@wayward/game/game/entity/player/IPlayer";
+import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 import type { INote } from "@wayward/game/game/entity/player/note/NoteManager";
 import type Player from "@wayward/game/game/entity/player/Player";
 import { TileUpdateType } from "@wayward/game/game/IGame";
 import type Island from "@wayward/game/game/island/Island";
-import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
-import Item from "@wayward/game/game/item/Item";
-import ItemManager from "@wayward/game/game/item/ItemManager";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import type ItemManager from "@wayward/game/game/item/ItemManager";
 import type { IPromptDescriptionBase } from "@wayward/game/game/meta/prompt/IPrompt";
 import { Prompt } from "@wayward/game/game/meta/prompt/IPrompt";
 import type Prompts from "@wayward/game/game/meta/prompt/Prompts";
 import type { IPrompt } from "@wayward/game/game/meta/prompt/Prompts";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import InterruptChoice from "@wayward/game/language/dictionary/InterruptChoice";
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
-import Translation from "@wayward/game/language/Translation";
+import type TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import type Translation from "@wayward/game/language/Translation";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import { Direction } from "@wayward/game/utilities/math/Direction";
-import { IVector2 } from "@wayward/game/utilities/math/IVector";
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Bound } from "@wayward/utilities/Decorators";
 import EventEmitter, { Priority } from "@wayward/utilities/event/EventEmitter";
@@ -46,7 +49,8 @@ import Objects from "@wayward/utilities/object/Objects";
 import ResolvablePromise from "@wayward/utilities/promise/ResolvablePromise";
 import Task from "@wayward/utilities/promise/Task";
 
-import { getTarsMod, getTarsTranslation, ISaveData, ISaveDataContainer, TarsTranslation } from "../ITarsMod";
+import type { ISaveData, ISaveDataContainer } from "../ITarsMod";
+import { getTarsMod, getTarsTranslation, TarsTranslation } from "../ITarsMod";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import ExecuteAction from "../objectives/core/ExecuteAction";
@@ -67,7 +71,7 @@ import RecoverThirst from "../objectives/recover/RecoverThirst";
 import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToZ from "../objectives/utility/moveTo/MoveToZ";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import { TarsOverlay } from "../ui/TarsOverlay";
+import type { TarsOverlay } from "../ui/TarsOverlay";
 import { ActionUtilities } from "../utilities/ActionUtilities";
 import { BaseUtilities } from "../utilities/BaseUtilities";
 import { CreatureUtilities } from "../utilities/CreatureUtilities";
@@ -81,12 +85,13 @@ import { TileUtilities } from "../utilities/TileUtilities";
 import Context from "./context/Context";
 import { ContextDataType, MovingToNewIslandState } from "./context/IContext";
 import { ExecuteObjectivesResultType, Executor } from "./Executor";
-import { IBase, IInventoryItems, IResetOptions, ITarsEvents, IUtilities, NavigationSystemState, QuantumBurstStatus, TarsMode, tickSpeed } from "./ITars";
-import { ITarsOptions } from "./ITarsOptions";
+import type { IBase, IInventoryItems, IResetOptions, ITarsEvents, IUtilities } from "./ITars";
+import { NavigationSystemState, QuantumBurstStatus, TarsMode, tickSpeed } from "./ITars";
+import type { ITarsOptions } from "./ITarsOptions";
 import type { ITarsMode } from "./mode/IMode";
 import { modes } from "./mode/Modes";
 import Navigation, { tileUpdateRadius } from "./navigation/Navigation";
-import { NavigationKdTrees } from "./navigation/NavigationKdTrees";
+import type { NavigationKdTrees } from "./navigation/NavigationKdTrees";
 import type { IObjective } from "./objective/IObjective";
 import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
@@ -117,7 +122,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	private objectivePipeline: Array<IObjective | IObjective[]> | undefined;
 	private interruptObjectivePipeline: Array<IObjective | IObjective[]> | undefined;
 	private interruptContext: Context | undefined;
-	private readonly interruptContexts: Map<number, Context> = new Map();
+	private readonly interruptContexts = new Map<number, Context>();
 	private interruptIds: Set<string> | undefined;
 
 	private tickTimeoutId: number | undefined;
@@ -126,7 +131,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	private navigationUpdatePromise: ResolvablePromise | undefined;
 	private readonly navigationQueuedUpdates: Array<() => void> = [];
 
-	private readonly modeCache: Map<TarsMode, ITarsMode> = new Map();
+	private readonly modeCache = new Map<TarsMode, ITarsMode>();
 
 	private loaded = false;
 
@@ -172,7 +177,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		this.navigationSystemState = NavigationSystemState.NotInitialized;
 
 		this.navigationUpdatePromise?.resolve();
-		this.navigationUpdatePromise = undefined
+		this.navigationUpdatePromise = undefined;
 
 		this.navigationQueuedUpdates.length = 0;
 
@@ -217,7 +222,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		const npc = this.asNPC;
 		if (npc) {
-			Rename.execute(localPlayer, npc, container.name);
+			void Rename.execute(localPlayer, npc, container.name);
 		}
 	}
 
@@ -237,7 +242,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		this.utilities.navigation.load();
 
-		this.utilities.ensureSailingMode = (sailingMode) => this.ensureSailingMode(sailingMode);
+		this.utilities.ensureSailingMode = sailingMode => this.ensureSailingMode(sailingMode);
 
 		eventManager.registerEventBusSubscriber(this);
 
@@ -278,7 +283,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		this.utilities.movement.resetMovementOverlays();
 
 		multiplayer.executeClientside(() => {
-			UpdateWalkTo.execute(this.human, undefined);
+			void UpdateWalkTo.execute(this.human, undefined);
 
 			OptionsInterrupt.restore(this.human);
 		});
@@ -383,7 +388,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		const objective = this.getCurrentObjective();
 		if (objective !== undefined && objective instanceof MoveToTarget) {
 			const result = objective.onItemRemoved(this.context, item);
-			if (result === true) {
+			if (result) {
 				this.fullInterrupt(`${item} was removed`);
 			}
 		}
@@ -608,7 +613,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			return;
 		}
 
-		if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad && nextTile.doodad.blocksMove) || nextTile.isPlayerOnTile()) {
+		if ((nextTile.npc && nextTile.npc !== this.human) || (nextTile.doodad?.blocksMove) || nextTile.isPlayerOnTile()) {
 			this.interrupt("Interrupting due to blocked movement");
 		}
 	}
@@ -622,7 +627,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		// we are attacking something. cancel and pending walk path
 		if (this.human.isWalkingTo) {
 			multiplayer.executeClientside(() => {
-				UpdateWalkTo.execute(this.human, undefined);
+				void UpdateWalkTo.execute(this.human, undefined);
 			});
 		}
 
@@ -713,7 +718,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		// this.fullInterrupt();
 
-		this.toggle(true);
+		await this.toggle(true);
 	}
 
 	////////////////////////////////////////////////
@@ -763,7 +768,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		if (this.saveData.enabled) {
 			if (this.saveData.options.navigationOverlays) {
 				this.overlay.show();
-				this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.context));
+				await this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.context));
 				this.human.updateView(RenderSource.Mod, false);
 			}
 
@@ -810,6 +815,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 								shouldInterrupt = false;
 							}
 						}
+
 						break;
 
 					case "goodCitizen":
@@ -836,7 +842,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 						if (this.saveData.options.navigationOverlays) {
 							this.overlay.show();
-							this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.getContext()));
+							void this.utilities.navigation.ensureOverlays(() => this.utilities.base.getBaseTiles(this.getContext()));
 
 						} else {
 							this.overlay.hide();
@@ -864,7 +870,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		} else {
 			multiplayer.executeClientside(() => {
-				UpdateWalkTo.execute(this.human, { type: "path", path: path, force: true });
+				void UpdateWalkTo.execute(this.human, { type: "path", path: path, force: true });
 			});
 		}
 	}
@@ -873,7 +879,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		this.updateOptions({ mode: TarsMode.Manual });
 
 		if (!this.isRunning()) {
-			this.toggle();
+			await this.toggle();
 		}
 
 		await this.initializeMode(this.context, TarsMode.Manual, modeInstance);
@@ -1132,7 +1138,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		this.utilities.movement.resetMovementOverlays();
 
 		multiplayer.executeClientside(() => {
-			UpdateWalkTo.execute(this.human, undefined);
+			void UpdateWalkTo.execute(this.human, undefined);
 		});
 	}
 
@@ -1339,6 +1345,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 								this.interruptContexts.delete(i);
 								this.log.debug(`Deleting saved context from ${i}`);
 							}
+
 							break;
 
 						default:
@@ -1501,7 +1508,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		return interrupts;
 	}
 
-	private getRecoverInterrupts(context: Context, onlyUseAvailableItems: boolean, allowWaiting: boolean): (IObjective | undefined)[] {
+	private getRecoverInterrupts(context: Context, onlyUseAvailableItems: boolean, allowWaiting: boolean): Array<IObjective | undefined> {
 		// focus on healing if our health is below 85% while poisoned
 		const poisonHealthPercentThreshold = 0.85;
 
@@ -1642,7 +1649,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 	private repairInterrupt(context: Context, queuedRepairs: Set<Item>, itemOrItems: Item | Item[] | undefined): IObjective | undefined {
 		for (const item of (Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems])) {
-			if (item === undefined || item.durability === undefined || item.durabilityMax === undefined || queuedRepairs.has(item)) {
+			if (item?.durability === undefined || item.durabilityMax === undefined || queuedRepairs.has(item)) {
 				return undefined;
 			}
 
@@ -1698,7 +1705,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	private checkNearbyCreature(context: Context, direction: Direction.Cardinal): Creature | undefined {
 		const point = Vector2.DIRECTIONS[direction];
 		const tile = context.island.getTileSafe(context.human.x + point.x, context.human.y + point.y, context.human.z);
-		if (tile && tile.creature && !tile.creature.isTamed) {
+		if (tile?.creature && !tile.creature.isTamed) {
 			//  && (tile.creature.ai & AiType.Hostile) !== 0
 			return tile.creature;
 		}

@@ -1,12 +1,12 @@
 import type CommandManager from "@wayward/game/command/CommandManager";
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 import CreateControllableNPC from "@wayward/game/game/entity/action/actions/CreateControllableNPC";
 import type { Source } from "@wayward/game/game/entity/player/IMessageManager";
 import { MessageType } from "@wayward/game/game/entity/player/IMessageManager";
 import type Player from "@wayward/game/game/entity/player/Player";
-import { IPromptConfirmDescription } from "@wayward/game/game/meta/prompt/IPrompt";
+import type { IPromptConfirmDescription } from "@wayward/game/game/meta/prompt/IPrompt";
 import type Dictionary from "@wayward/game/language/Dictionary";
 import Translation from "@wayward/game/language/Translation";
 import type Message from "@wayward/game/language/dictionary/Message";
@@ -22,16 +22,19 @@ import { MenuBarButtonGroup, type MenuBarButtonType } from "@wayward/game/ui/scr
 import Files from "@wayward/game/utilities/Files";
 import Log from "@wayward/utilities/Log";
 import SearchParams from "@wayward/utilities/SearchParams";
-import { IEventEmitter, Priority } from "@wayward/utilities/event/EventEmitter";
+import type { IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { Priority } from "@wayward/utilities/event/EventEmitter";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 
-import NPC from "@wayward/game/game/entity/npc/NPC";
-import { TranslationArg } from "@wayward/game/language/ITranslation";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type { TranslationArg } from "@wayward/game/language/ITranslation";
 import type { IGlobalSaveData, ISaveData, ISaveDataContainer, ITarsModEvents } from "./ITarsMod";
 import { TARS_ID, TarsTranslation, TarsUiSaveDataKey, setTarsMod } from "./ITarsMod";
 import { NavigationSystemState, QuantumBurstStatus, TarsMode, tarsUniqueNpcType } from "./core/ITars";
-import { ITarsOptions, createOptions } from "./core/ITarsOptions";
-import Tars, { TarsNPC } from "./core/Tars";
+import type { ITarsOptions } from "./core/ITarsOptions";
+import { createOptions } from "./core/ITarsOptions";
+import type { TarsNPC } from "./core/Tars";
+import Tars from "./core/Tars";
 import { NavigationKdTrees } from "./core/navigation/NavigationKdTrees";
 import TarsDialog from "./ui/TarsDialog";
 import { TarsOverlay } from "./ui/TarsOverlay";
@@ -57,10 +60,10 @@ export default class TarsMod extends Mod {
 
 	////////////////////////////////////
 
-	@Register.bindable("ToggleDialog", IInput.key("Comma"))
+	@Register.bindable("ToggleDialog", IInput.key("Home"))
 	public readonly bindableToggleDialog: Bindable;
 
-	@Register.bindable("ToggleTars", IInput.key("Period"))
+	@Register.bindable("ToggleTars", IInput.key("Pause"))
 	public readonly bindableToggleTars: Bindable;
 
 	@Register.bindable("ToggleQuadrantComponent")
@@ -131,7 +134,7 @@ export default class TarsMod extends Mod {
 
 	////////////////////////////////////
 
-	private readonly tarsInstances: Set<Tars> = new Set();
+	private readonly tarsInstances = new Set<Tars>();
 
 	private readonly tarsOverlay: TarsOverlay = new TarsOverlay(true);
 
@@ -188,12 +191,12 @@ export default class TarsMod extends Mod {
 
 	@Register.command("TARS")
 	public command(_: CommandManager, _player: Player, _args: string): void {
-		this.localPlayerTars?.toggle();
+		void this.localPlayerTars?.toggle();
 	}
 
 	@Bind.onDown(Registry<TarsMod>().get("bindableToggleTars"))
 	public onToggleTars(): boolean {
-		this.localPlayerTars?.toggle();
+		void this.localPlayerTars?.toggle();
 		return true;
 	}
 
@@ -379,7 +382,7 @@ export default class TarsMod extends Mod {
 		}
 
 		if (!this.localPlayerTars.isRunning() && (this.localPlayerTars.isEnabled() || SearchParams.hasSwitch("autotars"))) {
-			this.localPlayerTars.toggle(true);
+			await this.localPlayerTars.toggle(true);
 		}
 	}
 
@@ -428,7 +431,7 @@ export default class TarsMod extends Mod {
 
 		this.tarsInstances.add(tars);
 
-		tars.event.waitFor("unload").then(() => {
+		void tars.event.waitFor("unload").then(() => {
 			this.tarsInstances.delete(tars);
 
 			this.refreshTarsInstanceReferences();
@@ -485,7 +488,7 @@ export default class TarsMod extends Mod {
 			throw new Error("Invalid spawn position");
 		}
 
-		CreateControllableNPC.execute(localPlayer, tarsUniqueNpcType, spawnTile);
+		void CreateControllableNPC.execute(localPlayer, tarsUniqueNpcType, spawnTile);
 	}
 
 	/**
@@ -499,7 +502,7 @@ export default class TarsMod extends Mod {
 
 		const tarsNpc: typeof npc & { tarsInstance?: Tars } = npc;
 
-		npc.event.waitFor("ready").then(() => {
+		void npc.event.waitFor("ready").then(() => {
 			if (tarsNpc.tarsInstance) {
 				// already ready
 				return;
@@ -512,13 +515,13 @@ export default class TarsMod extends Mod {
 			tarsNpc.tarsInstance = this.createAndLoadTars(tarsNpc, tarsNpc.saveData);
 
 			if (tarsNpc.tarsInstance.isEnabled()) {
-				tarsNpc.tarsInstance.toggle(true);
+				void tarsNpc.tarsInstance.toggle(true);
 			}
 		});
 
-		npc.event.waitFor("cleanup").then(() => {
+		void npc.event.waitFor("cleanup").then(() => {
 			if (tarsNpc.tarsInstance) {
-				gameScreen?.dialogs.get<TarsDialog>(this.dialogMain, tarsNpc.tarsInstance.dialogSubId)?.close();
+				void gameScreen?.dialogs.get<TarsDialog>(this.dialogMain, tarsNpc.tarsInstance.dialogSubId)?.close();
 
 				tarsNpc.tarsInstance.disable(true);
 				tarsNpc.tarsInstance.unload();
@@ -546,7 +549,7 @@ export default class TarsMod extends Mod {
 		tarsNpc.tarsInstance = this.createAndLoadTars(tarsNpc, tarsNpc.saveData);
 
 		if (tarsNpc.tarsInstance.isEnabled()) {
-			tarsNpc.tarsInstance.toggle(true);
+			void tarsNpc.tarsInstance.toggle(true);
 		}
 
 		if (openDialog) {

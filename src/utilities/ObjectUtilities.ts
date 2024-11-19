@@ -6,8 +6,8 @@ import type NPC from "@wayward/game/game/entity/npc/NPC";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import { AiType } from "@wayward/game/game/entity/ai/AI";
-import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
-import Entity from "@wayward/types/definitions/game/game/entity/Entity";
+import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import type Entity from "@wayward/types/definitions/game/game/entity/Entity";
 import type Context from "../core/context/Context";
 
 export enum FindObjectType {
@@ -20,8 +20,8 @@ export enum FindObjectType {
 
 export class ObjectUtilities {
 
-	private readonly cachedSorts: Map<string, any> = new Map();
-	private readonly cachedObjects: Map<string, any> = new Map();
+	private readonly cachedSorts = new Map<string, any>();
+	private readonly cachedObjects = new Map<string, any>();
 
 	public clearCache(): void {
 		this.cachedSorts.clear();

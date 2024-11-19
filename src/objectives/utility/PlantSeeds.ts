@@ -1,4 +1,4 @@
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
@@ -8,7 +8,7 @@ import PlantSeed from "../other/item/PlantSeed";
 export default class PlantSeeds extends Objective {
 
 	constructor(private readonly seeds: Item[]) {
-		super()
+		super();
 	}
 
 	public getIdentifier(): string {

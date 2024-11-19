@@ -41,7 +41,7 @@ export default class CheckSpecialItems extends Objective {
 							action: OpenBottle,
 							args: [item],
 						},
-					}).setStatus("Opening glass bottle")
+					}).setStatus("Opening glass bottle"),
 			]));
 		}
 

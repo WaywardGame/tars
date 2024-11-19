@@ -2,8 +2,7 @@ import type Item from "@wayward/game/game/item/Item";
 import type { ILogLine } from "@wayward/utilities/Log";
 import type Log from "@wayward/utilities/Log";
 // @ts-ignore
-import Vector2 from "@wayward/game/utilities/math/Vector2";
-import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 
 import type Context from "../context/Context";
 import type { IObjective, IObjectiveInfo, IObjectivePriority } from "../objective/IObjective";
@@ -551,8 +550,8 @@ export default class Plan implements IPlan {
 		const depthMap = new Map<number, IExecutionTree>();
 		depthMap.set(1, rootTree);
 
-		const reserveItemObjectives: Map<Item, number> = new Map();
-		const keepInInventoryReserveItemObjectives: Map<Item, number> = new Map();
+		const reserveItemObjectives = new Map<Item, number>();
+		const keepInInventoryReserveItemObjectives = new Map<Item, number>();
 
 		// todo: find the easiest objective for each group. and make that objective the first one?
 
@@ -610,7 +609,7 @@ export default class Plan implements IPlan {
 			depthMap.set(depth, childTree);
 		}
 
-		const cachedExecutionPriorities: Map<string, Map<IExecutionTree, IObjectivePriority>> = new Map();
+		const cachedExecutionPriorities = new Map<string, Map<IExecutionTree, IObjectivePriority>>();
 
 		const getExecutionPriority = (objective: IObjective, tree: IExecutionTree) => {
 			const hashCode = objective.getHashCode(context);
@@ -628,7 +627,7 @@ export default class Plan implements IPlan {
 			}
 
 			return priority;
-		}
+		};
 
 		const walkAndSortTree = (tree: IExecutionTree) => {
 			tree.children = tree.children.sort((treeA, treeB) => {
@@ -806,7 +805,7 @@ export default class Plan implements IPlan {
 		// move all reserve item objectives to the top of the tree so they are executed first
 		// this will prevent interrupt objectives from messing with these items
 		// todo: split up soft / hard reserve too?
-		let objectivesToInsertAtFront: IExecutionTree[] = [];
+		const objectivesToInsertAtFront: IExecutionTree[] = [];
 
 		if (reserveItemObjectives.size > 0) {
 			const reserveItemObjective = new ReserveItems();
@@ -914,7 +913,7 @@ export default class Plan implements IPlan {
 
 	// @ts-ignore
 	private getExecutionTreePosition(tree: IExecutionTree): IVector3 | undefined {
-		const position = tree.objective.getPosition?.()
+		const position = tree.objective.getPosition?.();
 		if (position !== undefined) {
 			return position;
 		}

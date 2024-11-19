@@ -1,24 +1,25 @@
 import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
 import Dig from "@wayward/game/game/entity/action/actions/Dig";
 import Till from "@wayward/game/game/entity/action/actions/Till";
-import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
+import type { IContainer, ItemType } from "@wayward/game/game/item/IItem";
 import type { ITileContainer } from "@wayward/game/game/tile/ITerrain";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 
 import { WaterType } from "@wayward/game/game/island/IIsland";
-import Item from "@wayward/game/game/item/Item";
-import Tile from "@wayward/game/game/tile/Tile";
-import { Direction } from "@wayward/game/utilities/math/Direction";
-import { ActionType, IActionNotUsable } from "@wayward/game/game/entity/action/IAction";
-import { ITillCanUse } from "@wayward/game/game/entity/action/actions/ToggleTilled";
+import type Item from "@wayward/game/game/item/Item";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type { Direction } from "@wayward/game/utilities/math/Direction";
+import type { IActionNotUsable } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { ITillCanUse } from "@wayward/game/game/entity/action/actions/ToggleTilled";
 import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
 import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
 
 import { gardenMaxTilesChecked } from "../objectives/other/tile/TillForSeed";
 import type { ITileLocation } from "../core/ITars";
-import Context from "../core/context/Context";
-import { ExtendedTerrainType } from "../core/navigation/INavigation";
+import type Context from "../core/context/Context";
+import type { ExtendedTerrainType } from "../core/navigation/INavigation";
 
 export interface IOpenTileOptions {
 	requireNoItemsOnTile: boolean;
@@ -28,11 +29,11 @@ export interface IOpenTileOptions {
 
 export class TileUtilities {
 
-	private readonly seedAllowedTileSet: Map<ItemType, Set<TerrainType>> = new Map();
-	private readonly tileLocationCache: Map<string, ITileLocation[]> = new Map();
-	private readonly canUseArgsCache: Map<number, { point: IVector3; direction: Direction.Cardinal } | null> = new Map();
-	private readonly canUseResultCache: Map<number, IActionNotUsable | ITillCanUse> = new Map();
-	private readonly nearbyTillableTile: Map<ItemType, Tile | undefined | null> = new Map();
+	private readonly seedAllowedTileSet = new Map<ItemType, Set<TerrainType>>();
+	private readonly tileLocationCache = new Map<string, ITileLocation[]>();
+	private readonly canUseArgsCache = new Map<number, { point: IVector3; direction: Direction.Cardinal } | null>();
+	private readonly canUseResultCache = new Map<number, IActionNotUsable | ITillCanUse>();
+	private readonly nearbyTillableTile = new Map<ItemType, Tile | undefined | null>();
 
 	public clearCache(): void {
 		this.seedAllowedTileSet.clear();
@@ -46,7 +47,7 @@ export class TileUtilities {
 		const tile = tileOverride ?? context.getTile();
 
 		const results: ITileLocation[][] = [
-			this._getNearestTileLocation(context, tileType, tile)
+			this._getNearestTileLocation(context, tileType, tile),
 		];
 
 		if (!tileOverride && context.options.allowCaves) {
@@ -157,10 +158,10 @@ export class TileUtilities {
 		let result = this.nearbyTillableTile.get(seedItemType);
 		if (result === undefined) {
 			result = context.utilities.base.getBaseTile(context).findMatchingTile(
-				(tile) => context.utilities.tile.canTill(context, tile, context.inventory.hoe, allowedTilesSet),
+				tile => context.utilities.tile.canTill(context, tile, context.inventory.hoe, allowedTilesSet),
 				{
 					maxTilesChecked: gardenMaxTilesChecked,
-				}
+				},
 			);
 
 			this.nearbyTillableTile.set(seedItemType, result ? result : null);
@@ -226,7 +227,7 @@ export class TileUtilities {
 	}
 
 	public hasCorpses(tile: Tile): boolean {
-		return !!(tile.corpses && tile.corpses.length);
+		return !!(tile.corpses?.length);
 	}
 
 	public hasItems(tile: Tile): boolean {

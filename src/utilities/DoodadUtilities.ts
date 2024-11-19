@@ -8,7 +8,7 @@ import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
 export class DoodadUtilities {
 
 	public getDoodadTypes(doodadTypeOrGroup: DoodadType | DoodadTypeGroup, includeLitAndRevert?: boolean): Set<DoodadType> {
-		const doodadTypes: Set<DoodadType> = new Set();
+		const doodadTypes = new Set<DoodadType>();
 		if (DoodadManager.isGroup(doodadTypeOrGroup)) {
 			for (const dt of Enums.values(DoodadType)) {
 				const doodadDescription = doodadDescriptions[dt];
@@ -90,7 +90,7 @@ export class DoodadUtilities {
 
 	public requiresFire(doodadTypeOrGroup: DoodadType | DoodadTypeGroup): boolean {
 		const description = doodadDescriptions[doodadTypeOrGroup];
-		if (description && description.lit !== undefined) {
+		if (description?.lit !== undefined) {
 			if (DoodadManager.isGroup(doodadTypeOrGroup)) {
 				const litDescription = doodadDescriptions[description.lit];
 				if (litDescription && DoodadManager.isInGroup(description.lit, doodadTypeOrGroup)) {

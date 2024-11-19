@@ -1,5 +1,6 @@
 import Reinforce from "@wayward/game/game/entity/action/actions/Reinforce";
-import { ActionArgumentsOf, ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../../core/context/Context";
@@ -56,7 +57,7 @@ export default class ReinforceItem extends Objective {
 		}
 
 		objectives.push(
-			new ExecuteAction(Reinforce, (context) => {
+			new ExecuteAction(Reinforce, context => {
 				const reinforceItem = context.getData(itemContextDataKey);
 				if (!reinforceItem) {
 					this.log.error("Invalid reinforce item");

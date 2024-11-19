@@ -23,7 +23,7 @@ export default class CheckDecayingItems extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		// it's very important to include items in inventory, so if this objective is restarted after grabing the item from the chest, it will continue to work
 		const baseItemsWithDecay = context.utilities.item.getBaseItems(context)
-			.filter(item => item.getDecayTime() !== undefined)
+			.filter(item => item.getDecayTime() !== undefined);
 
 		const animalFatItemsDecayingSoon = baseItemsWithDecay
 			.filter(item => item.type === ItemType.AnimalFat && item.getDecayTime()! <= 500)

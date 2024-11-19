@@ -36,7 +36,7 @@ export default class Fish extends Objective {
 					fishingRange: range,
 					moveToAdjacentTile: true,
 					// moveToRange: 2, // stay at least 1 extra tile away from it
-					disallowBoats: true
+					disallowBoats: true,
 				}));
 
 			objectives.push(new UseItem(Cast, "fishing"));

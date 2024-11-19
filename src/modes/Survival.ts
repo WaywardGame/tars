@@ -7,7 +7,7 @@ import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { ItemType } from "@wayward/game/game/item/IItem";
 
 import { AiType } from "@wayward/game/game/entity/ai/AI";
-import { IInventoryItems } from "../core/ITars";
+import type { IInventoryItems } from "../core/ITars";
 import type Context from "../core/context/Context";
 import { ContextDataType, MovingToNewIslandState } from "../core/context/IContext";
 import type { ITarsMode } from "../core/mode/IMode";
@@ -278,7 +278,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 					// and rember we are organizing until we're done!
 					await this.runWhile(context, objectives,
 						"OrganizeBase",
-						async (context) => context.utilities.base.getTilesWithItemsNearBase(context).totalCount > 20,
+						async context => context.utilities.base.getTilesWithItemsNearBase(context).totalCount > 20,
 						async () => {
 							const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
 							objectives.push(new OrganizeBase(tiles.tiles));
@@ -434,6 +434,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 						return ObjectiveResult.Complete;
 					}));
 
+				// eslint-disable-next-line no-fallthrough
 				case MovingToNewIslandState.Preparing:
 					// make a sail boat
 
@@ -572,7 +573,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>): Promise<void> {
 		return this.runWhile(context, objectives,
 			id,
-			async (context) => context.utilities.base.isNearBase(context),
+			async context => context.utilities.base.isNearBase(context),
 			determineObjectives);
 	}
 

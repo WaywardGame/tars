@@ -1,4 +1,4 @@
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import Disassemble from "@wayward/game/game/entity/action/actions/Disassemble";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
@@ -8,7 +8,8 @@ import Translation from "@wayward/game/language/Translation";
 
 import type { IDisassemblySearch } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
@@ -119,7 +120,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				{
 					genericAction: {
 						action: Disassemble,
-						args: (context) => {
+						args: context => {
 							const item = context.getData<Item | undefined>(itemContextDataKey);
 							if (!item?.isValid) {
 								// treat this as an expected case
@@ -128,7 +129,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 								return ObjectiveResult.Restart;
 							}
 
-							let requiredItems: Array<Item> | undefined;
+							let requiredItems: Item[] | undefined;
 
 							if (requiredItemHashCodes) {
 								for (const requiredItemHashCode of requiredItemHashCodes) {

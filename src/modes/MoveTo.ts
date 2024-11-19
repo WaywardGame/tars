@@ -13,7 +13,7 @@ import Lambda from "../objectives/core/Lambda";
 import MoveToTarget from "../objectives/core/MoveToTarget";
 import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToIsland from "../objectives/utility/moveTo/MoveToIsland";
-import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { ContextDataType } from "../core/context/IContext";
 import SetContextData from "../objectives/contextData/SetContextData";
 
@@ -152,7 +152,7 @@ export class MoveToMode implements ITarsMode {
 					const objectives: IObjective[] = [
 						new MoveToIsland(npcOrType.islandId),
 						new MoveToTarget(npcOrType, true),
-					]
+					];
 
 					if (!this.target.follow) {
 						objectives.push(new Lambda(async () => {
@@ -201,7 +201,7 @@ export class MoveToMode implements ITarsMode {
 					const objectives: IObjective[] = [
 						new MoveToIsland(player.islandId),
 						new MoveToTarget(player, true),
-					]
+					];
 
 					if (!this.target.follow) {
 						objectives.push(new Lambda(async () => {

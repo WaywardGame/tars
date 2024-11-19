@@ -1,7 +1,8 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 
 import type Context from "../../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
 import AcquireWaterContainer from "../../../acquire/item/specific/AcquireWaterContainer";
 import MoveToTarget from "../../../core/MoveToTarget";

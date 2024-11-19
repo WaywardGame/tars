@@ -1,8 +1,8 @@
 import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 import StartFire from "@wayward/game/game/entity/action/actions/StartFire";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
-import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
-import { EquipType } from "@wayward/game/game/entity/IHuman";
+import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import type { EquipType } from "@wayward/game/game/entity/IHuman";
 import type { QuestInstance } from "@wayward/game/game/entity/player/quest/QuestManager";
 import type { IQuestRequirement } from "@wayward/game/game/entity/player/quest/requirement/IRequirement";
 import { QuestRequirementType } from "@wayward/game/game/entity/player/quest/requirement/IRequirement";
@@ -11,7 +11,7 @@ import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
 import ItemManager from "@wayward/game/game/item/ItemManager";
 import Enums from "@wayward/game/utilities/enum/Enums";
 
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 import { ActionSlotUpdateReason } from "@wayward/game/ui/screen/screens/game/static/actions/IActionBar";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -273,7 +273,6 @@ export default class CompleteQuestRequirement extends Objective {
 						return ObjectiveResult.Impossible;
 					}
 
-					console.log(itemToSlot);
 					slot.equipItem(itemToSlot, false);
 					if (!slot.slotData.actionId) {
 						return ObjectiveResult.Impossible;

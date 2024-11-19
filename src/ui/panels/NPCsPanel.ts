@@ -11,9 +11,10 @@ import { Bound } from "@wayward/utilities/Decorators";
 
 import Mod from "@wayward/game/mod/Mod";
 import { TARS_ID, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
-import TarsMod from "../../TarsMod";
-import Tars, { TarsNPC } from "../../core/Tars";
-import TarsDialog from "../TarsDialog";
+import type TarsMod from "../../TarsMod";
+import type { TarsNPC } from "../../core/Tars";
+import type Tars from "../../core/Tars";
+import type TarsDialog from "../TarsDialog";
 import TarsPanel from "../components/TarsPanel";
 
 export default class NPCsPanel extends TarsPanel {
@@ -61,7 +62,7 @@ export default class NPCsPanel extends TarsPanel {
 		events.subscribe("create", this.refresh);
 		events.subscribe("remove", this.refresh);
 
-		this.refresh();
+		void this.refresh();
 	}
 
 	@EventHandler(Island, "deactivated")
@@ -69,7 +70,7 @@ export default class NPCsPanel extends TarsPanel {
 		island.npcs.event.unsubscribe("create", this.refresh);
 		island.npcs.event.unsubscribe("remove", this.refresh);
 
-		this.refresh();
+		void this.refresh();
 	}
 
 	@Bound
@@ -109,7 +110,7 @@ export default class NPCsPanel extends TarsPanel {
 							return;
 						}
 
-						RemoveControllableNPC.execute(localPlayer, npc);
+						await RemoveControllableNPC.execute(localPlayer, npc);
 					}))
 				.appendTo(this.rows);
 

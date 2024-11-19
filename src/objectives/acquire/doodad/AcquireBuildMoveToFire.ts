@@ -30,7 +30,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return `Acquiring fire`;
+		return "Acquiring fire";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

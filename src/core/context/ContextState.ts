@@ -1,7 +1,7 @@
 import type { ItemType } from "@wayward/game/game/item/IItem";
-import Item from "@wayward/game/game/item/Item";
-import { ReserveType } from "../ITars";
-import { HashCodeFiltering } from "../objective/IObjective";
+import type Item from "@wayward/game/game/item/Item";
+import type { ReserveType } from "../ITars";
+import type { HashCodeFiltering } from "../objective/IObjective";
 
 export default class ContextState {
 

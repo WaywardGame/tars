@@ -1,6 +1,7 @@
 import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
 import { DoodadType, GrowingStage } from "@wayward/game/game/doodad/IDoodad";
-import { ActionArgumentsOf, ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import GatherLiquid from "@wayward/game/game/entity/action/actions/GatherLiquid";
 import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { corpseDescriptions } from "@wayward/game/game/entity/creature/corpse/Corpses";
@@ -13,9 +14,10 @@ import Translation from "@wayward/game/language/Translation";
 import Enums from "@wayward/game/utilities/enum/Enums";
 
 import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
-import { CreatureSearch, DoodadSearchMap, ITerrainResourceSearch, ITerrainWaterSearch } from "../../../core/ITars";
+import type { CreatureSearch, DoodadSearchMap, ITerrainResourceSearch, ITerrainWaterSearch } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
 import AddDifficulty from "../../core/AddDifficulty";
@@ -42,10 +44,10 @@ import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 
 export default class AcquireItem extends AcquireBase {
 
-	private static readonly terrainResourceSearchCache: Map<ItemType, ITerrainResourceSearch[]> = new Map();
-	private static readonly terrainWaterSearchCache: Map<ItemType, ITerrainWaterSearch[]> = new Map();
-	private static readonly doodadSearchCache: Map<ItemType, DoodadSearchMap> = new Map();
-	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
+	private static readonly terrainResourceSearchCache = new Map<ItemType, ITerrainResourceSearch[]>();
+	private static readonly terrainWaterSearchCache = new Map<ItemType, ITerrainWaterSearch[]>();
+	private static readonly doodadSearchCache = new Map<ItemType, DoodadSearchMap>();
+	private static readonly creatureSearchCache = new Map<ItemType, CreatureSearch>();
 
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();
@@ -157,7 +159,7 @@ export default class AcquireItem extends AcquireBase {
 						}
 					}
 
-					const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", (doodad) => doodad.getLiquidGatherType() !== undefined);
+					const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", doodad => doodad.getLiquidGatherType() !== undefined);
 					for (const doodad of doodads) {
 						const liquidGatherType = doodad.getLiquidGatherType()!;
 						if (returnOnUseAndDecayItemDescription.liquidGather?.[liquidGatherType] !== this.itemType) {
@@ -216,7 +218,7 @@ export default class AcquireItem extends AcquireBase {
 								{
 									genericAction: {
 										action: GatherLiquid,
-										args: (context) => {
+										args: context => {
 											const item = context.getData(itemContextDataKey);
 											if (!item?.isValid) {
 												this.log.warn("Invalid water container");
@@ -259,7 +261,7 @@ export default class AcquireItem extends AcquireBase {
 			}
 
 			if (!exclude && this.itemType !== ItemType.PlantRoots) {
-				const resolvedTypes: Map<TerrainType, ITerrainResourceSearch[]> = new Map();
+				const resolvedTypes = new Map<TerrainType, ITerrainResourceSearch[]>();
 
 				const unresolvedTypes: TerrainType[] = Array.from(Enums.values(TerrainType));
 
@@ -391,7 +393,7 @@ export default class AcquireItem extends AcquireBase {
 					// todo: add
 				}
 
-				const searchMap: Map<GrowingStage, number> = new Map();
+				const searchMap = new Map<GrowingStage, number>();
 
 				resolvedTypes.set(doodadType, searchMap);
 
@@ -473,7 +475,7 @@ export default class AcquireItem extends AcquireBase {
 			for (const creatureType of Enums.values(CreatureType)) {
 				if (creatureType !== CreatureType.Shark) {
 					const corpseDescription = corpseDescriptions[creatureType];
-					if (corpseDescription && corpseDescription.resource) {
+					if (corpseDescription?.resource) {
 						for (const resource of corpseDescription.resource) {
 							if (resource.item === this.itemType) {
 								let itemTypes = map.get(creatureType);

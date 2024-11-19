@@ -1,18 +1,20 @@
-import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import type { ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
 import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
 import Enums from "@wayward/game/utilities/enum/Enums";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
-import { IInventoryItems, ReserveType } from "../../../core/ITars";
+import type { IInventoryItems } from "../../../core/ITars";
+import { ReserveType } from "../../../core/ITars";
 import { inventoryItemInfo } from "../../../core/ITars";
 import Objective from "../../../core/objective/Objective";
 import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";
 import AcquireItemByGroup from "./AcquireItemByGroup";
 import AnalyzeInventory from "../../analyze/AnalyzeInventory";
-import { IAcquireItemOptions } from "./AcquireBase";
+import type { IAcquireItemOptions } from "./AcquireBase";
 
 export interface IAcquireInventoryItemOptions {
 	reserveType: ReserveType;

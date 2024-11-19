@@ -7,7 +7,7 @@ import { ContextDataType } from "../context/IContext";
 import { ReserveType } from "../ITars";
 import type { HashCodeFiltering, IObjective, ObjectiveExecutionResult } from "./IObjective";
 import type Item from "@wayward/game/game/item/Item";
-import { LoggerUtilities } from "../../utilities/LoggerUtilities";
+import type { LoggerUtilities } from "../../utilities/LoggerUtilities";
 import { PlanningAccuracy } from "../ITarsOptions";
 
 export default abstract class Objective implements IObjective {
@@ -71,9 +71,9 @@ export default abstract class Objective implements IObjective {
 	public getHashCode(context: Context | undefined, skipContextDataKey?: boolean): string {
 		let hashCode = this.getIdentifier(context);
 
-		if (hashCode.includes("[object")) {
-			console.warn("Invalid objective identifier", hashCode);
-		}
+		// if (hashCode.includes("[object")) {
+		// 	console.warn("Invalid objective identifier", hashCode);
+		// }
 
 		// greatly increases accuracy at a cost of performance
 		if (context && this.includePositionInHashCode !== false && (this.includePositionInHashCode || context.options.planningAccuracy === PlanningAccuracy.Accurate)) {

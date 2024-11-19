@@ -1,4 +1,4 @@
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 import type { IBase, IInventoryItems, IUtilities } from "../ITars";
 
 export interface IContext {

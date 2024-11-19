@@ -1,7 +1,8 @@
-import { IOverlayInfo, OverlayType } from "@wayward/game/game/tile/ITerrain";
-import Tile from "@wayward/game/game/tile/Tile";
+import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import { OverlayType } from "@wayward/game/game/tile/ITerrain";
+import type Tile from "@wayward/game/game/tile/Tile";
 import GenericOverlay from "@wayward/game/renderer/overlay/GenericOverlay";
-import { IColorFul } from "@wayward/utilities/Color";
+import type { IColorFul } from "@wayward/utilities/Color";
 
 export class TarsOverlay extends GenericOverlay<IOverlayInfo, [isBaseTile: boolean, isDisabled: boolean, penalty: number]> {
 

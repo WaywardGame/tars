@@ -1,4 +1,4 @@
-import { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import Craft from "@wayward/game/game/entity/action/actions/Craft";
 import type { IContainer, IRecipe } from "@wayward/game/game/item/IItem";
 import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
@@ -13,8 +13,10 @@ import Message from "@wayward/game/language/dictionary/Message";
 import { ReserveType } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
-import { IGetItemOptions, ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IGetItemOptions } from "../../../utilities/ItemUtilities";
+import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
 import AddDifficulty from "../../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
@@ -224,13 +226,13 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 							checker.itemBaseComponent,
 						];
 						for (const item of items) {
-							if (item && item.isValid) {
+							if (item?.isValid) {
 								// we failed to craft and one of our items broke
 								// restart instead of trying to craft again
 								return ObjectiveResult.Restart;
 							}
 						}
-					}
+					},
 				})
 				.passAcquireData(this)
 				.setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));

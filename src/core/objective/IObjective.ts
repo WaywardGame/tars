@@ -1,9 +1,9 @@
 import type { ActionType } from "@wayward/game/game/entity/action/IAction";
 import type { DamageType } from "@wayward/game/game/entity/IEntity";
-import { ItemType } from "@wayward/game/game/item/IItem";
+import type { ItemType } from "@wayward/game/game/item/IItem";
 import type { ILog, ILogLine } from "@wayward/utilities/Log";
-import { IVector3 } from "@wayward/game/utilities/math/IVector";
-import { LoggerUtilities } from "../../utilities/LoggerUtilities";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
+import type { LoggerUtilities } from "../../utilities/LoggerUtilities";
 
 import type Context from "../context/Context";
 import type ContextState from "../context/ContextState";

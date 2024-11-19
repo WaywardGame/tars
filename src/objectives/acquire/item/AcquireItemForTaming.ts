@@ -9,7 +9,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForTaming extends Objective {
 
-	private static readonly cache: Map<CreatureType, ItemType[]> = new Map();
+	private static readonly cache = new Map<CreatureType, ItemType[]>();
 
 	constructor(private readonly creature: Creature) {
 		super();

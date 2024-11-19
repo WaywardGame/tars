@@ -12,7 +12,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForAction extends Objective {
 
-	private static readonly cache: Map<ActionType, ItemType[]> = new Map();
+	private static readonly cache = new Map<ActionType, ItemType[]>();
 
 	constructor(private readonly actionType: ActionType) {
 		super();
@@ -46,7 +46,7 @@ export default class AcquireItemForAction extends Objective {
 
 			for (const it of Enums.values(ItemType)) {
 				const itemDescription = itemDescriptions[it];
-				if (itemDescription && itemDescription.use !== undefined && itemDescription.use.includes(actionType)) {
+				if (itemDescription?.use?.includes(actionType)) {
 					if (actionType === ActionType.StartFire) {
 						// prefer fire starter items
 						// don't use torches

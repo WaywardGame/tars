@@ -5,9 +5,10 @@ import type Translation from "@wayward/game/language/Translation";
 import type Mod from "@wayward/game/mod/Mod";
 import type { Events } from "@wayward/utilities/event/EventEmitter";
 
-import { Reference } from "@wayward/game/game/reference/IReferenceManager";
+import type { Reference } from "@wayward/game/game/reference/IReferenceManager";
 import type TarsMod from "./TarsMod";
-import { ITarsOptions, PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
+import type { ITarsOptions } from "./core/ITarsOptions";
+import { PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
 import type { IContext } from "./core/context/IContext";
 import { TreasureHunterType } from "./modes/TreasureHunter";
 
@@ -74,7 +75,6 @@ export enum TarsUiSaveDataKey {
 	MoveToNPCTypeDropdown,
 	TameCreatureDropdown,
 }
-
 
 export enum TarsTranslation {
 	Name,
@@ -393,8 +393,8 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		tooltip: TarsTranslation.DialogRangeRecoverHealthThresholdTooltip,
 		slider: {
 			min: 0,
-			max: (context) => context.human.stat.get<IStatMax>(Stat.Health).max,
-		}
+			max: context => context.human.stat.get<IStatMax>(Stat.Health).max,
+		},
 	},
 	{
 		option: "recoverThresholdStamina",
@@ -403,8 +403,8 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		tooltip: TarsTranslation.DialogRangeRecoverStaminaThresholdTooltip,
 		slider: {
 			min: 0,
-			max: (context) => context.human.stat.get<IStatMax>(Stat.Stamina).max,
-		}
+			max: context => context.human.stat.get<IStatMax>(Stat.Stamina).max,
+		},
 	},
 	{
 		option: "recoverThresholdHunger",
@@ -413,8 +413,8 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		tooltip: TarsTranslation.DialogRangeRecoverHungerThresholdTooltip,
 		slider: {
 			min: 0,
-			max: (context) => context.human.stat.get<IStatMax>(Stat.Hunger).max,
-		}
+			max: context => context.human.stat.get<IStatMax>(Stat.Hunger).max,
+		},
 	},
 	{
 		option: "recoverThresholdThirst",
@@ -423,8 +423,8 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		tooltip: TarsTranslation.DialogRangeRecoverThirstThresholdTooltip,
 		slider: {
 			min: 0,
-			max: (context) => context.human.stat.get<IStatMax>(Stat.Thirst).max,
-		}
+			max: context => context.human.stat.get<IStatMax>(Stat.Thirst).max,
+		},
 	},
 	TarsTranslation.DialogLabelAdvanced,
 	{

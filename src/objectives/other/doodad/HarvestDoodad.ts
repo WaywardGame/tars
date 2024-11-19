@@ -1,4 +1,4 @@
-import Doodad from "@wayward/game/game/doodad/Doodad";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";

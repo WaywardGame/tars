@@ -1,5 +1,6 @@
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
-import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
 import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
 import Eat from "@wayward/game/game/entity/action/actions/Eat";
 
@@ -115,7 +116,7 @@ export default class AcquireFood extends Objective {
 					objectivePipeline.push(new AcquireItemWithRecipe(itemType, recipe));
 				}
 
-				objectivePipelines.push(objectivePipeline)
+				objectivePipelines.push(objectivePipeline);
 			}
 		}
 

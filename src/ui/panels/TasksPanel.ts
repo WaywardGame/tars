@@ -10,7 +10,7 @@ import ItemDropdown from "@wayward/game/ui/component/dropdown/ItemDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
 
-import Tars from "../../core/Tars";
+import type Tars from "../../core/Tars";
 import { getTarsTranslation, TarsTranslation, TarsUiSaveDataKey } from "../../ITarsMod";
 import { AcquireItemMode } from "../../modes/AcquireItem";
 import { BuildDoodadMode } from "../../modes/BuildDoodad";

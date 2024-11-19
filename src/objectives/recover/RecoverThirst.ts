@@ -117,7 +117,6 @@ export default class RecoverThirst extends Objective {
 						// build a dripstone while waiting
 						objectivePipelines.push([new AcquireInventoryItem("dripStone"), new BuildItem()]);
 
-
 					} else {
 						// run back to the water source and wait
 						for (const doodad of waterSourceDoodads) {

@@ -11,8 +11,8 @@ import Files from "@wayward/game/utilities/Files";
 import { Bound } from "@wayward/utilities/Decorators";
 
 import { TARS_ID, TarsTranslation, getTarsTranslation } from "../../ITarsMod";
-import TarsMod from "../../TarsMod";
-import Tars from "../../core/Tars";
+import type TarsMod from "../../TarsMod";
+import type Tars from "../../core/Tars";
 import TarsPanel from "../components/TarsPanel";
 
 export default class DataPanel extends TarsPanel {

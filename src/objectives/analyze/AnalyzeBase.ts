@@ -7,7 +7,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { BaseInfoKey } from "../../core/ITars";
 import { baseInfo } from "../../core/ITars";
-import Tile from "@wayward/types/definitions/game/game/tile/Tile";
+import type Tile from "@wayward/types/definitions/game/game/tile/Tile";
 
 const baseDoodadDistanceSq = Math.pow(50, 2);
 

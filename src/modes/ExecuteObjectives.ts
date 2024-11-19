@@ -21,7 +21,7 @@ export class ExecuteObjectivesMode implements ITarsMode {
 			new Lambda(async () => {
 				this.finished(true);
 				return ObjectiveResult.Complete;
-			})
+			}),
 		];
 	}
 

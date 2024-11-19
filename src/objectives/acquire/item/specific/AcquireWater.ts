@@ -3,7 +3,7 @@ import { ItemTypeGroup } from "@wayward/game/game/item/IItem";
 import type Context from "../../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
-import { IAcquireItemOptions } from "../AcquireBase";
+import type { IAcquireItemOptions } from "../AcquireBase";
 import AcquireItemByGroup from "../AcquireItemByGroup";
 
 export interface IAcquireWaterOptions extends IAcquireItemOptions {

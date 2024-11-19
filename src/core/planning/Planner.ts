@@ -1,6 +1,6 @@
 import type Log from "@wayward/utilities/Log";
 import { MemoryLog } from "@wayward/utilities/Log";
-import { LoggerUtilities } from "../../utilities/LoggerUtilities";
+import type { LoggerUtilities } from "../../utilities/LoggerUtilities";
 
 import type Context from "../context/Context";
 import ContextState from "../context/ContextState";
@@ -677,6 +677,7 @@ export class Planner implements IPlanner {
 						this.writeCalculationLog(`Set "${cacheImpossibledObjectiveHashCode}" to Impossible (broad). (depth: ${changes.depth})`);
 					}
 				}
+
 				break;
 
 			case CalculatedDifficultyStatus.NotCalculatedYet:
@@ -782,7 +783,7 @@ export class Planner implements IPlanner {
 				.sort((a, b) => b[1] - a[1])
 				.slice(0, 10);
 			if (counts.length > 0) {
-				this.log.debug(`Objective Stats`, counts.join(", "));
+				this.log.debug("Objective Stats", counts.join(", "));
 			}
 		}
 

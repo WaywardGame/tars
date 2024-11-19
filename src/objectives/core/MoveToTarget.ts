@@ -1,13 +1,13 @@
-import Doodad from "@wayward/game/game/doodad/Doodad";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
 import Ride from "@wayward/game/game/entity/action/actions/Ride";
 import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
 import Creature from "@wayward/game/game/entity/creature/Creature";
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 import type { IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 import Tile from "@wayward/game/game/tile/Tile";
-import TileEvent from "@wayward/game/game/tile/TileEvent";
+import type TileEvent from "@wayward/game/game/tile/TileEvent";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 
@@ -50,8 +50,8 @@ export interface IMoveToTargetOptions {
 
 export default class MoveToTarget extends Objective {
 
-	private trackedCreature: Creature | undefined;
-	private trackedCorpse: Corpse | undefined;
+	private readonly trackedCreature: Creature | undefined;
+	private readonly trackedCorpse: Corpse | undefined;
 	private trackedItem: Item | undefined;
 
 	private trackedPosition: IVector3 | undefined;
@@ -238,7 +238,7 @@ export default class MoveToTarget extends Objective {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, context.human.z);
 					const terrainDescription = tile.description;
-					if (terrainDescription && terrainDescription.water) {
+					if (terrainDescription?.water) {
 						swimTiles++;
 					}
 				}
@@ -260,7 +260,7 @@ export default class MoveToTarget extends Objective {
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
 			const terrainDescription = tile.description;
-			if (terrainDescription && terrainDescription.water) {
+			if (terrainDescription?.water) {
 				return [
 					new UseItem(Ride, context.inventory.sailboat),
 					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
@@ -274,7 +274,7 @@ export default class MoveToTarget extends Objective {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, this.target.z);
 					const terrainDescription = tile.description;
-					if (terrainDescription && terrainDescription.water) {
+					if (terrainDescription?.water) {
 						firstWaterTile = tile;
 						break;
 					}
@@ -416,7 +416,7 @@ export default class MoveToTarget extends Objective {
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
 			const terrainDescription = tile.description;
-			if (terrainDescription && terrainDescription.water) {
+			if (terrainDescription?.water) {
 				this.log.warn("Interrupting to use sail boat");
 				return true;
 			}

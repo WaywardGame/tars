@@ -45,7 +45,7 @@ export class PlayerUtilities {
 		}
 
 		if (Array.isArray(recoverThreshold)) {
-			recoverThreshold = Math.min(...recoverThreshold.map((threshold) => this.parseThreshold(context, stat, threshold)));
+			recoverThreshold = Math.min(...recoverThreshold.map(threshold => this.parseThreshold(context, stat, threshold)));
 		} else {
 			recoverThreshold = this.parseThreshold(context, stat, recoverThreshold);
 		}

@@ -1,8 +1,8 @@
 // http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps
 // http://www.roguebasin.com/index.php?title=Dijkstra_Maps_Visualized
 
-import { IVector2 } from "@wayward/game/utilities/math/IVector"
-import { Direction } from "@wayward/game/utilities/math/Direction"
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
+import { Direction } from "@wayward/game/utilities/math/Direction";
 import PriorityQueue, { PriorityQueueType } from "@wayward/utilities/collection/queue/PriorityQueue";
 
 export interface IDijkstraMapNode extends IVector2 {
@@ -18,7 +18,8 @@ export interface IDijkstraMapNode extends IVector2 {
 }
 
 /**
- * Too slow for TARS
+ * Note: This is not used since it's too slow
+ * wayward++ is used instead
  */
 export class DijkstraMap {
 
@@ -45,19 +46,19 @@ export class DijkstraMap {
 			for (let y = 0; y < mapSize; y++) {
 				const node = this.getNode(x, y);
 
-				if (x != 0) {
+				if (x !== 0) {
 					node.connections.set(Direction.West, this.getNode(x - 1, y));
 				}
 
-				if (x != mapSize - 1) {
+				if (x !== mapSize - 1) {
 					node.connections.set(Direction.East, this.getNode(x + 1, y));
 				}
 
-				if (y != 0) {
+				if (y !== 0) {
 					node.connections.set(Direction.North, this.getNode(x, y - 1));
 				}
 
-				if (y != mapSize - 1) {
+				if (y !== mapSize - 1) {
 					node.connections.set(Direction.South, this.getNode(x, y + 1));
 				}
 			}
@@ -80,12 +81,12 @@ export class DijkstraMap {
 
 	}
 
-	public findPath(end: IVector2): { success: boolean; path: IDijkstraMapNode[]; score: number; } | undefined {
+	public findPath(end: IVector2): { success: boolean; path: IDijkstraMapNode[]; score: number } | undefined {
 		if (this.origin === undefined) {
 			return undefined;
 		}
 
-		let endNode = this.getNode(end.x, end.y);
+		const endNode = this.getNode(end.x, end.y);
 
 		const path: IDijkstraMapNode[] = [];
 
@@ -107,7 +108,7 @@ export class DijkstraMap {
 			success,
 			path,
 			score: endNode.score,
-		}
+		};
 	}
 
 	private update(): void {
@@ -117,7 +118,7 @@ export class DijkstraMap {
 
 		this.reset();
 
-		const opened: PriorityQueue<IDijkstraMapNode> = new PriorityQueue(PriorityQueueType.LowestToHighest);
+		const opened = new PriorityQueue<IDijkstraMapNode>(PriorityQueueType.LowestToHighest);
 		opened.push(this.origin, 0);
 
 		this.origin.parent = undefined;
