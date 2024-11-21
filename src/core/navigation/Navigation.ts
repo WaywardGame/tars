@@ -10,6 +10,7 @@ import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import type Log from "@wayward/utilities/Log";
 import WorldZ from "@wayward/utilities/game/WorldZ";
 import Task from "@wayward/utilities/promise/Task";
+import { Direction } from "@wayward/game/utilities/math/Direction";
 
 import type { TarsOverlay } from "../../ui/TarsOverlay";
 import type { CreatureUtilities } from "../../utilities/CreatureUtilities";
@@ -303,27 +304,28 @@ export default class Navigation {
 			mapInfo.dirtyDijkstra = true;
 			mapInfo.dijkstraMap.updateNode(tile.x, tile.y, penalty, isDisabled);
 
-			// for (const direction of Direction.CARDINALS) {
-			// 	const neighborTile = tile.getTileInDirection(direction);
-			// 	if (!neighborTile?.canSlip(undefined, true, true)) {
-			// 		continue;
-			// 	}
+			const canSlip = tile.canSlip(undefined, true, true);
 
-			// 	let nextNoSlipTile: Tile | undefined = neighborTile;
+			for (const direction of Direction.CARDINALS) {
+				const neighborTile = tile.getTileInDirection(direction);
+				if (!canSlip && !neighborTile?.canSlip(undefined, true, true)) {
+					continue;
+				}
 
-			// 	// if the entity can slip on this tile, we will assume they will and take that into account
-			// 	while (nextNoSlipTile?.canSlip(undefined, true, true)) {
-			// 		// direction ??= tile.getDirectionToTile(nextNoSlipTile);
-			// 		nextNoSlipTile = nextNoSlipTile.getTileInDirection(direction);
-			// 	}
+				let nextNoSlipTile: Tile | undefined = neighborTile;
 
-			// 	if (nextNoSlipTile) {
-			// 		const currentTileNode = mapInfo.dijkstraMap.getNode(tile.x, tile.y);
-			// 		const nextNoSlipTileNode = mapInfo.dijkstraMap.getNode(nextNoSlipTile.x, nextNoSlipTile.y);
-			// 		currentTileNode.connectTo(nextNoSlipTileNode, direction);
-			// 		// nextNoSlipTileNode.connectTo(currentTileNode, Direction.OPPOSITES[direction]);
-			// 	}
-			// }
+				// if the entity can slip on this tile, we will assume they will and take that into account
+				while (nextNoSlipTile?.canSlip(undefined, true, true)) {
+					// direction ??= tile.getDirectionToTile(nextNoSlipTile);
+					nextNoSlipTile = nextNoSlipTile.getTileInDirection(direction);
+				}
+
+				if (nextNoSlipTile) {
+					mapInfo.dijkstraMap.connectNodes(tile.x, tile.y, nextNoSlipTile.x, nextNoSlipTile.y, direction);
+					// mapInfo.dijkstraMap.getNode(tile.x, tile.y).connectTo(mapInfo.dijkstraMap.getNode(nextNoSlipTile.x, nextNoSlipTile.y), direction);
+					// mapInfo.dijkstraMap.getNode(tile.x, tile.y).connectTo(mapInfo.dijkstraMap.getNode(nextNoSlipTile.x, nextNoSlipTile.y), Direction.OPPOSITES[direction]);
+				}
+			}
 
 		} catch (ex) {
 			this.log.trace("invalid node", tile.x, tile.y, penalty, isDisabled);
