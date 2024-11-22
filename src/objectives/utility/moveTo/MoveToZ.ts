@@ -32,7 +32,7 @@ export default class MoveToZ extends Objective {
 
 		for (const tileLocation of tileLocations) {
 			objectivePipelines.push([
-				new MoveToTarget(tileLocation.tile, false, { idleIfAlreadyThere: true, changeZ: tileLocation.tile.z === WorldZ.Surface ? WorldZ.Cave : WorldZ.Surface }),
+				new MoveToTarget(tileLocation.tile, false, { ascendDescend: true, changeZ: tileLocation.tile.z === WorldZ.Surface ? WorldZ.Cave : WorldZ.Surface }),
 			]);
 		}
 

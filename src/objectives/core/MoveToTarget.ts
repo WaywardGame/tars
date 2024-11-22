@@ -17,11 +17,12 @@ import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { MoveResult } from "../../utilities/MovementUtilities";
-import Idle from "../other/Idle";
 import EquipItem from "../other/item/EquipItem";
 import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
 import AddDifficulty from "./AddDifficulty";
+import ExecuteAction from "../core/ExecuteAction";
+import AscendDescend from "@wayward/game/game/entity/action/actions/AscendDescend";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
 // caves are scary
@@ -35,7 +36,7 @@ export interface IMoveToTargetOptions {
 	disableTracking: boolean;
 	allowBoat: boolean;
 	skipIfAlreadyThere: boolean;
-	idleIfAlreadyThere: boolean;
+	ascendDescend: boolean;
 
 	/**
 	 * Equip weapons when close to the target when it's a creature
@@ -151,7 +152,7 @@ export default class MoveToTarget extends Objective {
 						new AddDifficulty(zChangeDifficulty),
 
 						// move to cave entrance
-						new MoveToTarget(context.island.getTile(oppositeZOrigin.x, oppositeZOrigin.y, tile.z), false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+						new MoveToTarget(context.island.getTile(oppositeZOrigin.x, oppositeZOrigin.y, tile.z), false, { ...this.options, ascendDescend: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
 
 						// move to target
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }).passOverriddenDifficulty(this),
@@ -317,8 +318,8 @@ export default class MoveToTarget extends Objective {
 				this.log.info(`Finished moving to target (${this.target.x},${this.target.y},${this.target.z})`);
 				context.setData(ContextDataType.Tile, context.human.tile);
 
-				if (movementPath === ObjectiveResult.Complete && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
-					return new Idle({ force: true, canMoveToIdle: false });
+				if (movementPath === ObjectiveResult.Complete && this.options?.ascendDescend && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
+					return new ExecuteAction(AscendDescend, []).setStatus("Ascend/Descend");
 				}
 
 				return ObjectiveResult.Complete;
