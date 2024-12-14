@@ -1,19 +1,8 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import type { IContainer } from "game/item/IItem";
-import { ItemType } from "game/item/IItem";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -21,7 +10,7 @@ import Objective from "../../core/objective/Objective";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
 import SetContextData from "../contextData/SetContextData";
 import ReserveItems from "../core/ReserveItems";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class GatherFromChest extends Objective {
 
@@ -37,7 +26,7 @@ export default class GatherFromChest extends Objective {
 		return `Gathering ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} from a chest`;
 	}
 
-	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
+	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string): { objectiveHashCode: string; itemTypes: Set<ItemType> } {
 		return {
 			objectiveHashCode,
 			itemTypes: new Set([this.itemType]),
@@ -98,7 +87,7 @@ export default class GatherFromChest extends Objective {
 					return [
 						new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode),
 						new SetContextData(this.contextDataKey, item),
-						new MoveItemIntoInventory(item).overrideDifficulty(prioritizeBaseItems ? 5 : undefined),
+						new MoveItemsIntoInventory(item).overrideDifficulty(prioritizeBaseItems ? 5 : undefined),
 					];
 				}
 

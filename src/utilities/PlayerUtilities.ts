@@ -1,37 +1,26 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type { IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
 import type Context from "../core/context/Context";
 
 export class PlayerUtilities {
 
-	public getWeight(context: Context) {
+	public getWeight(context: Context): number {
 		return context.human.stat.get<IStatMax>(Stat.Weight).value;
 	}
 
-	public getMaxWeight(context: Context) {
+	public getMaxWeight(context: Context): number {
 		return context.human.stat.get<IStatMax>(Stat.Weight).max;
 	}
 
-	public isUsingVehicle(context: Context) {
+	public isUsingVehicle(context: Context): boolean {
 		return !!context.human.vehicleItemReference;
 	}
 
-	public isHealthy(context: Context) {
+	public isHealthy(context: Context): boolean {
 		return context.human.stat.get<IStatMax>(Stat.Health).value > 8 && context.human.stat.get<IStatMax>(Stat.Hunger).value > 8;
 	}
 
-	public getRecoverThreshold(context: Context, stat: Stat) {
+	public getRecoverThreshold(context: Context, stat: Stat): number {
 		let recoverThreshold: number | number[];
 
 		switch (stat) {
@@ -56,7 +45,7 @@ export class PlayerUtilities {
 		}
 
 		if (Array.isArray(recoverThreshold)) {
-			recoverThreshold = Math.min(...recoverThreshold.map((threshold) => this.parseThreshold(context, stat, threshold)));
+			recoverThreshold = Math.min(...recoverThreshold.map(threshold => this.parseThreshold(context, stat, threshold)));
 		} else {
 			recoverThreshold = this.parseThreshold(context, stat, recoverThreshold);
 		}
@@ -64,7 +53,7 @@ export class PlayerUtilities {
 		return recoverThreshold;
 	}
 
-	private parseThreshold(context: Context, stat: Stat, threshold: number) {
+	private parseThreshold(context: Context, stat: Stat, threshold: number): number {
 		return threshold > 0 ? threshold : context.human.stat.get<IStatMax>(stat).max + threshold;
 	}
 }

@@ -1,23 +1,9 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { doodadDescriptions } from "game/doodad/Doodads";
-import { ActionType } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import { TerrainType } from "game/tile/ITerrain";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Till from "game/entity/action/actions/Till";
-import Tile from "game/tile/Tile";
+import type { ItemType } from "@wayward/game/game/item/IItem";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
+import Till from "@wayward/game/game/entity/action/actions/Till";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -34,98 +20,89 @@ export const gardenMaxTilesChecked = 1536;
 
 export default class TillForSeed extends Objective {
 
-    private readonly allowedTilesSet: Set<TerrainType>;
+	constructor(private readonly itemType: ItemType, private readonly maxTilesChecked: number | undefined = gardenMaxTilesChecked) {
+		super();
+	}
 
-    constructor(private readonly itemType: ItemType, private readonly maxTilesChecked: number | undefined = gardenMaxTilesChecked) {
-        super();
+	public getIdentifier(): string {
+		return `TillForSeed:${this.itemType}`;
+	}
 
+	public getStatus(): string | undefined {
+		return `Tilling to plant ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
+	}
 
-        this.allowedTilesSet = new Set(doodadDescriptions[itemDescriptions[this.itemType]?.onUse?.[ActionType.Plant]!]?.allowedTiles ?? []);
-    }
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const result = this.getTillObjectives(context);
+		if (result === undefined) {
+			return ObjectiveResult.Impossible;
+		}
 
-    public getIdentifier(): string {
-        return `TillForSeed:${Array.from(this.allowedTilesSet).join(",")}`;
-    }
+		return [
+			new AcquireInventoryItem("hoe"),
+			...result,
+		];
+	}
 
-    public getStatus(): string | undefined {
-        return `Tilling to plant ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`;
-    }
+	private getTillObjectives(context: Context): IObjective[] | undefined {
+		const allowedTilesSet = context.utilities.tile.getSeedAllowedTileSet(this.itemType);
+		if (allowedTilesSet.size === 0) {
+			return undefined;
+		}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const result = this.getTillObjectives(context);
-        if (result === undefined) {
-            return ObjectiveResult.Impossible;
-        }
+		const emptyTilledTile = context.utilities.base.getBaseTile(context).findMatchingTile(
+			tile => allowedTilesSet.has(tile.type) &&
+				tile.isTilled &&
+				tile.isEmpty &&
+				tile.isOpen,
+			{
+				maxTilesChecked: this.maxTilesChecked,
+			});
+		if (emptyTilledTile !== undefined) {
+			return [
+				new MoveToTarget(emptyTilledTile, true),
+				new ClearTile(emptyTilledTile),
+			];
+		}
 
-        return [
-            new AcquireInventoryItem("hoe"),
-            ...result,
-        ];
-    }
+		let tile: Tile | undefined;
 
-    private getTillObjectives(context: Context): IObjective[] | undefined {
-        if (this.allowedTilesSet.size === 0) {
-            return undefined;
-        }
+		const facingTile = context.human.facingTile;
 
-        const emptyTilledTile = context.utilities.base.getBaseTile(context).findMatchingTile(
-            (tile) => this.allowedTilesSet.has(tile.type) &&
-                tile.isTilled &&
-                tile.isEmpty &&
-                tile.isOpenTile,
-            {
-                maxTilesChecked: this.maxTilesChecked
-            });
-        if (emptyTilledTile !== undefined) {
-            return [
-                new MoveToTarget(emptyTilledTile, true),
-                new ClearTile(emptyTilledTile),
-            ];
-        }
+		if (context.utilities.tile.canTill(context, facingTile, context.inventory.hoe, allowedTilesSet)) {
+			tile = facingTile;
 
-        let tile: Tile | undefined;
+		} else {
+			tile = context.utilities.tile.getNearbyTillableTile(context, this.itemType, allowedTilesSet);
+		}
 
-        const facingTile = context.human.facingTile;
-        if (context.utilities.tile.canTill(context, facingTile, context.inventory.hoe, this.allowedTilesSet)) {
-            tile = facingTile;
+		if (!tile) {
+			return undefined;
+		}
 
-        } else {
-            const nearbyTillableTile = context.utilities.base.getBaseTile(context).findMatchingTile(
-                (tile) => context.utilities.tile.canTill(context, tile, context.inventory.hoe, this.allowedTilesSet),
-                {
-                    maxTilesChecked: gardenMaxTilesChecked,
-                }
-            );
+		const objectives: IObjective[] = [];
 
-            if (!nearbyTillableTile) {
-                return undefined;
-            }
+		if (tile.type === TerrainType.Grass) {
+			objectives.push(new DigTile(tile, { digUntilTypeIsNot: TerrainType.Grass }));
+		}
 
-            tile = nearbyTillableTile;
-        }
+		objectives.push(
+			new MoveToTarget(tile, true),
+			new ClearTile(tile),
+			new UseItem(Till, "hoe"),
+			new Lambda(async context => {
+				const facingPoint = context.human.facingTile;
 
-        let objectives: IObjective[] = [];
+				if (facingPoint.isTilled) {
+					return ObjectiveResult.Complete;
+				}
 
-        if (tile.type === TerrainType.Grass) {
-            objectives.push(new DigTile(tile, { digUntilTypeIsNot: TerrainType.Grass }));
-        }
+				this.log.info("Not tilled yet");
 
-        objectives.push(
-            new MoveToTarget(tile, true),
-            new UseItem(Till, "hoe"),
-            new Lambda(async context => {
-                const facingPoint = context.human.facingTile;
+				return ObjectiveResult.Restart;
+			}).setStatus(this),
+		);
 
-                if (facingPoint.isTilled) {
-                    return ObjectiveResult.Complete;
-                }
-
-                this.log.info("Not tilled yet");
-
-                return ObjectiveResult.Restart;
-            }).setStatus(this),
-        );
-
-        return objectives;
-    }
+		return objectives;
+	}
 }

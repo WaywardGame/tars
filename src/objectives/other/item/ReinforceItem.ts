@@ -1,17 +1,7 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Reinforce from "game/entity/action/actions/Reinforce";
-import { ActionArguments, ActionType } from "game/entity/action/IAction";
-import type Item from "game/item/Item";
+import Reinforce from "@wayward/game/game/entity/action/actions/Reinforce";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -43,7 +33,7 @@ export default class ReinforceItem extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!this.item.isValid()) {
+		if (!this.item.isValid) {
 			return ObjectiveResult.Restart;
 		}
 
@@ -51,7 +41,7 @@ export default class ReinforceItem extends Objective {
 			return ObjectiveResult.Ignore;
 		}
 
-		this.log.info(`Reinforcing item. Current durability: ${this.item.durability}/${this.item.durabilityMax}`);
+		this.log.info(`Reinforcing item. Current durability: ${this.item.durability}/${this.item.durabilityMaxWithMagical}`);
 
 		const itemContextDataKey = this.getUniqueContextDataKey("ReinforceItem");
 
@@ -67,14 +57,14 @@ export default class ReinforceItem extends Objective {
 		}
 
 		objectives.push(
-			new ExecuteAction(Reinforce, (context) => {
+			new ExecuteAction(Reinforce, context => {
 				const reinforceItem = context.getData(itemContextDataKey);
 				if (!reinforceItem) {
 					this.log.error("Invalid reinforce item");
 					return ObjectiveResult.Restart;
 				}
 
-				return [reinforceItem, this.item] as ActionArguments<typeof Reinforce>;
+				return [reinforceItem, this.item] as ActionArgumentsOf<typeof Reinforce>;
 			}).setStatus(this),
 			new Lambda(async context => {
 				if (this.needsReinforcement(context)) {
@@ -91,7 +81,7 @@ export default class ReinforceItem extends Objective {
 
 	private needsReinforcement(context: Context): boolean {
 		const minDur = this.item.durability;
-		const maxDur = this.item.durabilityMax;
+		const maxDur = this.item.durabilityMaxWithMagical;
 		if (minDur === undefined || maxDur === undefined) {
 			return false;
 		}

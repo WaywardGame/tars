@@ -1,32 +1,20 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import { TerrainType } from "game/tile/ITerrain";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
-import type Creature from "game/entity/creature/Creature";
-import type Item from "game/item/Item";
-import { BiomeType } from "game/biome/IBiome";
-import { WaterType } from "game/island/IIsland";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type Item from "@wayward/game/game/item/Item";
+import { BiomeType } from "@wayward/game/game/biome/IBiome";
+import { WaterType } from "@wayward/game/game/island/IIsland";
 
 import type Context from "../core/context/Context";
 import type { BaseInfoKey, IBaseInfo } from "../core/ITars";
 import { baseInfo } from "../core/ITars";
 import { FindObjectType } from "./ObjectUtilities";
-import DoodadManager from "game/doodad/DoodadManager";
-import { doodadDescriptions } from "game/doodad/Doodads";
-import { DoodadType } from "game/doodad/IDoodad";
+import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
 import AnalyzeBase from "../objectives/analyze/AnalyzeBase";
-import Tile from "game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { nearBaseDataKeys } from "../core/context/IContext";
 
 const nearBaseDistance = 14;
@@ -47,11 +35,11 @@ export class BaseUtilities {
 
 	private tilesNearBaseCache: Tile[] | undefined;
 
-	public clearCache() {
+	public clearCache(): void {
 		this.tilesNearBaseCache = undefined;
 	}
 
-	public canBuildWaterDesalinators(context: Context) {
+	public canBuildWaterDesalinators(context: Context): boolean {
 		return context.island.biomeType !== BiomeType.IceCap;
 	}
 
@@ -69,7 +57,7 @@ export class BaseUtilities {
 		let good = false;
 
 		if (this.hasBase(context)) {
-			good = this.isNearBase(context, tile, options?.nearBaseDistanceSq);
+			good = this.isNearBase(context, tile, options?.nearBaseDistanceSq, true);
 
 		} else {
 			// this is the first base item. don't make it on beach sand or gravel
@@ -157,8 +145,8 @@ export class BaseUtilities {
 		return context.base.campfire.length > 0 || context.base.dripStone.length > 0 || context.base.waterStill.length > 0;
 	}
 
-	public isNearBase(context: Context, point: IVector3 = context.human, distanceSq: number = nearBaseDistanceSq): boolean {
-		if (nearBaseDataKeys.some(nearBaseDataKey => context.hasData(nearBaseDataKey))) {
+	public isNearBase(context: Context, tile: Tile = context.human.tile, distanceSq: number = nearBaseDistanceSq, skipNearBaseOverride = false): boolean {
+		if (!skipNearBaseOverride && nearBaseDataKeys.some(nearBaseDataKey => context.hasData(nearBaseDataKey))) {
 			// we were doing some near base stuff, keep at it!
 			return true;
 		}
@@ -169,7 +157,7 @@ export class BaseUtilities {
 
 		const baseTiles = this.getBaseTiles(context);
 		for (const baseTile of baseTiles) {
-			if (baseTile.z === point.z && (distanceSq === Infinity || Vector2.squaredDistance(baseTile, point) <= distanceSq)) {
+			if (baseTile.z === tile.z && (distanceSq === Infinity || Vector2.squaredDistance(baseTile, tile) <= distanceSq)) {
 				return true;
 			}
 		}
@@ -177,13 +165,13 @@ export class BaseUtilities {
 		return false;
 	}
 
-	public getTilesNearBase(context: Context) {
+	public getTilesNearBase(context: Context): Tile[] {
 		const baseTile = this.getBaseTile(context);
 
 		this.tilesNearBaseCache ??= baseTile.findMatchingTiles(
 			() => true,
 			{
-				canVisitTile: (tile) => this.isNearBase(context, tile),
+				canVisitTile: tile => this.isNearBase(context, tile, undefined, true),
 			},
 		);
 
@@ -232,7 +220,7 @@ export class BaseUtilities {
 		const result: Creature[] = [];
 
 		for (const tile of this.getTilesNearBase(context)) {
-			if (tile.creature && !tile.creature.isTamed()) {
+			if (tile.creature && !tile.creature.isTamed) {
 				result.push(tile.creature);
 			}
 		}
@@ -240,37 +228,35 @@ export class BaseUtilities {
 		return result;
 	}
 
-	public getWaterSourceDoodads(context: Context) {
+	public getWaterSourceDoodads(context: Context): Doodad[] {
 		return context.base.dripStone.concat(context.base.waterStill).concat(context.base.solarStill);
 	}
 
-	public isTreasureChestLocation(context: Context, point: IVector3): boolean {
+	public isTreasureChestLocation(context: Context, tile: Tile): boolean {
 		return context.island.treasureMaps
 			.some(drawnMap => drawnMap.getTreasure()
-				.some(treasure => treasure.x === point.x && treasure.y === point.y && drawnMap.position.z === point.z));
+				.some(treasure => treasure.x === tile.x && treasure.y === tile.y && drawnMap.position.z === tile.z));
 	}
 
-	public matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, point?: IVector3): boolean {
+	public matchesBaseInfo(context: Context, info: IBaseInfo, doodadType: DoodadType, tile?: Tile): boolean {
 		const doodadDescription = doodadDescriptions[doodadType];
 		if (!doodadDescription) {
 			return false;
 		}
 
-		if (point && info.tryPlaceNear !== undefined) {
+		if (tile && info.tryPlaceNear !== undefined) {
 			const placeNearDoodads = context.base[info.tryPlaceNear];
 
 			// reject doodads that won't be able to be near the desired type
-			const isValid = AnalyzeBase.getNearPoints(point)
-				.some((point) => {
-					const tile = context.island.getTileFromPoint(point);
-
+			const isValid = AnalyzeBase.getNearTiles(context, tile)
+				.some(nearTile => {
 					// check if the nearby doodad matches desired one
-					if (tile.doodad && (placeNearDoodads.includes(tile.doodad) || this.matchesBaseInfo(context, baseInfo[info.tryPlaceNear!], tile.doodad.type))) {
+					if (nearTile.doodad && (placeNearDoodads.includes(nearTile.doodad) || this.matchesBaseInfo(context, baseInfo[info.tryPlaceNear!], nearTile.doodad.type))) {
 						// nearby doodad is there
 						return true;
 					}
 
-					if (context.utilities.base.isOpenArea(context, tile, 0)) {
+					if (context.utilities.base.isOpenArea(context, nearTile, 0)) {
 						// there is an open spot for the other doodad
 						return true;
 					}
@@ -289,7 +275,7 @@ export class BaseUtilities {
 						return true;
 					}
 
-					if (doodadDescription.group && doodadDescription.group.includes(doodadTypeOrGroup)) {
+					if (doodadDescription.group?.includes(doodadTypeOrGroup)) {
 						return true;
 					}
 
@@ -321,7 +307,7 @@ export class BaseUtilities {
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.human.z) {
 				const description = doodad.description;
-				if (description && description.isTree && await this.isGoodTargetOrigin(context, doodad)) {
+				if (description && description.isTree && await this.isGoodTargetOrigin(context, doodad.tile)) {
 					for (let x = -6; x <= 6; x++) {
 						for (let y = -6; y <= 6; y++) {
 							if (x === 0 && y === 0) {
@@ -343,7 +329,7 @@ export class BaseUtilities {
 		}
 	}
 
-	private async isGoodTargetOrigin(context: Context, origin: IVector3): Promise<boolean> {
+	private async isGoodTargetOrigin(context: Context, origin: Tile): Promise<boolean> {
 		// build our base near trees, grass, and open tiles
 		let nearbyTrees = 0;
 		let nearbyCommonTiles = 0;
@@ -408,7 +394,7 @@ export class BaseUtilities {
 
 				if (tile.doodad) {
 					const description = tile.doodad.description;
-					if (description && description.isTree) {
+					if (description?.isTree) {
 						nearbyTrees++;
 					}
 

@@ -1,31 +1,22 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
+import type { TileUpdateType } from "@wayward/game/game/IGame";
+import type Island from "@wayward/game/game/island/Island";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
+import type Tile from "@wayward/game/game/tile/Tile";
+import WorldZ from "@wayward/utilities/game/WorldZ";
+import { KdTree } from "@wayward/game/utilities/collection/kdtree/KdTree";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
 
-import { EventBus } from "event/EventBuses";
-import EventManager, { EventHandler } from "event/EventManager";
-import { TileUpdateType } from "game/IGame";
-import Island from "game/island/Island";
-import { TerrainType } from "game/tile/ITerrain";
-import { terrainDescriptions } from "game/tile/Terrains";
-import Tile from "game/tile/Tile";
-import { WorldZ } from "game/WorldZ";
-import { KdTree } from "utilities/collection/tree/KdTree";
-import Enums from "utilities/enum/Enums";
-import { IVector2 } from "utilities/math/IVector";
-
-import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation, ExtendedTerrainType } from "./INavigation";
+import type { ExtendedTerrainType } from "./INavigation";
+import { freshWaterTileLocation, anyWaterTileLocation, gatherableTileLocation } from "./INavigation";
+import type Task from "@wayward/utilities/promise/Task";
 
 interface INavigationMapData {
-    kdTreeTileTypes: Uint8Array;
-    kdTrees: Map<ExtendedTerrainType, KdTree>;
+	kdTreeTileTypes: Uint8Array;
+	kdTrees: Map<ExtendedTerrainType, KdTree>;
 }
 
 /**
@@ -33,172 +24,187 @@ interface INavigationMapData {
  */
 export class NavigationKdTrees {
 
-    private maps: WeakMap<Island, Map<number, INavigationMapData>> = new Map();
+	private maps: WeakMap<Island, Map<number, INavigationMapData>> = new Map();
 
-    private readonly freshWaterTypes: Set<TerrainType> = new Set();
-    private readonly seaWaterTypes: Set<TerrainType> = new Set();
-    private readonly gatherableTypes: Set<TerrainType> = new Set();
+	private readonly freshWaterTypes = new Set<TerrainType>();
+	private readonly seaWaterTypes = new Set<TerrainType>();
+	private readonly gatherableTypes = new Set<TerrainType>();
 
-    public load() {
-        this.unload();
+	private loaded = false;
 
-        for (const tileType of Enums.values(TerrainType)) {
-            const tileTypeName = TerrainType[tileType];
+	public load(): void {
+		this.unload();
 
-            const terrainDescription = terrainDescriptions[tileType];
-            if (!terrainDescription || terrainDescription.ice) {
-                continue;
-            }
+		this.loaded = true;
 
-            if (tileTypeName.includes("FreshWater")) {
-                this.freshWaterTypes.add(tileType);
+		for (const tileType of Enums.values(TerrainType)) {
+			const tileTypeName = TerrainType[tileType];
 
-            } else if (tileTypeName.includes("Seawater")) {
-                this.seaWaterTypes.add(tileType);
-            }
+			const terrainDescription = terrainDescriptions[tileType];
+			if (!terrainDescription || terrainDescription.ice) {
+				continue;
+			}
 
-            if (terrainDescription.gather) {
-                this.gatherableTypes.add(tileType);
-            }
-        }
+			if (tileTypeName.includes("FreshWater")) {
+				this.freshWaterTypes.add(tileType);
 
-        EventManager.registerEventBusSubscriber(this);
-    }
+			} else if (tileTypeName.includes("Seawater")) {
+				this.seaWaterTypes.add(tileType);
+			}
 
-    public unload() {
-        EventManager.deregisterEventBusSubscriber(this);
+			if (terrainDescription.gather) {
+				this.gatherableTypes.add(tileType);
+			}
+		}
 
-        this.maps = new WeakMap();
+		eventManager.registerEventBusSubscriber(this);
+	}
 
-        this.freshWaterTypes.clear();
-        this.seaWaterTypes.clear();
-        this.gatherableTypes.clear();
-    }
+	public unload(): void {
+		if (!this.loaded) {
+			return;
+		}
 
-    /**
-     * Initializes kdtrees for the provided island.
-     * No-ops if the island was already initialized
-     */
-    public initializeIsland(island: Island) {
-        let islandMaps = this.maps.get(island);
-        if (islandMaps) {
-            return;
-        }
+		this.loaded = false;
 
-        islandMaps = new Map();
+		eventManager.deregisterEventBusSubscriber(this);
 
-        for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
-            const data: INavigationMapData = {
-                kdTrees: new Map(),
-                kdTreeTileTypes: new Uint8Array(island.mapSizeSq),
-            };
+		this.maps = new WeakMap();
 
-            data.kdTrees.set(freshWaterTileLocation, new KdTree());
-            data.kdTrees.set(anyWaterTileLocation, new KdTree());
-            data.kdTrees.set(gatherableTileLocation, new KdTree());
+		this.freshWaterTypes.clear();
+		this.seaWaterTypes.clear();
+		this.gatherableTypes.clear();
+	}
 
-            // attempt to make a somewhat balanced kdtree by starting at the midpoint
-            const halfMapSize = Math.floor(island.mapSize / 2);
+	/**
+	 * Initializes kdtrees for the provided island.
+	 * No-ops if the island was already initialized
+	 */
+	public async initializeIsland(task: Task, island: Island): Promise<void> {
+		let islandMaps = this.maps.get(island);
+		if (islandMaps) {
+			return;
+		}
 
-            for (let offsetX = 0; offsetX < halfMapSize; offsetX++) {
-                for (let offsetY = 0; offsetY < halfMapSize; offsetY++) {
-                    const x1 = halfMapSize + offsetX;
-                    const y1 = halfMapSize + offsetY;
-                    this.updateKdTree(island, x1, y1, z, island.getTile(x1, y1, z).type, data);
+		islandMaps = new Map();
 
-                    if (offsetX !== 0 || offsetY !== 0) {
-                        const x2 = halfMapSize - offsetX;
-                        const y2 = halfMapSize - offsetY;
-                        this.updateKdTree(island, x2, y2, z, island.getTile(x2, y2, z).type, data);
-                    }
-                }
-            }
+		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
+			const data: INavigationMapData = {
+				kdTrees: new Map(),
+				kdTreeTileTypes: new Uint8Array(island.mapSizeSq),
+			};
 
-            islandMaps.set(z, data);
-        }
+			data.kdTrees.set(freshWaterTileLocation, new KdTree());
+			data.kdTrees.set(anyWaterTileLocation, new KdTree());
+			data.kdTrees.set(gatherableTileLocation, new KdTree());
 
-        this.maps.set(island, islandMaps);
-    }
+			// attempt to make a somewhat balanced kdtree by starting at the midpoint
+			const halfMapSize = Math.floor(island.mapSize / 2);
 
-    public getKdTree(island: Island, z: number, tileType: ExtendedTerrainType): KdTree | undefined {
-        return this.maps.get(island)?.get(z)?.kdTrees.get(tileType);
-    }
+			for (let offsetX = 0; offsetX < halfMapSize; offsetX++) {
+				for (let offsetY = 0; offsetY < halfMapSize; offsetY++) {
+					const x1 = halfMapSize + offsetX;
+					const y1 = halfMapSize + offsetY;
+					this.updateKdTree(island, x1, y1, z, island.getTile(x1, y1, z).type, data);
 
-    @EventHandler(EventBus.Island, "tileUpdate")
-    public onTileUpdate(island: Island, tile: Tile, tileUpdateType: TileUpdateType): void {
-        const maps = this.maps.get(island);
-        if (!maps) {
-            return;
-        }
+					if (offsetX !== 0 || offsetY !== 0) {
+						const x2 = halfMapSize - offsetX;
+						const y2 = halfMapSize - offsetY;
+						this.updateKdTree(island, x2, y2, z, island.getTile(x2, y2, z).type, data);
+					}
+				}
 
-        this.updateKdTree(island, tile.x, tile.y, tile.z, tile.type, maps.get(tile.z));
-    }
+				if (task.shouldYield) {
+					// prevent freezing while this is being initialized
+					await task.forceYield();
+				}
+			}
 
-    public updateKdTree(island: Island, x: number, y: number, z: number, tileType: number, navigationMapData: INavigationMapData | undefined = this.maps.get(island)?.get(z)) {
-        if (!navigationMapData) {
-            throw new Error(`Invalid navigation info for ${island}, ${z}`);
-        }
+			islandMaps.set(z, data);
+		}
 
-        const point: IVector2 = { x, y };
+		this.maps.set(island, islandMaps);
+	}
 
-        const kdTreeIndex = (y * island.mapSize) + x;
-        let kdTreeTileType = navigationMapData.kdTreeTileTypes[kdTreeIndex];
-        if (kdTreeTileType !== 0) {
-            kdTreeTileType--;
+	public getKdTree(island: Island, z: number, tileType: ExtendedTerrainType): KdTree | undefined {
+		return this.maps.get(island)?.get(z)?.kdTrees.get(tileType);
+	}
 
-            if (kdTreeTileType === tileType) {
-                return;
-            }
+	@EventHandler(EventBus.Island, "tileUpdate")
+	public onTileUpdate(island: Island, tile: Tile, tileUpdateType: TileUpdateType): void {
+		const maps = this.maps.get(island);
+		if (!maps) {
+			return;
+		}
 
-            // tile type changed
+		this.updateKdTree(island, tile.x, tile.y, tile.z, tile.type, maps.get(tile.z));
+	}
 
-            navigationMapData.kdTrees.get(kdTreeTileType)!.remove(point);
+	public updateKdTree(island: Island, x: number, y: number, z: number, tileType: number, navigationMapData: INavigationMapData | undefined = this.maps.get(island)?.get(z)): void {
+		if (!navigationMapData) {
+			throw new Error(`Invalid navigation info for ${island}, ${z}`);
+		}
 
-            this.updateKdTreeSpecialTileTypes(navigationMapData, kdTreeTileType, point, false);
-        }
+		const point: IVector2 = { x, y };
 
-        navigationMapData.kdTreeTileTypes[kdTreeIndex] = tileType + 1;
+		const kdTreeIndex = (y * island.mapSize) + x;
+		let kdTreeTileType = navigationMapData.kdTreeTileTypes[kdTreeIndex];
+		if (kdTreeTileType !== 0) {
+			kdTreeTileType--;
 
-        let kdTree = navigationMapData.kdTrees.get(tileType);
-        if (!kdTree) {
-            kdTree = new KdTree();
-            navigationMapData.kdTrees.set(tileType, kdTree);
-        }
+			if (kdTreeTileType === tileType) {
+				return;
+			}
 
-        kdTree.add(point);
+			// tile type changed
 
-        this.updateKdTreeSpecialTileTypes(navigationMapData, tileType, point, true);
-    }
+			navigationMapData.kdTrees.get(kdTreeTileType)!.remove(point);
 
-    private updateKdTreeSpecialTileTypes(navigationMapData: INavigationMapData, tileType: TerrainType, point: IVector2, insert: boolean) {
-        const isFreshWater = this.freshWaterTypes.has(tileType);
-        const isSeawater = this.seaWaterTypes.has(tileType);
+			this.updateKdTreeSpecialTileTypes(navigationMapData, kdTreeTileType, point, false);
+		}
 
-        if (isFreshWater || isSeawater) {
-            if (insert) {
-                navigationMapData.kdTrees.get(anyWaterTileLocation)!.add(point);
+		navigationMapData.kdTreeTileTypes[kdTreeIndex] = tileType + 1;
 
-            } else {
-                navigationMapData.kdTrees.get(anyWaterTileLocation)!.remove(point);
-            }
+		let kdTree = navigationMapData.kdTrees.get(tileType);
+		if (!kdTree) {
+			kdTree = new KdTree();
+			navigationMapData.kdTrees.set(tileType, kdTree);
+		}
 
-            if (isFreshWater) {
-                if (insert) {
-                    navigationMapData.kdTrees.get(freshWaterTileLocation)!.add(point);
+		kdTree.add(point);
 
-                } else {
-                    navigationMapData.kdTrees.get(freshWaterTileLocation)!.remove(point);
-                }
-            }
-        }
+		this.updateKdTreeSpecialTileTypes(navigationMapData, tileType, point, true);
+	}
 
-        if (this.gatherableTypes.has(tileType)) {
-            if (insert) {
-                navigationMapData.kdTrees.get(gatherableTileLocation)!.add(point);
+	private updateKdTreeSpecialTileTypes(navigationMapData: INavigationMapData, tileType: TerrainType, point: IVector2, insert: boolean): void {
+		const isFreshWater = this.freshWaterTypes.has(tileType);
+		const isSeawater = this.seaWaterTypes.has(tileType);
 
-            } else {
-                navigationMapData.kdTrees.get(gatherableTileLocation)!.remove(point);
-            }
-        }
-    }
+		if (isFreshWater || isSeawater) {
+			if (insert) {
+				navigationMapData.kdTrees.get(anyWaterTileLocation)!.add(point);
+
+			} else {
+				navigationMapData.kdTrees.get(anyWaterTileLocation)!.remove(point);
+			}
+
+			if (isFreshWater) {
+				if (insert) {
+					navigationMapData.kdTrees.get(freshWaterTileLocation)!.add(point);
+
+				} else {
+					navigationMapData.kdTrees.get(freshWaterTileLocation)!.remove(point);
+				}
+			}
+		}
+
+		if (this.gatherableTypes.has(tileType)) {
+			if (insert) {
+				navigationMapData.kdTrees.get(gatherableTileLocation)!.add(point);
+
+			} else {
+				navigationMapData.kdTrees.get(gatherableTileLocation)!.remove(point);
+			}
+		}
+	}
 }

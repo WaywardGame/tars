@@ -1,16 +1,5 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { MovingClientSide } from "game/entity/IHuman";
-import { WeightStatus } from "game/entity/player/IPlayer";
+import { MovingState } from "@wayward/game/game/entity/IHuman";
+import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 
 import type Context from "./context/Context";
 import { MovingToNewIslandState, ContextDataType } from "./context/IContext";
@@ -19,7 +8,8 @@ import Objective from "./objective/Objective";
 
 import type { IPlan } from "./planning/IPlan";
 import { ExecuteResultType } from "./planning/IPlan";
-import { IPlanner } from "./planning/IPlanner";
+import type { IPlanner } from "./planning/IPlanner";
+import { sleep } from "@wayward/utilities/promise/Async";
 
 export enum ExecuteObjectivesResultType {
 	Completed,
@@ -65,7 +55,7 @@ export class Executor {
 		return this.latestExecutingPlan;
 	}
 
-	public reset() {
+	public reset(): void {
 		this.interrupted = false;
 		this.weightChanged = false;
 		this.latestExecutingPlan = undefined;
@@ -73,11 +63,11 @@ export class Executor {
 		this.planner.reset();
 	}
 
-	public interrupt() {
+	public interrupt(): void {
 		this.interrupted = true;
 	}
 
-	public tryClearInterrupt() {
+	public tryClearInterrupt(): boolean {
 		if (this.interrupted) {
 			this.interrupted = false;
 			return true;
@@ -86,15 +76,15 @@ export class Executor {
 		return false;
 	}
 
-	public markWeightChanged() {
+	public markWeightChanged(): void {
 		this.weightChanged = true;
 	}
 
-	public isReady(context: Context, checkForInterrupts: boolean) {
-		return !context.human.isResting() &&
-			context.human.movingClientside !== MovingClientSide.Moving &&
+	public isReady(context: Context, checkForInterrupts: boolean): boolean {
+		return !context.human.isResting &&
+			context.human.movingData.state !== MovingState.Moving &&
 			!context.human.hasDelay() &&
-			!context.human.isGhost() &&
+			!context.human.isGhost &&
 			!game.isPaused &&
 			(!checkForInterrupts || !this.interrupted);
 	}
@@ -233,6 +223,10 @@ export class Executor {
 
 			// the plan finished
 			this.latestExecutingPlan = undefined;
+		}
+
+		if (context.tars.saveData.options.slowMode) {
+			await sleep(250);
 		}
 
 		return {

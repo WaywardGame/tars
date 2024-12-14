@@ -1,23 +1,12 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import type { IStat, IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import Cure from "@wayward/game/game/entity/action/actions/Cure";
+import Eat from "@wayward/game/game/entity/action/actions/Eat";
+import Heal from "@wayward/game/game/entity/action/actions/Heal";
+import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
 
-import type { IStat, IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
-import { ActionType } from "game/entity/action/IAction";
-import Cure from "game/entity/action/actions/Cure";
-import Eat from "game/entity/action/actions/Eat";
-import Heal from "game/entity/action/actions/Heal";
-import { WeightStatus } from "game/entity/player/IPlayer";
-
-import { ConsumeItemStats } from "game/item/IItem";
+import { ConsumeItemStats } from "@wayward/game/game/item/IItem";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";

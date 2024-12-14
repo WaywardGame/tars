@@ -1,19 +1,8 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Creature from "game/entity/creature/Creature";
-import { EquipType } from "game/entity/IHuman";
-import { ItemType } from "game/item/IItem";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import type { CreatureSearch } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -43,7 +32,7 @@ export default class GatherFromCreature extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed() && !context.utilities.creature.isScaredOfCreature(context, creature))
+		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed && !context.utilities.creature.isScaredOfCreature(context.human, creature))
 			.map(creature => {
 				const objectives: IObjective[] = [];
 
@@ -53,7 +42,7 @@ export default class GatherFromCreature extends Objective {
 
 				// require a sword and shield before engaging with a creature
 				if (context.inventory.equipSword === undefined && !context.options.lockEquipment) {
-					objectives.push(new AcquireItem(ItemType.WoodenSword), new AnalyzeInventory(), new EquipItem(EquipType.MainHand));
+					objectives.push(new AcquireItem(ItemType.WoodenShortSword), new AnalyzeInventory(), new EquipItem(EquipType.MainHand));
 				}
 
 				if (context.inventory.equipShield === undefined && !context.options.lockEquipment) {

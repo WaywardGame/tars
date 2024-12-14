@@ -1,19 +1,9 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { IContainer } from "game/item/IItem";
-import type Item from "game/item/Item";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../core/context/Context";
-import { IInventoryItemInfo, IInventoryItems, InventoryItemFlag, inventoryItemInfo } from "../../core/ITars";
+import type { IInventoryItemInfo, IInventoryItems } from "../../core/ITars";
+import { InventoryItemFlag, inventoryItemInfo } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
@@ -96,7 +86,7 @@ export default class AnalyzeInventory extends Objective {
 							return (itemB.durability ?? 999999) - (itemA.durability ?? 999999);
 
 						case InventoryItemFlag.PreferHigherDecay:
-							return (itemB.decay ?? 999999) - (itemA.decay ?? 999999);
+							return (itemB.getDecayTime() ?? 999999) - (itemA.getDecayTime() ?? 999999);
 
 						case InventoryItemFlag.PreferLowerWeight:
 							return itemA.getTotalWeight() - itemB.getTotalWeight();
@@ -127,8 +117,8 @@ export default class AnalyzeInventory extends Objective {
 		return ObjectiveResult.Ignore;
 	}
 
-	public static getItems(context: Context, itemInfo: IInventoryItemInfo) {
-		const items: Set<Item> = new Set();
+	public static getItems(context: Context, itemInfo: IInventoryItemInfo): Set<Item> {
+		const items = new Set<Item>();
 
 		if (itemInfo.itemTypes) {
 			const itemTypes = typeof (itemInfo.itemTypes) === "function" ? itemInfo.itemTypes(context) : itemInfo.itemTypes;
@@ -178,8 +168,8 @@ export default class AnalyzeInventory extends Objective {
 		return items;
 	}
 
-	private isValid(context: Context, itemInfo: IInventoryItemInfo, item: Item) {
-		if (!item.isValid()) {
+	private isValid(context: Context, itemInfo: IInventoryItemInfo, item: Item): boolean {
+		if (!item.isValid) {
 			return false;
 		}
 

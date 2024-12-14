@@ -1,25 +1,14 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { OwnEventHandler } from "event/EventManager";
-import Translation from "language/Translation";
-import Message from "language/dictionary/Message";
-import type { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import { Edge } from "ui/screen/screens/game/Dialogs";
-import type { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import TabDialog from "ui/screen/screens/game/component/TabDialog";
-import { Tuple } from "utilities/collection/Tuple";
-import Vector2 from "utilities/math/Vector2";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import Translation from "@wayward/game/language/Translation";
+import Message from "@wayward/game/language/dictionary/Message";
+import type { DialogId, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import { Edge } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import type { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import TabDialog from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { TarsTranslation, TarsUiSaveDataKey, getTarsTranslation } from "../ITarsMod";
-import Tars from "../core/Tars";
+import type Tars from "../core/Tars";
 import type TarsPanel from "./components/TarsPanel";
 import DataPanel from "./panels/DataPanel";
 import GeneralPanel from "./panels/GeneralPanel";
@@ -69,20 +58,20 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 	}
 
 	@OwnEventHandler(TarsDialog, "changeSubpanel")
-	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
+	protected onChangeSubpanel(activeSubpanel: SubpanelInformation): void {
 		this.tarsInstance!.saveData.ui[TarsUiSaveDataKey.ActivePanelId] = activeSubpanel[0];
 	}
 
 	public override getName(): Translation {
 		if (!this.tarsInstance) {
-			return Translation.message(Message.None)
+			return Translation.message(Message.None);
 		}
 
 		return getTarsTranslation(TarsTranslation.DialogTitleMain)
 			.addArgs(this.tarsInstance.getName(), this.tarsInstance.getStatus());
 	}
 
-	public initialize(tarsInstance: Tars) {
+	public initialize(tarsInstance: Tars): void {
 		if (this.tarsInstance !== tarsInstance) {
 			this.tarsInstance = tarsInstance;
 			this.initializeSubpanels();
@@ -93,7 +82,7 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 		this.refreshHeader();
 	}
 
-	public refreshHeader() {
+	public refreshHeader(): void {
 		this.header.refresh();
 	}
 
@@ -106,10 +95,10 @@ export default class TarsDialog extends TabDialog<TarsPanel> {
 			return [];
 		}
 
-		let panels: TarsPanel[] = [];
+		const panels: TarsPanel[] = [];
 
 		for (const panelClass of subpanelClasses) {
-			if (panelClass === NPCsPanel && (this.subId.length !== 0 || !localPlayer.isHost())) {
+			if (panelClass === NPCsPanel && (this.subId.length !== 0 || !localPlayer.isHost)) {
 				// don't show npc panel for npc dialog or for non-mp hostss
 				continue;
 			}

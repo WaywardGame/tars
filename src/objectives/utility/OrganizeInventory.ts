@@ -1,19 +1,8 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import type { IContainer } from "game/item/IItem";
-import type Item from "game/item/Item";
-import Vector2 from "utilities/math/Vector2";
-import Drop from "game/entity/action/actions/Drop";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Drop from "@wayward/game/game/entity/action/actions/Drop";
 
 import { ContextDataType } from "../../core/context/IContext";
 import type Context from "../../core/context/Context";
@@ -23,8 +12,9 @@ import Objective from "../../core/objective/Objective";
 import ExecuteAction from "../core/ExecuteAction";
 import MoveToTarget from "../core/MoveToTarget";
 import Restart from "../core/Restart";
-import MoveItem from "../other/item/MoveItem";
+import MoveItemsFromContainer from "../other/item/MoveItemsFromContainer";
 import { defaultMaxTilesChecked } from "../../core/ITars";
+import { sleep } from "@wayward/utilities/promise/Async";
 
 const maxChestDistance = 128;
 
@@ -178,14 +168,21 @@ export default class OrganizeInventory extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const target = context.human.tile.findMatchingTile(tile => context.utilities.tile.isOpenTile(context, tile), { maxTilesChecked: defaultMaxTilesChecked });
+		const itemToDrop = unusedItems[0];
+
+		const target = context.human.tile.findMatchingTile(tile =>
+			context.utilities.tile.isOpenTile(context, tile) &&
+			Drop.canUseAt(context.human, { fromTile: tile, targetTile: tile }, itemToDrop).usable,
+			{ maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
 		}
 
-		const itemToDrop = unusedItems[0];
-
 		this.log.info(`Dropping ${itemToDrop}`);
+
+		if (context.tars.saveData.options.slowMode) {
+			await sleep(500);
+		}
 
 		return [
 			new MoveToTarget(target, false),
@@ -193,7 +190,7 @@ export default class OrganizeInventory extends Objective {
 		];
 	}
 
-	public static moveIntoChestsObjectives(context: Context, itemsToMove: Item[]) {
+	public static moveIntoChestsObjectives(context: Context, itemsToMove: Item[]): IObjective[] | undefined {
 		const chests = context.base.chest.slice().concat(context.base.intermediateChest);
 
 		for (const chest of chests) {
@@ -206,15 +203,14 @@ export default class OrganizeInventory extends Objective {
 		return undefined;
 	}
 
-	private static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]) {
+	private static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]): IObjective[] | undefined {
 		const objectives: IObjective[] = [];
 
 		const targetContainer = chest as IContainer;
 		let chestWeight = context.island.items.computeContainerWeight(targetContainer);
 		const chestWeightCapacity = context.island.items.getWeightCapacity(targetContainer);
-		if (chestWeightCapacity !== undefined && chestWeight + itemsToMove[0].getTotalWeight(undefined, targetContainer) <= chestWeightCapacity) {
-			// at least 1 item fits in the chest. move to it and start moving items
-			objectives.push(new MoveToTarget(chest, true));
+		if (chestWeightCapacity !== undefined) {
+			const itemsToMoveWithinWeight: Item[] = [];
 
 			for (const item of itemsToMove) {
 				const itemWeight = item.getTotalWeight(undefined, targetContainer);
@@ -224,11 +220,18 @@ export default class OrganizeInventory extends Objective {
 
 				chestWeight += itemWeight;
 
-				objectives.push(new MoveItem(item, targetContainer, chest));
+				itemsToMoveWithinWeight.push(item);
 			}
 
-			// restart in case there's more to move
-			objectives.push(new Restart());
+			if (itemsToMoveWithinWeight.length > 0) {
+				// at least 1 item fits in the chest. move to it and start moving items
+				objectives.push(new MoveToTarget(chest, true));
+
+				objectives.push(new MoveItemsFromContainer(itemsToMoveWithinWeight, targetContainer));
+
+				// restart in case there's more to move
+				objectives.push(new Restart());
+			}
 		}
 
 		return objectives.length > 0 ? objectives : undefined;

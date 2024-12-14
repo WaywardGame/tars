@@ -1,23 +1,12 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import DoodadManager from "game/doodad/DoodadManager";
-import { DoodadType } from "game/doodad/IDoodad";
-import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import UpdateWalkPath from "game/entity/action/actions/UpdateWalkPath";
-import { ActionType } from "game/entity/action/IAction";
-import type Item from "game/item/Item";
-import Build from "game/entity/action/actions/Build";
-import Tile from "game/tile/Tile";
-import { ItemType } from "game/item/IItem";
+import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
+import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import UpdateWalkTo from "@wayward/game/game/entity/action/actions/UpdateWalkTo";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
+import Build from "@wayward/game/game/entity/action/actions/Build";
+import type Tile from "@wayward/game/game/tile/Tile";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -55,13 +44,13 @@ export default class BuildItem extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const item = this.item ?? this.getAcquiredItem(context);
-		if (!item?.isValid()) {
+		if (!item?.isValid) {
 			this.log.warn("Invalid build item");
 			return ObjectiveResult.Restart;
 		}
 
 		const description = item.description;
-		if (!description || !description.use || !description.use.includes(ActionType.Build)) {
+		if (!description?.use?.includes(ActionType.Build)) {
 			this.log.error(`Invalid build item. ${item}`);
 			return ObjectiveResult.Impossible;
 		}
@@ -93,13 +82,11 @@ export default class BuildItem extends Objective {
 			}
 
 			if (context.utilities.base.hasBase(context)) {
-				if (baseInfo && baseInfo.tryPlaceNear !== undefined) {
+				if (baseInfo?.tryPlaceNear !== undefined) {
 					const nearDoodads = context.base[baseInfo.tryPlaceNear];
 					if (nearDoodads.length > 0) {
-						const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
-
-						for (const point of possiblePoints) {
-							const tile = context.island.getTileFromPoint(point);
+						const possibleTiles = AnalyzeBase.getNearTilesFromDoodads(context, nearDoodads);
+						for (const tile of possibleTiles) {
 							if (context.utilities.base.isGoodBuildTile(context, tile, { openAreaRadius: 0 })) {
 								this.target = tile;
 								break;
@@ -116,14 +103,14 @@ export default class BuildItem extends Objective {
 					for (const baseTile of baseTiles) {
 						if (isWell) {
 							// look for unlimited wells first
-							this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
+							this.target = baseTile.findMatchingTile(tile => context.utilities.base.isGoodWellBuildTile(context, tile, true), { maxTilesChecked: defaultMaxTilesChecked });
 							if (this.target === undefined) {
 								this.log.info("Couldn't find unlimited well tile");
-								this.target = baseTile.findMatchingTile((tile) => context.utilities.base.isGoodWellBuildTile(context, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
+								this.target = baseTile.findMatchingTile(tile => context.utilities.base.isGoodWellBuildTile(context, tile, false), { maxTilesChecked: defaultMaxTilesChecked });
 							}
 
 						} else {
-							this.target = baseTile.findMatchingTile((tile) => {
+							this.target = baseTile.findMatchingTile(tile => {
 								if (baseInfo && !context.utilities.base.matchesBaseInfo(context, baseInfo, buildDoodadType, tile)) {
 									// AnalyzeBase won't like a doodad at this position
 									return false;
@@ -172,7 +159,7 @@ export default class BuildItem extends Objective {
 		];
 	}
 
-	public override async onMove(context: Context) {
+	public override async onMove(context: Context): Promise<boolean | IObjective> {
 		this.movements++;
 
 		if (this.movements >= recalculateMovements) {
@@ -185,7 +172,7 @@ export default class BuildItem extends Objective {
 			context.utilities.movement.resetMovementOverlays();
 
 			multiplayer.executeClientside(() => {
-				UpdateWalkPath.execute(context.human, undefined);
+				void UpdateWalkTo.execute(context.human, undefined);
 			});
 		}
 
@@ -201,6 +188,5 @@ export default class BuildItem extends Objective {
 
 		return undefined;
 	}
-
 
 }

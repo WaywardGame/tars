@@ -1,17 +1,6 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Repair from "game/entity/action/actions/Repair";
-import { ActionArguments } from "game/entity/action/IAction";
-import type Item from "game/item/Item";
+import Repair from "@wayward/game/game/entity/action/actions/Repair";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -46,26 +35,26 @@ export default class RepairItem extends Objective {
 		}
 
 		const description = this.item.description;
-		if (!description || description.durability === undefined || description.repairable === false) {
+		if (description?.durability === undefined || description.repairable === false) {
 			// this.log.warn("item isn't repariable", this.item, description);
 			return ObjectiveResult.Ignore;
 		}
 
-		if (context.human.isSwimming()) {
+		if (context.human.isSwimming) {
 			return ObjectiveResult.Ignore;
 		}
 
 		return [
 			new AcquireInventoryItem("hammer"),
 			new CompleteRequirements(context.island.items.hasAdditionalRequirements(context.human, this.item.type, undefined, true)),
-			new ExecuteAction(Repair, (context) => {
+			new ExecuteAction(Repair, context => {
 				const hammer = context.inventory.hammer;
 				if (!hammer) {
 					this.log.error("Invalid hammer");
 					return ObjectiveResult.Restart;
 				}
 
-				return [hammer, this.item] as ActionArguments<typeof Repair>;
+				return [hammer, this.item] as ActionArgumentsOf<typeof Repair>;
 			}).setStatus(this),
 		];
 	}

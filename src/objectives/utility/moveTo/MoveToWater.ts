@@ -1,17 +1,6 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { WaterType } from "game/island/IIsland";
-import { TerrainType } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
+import { WaterType } from "@wayward/game/game/island/IIsland";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -61,9 +50,9 @@ export default class MoveToWater extends Objective {
 
 		const fishingRange = this.options?.fishingRange ?? 1;
 
-		const disabledTiles: Set<Tile> = new Set();
+		const disabledTiles = new Set<Tile>();
 
-		const target = context.getTile().findMatchingTile((tile) => {
+		const target = context.getTile().findMatchingTile(tile => {
 			if (disabledTiles.has(tile)) {
 				return false;
 			}
@@ -87,7 +76,7 @@ export default class MoveToWater extends Objective {
 						return false;
 					}
 
-					const result = tile.canSailAwayFrom();
+					const result = tile.canSailAwayFrom(context.human);
 					if (!result.canSailAway) {
 						if (result.blockedTilesChecked) {
 							disabledTiles.addFrom(result.blockedTilesChecked);
@@ -114,7 +103,7 @@ export default class MoveToWater extends Objective {
 
 					for (const nearbyTile of tile.getTilesAround()) {
 						// const nearbyTerrainDescription = nearbyTile.description;
-						if (!navigation.isDisabled(nearbyTile) && (!nearbyTile.doodad || (!nearbyTile.doodad.blocksMove() && !nearbyTile.doodad.isDangerous(context.human)))) {
+						if (!navigation.isDisabled(nearbyTile) && (!nearbyTile.doodad || (!nearbyTile.doodad.blocksMove && !nearbyTile.doodad.isDangerous(context.human)))) {
 							standableNearbyTiles.push(nearbyTile);
 						}
 					}
@@ -129,7 +118,8 @@ export default class MoveToWater extends Objective {
 					for (const standableNearbyTile of standableNearbyTiles) {
 						const direction = context.island.getDirectionFromMovement(tile.x - standableNearbyTile.x, tile.y - standableNearbyTile.y);
 
-						const mobCheck = context.island.checkForTargetInRange(standableNearbyTile, direction, fishingRange);
+						const rangedResolved = context.island.applyRangedAccuracy(standableNearbyTile, direction, fishingRange);
+						const mobCheck = context.island.checkForTargetInRange(standableNearbyTile, rangedResolved);
 						if (mobCheck.noTile || mobCheck.obstacle || (mobCheck.creature && !mobCheck.creature.description?.fishable)) {
 							return false;
 						}
@@ -162,7 +152,7 @@ export default class MoveToWater extends Objective {
 					// verify there's no dangerous creatures nearby
 					const nearbyTiles = tile.tilesInRange(16, true);
 					for (const tile of nearbyTiles) {
-						if (tile.creature && context.utilities.creature.isScaredOfCreature(context, tile.creature)) {
+						if (tile.creature && context.utilities.creature.isScaredOfCreature(context.human, tile.creature)) {
 							return false;
 						}
 					}

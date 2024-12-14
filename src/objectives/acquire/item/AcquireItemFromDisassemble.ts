@@ -1,38 +1,27 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import Disassemble from "@wayward/game/game/entity/action/actions/Disassemble";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { ListEnder } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
 
-import Stream from "@wayward/goodstream/Stream";
-import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
-import Dictionary from "language/Dictionary";
-import { ListEnder } from "language/ITranslation";
-import Translation from "language/Translation";
-import Disassemble from "game/entity/action/actions/Disassemble";
-import { ActionArguments } from "game/entity/action/IAction";
-
-import type Context from "../../../core/context/Context";
 import type { IDisassemblySearch } from "../../../core/ITars";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type Context from "../../../core/context/Context";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import ProvideItems from "../../core/ProvideItems";
 import ReserveItems from "../../core/ReserveItems";
-import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
+import UseProvidedItem from "../../core/UseProvidedItem";
+import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
-import UseProvidedItem from "../../core/UseProvidedItem";
 
 /**
  * Disassembles one of the items.
@@ -50,7 +39,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		const translation = Stream.values(this.searches.map(({ item }) => item.getName()))
+		const translation = this.searches.map(({ item }) => item.getName())
 			.collect(Translation.formatList, ListEnder.Or);
 
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by disassembling ${translation.getString()}`;
@@ -90,7 +79,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				new ReserveItems(item),
 				new ProvideItems(...disassemblyItems.map(item => item.type)),
 				new SetContextData(itemContextDataKey, item),
-				new MoveItemIntoInventory(item),
+				new MoveItemsIntoInventory(item),
 			];
 
 			let requiredItemHashCodes: string[] | undefined;
@@ -119,7 +108,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 				}
 			}
 
-			if (context.human.isSwimming()) {
+			if (context.human.isSwimming) {
 				objectives.push(new MoveToLand());
 			}
 
@@ -131,21 +120,21 @@ export default class AcquireItemFromDisassemble extends Objective {
 				{
 					genericAction: {
 						action: Disassemble,
-						args: (context) => {
+						args: context => {
 							const item = context.getData<Item | undefined>(itemContextDataKey);
-							if (!item?.isValid()) {
+							if (!item?.isValid) {
 								// treat this as an expected case
 								// the item was likely broken earlier in the execution tree
 								// this.log.warn(`Missing disassemble item "${item}". Bug in TARS pipeline, will fix itself. Hash code: ${hashCode}`);
 								return ObjectiveResult.Restart;
 							}
 
-							let requiredItems: Array<Item> | undefined;
+							let requiredItems: Item[] | undefined;
 
 							if (requiredItemHashCodes) {
 								for (const requiredItemHashCode of requiredItemHashCodes) {
 									const item = context.getData<Item>(requiredItemHashCode);
-									if (!item?.isValid()) {
+									if (!item?.isValid) {
 										// treat this as an expected case
 										// the item was likely broken earlier in the execution tree
 										// this.log.warn(`Missing required item "${item}" for disassembly. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
@@ -156,7 +145,7 @@ export default class AcquireItemFromDisassemble extends Objective {
 								}
 							}
 
-							return [item, requiredItems] as ActionArguments<typeof Disassemble>;
+							return [item, requiredItems] as ActionArgumentsOf<typeof Disassemble>;
 						},
 					},
 				}).passAcquireData(this).setStatus(() => `Disassembling ${item.getName().getString()}`));

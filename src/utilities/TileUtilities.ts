@@ -1,29 +1,25 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
+import Dig from "@wayward/game/game/entity/action/actions/Dig";
+import Till from "@wayward/game/game/entity/action/actions/Till";
+import type { IContainer, ItemType } from "@wayward/game/game/item/IItem";
+import type { ITileContainer } from "@wayward/game/game/tile/ITerrain";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 
-import Butcher from "game/entity/action/actions/Butcher";
-import Dig from "game/entity/action/actions/Dig";
-import Till from "game/entity/action/actions/Till";
-import { IContainer } from "game/item/IItem";
-import type { ITileContainer } from "game/tile/ITerrain";
-import { TerrainType } from "game/tile/ITerrain";
-import type { IVector3 } from "utilities/math/IVector";
+import { WaterType } from "@wayward/game/game/island/IIsland";
+import type Item from "@wayward/game/game/item/Item";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type { Direction } from "@wayward/game/utilities/math/Direction";
+import type { IActionNotUsable } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { ITillCanUse } from "@wayward/game/game/entity/action/actions/ToggleTilled";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
 
-import { WaterType } from "game/island/IIsland";
-import Item from "game/item/Item";
-import Tile from "game/tile/Tile";
-import { Direction } from "utilities/math/Direction";
+import { gardenMaxTilesChecked } from "../objectives/other/tile/TillForSeed";
 import type { ITileLocation } from "../core/ITars";
-import Context from "../core/context/Context";
-import { ExtendedTerrainType } from "../core/navigation/INavigation";
+import type Context from "../core/context/Context";
+import type { ExtendedTerrainType } from "../core/navigation/INavigation";
 
 export interface IOpenTileOptions {
 	requireNoItemsOnTile: boolean;
@@ -33,23 +29,29 @@ export interface IOpenTileOptions {
 
 export class TileUtilities {
 
-	private readonly tileLocationCache: Map<string, ITileLocation[]> = new Map();
-	private readonly canUseArgsCache: Map<string, { point: IVector3; direction: Direction.Cardinal } | null> = new Map();
+	private readonly seedAllowedTileSet = new Map<ItemType, Set<TerrainType>>();
+	private readonly tileLocationCache = new Map<string, ITileLocation[]>();
+	private readonly canUseArgsCache = new Map<number, { point: IVector3; direction: Direction.Cardinal } | null>();
+	private readonly canUseResultCache = new Map<number, IActionNotUsable | ITillCanUse>();
+	private readonly nearbyTillableTile = new Map<ItemType, Tile | undefined | null>();
 
-	public clearCache() {
+	public clearCache(): void {
+		this.seedAllowedTileSet.clear();
 		this.tileLocationCache.clear();
 		this.canUseArgsCache.clear();
+		this.canUseResultCache.clear();
+		this.nearbyTillableTile.clear();
 	}
 
-	public getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, positionOverride?: IVector3): ITileLocation[] {
-		const position = positionOverride ?? context.getTile();
+	public getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, tileOverride?: Tile): ITileLocation[] {
+		const tile = tileOverride ?? context.getTile();
 
 		const results: ITileLocation[][] = [
-			this._getNearestTileLocation(context, tileType, position)
+			this._getNearestTileLocation(context, tileType, tile),
 		];
 
-		if (!positionOverride && context.options.allowCaves) {
-			const oppositeOrigin = context.utilities.navigation.calculateOppositeOrigin(position.z);
+		if (!tileOverride && context.options.allowCaves) {
+			const oppositeOrigin = context.utilities.navigation.calculateOppositeOrigin(tile.z);
 			// const oppositeOrigin = context.utilities.navigation.getOppositeOrigin();
 			if (oppositeOrigin) {
 				results.push(this._getNearestTileLocation(context, tileType, oppositeOrigin));
@@ -59,24 +61,24 @@ export class TileUtilities {
 		return results.flat();
 	}
 
-	private _getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, position: IVector3): ITileLocation[] {
-		const cacheId = `${tileType},${position.x},${position.y},${position.z}`;
+	private _getNearestTileLocation(context: Context, tileType: ExtendedTerrainType, tile: Tile): ITileLocation[] {
+		const cacheId = `${tileType},${tile.id}`;
 
 		let result = this.tileLocationCache.get(cacheId);
 		if (!result) {
-			result = context.utilities.navigation.getNearestTileLocation(context.island, tileType, position);
+			result = context.utilities.navigation.getNearestTileLocation(context.island, tileType, tile);
 			this.tileLocationCache.set(cacheId, result);
 		}
 
 		return result;
 	}
 
-	public isSwimmingOrOverWater(context: Context) {
+	public isSwimmingOrOverWater(context: Context): boolean {
 		const tile = context.getTile();
-		return context.human.isSwimming() || tile?.description?.water === true;
+		return context.human.isSwimming || tile?.description?.water === true;
 	}
 
-	public isOverDeepSeaWater(context: Context) {
+	public isOverDeepSeaWater(context: Context): boolean {
 		return context.getTile()?.type === TerrainType.DeepSeawater;
 		// return Terrains[game.getTileFromPoint(context.getPosition(.type))]?.deepWater === true;
 	}
@@ -129,8 +131,8 @@ export class TileUtilities {
 		return this.isFreeOfOtherPlayers(context, tile);
 	}
 
-	public isFreeOfOtherPlayers(context: Context, tile: Tile) {
-		const players = tile.getPlayersOnTile(false, true);
+	public isFreeOfOtherPlayers(context: Context, tile: Tile): boolean {
+		const players = tile.getPlayersOnTile();
 		if (players.length > 0) {
 			for (const player of players) {
 				if (player !== context.human) {
@@ -142,15 +144,41 @@ export class TileUtilities {
 		return true;
 	}
 
-	public canGather(context: Context, tile: Tile, skipDoodadCheck?: boolean) {
+	public getSeedAllowedTileSet(seedItemType: ItemType): Set<TerrainType> {
+		let tileSet = this.seedAllowedTileSet.get(seedItemType);
+		if (tileSet === undefined) {
+			tileSet = new Set(doodadDescriptions[itemDescriptions[seedItemType]?.onUse?.[ActionType.Plant]!]?.allowedTiles ?? []);
+			this.seedAllowedTileSet.set(seedItemType, tileSet);
+		}
+
+		return tileSet;
+	}
+
+	public getNearbyTillableTile(context: Context, seedItemType: ItemType, allowedTilesSet: Set<TerrainType>): Tile | undefined {
+		let result = this.nearbyTillableTile.get(seedItemType);
+		if (result === undefined) {
+			result = context.utilities.base.getBaseTile(context).findMatchingTile(
+				tile => context.utilities.tile.canTill(context, tile, context.inventory.hoe, allowedTilesSet),
+				{
+					maxTilesChecked: gardenMaxTilesChecked,
+				},
+			);
+
+			this.nearbyTillableTile.set(seedItemType, result ? result : null);
+		}
+
+		return result ? result : undefined;
+	}
+
+	public canGather(context: Context, tile: Tile, skipDoodadCheck?: boolean): boolean {
 		if (!skipDoodadCheck && !tile.description?.gather && (tile.doodad || this.hasItems(tile))) {
 			return false;
 		}
 
-		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.isPlayerOnTile(false, true);
+		return !this.hasCorpses(tile) && !tile.creature && !tile.npc && !tile.isPlayerOnTile() && !tile.isDeepHole;
 	}
 
-	public canDig(context: Context, tile: Tile) {
+	public canDig(context: Context, tile: Tile): boolean {
 		const canUseArgs = this.getCanUseArgs(context, tile);
 		if (!canUseArgs) {
 			return false;
@@ -168,7 +196,12 @@ export class TileUtilities {
 		// default to any item in the inventory just so ItemNearby is satisfied
 		tool ??= context.human.inventory.containedItems[0];
 
-		const canUse = Till.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool);
+		let canUse = this.canUseResultCache.get(tile.id);
+		if (canUse === undefined) {
+			canUse = Till.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool);
+			this.canUseResultCache.set(tile.id, canUse);
+		}
+
 		if (!canUse.usable) {
 			return false;
 		}
@@ -181,7 +214,7 @@ export class TileUtilities {
 		return context.utilities.base.isOpenArea(context, tile);
 	}
 
-	public canButcherCorpse(context: Context, tile: Tile, tool: Item | undefined) {
+	public canButcherCorpse(context: Context, tile: Tile, tool: Item | undefined): boolean {
 		const canUseArgs = this.getCanUseArgs(context, tile);
 		if (!canUseArgs) {
 			return false;
@@ -193,19 +226,17 @@ export class TileUtilities {
 		return Butcher.canUseWhileFacing(context.human, canUseArgs.point, canUseArgs.direction, tool).usable;
 	}
 
-	public hasCorpses(tile: Tile) {
-		return !!(tile.corpses && tile.corpses.length);
+	public hasCorpses(tile: Tile): boolean {
+		return !!(tile.corpses?.length);
 	}
 
-	public hasItems(tile: Tile) {
+	public hasItems(tile: Tile): boolean {
 		const tileContainer = tile as ITileContainer;
 		return tileContainer.containedItems && tileContainer.containedItems.length > 0;
 	}
 
 	private getCanUseArgs(context: Context, tile: Tile): { point: IVector3; direction: Direction.Cardinal } | null {
-		const cacheId = `${tile.x},${tile.y},${tile.z}`;
-
-		let result = this.canUseArgsCache.get(cacheId);
+		let result = this.canUseArgsCache.get(tile.id);
 		if (result === undefined) {
 			const endPositions = context.utilities.movement.getMovementEndPositions(context, tile, true);
 			if (endPositions.length !== 0) {
@@ -218,7 +249,7 @@ export class TileUtilities {
 				result = null;
 			}
 
-			this.canUseArgsCache.set(cacheId, result);
+			this.canUseArgsCache.set(tile.id, result);
 		}
 
 		return result;

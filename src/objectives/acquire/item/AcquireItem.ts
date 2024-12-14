@@ -1,33 +1,26 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import { DoodadType, GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import GatherLiquid from "@wayward/game/game/entity/action/actions/GatherLiquid";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { corpseDescriptions } from "@wayward/game/game/entity/creature/corpse/Corpses";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import TerrainResources from "@wayward/game/game/tile/TerrainResources";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
+import Enums from "@wayward/game/utilities/enum/Enums";
 
-import { doodadDescriptions } from "game/doodad/Doodads";
-import { DoodadType, GrowingStage } from "game/doodad/IDoodad";
-import { ActionArguments, ActionType } from "game/entity/action/IAction";
-import { corpseDescriptions } from "game/entity/creature/corpse/Corpses";
-import { CreatureType } from "game/entity/creature/ICreature";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import { TerrainType } from "game/tile/ITerrain";
-import TerrainResources from "game/tile/TerrainResources";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
-import Enums from "utilities/enum/Enums";
-import GatherLiquid from "game/entity/action/actions/GatherLiquid";
-
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
+import type { CreatureSearch, DoodadSearchMap, ITerrainResourceSearch, ITerrainWaterSearch } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
-import { ITerrainResourceSearch, DoodadSearchMap, CreatureSearch, ITerrainWaterSearch } from "../../../core/ITars";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
+import AddDifficulty from "../../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
@@ -41,22 +34,20 @@ import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
 import GatherFromTerrainWater from "../../gather/GatherFromTerrainWater";
 import Idle from "../../other/Idle";
+import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
 import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
 import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
 import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
-import AddDifficulty from "../../core/AddDifficulty";
-import { terrainDescriptions } from "game/tile/Terrains";
-import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
 
 export default class AcquireItem extends AcquireBase {
 
-	private static readonly terrainResourceSearchCache: Map<ItemType, ITerrainResourceSearch[]> = new Map();
-	private static readonly terrainWaterSearchCache: Map<ItemType, ITerrainWaterSearch[]> = new Map();
-	private static readonly doodadSearchCache: Map<ItemType, DoodadSearchMap> = new Map();
-	private static readonly creatureSearchCache: Map<ItemType, CreatureSearch> = new Map();
+	private static readonly terrainResourceSearchCache = new Map<ItemType, ITerrainResourceSearch[]>();
+	private static readonly terrainWaterSearchCache = new Map<ItemType, ITerrainWaterSearch[]>();
+	private static readonly doodadSearchCache = new Map<ItemType, DoodadSearchMap>();
+	private static readonly creatureSearchCache = new Map<ItemType, CreatureSearch>();
 
 	constructor(private readonly itemType: ItemType, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();
@@ -126,7 +117,7 @@ export default class AcquireItem extends AcquireBase {
 		}
 
 		if (itemDescription) {
-			if (itemDescription.recipe) {
+			if (itemDescription.recipe && itemDescription.craftable !== false) {
 				if (this.options.allowCraftingForUnmetRequiredDoodads ||
 					!itemDescription.recipe.requiredDoodads ||
 					(itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
@@ -168,7 +159,7 @@ export default class AcquireItem extends AcquireBase {
 						}
 					}
 
-					const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", (doodad) => doodad.getLiquidGatherType() !== undefined);
+					const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", doodad => doodad.getLiquidGatherType() !== undefined);
 					for (const doodad of doodads) {
 						const liquidGatherType = doodad.getLiquidGatherType()!;
 						if (returnOnUseAndDecayItemDescription.liquidGather?.[liquidGatherType] !== this.itemType) {
@@ -227,14 +218,14 @@ export default class AcquireItem extends AcquireBase {
 								{
 									genericAction: {
 										action: GatherLiquid,
-										args: (context) => {
+										args: context => {
 											const item = context.getData(itemContextDataKey);
-											if (!item?.isValid()) {
+											if (!item?.isValid) {
 												this.log.warn("Invalid water container");
 												return ObjectiveResult.Restart;
 											}
 
-											return [item] as ActionArguments<typeof GatherLiquid>;
+											return [item] as ActionArgumentsOf<typeof GatherLiquid>;
 										},
 									},
 								})
@@ -270,7 +261,7 @@ export default class AcquireItem extends AcquireBase {
 			}
 
 			if (!exclude && this.itemType !== ItemType.PlantRoots) {
-				const resolvedTypes: Map<TerrainType, ITerrainResourceSearch[]> = new Map();
+				const resolvedTypes = new Map<TerrainType, ITerrainResourceSearch[]>();
 
 				const unresolvedTypes: TerrainType[] = Array.from(Enums.values(TerrainType));
 
@@ -402,7 +393,7 @@ export default class AcquireItem extends AcquireBase {
 					// todo: add
 				}
 
-				const searchMap: Map<GrowingStage, number> = new Map();
+				const searchMap = new Map<GrowingStage, number>();
 
 				resolvedTypes.set(doodadType, searchMap);
 
@@ -484,7 +475,7 @@ export default class AcquireItem extends AcquireBase {
 			for (const creatureType of Enums.values(CreatureType)) {
 				if (creatureType !== CreatureType.Shark) {
 					const corpseDescription = corpseDescriptions[creatureType];
-					if (corpseDescription && corpseDescription.resource) {
+					if (corpseDescription?.resource) {
 						for (const resource of corpseDescription.resource) {
 							if (resource.item === this.itemType) {
 								let itemTypes = map.get(creatureType);

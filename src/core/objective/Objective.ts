@@ -1,31 +1,20 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Creature from "game/entity/creature/Creature";
-import type { ILog } from "utilities/Log";
-import { nullLog } from "utilities/Log";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type { ILog } from "@wayward/utilities/Log";
+import { nullLog } from "@wayward/utilities/Log";
 
 import type Context from "../context/Context";
 import { ContextDataType } from "../context/IContext";
 import { ReserveType } from "../ITars";
 import type { HashCodeFiltering, IObjective, ObjectiveExecutionResult } from "./IObjective";
-import type Item from "game/item/Item";
-import { LoggerUtilities } from "../../utilities/LoggerUtilities";
+import type Item from "@wayward/game/game/item/Item";
+import type { LoggerUtilities } from "../../utilities/LoggerUtilities";
 import { PlanningAccuracy } from "../ITarsOptions";
 
 export default abstract class Objective implements IObjective {
 
 	private static uuid = 0;
 
-	public static reset() {
+	public static reset(): void {
 		this.uuid = 0;
 	}
 
@@ -69,7 +58,7 @@ export default abstract class Objective implements IObjective {
 		return this._log ?? nullLog;
 	}
 
-	public ensureLogger(loggerUtilities: LoggerUtilities) {
+	public ensureLogger(loggerUtilities: LoggerUtilities): void {
 		if (this._log === undefined) {
 			this.setLogger(loggerUtilities.createLog(this.getName()));
 		}
@@ -82,9 +71,9 @@ export default abstract class Objective implements IObjective {
 	public getHashCode(context: Context | undefined, skipContextDataKey?: boolean): string {
 		let hashCode = this.getIdentifier(context);
 
-		if (hashCode.includes("[object")) {
-			console.warn("Invalid objective identifier", hashCode);
-		}
+		// if (hashCode.includes("[object")) {
+		// 	console.warn("Invalid objective identifier", hashCode);
+		// }
 
 		// greatly increases accuracy at a cost of performance
 		if (context && this.includePositionInHashCode !== false && (this.includePositionInHashCode || context.options.planningAccuracy === PlanningAccuracy.Accurate)) {
@@ -146,7 +135,7 @@ export default abstract class Objective implements IObjective {
 		}
 	}
 
-	public setStatus(status: IObjective | (() => string) | string) {
+	public setStatus(status: IObjective | (() => string) | string): this {
 		this._status = status;
 		return this;
 	}
@@ -192,12 +181,12 @@ export default abstract class Objective implements IObjective {
 		return false;
 	}
 
-	public overrideDifficulty(difficulty: number | undefined) {
+	public overrideDifficulty(difficulty: number | undefined): this {
 		this._overrideDifficulty = difficulty;
 		return this;
 	}
 
-	public passOverriddenDifficulty(objective: Objective) {
+	public passOverriddenDifficulty(objective: Objective): this {
 		this._overrideDifficulty = objective._overrideDifficulty;
 		return this;
 	}
@@ -206,7 +195,7 @@ export default abstract class Objective implements IObjective {
 		return this._overrideDifficulty !== undefined;
 	}
 
-	public getDifficulty(context: Context) {
+	public getDifficulty(context: Context): number {
 		if (this._overrideDifficulty !== undefined) {
 			return this._overrideDifficulty;
 		}
@@ -218,13 +207,13 @@ export default abstract class Objective implements IObjective {
 	 * Called when the player moves while this objective is running
 	 */
 	public async onMove(context: Context, ignoreCreature?: Creature): Promise<IObjective | boolean> {
-		const walkPath = context.human.walkPath;
+		const walkPath = context.human.walkToInProgress;
 		if (walkPath) {
 			// interrupt if an npc or creature moved along our walk path (only close point)
 			for (let i = 0; i < Math.min(10, walkPath.path.length); i++) {
 				const point = walkPath.path[i];
 				const tile = context.island.getTile(point.x, point.y, context.human.z);
-				if ((tile.npc !== undefined && tile.npc !== context.human) || (tile.creature && !tile.creature.isTamed() && tile.creature !== ignoreCreature)) {
+				if ((tile.npc !== undefined && tile.npc !== context.human) || (tile.creature && !tile.creature.isTamed && tile.creature !== ignoreCreature)) {
 					this.log.info("NPC or creature moved along walk path, recalculating");
 					return true;
 				}
@@ -238,19 +227,19 @@ export default abstract class Objective implements IObjective {
 	 * For AcquireItem objectives, the key will be set to the item once it's acquired
 	 * For objectives that are going to use an item, this will change how context.getAcquiredItem() works
 	 */
-	public setContextDataKey(contextDataKey: string) {
+	public setContextDataKey(contextDataKey: string): this {
 		this.contextDataKey = contextDataKey;
 		return this;
 	}
 
-	public shouldKeepInInventory() {
+	public shouldKeepInInventory(): boolean {
 		return this._shouldKeepInInventory ?? false;
 	}
 
 	/**
 	 * Marks that the acquired item should be kept in the inventory even when the player is overweight
 	 */
-	public keepInInventory() {
+	public keepInInventory(): this {
 		this._shouldKeepInInventory = true;
 		return this;
 	}
@@ -258,19 +247,19 @@ export default abstract class Objective implements IObjective {
 	/**
 	 * Set the reserve type for the acquired item
 	 */
-	public setReserveType(reserveType: ReserveType | undefined) {
+	public setReserveType(reserveType: ReserveType | undefined): this {
 		this.reserveType = reserveType;
 		return this;
 	}
 
-	public passAcquireData(objective: Objective, reserveType?: ReserveType) {
+	public passAcquireData(objective: Objective, reserveType?: ReserveType): this {
 		this.contextDataKey = objective.contextDataKey;
 		this._shouldKeepInInventory = objective._shouldKeepInInventory;
 		this.reserveType = reserveType ?? objective.reserveType;
 		return this;
 	}
 
-	public passShouldKeepInInventory(objective: Objective) {
+	public passShouldKeepInInventory(objective: Objective): this {
 		this._shouldKeepInInventory = objective._shouldKeepInInventory;
 		return this;
 	}

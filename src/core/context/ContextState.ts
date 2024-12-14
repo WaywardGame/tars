@@ -1,18 +1,7 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import { ReserveType } from "../ITars";
-import { HashCodeFiltering } from "../objective/IObjective";
+import type { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import type { ReserveType } from "../ITars";
+import type { HashCodeFiltering } from "../objective/IObjective";
 
 export default class ContextState {
 
@@ -118,7 +107,7 @@ export default class ContextState {
 		}
 	}
 
-	public reset() {
+	public reset(): void {
 		this.depth = 0;
 		this.includeHashCode = false;
 		this.minimumAcceptedDifficulty = undefined;
@@ -137,7 +126,7 @@ export default class ContextState {
 		return this.data?.get(type);
 	}
 
-	public set<T = any>(type: string, value: T | undefined, trackUndefined?: boolean) {
+	public set<T = any>(type: string, value: T | undefined, trackUndefined?: boolean): void {
 		if (value !== undefined || trackUndefined) {
 			if (!this.data) {
 				this.data = new Map();
@@ -150,7 +139,7 @@ export default class ContextState {
 		}
 	}
 
-	public addReservedItemTypeForObjectiveHashCode(itemType: ItemType, objectiveHashCode: string = "") {
+	public addReservedItemTypeForObjectiveHashCode(itemType: ItemType, objectiveHashCode: string = ""): void {
 		this.reservedItemTypesPerObjectiveHashCode ??= new Map();
 
 		let existingSet = this.reservedItemTypesPerObjectiveHashCode.get(itemType);
@@ -163,7 +152,7 @@ export default class ContextState {
 		}
 	}
 
-	public addReservedItemForObjectiveHashCode(item: Item, objectiveHashCode: string) {
+	public addReservedItemForObjectiveHashCode(item: Item, objectiveHashCode: string): void {
 		this.addReservedItemTypeForObjectiveHashCode(item.type, objectiveHashCode);
 
 		this.reservedItemsPerObjectiveHashCode ??= new Map();

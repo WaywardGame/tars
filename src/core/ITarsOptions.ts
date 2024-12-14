@@ -1,14 +1,4 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
+import Deity from "@wayward/game/game/deity/Deity";
 import { TreasureHunterType } from "../modes/TreasureHunter";
 import { TarsMode } from "./ITars";
 
@@ -16,100 +6,118 @@ import { TarsMode } from "./ITars";
  * List of options
  */
 export interface ITarsOptions {
-    mode: TarsMode;
+	mode: TarsMode;
 
-    stayHealthy: boolean;
-    allowCaves: boolean;
-    allowBackpacks: boolean;
+	stayHealthy: boolean;
+	allowCaves: boolean;
+	allowBackpacks: boolean;
 
-    lockInventory: boolean;
-    lockEquipment: boolean;
-    useProtectedItems: TarsUseProtectedItems;
-    useProtectedItemsForEquipment: boolean;
+	lockInventory: boolean;
+	lockEquipment: boolean;
+	useProtectedItems: TarsUseProtectedItems;
+	useProtectedItemsForEquipment: boolean;
 
-    goodCitizen: boolean;
+	deity: Deity | null;
 
-    recoverThresholdHealth: number;
-    recoverThresholdStamina: number;
-    recoverThresholdHunger: number;
-    recoverThresholdThirst: number;
-    recoverThresholdThirstFromMax: number;
+	goodCitizen: boolean;
 
-    survivalExploreIslands: boolean;
-    survivalUseOrbsOfInfluence: boolean;
-    survivalReadBooks: boolean;
-    survivalClearSwamps: boolean;
-    survivalOrganizeBase: boolean;
-    survivalMaintainLowDifficulty: boolean;
+	recoverThresholdHealth: number;
+	recoverThresholdStamina: number;
+	recoverThresholdHunger: number;
+	recoverThresholdThirst: number;
+	recoverThresholdThirstFromMax: number;
 
-    gardenerOnlyEdiblePlants: boolean;
+	survivalExploreIslands: boolean;
+	survivalUseOrbsOfInfluence: boolean;
+	survivalReadBooks: boolean;
+	survivalClearSwamps: boolean;
+	survivalOrganizeBase: boolean;
+	survivalStartWaterSources: boolean;
+	survivalMaintainLowDifficulty: boolean;
 
-    harvesterOnlyUseHands: boolean;
+	gardenerOnlyEdiblePlants: boolean;
 
-    treasureHunterPrecognition: boolean;
-    treasureHunterType: TreasureHunterType;
+	harvesterOnlyUseHands: boolean;
 
-    planningAccuracy: PlanningAccuracy;
+	treasureHunterPrecognition: boolean;
+	treasureHunterType: TreasureHunterType;
 
-    quantumBurst: boolean;
-    debugLogging: boolean;
-    navigationOverlays: boolean;
-    freeze: boolean;
+	planningAccuracy: PlanningAccuracy;
+
+	quantumBurst: boolean;
+
+	limitGroundItemSearch: boolean;
+	limitDisassembleItemSearch: boolean;
+
+	debugLogging: boolean;
+	navigationOverlays: boolean;
+	freeze: boolean;
+	preventNotes: boolean;
+	slowMode: boolean;
 }
 
 export enum TarsUseProtectedItems {
-    No,
-    Yes,
-    YesWithBreakCheck,
+	No,
+	Yes,
+	YesWithBreakCheck,
 }
 
 export enum PlanningAccuracy {
-    Simple,
-    Accurate,
+	Simple,
+	Accurate,
 }
 
 export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITarsOptions {
-    return {
-        mode: TarsMode.Survival,
+	return {
+		mode: TarsMode.Survival,
 
-        stayHealthy: true,
-        allowCaves: false,
-        allowBackpacks: true,
+		stayHealthy: true,
+		allowCaves: false,
+		allowBackpacks: true,
 
-        lockInventory: false,
-        lockEquipment: false,
-        useProtectedItems: TarsUseProtectedItems.No,
-        useProtectedItemsForEquipment: true,
+		lockInventory: false,
+		lockEquipment: false,
+		useProtectedItems: TarsUseProtectedItems.No,
+		useProtectedItemsForEquipment: true,
 
-        goodCitizen: isWebWorker ? false : true,
+		deity: Deity.Chaos,
 
-        recoverThresholdHealth: 30,
-        recoverThresholdStamina: 20,
-        recoverThresholdHunger: 8,
-        recoverThresholdThirst: 10,
-        recoverThresholdThirstFromMax: -10,
+		goodCitizen: isWebWorker ? false : true,
 
-        survivalExploreIslands: true,
-        survivalUseOrbsOfInfluence: true,
-        survivalReadBooks: true,
-        survivalClearSwamps: true,
-        survivalOrganizeBase: true,
-        survivalMaintainLowDifficulty: false,
+		recoverThresholdHealth: 30,
+		recoverThresholdStamina: 20,
+		recoverThresholdHunger: 8,
+		recoverThresholdThirst: 10,
+		recoverThresholdThirstFromMax: -10,
 
-        gardenerOnlyEdiblePlants: true,
+		survivalExploreIslands: true,
+		survivalUseOrbsOfInfluence: true,
+		survivalReadBooks: true,
+		survivalClearSwamps: true,
+		survivalOrganizeBase: true,
+		survivalStartWaterSources: true,
+		survivalMaintainLowDifficulty: false,
 
-        harvesterOnlyUseHands: false,
+		gardenerOnlyEdiblePlants: true,
 
-        treasureHunterPrecognition: false,
-        treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
+		harvesterOnlyUseHands: false,
 
-        planningAccuracy: PlanningAccuracy.Accurate,
+		treasureHunterPrecognition: false,
+		treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
 
-        quantumBurst: false,
-        debugLogging: false,
-        navigationOverlays: false,
-        freeze: false,
+		planningAccuracy: PlanningAccuracy.Accurate,
 
-        ...initialOptions,
-    };
+		limitGroundItemSearch: true,
+		limitDisassembleItemSearch: true,
+
+		quantumBurst: false,
+
+		debugLogging: false,
+		navigationOverlays: false,
+		freeze: false,
+		preventNotes: true,
+		slowMode: false,
+
+		...initialOptions,
+	};
 }

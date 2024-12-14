@@ -1,59 +1,46 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import { TurnMode } from "@wayward/game/game/IGame";
+import { BiomeType } from "@wayward/game/game/biome/IBiome";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import type { IStat, IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
-import { AiType } from "game/entity/IEntity";
-import { EquipType } from "game/entity/IHuman";
-import type { IStat, IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
-import { TurnMode } from "game/IGame";
-import { ItemType } from "game/item/IItem";
-import { CreatureType } from "game/entity/creature/ICreature";
-import { BiomeType } from "game/biome/IBiome";
-
+import { AiType } from "@wayward/game/game/entity/ai/AI";
+import type { IInventoryItems } from "../core/ITars";
 import type Context from "../core/context/Context";
 import { ContextDataType, MovingToNewIslandState } from "../core/context/IContext";
+import type { ITarsMode } from "../core/mode/IMode";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
 import AcquireFood from "../objectives/acquire/item/AcquireFood";
+import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
+import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
 import AcquireWaterContainer from "../objectives/acquire/item/specific/AcquireWaterContainer";
 import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
 import Lambda from "../objectives/core/Lambda";
+import MoveToTarget from "../objectives/core/MoveToTarget";
 import Restart from "../objectives/core/Restart";
-import BuildItem from "../objectives/other/item/BuildItem";
-import EquipItem from "../objectives/other/item/EquipItem";
 import Idle from "../objectives/other/Idle";
-import ReinforceItem from "../objectives/other/item/ReinforceItem";
-import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import UpgradeInventoryItem from "../objectives/other/UpgradeInventoryItem";
+import HuntCreatures from "../objectives/other/creature/HuntCreatures";
+import StartWaterSourceDoodad from "../objectives/other/doodad/StartWaterSourceDoodad";
+import BuildItem from "../objectives/other/item/BuildItem";
+import CheckDecayingItems from "../objectives/other/item/CheckDecayingItems";
+import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
+import EquipItem from "../objectives/other/item/EquipItem";
+import ReinforceItem from "../objectives/other/item/ReinforceItem";
 import RecoverHealth from "../objectives/recover/RecoverHealth";
 import RecoverHunger from "../objectives/recover/RecoverHunger";
 import DrainSwamp from "../objectives/utility/DrainSwamp";
-import MoveToNewIsland from "../objectives/utility/moveTo/MoveToNewIsland";
 import OrganizeBase from "../objectives/utility/OrganizeBase";
 import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import AcquireUseOrbOfInfluence from "../objectives/acquire/item/specific/AcquireUseOrbOfInfluence";
-import CheckDecayingItems from "../objectives/other/item/CheckDecayingItems";
-import HuntCreatures from "../objectives/other/creature/HuntCreatures";
 import PlantSeeds from "../objectives/utility/PlantSeeds";
-import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
-import type { ITarsMode } from "../core/mode/IMode";
-import { IInventoryItems } from "../core/ITars";
-import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
-import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
-import MoveToTarget from "../objectives/core/MoveToTarget";
+import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
 import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
+import MoveToNewIsland from "../objectives/utility/moveTo/MoveToNewIsland";
 import { BaseMode } from "./BaseMode";
-import Fish from "../objectives/other/tile/Fish";
-import StartWaterSourceDoodad from "../objectives/other/doodad/StartWaterSourceDoodad";
 
 /**
  * Survival mode
@@ -62,7 +49,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 	private finished: (success: boolean) => void;
 
-	public async initialize(_: Context, finished: (success: boolean) => void) {
+	public async initialize(_: Context, finished: (success: boolean) => void): Promise<void> {
 		this.finished = finished;
 	}
 
@@ -122,12 +109,18 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(...await this.getBuildAnotherChestObjectives(context));
 
+		// if (context.base.altar.length === 0) {
+		// 	objectives.push([new AcquireInventoryItem("altar"), new BuildItem()]);
+		// }
+
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
 
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase1, async (context, objectives) => {
-			for (const doodad of context.utilities.base.getWaterSourceDoodads(context)) {
-				objectives.push(new StartWaterSourceDoodad(doodad));
+			if (context.options.survivalStartWaterSources) {
+				for (const doodad of context.utilities.base.getWaterSourceDoodads(context)) {
+					objectives.push(new StartWaterSourceDoodad(doodad));
+				}
 			}
 
 			const seeds = context.utilities.item.getSeeds(context, true);
@@ -146,36 +139,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(new AcquireInventoryItem("heal"));
 
-		if (context.options.survivalMaintainLowDifficulty && context.utilities.creature.hasDecentEquipment(context)) {
-			// trigger once rep is below some limit
-			await this.runWhile(context, objectives,
-				"LoweringMalignity",
-				async (context) => context.island.getReputation() < 5000,
-				async (context, objectives) => {
-					// stop once rep is above 15k
-					if (context.island.getReputation() >= 15000) {
-						return;
-					}
-
-					objectives.push(new Fish());
-
-					objectives.push(new Restart());
-				});
-
-			// await this.runWhile(context, objectives,
-			// 	"LoweringMalignity",
-			// 	async (context) => context.island.getReputation() < -7500,
-			// 	async (context, objectives) => {
-			// 		// stop once rep is above 0
-			// 		if (context.island.getReputation() >= 0) {
-			// 			return;
-			// 		}
-
-			// 		objectives.push(new Fish());
-
-			// 		objectives.push(new Restart());
-			// 	});
-		}
+		// const deity = context.options.deity;
+		// if (deity !== undefined && deity !== null) {
+		// 	objectives.push(new DeitySacrifice(deity));
+		// }
 
 		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
 			(
@@ -232,9 +199,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			Extra objectives
 		*/
 
-		if (context.options.survivalUseOrbsOfInfluence) {
-			objectives.push(new AcquireUseOrbOfInfluence());
-		}
+		// todo: replace with rune stuff
+		// if (context.options.survivalUseOrbsOfInfluence) {
+		// 	objectives.push(new AcquireUseOrbOfInfluence());
+		// }
 
 		if (context.base.well.length === 0 && context.base.availableUnlimitedWellLocation !== undefined) {
 			// todo: only build a well if we find a good tile?
@@ -310,7 +278,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 					// and rember we are organizing until we're done!
 					await this.runWhile(context, objectives,
 						"OrganizeBase",
-						async (context) => context.utilities.base.getTilesWithItemsNearBase(context).totalCount > 20,
+						async context => context.utilities.base.getTilesWithItemsNearBase(context).totalCount > 20,
 						async () => {
 							const tiles = context.utilities.base.getTilesWithItemsNearBase(context);
 							objectives.push(new OrganizeBase(tiles.tiles));
@@ -320,7 +288,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 			if (safeToDrinkWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
-				objectives.push([new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterSourceDoodads: true, allowWaitingForWater: true }), new AnalyzeInventory()]);
+				objectives.push([
+					new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterSourceDoodads: true, allowWaitingForWater: true })
+						.setStatus("Gathering water before upgrade objectives"),
+					new AnalyzeInventory()]);
 			}
 		});
 
@@ -336,7 +307,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		// go on a killing spree once you have a good sword and shield
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase3, async (context, objectives) => {
 			const creatures = context.utilities.base.getNonTamedCreaturesNearBase(context)
-				.filter(creature => creature.hasAi(AiType.Hostile) || creature.hasAi(AiType.Hidden));
+				.filter(creature => creature.ai.has(AiType.Hostile) || creature.ai.has(AiType.Hidden));
 			if (creatures.length > 0) {
 				objectives.push(new HuntCreatures(creatures));
 			}
@@ -403,7 +374,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			objectives.push(new AcquireInventoryItem("backpack", { desiredCount: 2 }));
 		}
 
-		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenSword, ItemType.TinSword]));
+		this.addUpgradeItemObjectives(context, objectives, "equipSword", new Set([ItemType.WoodenShortSword, ItemType.TinShortSword]));
 		this.addUpgradeItemObjectives(context, objectives, "equipShield", new Set([ItemType.WoodenShield, ItemType.BarkShield, ItemType.TinShield]));
 		this.addUpgradeItemObjectives(context, objectives, "equipWaist", new Set([ItemType.LeatherBelt]));
 		this.addUpgradeItemObjectives(context, objectives, "equipNeck", new Set([ItemType.LeatherGorget, ItemType.TinBevor]));
@@ -443,7 +414,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			objectives.push([new AcquireInventoryItem("solarStill"), new BuildItem()]);
 		}
 
-		if (context.options.survivalExploreIslands && (!multiplayer.isConnected() || multiplayer.getOptions().allowTraveling)) {
+		if (context.options.survivalExploreIslands && (!multiplayer.isConnected || multiplayer.options.allowTraveling)) {
 			// move to a new island
 			const { safeToDrinkWaterContainers } = context.utilities.item.getWaterContainers(context);
 			const waterItemsNeeded = Math.max(4 - safeToDrinkWaterContainers.length, 0);
@@ -463,6 +434,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 						return ObjectiveResult.Complete;
 					}));
 
+				// eslint-disable-next-line no-fallthrough
 				case MovingToNewIslandState.Preparing:
 					// make a sail boat
 
@@ -527,7 +499,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			objectives.push(new OrganizeInventory());
 		}
 
-		if (!multiplayer.isConnected()) {
+		if (!multiplayer.isConnected) {
 			if (shouldUpgradeToLeather && game.getTurnMode() !== TurnMode.RealTime) {
 				objectives.push(new Lambda(async () => {
 					this.finished(true);
@@ -545,7 +517,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 	/**
 	 * Upgrades items if we haven't already upgraded them while on this island
 	 */
-	private addUpgradeItemObjectives(context: Context, objectives: Array<IObjective | IObjective[]>, inventoryItemKey: keyof IInventoryItems, fromItemTypes: Set<ItemType>) {
+	private addUpgradeItemObjectives(context: Context, objectives: Array<IObjective | IObjective[]>, inventoryItemKey: keyof IInventoryItems, fromItemTypes: Set<ItemType>): void {
 		const item = context.inventory[inventoryItemKey];
 		if (!item) {
 			// no existing item
@@ -598,10 +570,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		context: Context,
 		objectives: Array<IObjective | IObjective[]>,
 		id: ContextDataType,
-		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>) {
+		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>): Promise<void> {
 		return this.runWhile(context, objectives,
 			id,
-			async (context) => context.utilities.base.isNearBase(context),
+			async context => context.utilities.base.isNearBase(context),
 			determineObjectives);
 	}
 
@@ -610,7 +582,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		objectives: Array<IObjective | IObjective[]>,
 		id: string,
 		initialCondition: (context: Context) => Promise<boolean>,
-		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>) {
+		determineObjectives: (ontext: Context, objectives: Array<IObjective | IObjective[]>) => Promise<void>): Promise<void> {
 		const isContinuing = context.getDataOrDefault<boolean>(id, false);
 		if (!isContinuing && !await initialCondition(context)) {
 			return;

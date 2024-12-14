@@ -1,19 +1,8 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
-import type { ITileContainer } from "game/tile/ITerrain";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import type { ITileContainer } from "@wayward/game/game/tile/ITerrain";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -23,7 +12,7 @@ import SetContextData from "../contextData/SetContextData";
 import Lambda from "../core/Lambda";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class GatherFromGround extends Objective {
 
@@ -52,7 +41,7 @@ export default class GatherFromGround extends Objective {
 	// 	return true;
 	// }
 
-	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string) {
+	public override canIncludeContextHashCode(context: Context, objectiveHashCode: string): { objectiveHashCode: string; itemTypes: Set<ItemType> } {
 		return {
 			objectiveHashCode,
 			itemTypes: new Set([this.itemType]),
@@ -78,7 +67,7 @@ export default class GatherFromGround extends Objective {
 					.overrideDifficulty((prioritizeBaseItems && context.utilities.item.getBaseTileItems(context).has(item)) ? 5 : undefined)
 					.trackItem(item), // used to ensure each GatherFromGround objective tree contains a MoveToTarget objective
 				new SetContextData(this.contextDataKey, item),
-				new MoveItemIntoInventory(item, tile),
+				new MoveItemsIntoInventory(item, tile),
 			];
 		}
 
@@ -100,7 +89,7 @@ export default class GatherFromGround extends Objective {
 							if (item) {
 								objectives.push(new ReserveItems(item).passAcquireData(this).passObjectiveHashCode(objectiveHashCode));
 								objectives.push(new SetContextData(this.contextDataKey, item));
-								objectives.push(new MoveItemIntoInventory(item, tile));
+								objectives.push(new MoveItemsIntoInventory(item, tile));
 							}
 
 							return objectives;

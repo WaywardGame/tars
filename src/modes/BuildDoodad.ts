@@ -1,21 +1,10 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { EventBus } from "event/EventBuses";
-import { EventHandler } from "event/EventManager";
-import type Doodad from "game/doodad/Doodad";
-import type DoodadManager from "game/doodad/DoodadManager";
-import type { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import type Human from "game/entity/Human";
-import { doodadDescriptions } from "game/doodad/Doodads";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type DoodadManager from "@wayward/game/game/doodad/DoodadManager";
+import type { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import type Human from "@wayward/game/game/entity/Human";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
 
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
@@ -39,7 +28,7 @@ export class BuildDoodadMode implements ITarsMode {
 	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
 	}
 
-	public async initialize(context: Context, finished: (success: boolean) => void) {
+	public async initialize(context: Context, finished: (success: boolean) => void): Promise<void> {
 		this.finished = finished;
 		this.doodadTypes = context.utilities.doodad.getDoodadTypes(this.doodadTypeOrGroup);
 	}
@@ -50,7 +39,7 @@ export class BuildDoodadMode implements ITarsMode {
 
 		// const doodad = findDoodad(context, "BuildDoodad", (d: Doodad) => this.doodadTypes.has(d.type));
 		const doodad = this.doodad ? context.human.island.doodads.get(this.doodad) : undefined;
-		if (doodad && !doodad.isValid()) {
+		if (doodad && !doodad.isValid) {
 			this.doodad = undefined;
 		}
 
@@ -58,7 +47,7 @@ export class BuildDoodadMode implements ITarsMode {
 
 		if (doodad) {
 			const description = doodad.description;
-			if (description && description.lit !== undefined) {
+			if (description?.lit !== undefined) {
 				if (context.human.island.doodads.isGroup(this.doodadTypeOrGroup)) {
 					const litDescription = doodadDescriptions[description.lit];
 					if (litDescription && context.human.island.doodads.isInGroup(description.lit, this.doodadTypeOrGroup)) {
@@ -85,8 +74,7 @@ export class BuildDoodadMode implements ITarsMode {
 					return ObjectiveResult.Complete;
 				}));
 			}
-		}
-		else {
+		} else {
 			const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 			if (inventoryItem) {
 				objectives.push(new BuildItem(inventoryItem));
@@ -100,8 +88,8 @@ export class BuildDoodadMode implements ITarsMode {
 	}
 
 	@EventHandler(EventBus.DoodadManager, "create")
-	public onDoodadCreate(_: DoodadManager, doodad: Doodad, creator?: Human) {
-		if (creator === localPlayer && this.doodadTypes.has(doodad.type)) {
+	public onDoodadCreate(_: DoodadManager, doodad: Doodad, creator?: Human): void {
+		if (creator?.isLocalPlayer && this.doodadTypes.has(doodad.type)) {
 			this.doodad = doodad.id;
 		}
 	}

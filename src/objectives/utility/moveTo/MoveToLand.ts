@@ -1,14 +1,3 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
@@ -33,7 +22,7 @@ export default class MoveToLand extends Objective {
 
 		const navigation = context.utilities.navigation;
 
-		const target = context.getTile().findMatchingTile((tile) => {
+		const target = context.getTile().findMatchingTile(tile => {
 			const terrainDescription = tile.description;
 			if (terrainDescription && !terrainDescription.water &&
 				!navigation.isDisabled(tile) && navigation.getPenalty(tile) === 0) {

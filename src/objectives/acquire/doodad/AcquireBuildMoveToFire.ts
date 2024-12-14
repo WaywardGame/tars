@@ -1,18 +1,7 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import type { DoodadType } from "game/doodad/IDoodad";
-import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import Vector2 from "utilities/math/Vector2";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../../core/context/Context";
 import type { BaseInfoKey } from "../../../core/ITars";
@@ -41,7 +30,7 @@ export default class AcquireBuildMoveToFire extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return `Acquiring fire`;
+		return "Acquiring fire";
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {

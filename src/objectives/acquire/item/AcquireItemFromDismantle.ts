@@ -1,27 +1,17 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Stream from "@wayward/goodstream/Stream";
-import { ActionArguments, ActionType } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import type Item from "game/item/Item";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Dictionary from "language/Dictionary";
-import { ListEnder, TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
-import Dismantle from "game/entity/action/actions/Dismantle";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import Dismantle from "@wayward/game/game/entity/action/actions/Dismantle";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { ListEnder, TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
@@ -47,13 +37,14 @@ export default class AcquireItemFromDismantle extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		const translation = Stream.values(Array.from(this.dismantleItemTypes).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+		const translation = Array.from(this.dismantleItemTypes)
+			.map(itemType => Translation.nameOf(Dictionary.Item, itemType))
 			.collect(Translation.formatList, ListEnder.Or);
 
 		return `Acquiring ${Translation.nameOf(Dictionary.Item, this.itemType).getString()} by dismantling ${translation.getString()}`;
 	}
 
-	public override canIncludeContextHashCode() {
+	public override canIncludeContextHashCode(): boolean | Set<ItemType> {
 		return ItemUtilities.getRelatedItemTypes(this.itemType, RelatedItemType.Dismantle);
 	}
 
@@ -72,7 +63,7 @@ export default class AcquireItemFromDismantle extends Objective {
 
 		for (const itemType of this.dismantleItemTypes) {
 			const description = itemDescriptions[itemType];
-			if (!description || !description.dismantle) {
+			if (!description?.dismantle) {
 				continue;
 			}
 
@@ -118,7 +109,7 @@ export default class AcquireItemFromDismantle extends Objective {
 				}
 			}
 
-			if (context.human.isSwimming()) {
+			if (context.human.isSwimming) {
 				objectives.push(new MoveToLand());
 			}
 
@@ -128,9 +119,9 @@ export default class AcquireItemFromDismantle extends Objective {
 				{
 					genericAction: {
 						action: Dismantle,
-						args: (context) => {
+						args: context => {
 							const item = context.getData<Item>(itemContextDataKey);
-							if (!item?.isValid()) {
+							if (!item?.isValid) {
 								// treat this as an expected case
 								// the item was likely broken earlier in the execution tree
 								// this.log.warn(`Missing dismantle item ${item}. Bug in TARS pipeline, will fix itself`, hashCode);
@@ -140,7 +131,7 @@ export default class AcquireItemFromDismantle extends Objective {
 							let requiredItem: Item | undefined;
 							if (requiredItemHashCode) {
 								requiredItem = context.getData<Item>(requiredItemHashCode);
-								if (requiredItem && !requiredItem.isValid()) {
+								if (requiredItem && !requiredItem.isValid) {
 									// treat this as an expected case
 									// the item was likely broken earlier in the execution tree
 									// this.log.warn(`Missing required item "${requiredItem}" for dismantle. Bug in TARS pipeline, will fix itself. Hash code: ${requiredItemHashCode}`);
@@ -148,7 +139,7 @@ export default class AcquireItemFromDismantle extends Objective {
 								}
 							}
 
-							return [item, requiredItem] as ActionArguments<typeof Dismantle>;
+							return [item, requiredItem] as ActionArgumentsOf<typeof Dismantle>;
 						},
 					},
 				}).passAcquireData(this).setStatus(() => `Dismantling ${Translation.nameOf(Dictionary.Item, itemType).inContext(TextContext.Lowercase).getString()} for ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));

@@ -1,18 +1,8 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { ActionType } from "game/entity/action/IAction";
-import { IContainer, ItemType } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Eat from "game/entity/action/actions/Eat";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import Eat from "@wayward/game/game/entity/action/actions/Eat";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -23,7 +13,7 @@ import AcquireItem from "./AcquireItem";
 import AcquireItemForAction from "./AcquireItemForAction";
 import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
 import AddDifficulty from "../../core/AddDifficulty";
-import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
 
 export interface IAcquireFoodOptions {
 	onlyAllowBaseItems: boolean;
@@ -56,7 +46,7 @@ export default class AcquireFood extends Objective {
 				if (!context.island.items.isContainableInContainer(item, context.human.inventory)) {
 					if (context.utilities.item.foodItemTypes.has(item.type)) {
 						objectivePipelines.push([
-							new MoveItemIntoInventory(item).passAcquireData(this),
+							new MoveItemsIntoInventory(item).passAcquireData(this),
 						]);
 					}
 				}
@@ -88,7 +78,7 @@ export default class AcquireFood extends Objective {
 		return objectivePipelines;
 	}
 
-	public static getFoodRecipeObjectivePipelines(context: Context, eatFood: boolean) {
+	public static getFoodRecipeObjectivePipelines(context: Context, eatFood: boolean): IObjective[][] {
 		const objectivePipelines: IObjective[][] = [];
 
 		for (const itemType of context.utilities.item.foodItemTypes) {
@@ -126,7 +116,7 @@ export default class AcquireFood extends Objective {
 					objectivePipeline.push(new AcquireItemWithRecipe(itemType, recipe));
 				}
 
-				objectivePipelines.push(objectivePipeline)
+				objectivePipelines.push(objectivePipeline);
 			}
 		}
 

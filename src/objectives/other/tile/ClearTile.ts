@@ -1,17 +1,6 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Mine from "game/entity/action/actions/Mine";
-import Chop from "game/entity/action/actions/Chop";
-import Tile from "game/tile/Tile";
+import Mine from "@wayward/game/game/entity/action/actions/Mine";
+import Chop from "@wayward/game/game/entity/action/actions/Chop";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
@@ -23,7 +12,7 @@ import PickUpAllTileItems from "./PickUpAllTileItems";
 import ButcherCorpse from "../../interrupt/ButcherCorpse";
 
 export interface IClearTileOptions {
-    skipDoodad: boolean;
+	skipDoodad: boolean;
 }
 
 /**
@@ -31,52 +20,52 @@ export interface IClearTileOptions {
  */
 export default class ClearTile extends Objective {
 
-    constructor(private readonly target: Tile, private readonly options?: Partial<IClearTileOptions>) {
-        super();
-    }
+	constructor(private readonly target: Tile, private readonly options?: Partial<IClearTileOptions>) {
+		super();
+	}
 
-    public getIdentifier(): string {
-        return `ClearTile:${this.target.x},${this.target.y},${this.target.z}`;
-    }
+	public getIdentifier(): string {
+		return `ClearTile:${this.target.x},${this.target.y},${this.target.z}`;
+	}
 
-    public getStatus(): string | undefined {
-        return `Clearing tile ${this.target.x},${this.target.y},${this.target.z}`;
-    }
+	public getStatus(): string | undefined {
+		return `Clearing tile ${this.target.x},${this.target.y},${this.target.z}`;
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const objectives: IObjective[] = [
-            new PickUpAllTileItems(this.target),
-        ];
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const objectives: IObjective[] = [
+			new PickUpAllTileItems(this.target),
+		];
 
-        const tile = this.target;
+		const tile = this.target;
 
-        if (tile.npc || tile.creature || tile.isPlayerOnTile(false, true)) {
-            return ObjectiveResult.Impossible;
-        }
+		if (tile.npc || tile.creature || tile.isPlayerOnTile()) {
+			return ObjectiveResult.Impossible;
+		}
 
-        const tileType = tile.type;
-        const terrainDescription = tile.description;
-        if (terrainDescription && !terrainDescription.passable && !terrainDescription.water) {
-            objectives.push(
-                new ExecuteAction(Mine, [context.utilities.item.getBestToolForTerrainGather(context, tileType)]).setStatus("Destroying terrain"),
-                new Restart());
-        }
+		const tileType = tile.type;
+		const terrainDescription = tile.description;
+		if (terrainDescription && !terrainDescription.passable && !terrainDescription.water && !tile.isDeepHole) {
+			objectives.push(
+				new ExecuteAction(Mine, [context.utilities.item.getBestToolForTerrainGather(context, tileType)]).setStatus("Destroying terrain"),
+				new Restart());
+		}
 
-        if (!this.options?.skipDoodad && tile.doodad && !tile.doodad.canPickUp(context.human)) {
-            objectives.push(
-                new ExecuteAction(Chop, [context.utilities.item.getBestToolForDoodadGather(context, tile.doodad!)]).setStatus("Destroying doodad"),
-                new Restart(),
-            );
-        }
+		if (!this.options?.skipDoodad && tile.doodad && !tile.doodad.canPickUp(context.human)) {
+			objectives.push(
+				new ExecuteAction(Chop, [context.utilities.item.getBestToolForDoodadGather(context, tile.doodad!)]).setStatus("Destroying doodad"),
+				new Restart(),
+			);
+		}
 
-        if (context.utilities.tile.hasCorpses(tile) && context.inventory.butcher) {
-            objectives.push(
-                new ButcherCorpse(tile.corpses![0]!),
-                new Restart(),
-            );
-        }
+		if (context.utilities.tile.hasCorpses(tile) && context.inventory.butcher) {
+			objectives.push(
+				new ButcherCorpse(tile.corpses![0]!),
+				new Restart(),
+			);
+		}
 
-        return objectives;
-    }
+		return objectives;
+	}
 
 }

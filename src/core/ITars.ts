@@ -1,45 +1,34 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import type Island from "@wayward/game/game/island/Island";
+import type { IContainer, IItemDisassembly } from "@wayward/game/game/item/IItem";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type { ITerrainLoot } from "@wayward/game/game/tile/TerrainResources";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 
-import type Doodad from "game/doodad/Doodad";
-import type { GrowingStage } from "game/doodad/IDoodad";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
-import type { CreatureType } from "game/entity/creature/ICreature";
-import { StatusType } from "game/entity/IEntity";
-import { EquipType } from "game/entity/IHuman";
-import type Island from "game/island/Island";
-import type { IContainer, IItemDisassembly } from "game/item/IItem";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import type Item from "game/item/Item";
-import type { TerrainType } from "game/tile/ITerrain";
-import type { ITerrainLoot } from "game/tile/TerrainResources";
-import Tile from "game/tile/Tile";
-import { IVector3 } from "utilities/math/IVector";
-
-import { TarsOverlay } from "../ui/TarsOverlay";
-import { ActionUtilities } from "../utilities/ActionUtilities";
-import { BaseUtilities } from "../utilities/BaseUtilities";
-import { CreatureUtilities } from "../utilities/CreatureUtilities";
-import { DoodadUtilities } from "../utilities/DoodadUtilities";
-import { ItemUtilities } from "../utilities/ItemUtilities";
-import { LoggerUtilities } from "../utilities/LoggerUtilities";
-import { MovementUtilities } from "../utilities/MovementUtilities";
-import { ObjectUtilities } from "../utilities/ObjectUtilities";
-import { PlayerUtilities } from "../utilities/PlayerUtilities";
-import { TileUtilities } from "../utilities/TileUtilities";
-import Context from "./context/Context";
-import { IContext } from "./context/IContext";
-import { ITarsOptions } from "./ITarsOptions";
-import Navigation from "./navigation/Navigation";
+import { StatusType } from "@wayward/game/game/entity/status/IStatus";
+import type { TarsOverlay } from "../ui/TarsOverlay";
+import type { ActionUtilities } from "../utilities/ActionUtilities";
+import type { BaseUtilities } from "../utilities/BaseUtilities";
+import type { CreatureUtilities } from "../utilities/CreatureUtilities";
+import type { DoodadUtilities } from "../utilities/DoodadUtilities";
+import type { ItemUtilities } from "../utilities/ItemUtilities";
+import type { LoggerUtilities } from "../utilities/LoggerUtilities";
+import type { MovementUtilities } from "../utilities/MovementUtilities";
+import type { ObjectUtilities } from "../utilities/ObjectUtilities";
+import type { PlayerUtilities } from "../utilities/PlayerUtilities";
+import type { TileUtilities } from "../utilities/TileUtilities";
+import type Context from "./context/Context";
+import type { IContext } from "./context/IContext";
+import type { ITarsOptions } from "./ITarsOptions";
+import type Navigation from "./navigation/Navigation";
 
 export const tickSpeed = 333;
 
@@ -98,10 +87,10 @@ export interface IUtilities {
 	player: PlayerUtilities;
 	tile: TileUtilities;
 
-	ensureSailingMode(sailingMode: boolean): Promise<void>;
+	ensureSailingMode?(sailingMode: boolean): Promise<void>;
 }
 
-export const chestTypes: Map<ItemType, DoodadType> = new Map([
+export const chestTypes = new Map<ItemType, DoodadType>([
 	[ItemType.CopperChest, DoodadType.CopperChest],
 	[ItemType.IronChest, DoodadType.IronChest],
 	[ItemType.OrnateWoodenChest, DoodadType.OrnateWoodenChest],
@@ -110,6 +99,7 @@ export const chestTypes: Map<ItemType, DoodadType> = new Map([
 ]);
 
 export interface IBase {
+	altar: Doodad[];
 	anvil: Doodad[];
 	campfire: Doodad[];
 	chest: Doodad[];
@@ -142,6 +132,10 @@ export interface IBaseInfo {
 export type BaseInfoKey = Exclude<Exclude<keyof IBase, "buildAnotherChest">, "availableUnlimitedWellLocation">;
 
 export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
+	altar: {
+		doodadTypes: [DoodadTypeGroup.Altar],
+		allowMultiple: true,
+	},
 	anvil: {
 		doodadTypes: [DoodadTypeGroup.Anvil],
 		tryPlaceNear: "kiln",
@@ -159,12 +153,12 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 				return false;
 			}
 
-			if (context.options.goodCitizen && multiplayer.isConnected() && target.getBuilder() !== context.human) {
+			if (context.options.goodCitizen && multiplayer.isConnected && target.getBuilder() !== context.human) {
 				// prevent using chests placed by others
 				return false;
 			}
 
-			if (context.utilities.base.isTreasureChestLocation(context, target)) {
+			if (context.utilities.base.isTreasureChestLocation(context, target.tile)) {
 				// don't allow treasure chests to be base chests
 				return false;
 			}
@@ -232,6 +226,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
  * Note: knife is our sharpened
  */
 export interface IInventoryItems {
+	altar?: Item;
 	anvil?: Item;
 	axe?: Item;
 	backpack?: Item[];
@@ -322,6 +317,10 @@ export enum InventoryItemFlag {
 }
 
 export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo> = {
+	altar: {
+		itemTypes: [ItemTypeGroup.Altar],
+		requiredMinDur: 1,
+	},
 	anvil: {
 		itemTypes: [ItemTypeGroup.Anvil],
 		requiredMinDur: 1,
@@ -427,11 +426,11 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 	equipSword: {
 		itemTypes: [
 			// ItemType.BronzeSword,
-			ItemType.CopperSword,
-			ItemType.GoldSword,
-			ItemType.IronSword,
-			ItemType.WoodenSword,
-			ItemType.WroughtIronSword,
+			ItemType.CopperShortSword,
+			ItemType.GoldShortSword,
+			ItemType.IronShortSword,
+			ItemType.WoodenShortSword,
+			ItemType.WroughtIronShortSword,
 		],
 	},
 	fireKindling: {
@@ -462,7 +461,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 		},
 	},
 	food: {
-		itemTypes: (context) => Array.from(context.utilities.item.foodItemTypes),
+		itemTypes: context => Array.from(context.utilities.item.foodItemTypes),
 		flags: InventoryItemFlag.PreferHigherDecay,
 		allowMultiple: 5,
 	},
@@ -609,6 +608,7 @@ export const inventoryBuildItems: Array<keyof IInventoryItems> = [
 	"anvil",
 	"solarStill",
 	"sailboat",
+	"altar",
 ];
 
 export interface IBaseItemSearch {
@@ -666,7 +666,7 @@ export enum ReserveType {
 	/**
 	 * Hard means the item will be consumed
 	 */
-	Hard
+	Hard,
 }
 
 export interface IResetOptions {

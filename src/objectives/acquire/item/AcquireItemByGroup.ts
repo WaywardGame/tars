@@ -1,16 +1,5 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type { ItemType } from "game/item/IItem";
-import { ItemTypeGroup } from "game/item/IItem";
+import type { ItemType } from "@wayward/game/game/item/IItem";
+import { ItemTypeGroup } from "@wayward/game/game/item/IItem";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ItemUtilities } from "../../../utilities/ItemUtilities";
@@ -20,7 +9,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemByGroup extends AcquireBase {
 
-	private static readonly cache: Map<ItemTypeGroup, ItemType[]> = new Map();
+	private static readonly cache = new Map<ItemTypeGroup, ItemType[]>();
 
 	constructor(private readonly itemTypeGroup: ItemTypeGroup, private readonly options: Partial<IAcquireItemOptions> = {}) {
 		super();

@@ -1,20 +1,9 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import DoodadManager from "game/doodad/DoodadManager";
-import { doodadDescriptions } from "game/doodad/Doodads";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
+import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
+import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
@@ -64,7 +53,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 				let requiresFire = false;
 
 				const description = doodad.description;
-				if (description && description.lit !== undefined) {
+				if (description?.lit !== undefined) {
 					if (DoodadManager.isGroup(this.doodadTypeOrGroup)) {
 						const litDescription = doodadDescriptions[description.lit];
 						if (litDescription && DoodadManager.isInGroup(description.lit, this.doodadTypeOrGroup)) {

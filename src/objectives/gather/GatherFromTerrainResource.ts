@@ -1,23 +1,12 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import ItemManager from "game/item/ItemManager";
-import { TerrainType } from "game/tile/ITerrain";
-import { terrainDescriptions } from "game/tile/Terrains";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import ItemManager from "@wayward/game/game/item/ItemManager";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 
 import type Context from "../../core/context/Context";
-import { ITerrainResourceSearch, ITileLocation } from "../../core/ITars";
+import type { ITerrainResourceSearch, ITileLocation } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import AddDifficulty from "../core/AddDifficulty";
@@ -76,13 +65,13 @@ export default class GatherFromTerrainResource extends Objective {
 		return 10;
 	}
 
-	private processTerrainLocation(context: Context, objectivePipelines: IObjective[][], terrainSearch: ITerrainResourceSearch, tileLocation: ITileLocation, skipSmartCheck?: boolean) {
+	private processTerrainLocation(context: Context, objectivePipelines: IObjective[][], terrainSearch: ITerrainResourceSearch, tileLocation: ITileLocation, skipSmartCheck?: boolean): void {
 		const terrainDescription = terrainDescriptions[terrainSearch.type];
 		if (!terrainDescription) {
 			return;
 		}
 
-		// todo: debug solar still blocking wateR?
+		// todo: debug solar still blocking water?
 		if (!context.utilities.tile.canGather(context, tileLocation.tile)) {
 			return;
 		}

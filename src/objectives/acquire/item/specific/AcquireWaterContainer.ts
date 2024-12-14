@@ -1,20 +1,10 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { ActionArguments } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import OpenBottle from "game/entity/action/actions/OpenBottle";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import OpenBottle from "@wayward/game/game/entity/action/actions/OpenBottle";
+import { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
 import SetContextData from "../../../contextData/SetContextData";
 import ExecuteActionForItem, { ExecuteActionType } from "../../../core/ExecuteActionForItem";
@@ -51,14 +41,14 @@ export default class AcquireWaterContainer extends Objective {
 			{
 				genericAction: {
 					action: OpenBottle,
-					args: (context) => {
+					args: context => {
 						const item = context.getData(itemContextDataKey);
-						if (!item?.isValid()) {
+						if (!item?.isValid) {
 							this.log.warn(`Invalid message in a bottle item. ${messageInABottleItem}`);
 							return ObjectiveResult.Restart;
 						}
 
-						return [item] as ActionArguments<typeof OpenBottle>;
+						return [item] as ActionArgumentsOf<typeof OpenBottle>;
 					},
 				},
 			}).setStatus("Opening glass bottle"));

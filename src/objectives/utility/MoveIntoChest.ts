@@ -1,20 +1,8 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Stream from "@wayward/goodstream/Stream";
-import type { IContainer } from "game/item/IItem";
-import type Item from "game/item/Item";
-import { ListEnder } from "language/ITranslation";
-import Translation from "language/Translation";
-import Vector2 from "utilities/math/Vector2";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import { ListEnder } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -22,7 +10,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
 import BuildItem from "../other/item/BuildItem";
-import MoveItem from "../other/item/MoveItem";
+import MoveItemsFromContainer from "../other/item/MoveItemsFromContainer";
 import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export default class MoveIntoChest extends Objective {
@@ -40,7 +28,7 @@ export default class MoveIntoChest extends Objective {
 			return "Moving items into chests";
 		}
 
-		const translation = Stream.values(this.itemsToMove.map(item => item.getName()))
+		const translation = this.itemsToMove.map(item => item.getName())
 			.collect(Translation.formatList, ListEnder.And);
 
 		return `Moving ${translation.getString()} into chests`;
@@ -49,7 +37,7 @@ export default class MoveIntoChest extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const itemsToMove = this.itemsToMove ?? [this.getAcquiredItem(context)];
 		const firstItem = itemsToMove[0];
-		if (!firstItem?.isValid()) {
+		if (!firstItem?.isValid) {
 			this.log.warn("Invalid item to move");
 			return ObjectiveResult.Restart;
 		}
@@ -67,15 +55,10 @@ export default class MoveIntoChest extends Objective {
 			const targetContainer = chest as IContainer;
 			if (context.island.items.hasRoomInContainer(targetContainer, firstItem)) {
 				// at least 1 item fits in the chest
-				const objectives: IObjective[] = [];
-
-				objectives.push(new MoveToTarget(chest, true));
-
-				for (const item of itemsToMove) {
-					objectives.push(new MoveItem(item, targetContainer, chest));
-				}
-
-				objectivePipelines.push(objectives);
+				objectivePipelines.push([
+					new MoveToTarget(chest, true),
+					new MoveItemsFromContainer(itemsToMove as Item[], targetContainer, chest),
+				]);
 			}
 		}
 

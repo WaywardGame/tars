@@ -1,0 +1,17 @@
+{
+	"name": "@wayward/tars",
+	"private": true,
+	"version": "1.0.0",
+	"main": "out/TarsMod.js",
+	"types": "out/TarsMod.d.ts",
+	"scripts": {
+		"clean": "npx rimraf ./out ./tsconfig.*tsbuildinfo",
+		"build": "npx tsc --build --pretty",
+		"watch": "npx tsc --build --watch --pretty --preserveWatchOutput"
+	},
+	"devDependencies": {
+		"@wayward/types": "^2.13.5-beta",
+		"rimraf": "3.0.2",
+		"typescript": "^5.7.2"
+	}
+}

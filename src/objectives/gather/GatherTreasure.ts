@@ -1,138 +1,126 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { DoodadTypeGroup } from "game/doodad/IDoodad";
-import DrawnMap from "game/mapping/DrawnMap";
-import Lockpick from "game/entity/action/actions/Lockpick";
-import Cast from "game/entity/action/actions/Cast";
+import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import Cast from "@wayward/game/game/entity/action/actions/Cast";
+import Lockpick from "@wayward/game/game/entity/action/actions/Lockpick";
+import type DrawnMap from "@wayward/game/game/mapping/DrawnMap";
 
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
+import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import MoveToTarget from "../core/MoveToTarget";
 import ReserveItems from "../core/ReserveItems";
 import Restart from "../core/Restart";
-import MoveItemIntoInventory from "../other/item/MoveItemIntoInventory";
+import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 import UseItem from "../other/item/UseItem";
 import DigTile from "../other/tile/DigTile";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export interface IGatherTreasureOptions {
-    disableUnlocking: boolean;
-    disableGrabbingItems: boolean;
+	disableUnlocking: boolean;
+	disableGrabbingItems: boolean;
 }
 
 export default class GatherTreasure extends Objective {
 
-    constructor(private readonly drawnMap: DrawnMap, private readonly options?: Partial<IGatherTreasureOptions>) {
-        super();
-    }
+	constructor(private readonly drawnMap: DrawnMap, private readonly options?: Partial<IGatherTreasureOptions>) {
+		super();
+	}
 
-    public getIdentifier(): string {
-        return `GatherTreasure:${this.drawnMap}`;
-    }
+	public getIdentifier(): string {
+		return `GatherTreasure:${this.drawnMap}`;
+	}
 
-    public getStatus(): string | undefined {
-        return `Gathering treasure`;
-    }
+	public getStatus(): string | undefined {
+		return "Gathering treasure";
+	}
 
-    public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-        const treasures = this.drawnMap.getTreasure();
-        if (treasures.length === 0) {
-            return ObjectiveResult.Complete;
-        }
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const treasures = this.drawnMap.getTreasure();
+		if (treasures.length === 0) {
+			return ObjectiveResult.Complete;
+		}
 
-        const objectivePipelines: IObjective[][] = [];
+		const objectivePipelines: IObjective[][] = [];
 
-        for (const treasure of treasures) {
-            let objectives: IObjective[];
+		for (const treasure of treasures) {
+			let objectives: IObjective[];
 
-            const tile = context.human.island.getTile(treasure.x, treasure.y, this.drawnMap.position.z);
+			const tile = context.human.island.getTile(treasure.x, treasure.y, this.drawnMap.position.z);
 
-            if (this.drawnMap.isTreasureDiscovered(treasure)) {
-                const doodad = tile.doodad;
-                if (!doodad || doodad.crafterIdentifier) {
-                    continue;
-                }
+			if (this.drawnMap.isTreasureDiscovered(treasure)) {
+				const doodad = tile.doodad;
+				if (!doodad || doodad.crafterIdentifier) {
+					continue;
+				}
 
-                if (doodad.isInGroup(DoodadTypeGroup.LockedChest)) {
-                    if (this.options?.disableUnlocking) {
-                        continue;
-                    }
+				if (doodad.isInGroup(DoodadTypeGroup.LockedChest)) {
+					if (this.options?.disableUnlocking) {
+						continue;
+					}
 
-                    objectives = [
-                        new AcquireInventoryItem("lockPick"),
-                        new MoveToTarget(tile, true),
-                        new UseItem(Lockpick, context.inventory.lockPick),
-                    ];
+					objectives = [
+						new AcquireInventoryItem("lockPick"),
+						new MoveToTarget(tile, true),
+						new UseItem(Lockpick, context.inventory.lockPick),
+					];
 
-                } else if (doodad.containedItems && doodad.containedItems.length > 0) {
-                    if (this.options?.disableGrabbingItems) {
-                        continue;
-                    }
+				} else if (doodad.containedItems && doodad.containedItems.length > 0) {
+					if (this.options?.disableGrabbingItems) {
+						continue;
+					}
 
-                    objectives = [];
+					objectives = [];
 
-                    for (const item of doodad.containedItems) {
-                        objectives.push(
-                            new ReserveItems(item),
-                            new MoveItemIntoInventory(item),
-                        );
-                    }
+					for (const item of doodad.containedItems) {
+						objectives.push(
+							new ReserveItems(item),
+							new MoveItemsIntoInventory(item),
+						);
+					}
 
-                } else {
-                    continue;
-                }
+				} else {
+					continue;
+				}
 
-            } else {
-                // dig/cast the treasure out
-                objectives = [];
+			} else {
+				// dig/cast the treasure out
+				objectives = [];
 
-                const needFishingRod = tile.description?.water ? true : false;
-                if (needFishingRod) {
-                    objectives.push(new AcquireInventoryItem("fishing"));
-                }
+				const needFishingRod = tile.description?.water ? true : false;
+				if (needFishingRod) {
+					objectives.push(new AcquireInventoryItem("fishing"));
+				}
 
-                objectives.push(new AcquireInventoryItem("lockPick"));
+				objectives.push(new AcquireInventoryItem("lockPick"));
 
-                if (needFishingRod) {
-                    // if (context.inventory.fishing) {
-                    //     const ranged = context.inventory.fishing.description?.ranged ?? { range: 1 };
-                    //     const itemRange = ranged.range + (context.inventory.fishing?.magic.get(MagicalPropertyType.Range) ?? 0);
-                    //     const minRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "min");
-                    //     const maxRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "max");
+				if (needFishingRod) {
+					// if (context.inventory.fishing) {
+					//     const ranged = context.inventory.fishing.description?.ranged ?? { range: 1 };
+					//     const itemRange = ranged.range + (context.inventory.fishing?.magic.get(MagicalPropertyType.Range) ?? 0);
+					//     const minRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "min");
+					//     const maxRange = context.island.rangeFinder(itemRange, context.human.skill.get(SkillType.Fishing), "max");
 
-                    //     objectives.push(new MoveToTargetRange(target, minRange, maxRange));
-                    //     objectives.push(new UseItem(Cast, context.inventory.fishing));
+					//     objectives.push(new MoveToTargetRange(target, minRange, maxRange));
+					//     objectives.push(new UseItem(Cast, context.inventory.fishing));
 
-                    // } else {
-                    //     objectives.push(new Restart());
-                    // }
-                    objectives.push(new MoveToTarget(tile, true));
-                    objectives.push(new UseItem(Cast, context.inventory.fishing));
+					// } else {
+					//     objectives.push(new Restart());
+					// }
+					objectives.push(new MoveToTarget(tile, true));
+					objectives.push(new UseItem(Cast, context.inventory.fishing));
 
-                } else {
-                    objectives.push(new DigTile(tile));
-                }
-            }
+				} else {
+					objectives.push(new DigTile(tile));
+				}
+			}
 
-            // restart to cause a recalc, to double check that the treasure appeared
-            objectives.push(new Restart());
+			// restart to cause a recalc, to double check that the treasure appeared
+			objectives.push(new Restart());
 
-            objectivePipelines.push(objectives);
-        }
+			objectivePipelines.push(objectives);
+		}
 
-
-        return objectivePipelines;
-    }
+		return objectivePipelines;
+	}
 
 }

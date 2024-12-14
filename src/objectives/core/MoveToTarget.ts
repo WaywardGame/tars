@@ -1,38 +1,28 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Doodad from "game/doodad/Doodad";
-import Ride from "game/entity/action/actions/Ride";
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Creature from "game/entity/creature/Creature";
-import type { IStatMax } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
-import Item from "game/item/Item";
-import TileEvent from "game/tile/TileEvent";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
-import Human from "game/entity/Human";
-import Tile from "game/tile/Tile";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import Ride from "@wayward/game/game/entity/action/actions/Ride";
+import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import Creature from "@wayward/game/game/entity/creature/Creature";
+import type Human from "@wayward/game/game/entity/Human";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import type Item from "@wayward/game/game/item/Item";
+import Tile from "@wayward/game/game/tile/Tile";
+import type TileEvent from "@wayward/game/game/tile/TileEvent";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
-import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { MoveResult } from "../../utilities/MovementUtilities";
-import Idle from "../other/Idle";
 import EquipItem from "../other/item/EquipItem";
 import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
 import AddDifficulty from "./AddDifficulty";
+import ExecuteAction from "../core/ExecuteAction";
+import AscendDescend from "@wayward/game/game/entity/action/actions/AscendDescend";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
 // caves are scary
@@ -46,7 +36,7 @@ export interface IMoveToTargetOptions {
 	disableTracking: boolean;
 	allowBoat: boolean;
 	skipIfAlreadyThere: boolean;
-	idleIfAlreadyThere: boolean;
+	ascendDescend: boolean;
 
 	/**
 	 * Equip weapons when close to the target when it's a creature
@@ -61,8 +51,8 @@ export interface IMoveToTargetOptions {
 
 export default class MoveToTarget extends Objective {
 
-	private trackedCreature: Creature | undefined;
-	private trackedCorpse: Corpse | undefined;
+	private readonly trackedCreature: Creature | undefined;
+	private readonly trackedCorpse: Corpse | undefined;
 	private trackedItem: Item | undefined;
 
 	private trackedPosition: IVector3 | undefined;
@@ -116,9 +106,10 @@ export default class MoveToTarget extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		if (this.options?.skipIfAlreadyThere && this.target.x === tile.x && this.target.y === tile.y && this.target.z === tile.z) {
-			return ObjectiveResult.Complete;
-		}
+		// this doesn't take into account moveAdjacentToTarget
+		// if (this.options?.skipIfAlreadyThere && this.target.x === tile.x && this.target.y === tile.y && this.target.z === tile.z) {
+		// 	return ObjectiveResult.Complete;
+		// }
 
 		const endPositions = context.utilities.movement.getMovementEndPositions(context, this.target, this.moveAdjacentToTarget);
 		if (endPositions.length === 0) {
@@ -161,7 +152,7 @@ export default class MoveToTarget extends Objective {
 						new AddDifficulty(zChangeDifficulty),
 
 						// move to cave entrance
-						new MoveToTarget(context.island.getTile(oppositeZOrigin.x, oppositeZOrigin.y, tile.z), false, { ...this.options, idleIfAlreadyThere: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
+						new MoveToTarget(context.island.getTile(oppositeZOrigin.x, oppositeZOrigin.y, tile.z), false, { ...this.options, ascendDescend: true, changeZ: this.target.z }).passOverriddenDifficulty(this),
 
 						// move to target
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, skipZCheck: true }).passOverriddenDifficulty(this),
@@ -192,7 +183,7 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.trackedCreature && !this.trackedCreature.isValid()) {
+		if (this.trackedCreature && !this.trackedCreature.isValid) {
 			return ObjectiveResult.Complete;
 		}
 
@@ -211,7 +202,7 @@ export default class MoveToTarget extends Objective {
 			}
 
 			if (this.trackedCorpse || this.trackedItem) {
-				const decay = this.trackedCorpse?.decay ?? this.trackedItem?.decay;
+				const decay = this.trackedCorpse?.decay ?? this.trackedItem?.getDecayTime();
 				if (decay !== undefined && decay <= movementPath.path.length) {
 					// assuming manual turn mode, the corpse / item will decay by the time we arrive
 					return ObjectiveResult.Impossible;
@@ -248,7 +239,7 @@ export default class MoveToTarget extends Objective {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, context.human.z);
 					const terrainDescription = tile.description;
-					if (terrainDescription && terrainDescription.water) {
+					if (terrainDescription?.water) {
 						swimTiles++;
 					}
 				}
@@ -270,7 +261,7 @@ export default class MoveToTarget extends Objective {
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
 			const terrainDescription = tile.description;
-			if (terrainDescription && terrainDescription.water) {
+			if (terrainDescription?.water) {
 				return [
 					new UseItem(Ride, context.inventory.sailboat),
 					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
@@ -284,7 +275,7 @@ export default class MoveToTarget extends Objective {
 					const point = path[i];
 					const tile = context.island.getTile(point.x, point.y, this.target.z);
 					const terrainDescription = tile.description;
-					if (terrainDescription && terrainDescription.water) {
+					if (terrainDescription?.water) {
 						firstWaterTile = tile;
 						break;
 					}
@@ -327,8 +318,8 @@ export default class MoveToTarget extends Objective {
 				this.log.info(`Finished moving to target (${this.target.x},${this.target.y},${this.target.z})`);
 				context.setData(ContextDataType.Tile, context.human.tile);
 
-				if (movementPath === ObjectiveResult.Complete && this.options?.idleIfAlreadyThere && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
-					return new Idle({ force: true, canMoveToIdle: false });
+				if (movementPath === ObjectiveResult.Complete && this.options?.ascendDescend && context.human.z !== (this.options?.changeZ ?? this.target.z)) {
+					return new ExecuteAction(AscendDescend, []).setStatus("Ascend/Descend");
 				}
 
 				return ObjectiveResult.Complete;
@@ -338,36 +329,36 @@ export default class MoveToTarget extends Objective {
 	/**
 	 * Causes an interrupt if the item decays before we arrive.
 	 */
-	public trackItem(item: Item | undefined) {
+	public trackItem(item: Item | undefined): this {
 		this.trackedItem = item;
 
 		return this;
 	}
 
-	public onItemRemoved(context: Context, item: Item) {
+	public onItemRemoved(context: Context, item: Item): boolean {
 		return this.trackedItem === item;
 	}
 
-	public onCreatureRemoved(context: Context, creature: Creature) {
+	public onCreatureRemoved(context: Context, creature: Creature): boolean {
 		return this.trackedCreature === creature;
 	}
 
-	public onCorpseRemoved(context: Context, corpse: Corpse) {
+	public onCorpseRemoved(context: Context, corpse: Corpse): boolean {
 		return this.trackedCorpse === corpse;
 	}
 
 	/**
 	 * Called when the context human or creature moves
 	 */
-	public override async onMove(context: Context) {
+	public override async onMove(context: Context): Promise<boolean | IObjective | EquipItem> {
 		const trackedCreature = this.trackedCreature;
 		if (trackedCreature && this.trackedPosition) {
-			if (!trackedCreature.isValid()) {
+			if (!trackedCreature.isValid) {
 				this.log.info("Creature died");
 				return true;
 			}
 
-			if (trackedCreature.isTamed()) {
+			if (trackedCreature.isTamed) {
 				this.log.info("Creature became tamed");
 				return true;
 			}
@@ -426,7 +417,7 @@ export default class MoveToTarget extends Objective {
 		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
 			const terrainDescription = tile.description;
-			if (terrainDescription && terrainDescription.water) {
+			if (terrainDescription?.water) {
 				this.log.warn("Interrupting to use sail boat");
 				return true;
 			}

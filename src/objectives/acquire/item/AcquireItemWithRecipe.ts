@@ -1,42 +1,33 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import Craft from "@wayward/game/game/entity/action/actions/Craft";
+import type { IContainer, IRecipe } from "@wayward/game/game/item/IItem";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import type { IRequirementInfo } from "@wayward/game/game/item/IItemManager";
+import { WeightType } from "@wayward/game/game/item/IItemManager";
+import type Item from "@wayward/game/game/item/Item";
+import type ItemRecipeRequirementChecker from "@wayward/game/game/item/ItemRecipeRequirementChecker";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
 
-import type { IContainer, IRecipe } from "game/item/IItem";
-import { ItemType, ItemTypeGroup } from "game/item/IItem";
-import type { IRequirementInfo } from "game/item/IItemManager";
-import { WeightType } from "game/item/IItemManager";
-import type Item from "game/item/Item";
-import type ItemRecipeRequirementChecker from "game/item/ItemRecipeRequirementChecker";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
-import Craft from "game/entity/action/actions/Craft";
-import { ActionArguments } from "game/entity/action/IAction";
-
+import Message from "@wayward/game/language/dictionary/Message";
+import { ReserveType } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
-import { ReserveType } from "../../../core/ITars";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../../core/objective/IObjective";
-import { IGetItemOptions, ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
+import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
+import { ObjectiveResult } from "../../../core/objective/IObjective";
+import type { IGetItemOptions } from "../../../utilities/ItemUtilities";
+import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
 import SetContextData from "../../contextData/SetContextData";
+import AddDifficulty from "../../core/AddDifficulty";
 import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import MoveToTarget from "../../core/MoveToTarget";
 import ReserveItems from "../../core/ReserveItems";
+import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
 import CompleteRequirements from "../../utility/CompleteRequirements";
 import MoveToLand from "../../utility/moveTo/MoveToLand";
 import AcquireBase from "./AcquireBase";
 import AcquireItem from "./AcquireItem";
 import AcquireItemByGroup from "./AcquireItemByGroup";
-import AddDifficulty from "../../core/AddDifficulty";
-import Message from "language/dictionary/Message";
-import MoveItemIntoInventory from "../../other/item/MoveItemIntoInventory";
 
 // TARS recomputes and fixes itself when this happens
 const expectedCraftMessages = new Set<Message>([Message.ActionCraftYouLackTheRequirements]);
@@ -180,7 +171,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 					const moveIfInIntermediateChest = (item: Item | undefined) => {
 						if (item) {
 							if (context.island.items.isContainableInContainer(item, intermediateChest as IContainer)) {
-								objectives.push(new MoveItemIntoInventory(item, intermediateChest.tile));
+								objectives.push(new MoveItemsIntoInventory(item, intermediateChest.tile));
 							}
 						}
 					};
@@ -224,7 +215,7 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 							// 	context.utilities.item.processRecipe(context, this.recipe, true, options) :
 							// 	context.utilities.item.processRecipe(context, this.recipe, false, options);
 
-							return [this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent] as ActionArguments<typeof Craft>;
+							return [this.itemType, checker.itemComponentsRequired, checker.itemComponentsConsumed, checker.itemBaseComponent] as ActionArgumentsOf<typeof Craft>;
 						},
 						expectedMessages: expectedCraftMessages,
 					},
@@ -235,13 +226,13 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 							checker.itemBaseComponent,
 						];
 						for (const item of items) {
-							if (item && item.isValid()) {
+							if (item?.isValid) {
 								// we failed to craft and one of our items broke
 								// restart instead of trying to craft again
 								return ObjectiveResult.Restart;
 							}
 						}
-					}
+					},
 				})
 				.passAcquireData(this)
 				.setStatus(() => `Crafting ${Translation.nameOf(Dictionary.Item, this.itemType).getString()}`));

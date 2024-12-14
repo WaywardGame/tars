@@ -1,22 +1,11 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import DoodadManager from "game/doodad/DoodadManager";
-import { DoodadType, DoodadTypeGroup } from "game/doodad/IDoodad";
-import { ActionType } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import { itemDescriptions } from "game/item/ItemDescriptions";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
-import Enums from "utilities/enum/Enums";
+import DoodadManager from "@wayward/game/game/doodad/DoodadManager";
+import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import { itemDescriptions } from "@wayward/game/game/item/ItemDescriptions";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
+import Enums from "@wayward/game/utilities/enum/Enums";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
@@ -24,7 +13,7 @@ import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForDoodad extends Objective {
 
-	private static readonly cache: Map<DoodadType | DoodadTypeGroup, ItemType[]> = new Map();
+	private static readonly cache = new Map<DoodadType | DoodadTypeGroup, ItemType[]>();
 
 	constructor(private readonly doodadTypeOrGroup: DoodadType | DoodadTypeGroup) {
 		super();
@@ -61,7 +50,7 @@ export default class AcquireItemForDoodad extends Objective {
 			for (const doodadType of doodadTypes) {
 				for (const itemType of Enums.values(ItemType)) {
 					const itemDescription = itemDescriptions[itemType];
-					if (itemDescription && itemDescription.onUse &&
+					if (itemDescription?.onUse &&
 						(itemDescription.onUse[ActionType.Build]?.type === doodadType || itemDescription.onUse[ActionType.PlaceDown]?.type === doodadType)) {
 						result.push(itemType);
 					}

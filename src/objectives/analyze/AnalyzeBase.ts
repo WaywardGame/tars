@@ -1,17 +1,5 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -19,6 +7,7 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { BaseInfoKey } from "../../core/ITars";
 import { baseInfo } from "../../core/ITars";
+import type Tile from "@wayward/types/definitions/game/game/tile/Tile";
 
 const baseDoodadDistanceSq = Math.pow(50, 2);
 
@@ -47,7 +36,7 @@ export default class AnalyzeBase extends Objective {
 				.filter(doodad => {
 					// verify the existing base doodad is still valid
 					// maybe we messed up some tiles next to it since when we placed it
-					if (!doodad.isValid() || !context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad)) {
+					if (!doodad.isValid || !context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad.tile)) {
 						changed = true;
 						this.log.info(`"${key}" was removed`);
 
@@ -67,12 +56,12 @@ export default class AnalyzeBase extends Objective {
 					targets = [];
 
 					const nearDoodads = context.base[placeNear];
-					const possiblePoints = AnalyzeBase.getNearPointsFromDoodads(nearDoodads);
+					const possiblePoints = AnalyzeBase.getNearTilesFromDoodads(context, nearDoodads);
 
 					for (const point of possiblePoints) {
 						const tile = context.island.getTileFromPoint(point);
 						const doodad = tile.doodad;
-						if (doodad && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad)) {
+						if (doodad && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad.tile)) {
 							targets.push(doodad);
 						}
 					}
@@ -81,7 +70,7 @@ export default class AnalyzeBase extends Objective {
 					// UUID for the key in order to ensure this always does a fresh scan
 					targets = info.findTargets ?
 						info.findTargets(context) :
-						context.utilities.object.findDoodads(context, `${this.getIdentifier()}:${this.getUniqueIdentifier()}`, doodad => doodad.builderIdentifier !== undefined && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad));
+						context.utilities.object.findDoodads(context, `${this.getIdentifier()}:${this.getUniqueIdentifier()}`, doodad => doodad.builderIdentifier !== undefined && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad.tile));
 				}
 
 				for (const target of targets) {
@@ -108,7 +97,7 @@ export default class AnalyzeBase extends Objective {
 		}
 
 		if (changed) {
-			let availableUnlimitedWellLocation: IVector3 | undefined;
+			let availableUnlimitedWellLocation: Tile | undefined;
 
 			const baseTiles = context.utilities.base.getBaseTiles(context);
 			for (const baseTile of baseTiles) {
@@ -124,7 +113,7 @@ export default class AnalyzeBase extends Objective {
 					context.base.availableUnlimitedWellLocation.x !== availableUnlimitedWellLocation.x ||
 					context.base.availableUnlimitedWellLocation.y !== availableUnlimitedWellLocation.y ||
 					context.base.availableUnlimitedWellLocation.z !== availableUnlimitedWellLocation.z)) {
-					context.base.availableUnlimitedWellLocation = availableUnlimitedWellLocation;
+					context.base.availableUnlimitedWellLocation = availableUnlimitedWellLocation.point;
 					this.log.info(`Found unlimited well location (${context.base.availableUnlimitedWellLocation.x}, ${context.base.availableUnlimitedWellLocation.y}, ${context.base.availableUnlimitedWellLocation.z})`);
 				}
 
@@ -143,17 +132,17 @@ export default class AnalyzeBase extends Objective {
 		return ObjectiveResult.Ignore;
 	}
 
-	public static getNearPointsFromDoodads(doodads: Doodad[]) {
-		return doodads.map(doodad => this.getNearPoints(doodad)).flat();
+	public static getNearTilesFromDoodads(context: Context, doodads: Doodad[]): Tile[] {
+		return doodads.map(doodad => this.getNearTiles(context, doodad.tile)).flat();
 	}
 
-	public static getNearPoints(point: IVector3): IVector3[] {
+	public static getNearTiles(context: Context, tile: Tile): Tile[] {
 		return [
-			{ x: point.x, y: point.y + 2, z: point.z },
-			{ x: point.x, y: point.y - 2, z: point.z },
-			{ x: point.x + 2, y: point.y, z: point.z },
-			{ x: point.x - 2, y: point.y, z: point.z },
-		];
+			{ x: tile.x, y: tile.y + 2, z: tile.z },
+			{ x: tile.x, y: tile.y - 2, z: tile.z },
+			{ x: tile.x + 2, y: tile.y, z: tile.z },
+			{ x: tile.x - 2, y: tile.y, z: tile.z },
+		].map(point => context.island.getTileFromPoint(point));
 	}
 
 }

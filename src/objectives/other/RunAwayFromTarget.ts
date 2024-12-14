@@ -1,29 +1,18 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Entity from "game/entity/Entity";
-import { Stat } from "game/entity/IStats";
-import type { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
+import type Entity from "@wayward/game/game/entity/Entity";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import type Context from "../../core/context/Context";
-import { IObjective, ObjectiveExecutionResult, ObjectiveResult } from "../../core/objective/IObjective";
+import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import MoveToTarget from "../core/MoveToTarget";
-import Tile from "game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 const safetyCheckDistance = 5;
 const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
 
 export default class RunAwayFromTarget extends Objective {
 
-	constructor(private readonly target: Entity | IVector3, private readonly maxRunAwayDistance = 30) {
+	constructor(private readonly target: Entity, private readonly maxRunAwayDistance = 30) {
 		super();
 	}
 
@@ -32,7 +21,7 @@ export default class RunAwayFromTarget extends Objective {
 	}
 
 	public getStatus(): string | undefined {
-		return `Running away from ${this.target instanceof Entity ? this.target.getName() : `(${this.target.x},${this.target.y},${this.target.z})`}`;
+		return `Running away from ${this.target.getName()}`;
 	}
 
 	public override isDynamic(): boolean {
@@ -47,10 +36,10 @@ export default class RunAwayFromTarget extends Objective {
 
 		// get a list of all nearby tiles that are open
 		const nearbyOpenTiles = context.human.tile.findMatchingTiles(
-			(tile) => {
+			tile => {
 				const terrainDescription = tile.description;
 				if (terrainDescription &&
-					((!terrainDescription.passable && !terrainDescription.water) || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
+					((!terrainDescription.passable && !terrainDescription.water) || tile.isDeepHole || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
 					return false;
 				}
 
@@ -61,7 +50,7 @@ export default class RunAwayFromTarget extends Objective {
 				return true;
 			},
 			{
-				canVisitTile: (nextTile) => Vector2.squaredDistance(context.human, nextTile) <= nearbyTilesDistanceSq,
+				canVisitTile: nextTile => Vector2.squaredDistance(context.human, nextTile) <= nearbyTilesDistanceSq,
 			},
 		);
 
@@ -83,7 +72,7 @@ export default class RunAwayFromTarget extends Objective {
 			score -= distance * 200;
 
 			for (const point of movementPath.path) {
-				const index = `${point.x},${point.y}`;
+				const index = `${point.x},${point.y} `;
 
 				let pointScore = scoreCache.get(index);
 				if (pointScore === undefined) {
@@ -94,7 +83,7 @@ export default class RunAwayFromTarget extends Objective {
 					pointScore += navigation.getPenalty(tile) * 10;
 
 					// try to avoid paths that has blocking things
-					if (tile.doodad?.blocksMove()) {
+					if (tile.doodad?.blocksMove || tile.isDeepHole) {
 						pointScore += 2000;
 					}
 
@@ -107,7 +96,7 @@ export default class RunAwayFromTarget extends Objective {
 
 					// use this method to walk all tiles along the path to calculate a "safety" score
 					tile.findMatchingTiles(
-						(tile) => {
+						tile => {
 							pointScore! += navigation.getPenalty(tile);
 
 							// creatures are scary
@@ -116,7 +105,7 @@ export default class RunAwayFromTarget extends Objective {
 							// }
 
 							// // add score for doodads and terrains because we would rather end up in an open area
-							// if (tile.doodad?.blocksMove()) {
+							// if (tile.doodad?.blocksMove) {
 							// 	pointScore! += 100;
 							// }
 
@@ -136,7 +125,7 @@ export default class RunAwayFromTarget extends Objective {
 							return true;
 						},
 						{
-							canVisitTile: (nextTile) => Vector2.squaredDistance(point, nextTile) <= safetyCheckDistanceSq,
+							canVisitTile: nextTile => Vector2.squaredDistance(point, nextTile) <= safetyCheckDistanceSq,
 						},
 					);
 

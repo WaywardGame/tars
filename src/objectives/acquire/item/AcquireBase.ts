@@ -1,15 +1,4 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type { ItemType } from "game/item/IItem";
+import type { ItemType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../core/context/Context";
 import type { IExecutionTree } from "../../../core/planning/IPlan";
@@ -20,7 +9,7 @@ import GatherFromCreature from "../../gather/GatherFromCreature";
 import GatherFromDoodad from "../../gather/GatherFromDoodad";
 import GatherFromGround from "../../gather/GatherFromGround";
 import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
-import { IObjective, IObjectivePriority } from "../../../core/objective/IObjective";
+import type { IObjective, IObjectivePriority } from "../../../core/objective/IObjective";
 
 export interface IAcquireItemOptions extends IGatherItemOptions {
 	disallowCreatureSearch: boolean;
@@ -104,7 +93,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 		return result;
 	}
 
-	private addResult(source: IObjectivePriority, destination: IObjectivePriority) {
+	private addResult(source: IObjectivePriority, destination: IObjectivePriority): void {
 		for (const key of Object.keys(source) as Array<keyof IObjectivePriority>) {
 			if (typeof (source[key]) === "number") {
 				(destination as any)[key] += source[key] as number;
@@ -120,7 +109,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	/**
 	 * Higher number = higher priority = it will be executed first
 	 */
-	private addGatherObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree) {
+	private addGatherObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree): void {
 		if (tree.objective instanceof GatherFromCreature) {
 			result.totalGatherObjectives++;
 			result.gatherObjectives.GatherFromCreature++;
@@ -152,7 +141,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	/**
 	 * Higher number = higher priority = it will be executed first
 	 */
-	private addAcquireObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree) {
+	private addAcquireObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree): void {
 		if (tree.objective.getName() === "UseProvidedItem") {
 			result.useProvidedItemObjectives++;
 		}

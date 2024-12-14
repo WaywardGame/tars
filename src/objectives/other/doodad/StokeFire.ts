@@ -1,16 +1,5 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import StokeFireAction from "game/entity/action/actions/StokeFire";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import StokeFireAction from "@wayward/game/game/entity/action/actions/StokeFire";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -19,12 +8,12 @@ import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import MoveToTarget from "../../core/MoveToTarget";
 
-import StartFire from "./StartFire";
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
 import { ReserveType } from "../../../core/ITars";
+import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
 import ExecuteAction from "../../core/ExecuteAction";
-import Item from "game/item/Item";
-import { ActionArguments } from "game/entity/action/IAction";
+import StartFire from "./StartFire";
 
 export default class StokeFire extends Objective {
 
@@ -60,14 +49,14 @@ export default class StokeFire extends Objective {
 
 		objectives.push(new MoveToTarget(doodad, true));
 
-		objectives.push(new ExecuteAction(StokeFireAction, (context) => {
+		objectives.push(new ExecuteAction(StokeFireAction, context => {
 			const kindling = context.getData<Item>(itemContextDataKey);
-			if (!kindling?.isValid()) {
+			if (!kindling?.isValid) {
 				this.log.warn("Invalid StokeFire kindling");
 				return ObjectiveResult.Restart;
 			}
 
-			return [kindling] as ActionArguments<typeof StokeFireAction>;
+			return [kindling] as ActionArgumentsOf<typeof StokeFireAction>;
 		}).setStatus(this));
 
 		return objectives;

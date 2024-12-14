@@ -1,37 +1,27 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Stream from "@wayward/goodstream/Stream";
-import type { AnyActionDescription } from "game/entity/action/IAction";
-import { ActionType } from "game/entity/action/IAction";
-import { ItemType } from "game/item/IItem";
-import { TerrainType } from "game/tile/ITerrain";
-import Dictionary from "language/Dictionary";
-import { ListEnder } from "language/ITranslation";
-import Translation from "language/Translation";
-import Item from "game/item/Item";
-import MoveItem from "game/entity/action/actions/MoveItem";
-import Harvest from "game/entity/action/actions/Harvest";
-import Butcher from "game/entity/action/actions/Butcher";
-import Chop from "game/entity/action/actions/Chop";
-import Dig from "game/entity/action/actions/Dig";
-import Mine from "game/entity/action/actions/Mine";
+import type { AnyActionDescription } from "@wayward/game/game/entity/action/IAction";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { ListEnder } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import type Item from "@wayward/game/game/item/Item";
+// import MoveItem from "@wayward/game/game/entity/action/actions/MoveItem";
+import Harvest from "@wayward/game/game/entity/action/actions/Harvest";
+import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
+import Chop from "@wayward/game/game/entity/action/actions/Chop";
+import Dig from "@wayward/game/game/entity/action/actions/Dig";
+import Mine from "@wayward/game/game/entity/action/actions/Mine";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { ReserveType } from "../../core/ITars";
-import { GetActionArguments } from "../../utilities/ActionUtilities";
-import Message from "language/dictionary/Message";
+import type { GetActionArguments } from "../../utilities/ActionUtilities";
+import type Message from "@wayward/game/language/dictionary/Message";
+import PickUpItem from "@wayward/game/game/entity/action/actions/PickUpItem";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 export enum ExecuteActionType {
 	Generic,
@@ -56,7 +46,7 @@ export interface IExecuteActionForItemOptions<T extends AnyActionDescription> {
 
 	genericAction: IExecuteActioGenericAction<T>;
 
-	preRetry: (context: Context) => ObjectiveResult | undefined,
+	preRetry: (context: Context) => ObjectiveResult | undefined;
 }
 
 export default class ExecuteActionForItem<T extends AnyActionDescription> extends Objective {
@@ -79,7 +69,8 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 	}
 
 	public getStatus(): string | undefined {
-		const translation = Stream.values(Array.from(this.itemTypes).map(itemType => Translation.nameOf(Dictionary.Item, itemType)))
+		const translation = Array.from(this.itemTypes)
+			.map(itemType => Translation.nameOf(Dictionary.Item, itemType))
 			.collect(Translation.formatList, ListEnder.Or);
 
 		return `Acquiring ${translation.getString()}`;
@@ -134,7 +125,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 				result = await this.executeActionForItem(context, this.itemTypes, {
 					action,
-					args: [this.options?.onlyGatherWithHands ? undefined : context.utilities.item.getBestToolForDoodadGather(context, doodad)]
+					args: [this.options?.onlyGatherWithHands ? undefined : context.utilities.item.getBestToolForDoodadGather(context, doodad)],
 				});
 
 				break;
@@ -155,7 +146,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 
 				result = await this.executeActionForItem(context, this.itemTypes, {
 					action,
-					args: [context.utilities.item.getBestToolForTerrainGather(context, tileType)]
+					args: [context.utilities.item.getBestToolForTerrainGather(context, tileType)],
 				});
 
 				break;
@@ -192,7 +183,7 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 	}
 
 	private async executeActionForItem<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult> {
-		let matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, action);
+		const matchingNewItem = await this.executeActionCompareInventoryItems(context, itemTypes, action);
 		if (typeof (matchingNewItem) === "number") {
 			return matchingNewItem;
 		}
@@ -212,23 +203,51 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			return ObjectiveResult.Complete;
 		}
 
-		const matchingTileItems = context.human.tile.containedItems?.filter(item => itemTypes.has(item.type));
-		if (matchingTileItems !== undefined && matchingTileItems.length > 0) {
+		const pickedUpOnCurrentTile = await this.tryPickUpItem(context, itemTypes, context.human.tile);
+		if (pickedUpOnCurrentTile !== undefined) {
+			return pickedUpOnCurrentTile;
+		}
+
+		const pickedUpOnFacingTile = await this.tryPickUpItem(context, itemTypes, context.human.facingTile);
+		if (pickedUpOnFacingTile !== undefined) {
+			return pickedUpOnFacingTile;
+		}
+
+		context.setData(this.contextDataKey, undefined);
+
+		return this.options?.preRetry?.(context) ?? ObjectiveResult.Pending;
+	}
+
+	private async executeActionCompareInventoryItems<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult | Item | undefined> {
+		// map item ids to types. some items might change types due to an action
+		const itemsBefore = new Map<number, ItemType>(context.utilities.item.getItemsInInventory(context).map(item => ([item.id, item.type])));
+
+		const result = await context.utilities.action.executeAction(context, action.action, action.args, action.expectedMessages);
+		if (result !== ObjectiveResult.Complete) {
+			return result;
+		}
+
+		const newOrChangedItems = context.utilities.item.getItemsInInventory(context).filter(item => {
+			const beforeItemType = itemsBefore.get(item.id);
+			return beforeItemType === undefined || beforeItemType !== item.type;
+		});
+
+		return newOrChangedItems.find(item => itemTypes.has(item.type));
+	}
+
+	private async tryPickUpItem(context: Context, itemTypes: Set<ItemType>, tile: Tile): Promise<ObjectiveResult | undefined> {
+		const matchingTileItem = tile.containedItems?.filter(item => itemTypes.has(item.type))?.[0];
+		if (matchingTileItem) {
 			const matchingNewItems: Item[] = [];
 
-			for (let i = 0; i < (this.options?.moveAllMatchingItems ? matchingTileItems.length : 1); i++) {
-				const itemToMove = matchingTileItems[i];
-				const targetContainer = context.utilities.item.getMoveItemToInventoryTarget(context, itemToMove);
+			const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: PickUpItem, args: [context.human.tile === tile, [matchingTileItem]] });
+			if (typeof (matchingItem) === "number") {
+				this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
+				return matchingItem;
+			}
 
-				const matchingItem = await this.executeActionCompareInventoryItems(context, itemTypes, { action: MoveItem, args: [itemToMove, targetContainer] });
-				if (typeof (matchingItem) === "number") {
-					this.log.warn("Issue moving items", ObjectiveResult[matchingItem]);
-					return matchingItem;
-				}
-
-				if (matchingItem !== undefined) {
-					matchingNewItems.push(matchingItem);
-				}
+			if (matchingItem !== undefined) {
+				matchingNewItems.push(matchingItem);
 			}
 
 			if (matchingNewItems.length > 0) {
@@ -249,25 +268,6 @@ export default class ExecuteActionForItem<T extends AnyActionDescription> extend
 			}
 		}
 
-		context.setData(this.contextDataKey, undefined);
-
-		return this.options?.preRetry?.(context) ?? ObjectiveResult.Pending;
-	}
-
-	private async executeActionCompareInventoryItems<T extends AnyActionDescription>(context: Context, itemTypes: Set<ItemType>, action: IExecuteActioGenericAction<T>): Promise<ObjectiveResult | Item | undefined> {
-		// map item ids to types. some items might change types due to an action
-		const itemsBefore: Map<number, ItemType> = new Map(context.utilities.item.getItemsInInventory(context).map(item => ([item.id, item.type])));
-
-		const result = await context.utilities.action.executeAction(context, action.action, action.args, action.expectedMessages);
-		if (result !== ObjectiveResult.Complete) {
-			return result;
-		}
-
-		const newOrChangedItems = context.utilities.item.getItemsInInventory(context).filter(item => {
-			const beforeItemType = itemsBefore.get(item.id);
-			return beforeItemType === undefined || beforeItemType !== item.type;
-		});
-
-		return newOrChangedItems.find(item => itemTypes.has(item.type));
+		return undefined;
 	}
 }

@@ -3,7 +3,8 @@
 	"dictionaries": {
 		"bindable": {
 			"modTARSToggleDialog": "Toggle TARS Dialog",
-			"modTARSToggleTars": "Toggle TARS"
+			"modTARSToggleTars": "Toggle TARS",
+			"modTARSToggleQuadrantComponent": "Toggle TARS Status"
 		},
 		"source": {
 			"modTARSTARS": "TARS"
@@ -50,6 +51,8 @@
 			"dialogButtonRename": "Rename",
 			"dialogButtonExploreIslands": "Explore Islands",
 			"dialogButtonExploreIslandsTooltip": "Allow TARS to explore other islandsafter it makes a base, equipment, and has enough resources for traveling.\nNote: This has no effect when in a multiplayer game.",
+			"dialogButtonStartWaterSources": "Start Waterstills",
+			"dialogButtonStartWaterSourcesTooltip": "Enables TARS to start all water stills & drip stones when near the base.",
 			"dialogButtonMoveToBase": "Move to Base",
 			"dialogButtonMoveToDoodad": "Move to Doodad",
 			"dialogButtonMoveToIsland": "Move to Island",
@@ -61,10 +64,18 @@
 			"dialogButtonMoveToTerrain": "Move to Terrain",
 			"dialogButtonQuantumBurst": "Quantum Burst",
 			"dialogButtonQuantumBurstTooltip": "Allow TARS to harness the power of interdimensional energy allowing for quantum computating.\nWarning: The cooldown after disabling this is directly proportional to the time active\nNote: This has no effect when in a multiplayer game.",
+			"dialogButtonLimitGroundItemSearch": "Limit Ground Item Search",
+			"dialogButtonLimitGroundItemSearchTooltip": "Limits the search space for finding items on the ground. Enabling this improves performance in large games.",
+			"dialogButtonLimitDisassembleItemSearch": "Limit Disassemble Item Search",
+			"dialogButtonLimitDisassembleItemSearchTooltip": "Limits the search space for finding items to disassemble. Enabling this improves performance in large games.",
 			"dialogButtonFreeze": "Freeze",
 			"dialogButtonFreezeTooltip": "Prevent TARS from executing actions.",
 			"dialogButtonNavigationOverlays": "Navigation Overlay",
 			"dialogButtonNavigationOverlaysTooltip": "Show navigation overlay over tiles.",
+			"dialogButtonPreventNotes": "Prevent Writing Notes",
+			"dialogButtonPreventNotesTooltip": "Disables notes being written while TARS is running.",
+			"dialogButtonSlowMode": "Slow Mode",
+			"dialogButtonSlowModeTooltip": "Slows down TARS so there are pauses between each execution of plans and actions.",
 			"dialogButtonStayHealthy": "Stay Healthy",
 			"dialogButtonStayHealthyTooltip": "Allow TARS to recover health, stamina, hunger, and thirst when necessary.",
 			"dialogButtonGoodCitizen": "Good Citizen",
@@ -122,6 +133,14 @@
 			"dialogButtonImportData": "Import Data",
 			"dialogButtonImportDataTooltip": "Imports a new global data slot from a file.",
 			"DialogButtonExportTooltip": "Export",
+			"dialogButtonNone": "None",
+			"dialogButtonGood": "Good",
+			"dialogButtonNeutral": "Neutral",
+			"dialogButtonEvil": "Evil",
+			"dialogButtonDeityNoneTooltip": "Disables sacrificing runes to deities",
+			"dialogButtonDeityGoodTooltip": "Sacrifice runes to the good deity",
+			"dialogButtonDeityNeutralTooltip": "Sacrifice runes to the neutral deity",
+			"dialogButtonDeityEvilTooltip": "Sacrifice runes to the evil deity",
 			"dialogLabelAdvanced": "Advanced",
 			"dialogLabelCreature": "{#--text-secondary:Creature}",
 			"dialogLabelDeveloper": "Developer",
@@ -136,6 +155,7 @@
 			"dialogLabelPlayer": "{#--text-secondary:Player}",
 			"dialogLabelRecoverThresholds": "Recover Thresholds",
 			"dialogLabelTerrain": "{#--text-secondary:Terrain}",
+			"dialogLabelDeity": "Deity",
 			"dialogModeGardener": "Gardener Mode",
 			"dialogModeGardenerTooltip": "TARS will gather seeds and plant them to make a garden.",
 			"dialogModeHarvester": "Harvester Mode",
@@ -170,7 +190,7 @@
 			"dialogRangeRecoverThirstThreshold": "Thirst",
 			"dialogRangeRecoverThirstThresholdTooltip": "TARS will recover thirst once it hits this value.",
 			"dialogStatusNavigatingInitializing": "Initializing navigation system",
-			"dialogTitleMain": "TARS{0? / {0}}: {1}"
+			"dialogTitleMain": "TARS{0? / {0}}: {.TARS-TASK:{1}}"
 		}
 	}
 }

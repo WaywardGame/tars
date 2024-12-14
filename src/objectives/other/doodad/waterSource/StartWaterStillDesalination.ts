@@ -1,20 +1,9 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import type Doodad from "game/doodad/Doodad";
-import AttachContainer from "game/entity/action/actions/AttachContainer";
-import DetachContainer from "game/entity/action/actions/DetachContainer";
-import Pour from "game/entity/action/actions/Pour";
-import type { IStat } from "game/entity/IStats";
-import { Stat } from "game/entity/IStats";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import AttachContainer from "@wayward/game/game/entity/action/actions/AttachContainer";
+import DetachContainer from "@wayward/game/game/entity/action/actions/DetachContainer";
+import Pour from "@wayward/game/game/entity/action/actions/Pour";
+import type { IStat } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
 
 import type Context from "../../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
@@ -90,7 +79,7 @@ export default class StartWaterStillDesalination extends Objective {
 
 				if (availableWaterContainer.durability !== undefined &&
 					availableWaterContainer.durabilityMax !== undefined &&
-					(availableWaterContainer.durability / availableWaterContainer.durabilityMax) < 0.6) {
+					(availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
 					// repair our container
 					objectives.push(new RepairItem(availableWaterContainer));
 				}

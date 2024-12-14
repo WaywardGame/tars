@@ -1,30 +1,19 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import StartFireAction from "@wayward/game/game/entity/action/actions/StartFire";
+import type Item from "@wayward/game/game/item/Item";
+import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
 
-import type Doodad from "game/doodad/Doodad";
-import { TileEventType } from "game/tile/ITileEvent";
-import StartFireAction from "game/entity/action/actions/StartFire";
-import { ActionArguments } from "game/entity/action/IAction";
-import Item from "game/item/Item";
-
+import { ReserveType } from "../../../core/ITars";
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import MoveToTarget from "../../core/MoveToTarget";
-import { ReserveType } from "../../../core/ITars";
 import ExecuteAction from "../../core/ExecuteAction";
 import Lambda from "../../core/Lambda";
+import MoveToTarget from "../../core/MoveToTarget";
 
 export default class StartFire extends Objective {
 
@@ -50,7 +39,7 @@ export default class StartFire extends Objective {
 		const objectives: IObjective[] = [];
 
 		const description = doodad.description;
-		if (!description || description.lit === undefined || description.providesFire) {
+		if (description?.lit === undefined || description.providesFire) {
 			// it's already lit
 			objectives.push(new MoveToTarget(doodad, true));
 
@@ -69,30 +58,30 @@ export default class StartFire extends Objective {
 
 			objectives.push(new MoveToTarget(doodad, true));
 
-			objectives.push(new ExecuteAction(StartFireAction, (context) => {
-				if (!context.inventory.fireStarter?.isValid()) {
+			objectives.push(new ExecuteAction(StartFireAction, context => {
+				if (!context.inventory.fireStarter?.isValid) {
 					this.log.warn("Invalid fireStarter");
 					return ObjectiveResult.Restart;
 				}
 
 				const kindling = context.getData<Item>(kindlingDataKey);
-				if (!kindling?.isValid()) {
+				if (!kindling?.isValid) {
 					this.log.warn("Invalid StartFireKindling");
 					return ObjectiveResult.Restart;
 				}
 
 				const tinder = context.getData<Item>(tinderDataKey);
-				if (!tinder?.isValid()) {
+				if (!tinder?.isValid) {
 					this.log.warn("Invalid StartFireTinder");
 					return ObjectiveResult.Restart;
 				}
 
-				return [context.inventory.fireStarter, undefined, kindling, tinder, undefined] as ActionArguments<typeof StartFireAction>;
+				return [context.inventory.fireStarter, undefined, kindling, tinder, undefined] as ActionArgumentsOf<typeof StartFireAction>;
 			}).setStatus(this));
 
 			objectives.push(new Lambda(async context => {
 				const description = doodad.description;
-				if (!description || description.lit === undefined || description.providesFire) {
+				if (description?.lit === undefined || description.providesFire) {
 					return ObjectiveResult.Complete;
 				}
 
