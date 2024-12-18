@@ -191,7 +191,20 @@ export default class OrganizeInventory extends Objective {
 	}
 
 	public static moveIntoChestsObjectives(context: Context, itemsToMove: Item[]): IObjective[] | undefined {
-		const chests = context.base.chest.slice().concat(context.base.intermediateChest);
+		const chests = context.base.chest.slice();
+
+		for (const chest of chests) {
+			const organizeInventoryObjectives = OrganizeInventory.moveIntoChestObjectives(context, chest, itemsToMove);
+			if (organizeInventoryObjectives) {
+				return organizeInventoryObjectives;
+			}
+		}
+
+		return undefined;
+	}
+
+	public static moveIntoIntermediateChestsObjectives(context: Context, itemsToMove: Item[]): IObjective[] | undefined {
+		const chests = context.base.intermediateChest.slice();
 
 		for (const chest of chests) {
 			const organizeInventoryObjectives = OrganizeInventory.moveIntoChestObjectives(context, chest, itemsToMove);

@@ -110,7 +110,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 	private base: IBase;
 	private inventory: IInventoryItems;
-	private readonly utilities: IUtilities;
+	private readonly utilities: Readonly<IUtilities>;
 
 	private readonly statThresholdExceeded: Record<number, boolean> = {};
 	private quantumBurstCooldown = 0;
@@ -162,6 +162,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			overlay: this.overlay,
 			player: new PlayerUtilities(),
 			tile: new TileUtilities(),
+			ensureSailingMode: isSailing => this.ensureSailingMode(isSailing),
 		};
 
 		this.log.info(`Created TARS instance on island id ${this.human.islandId}`);
@@ -181,7 +182,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		this.navigationQueuedUpdates.length = 0;
 
-		this.utilities.ensureSailingMode = undefined;
 		this.utilities.navigation.unload();
 
 		this.log.info(`Deleted TARS instance on island id ${this.human.islandId}`);
@@ -241,8 +241,6 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		// this.delete();
 
 		this.utilities.navigation.load();
-
-		this.utilities.ensureSailingMode = sailingMode => this.ensureSailingMode(sailingMode);
 
 		eventManager.registerEventBusSubscriber(this);
 
@@ -555,7 +553,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			if (updateNeighbors) {
 				const tiles = tile.tilesInRange(tileUpdateRadius, true);
 				for (const otherTile of tiles) {
-					this.utilities.navigation.onTileUpdate(
+					this.utilities.navigation.processTileUpdate(
 						otherTile,
 						otherTile.type,
 						baseTiles.has(otherTile),
@@ -563,7 +561,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 				}
 
 			} else {
-				this.utilities.navigation.onTileUpdate(
+				this.utilities.navigation.processTileUpdate(
 					tile,
 					tile.type,
 					baseTiles.has(tile),
@@ -866,7 +864,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	public updateWalkPath(path: IVector2[]): void {
 		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(this.context, this.interruptContext, path);
 		if (organizeInventoryInterrupts && organizeInventoryInterrupts.length > 0) {
-			this.interrupt("Organize inventory", ...organizeInventoryInterrupts);
+			this.interrupt("Organize inventory before moving far away", ...organizeInventoryInterrupts);
 
 		} else {
 			multiplayer.executeClientside(() => {
@@ -949,23 +947,19 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		this.event.emit("statusChange");
 	}
 
-	public async ensureSailingMode(sailingMode: boolean): Promise<void> {
-		if (!this.utilities.navigation) {
-			return;
-		}
-
+	public async ensureSailingMode(isSailing: boolean): Promise<void> {
 		if (this.navigationUpdatePromise) {
 			return this.navigationUpdatePromise;
 		}
 
-		if (this.utilities.navigation.shouldUpdateSailingMode(sailingMode)) {
-			this.log.info("Updating sailing mode", sailingMode);
+		if (this.utilities.navigation.shouldUpdateSailingMode(isSailing)) {
+			this.log.info("Updating sailing mode", isSailing);
 
 			this.navigationUpdatePromise = new ResolvablePromise();
 
 			this.navigationSystemState = NavigationSystemState.NotInitialized;
 
-			await this.ensureNavigation(sailingMode);
+			await this.ensureNavigation(isSailing);
 
 			this.navigationUpdatePromise.resolve();
 			this.navigationUpdatePromise = undefined;
@@ -1811,8 +1805,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		// 	reservedItems = reservedItems.filter(item => !interruptReservedItems.includes(item));
 		// }
 
+		// reverse items should be moved into intermediate chests
 		if (reservedItems.length > 0) {
-			const organizeInventoryObjectives = OrganizeInventory.moveIntoChestsObjectives(context, reservedItems);
+			const organizeInventoryObjectives = OrganizeInventory.moveIntoIntermediateChestsObjectives(context, reservedItems);
 			if (organizeInventoryObjectives) {
 				objectives = objectives.concat(organizeInventoryObjectives);
 			}
