@@ -14,7 +14,6 @@ export default class OptionsInterrupt extends Objective {
 
 	private static readonly desiredOptions: Partial<IOptions> = {
 		autoAttack: true, // todo: I think this should be false
-		autoPickup: false,
 		dropIntoContainers: false,
 		dropLocation: DropLocation.Feet,
 		dropOnDisassemble: true,

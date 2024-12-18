@@ -10,6 +10,7 @@ import Tile from "@wayward/game/game/tile/Tile";
 import type TileEvent from "@wayward/game/game/tile/TileEvent";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
+import AscendDescend from "@wayward/game/game/entity/action/actions/AscendDescend";
 
 import type Context from "../../core/context/Context";
 import { ContextDataType } from "../../core/context/IContext";
@@ -22,7 +23,6 @@ import UseItem from "../other/item/UseItem";
 import Rest from "../other/Rest";
 import AddDifficulty from "./AddDifficulty";
 import ExecuteAction from "../core/ExecuteAction";
-import AscendDescend from "@wayward/game/game/entity/action/actions/AscendDescend";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
 // caves are scary
@@ -116,18 +116,19 @@ export default class MoveToTarget extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const defaultEndPosition = endPositions[0];
+		// PlanningAccuracy.Simple is handled by the objective position, no need for extra tricks like this
+		// if (context.options.planningAccuracy === PlanningAccuracy.Simple && context.calculatingDifficulty) {
+		// 	const defaultEndPosition = endPositions[0];
 
-		if (context.calculatingDifficulty) {
-			if (tile.x !== context.human.x || tile.y !== context.human.y || tile.z !== context.human.z) {
-				context.setData(ContextDataType.Tile, context.island.getTile(defaultEndPosition.x, defaultEndPosition.y, this.options?.changeZ ?? defaultEndPosition.z));
+		// 	if (tile.x !== context.human.x || tile.y !== context.human.y || tile.z !== context.human.z) {
+		// 		context.setData(ContextDataType.Tile, context.island.getTile(defaultEndPosition.x, defaultEndPosition.y, this.options?.changeZ ?? defaultEndPosition.z));
 
-				// squared distance makes the diff very large. other diffs would have to be modified to compensate
-				const diff = Math.ceil(Vector2.distance(tile, defaultEndPosition) + (tile.z !== defaultEndPosition.z ? zChangeDifficulty : 0));
+		// 		// squared distance makes the diff very large. other diffs would have to be modified to compensate
+		// 		const diff = Math.ceil(Vector2.distance(tile, defaultEndPosition) + (tile.z !== defaultEndPosition.z ? zChangeDifficulty : 0));
 
-				return diff;
-			}
-		}
+		// 		return diff;
+		// 	}
+		// }
 
 		if (this.options?.changeZ === tile.z) {
 			// this objective runs dynamically so it's possible it's already in the correct z

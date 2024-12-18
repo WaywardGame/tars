@@ -87,7 +87,7 @@ export interface IUtilities {
 	player: PlayerUtilities;
 	tile: TileUtilities;
 
-	ensureSailingMode?(sailingMode: boolean): Promise<void>;
+	ensureSailingMode(isSailing: boolean): Promise<void>;
 }
 
 export const chestTypes = new Map<ItemType, DoodadType>([

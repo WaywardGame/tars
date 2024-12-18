@@ -144,13 +144,18 @@ export default class AcquireItem extends AcquireBase {
 
 							const objectives: IObjective[] = [];
 
-							const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
+							// notes for future reference:
+							// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
+							const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, {
+								// allowUnsafeWaterContainers: true, the water container might be stolen (related to interrupts?) by AnalyzeInventory, so allowInventoryItems should be set }
+								allowInventoryItems: true,
+							});
 							if (waterContainer) {
-								objectives.push(new ReserveItems(waterContainer).passShouldKeepInInventory(this));
+								objectives.push(new ReserveItems(waterContainer).keepInInventory());
 								objectives.push(new SetContextData(itemContextDataKey, waterContainer));
 
 							} else {
-								objectives.push(new AcquireItem(returnOnUseAndDecayItemType).passShouldKeepInInventory(this).setContextDataKey(itemContextDataKey));
+								objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
 							}
 
 							objectives.push(new GatherFromTerrainWater(terrainWaterSearch, itemContextDataKey).passAcquireData(this));
@@ -200,14 +205,16 @@ export default class AcquireItem extends AcquireBase {
 
 						const objectives: IObjective[] = [];
 
+						// notes for future reference:
+						// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
 						// todo: allow emptying unsafe water to pick up purified still water?
 						const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
 						if (waterContainer) {
-							objectives.push(new ReserveItems(waterContainer).passShouldKeepInInventory(this));
+							objectives.push(new ReserveItems(waterContainer).keepInInventory());
 							objectives.push(new SetContextData(itemContextDataKey, waterContainer));
 
 						} else {
-							objectives.push(new AcquireItem(returnOnUseAndDecayItemType).passShouldKeepInInventory(this).setContextDataKey(itemContextDataKey));
+							objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
 						}
 
 						objectives.push(

@@ -9,6 +9,7 @@ import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import PathOverlayFootPrints from "@wayward/game/ui/screen/screens/game/util/movement/PathOverlayFootPrints";
 import { Direction } from "@wayward/game/utilities/math/Direction";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
+import { VehicleType } from "@wayward/game/game/item/IItem";
 
 import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
 import Chop from "@wayward/game/game/entity/action/actions/Chop";
@@ -136,7 +137,7 @@ export class MovementUtilities {
 		this.ensureOrigin(context);
 
 		// ensure sailing mode is up to date
-		await context.utilities.ensureSailingMode?.(!!context.human.vehicleItemReference);
+		await context.utilities.ensureSailingMode(context.human.vehicleItemReference?.item?.description?.vehicle?.type === VehicleType.Boat);
 
 		// short circuit if we're already there
 		if (moveAdjacentToTarget) {

@@ -35,9 +35,9 @@ export default class Idle extends Objective {
 
 		if (!this.options?.force &&
 			(game.getTurnMode() === TurnMode.RealTime ||
-				context.island.simulatedTickHelper.hasScheduledTick ||
-				!context.island.simulatedTickHelper.hasTimePassedSinceLastTick((game.getTickSpeed() * game.interval) + 200, game.absoluteTime))) {
+				(context.human.isHost && (context.island.simulatedTickHelper.hasScheduledTick || !context.island.simulatedTickHelper.hasTimePassedSinceLastTick((game.getTickSpeed() * game.interval) + 200, game.absoluteTime))))) {
 			// don't idle in realtime mode or in simulated mode if the turns are ticking still. +200ms buffer for ping
+			// simulatedTickHelper is only correct for the host
 			objectivePipelines.push(new Lambda(async (context, lambda) => {
 				lambda.log.info("Smart idling");
 				return ObjectiveResult.Complete;

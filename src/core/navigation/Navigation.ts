@@ -39,7 +39,7 @@ export default class Navigation {
 
 	private oppositeOrigin: Tile | undefined;
 
-	private sailingMode: boolean;
+	private isSailing = false;
 
 	private addedOverlays = false;
 
@@ -56,7 +56,7 @@ export default class Navigation {
 
 		this.origin = undefined;
 
-		this.sailingMode = false;
+		this.isSailing = false;
 
 		for (let z = WorldZ.Min; z <= WorldZ.Max; z++) {
 			try {
@@ -95,14 +95,14 @@ export default class Navigation {
 		}
 	}
 
-	public shouldUpdateSailingMode(sailingMode: boolean): boolean {
-		return this.sailingMode !== sailingMode;
+	public shouldUpdateSailingMode(isSailing: boolean): boolean {
+		return this.isSailing !== isSailing;
 	}
 
-	public async updateAll(sailingMode: boolean, getBaseTiles: () => Set<Tile>): Promise<void> {
-		this.log.info("Updating navigation. Please wait...");
+	public async updateAll(isSailing: boolean, getBaseTiles: () => Set<Tile>): Promise<void> {
+		this.log.info(`Updating navigation. Is sailing: ${isSailing}. Please wait...`);
 
-		this.sailingMode = sailingMode;
+		this.isSailing = isSailing;
 
 		const island = this.human.island;
 
@@ -116,7 +116,7 @@ export default class Navigation {
 
 		for (const tile of Object.values(island.tiles)) {
 			if (tile) {
-				this.onTileUpdate(tile, tile.type, baseTiles.has(tile));
+				this.processTileUpdate(tile, tile.type, baseTiles.has(tile));
 			}
 
 			if (task.shouldYield) {
@@ -132,7 +132,7 @@ export default class Navigation {
 					for (let y = -creaturePenaltyRadius; y <= creaturePenaltyRadius; y++) {
 						const tile = island.getTileSafe(creature.x + x, creature.y + y, creature.z);
 						if (tile) {
-							this.onTileUpdate(tile, tile.type, baseTiles.has(tile), TileUpdateType.Creature);
+							this.processTileUpdate(tile, tile.type, baseTiles.has(tile), TileUpdateType.Creature);
 						}
 					}
 				}
@@ -277,7 +277,7 @@ export default class Navigation {
 			penalty ?? this.getPenalty(tile, tileType, terrainDescription, tileUpdateType));
 	}
 
-	public onTileUpdate(
+	public processTileUpdate(
 		tile: Tile,
 		tileType: TerrainType,
 		isBaseTile: boolean,
@@ -429,7 +429,7 @@ export default class Navigation {
 			this.updateOrigin();
 		}
 
-		const response: IDijkstraMapFindPathResult = {
+		const result: IDijkstraMapFindPathResult = {
 			success: false,
 			path: [],
 			score: 0,
@@ -438,18 +438,18 @@ export default class Navigation {
 			moveAdjacentToTarget,
 		};
 
-		mapInfo.dijkstraMap.findPath2(response);
+		mapInfo.dijkstraMap.findPath2(result);
 
-		if (response.success) {
+		if (result.success) {
 			// path has the end node at index 0 and the start node at (length - 1)
 			// normally we would reverse the array, but I path find from end to start instead of start to end
 			return {
-				path: response.path.map<IVector3>(node => ({
+				path: result.path.map<IVector3>(node => ({
 					x: node.x,
 					y: node.y,
 					z: end.z,
 				})),
-				score: response.score,
+				score: result.score,
 			};
 		}
 
@@ -604,12 +604,16 @@ export default class Navigation {
 				// stay away from coasts
 				penalty += 6;
 
-			} else if (terrainDescription.water && !this.sailingMode) {
+			} else if (terrainDescription.ice || terrainDescription.isSlippery) {
+				// stay off of ice / slippery surfaces
+				penalty += 20;
+
+			} else if (terrainDescription.water && !this.isSailing) {
 				// stay out of water
 				penalty += 20;
 			}
 
-			if (this.sailingMode && !terrainDescription.water && !terrainDescription.shallowWater) {
+			if (this.isSailing && !terrainDescription.water && !terrainDescription.shallowWater) {
 				// try to stay in water while sailing
 				penalty += 200;
 			}
