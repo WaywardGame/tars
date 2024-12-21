@@ -1,4 +1,4 @@
-import { ItemType } from "@wayward/game/game/item/IItem";
+import { VehicleType } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
 import type Tile from "@wayward/game/game/tile/Tile";
 
@@ -49,8 +49,8 @@ export default class OrganizeBase extends Objective {
 				const itemsToMove: Item[] = [];
 
 				for (const item of tile.containedItems) {
-					if (item.type === ItemType.Sailboat) {
-						// don't organize sailboats
+					if (item.description?.vehicle?.type === VehicleType.Boat) {
+						// don't organize boats
 						continue;
 					}
 

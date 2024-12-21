@@ -6,7 +6,7 @@ import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import type Item from "@wayward/game/game/item/Item";
 import Build from "@wayward/game/game/entity/action/actions/Build";
 import type Tile from "@wayward/game/game/tile/Tile";
-import { ItemType } from "@wayward/game/game/item/IItem";
+import { VehicleType } from "@wayward/game/game/item/IItem";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
@@ -68,7 +68,7 @@ export default class BuildItem extends Objective {
 
 		let moveToTargetObjectives: IObjective[];
 
-		if (item.type === ItemType.Sailboat) {
+		if (item.description?.vehicle?.type === VehicleType.Boat) {
 			moveToTargetObjectives = [
 				new MoveToWater(MoveToWaterType.SailAwayWater, { disallowBoats: true }),
 			];

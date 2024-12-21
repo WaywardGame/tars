@@ -1077,7 +1077,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 				furnace: [],
 				intermediateChest: [],
 				kiln: [],
-				sailboat: [],
+				boat: [],
 				solarStill: [],
 				waterStill: [],
 				well: [],
@@ -1478,21 +1478,19 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			interrupts.push(...this.getRecoverInterrupts(context, true, true));
 		}
 
-		interrupts = interrupts.concat([
-			this.buildItemObjectives(context),
-			// this.reduceWeightInterrupt(context),
-		]);
+		interrupts.push(...this.buildItemObjectives(context));
+		// this.reduceWeightInterrupt(context),
 
 		if (stayHealthy) {
 			interrupts.push(...this.getRecoverInterrupts(context, false, true));
 		}
 
-		interrupts = interrupts.concat([
+		interrupts = interrupts.concat(
 			this.gatherFromCorpsesInterrupt(context),
 			this.repairsInterrupt(context),
 			this.escapeCavesInterrupt(context),
 			this.returnToBaseInterrupt(context),
-		]);
+		);
 
 		const organizeInventoryInterrupts = this.organizeInventoryInterrupts(context);
 		if (organizeInventoryInterrupts) {
@@ -1709,14 +1707,14 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		return this.utilities.item.getItemsToBuild(context).map(item => new BuildItem(item));
 	}
 
-	private gatherFromCorpsesInterrupt(context: Context): IObjective[] | undefined {
+	private gatherFromCorpsesInterrupt(context: Context): IObjective[][] | undefined {
 		if (!this.inventory.butcher) {
 			return undefined;
 		}
 
 		const targets = this.utilities.object.findCarvableCorpses(context, "gatherFromCorpsesInterrupt", corpse => Vector2.distance(context.human, corpse) < 16);
 
-		const objectives: IObjective[] = [];
+		const objectivePipelines: IObjective[][] = [];
 
 		for (const target of targets) {
 			const tile = target.tile;
@@ -1731,15 +1729,18 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 					const step = corpse.step || 0;
 					const count = resources.length - step;
 
+					const objectives: IObjective[] = [];
 					// try to butcher it the maximum amount of times. the actual amount of times could be different due to randomness
 					for (let i = 0; i < count; i++) {
 						objectives.push(new ButcherCorpse(corpse));
 					}
+
+					objectivePipelines.push(objectives);
 				}
 			}
 		}
 
-		return objectives;
+		return objectivePipelines;
 	}
 
 	private reduceWeightInterrupt(context: Context): IObjective | undefined {
@@ -1858,12 +1859,13 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 					continue;
 				}
 
+				const items: Item[] = [];
+
 				while (itemsToMove.length > 0) {
 					const itemToMove = itemsToMove[0];
 					const itemToMoveWeight = itemToMove.getTotalWeight(undefined, backpackContainer);
 					if (weight + itemToMoveWeight < weightCapacity) {
-						objectives.push(new ExecuteAction(MoveItemAction, [itemToMove, backpackContainer])
-							.setStatus(`Moving ${itemToMove.getName()} into ${backpack.getName()}`));
+						items.push(itemToMove);
 
 						weight += itemToMoveWeight;
 
@@ -1872,6 +1874,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 					} else {
 						break;
 					}
+				}
+
+				if (items.length > 0) {
+					objectives.push(new ExecuteAction(MoveItemAction, [items, backpackContainer])
+						.setStatus(`Moving ${items.join(",")} into ${backpack.getName()}`));
 				}
 			}
 		}

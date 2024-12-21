@@ -37,20 +37,20 @@ export default class MoveToIsland extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
-		for (const sailboat of context.base.sailboat) {
-			const result = sailboat.tile.canSailAwayFrom(context.human);
+		for (const boat of context.base.boat) {
+			const result = boat.tile.canSailAwayFrom(context.human);
 			if (result.canSailAway) {
 				objectivePipelines.push([
-					new MoveToTarget(sailboat, false),
+					new MoveToTarget(boat, false),
 					new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
 				]);
 			}
 		}
 
 		if (objectivePipelines.length === 0) {
-			// no sail boats or sailboats are not in good spots
+			// no sail boats or boats are not in good spots
 			objectivePipelines.push([
-				new AcquireInventoryItem("sailboat"),
+				new AcquireInventoryItem("boat"),
 				new MoveToWater(MoveToWaterType.SailAwayWater),
 				new ExecuteAction(SailToIsland, [islandPosition.x, islandPosition.y]).setStatus(this),
 			]);

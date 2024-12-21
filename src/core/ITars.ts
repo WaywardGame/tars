@@ -107,7 +107,7 @@ export interface IBase {
 	furnace: Doodad[];
 	intermediateChest: Doodad[];
 	kiln: Doodad[];
-	sailboat: Doodad[];
+	boat: Doodad[];
 	solarStill: Doodad[];
 	waterStill: Doodad[];
 	well: Doodad[];
@@ -200,7 +200,7 @@ export const baseInfo: Record<BaseInfoKey, IBaseInfo> = {
 		litType: DoodadTypeGroup.LitKiln,
 		tryPlaceNear: "anvil",
 	},
-	sailboat: {
+	boat: {
 		doodadTypes: [DoodadType.Sailboat],
 		nearBaseDistanceSq: Infinity,
 		allowMultiple: true,
@@ -261,7 +261,7 @@ export interface IInventoryItems {
 	knife?: Item;
 	lockPick?: Item;
 	pickAxe?: Item;
-	sailboat?: Item;
+	boat?: Item;
 	shovel?: Item;
 	solarStill?: Item;
 	tongs?: Item;
@@ -538,7 +538,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			option: ActionType.Mine,
 		},
 	},
-	sailboat: {
+	boat: {
 		itemTypes: [ItemType.Sailboat],
 		// allowInChests: true,
 		// allowOnTiles: true,
@@ -607,7 +607,7 @@ export const inventoryBuildItems: Array<keyof IInventoryItems> = [
 	"furnace",
 	"anvil",
 	"solarStill",
-	"sailboat",
+	"boat",
 	"altar",
 ];
 

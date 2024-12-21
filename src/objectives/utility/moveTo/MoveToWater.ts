@@ -1,5 +1,4 @@
 import { WaterType } from "@wayward/game/game/island/IIsland";
-import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../../../core/context/Context";
@@ -57,7 +56,6 @@ export default class MoveToWater extends Objective {
 				return false;
 			}
 
-			const tileType = tile.type;
 			const terrainDescription = tile.description;
 			if (!terrainDescription) {
 				return false;
@@ -72,7 +70,7 @@ export default class MoveToWater extends Objective {
 					break;
 
 				case MoveToWaterType.SailAwayWater:
-					if (tileType !== TerrainType.DeepSeawater) {
+					if (!terrainDescription.water && !terrainDescription.shallowWater) {
 						return false;
 					}
 

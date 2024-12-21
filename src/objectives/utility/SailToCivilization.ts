@@ -58,7 +58,7 @@ export default class SailToCivilization extends Objective {
 			}
 		}
 
-		objectives.push(new AcquireInventoryItem("sailboat"));
+		objectives.push(new AcquireInventoryItem("boat"));
 
 		if (!game.isChallenge) {
 			// todo: add a way to set this only for a specific item?
@@ -73,9 +73,9 @@ export default class SailToCivilization extends Objective {
 		}
 
 		objectives.push(
-			new MoveItemsIntoInventory(context.inventory.sailboat),
+			new MoveItemsIntoInventory(context.inventory.boat),
 			new MoveToWater(MoveToWaterType.SailAwayWater),
-			new ExecuteAction(SailToCivilizationAction, [context.inventory.sailboat, true]).setStatus(this),
+			new ExecuteAction(SailToCivilizationAction, [context.inventory.boat, true]).setStatus(this),
 		);
 
 		return objectives;

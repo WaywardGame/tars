@@ -304,7 +304,9 @@ export default class Navigation {
 			mapInfo.dirtyDijkstra = true;
 			mapInfo.dijkstraMap.updateNode(tile.x, tile.y, penalty, isDisabled);
 
-			const canSlip = tile.canSlip(undefined, true, true);
+			// we can't slip into a blocked tile
+			// todo: change the check for this?
+			const canSlip = !tile.hasBlockingTerrain && !tile.hasBlockingDoodad && tile.canSlip(undefined, true, true);
 
 			for (const direction of Direction.CARDINALS) {
 				const neighborTile = tile.getTileInDirection(direction);
@@ -315,7 +317,7 @@ export default class Navigation {
 				let nextNoSlipTile: Tile | undefined = neighborTile;
 
 				// if the entity can slip on this tile, we will assume they will and take that into account
-				while (nextNoSlipTile?.canSlip(undefined, true, true)) {
+				while (nextNoSlipTile && !nextNoSlipTile.hasBlockingTerrain && !nextNoSlipTile.hasBlockingDoodad && nextNoSlipTile.canSlip(undefined, true, true)) {
 					// direction ??= tile.getDirectionToTile(nextNoSlipTile);
 					nextNoSlipTile = nextNoSlipTile.getTileInDirection(direction);
 				}
