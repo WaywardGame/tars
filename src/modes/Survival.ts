@@ -72,12 +72,18 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			return objectives;
 		}
 
-		if (context.inventory.sailboat && context.human.island.items.isContainableInContainer(context.inventory.sailboat, context.human.inventory)) {
+		if (context.inventory.boat && context.human.island.items.isContainableInContainer(context.inventory.boat, context.human.inventory)) {
 			//  we likely just moved to a new island
 			const movedToNewIslandObjectives: IObjective[] = [];
 
 			if (context.utilities.base.hasBase(context)) {
+				// we have a base, so maybe we're still preparing the move?
 				movedToNewIslandObjectives.push(new MoveToBase());
+
+				// this should be done in a Build interrupt
+				// if (context.base.boat.length === 0) {
+				// 	objectives.push([new AcquireInventoryItem("boat"), new BuildItem()]);
+				// }
 
 			} else {
 				const target = await context.utilities.base.findInitialBuildTile(context);
@@ -288,6 +294,12 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 			if (safeToDrinkWaterContainers.length < 2 && availableWaterContainers.length > 0) {
 				// we are trying to gather water. wait before moving on to upgrade objectives
+
+				// if (context.utilities.base.canBuildWaterDesalinators(context) && context.base.waterStill.length < 2 &&
+				// 	(context.base.dripStone.length === 0 || context.base.dripStone.every(dripStone => context.utilities.doodad.isWaterSourceDoodadBusy(dripStone))) || (context.base.waterStill.length === 0 || context.base.waterStill.every(waterStill => context.utilities.doodad.isWaterSourceDoodadBusy(waterStill)))) {
+				// 	objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+				// }
+
 				objectives.push([
 					new AcquireWater({ disallowTerrain: true, disallowWell: true, allowStartingWaterSourceDoodads: true, allowWaitingForWater: true })
 						.setStatus("Gathering water before upgrade objectives"),
@@ -438,9 +450,9 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 				case MovingToNewIslandState.Preparing:
 					// make a sail boat
 
-					// it's possible theres a sailboat at the time this is checked, but it's actually dropped after
-					if (context.base.sailboat.length === 0) {
-						objectives.push([new AcquireInventoryItem("sailboat"), new BuildItem()]);
+					// it's possible theres a boat at the time this is checked, but it's actually dropped after
+					if (context.base.boat.length === 0) {
+						objectives.push([new AcquireInventoryItem("boat"), new BuildItem()]);
 					}
 
 					if (needHealthRecovery) {

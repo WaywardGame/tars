@@ -259,12 +259,12 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
+		if (this.options?.allowBoat && context.inventory.boat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
 			const terrainDescription = tile.description;
 			if (terrainDescription?.water) {
 				return [
-					new UseItem(Ride, context.inventory.sailboat),
+					new UseItem(Ride, context.inventory.boat),
 					new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options, allowBoat: false }),
 				];
 			}
@@ -285,7 +285,7 @@ export default class MoveToTarget extends Objective {
 				if (firstWaterTile) {
 					return [
 						new MoveToTarget(firstWaterTile, false),
-						new UseItem(Ride, context.inventory.sailboat),
+						new UseItem(Ride, context.inventory.boat),
 						new MoveToTarget(this.target, this.moveAdjacentToTarget, { ...this.options }),
 					];
 				}
@@ -415,7 +415,7 @@ export default class MoveToTarget extends Objective {
 			}
 		}
 
-		if (this.options?.allowBoat && context.inventory.sailboat && !context.human.vehicleItemReference) {
+		if (this.options?.allowBoat && context.inventory.boat && !context.human.vehicleItemReference) {
 			const tile = context.human.tile;
 			const terrainDescription = tile.description;
 			if (terrainDescription?.water) {
