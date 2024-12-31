@@ -10,6 +10,7 @@ import PathOverlayFootPrints from "@wayward/game/ui/screen/screens/game/util/mov
 import { Direction } from "@wayward/game/utilities/math/Direction";
 import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import { VehicleType } from "@wayward/game/game/item/IItem";
+import { TileUpdateType } from "@wayward/game/game/IGame";
 
 import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
 import Chop from "@wayward/game/game/entity/action/actions/Chop";
@@ -215,16 +216,29 @@ export class MovementUtilities {
 
 					if (nextTile.creature) {
 						// walking into a creature
-
-						// ensure we are wearing the correct equipment
-						const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
-						if (handEquipmentChange) {
-							context.log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
-
-							await context.utilities.action.executeAction(context, Equip, [handEquipmentChange.item, handEquipmentChange.equipType]);
-						}
-
 						context.log.info("Walking into a creature");
+
+						if (!nextTile.creature.isTamed) {
+							// ensure we are wearing the correct equipment
+							const handEquipmentChange = context.utilities.item.updateHandEquipment(context);
+							if (handEquipmentChange) {
+								context.log.info(`Going to equip ${handEquipmentChange.item} before attacking`);
+
+								await context.utilities.action.executeAction(context, Equip, [handEquipmentChange.item, handEquipmentChange.equipType]);
+							}
+
+						} else if (!nextTile.creature.canSwapWith(context.human, undefined)) {
+							// issue with navigation nodes since canSwapWith might be cached due to a tile update
+							context.log.info("Creature is blocking movement");
+
+							const baseTiles = context.utilities.base.getBaseTiles(context);
+							const tile = nextTile.creature.tile;
+							if (tile) {
+								context.utilities.navigation.processTileUpdate(tile, tile.type, baseTiles.has(tile), TileUpdateType.Creature);
+							}
+
+							return MoveResult.NoPath;
+						}
 
 						await context.utilities.action.executeAction(context, Move, [direction]);
 

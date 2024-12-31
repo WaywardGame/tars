@@ -163,7 +163,7 @@ export default class TarsMod extends Mod {
 			this.globalSaveData.dataSlots = [];
 		}
 
-		Log.disableFileLogging(logSourceName);
+		Log.disableFileLoggingForSource(logSourceName);
 	}
 
 	public override onUninitialize(): void {
