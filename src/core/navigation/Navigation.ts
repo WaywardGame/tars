@@ -169,12 +169,14 @@ export default class Navigation {
 			this.origin = origin;
 		}
 
-		if (this.originUpdateTimeout === undefined) {
-			this.originUpdateTimeout = window.setTimeout(() => {
-				this.originUpdateTimeout = undefined;
-				this.updateOrigin();
-			}, 10);
-		}
+		// updateOrigin will automatically be called when we try to access the dijkstraMap map
+		// we shouldn't need to call it on a timer
+		// if (this.originUpdateTimeout === undefined) {
+		// 	this.originUpdateTimeout = window.setTimeout(() => {
+		// 		this.originUpdateTimeout = undefined;
+		// 		this.updateOrigin();
+		// 	}, 10);
+		// }
 	}
 
 	public updateOrigin(origin?: Tile): void {

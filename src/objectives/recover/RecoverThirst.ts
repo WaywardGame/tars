@@ -35,7 +35,7 @@ export default class RecoverThirst extends Objective {
 
 	public static isEmergency(context: Context): boolean {
 		const thirstStat = context.human.stat.get<IStatMax>(Stat.Thirst);
-		return thirstStat.value <= 3 && context.utilities.base.getWaterSourceDoodads(context).every(doodad => !context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad));
+		return thirstStat.value <= 3 && context.utilities.base.getWaterSourceDoodads(context).every(doodad => !context.utilities.doodad.isWaterSourceDoodadGatherable(doodad));
 	}
 
 	constructor(private readonly options: IRecoverThirstOptions) {
@@ -90,7 +90,7 @@ export default class RecoverThirst extends Objective {
 		}
 
 		if (waterSourceDoodads.length > 0) {
-			const isWaitingForAll = waterSourceDoodads.every(doodad => context.utilities.doodad.isWaterSourceDoodadBusy(doodad));
+			const isWaitingForAll = waterSourceDoodads.every(doodad => context.utilities.doodad.isWaterSourceDoodadBusy(doodad) && !context.utilities.doodad.isWaterSourceDoodadGatherable(doodad));
 			if (isWaitingForAll) {
 				if ((health.value / health.max) <= 0.3) {
 					this.log.info("Making health items");
@@ -131,11 +131,11 @@ export default class RecoverThirst extends Objective {
 
 			} else {
 				for (const doodad of waterSourceDoodads) {
-					if (context.utilities.doodad.isWaterSourceDoodadBusy(doodad) || context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
+					if (context.utilities.doodad.isWaterSourceDoodadBusy(doodad) || context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
 						continue;
 					}
 
-					if (!context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
+					if (!context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
 						const stamina = context.human.stat.get<IStatMax>(Stat.Stamina);
 						if ((stamina.value / stamina.max) < 0.9) {
 							objectivePipelines.push([new RecoverStamina()]);
@@ -167,7 +167,7 @@ export default class RecoverThirst extends Objective {
 				const waterSourceDoodads = context.utilities.base.getWaterSourceDoodads(context);
 				for (const doodad of waterSourceDoodads) {
 					// if we're near our base, the solar still is ready, and we're thirsty, go drink
-					if (context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad) && (thirstStat.max - thirstStat.value) >= 10) {
+					if (context.utilities.doodad.isWaterSourceDoodadGatherable(doodad) && (thirstStat.max - thirstStat.value) >= 10) {
 						this.log.info(`Near base, going to drink from a ${doodad}`);
 
 						const difficulty = (doodad.type === DoodadType.SolarStill && doodad.isInGroup(DoodadTypeGroup.Dripstone)) ? -100 : 0;
@@ -205,7 +205,7 @@ export default class RecoverThirst extends Objective {
 		const waterSourceDoodads = context.utilities.base.getWaterSourceDoodads(context);
 
 		if (!RecoverThirst.isEmergency(context) && !context.utilities.base.isNearBase(context)) {
-			const isDrinkableWaterAvailable = waterSourceDoodads.some(waterSourceDoodad => !context.utilities.doodad.isWaterSourceDoodadBusy(waterSourceDoodad) && context.utilities.doodad.isWaterSourceDoodadDrinkable(waterSourceDoodad));
+			const isDrinkableWaterAvailable = waterSourceDoodads.some(waterSourceDoodad => !context.utilities.doodad.isWaterSourceDoodadBusy(waterSourceDoodad) && context.utilities.doodad.isWaterSourceDoodadGatherable(waterSourceDoodad));
 			if (isDrinkableWaterAvailable) {
 				// drinkable water is available at the base
 				// don't go back to the base until we have too
@@ -291,7 +291,7 @@ export default class RecoverThirst extends Objective {
 
 						const waterSourceObjectives: IObjective[] = [];
 
-						if (context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
+						if (context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
 							waterSourceObjectives.push(new MoveToTarget(doodad, true));
 							waterSourceObjectives.push(new ExecuteAction(DrinkInFront, []));
 

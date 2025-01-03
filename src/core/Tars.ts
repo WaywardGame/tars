@@ -502,6 +502,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 				this.interrupt("Target moved", result);
 			}
 		}
+
+		this.updateStatus();
 	}
 
 	@EventHandler(EventBus.Humans, "canChangeWalkTo")
@@ -1148,9 +1150,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 	private async tick(): Promise<void> {
 		try {
-			if (this.context.human.hasDelay()) {
-				this.processQuantumBurst();
-			}
+			this.processQuantumBurst();
 
 			await Task.post(async () => this.onTick(), "background");
 
@@ -1165,9 +1165,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			return;
 		}
 
-		if (this.context.human.hasDelay()) {
-			this.processQuantumBurst();
-		}
+		this.processQuantumBurst();
 
 		this.tickTimeoutId = window.setTimeout(this.tick.bind(this), this.isQuantumBurstEnabled() ? game.interval : tickSpeed);
 	}
@@ -1903,15 +1901,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			return;
 		}
 
-		this.context.human.nextMoveTime = 0;
-		delete this.context.human.movingData.state;
-		delete this.context.human.movingData.time;
-		delete this.context.human.movingData.options;
-		delete this.context.human.attackAnimationData;
-
-		while (this.context.human.hasDelay()) {
-			game.absoluteTime += 100;
-		}
+		this.context.human.removeDelays();
 	}
 
 	private getDialogSubId(): string {

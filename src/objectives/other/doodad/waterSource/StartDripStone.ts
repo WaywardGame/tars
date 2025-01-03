@@ -34,6 +34,11 @@ export default class StartDripStone extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		if (this.dripStone.hasWater?.top) {
+			// if (
+			// 	(this.dripStone.gatherReady !== undefined && this.dripStone.gatherReady <= 0) ||
+			// 	this.dripStone.hasWater?.top ||
+			// 	this.dripStone.hasWater?.bottom
+			// ) {
 			return ObjectiveResult.Ignore;
 		}
 
