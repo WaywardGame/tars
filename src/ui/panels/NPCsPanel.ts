@@ -76,7 +76,9 @@ export default class NPCsPanel extends TarsPanel {
 	@Bound
 	protected async refresh(): Promise<void> {
 		// ensure the refresh occurs after the npc is removed from the manager
-		await this.sleep(10);
+		if (!await this.sleep(10)) {
+			return;
+		}
 
 		this.rows.dump();
 
