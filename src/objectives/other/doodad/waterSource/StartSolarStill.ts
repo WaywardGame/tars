@@ -2,7 +2,7 @@ import type Doodad from "@wayward/game/game/doodad/Doodad";
 import AttachContainer from "@wayward/game/game/entity/action/actions/AttachContainer";
 
 import type Context from "../../../../core/context/Context";
-import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
+import { ObjectiveResult, type IObjective, type ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
 import AcquireWaterContainer from "../../../acquire/item/specific/AcquireWaterContainer";
 import MoveToTarget from "../../../core/MoveToTarget";
@@ -32,6 +32,10 @@ export default class StartSolarStill extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		if (this.solarStill.tile.creature) {
+			return ObjectiveResult.Impossible;
+		}
+
 		const objectives: IObjective[] = [
 			// solar still tile must not have items on it
 			new PickUpAllTileItems(this.solarStill.tile),

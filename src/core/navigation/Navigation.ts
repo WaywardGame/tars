@@ -316,16 +316,26 @@ export default class Navigation {
 					continue;
 				}
 
-				let nextNoSlipTile: Tile | undefined = neighborTile;
+				let connectionTile: Tile | undefined = neighborTile;
 
 				// if the entity can slip on this tile, we will assume they will and take that into account
-				while (nextNoSlipTile && !nextNoSlipTile.hasBlockingTerrain && !nextNoSlipTile.hasBlockingDoodad && nextNoSlipTile.canSlip(undefined, true, true)) {
+				while (connectionTile) {
 					// direction ??= tile.getDirectionToTile(nextNoSlipTile);
-					nextNoSlipTile = nextNoSlipTile.getTileInDirection(direction);
+					const nextConnectionTile = connectionTile.getTileInDirection(direction);
+					const canSlipOntoNextTile = nextConnectionTile &&
+						!nextConnectionTile.hasBlockingTerrain &&
+						!nextConnectionTile.hasBlockingDoodad &&
+						connectionTile.canSlip(undefined, true, true);
+					if (!canSlipOntoNextTile) {
+						break;
+					}
+
+					connectionTile = nextConnectionTile;
 				}
 
-				if (nextNoSlipTile) {
-					mapInfo.dijkstraMap.connectNodes(tile.x, tile.y, nextNoSlipTile.x, nextNoSlipTile.y, direction);
+				// only update the connection if it's different (not the current neighbor tile)
+				if (connectionTile && connectionTile !== neighborTile) {
+					mapInfo.dijkstraMap.connectNodes(tile.x, tile.y, connectionTile.x, connectionTile.y, direction);
 					// mapInfo.dijkstraMap.getNode(tile.x, tile.y).connectTo(mapInfo.dijkstraMap.getNode(nextNoSlipTile.x, nextNoSlipTile.y), direction);
 					// mapInfo.dijkstraMap.getNode(tile.x, tile.y).connectTo(mapInfo.dijkstraMap.getNode(nextNoSlipTile.x, nextNoSlipTile.y), Direction.OPPOSITES[direction]);
 				}

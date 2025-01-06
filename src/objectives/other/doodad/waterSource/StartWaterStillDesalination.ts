@@ -118,6 +118,10 @@ export default class StartWaterStillDesalination extends Objective {
 			if (!this.waterStill.stillContainer) {
 				this.log.info("No still container");
 
+				if (this.waterStill.tile.creature) {
+					return ObjectiveResult.Impossible;
+				}
+
 				if (availableWaterContainer === undefined) {
 					objectives.push(new AcquireWaterContainer().keepInInventory());
 				}
