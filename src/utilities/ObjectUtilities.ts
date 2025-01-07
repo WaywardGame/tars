@@ -4,11 +4,13 @@ import type Creature from "@wayward/game/game/entity/creature/Creature";
 import { MoveType } from "@wayward/game/game/entity/IEntity";
 import type NPC from "@wayward/game/game/entity/npc/NPC";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
-
 import { AiType } from "@wayward/game/game/entity/ai/AI";
 import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
-import type Entity from "@wayward/types/definitions/game/game/entity/Entity";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
+
 import type Context from "../core/context/Context";
+import { PlanningAccuracy } from "../core/ITarsOptions";
 
 export enum FindObjectType {
 	Creature,
@@ -28,14 +30,27 @@ export class ObjectUtilities {
 		this.cachedObjects.clear();
 	}
 
-	public getSortedObjects<T extends Entity>(context: Context, type: FindObjectType, allObjects: SaferArray<T>): T[] {
-		const sortedCacheId = FindObjectType[type];
+	/**
+	 * todo: sort based on context.getPosition() instead?
+	 */
+	public getSortedObjects<T extends Entity>(context: Context, type: FindObjectType, allObjects: SaferArray<T>, origin?: IVector2): T[] {
+		let sortedCacheId: string;
+
+		if (context.options.planningAccuracy === PlanningAccuracy.Accurate) {
+			origin ??= context.getTile();
+			sortedCacheId = `${FindObjectType[type]},${origin.x},${origin.y}`
+
+		} else {
+			origin ??= context.human;
+			sortedCacheId = FindObjectType[type];
+		}
+
 		let sortedObjects = this.cachedSorts.get(sortedCacheId);
 		if (sortedObjects === undefined) {
 			sortedObjects = allObjects
 				.slice()
 				.filter(a => a !== undefined)
-				.sort((a, b) => Vector2.squaredDistance(context.human, a!) - Vector2.squaredDistance(context.human, b!));
+				.sort((a, b) => Vector2.squaredDistance(origin, a!) - Vector2.squaredDistance(origin, b!));
 			this.cachedSorts.set(sortedCacheId, sortedObjects);
 		}
 
