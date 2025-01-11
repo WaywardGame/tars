@@ -20,6 +20,7 @@ import type Tile from "@wayward/game/game/tile/Tile";
 import type Context from "../core/context/Context";
 import type { NavigationPath } from "../core/navigation/INavigation";
 import { ObjectiveResult } from "../core/objective/IObjective";
+import { PlanningAccuracy } from "../core/ITarsOptions";
 
 export enum MoveResult {
 	NoTarget,
@@ -116,7 +117,8 @@ export class MovementUtilities {
 			return ObjectiveResult.Complete;
 		}
 
-		const pathId = `${target.x},${target.y},${target.z}:${moveAdjacentToTarget ? "A" : "O"}:${reverse ? "R" : "N"}`;
+		const fromTileId = context.options.planningAccuracy === PlanningAccuracy.Accurate ? context.getTile() : -1;
+		const pathId = `${target.x},${target.y},${target.z}:${moveAdjacentToTarget ? "A" : "O"}:${reverse ? "R" : "N"}:${fromTileId}`;
 
 		let movementPath = this.cachedPaths.get(pathId);
 		if (movementPath === undefined) {

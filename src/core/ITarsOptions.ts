@@ -62,8 +62,12 @@ export enum TarsUseProtectedItems {
 	YesWithBreakCheck,
 }
 
+/**
+ * Order matters. Less accurate first
+ */
 export enum PlanningAccuracy {
-	Simple,
+	Basic,
+	Standard,
 	Accurate,
 }
 
@@ -105,7 +109,7 @@ export function createOptions(initialOptions: Partial<ITarsOptions> = {}): ITars
 		treasureHunterPrecognition: false,
 		treasureHunterType: TreasureHunterType.DiscoverAndUnlockTreasure,
 
-		planningAccuracy: PlanningAccuracy.Accurate,
+		planningAccuracy: PlanningAccuracy.Standard,
 
 		limitGroundItemSearch: true,
 		limitDisassembleItemSearch: true,

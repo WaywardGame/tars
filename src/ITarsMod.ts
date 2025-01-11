@@ -93,8 +93,10 @@ export enum TarsTranslation {
 	DialogPanelGlobalOptions,
 	DialogPanelModeOptions,
 
-	DialogButtonSimple,
-	DialogButtonSimpleTooltip,
+	DialogButtonBasic,
+	DialogButtonBasicTooltip,
+	DialogButtonStandard,
+	DialogButtonStandardTooltip,
 	DialogButtonAccurate,
 	DialogButtonAccurateTooltip,
 	DialogButtonAllowProtectedItems,
@@ -350,7 +352,8 @@ export const uiConfigurableGlobalOptions: Array<TarsOptionSection | TarsTranslat
 		option: "planningAccuracy",
 		type: TarsOptionSectionType.Choice,
 		choices: [
-			[TarsTranslation.DialogButtonSimple, TarsTranslation.DialogButtonSimpleTooltip, PlanningAccuracy.Simple],
+			[TarsTranslation.DialogButtonBasic, TarsTranslation.DialogButtonBasicTooltip, PlanningAccuracy.Basic],
+			[TarsTranslation.DialogButtonStandard, TarsTranslation.DialogButtonStandardTooltip, PlanningAccuracy.Standard],
 			[TarsTranslation.DialogButtonAccurate, TarsTranslation.DialogButtonAccurateTooltip, PlanningAccuracy.Accurate],
 		],
 	},

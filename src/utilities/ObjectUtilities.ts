@@ -7,7 +7,7 @@ import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { AiType } from "@wayward/game/game/entity/ai/AI";
 import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import type Entity from "@wayward/game/game/entity/Entity";
-import type { IVector2 } from "@wayward/game/utilities/math/IVector";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 import type Context from "../core/context/Context";
 import { PlanningAccuracy } from "../core/ITarsOptions";
@@ -33,34 +33,39 @@ export class ObjectUtilities {
 	/**
 	 * todo: sort based on context.getPosition() instead?
 	 */
-	public getSortedObjects<T extends Entity>(context: Context, type: FindObjectType, allObjects: SaferArray<T>, origin?: IVector2): T[] {
-		let sortedCacheId: string;
+	public getSortedObjects<T extends Entity>(context: Context, type: FindObjectType, allObjects: SaferArray<T>, origin?: Tile): T[] {
+		let cacheId: string;
 
 		if (context.options.planningAccuracy === PlanningAccuracy.Accurate) {
 			origin ??= context.getTile();
-			sortedCacheId = `${FindObjectType[type]},${origin.x},${origin.y}`
+			cacheId = `${FindObjectType[type]},${origin.id}`;
 
 		} else {
-			origin ??= context.human;
-			sortedCacheId = FindObjectType[type];
+			origin ??= context.human.tile;
+			cacheId = FindObjectType[type];
 		}
 
-		let sortedObjects = this.cachedSorts.get(sortedCacheId);
+		let sortedObjects = this.cachedSorts.get(cacheId);
 		if (sortedObjects === undefined) {
 			sortedObjects = allObjects
 				.slice()
 				.filter(a => a !== undefined)
 				.sort((a, b) => Vector2.squaredDistance(origin, a!) - Vector2.squaredDistance(origin, b!));
-			this.cachedSorts.set(sortedCacheId, sortedObjects);
+			this.cachedSorts.set(cacheId, sortedObjects);
 		}
 
 		return sortedObjects;
 	}
 
 	private findObjects<T extends Entity>(context: Context, type: FindObjectType, id: string, allObjects: SaferArray<T>, isTarget: (object: T) => boolean, top?: number): T[] {
-		const cacheId = top === undefined ? `${type}-${id}` : `${type}-${id}-${top}`;
+		let cacheId = top === undefined ? `${type}-${id}` : `${type}-${id}-${top}`;
 
-		const cachedResults = this.cachedObjects.get(id) || this.cachedObjects.get(cacheId);
+		if (context.options.planningAccuracy === PlanningAccuracy.Accurate) {
+			const origin = context.getTile();
+			cacheId += `,${origin.id}`;
+		}
+
+		const cachedResults = this.cachedObjects.get(cacheId);
 		if (cachedResults !== undefined) {
 			return cachedResults;
 		}
