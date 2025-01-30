@@ -533,6 +533,9 @@ export default class Navigation {
 
 		let penalty = 0;
 
+		// tier 7 is the max in base game.
+		penalty += tile.zoneTier * 14;
+
 		if (tileType === TerrainType.Lava || tile.events?.some(tileEvent => tileEvent.type === TileEventType.Fire || tileEvent.type === TileEventType.Acid)) {
 			penalty += 150;
 		}
