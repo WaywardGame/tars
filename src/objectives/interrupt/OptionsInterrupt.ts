@@ -21,6 +21,7 @@ export default class OptionsInterrupt extends Objective {
 		dropOnGatherHarvest: true,
 		useAdjacentContainers: false,
 		warnOnDangerousActions: false,
+		warnOnDroppingActions: false,
 		warnOnDestructiveActions: false,
 		warnWhenBreakingItems: false,
 		warnWhenBreakingItemsOnCraft: false,
