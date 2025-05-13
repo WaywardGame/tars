@@ -1,5 +1,5 @@
 import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
-import { DoodadType, GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import { DoodadType, DoodadTypeGroup, GrowingStage } from "@wayward/game/game/doodad/IDoodad";
 import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
 import GatherLiquid from "@wayward/game/game/entity/action/actions/GatherLiquid";
@@ -171,28 +171,29 @@ export default class AcquireItem extends AcquireBase {
 							continue;
 						}
 
-						const wellData = context.island.wellData[doodad.getTileId()];
-						if (wellData) {
-							if (this.options?.disallowWell || wellData.quantity === 0) {
+						const well = doodad.isInGroup(DoodadTypeGroup.Well) ? doodad.tile.well : undefined;
+						if (well) {
+							if (this.options?.disallowWell || well.quantity === 0) {
 								continue;
 							}
 
-						} else if (!context.utilities.doodad.isWaterSourceDoodadDrinkable(doodad)) {
+						} else if (!context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
 							if (this.options?.allowStartingWaterSourceDoodads) {
 								// start desalination and run back to the waterstill and wait
 								const objectives: IObjective[] = [
 									new StartWaterSourceDoodad(doodad),
 								];
 
-								if (this.options?.allowWaitingForWater) {
-									// add difficulty to show that we don't want to idle
-									objectives.push(new AddDifficulty(100));
+								// add difficulty to show that we don't want to idle
+								// difficulty is based on how long until the water is gatherable
+								objectives.push(new AddDifficulty(100 + (context.utilities.doodad.getTurnsUntilWaterSourceIsGatherable(doodad) * 2)));
 
+								if (this.options?.allowWaitingForWater) {
 									if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
 										objectives.push(new MoveToTarget(doodad, true, { range: 5 }));
 									}
 
-									objectives.push(new Idle());
+									objectives.push(new Idle().setStatus(`Waiting for ${doodad.getName()}`));
 								}
 
 								objectivePipelines.push(objectives);

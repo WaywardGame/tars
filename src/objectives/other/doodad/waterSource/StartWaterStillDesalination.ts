@@ -50,7 +50,7 @@ export default class StartWaterStillDesalination extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
-		if (!this.options.forceStoke && context.utilities.doodad.isWaterSourceDoodadDrinkable(this.waterStill)) {
+		if (!this.options.forceStoke && context.utilities.doodad.isWaterSourceDoodadGatherable(this.waterStill)) {
 			// water is ready
 			return ObjectiveResult.Ignore;
 		}
@@ -117,6 +117,10 @@ export default class StartWaterStillDesalination extends Objective {
 		if (!this.options.disableAttaching) {
 			if (!this.waterStill.stillContainer) {
 				this.log.info("No still container");
+
+				if (this.waterStill.tile.creature) {
+					return ObjectiveResult.Impossible;
+				}
 
 				if (availableWaterContainer === undefined) {
 					objectives.push(new AcquireWaterContainer().keepInInventory());

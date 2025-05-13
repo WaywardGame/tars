@@ -240,10 +240,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 				objectives.push([new AcquireInventoryItem("dripStone"), new BuildItem()]);
 			}
 
-			// build a second water still
-			// if (context.utilities.base.canBuildWaterDesalinators(context) && context.base.waterStill.length < 2) {
-			// 	objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
-			// }
+			// build a water still
+			if (context.utilities.base.canBuildWaterDesalinators(context) && context.base.waterStill.length < 1) {
+				objectives.push([new AcquireInventoryItem("waterStill"), new BuildItem()]);
+			}
 
 			// carry food with you
 			if (context.inventory.food === undefined) {

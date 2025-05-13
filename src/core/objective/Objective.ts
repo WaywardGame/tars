@@ -76,7 +76,7 @@ export default abstract class Objective implements IObjective {
 		// }
 
 		// greatly increases accuracy at a cost of performance
-		if (context && this.includePositionInHashCode !== false && (this.includePositionInHashCode || context.options.planningAccuracy === PlanningAccuracy.Accurate)) {
+		if (context && this.includePositionInHashCode !== false && (this.includePositionInHashCode || context.options.planningAccuracy >= PlanningAccuracy.Standard)) {
 			const tile = context.getTile();
 			hashCode += `:(${tile.x},${tile.y},${tile.z})`;
 		}

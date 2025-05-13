@@ -296,13 +296,16 @@ export class BaseUtilities {
 	}
 
 	public async findInitialBuildTile(context: Context): Promise<Tile | undefined> {
-		const facingTile = context.human.facingTile;
+		const desiredOriginTile = context.island.isDefaultIsland ? context.island.getSpawnPoint() : context.human.tile;
+		// context.island.zones.all().sort
 
-		if (await this.isGoodTargetOrigin(context, facingTile) && context.utilities.base.isGoodBuildTile(context, facingTile)) {
-			return facingTile;
+		// const facingTile = context.human.facingTile;
+
+		if (await this.isGoodTargetOrigin(context, desiredOriginTile) && context.utilities.base.isGoodBuildTile(context, desiredOriginTile)) {
+			return desiredOriginTile;
 		}
 
-		const sortedObjects = context.utilities.object.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[]);
+		const sortedObjects = context.utilities.object.getSortedObjects(context, FindObjectType.Doodad, context.island.doodads.getObjects() as Doodad[], desiredOriginTile);
 
 		for (const doodad of sortedObjects) {
 			if (doodad !== undefined && doodad.z === context.human.z) {

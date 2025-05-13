@@ -32,6 +32,11 @@ export default class DigTile extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		if (this.target.isDeepHole) {
+			// too deep to dig
+			return ObjectiveResult.Impossible;
+		}
+
 		const objectives: IObjective[] = [];
 
 		objectives.push(new AcquireInventoryItem("shovel"));
