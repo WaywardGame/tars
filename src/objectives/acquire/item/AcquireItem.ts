@@ -118,9 +118,9 @@ export default class AcquireItem extends AcquireBase {
 
 		if (itemDescription) {
 			if (itemDescription.recipe && itemDescription.craftable !== false) {
-				if (this.options.allowCraftingForUnmetRequiredDoodads ||
-					!itemDescription.recipe.requiredDoodads ||
-					(itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
+				if (this.options.allowCraftingForUnmetRequiredDoodads
+					|| !itemDescription.recipe.requiredDoodads
+					|| (itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
 					objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);
 				}
 			}
@@ -135,21 +135,82 @@ export default class AcquireItem extends AcquireBase {
 			if (itemDescription.returnOnUseAndDecay !== undefined) {
 				const returnOnUseAndDecayItemType = itemDescription.returnOnUseAndDecay.type;
 
-				const returnOnUseAndDecayItemDescription = itemDescriptions[returnOnUseAndDecayItemType];
-				if (returnOnUseAndDecayItemDescription) {
-					if (!this.options?.disallowTerrain) {
-						const terrainWaterSearch = this.getTerrainWaterSearch(context, returnOnUseAndDecayItemType);
-						if (terrainWaterSearch.length > 0) {
-							const itemContextDataKey = this.getUniqueContextDataKey("WaterContainer");
+				if (!context.island.items.isGroup(returnOnUseAndDecayItemType)) {
+					const returnOnUseAndDecayItemDescription = itemDescriptions[returnOnUseAndDecayItemType];
+					if (returnOnUseAndDecayItemDescription) {
+						if (!this.options?.disallowTerrain) {
+							const terrainWaterSearch = this.getTerrainWaterSearch(context, returnOnUseAndDecayItemType);
+							if (terrainWaterSearch.length > 0) {
+								const itemContextDataKey = this.getUniqueContextDataKey("WaterContainer");
+
+								const objectives: IObjective[] = [];
+
+								// notes for future reference:
+								// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
+								const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, {
+									// allowUnsafeWaterContainers: true, the water container might be stolen (related to interrupts?) by AnalyzeInventory, so allowInventoryItems should be set }
+									allowInventoryItems: true,
+								});
+								if (waterContainer) {
+									objectives.push(new ReserveItems(waterContainer).keepInInventory());
+									objectives.push(new SetContextData(itemContextDataKey, waterContainer));
+
+								} else {
+									objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
+								}
+
+								objectives.push(new GatherFromTerrainWater(terrainWaterSearch, itemContextDataKey).passAcquireData(this));
+
+								objectivePipelines.push(objectives);
+							}
+						}
+
+						const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", doodad => doodad.getLiquidGatherType() !== undefined);
+						for (const doodad of doodads) {
+							const liquidGatherType = doodad.getLiquidGatherType()!;
+							if (returnOnUseAndDecayItemDescription.liquidGather?.[liquidGatherType] !== this.itemType) {
+								continue;
+							}
+
+							const well = doodad.isInGroup(DoodadTypeGroup.Well) ? doodad.tile.well : undefined;
+							if (well) {
+								if (this.options?.disallowWell || well.quantity === 0) {
+									continue;
+								}
+
+							} else if (!context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
+								if (this.options?.allowStartingWaterSourceDoodads) {
+									// start desalination and run back to the waterstill and wait
+									const objectives: IObjective[] = [
+										new StartWaterSourceDoodad(doodad),
+									];
+
+									// add difficulty to show that we don't want to idle
+									// difficulty is based on how long until the water is gatherable
+									objectives.push(new AddDifficulty(100 + (context.utilities.doodad.getTurnsUntilWaterSourceIsGatherable(doodad) * 2)));
+
+									if (this.options?.allowWaitingForWater) {
+										if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
+											objectives.push(new MoveToTarget(doodad, true, { range: 5 }));
+										}
+
+										objectives.push(new Idle().setStatus(`Waiting for ${doodad.getName()}`));
+									}
+
+									objectivePipelines.push(objectives);
+								}
+
+								continue;
+							}
+
+							const itemContextDataKey = this.getUniqueContextDataKey(`WaterContainerFor${doodad.id}`);
 
 							const objectives: IObjective[] = [];
 
 							// notes for future reference:
 							// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
-							const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, {
-								// allowUnsafeWaterContainers: true, the water container might be stolen (related to interrupts?) by AnalyzeInventory, so allowInventoryItems should be set }
-								allowInventoryItems: true,
-							});
+							// todo: allow emptying unsafe water to pick up purified still water?
+							const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
 							if (waterContainer) {
 								objectives.push(new ReserveItems(waterContainer).keepInInventory());
 								objectives.push(new SetContextData(itemContextDataKey, waterContainer));
@@ -158,88 +219,29 @@ export default class AcquireItem extends AcquireBase {
 								objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
 							}
 
-							objectives.push(new GatherFromTerrainWater(terrainWaterSearch, itemContextDataKey).passAcquireData(this));
+							objectives.push(
+								new MoveToTarget(doodad, true),
+								new ExecuteActionForItem(
+									ExecuteActionType.Generic,
+									[this.itemType],
+									{
+										genericAction: {
+											action: GatherLiquid,
+											args: context => {
+												const item = context.getData(itemContextDataKey);
+												if (!item?.isValid) {
+													this.log.warn("Invalid water container");
+													return ObjectiveResult.Restart;
+												}
+
+												return [item] as ActionArgumentsOf<typeof GatherLiquid>;
+											},
+										},
+									})
+									.passAcquireData(this));
 
 							objectivePipelines.push(objectives);
 						}
-					}
-
-					const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", doodad => doodad.getLiquidGatherType() !== undefined);
-					for (const doodad of doodads) {
-						const liquidGatherType = doodad.getLiquidGatherType()!;
-						if (returnOnUseAndDecayItemDescription.liquidGather?.[liquidGatherType] !== this.itemType) {
-							continue;
-						}
-
-						const well = doodad.isInGroup(DoodadTypeGroup.Well) ? doodad.tile.well : undefined;
-						if (well) {
-							if (this.options?.disallowWell || well.quantity === 0) {
-								continue;
-							}
-
-						} else if (!context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
-							if (this.options?.allowStartingWaterSourceDoodads) {
-								// start desalination and run back to the waterstill and wait
-								const objectives: IObjective[] = [
-									new StartWaterSourceDoodad(doodad),
-								];
-
-								// add difficulty to show that we don't want to idle
-								// difficulty is based on how long until the water is gatherable
-								objectives.push(new AddDifficulty(100 + (context.utilities.doodad.getTurnsUntilWaterSourceIsGatherable(doodad) * 2)));
-
-								if (this.options?.allowWaitingForWater) {
-									if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
-										objectives.push(new MoveToTarget(doodad, true, { range: 5 }));
-									}
-
-									objectives.push(new Idle().setStatus(`Waiting for ${doodad.getName()}`));
-								}
-
-								objectivePipelines.push(objectives);
-							}
-
-							continue;
-						}
-
-						const itemContextDataKey = this.getUniqueContextDataKey(`WaterContainerFor${doodad.id}`);
-
-						const objectives: IObjective[] = [];
-
-						// notes for future reference:
-						// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
-						// todo: allow emptying unsafe water to pick up purified still water?
-						const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
-						if (waterContainer) {
-							objectives.push(new ReserveItems(waterContainer).keepInInventory());
-							objectives.push(new SetContextData(itemContextDataKey, waterContainer));
-
-						} else {
-							objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
-						}
-
-						objectives.push(
-							new MoveToTarget(doodad, true),
-							new ExecuteActionForItem(
-								ExecuteActionType.Generic,
-								[this.itemType],
-								{
-									genericAction: {
-										action: GatherLiquid,
-										args: context => {
-											const item = context.getData(itemContextDataKey);
-											if (!item?.isValid) {
-												this.log.warn("Invalid water container");
-												return ObjectiveResult.Restart;
-											}
-
-											return [item] as ActionArgumentsOf<typeof GatherLiquid>;
-										},
-									},
-								})
-								.passAcquireData(this));
-
-						objectivePipelines.push(objectives);
 					}
 				}
 			}
