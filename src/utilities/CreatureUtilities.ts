@@ -5,7 +5,7 @@ import { ItemType } from "@wayward/game/game/item/IItem";
 import type { IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import { WeightStatus } from "@wayward/game/game/entity/player/IPlayer";
-import { CombatDangerLevel } from "@wayward/game/game/entity/CombatStrengthManager";
+import { CombatDangerLevel } from "@wayward/game/game/entity/ICombatStrength";
 
 import type Context from "../core/context/Context";
 import type Human from "@wayward/game/game/entity/Human";
@@ -64,9 +64,9 @@ export class CreatureUtilities {
 				return !this.hasDecentEquipment(human);
 
 			case CreatureType.Kraken:
-				return !this.hasDecentEquipment(human) ||
-					human.getEquippedItem(EquipType.Legs)?.type === ItemType.BarkLeggings ||
-					human.getEquippedItem(EquipType.Chest)?.type === ItemType.BarkTunic;
+				return !this.hasDecentEquipment(human)
+					|| human.getEquippedItem(EquipType.Legs)?.type === ItemType.BarkLeggings
+					|| human.getEquippedItem(EquipType.Chest)?.type === ItemType.BarkTunic;
 
 			default:
 				return creature.aberrant ? !this.hasDecentEquipment(human) : false;

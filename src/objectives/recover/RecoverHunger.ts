@@ -116,7 +116,7 @@ export default class RecoverHunger extends Objective {
 			.sort((a, b) => (a.getDecayTime() ?? 999999) - (b.getDecayTime() ?? 999999));
 	}
 
-	private eatItem(context: Context, item: Item): Array<MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human, void, IConsumeItemCanUse, [Item]>>> {
+	private eatItem(context: Context, item: Item): Array<MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], ActionType, Human, void, IConsumeItemCanUse, [Item]>>> {
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
 			new MoveItemsIntoInventory(item).keepInInventory(),
