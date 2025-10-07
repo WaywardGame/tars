@@ -228,9 +228,9 @@ export class ItemUtilities {
 		if (cachedItems === undefined) {
 			cachedItems = context.island.items.getObjects()
 				.filter(item =>
-					item !== undefined &&
-					item.type === itemType &&
-					context.island.items.isTileContainer(item.containedWithin)) as Item[];
+					item !== undefined
+					&& item.type === itemType
+					&& context.island.items.isTileContainer(item.containedWithin)) as Item[];
 			if (context.options.limitGroundItemSearch && cachedItems.length > groundItemLimit) {
 				// limit to the first X items on the ground
 				cachedItems = cachedItems.slice(0, groundItemLimit);
@@ -467,8 +467,8 @@ export class ItemUtilities {
 	}
 
 	public canDestroyItem(context: Context, item: Item): boolean {
-		if (context.options.goodCitizen && multiplayer.isConnected &&
-			item.crafterIdentifier !== undefined && item.crafterIdentifier !== context.human.identifier) {
+		if (context.options.goodCitizen && multiplayer.isConnected
+			&& item.crafterIdentifier !== undefined && item.crafterIdentifier !== context.human.identifier) {
 			// prevent destroying other peoples items
 			return false;
 		}
@@ -481,10 +481,10 @@ export class ItemUtilities {
 	}
 
 	public isSafeToDrinkItemType(context: Context, itemType: ItemType): boolean {
-		return context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfMedicinalWater) ||
-			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfDesalinatedWater) ||
-			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfPurifiedFreshWater) ||
-			context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfFilteredWater);
+		return context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfMedicinalWater)
+			|| context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfDesalinatedWater)
+			|| context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfPurifiedFreshWater)
+			|| context.island.items.isInGroup(itemType, ItemTypeGroup.ContainerOfFilteredWater);
 	}
 
 	public isDrinkableItem(item: Item): boolean {
@@ -729,8 +729,8 @@ export class ItemUtilities {
 		const items = this.getInventoryItemsWithUse(context, actionType, filterEquipped)
 			.filter(item => {
 				const description = item.description;
-				return description && description.equip === EquipType.Held &&
-					(preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
+				return description && description.equip === EquipType.Held
+					&& (preferredDamageType === undefined || (description.damageType !== undefined && ((description.damageType & preferredDamageType) !== 0)));
 			});
 		if (actionType !== ActionType.Attack) {
 			return items.sort((itemA, itemB) => itemB.getItemUseBonus(actionType) - itemA.getItemUseBonus(actionType));
@@ -769,9 +769,9 @@ export class ItemUtilities {
 				if (use === ActionType.Attack) {
 					const descriptionA = a.description;
 					const descriptionB = b.description;
-					if (descriptionA !== undefined && descriptionB !== undefined &&
-						descriptionA.attack !== undefined && descriptionB.attack !== undefined &&
-						descriptionA.damageType !== undefined && descriptionB.damageType !== undefined) {
+					if (descriptionA !== undefined && descriptionB !== undefined
+						&& descriptionA.attack !== undefined && descriptionB.attack !== undefined
+						&& descriptionA.damageType !== undefined && descriptionB.damageType !== undefined) {
 						if (descriptionA.attack === descriptionB.attack) {
 							const damageTypesA = Enums.values(DamageType).filter(type => (descriptionA.damageType! & type) === type).length;
 							const damageTypesB = Enums.values(DamageType).filter(type => (descriptionB.damageType! & type) === type).length;
@@ -828,9 +828,9 @@ export class ItemUtilities {
 		const items = this.getItemsInInventory(context);
 		return items
 			.filter(item => {
-				if (item.isEquipped(true) ||
-					this.isInventoryItem(context, item) ||
-					(!options.allowReservedItems && context.isReservedItem(item))) {
+				if (item.isEquipped(true)
+					|| this.isInventoryItem(context, item)
+					|| (!options.allowReservedItems && context.isReservedItem(item))) {
 					return false;
 				}
 
@@ -863,9 +863,9 @@ export class ItemUtilities {
 		const baseItems = this.getBaseItems(context);
 		return baseItems.filter(
 			item =>
-				item.durability !== undefined &&
-				item.durability > 0 &&
-				(onlyEdible ? this.edibleSeedItemTypes : this.allSeedItemTypes).has(item.type),
+				item.durability !== undefined
+				&& item.durability > 0
+				&& (onlyEdible ? this.edibleSeedItemTypes : this.allSeedItemTypes).has(item.type),
 		);
 	}
 
@@ -966,7 +966,7 @@ export class ItemUtilities {
 		for (const growingStage of Enums.values(GrowingStage)) {
 			const resourceItems = (gather?.[growingStage] ?? []).concat(harvest?.[growingStage] ?? []);
 			for (const resourceItem of resourceItems) {
-				if (this.isEdible(resourceItem.type)) {
+				if (resourceItem.itemType && this.isEdible(resourceItem.itemType)) {
 					return true;
 				}
 			}
@@ -977,7 +977,7 @@ export class ItemUtilities {
 
 	private isEdible(itemType: ItemType): boolean {
 		const onEat = ConsumeItemStats.resolve(itemDescriptions[itemType]?.onUse?.[ActionType.Eat]);
-		return (onEat.get(Stat.Health) ?? 0) >= 1 && // hp. note: must be greater than or equal to 1 for Pemmican
-			(onEat.get(Stat.Hunger) ?? 0) > 1; // hunger. don't continously dig for grass seeds
+		return (onEat.get(Stat.Health) ?? 0) >= 1 // hp. note: must be greater than or equal to 1 for Pemmican
+			&& (onEat.get(Stat.Hunger) ?? 0) > 1; // hunger. don't continously dig for grass seeds
 	}
 }

@@ -305,7 +305,7 @@ export default class AcquireItem extends AcquireBase {
 
 					const resource = TerrainResources[terrainType];
 					const terrainItems = context.island.getTerrainItems(resource);
-					if (resource && terrainItems && (resource.defaultItem === this.itemType || terrainItems.some(ri => ri.type === this.itemType))) {
+					if (resource && terrainItems && (resource.defaultItem === this.itemType || terrainItems.some(ri => ri.itemType === this.itemType))) {
 						const terrainSearch: ITerrainResourceSearch = {
 							type: terrainType,
 							itemType: this.itemType,
@@ -416,7 +416,7 @@ export default class AcquireItem extends AcquireBase {
 
 						if ((doodadDescription.isTall && growingStage >= GrowingStage.Budding) || growingStage >= GrowingStage.Ripening) {
 							for (const resourceItem of resourceItems) {
-								if (resourceItem.type !== this.itemType) {
+								if (resourceItem.itemType !== this.itemType) {
 									continue;
 								}
 
@@ -453,7 +453,7 @@ export default class AcquireItem extends AcquireBase {
 						}
 
 						for (const resourceItem of resourceItems) {
-							if (resourceItem.type !== this.itemType) {
+							if (resourceItem.itemType !== this.itemType) {
 								continue;
 							}
 

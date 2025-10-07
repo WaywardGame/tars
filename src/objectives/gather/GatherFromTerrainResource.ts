@@ -99,7 +99,7 @@ export default class GatherFromTerrainResource extends Objective {
 
 				let chanceForHit = 0;
 
-				if (loot.type === terrainSearch.itemType) {
+				if (loot.itemType === terrainSearch.itemType) {
 					matches++;
 
 					if (loot.chance === undefined) {

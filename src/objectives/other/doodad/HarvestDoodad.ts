@@ -31,7 +31,7 @@ export default class HarvestDoodad extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
-		const itemTypes = harvestLoot.map(loot => loot.type);
+		const itemTypes = harvestLoot.map(loot => loot.itemType).filter(itemType => itemType !== undefined);
 
 		return [
 			new MoveToTarget(this.doodad, true),
