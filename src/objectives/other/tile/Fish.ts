@@ -6,9 +6,7 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import MoveToWater, { MoveToWaterType } from "../../utility/moveTo/MoveToWater";
-import UseItem from "../item/UseItem";
+import { MoveToWaterType } from "../../utility/moveTo/MoveToWater";
 
 export default class Fish extends Objective {
 
@@ -22,6 +20,8 @@ export default class Fish extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectives: IObjective[] = [];
+
+		const { AcquireInventoryItem, MoveToWater, UseItem } = context.objectives;
 
 		objectives.push(new AcquireInventoryItem("fishing"));
 

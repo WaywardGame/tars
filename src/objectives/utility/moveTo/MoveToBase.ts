@@ -4,7 +4,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
 
 const returnToBaseDistance = 20;
 const returnToBaseDistanceSq = Math.pow(returnToBaseDistance, 2);
@@ -28,6 +27,7 @@ export default class MoveToBase extends Objective {
 
 		this.log.info("Returning to base");
 
+		const { MoveToTarget } = context.objectives;
 		return new MoveToTarget(baseTile, true);
 	}
 

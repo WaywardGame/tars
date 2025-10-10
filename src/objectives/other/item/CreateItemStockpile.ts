@@ -5,10 +5,6 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItem from "../../acquire/item/AcquireItem";
-import ReserveItems from "../../core/ReserveItems";
-
-import MoveIntoChest from "../../utility/MoveIntoChest";
 
 /**
  * Acquires items and moves them into chests in the base
@@ -41,6 +37,8 @@ export default class CreateItemStockpile extends Objective {
 		}
 
 		const objectives: IObjective[] = [];
+
+		const { ReserveItems, AcquireItem, MoveIntoChest } = context.objectives;
 
 		for (const baseItem of baseItems) {
 			objectives.push(new ReserveItems(baseItem));

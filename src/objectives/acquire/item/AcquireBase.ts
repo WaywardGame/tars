@@ -3,12 +3,6 @@ import type { ItemType } from "@wayward/game/game/item/IItem";
 import type Context from "../../../core/context/Context";
 import type { IExecutionTree } from "../../../core/planning/IPlan";
 import Objective from "../../../core/objective/Objective";
-import GatherFromChest from "../../gather/GatherFromChest";
-import GatherFromCorpse from "../../gather/GatherFromCorpse";
-import GatherFromCreature from "../../gather/GatherFromCreature";
-import GatherFromDoodad from "../../gather/GatherFromDoodad";
-import GatherFromGround from "../../gather/GatherFromGround";
-import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
 import type { IObjective, IObjectivePriority } from "../../../core/objective/IObjective";
 
 export interface IAcquireItemOptions extends IGatherItemOptions {
@@ -65,8 +59,8 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 		const isAcquireObjective = tree.objective instanceof AcquireBase;
 		if (isAcquireObjective) {
 			for (const child of children) {
-				this.addGatherObjectivePriorities(result, child);
-				this.addAcquireObjectivePriorities(result, child);
+				this.addGatherObjectivePriorities(context, result, child);
+				this.addAcquireObjectivePriorities(context, result, child);
 			}
 		}
 
@@ -109,7 +103,9 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	/**
 	 * Higher number = higher priority = it will be executed first
 	 */
-	private addGatherObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree): void {
+	private addGatherObjectivePriorities(context: Context, result: IObjectivePriority, tree: IExecutionTree): void {
+		const { GatherFromCreature, GatherFromCorpse, GatherFromGround, GatherFromTerrainResource, GatherFromDoodad, GatherFromChest } = context.objectives;
+
 		if (tree.objective instanceof GatherFromCreature) {
 			result.totalGatherObjectives++;
 			result.gatherObjectives.GatherFromCreature++;
@@ -141,7 +137,7 @@ export default abstract class AcquireBase extends Objective implements IObjectiv
 	/**
 	 * Higher number = higher priority = it will be executed first
 	 */
-	private addAcquireObjectivePriorities(result: IObjectivePriority, tree: IExecutionTree): void {
+	private addAcquireObjectivePriorities(context: Context, result: IObjectivePriority, tree: IExecutionTree): void {
 		if (tree.objective.getName() === "UseProvidedItem") {
 			result.useProvidedItemObjectives++;
 		}

@@ -5,7 +5,6 @@ import type { ObjectiveExecutionResult } from "../../../core/objective/IObjectiv
 import { ItemUtilities } from "../../../utilities/ItemUtilities";
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
-import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemByGroup extends AcquireBase {
 
@@ -36,6 +35,8 @@ export default class AcquireItemByGroup extends AcquireBase {
 		if (this.options.excludeItemTypes) {
 			itemTypes = itemTypes.filter(itemType => !this.options.excludeItemTypes!.has(itemType));
 		}
+
+		const { AcquireItem } = context.objectives;
 
 		return itemTypes.map(itemType => [new AcquireItem(itemType, this.options).passAcquireData(this)]);
 	}

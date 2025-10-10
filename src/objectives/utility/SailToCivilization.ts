@@ -7,14 +7,7 @@ import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import AcquireItem from "../acquire/item/AcquireItem";
-import SetContextData from "../contextData/SetContextData";
-import ExecuteAction from "../core/ExecuteAction";
-import ReserveItems from "../core/ReserveItems";
-import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
-import CompleteQuest from "../quest/CompleteQuest";
-import MoveToWater, { MoveToWaterType } from "./moveTo/MoveToWater";
+import { MoveToWaterType } from "./moveTo/MoveToWater";
 
 const requiredItems: ItemType[] = [
 	ItemType.GoldShortSword,
@@ -42,6 +35,8 @@ export default class SailToCivilization extends Objective {
 		}
 
 		const objectives: IObjective[] = [];
+
+		const { AcquireInventoryItem, AcquireItem, SetContextData, ExecuteAction, ReserveItems, MoveItemsIntoInventory, CompleteQuest, MoveToWater } = context.objectives;
 
 		if (game.isChallenge) {
 			const quest = player.quests.getQuests(QuestType.Challenge)?.[0];

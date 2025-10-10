@@ -7,8 +7,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Restart from "../core/Restart";
-import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class OrganizeBase extends Objective {
 
@@ -78,6 +76,8 @@ export default class OrganizeBase extends Objective {
 			}
 
 			const objectives: IObjective[] = [];
+
+			const { Restart, MoveItemsIntoInventory } = context.objectives;
 
 			// pick up items from tile
 			objectives.push(new MoveItemsIntoInventory(itemsToMove, tile));

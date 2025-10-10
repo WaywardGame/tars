@@ -5,7 +5,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
 
 export enum MoveToWaterType {
 	AnyWater,
@@ -168,6 +167,8 @@ export default class MoveToWater extends Objective {
 		if (!target) {
 			return ObjectiveResult.Impossible;
 		}
+
+		const { MoveToTarget } = context.objectives;
 
 		return new MoveToTarget(
 			target,

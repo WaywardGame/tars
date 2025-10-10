@@ -4,7 +4,6 @@ import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { IOriganizeInventoryOptions } from "../utility/OrganizeInventory";
-import OrganizeInventory from "../utility/OrganizeInventory";
 
 export default class ReduceWeight extends Objective {
 
@@ -37,6 +36,8 @@ export default class ReduceWeight extends Objective {
 		if (weightStatus === WeightStatus.None) {
 			return ObjectiveResult.Ignore;
 		}
+
+		const { OrganizeInventory } = context.objectives;
 
 		return new OrganizeInventory({
 			allowChests: weightStatus !== WeightStatus.Overburdened,

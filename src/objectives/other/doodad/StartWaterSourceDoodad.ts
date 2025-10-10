@@ -4,9 +4,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
-import StartDripStone from "./waterSource/StartDripStone";
-import StartSolarStill from "./waterSource/StartSolarStill";
-import StartWaterStillDesalination from "./waterSource/StartWaterStillDesalination";
 
 export default class StartWaterSourceDoodad extends Objective {
 
@@ -23,6 +20,7 @@ export default class StartWaterSourceDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { StartDripStone, StartSolarStill, StartWaterStillDesalination } = context.objectives;
 		if (this.doodad.isInGroup(DoodadTypeGroup.Dripstone)) {
 			return new StartDripStone(this.doodad);
 		}

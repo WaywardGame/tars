@@ -9,7 +9,6 @@ import Enums from "@wayward/game/utilities/enum/Enums";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForDoodad extends Objective {
 
@@ -36,6 +35,7 @@ export default class AcquireItemForDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireItem } = context.objectives;
 		// min dur of 1 is required to build doodads
 		return this.getItems(context)
 			.map(item => [new AcquireItem(item, { requiredMinDur: 1 }).passAcquireData(this)]);
@@ -50,8 +50,8 @@ export default class AcquireItemForDoodad extends Objective {
 			for (const doodadType of doodadTypes) {
 				for (const itemType of Enums.values(ItemType)) {
 					const itemDescription = itemDescriptions[itemType];
-					if (itemDescription?.onUse &&
-						(itemDescription.onUse[ActionType.Build]?.type === doodadType || itemDescription.onUse[ActionType.PlaceDown]?.type === doodadType)) {
+					if (itemDescription?.onUse
+						&& (itemDescription.onUse[ActionType.Build]?.type === doodadType || itemDescription.onUse[ActionType.PlaceDown]?.type === doodadType)) {
 						result.push(itemType);
 					}
 				}

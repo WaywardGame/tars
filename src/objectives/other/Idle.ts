@@ -6,10 +6,6 @@ import { defaultMaxTilesChecked } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import ExecuteAction from "../core/ExecuteAction";
-import Lambda from "../core/Lambda";
-import MoveToTarget from "../core/MoveToTarget";
-import Restart from "../core/Restart";
 
 export interface IIdleOptions {
 	force: boolean;
@@ -33,9 +29,11 @@ export default class Idle extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[] = [];
 
-		if (!this.options?.force &&
-			(game.getTurnMode() === TurnMode.RealTime ||
-				(context.human.isHost && (context.island.simulatedTickHelper.hasScheduledTick || !context.island.simulatedTickHelper.hasTimePassedSinceLastTick((game.getTickSpeed() * game.interval) + 200, game.absoluteTime))))) {
+		const { ExecuteAction, Lambda, MoveToTarget, Restart } = context.objectives;
+
+		if (!this.options?.force
+			&& (game.getTurnMode() === TurnMode.RealTime
+				|| (context.human.isHost && (context.island.simulatedTickHelper.hasScheduledTick || !context.island.simulatedTickHelper.hasTimePassedSinceLastTick((game.getTickSpeed() * game.interval) + 200, game.absoluteTime))))) {
 			// don't idle in realtime mode or in simulated mode if the turns are ticking still. +200ms buffer for ping
 			// simulatedTickHelper is only correct for the host
 			objectivePipelines.push(new Lambda(async (context, lambda) => {

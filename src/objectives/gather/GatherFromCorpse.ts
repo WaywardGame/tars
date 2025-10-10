@@ -5,9 +5,7 @@ import type Context from "../../core/context/Context";
 import type { CreatureSearch } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
-import MoveToTarget from "../core/MoveToTarget";
+import { ExecuteActionType } from "../core/ExecuteActionForItem";
 
 export default class GatherFromCorpse extends Objective {
 
@@ -24,6 +22,7 @@ export default class GatherFromCorpse extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireInventoryItem, ExecuteActionForItem, MoveToTarget } = context.objectives;
 		return context.utilities.object.findCarvableCorpses(context, this.getIdentifier(), (corpse: Corpse) => {
 			const itemTypes = this.search.map.get(corpse.type);
 			if (itemTypes) {

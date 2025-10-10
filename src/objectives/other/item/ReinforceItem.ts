@@ -8,10 +8,6 @@ import type { IObjective, ObjectiveExecutionResult } from "../../../core/objecti
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import AcquireItemForAction from "../../acquire/item/AcquireItemForAction";
-import SetContextData from "../../contextData/SetContextData";
-import ExecuteAction from "../../core/ExecuteAction";
-import Lambda from "../../core/Lambda";
-import ReserveItems from "../../core/ReserveItems";
 
 /**
  * Reinforces an item if
@@ -46,6 +42,8 @@ export default class ReinforceItem extends Objective {
 		const itemContextDataKey = this.getUniqueContextDataKey("ReinforceItem");
 
 		const objectives: IObjective[] = [];
+
+		const { SetContextData, ExecuteAction, Lambda, ReserveItems } = context.objectives;
 
 		const reinforceItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Reinforce);
 		if (reinforceItems.length > 0) {

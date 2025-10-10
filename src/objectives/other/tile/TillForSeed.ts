@@ -9,12 +9,6 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
-import DigTile from "../tile/DigTile";
-import Lambda from "../../core/Lambda";
-import ClearTile from "../tile/ClearTile";
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import UseItem from "../item/UseItem";
 
 export const gardenMaxTilesChecked = 1536;
 
@@ -38,6 +32,8 @@ export default class TillForSeed extends Objective {
 			return ObjectiveResult.Impossible;
 		}
 
+		const { AcquireInventoryItem } = context.objectives;
+
 		return [
 			new AcquireInventoryItem("hoe"),
 			...result,
@@ -50,11 +46,13 @@ export default class TillForSeed extends Objective {
 			return undefined;
 		}
 
+		const { MoveToTarget, DigTile, Lambda, ClearTile, UseItem } = context.objectives;
+
 		const emptyTilledTile = context.utilities.base.getBaseTile(context).findMatchingTile(
-			tile => allowedTilesSet.has(tile.type) &&
-				tile.isTilled &&
-				tile.isEmpty &&
-				tile.isOpen,
+			tile => allowedTilesSet.has(tile.type)
+				&& tile.isTilled
+				&& tile.isEmpty
+				&& tile.isOpen,
 			{
 				maxTilesChecked: this.maxTilesChecked,
 			});

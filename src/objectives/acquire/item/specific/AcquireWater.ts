@@ -4,7 +4,6 @@ import type Context from "../../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
 import type { IAcquireItemOptions } from "../AcquireBase";
-import AcquireItemByGroup from "../AcquireItemByGroup";
 
 export interface IAcquireWaterOptions extends IAcquireItemOptions {
 	onlySafeToDrink: boolean;
@@ -26,6 +25,8 @@ export default class AcquireWater extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireItemByGroup } = context.objectives;
+
 		if (this.options?.onlyForDesalination) {
 			return [
 				[new AcquireItemByGroup(ItemTypeGroup.ContainerOfSeawater, this.options).passAcquireData(this)],

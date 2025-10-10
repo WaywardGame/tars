@@ -4,10 +4,7 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import MoveToTarget from "../../core/MoveToTarget";
-import Restart from "../../core/Restart";
-import ClearTile from "../tile/ClearTile";
+import { ExecuteActionType } from "../../core/ExecuteActionForItem";
 
 export default class HarvestDoodad extends Objective {
 
@@ -32,6 +29,8 @@ export default class HarvestDoodad extends Objective {
 		}
 
 		const itemTypes = harvestLoot.map(loot => loot.itemType).filter(itemType => itemType !== undefined);
+
+		const { ExecuteActionForItem, MoveToTarget, Restart, ClearTile } = context.objectives;
 
 		return [
 			new MoveToTarget(this.doodad, true),

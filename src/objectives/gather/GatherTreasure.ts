@@ -7,13 +7,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import MoveToTarget from "../core/MoveToTarget";
-import ReserveItems from "../core/ReserveItems";
-import Restart from "../core/Restart";
-import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
-import UseItem from "../other/item/UseItem";
-import DigTile from "../other/tile/DigTile";
 
 export interface IGatherTreasureOptions {
 	disableUnlocking: boolean;
@@ -41,6 +34,8 @@ export default class GatherTreasure extends Objective {
 		}
 
 		const objectivePipelines: IObjective[][] = [];
+
+		const { AcquireInventoryItem, MoveToTarget, ReserveItems, Restart, MoveItemsIntoInventory, UseItem, DigTile } = context.objectives;
 
 		for (const treasure of treasures) {
 			let objectives: IObjective[];

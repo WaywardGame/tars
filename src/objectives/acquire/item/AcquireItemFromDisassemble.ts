@@ -12,16 +12,7 @@ import type { IObjective, ObjectiveExecutionResult } from "../../../core/objecti
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
-import SetContextData from "../../contextData/SetContextData";
-import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import ProvideItems from "../../core/ProvideItems";
-import ReserveItems from "../../core/ReserveItems";
-import UseProvidedItem from "../../core/UseProvidedItem";
-import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
-import CompleteRequirements from "../../utility/CompleteRequirements";
-import MoveToLand from "../../utility/moveTo/MoveToLand";
-import AcquireItem from "./AcquireItem";
-import AcquireItemByGroup from "./AcquireItemByGroup";
+import { ExecuteActionType } from "../../core/ExecuteActionForItem";
 
 /**
  * Disassembles one of the items.
@@ -55,6 +46,8 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { SetContextData, ExecuteActionForItem, ProvideItems, ReserveItems, UseProvidedItem, MoveItemsIntoInventory, CompleteRequirements, MoveToLand, AcquireItem, AcquireItemByGroup } = context.objectives;
 
 		for (const { item, disassemblyItems, requiredForDisassembly } of this.searches) {
 			if (context.isHardReservedItem(item) || item.isProtected() || !context.utilities.item.canDestroyItem(context, item)) {
@@ -92,18 +85,18 @@ export default class AcquireItemFromDisassemble extends Objective {
 
 					const itemTypeOrGroup = requiredForDisassembly[i];
 
-					const requiredItem = context.island.items.isGroup(itemTypeOrGroup) ?
-						context.utilities.item.getItemInContainerByGroup(context, context.human.inventory, itemTypeOrGroup, { allowInventoryItems: true }) :
-						context.utilities.item.getItemInContainer(context, context.human.inventory, itemTypeOrGroup, { allowInventoryItems: true });
+					const requiredItem = context.island.items.isGroup(itemTypeOrGroup)
+						? context.utilities.item.getItemInContainerByGroup(context, context.human.inventory, itemTypeOrGroup, { allowInventoryItems: true })
+						: context.utilities.item.getItemInContainer(context, context.human.inventory, itemTypeOrGroup, { allowInventoryItems: true });
 					if (requiredItem) {
 						objectives.push(new ReserveItems(requiredItem));
 						objectives.push(new SetContextData(requiredItemHashCode, requiredItem));
 
 					} else {
 						objectives.push(
-							(context.island.items.isGroup(itemTypeOrGroup) ?
-								new AcquireItemByGroup(itemTypeOrGroup) :
-								new AcquireItem(itemTypeOrGroup)).setContextDataKey(requiredItemHashCode));
+							(context.island.items.isGroup(itemTypeOrGroup)
+								? new AcquireItemByGroup(itemTypeOrGroup)
+								: new AcquireItem(itemTypeOrGroup)).setContextDataKey(requiredItemHashCode));
 					}
 				}
 			}

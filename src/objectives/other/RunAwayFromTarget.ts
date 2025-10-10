@@ -1,12 +1,13 @@
 import type Entity from "@wayward/game/game/entity/Entity";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
+import type Tile from "@wayward/game/game/tile/Tile";
+
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import MoveToTarget from "../core/MoveToTarget";
-import type Tile from "@wayward/game/game/tile/Tile";
+
 const safetyCheckDistance = 5;
 const safetyCheckDistanceSq = Math.pow(safetyCheckDistance, 2);
 
@@ -38,8 +39,8 @@ export default class RunAwayFromTarget extends Objective {
 		const nearbyOpenTiles = context.human.tile.findMatchingTiles(
 			tile => {
 				const terrainDescription = tile.description;
-				if (terrainDescription &&
-					((!terrainDescription.passable && !terrainDescription.water) || tile.isDeepHole || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
+				if (terrainDescription
+					&& ((!terrainDescription.passable && !terrainDescription.water) || tile.isDeepHole || (terrainDescription.water && context.human.stat.get(Stat.Stamina)!.value <= 1))) {
 					return false;
 				}
 
@@ -143,6 +144,8 @@ export default class RunAwayFromTarget extends Objective {
 		// this.log.info("Points", pointsWithSafety);
 
 		const objectives: IObjective[] = [];
+
+		const { MoveToTarget } = context.objectives;
 
 		const bestTile = tilesWithSafety.length > 0 ? tilesWithSafety[0] : undefined;
 		// console.log("move to", bestPoint);

@@ -9,11 +9,6 @@ import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import AcquireItemForDoodad from "../objectives/acquire/item/AcquireItemForDoodad";
-import BuildItem from "../objectives/other/item/BuildItem";
-import MoveToTarget from "../objectives/core/MoveToTarget";
-import StartFire from "../objectives/other/doodad/StartFire";
-import Lambda from "../objectives/core/Lambda";
 import type { ITarsMode } from "../core/mode/IMode";
 
 // import AcquireBuildMoveToDoodad from "../../objectives/acquire/doodad/AcquireBuildMoveToDoodad";
@@ -62,6 +57,7 @@ export class BuildDoodadMode implements ITarsMode {
 
 		const objectives: IObjective[] = [];
 
+		const { StartFire, MoveToTarget, Lambda, BuildItem, AcquireItemForDoodad } = context.objectives;
 		if (doodad) {
 			if (requiresFire) {
 				// StartFire handles fetching fire supplies and moving to the doodad to light it

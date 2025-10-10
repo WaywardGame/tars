@@ -10,7 +10,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import ExecuteAction from "../../core/ExecuteAction";
 
 /**
  * Moves items from a tile container.
@@ -47,6 +46,8 @@ export default class MoveItemsFromTileContainer extends Objective {
 			this.log.warn(`Invalid move item ${items}`);
 			return ObjectiveResult.Restart;
 		}
+
+		const { ExecuteAction } = context.objectives;
 
 		return new ExecuteAction(PickUpItem, () => {
 			if (items.every(item => item.containedWithin === this.targetContainer)) {

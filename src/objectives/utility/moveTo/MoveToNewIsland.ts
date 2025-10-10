@@ -5,7 +5,6 @@ import Vector2 from "@wayward/game/utilities/math/Vector2";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToIsland from "./MoveToIsland";
 
 export default class MoveToNewIsland extends Objective {
 
@@ -50,6 +49,8 @@ export default class MoveToNewIsland extends Objective {
 		}
 
 		const objectivePipelines: IObjective[][] = [];
+
+		const { MoveToIsland } = context.objectives;
 
 		for (const islandId of unvisitedIslands) {
 			objectivePipelines.push([new MoveToIsland(islandId)]);

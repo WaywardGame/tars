@@ -4,9 +4,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Lambda from "../core/Lambda";
-import Restart from "../core/Restart";
-import CompleteQuestRequirement from "./CompleteQuestRequirement";
 
 export default class CompleteQuest extends Objective {
 
@@ -24,6 +21,8 @@ export default class CompleteQuest extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { Lambda, Restart, CompleteQuestRequirement } = context.objectives;
 
 		const pendingRequirements = this.quest.data.requirements.filter(requirement => !requirement.completed);
 		const isCompleted = this.quest.data.complete || pendingRequirements.length === 0;

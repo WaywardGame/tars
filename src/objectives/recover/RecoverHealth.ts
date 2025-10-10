@@ -11,9 +11,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import UseItem from "../other/item/UseItem";
-import OrganizeInventory from "../utility/OrganizeInventory";
 
 export default class RecoverHealth extends Objective {
 
@@ -36,6 +33,8 @@ export default class RecoverHealth extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireItemForAction, UseItem, OrganizeInventory } = context.objectives;
+
 		const healItems = context.utilities.item.getInventoryItemsWithUse(context, ActionType.Heal);
 		if (healItems.length > 0) {
 			this.log.info(`Healing with ${healItems[0].getName().getString()}`);

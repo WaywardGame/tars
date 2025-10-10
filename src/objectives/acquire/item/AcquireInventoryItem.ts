@@ -10,10 +10,6 @@ import type { IInventoryItems } from "../../../core/ITars";
 import { ReserveType } from "../../../core/ITars";
 import { inventoryItemInfo } from "../../../core/ITars";
 import Objective from "../../../core/objective/Objective";
-import AcquireItem from "./AcquireItem";
-import AcquireItemForAction from "./AcquireItemForAction";
-import AcquireItemByGroup from "./AcquireItemByGroup";
-import AnalyzeInventory from "../../analyze/AnalyzeInventory";
 import type { IAcquireItemOptions } from "./AcquireBase";
 
 export interface IAcquireInventoryItemOptions {
@@ -78,6 +74,8 @@ export default class AcquireInventoryItem extends Objective {
 
 		const objectivePipelines: IObjective[][] = [];
 
+		const { AcquireItemForAction } = context.objectives;
+
 		const itemInfo = inventoryItemInfo[this.inventoryKey];
 		const options: Partial<IAcquireItemOptions> | undefined = itemInfo?.requiredMinDur !== undefined ? { requiredMinDur: itemInfo.requiredMinDur } : undefined;
 
@@ -110,6 +108,8 @@ export default class AcquireInventoryItem extends Objective {
 
 	private getObjectivePipeline(context: Context, itemTypeOrGroup: ItemType | ItemTypeGroup, numberOfItems: number, options: Partial<IAcquireItemOptions> | undefined): IObjective[] {
 		const objectivePipeline: IObjective[] = [];
+
+		const { AcquireItem, AcquireItemByGroup, AnalyzeInventory } = context.objectives;
 
 		for (let i = 0; i < numberOfItems; i++) {
 			if (context.island.items.isGroup(itemTypeOrGroup)) {

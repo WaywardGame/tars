@@ -2,16 +2,12 @@ import { ItemType } from "@wayward/game/game/item/IItem";
 import Dictionary from "@wayward/game/language/Dictionary";
 import Translation from "@wayward/game/language/Translation";
 import Plant from "@wayward/game/game/entity/action/actions/Plant";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import UseItem from "./UseItem";
-import ReserveItems from "../../core/ReserveItems";
-import MoveItemsIntoInventory from "./MoveItemsIntoInventory";
-import type Item from "@wayward/game/game/item/Item";
-import TillForSeed from "../tile/TillForSeed";
 
 export const gardenMaxTilesChecked = 1536;
 
@@ -35,6 +31,8 @@ export default class PlantSeed extends Objective {
 			this.log.error("Invalid seed item");
 			return ObjectiveResult.Restart;
 		}
+
+		const { UseItem, ReserveItems, MoveItemsIntoInventory, TillForSeed } = context.objectives;
 
 		return [
 			new ReserveItems(item).keepInInventory(),

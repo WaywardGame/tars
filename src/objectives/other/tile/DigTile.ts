@@ -7,11 +7,6 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import UseItem from "../../../objectives/other/item/UseItem";
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import Lambda from "../../core/Lambda";
-import MoveToTarget from "../../core/MoveToTarget";
-import ClearTile from "./ClearTile";
 
 export interface IDigTileOptions {
 	digUntilTypeIsNot: TerrainType;
@@ -38,6 +33,8 @@ export default class DigTile extends Objective {
 		}
 
 		const objectives: IObjective[] = [];
+
+		const { UseItem, AcquireInventoryItem, Lambda, MoveToTarget, ClearTile } = context.objectives;
 
 		objectives.push(new AcquireInventoryItem("shovel"));
 

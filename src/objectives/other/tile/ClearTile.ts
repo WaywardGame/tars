@@ -6,10 +6,6 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import ExecuteAction from "../../core/ExecuteAction";
-import Restart from "../../core/Restart";
-import PickUpAllTileItems from "./PickUpAllTileItems";
-import ButcherCorpse from "../../interrupt/ButcherCorpse";
 
 export interface IClearTileOptions {
 	skipDoodad: boolean;
@@ -33,6 +29,8 @@ export default class ClearTile extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { ExecuteAction, Restart, PickUpAllTileItems, ButcherCorpse } = context.objectives;
+
 		const objectives: IObjective[] = [
 			new PickUpAllTileItems(this.target),
 		];

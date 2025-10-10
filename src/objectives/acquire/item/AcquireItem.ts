@@ -19,28 +19,10 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
-import SetContextData from "../../contextData/SetContextData";
-import AddDifficulty from "../../core/AddDifficulty";
-import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import MoveToTarget from "../../core/MoveToTarget";
-import ReserveItems from "../../core/ReserveItems";
-import UseProvidedItem from "../../core/UseProvidedItem";
-import GatherFromBuilt from "../../gather/GatherFromBuilt";
-import GatherFromChest from "../../gather/GatherFromChest";
-import GatherFromCorpse from "../../gather/GatherFromCorpse";
-import GatherFromCreature from "../../gather/GatherFromCreature";
-import GatherFromDoodad from "../../gather/GatherFromDoodad";
-import GatherFromGround from "../../gather/GatherFromGround";
-import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
-import GatherFromTerrainWater from "../../gather/GatherFromTerrainWater";
-import Idle from "../../other/Idle";
-import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
+
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
-import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
-import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
-import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
-import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+import { ExecuteActionType } from "../../core/ExecuteActionForItem";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -79,6 +61,8 @@ export default class AcquireItem extends AcquireBase {
 		this.log.info(`Acquiring ${ItemType[this.itemType]}...`);
 
 		const itemDescription = itemDescriptions[this.itemType];
+
+		const { SetContextData, AddDifficulty, ExecuteActionForItem, MoveToTarget, ReserveItems, UseProvidedItem, GatherFromBuilt, GatherFromChest, GatherFromCorpse, GatherFromCreature, GatherFromDoodad, GatherFromGround, GatherFromTerrainResource, GatherFromTerrainWater, Idle, StartWaterSourceDoodad, AcquireItemAndIgnite, AcquireItemFromDisassemble, AcquireItemFromDismantle, AcquireItemWithRecipe } = context.objectives;
 
 		const objectivePipelines: IObjective[][] = [
 			[new GatherFromGround(this.itemType, this.options).passAcquireData(this)],
@@ -128,7 +112,7 @@ export default class AcquireItem extends AcquireBase {
 			if (itemDescription.revert !== undefined) {
 				const revertItemDescription = itemDescriptions[itemDescription.revert];
 				if (revertItemDescription?.lit === this.itemType) {
-					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passAcquireData(this)]);
+					objectivePipelines.push([new AcquireItemAndIgnite(itemDescription.revert).passAcquireData(this)]);
 				}
 			}
 
@@ -180,6 +164,7 @@ export default class AcquireItem extends AcquireBase {
 
 							} else if (!context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
 								if (this.options?.allowStartingWaterSourceDoodads) {
+
 									// start desalination and run back to the waterstill and wait
 									const objectives: IObjective[] = [
 										new StartWaterSourceDoodad(doodad),

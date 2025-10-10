@@ -6,9 +6,7 @@ import Translation from "@wayward/game/language/Translation";
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
-import MoveToTarget from "../core/MoveToTarget";
-import ClearTile from "../other/tile/ClearTile";
+import { ExecuteActionType } from "../core/ExecuteActionForItem";
 
 export default class GatherFromBuilt extends Objective {
 
@@ -25,6 +23,7 @@ export default class GatherFromBuilt extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { ExecuteActionForItem, MoveToTarget, ClearTile } = context.objectives;
 		return context.utilities.object.findDoodads(context, this.getIdentifier(), doodad => {
 			if (doodad.type !== this.doodadtype || context.utilities.base.isBaseDoodad(context, doodad)) {
 				return false;

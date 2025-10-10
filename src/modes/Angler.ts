@@ -2,7 +2,6 @@ import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import type { ITarsMode } from "../core/mode/IMode";
 import { BaseMode } from "./BaseMode";
-import Fish from "../objectives/other/tile/Fish";
 
 /**
  * Fishing
@@ -17,6 +16,7 @@ export class AnglerMode extends BaseMode implements ITarsMode {
 
 		objectives.push(...await this.getBuildAnotherChestObjectives(context));
 
+		const { Fish } = context.objectives;
 		objectives.push(new Fish());
 
 		return objectives;

@@ -5,17 +5,9 @@ import type DrawnMap from "@wayward/game/game/mapping/DrawnMap";
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import Lambda from "../objectives/core/Lambda";
-import Idle from "../objectives/other/Idle";
 import type { ITarsMode } from "../core/mode/IMode";
-import GatherTreasures from "../objectives/gather/GatherTreasures";
 import { BaseMode } from "./BaseMode";
-
-export enum TreasureHunterType {
-	OnlyDiscoverTreasure,
-	DiscoverAndUnlockTreasure,
-	ObtainTreasure,
-}
+import { TreasureHunterType } from "./IModes";
 
 export class TreasureHunterMode extends BaseMode implements ITarsMode {
 
@@ -27,6 +19,8 @@ export class TreasureHunterMode extends BaseMode implements ITarsMode {
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const objectives: Array<IObjective | IObjective[]> = [];
+
+		const { GatherTreasures, Lambda, Idle } = context.objectives;
 
 		objectives.push(...await this.getBuildAnotherChestObjectives(context));
 

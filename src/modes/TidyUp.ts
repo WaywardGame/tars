@@ -1,11 +1,7 @@
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
-import OrganizeBase from "../objectives/utility/OrganizeBase";
-import OrganizeInventory from "../objectives/utility/OrganizeInventory";
 import type { ITarsMode } from "../core/mode/IMode";
-import Lambda from "../objectives/core/Lambda";
 import { BaseMode } from "./BaseMode";
 
 /**
@@ -21,6 +17,8 @@ export class TidyUpMode extends BaseMode implements ITarsMode {
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const objectives: Array<IObjective | IObjective[]> = [];
+
+		const { OrganizeBase, MoveToBase, OrganizeInventory, Lambda } = context.objectives;
 
 		objectives.push(...await this.getBuildAnotherChestObjectives(context));
 

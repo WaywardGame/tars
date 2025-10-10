@@ -1,10 +1,6 @@
 import type Context from "../../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
-import SetContextData from "../../../contextData/SetContextData";
-import ReserveItems from "../../../core/ReserveItems";
-import PlantSeed from "../../../other/item/PlantSeed";
-import AcquireItem from "../AcquireItem";
 
 export default class AcquireAndPlantSeed extends Objective {
 
@@ -26,6 +22,8 @@ export default class AcquireAndPlantSeed extends Objective {
 		return Array.from(this.onlyEdiblePlants ? context.utilities.item.edibleSeedItemTypes : context.utilities.item.allSeedItemTypes)
 			.map(itemType => {
 				const objectives: IObjective[] = [];
+
+				const { ReserveItems, SetContextData, AcquireItem, PlantSeed } = context.objectives;
 
 				// todo: require minDur > 0
 				const item = context.utilities.item.getItemInInventory(context, itemType);

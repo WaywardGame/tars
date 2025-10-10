@@ -17,17 +17,8 @@ import type { IObjective, ObjectiveExecutionResult } from "../../../core/objecti
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import type { IGetItemOptions } from "../../../utilities/ItemUtilities";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
-import SetContextData from "../../contextData/SetContextData";
-import AddDifficulty from "../../core/AddDifficulty";
-import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import MoveToTarget from "../../core/MoveToTarget";
-import ReserveItems from "../../core/ReserveItems";
-import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
-import CompleteRequirements from "../../utility/CompleteRequirements";
-import MoveToLand from "../../utility/moveTo/MoveToLand";
+import { ExecuteActionType } from "../../core/ExecuteActionForItem";
 import AcquireBase from "./AcquireBase";
-import AcquireItem from "./AcquireItem";
-import AcquireItemByGroup from "./AcquireItemByGroup";
 
 // TARS recomputes and fixes itself when this happens
 const expectedCraftMessages = new Set<Message>([Message.ActionCraftYouLackTheRequirements]);
@@ -93,6 +84,17 @@ export default class AcquireItemWithRecipe extends AcquireBase {
 		allowOrganizingItemsIntoIntermediateChest: boolean,
 		checker: ItemRecipeRequirementChecker,
 		checkerWithoutIntermediateChest?: ItemRecipeRequirementChecker): IObjective[] {
+		const { SetContextData,
+			AddDifficulty,
+			ExecuteActionForItem,
+			MoveToTarget,
+			ReserveItems,
+			MoveItemsIntoInventory,
+			CompleteRequirements,
+			MoveToLand,
+			AcquireItem,
+			AcquireItemByGroup } = context.objectives;
+
 		const objectives: IObjective[] = [
 			new SetContextData(ContextDataType.CanCraftFromIntermediateChest, this.recipeRequiresBaseDoodads),
 			new SetContextData(ContextDataType.AllowOrganizingReservedItemsIntoIntermediateChest, allowOrganizingItemsIntoIntermediateChest),

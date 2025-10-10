@@ -8,11 +8,6 @@ import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
-import SetContextData from "../contextData/SetContextData";
-import Lambda from "../core/Lambda";
-import MoveToTarget from "../core/MoveToTarget";
-import ReserveItems from "../core/ReserveItems";
-import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class GatherFromGround extends Objective {
 
@@ -55,6 +50,8 @@ export default class GatherFromGround extends Objective {
 	}
 
 	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
+		const { SetContextData, Lambda, MoveToTarget, ReserveItems, MoveItemsIntoInventory } = context.objectives;
+
 		const prioritizeBaseItems = context.getData(ContextDataType.PrioritizeBaseItems);
 
 		const item = context.human.tile.containedItems?.find(item => this.itemMatches(context, item));

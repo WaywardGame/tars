@@ -1,19 +1,14 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 import StokeFireAction from "@wayward/game/game/entity/action/actions/StokeFire";
+import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
 
 import type Context from "../../../core/context/Context";
 import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
-
-import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
-import type Item from "@wayward/game/game/item/Item";
 import { ReserveType } from "../../../core/ITars";
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import ExecuteAction from "../../core/ExecuteAction";
-import StartFire from "./StartFire";
 
 export default class StokeFire extends Objective {
 
@@ -39,6 +34,8 @@ export default class StokeFire extends Objective {
 		const itemContextDataKey = this.getUniqueContextDataKey("Kindling");
 
 		const objectives: IObjective[] = [];
+
+		const { AcquireInventoryItem, ExecuteAction, StartFire, MoveToTarget } = context.objectives;
 
 		const description = doodad.description;
 		if (description && !description.providesFire) {

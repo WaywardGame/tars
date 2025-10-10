@@ -15,13 +15,7 @@ import { defaultMaxTilesChecked, baseInfo } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AnalyzeBase from "../../analyze/AnalyzeBase";
-import Lambda from "../../core/Lambda";
-import MoveToTarget from "../../core/MoveToTarget";
-import PickUpAllTileItems from "../tile/PickUpAllTileItems";
-import UseItem from "./UseItem";
-import AnalyzeInventory from "../../analyze/AnalyzeInventory";
-import MoveToWater, { MoveToWaterType } from "../../utility/moveTo/MoveToWater";
+import { MoveToWaterType } from "../../utility/moveTo/MoveToWater";
 
 const recalculateMovements = 40;
 
@@ -67,6 +61,8 @@ export default class BuildItem extends Objective {
 		}
 
 		let moveToTargetObjectives: IObjective[];
+
+		const { AnalyzeBase, Lambda, MoveToTarget, PickUpAllTileItems, UseItem, AnalyzeInventory, MoveToWater } = context.objectives;
 
 		if (item.description?.vehicle?.type === VehicleType.Boat) {
 			moveToTargetObjectives = [

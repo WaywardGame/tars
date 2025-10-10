@@ -8,9 +8,6 @@ import type { BaseInfoKey } from "../../../core/ITars";
 import { baseInfo } from "../../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import StartFire from "../../other/doodad/StartFire";
-
-import AcquireBuildMoveToDoodad from "./AcquireBuildMoveToDoodad";
 
 /**
  * Acquires, builds, and moves to a lit doodad
@@ -35,6 +32,8 @@ export default class AcquireBuildMoveToFire extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectives: IObjective[] = [];
+
+		const { AcquireBuildMoveToDoodad, StartFire } = context.objectives;
 
 		let doodad: Doodad | undefined;
 		let doodadTypeOrGroup: DoodadType | DoodadTypeGroup | undefined;

@@ -5,7 +5,6 @@ import Translation from "@wayward/game/language/Translation";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import AcquireBase from "./AcquireBase";
-import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemByTypes extends AcquireBase {
 
@@ -33,7 +32,8 @@ export default class AcquireItemByTypes extends AcquireBase {
 		return this.itemTypes.some(itemType => context.isReservedItemType(itemType));
 	}
 
-	public async execute(): Promise<ObjectiveExecutionResult> {
+	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireItem } = context.objectives;
 		return this.itemTypes
 			.map(item => [new AcquireItem(item).passAcquireData(this)]);
 	}

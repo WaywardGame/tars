@@ -10,7 +10,7 @@ import type TarsMod from "./TarsMod";
 import type { ITarsOptions } from "./core/ITarsOptions";
 import { PlanningAccuracy, TarsUseProtectedItems } from "./core/ITarsOptions";
 import type { IContext } from "./core/context/IContext";
-import { TreasureHunterType } from "./modes/TreasureHunter";
+import { TreasureHunterType } from "./modes/IModes";
 
 export const TARS_ID = "TARS";
 
