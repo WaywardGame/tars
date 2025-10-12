@@ -40,7 +40,7 @@ import type Translation from "@wayward/game/language/Translation";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import { Direction } from "@wayward/game/utilities/math/Direction";
 import type { IVector2 } from "@wayward/game/utilities/math/IVector";
-import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Vector2, { DistanceType } from "@wayward/game/utilities/math/Vector2";
 import { Bound } from "@wayward/utilities/Decorators";
 import EventEmitter, { Priority } from "@wayward/utilities/event/EventEmitter";
 import WorldZ from "@wayward/utilities/game/WorldZ";
@@ -554,7 +554,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 			const updateNeighbors = tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn;
 			if (updateNeighbors) {
-				const tiles = tile.tilesInRange(tileUpdateRadius, true);
+				const tiles = tile.tilesInRange(DistanceType.Manhattan, tileUpdateRadius, true);
 				for (const otherTile of tiles) {
 					this.utilities.navigation.processTileUpdate(
 						otherTile,
