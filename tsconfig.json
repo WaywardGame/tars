@@ -1,7 +1,7 @@
 {
     "extends": "@wayward/types/tsconfig.mod.base.json",
     "compilerOptions": {
-        "baseUrl": "./fakepath/",
+        "baseUrl": "./",
         "outDir": "./out",
         "rootDir": "./src"
     },
