@@ -96,6 +96,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
+		objectives.push(new AcquireInventoryItem("crucible"));
 
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase1, async (context, objectives) => {
 			if (context.options.survivalStartWaterSources) {
@@ -350,6 +351,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		if (context.inventory.tongs) {
 			objectives.push(new ReinforceItem(context.inventory.tongs, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
+		if (context.inventory.crucible) {
+			objectives.push(new ReinforceItem(context.inventory.crucible, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
 		/*

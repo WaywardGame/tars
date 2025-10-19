@@ -1629,6 +1629,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			this.repairInterrupt(context, queuedRepairs, this.inventory.equipSword),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.equipShield),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.tongs),
+			this.repairInterrupt(context, queuedRepairs, this.inventory.crucible),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.bed),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.backpack),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.waterContainer),

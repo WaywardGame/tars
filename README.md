@@ -34,6 +34,7 @@ Here is a brief list of objectives TARS will complete as it's running:
 1. Acquire a pick axe
 1. Acquire a hammer
 1. Acquire tongs
+1. Acquire crucible
 1. Start desalinating water in the water still when near the base
 1. Plant seeds from the inventory when near the base
 1. Build a kiln

@@ -265,6 +265,7 @@ export interface IInventoryItems {
 	shovel?: Item;
 	solarStill?: Item;
 	tongs?: Item;
+	crucible?: Item;
 	waterContainer?: Item[];
 	waterStill?: Item;
 	well?: Item;
@@ -517,6 +518,13 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 			option: ItemTypeGroup.Tongs,
 		},
 	},
+	crucible: {
+		itemTypes: [ItemTypeGroup.Crucible],
+		flags: {
+			flag: InventoryItemFlag.PreferHigherTier,
+			option: ItemTypeGroup.Crucible,
+		},
+	},
 	lockPick: {
 		actionTypes: [ActionType.Lockpick],
 		flags: {
@@ -595,6 +603,7 @@ export const inventoryItemInfo: Record<keyof IInventoryItems, IInventoryItemInfo
 //     "bandage",
 //     "hammer",
 //     "tongs",
+//     "crucible",
 // ];
 
 export const inventoryBuildItems: Array<keyof IInventoryItems> = [
