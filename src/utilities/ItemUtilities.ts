@@ -3,7 +3,7 @@ import { doodadDescriptions } from "@wayward/game/game/doodad/Doodads";
 import type { DoodadType, DoodadTypeGroup, IDoodadDescription } from "@wayward/game/game/doodad/IDoodad";
 import { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
 import { AttackType, DamageType } from "@wayward/game/game/entity/IEntity";
-import { EquipType, SkillType } from "@wayward/game/game/entity/IHuman";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
 import type { IStatMax } from "@wayward/game/game/entity/IStats";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
@@ -25,6 +25,7 @@ import { inventoryBuildItems } from "../core/ITars";
 import { TarsUseProtectedItems } from "../core/ITarsOptions";
 import type Context from "../core/context/Context";
 import { ContextDataType } from "../core/context/IContext";
+import { SkillType } from "@wayward/game/game/entity/skill/ISkills";
 // import { IslandId } from "@wayward/game/game/island/IIsland";
 
 // item limit when limitGroundItemSearch is enabled

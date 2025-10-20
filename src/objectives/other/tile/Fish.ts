@@ -1,5 +1,5 @@
 import Cast from "@wayward/game/game/entity/action/actions/Cast";
-import { SkillType } from "@wayward/game/game/entity/IHuman";
+import { SkillType } from "@wayward/game/game/entity/skill/ISkills";
 import MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
 
 import type Context from "../../../core/context/Context";
