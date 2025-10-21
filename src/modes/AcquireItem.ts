@@ -8,6 +8,8 @@ import type { ITarsMode } from "../core/mode/IMode";
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import AcquireItem from "../objectives/acquire/item/AcquireItem";
+import { ContextDataType } from "../core/context/IContext";
+import SetContextData from "../objectives/contextData/SetContextData";
 
 export class AcquireItemMode implements ITarsMode {
 
@@ -21,7 +23,12 @@ export class AcquireItemMode implements ITarsMode {
 	}
 
 	public async determineObjectives(_: Context): Promise<Array<IObjective | IObjective[]>> {
-		return [new AcquireItem(this.itemType, { allowCraftingForUnmetRequiredDoodads: true })];
+		return [
+			[
+				new SetContextData(ContextDataType.AllowCraftingForUnmetRequiredDoodads, true),
+				new AcquireItem(this.itemType),
+			],
+		];
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "inventoryItemAdd")

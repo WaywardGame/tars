@@ -23,6 +23,7 @@ import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
 import { ExecuteActionType } from "../../core/ExecuteActionForItem";
+import { ContextDataType } from "../../../core/context/IContext";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -102,7 +103,7 @@ export default class AcquireItem extends AcquireBase {
 
 		if (itemDescription) {
 			if (itemDescription.recipe && itemDescription.craftable !== false) {
-				if (this.options.allowCraftingForUnmetRequiredDoodads
+				if (context.getDataOrDefault<boolean>(ContextDataType.AllowCraftingForUnmetRequiredDoodads, false)
 					|| !itemDescription.recipe.requiredDoodads
 					|| (itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
 					objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);

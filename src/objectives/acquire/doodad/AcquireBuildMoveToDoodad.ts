@@ -7,6 +7,7 @@ import Translation from "@wayward/game/language/Translation";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
+import Lambda from "../../core/Lambda";
 
 export interface IAcquireBuildMoveToDoodadOptions {
 	ignoreExistingDoodads: boolean;
@@ -86,9 +87,11 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 		const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 		if (inventoryItem === undefined) {
 			objectives.push(new AcquireItemForDoodad(this.doodadTypeOrGroup));
-		}
+			objectives.push(new Lambda(async () => new BuildItem(inventoryItem)));
 
-		objectives.push(new BuildItem(inventoryItem));
+		} else {
+			objectives.push(new BuildItem(inventoryItem));
+		}
 
 		if (requiresFire) {
 			// StartFire handles fetching fire supplies and moving to the doodad to light it

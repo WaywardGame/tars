@@ -29,6 +29,12 @@ export enum ContextDataType {
 	CanCraftFromIntermediateChest = "CanCraftFromIntermediateChest",
 
 	/**
+	 * Allow TARS to craft items even if required doodads are not present in the base.
+	 * TARS will go craft the required doodads as needed.
+	 */
+	AllowCraftingForUnmetRequiredDoodads = "AllowCraftingForUnmetRequiredDoodads",
+
+	/**
 	 * Prioritize using items from the base for the objective over gathering out in the field
 	 */
 	PrioritizeBaseItems = "PrioritizeBaseItems",
