@@ -13,6 +13,7 @@ import type Tars from "../Tars";
 import ContextState from "./ContextState";
 import type { IContext } from "./IContext";
 import { ContextDataType } from "./IContext";
+import type Objectives from "../../objectives/Objectives";
 
 export default class Context implements IContext {
 
@@ -23,6 +24,7 @@ export default class Context implements IContext {
 		public readonly base: IBase,
 		public readonly inventory: IInventoryItems,
 		public readonly utilities: IUtilities,
+		public readonly objectives: typeof Objectives,
 		public state = new ContextState(),
 		public readonly calculatingDifficulty: boolean = false,
 		private initialState?: ContextState) {
@@ -54,6 +56,7 @@ export default class Context implements IContext {
 			this.base,
 			this.inventory,
 			this.utilities,
+			this.objectives,
 			this.state.clone(increaseDepth),
 			calculatingDifficulty,
 			cloneInitialState ? this.initialState?.clone(increaseDepth) : this.initialState);

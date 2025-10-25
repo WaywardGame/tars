@@ -13,33 +13,6 @@ import { ContextDataType, MovingToNewIslandState } from "../core/context/IContex
 import type { ITarsMode } from "../core/mode/IMode";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import AcquireFood from "../objectives/acquire/item/AcquireFood";
-import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
-import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AcquireWater from "../objectives/acquire/item/specific/AcquireWater";
-import AcquireWaterContainer from "../objectives/acquire/item/specific/AcquireWaterContainer";
-import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
-import Lambda from "../objectives/core/Lambda";
-import MoveToTarget from "../objectives/core/MoveToTarget";
-import Restart from "../objectives/core/Restart";
-import Idle from "../objectives/other/Idle";
-import UpgradeInventoryItem from "../objectives/other/UpgradeInventoryItem";
-import HuntCreatures from "../objectives/other/creature/HuntCreatures";
-import StartWaterSourceDoodad from "../objectives/other/doodad/StartWaterSourceDoodad";
-import BuildItem from "../objectives/other/item/BuildItem";
-import CheckDecayingItems from "../objectives/other/item/CheckDecayingItems";
-import CheckSpecialItems from "../objectives/other/item/CheckSpecialItems";
-import EquipItem from "../objectives/other/item/EquipItem";
-import ReinforceItem from "../objectives/other/item/ReinforceItem";
-import RecoverHealth from "../objectives/recover/RecoverHealth";
-import RecoverHunger from "../objectives/recover/RecoverHunger";
-import DrainSwamp from "../objectives/utility/DrainSwamp";
-import OrganizeBase from "../objectives/utility/OrganizeBase";
-import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import PlantSeeds from "../objectives/utility/PlantSeeds";
-import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
-import MoveToLand from "../objectives/utility/moveTo/MoveToLand";
-import MoveToNewIsland from "../objectives/utility/moveTo/MoveToNewIsland";
 import { BaseMode } from "./BaseMode";
 
 /**
@@ -64,6 +37,8 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		const hands = context.human.getEquippedItem(EquipType.Hands);
 
 		const objectives: Array<IObjective | IObjective[]> = [];
+
+		const { AcquireFood, AcquireInventoryItem, AcquireItem, AcquireWater, AcquireWaterContainer, AnalyzeInventory, Lambda, MoveToTarget, Restart, Idle, HuntCreatures, StartWaterSourceDoodad, BuildItem, CheckDecayingItems, CheckSpecialItems, EquipItem, ReinforceItem, RecoverHealth, RecoverHunger, DrainSwamp, OrganizeBase, OrganizeInventory, PlantSeeds, MoveToBase, MoveToLand, MoveToNewIsland } = context.objectives;
 
 		const moveToNewIslandState = context.getDataOrDefault<MovingToNewIslandState>(ContextDataType.MovingToNewIsland, MovingToNewIslandState.None);
 
@@ -121,6 +96,7 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 
 		objectives.push(new AcquireInventoryItem("hammer"));
 		objectives.push(new AcquireInventoryItem("tongs"));
+		objectives.push(new AcquireInventoryItem("crucible"));
 
 		await this.runWhileNearBase(context, objectives, ContextDataType.NearBase1, async (context, objectives) => {
 			if (context.options.survivalStartWaterSources) {
@@ -150,10 +126,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		// 	objectives.push(new DeitySacrifice(deity));
 		// }
 
-		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst) &&
-			(
-				(context.base.dripStone.length > 0 && context.base.dripStone.some(dripStone => context.utilities.doodad.isWaterSourceDoodadBusy(dripStone))) ||
-				(context.base.waterStill.length > 0 && context.base.waterStill.some(waterStill => context.utilities.doodad.isWaterSourceDoodadBusy(waterStill)))
+		const waitingForWater = context.human.stat.get<IStat>(Stat.Thirst).value <= context.utilities.player.getRecoverThreshold(context, Stat.Thirst)
+			&& (
+				(context.base.dripStone.length > 0 && context.base.dripStone.some(dripStone => context.utilities.doodad.isWaterSourceDoodadBusy(dripStone)))
+				|| (context.base.waterStill.length > 0 && context.base.waterStill.some(waterStill => context.utilities.doodad.isWaterSourceDoodadBusy(waterStill)))
 			);
 
 		if (!waitingForWater && context.options.allowBackpacks) {
@@ -377,6 +353,10 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			objectives.push(new ReinforceItem(context.inventory.tongs, { minWorth: 200, targetDurabilityMultipler: 2 }));
 		}
 
+		if (context.inventory.crucible) {
+			objectives.push(new ReinforceItem(context.inventory.crucible, { minWorth: 200, targetDurabilityMultipler: 2 }));
+		}
+
 		/*
 			Upgrade objectives
 		*/
@@ -554,6 +534,8 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 			return;
 		}
 
+		const { UpgradeInventoryItem, Lambda, AnalyzeInventory, Restart } = context.objectives;
+
 		objectives.push([
 			new UpgradeInventoryItem(inventoryItemKey, fromItemTypes),
 			new Lambda(async () => {
@@ -599,6 +581,8 @@ export class SurvivalMode extends BaseMode implements ITarsMode {
 		if (!isContinuing && !await initialCondition(context)) {
 			return;
 		}
+
+		const { Lambda } = context.objectives;
 
 		if (isContinuing) {
 			context.log.debug(`${id} - Continuing`);

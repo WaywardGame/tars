@@ -6,8 +6,7 @@ import type Context from "../../core/context/Context";
 import type { DoodadSearchMap } from "../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
-import MoveToTarget from "../core/MoveToTarget";
+import { ExecuteActionType } from "../core/ExecuteActionForItem";
 
 export default class GatherFromDoodad extends Objective {
 
@@ -36,6 +35,7 @@ export default class GatherFromDoodad extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { ExecuteActionForItem, MoveToTarget } = context.objectives;
 		return context.utilities.object.findDoodads(context, this.getIdentifier(), (doodad: Doodad) => {
 			const searchMap = this.doodadSearchMap.get(doodad.type);
 			if (!searchMap) {

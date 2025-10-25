@@ -18,11 +18,7 @@ import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import { MoveResult } from "../../utilities/MovementUtilities";
-import EquipItem from "../other/item/EquipItem";
-import UseItem from "../other/item/UseItem";
-import Rest from "../other/Rest";
-import AddDifficulty from "./AddDifficulty";
-import ExecuteAction from "../core/ExecuteAction";
+import type EquipItem from "../other/item/EquipItem";
 // import MoveToZ from "../utility/moveTo/MoveToZ";
 
 // caves are scary
@@ -100,6 +96,8 @@ export default class MoveToTarget extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { UseItem, Rest, AddDifficulty, ExecuteAction } = context.objectives;
+
 		const tile = context.getTile();
 
 		if (!context.options.allowCaves && tile.z !== this.target.z) {
@@ -374,6 +372,7 @@ export default class MoveToTarget extends Objective {
 				if (handEquipmentChange) {
 					this.log.info(`Should equip ${handEquipmentChange.item} before attacking`);
 
+					const { EquipItem } = context.objectives;
 					return new EquipItem(handEquipmentChange.equipType, handEquipmentChange.item);
 					// await context.utilities.action.executeAction(context, ActionType.Equip, (context) => {
 					// 	action.execute(context.actionExecutor, handEquipmentChange.item, handEquipmentChange.equipType);
@@ -382,9 +381,9 @@ export default class MoveToTarget extends Objective {
 				}
 			}
 
-			if (trackedCreature.x !== this.trackedPosition.x ||
-				trackedCreature.y !== this.trackedPosition.y ||
-				trackedCreature.z !== this.trackedPosition.z) {
+			if (trackedCreature.x !== this.trackedPosition.x
+				|| trackedCreature.y !== this.trackedPosition.y
+				|| trackedCreature.z !== this.trackedPosition.z) {
 				this.log.info("Moving with tracked creature");
 
 				this.trackedPosition = trackedCreature.point;

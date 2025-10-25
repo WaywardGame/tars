@@ -8,14 +8,7 @@ import type { CreatureSearch } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import AcquireItem from "../acquire/item/AcquireItem";
-import AnalyzeInventory from "../analyze/AnalyzeInventory";
-import AddDifficulty from "../core/AddDifficulty";
-import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
-import Lambda from "../core/Lambda";
-import HuntCreature from "../other/creature/HuntCreature";
-import EquipItem from "../other/item/EquipItem";
+import { ExecuteActionType } from "../core/ExecuteActionForItem";
 
 export default class GatherFromCreature extends Objective {
 
@@ -35,6 +28,8 @@ export default class GatherFromCreature extends Objective {
 		return context.utilities.object.findCreatures(context, this.getIdentifier(), (creature: Creature) => this.search.map.has(creature.type) && !creature.isTamed && !context.utilities.creature.isScaredOfCreature(context.human, creature))
 			.map(creature => {
 				const objectives: IObjective[] = [];
+
+				const { AcquireInventoryItem, AcquireItem, AnalyzeInventory, AddDifficulty, ExecuteActionForItem, Lambda, HuntCreature, EquipItem } = context.objectives;
 
 				if (creature.aberrant) {
 					objectives.push(new AddDifficulty(1000));

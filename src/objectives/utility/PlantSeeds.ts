@@ -2,8 +2,6 @@ import type Item from "@wayward/game/game/item/Item";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Restart from "../core/Restart";
-import PlantSeed from "../other/item/PlantSeed";
 
 export default class PlantSeeds extends Objective {
 
@@ -21,6 +19,8 @@ export default class PlantSeeds extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { Restart, PlantSeed } = context.objectives;
 
 		for (const seed of this.seeds) {
 			objectivePipelines.push([

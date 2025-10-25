@@ -6,9 +6,6 @@ import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import ExecuteAction from "../core/ExecuteAction";
-import CompleteRequirements from "../utility/CompleteRequirements";
 
 export default class RepairItem extends Objective {
 
@@ -43,6 +40,8 @@ export default class RepairItem extends Objective {
 		if (context.human.isSwimming) {
 			return ObjectiveResult.Ignore;
 		}
+
+		const { AcquireInventoryItem, ExecuteAction, CompleteRequirements } = context.objectives;
 
 		return [
 			new AcquireInventoryItem("hammer"),

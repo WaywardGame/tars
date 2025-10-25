@@ -1,7 +1,6 @@
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import type { ITarsMode } from "../core/mode/IMode";
-import HarvestDoodads from "../objectives/other/doodad/HarvestDoodads";
 import { BaseMode } from "./BaseMode";
 
 export class HarvesterMode extends BaseMode implements ITarsMode {
@@ -18,6 +17,7 @@ export class HarvesterMode extends BaseMode implements ITarsMode {
 		const doodads = context.utilities.object.findDoodads(context, "Harvester", doodad => doodad.canHarvest(), 10);
 		if (doodads.length > 0) {
 			objectives.push(...await this.getBuildAnotherChestObjectives(context));
+			const { HarvestDoodads } = context.objectives;
 			objectives.push(new HarvestDoodads(doodads));
 		}
 

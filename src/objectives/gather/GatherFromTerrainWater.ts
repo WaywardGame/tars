@@ -10,9 +10,7 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
-import MoveToTarget from "../core/MoveToTarget";
-import PickUpAllTileItems from "../other/tile/PickUpAllTileItems";
+import { ExecuteActionType } from "../core/ExecuteActionForItem";
 
 export default class GatherFromTerrainWater extends Objective {
 
@@ -30,6 +28,8 @@ export default class GatherFromTerrainWater extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { ExecuteActionForItem, MoveToTarget, PickUpAllTileItems } = context.objectives;
 
 		for (const terrainSearch of this.search) {
 			const terrainDescription = terrainDescriptions[terrainSearch.type];

@@ -3,7 +3,6 @@ import type Creature from "@wayward/game/game/entity/creature/Creature";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import HuntCreature from "./HuntCreature";
 
 export default class HuntCreatures extends Objective {
 
@@ -21,6 +20,8 @@ export default class HuntCreatures extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { HuntCreature } = context.objectives;
 
 		for (const creature of this.creatures) {
 			objectivePipelines.push([new HuntCreature(creature, true)]);

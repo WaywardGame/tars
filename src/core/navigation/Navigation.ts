@@ -17,6 +17,7 @@ import type { CreatureUtilities } from "../../utilities/CreatureUtilities";
 import type { ITileLocation } from "../ITars";
 import type { ExtendedTerrainType, NavigationPath } from "./INavigation";
 import type { NavigationKdTrees } from "./NavigationKdTrees";
+import { DistanceType } from "@wayward/game/utilities/math/Vector2";
 
 interface INavigationMapData {
 	dijkstraMap: IDijkstraMap;
@@ -322,10 +323,10 @@ export default class Navigation {
 				while (connectionTile) {
 					// direction ??= tile.getDirectionToTile(nextNoSlipTile);
 					const nextConnectionTile = connectionTile.getTileInDirection(direction);
-					const canSlipOntoNextTile = nextConnectionTile &&
-						!nextConnectionTile.hasBlockingTerrain &&
-						!nextConnectionTile.hasBlockingDoodad &&
-						connectionTile.canSlip(undefined, true, true);
+					const canSlipOntoNextTile = nextConnectionTile
+						&& !nextConnectionTile.hasBlockingTerrain
+						&& !nextConnectionTile.hasBlockingDoodad
+						&& connectionTile.canSlip(undefined, true, true);
 					if (!canSlipOntoNextTile) {
 						break;
 					}
@@ -493,12 +494,12 @@ export default class Navigation {
 				return true;
 			}
 
-			if (!description.isDoor &&
-				!description.isGate &&
-				!description.isWall &&
-				!description.isTree &&
-				(doodad.blocksMove || doodad.isDangerous(this.human)) &&
-				!doodad.isVehicle) {
+			if (!description.isDoor
+				&& !description.isGate
+				&& !description.isWall
+				&& !description.isTree
+				&& (doodad.blocksMove || doodad.isDangerous(this.human))
+				&& !doodad.isVehicle) {
 				return true;
 			}
 		}
@@ -551,7 +552,7 @@ export default class Navigation {
 			}
 
 			// penalty for creatures on or near the tile
-			const otherTiles = tile.tilesInRange(creaturePenaltyRadius, true);
+			const otherTiles = tile.tilesInRange(DistanceType.Manhattan, creaturePenaltyRadius, true);
 			for (const otherTile of otherTiles) {
 				const creature = otherTile.creature;
 				if (creature) {

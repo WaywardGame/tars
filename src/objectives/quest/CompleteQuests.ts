@@ -2,8 +2,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Restart from "../core/Restart";
-import CompleteQuest from "./CompleteQuest";
 
 export default class CompleteQuests extends Objective {
 
@@ -22,6 +20,8 @@ export default class CompleteQuests extends Objective {
 		}
 
 		const objectivePipelines: IObjective[][] = [];
+
+		const { Restart, CompleteQuest } = context.objectives;
 
 		// restart after each quest in case theres more
 		for (const quest of quests) {

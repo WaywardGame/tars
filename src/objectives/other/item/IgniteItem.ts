@@ -7,10 +7,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireBuildMoveToFire from "../../acquire/doodad/AcquireBuildMoveToFire";
-import EquipItem from "./EquipItem";
-
-import UseItem from "./UseItem";
 
 export default class IgniteItem extends Objective {
 
@@ -38,6 +34,8 @@ export default class IgniteItem extends Objective {
 			this.log.error(`Invalid ignite item. ${item}`);
 			return ObjectiveResult.Impossible;
 		}
+
+		const { AcquireBuildMoveToFire, EquipItem, UseItem } = context.objectives;
 
 		return [
 			new AcquireBuildMoveToFire(),

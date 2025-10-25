@@ -3,11 +3,6 @@ import { TurnMode } from "@wayward/game/game/IGame";
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import Lambda from "../objectives/core/Lambda";
-import Idle from "../objectives/other/Idle";
-import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
-import OrganizeInventory from "../objectives/utility/OrganizeInventory";
-import CompleteQuests from "../objectives/quest/CompleteQuests";
 import type { ITarsMode } from "../core/mode/IMode";
 import { BaseMode } from "./BaseMode";
 
@@ -21,6 +16,8 @@ export class QuestMode extends BaseMode implements ITarsMode {
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const objectives: Array<IObjective | IObjective[]> = [];
+
+		const { CompleteQuests, MoveToBase, OrganizeInventory, Lambda, Idle } = context.objectives;
 
 		objectives.push(...await this.getCommonInitialObjectives(context));
 

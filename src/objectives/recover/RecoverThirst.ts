@@ -9,21 +9,8 @@ import { DoodadType, DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
-import Objective from "../../core/objective/Objective";
-import AcquireItemForAction from "../acquire/item/AcquireItemForAction";
-import ExecuteAction from "../core/ExecuteAction";
-import MoveToTarget from "../core/MoveToTarget";
-import BuildItem from "../other/item/BuildItem";
-import Idle from "../other/Idle";
-import UseItem from "../other/item/UseItem";
-import RecoverStamina from "./RecoverStamina";
-import AcquireWater from "../acquire/item/specific/AcquireWater";
-import AddDifficulty from "../core/AddDifficulty";
-import Restart from "../core/Restart";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 import { freshWaterTileLocation } from "../../core/navigation/INavigation";
-import MoveToBase from "../utility/moveTo/MoveToBase";
-import StartWaterSourceDoodad from "../other/doodad/StartWaterSourceDoodad";
+import Objective from "../../core/objective/Objective";
 
 export interface IRecoverThirstOptions {
 	onlyUseAvailableItems: boolean;
@@ -64,6 +51,8 @@ export default class RecoverThirst extends Objective {
 
 	private async getEmergencyObjectives(context: Context): Promise<IObjective[][]> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { AcquireItemForAction, ExecuteAction, MoveToTarget, BuildItem, Idle, UseItem, RecoverStamina, AcquireWater, AcquireInventoryItem, MoveToBase, StartWaterSourceDoodad } = context.objectives;
 
 		const { availableWaterContainers } = context.utilities.item.getWaterContainers(context);
 		if (availableWaterContainers.length > 0) {
@@ -159,6 +148,8 @@ export default class RecoverThirst extends Objective {
 	private getAboveThresholdObjectives(context: Context): IObjective[][] | ObjectiveResult.Ignore {
 		const objectivePipelines: IObjective[][] = [];
 
+		const { ExecuteAction, MoveToTarget, AddDifficulty } = context.objectives;
+
 		if (!this.options.onlyUseAvailableItems) {
 			// todo: maybe remove this near base check?
 			if (context.utilities.base.isNearBase(context)) {
@@ -203,6 +194,8 @@ export default class RecoverThirst extends Objective {
 
 	private async getExceededThresholdObjectives(context: Context): Promise<IObjective[][] | ObjectiveResult.Ignore> {
 		const waterSourceDoodads = context.utilities.base.getWaterSourceDoodads(context);
+
+		const { ExecuteAction, MoveToTarget, BuildItem, UseItem, AcquireWater, Restart, AcquireInventoryItem, StartWaterSourceDoodad } = context.objectives;
 
 		if (!RecoverThirst.isEmergency(context) && !context.utilities.base.isNearBase(context)) {
 			const isDrinkableWaterAvailable = waterSourceDoodads.some(waterSourceDoodad => !context.utilities.doodad.isWaterSourceDoodadBusy(waterSourceDoodad) && context.utilities.doodad.isWaterSourceDoodadGatherable(waterSourceDoodad));

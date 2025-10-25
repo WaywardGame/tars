@@ -10,10 +10,6 @@ import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import ExecuteAction from "../../core/ExecuteAction";
-import Lambda from "../../core/Lambda";
-import MoveToTarget from "../../core/MoveToTarget";
 
 export default class StartFire extends Objective {
 
@@ -37,6 +33,8 @@ export default class StartFire extends Objective {
 		}
 
 		const objectives: IObjective[] = [];
+
+		const { AcquireInventoryItem, ExecuteAction, Lambda, MoveToTarget } = context.objectives;
 
 		const description = doodad.description;
 		if (description?.lit === undefined || description.providesFire) {

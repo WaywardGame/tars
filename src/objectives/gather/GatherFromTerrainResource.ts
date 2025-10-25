@@ -9,9 +9,7 @@ import type Context from "../../core/context/Context";
 import type { ITerrainResourceSearch, ITileLocation } from "../../core/ITars";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AddDifficulty from "../core/AddDifficulty";
-import ExecuteActionForItem, { ExecuteActionType } from "../core/ExecuteActionForItem";
-import MoveToTarget from "../core/MoveToTarget";
+import { ExecuteActionType } from "../core/ExecuteActionForItem";
 
 export default class GatherFromTerrainResource extends Objective {
 
@@ -76,6 +74,8 @@ export default class GatherFromTerrainResource extends Objective {
 			return;
 		}
 
+		const { AddDifficulty, ExecuteActionForItem, MoveToTarget } = context.objectives;
+
 		let step = 0;
 
 		const tile = tileLocation.tile;
@@ -99,7 +99,7 @@ export default class GatherFromTerrainResource extends Objective {
 
 				let chanceForHit = 0;
 
-				if (loot.type === terrainSearch.itemType) {
+				if (loot.itemType === terrainSearch.itemType) {
 					matches++;
 
 					if (loot.chance === undefined) {

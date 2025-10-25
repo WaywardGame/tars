@@ -5,8 +5,6 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
-import IgniteItem from "../../other/item/IgniteItem";
-import AcquireItem from "./AcquireItem";
 
 /**
  * Acquires an item for the specified type and ignites it
@@ -35,6 +33,8 @@ export default class AcquireItemAndIgnite extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectives: IObjective[] = [];
+
+		const { AcquireItem, IgniteItem } = context.objectives;
 
 		const itemToIgnite = context.utilities.item.getItemInInventory(context, this.itemType);
 		if (itemToIgnite === undefined) {

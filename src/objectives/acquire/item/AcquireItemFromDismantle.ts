@@ -14,12 +14,7 @@ import type { IObjective, ObjectiveExecutionResult } from "../../../core/objecti
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
-import SetContextData from "../../contextData/SetContextData";
-import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import ReserveItems from "../../core/ReserveItems";
-import MoveToLand from "../../utility/moveTo/MoveToLand";
-import AcquireItem from "./AcquireItem";
-import AcquireItemByGroup from "./AcquireItemByGroup";
+import { ExecuteActionType } from "../../core/ExecuteActionForItem";
 
 /**
  * Dismantles one of the item types.
@@ -60,6 +55,8 @@ export default class AcquireItemFromDismantle extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { SetContextData, ExecuteActionForItem, ReserveItems, MoveToLand, AcquireItem, AcquireItemByGroup } = context.objectives;
 
 		for (const itemType of this.dismantleItemTypes) {
 			const description = itemDescriptions[itemType];

@@ -4,8 +4,6 @@ import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Idle from "../other/Idle";
-import Rest from "../other/Rest";
 
 export default class RecoverStamina extends Objective {
 
@@ -22,6 +20,8 @@ export default class RecoverStamina extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { Idle, Rest } = context.objectives;
+
 		if (context.human.status.Poisoned || context.human.status.Burned) {
 			if (context.human.stat.get<IStat>(Stat.Stamina).value <= 1) {
 				// emergency. wait it out

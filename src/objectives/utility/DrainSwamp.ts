@@ -5,8 +5,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import Restart from "../core/Restart";
-import DigTile from "../other/tile/DigTile";
 
 export default class DrainSwamp extends Objective {
 
@@ -28,6 +26,8 @@ export default class DrainSwamp extends Objective {
 		}
 
 		const objectivePipelines: IObjective[][] = [];
+
+		const { Restart, DigTile } = context.objectives;
 
 		// restart after digging because there's probably more tiles
 		for (const target of this.tiles) {

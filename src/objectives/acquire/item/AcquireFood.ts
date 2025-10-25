@@ -7,13 +7,6 @@ import Eat from "@wayward/game/game/entity/action/actions/Eat";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import UseItem from "../../other/item/UseItem";
-
-import AcquireItem from "./AcquireItem";
-import AcquireItemForAction from "./AcquireItemForAction";
-import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
-import AddDifficulty from "../../core/AddDifficulty";
-import MoveItemsIntoInventory from "../../other/item/MoveItemsIntoInventory";
 
 export interface IAcquireFoodOptions {
 	onlyAllowBaseItems: boolean;
@@ -36,6 +29,8 @@ export default class AcquireFood extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { AcquireItem, AcquireItemForAction, MoveItemsIntoInventory, AddDifficulty } = context.objectives;
 
 		// check if we can craft food based on our current items (inventory and base)
 		objectivePipelines.push(...AcquireFood.getFoodRecipeObjectivePipelines(context, false));
@@ -80,6 +75,8 @@ export default class AcquireFood extends Objective {
 
 	public static getFoodRecipeObjectivePipelines(context: Context, eatFood: boolean): IObjective[][] {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { AcquireItemWithRecipe, UseItem } = context.objectives;
 
 		for (const itemType of context.utilities.item.foodItemTypes) {
 			if (itemType === ItemType.Pemmican) {

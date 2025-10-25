@@ -19,28 +19,11 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import { ItemUtilities, RelatedItemType } from "../../../utilities/ItemUtilities";
-import SetContextData from "../../contextData/SetContextData";
-import AddDifficulty from "../../core/AddDifficulty";
-import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import MoveToTarget from "../../core/MoveToTarget";
-import ReserveItems from "../../core/ReserveItems";
-import UseProvidedItem from "../../core/UseProvidedItem";
-import GatherFromBuilt from "../../gather/GatherFromBuilt";
-import GatherFromChest from "../../gather/GatherFromChest";
-import GatherFromCorpse from "../../gather/GatherFromCorpse";
-import GatherFromCreature from "../../gather/GatherFromCreature";
-import GatherFromDoodad from "../../gather/GatherFromDoodad";
-import GatherFromGround from "../../gather/GatherFromGround";
-import GatherFromTerrainResource from "../../gather/GatherFromTerrainResource";
-import GatherFromTerrainWater from "../../gather/GatherFromTerrainWater";
-import Idle from "../../other/Idle";
-import StartWaterSourceDoodad from "../../other/doodad/StartWaterSourceDoodad";
+
 import type { IAcquireItemOptions } from "./AcquireBase";
 import AcquireBase from "./AcquireBase";
-import AcquireItemFromIgnite from "./AcquireItemAndIgnite";
-import AcquireItemFromDisassemble from "./AcquireItemFromDisassemble";
-import AcquireItemFromDismantle from "./AcquireItemFromDismantle";
-import AcquireItemWithRecipe from "./AcquireItemWithRecipe";
+import { ExecuteActionType } from "../../core/ExecuteActionForItem";
+import { ContextDataType } from "../../../core/context/IContext";
 
 export default class AcquireItem extends AcquireBase {
 
@@ -80,6 +63,8 @@ export default class AcquireItem extends AcquireBase {
 
 		const itemDescription = itemDescriptions[this.itemType];
 
+		const { SetContextData, AddDifficulty, ExecuteActionForItem, MoveToTarget, ReserveItems, UseProvidedItem, GatherFromBuilt, GatherFromChest, GatherFromCorpse, GatherFromCreature, GatherFromDoodad, GatherFromGround, GatherFromTerrainResource, GatherFromTerrainWater, Idle, StartWaterSourceDoodad, AcquireItemAndIgnite, AcquireItemFromDisassemble, AcquireItemFromDismantle, AcquireItemWithRecipe } = context.objectives;
+
 		const objectivePipelines: IObjective[][] = [
 			[new GatherFromGround(this.itemType, this.options).passAcquireData(this)],
 			[new GatherFromChest(this.itemType, this.options).passAcquireData(this)],
@@ -118,9 +103,9 @@ export default class AcquireItem extends AcquireBase {
 
 		if (itemDescription) {
 			if (itemDescription.recipe && itemDescription.craftable !== false) {
-				if (this.options.allowCraftingForUnmetRequiredDoodads ||
-					!itemDescription.recipe.requiredDoodads ||
-					(itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
+				if (context.getDataOrDefault<boolean>(ContextDataType.AllowCraftingForUnmetRequiredDoodads, false)
+					|| !itemDescription.recipe.requiredDoodads
+					|| (itemDescription.recipe.requiredDoodads && context.base.anvil.length > 0)) {
 					objectivePipelines.push([new AcquireItemWithRecipe(this.itemType, itemDescription.recipe).passAcquireData(this)]);
 				}
 			}
@@ -128,28 +113,90 @@ export default class AcquireItem extends AcquireBase {
 			if (itemDescription.revert !== undefined) {
 				const revertItemDescription = itemDescriptions[itemDescription.revert];
 				if (revertItemDescription?.lit === this.itemType) {
-					objectivePipelines.push([new AcquireItemFromIgnite(itemDescription.revert).passAcquireData(this)]);
+					objectivePipelines.push([new AcquireItemAndIgnite(itemDescription.revert).passAcquireData(this)]);
 				}
 			}
 
 			if (itemDescription.returnOnUseAndDecay !== undefined) {
 				const returnOnUseAndDecayItemType = itemDescription.returnOnUseAndDecay.type;
 
-				const returnOnUseAndDecayItemDescription = itemDescriptions[returnOnUseAndDecayItemType];
-				if (returnOnUseAndDecayItemDescription) {
-					if (!this.options?.disallowTerrain) {
-						const terrainWaterSearch = this.getTerrainWaterSearch(context, returnOnUseAndDecayItemType);
-						if (terrainWaterSearch.length > 0) {
-							const itemContextDataKey = this.getUniqueContextDataKey("WaterContainer");
+				if (!context.island.items.isGroup(returnOnUseAndDecayItemType)) {
+					const returnOnUseAndDecayItemDescription = itemDescriptions[returnOnUseAndDecayItemType];
+					if (returnOnUseAndDecayItemDescription) {
+						if (!this.options?.disallowTerrain) {
+							const terrainWaterSearch = this.getTerrainWaterSearch(context, returnOnUseAndDecayItemType);
+							if (terrainWaterSearch.length > 0) {
+								const itemContextDataKey = this.getUniqueContextDataKey("WaterContainer");
+
+								const objectives: IObjective[] = [];
+
+								// notes for future reference:
+								// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
+								const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, {
+									// allowUnsafeWaterContainers: true, the water container might be stolen (related to interrupts?) by AnalyzeInventory, so allowInventoryItems should be set }
+									allowInventoryItems: true,
+								});
+								if (waterContainer) {
+									objectives.push(new ReserveItems(waterContainer).keepInInventory());
+									objectives.push(new SetContextData(itemContextDataKey, waterContainer));
+
+								} else {
+									objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
+								}
+
+								objectives.push(new GatherFromTerrainWater(terrainWaterSearch, itemContextDataKey).passAcquireData(this));
+
+								objectivePipelines.push(objectives);
+							}
+						}
+
+						const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", doodad => doodad.getLiquidGatherType() !== undefined);
+						for (const doodad of doodads) {
+							const liquidGatherType = doodad.getLiquidGatherType()!;
+							if (returnOnUseAndDecayItemDescription.liquidGather?.[liquidGatherType] !== this.itemType) {
+								continue;
+							}
+
+							const well = doodad.isInGroup(DoodadTypeGroup.Well) ? doodad.tile.well : undefined;
+							if (well) {
+								if (this.options?.disallowWell || well.quantity === 0) {
+									continue;
+								}
+
+							} else if (!context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
+								if (this.options?.allowStartingWaterSourceDoodads) {
+
+									// start desalination and run back to the waterstill and wait
+									const objectives: IObjective[] = [
+										new StartWaterSourceDoodad(doodad),
+									];
+
+									// add difficulty to show that we don't want to idle
+									// difficulty is based on how long until the water is gatherable
+									objectives.push(new AddDifficulty(100 + (context.utilities.doodad.getTurnsUntilWaterSourceIsGatherable(doodad) * 2)));
+
+									if (this.options?.allowWaitingForWater) {
+										if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
+											objectives.push(new MoveToTarget(doodad, true, { range: 5 }));
+										}
+
+										objectives.push(new Idle().setStatus(`Waiting for ${doodad.getName()}`));
+									}
+
+									objectivePipelines.push(objectives);
+								}
+
+								continue;
+							}
+
+							const itemContextDataKey = this.getUniqueContextDataKey(`WaterContainerFor${doodad.id}`);
 
 							const objectives: IObjective[] = [];
 
 							// notes for future reference:
 							// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
-							const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, {
-								// allowUnsafeWaterContainers: true, the water container might be stolen (related to interrupts?) by AnalyzeInventory, so allowInventoryItems should be set }
-								allowInventoryItems: true,
-							});
+							// todo: allow emptying unsafe water to pick up purified still water?
+							const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
 							if (waterContainer) {
 								objectives.push(new ReserveItems(waterContainer).keepInInventory());
 								objectives.push(new SetContextData(itemContextDataKey, waterContainer));
@@ -158,88 +205,29 @@ export default class AcquireItem extends AcquireBase {
 								objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
 							}
 
-							objectives.push(new GatherFromTerrainWater(terrainWaterSearch, itemContextDataKey).passAcquireData(this));
+							objectives.push(
+								new MoveToTarget(doodad, true),
+								new ExecuteActionForItem(
+									ExecuteActionType.Generic,
+									[this.itemType],
+									{
+										genericAction: {
+											action: GatherLiquid,
+											args: context => {
+												const item = context.getData(itemContextDataKey);
+												if (!item?.isValid) {
+													this.log.warn("Invalid water container");
+													return ObjectiveResult.Restart;
+												}
+
+												return [item] as ActionArgumentsOf<typeof GatherLiquid>;
+											},
+										},
+									})
+									.passAcquireData(this));
 
 							objectivePipelines.push(objectives);
 						}
-					}
-
-					const doodads = context.utilities.object.findDoodads(context, "GatherLiquidDoodads", doodad => doodad.getLiquidGatherType() !== undefined);
-					for (const doodad of doodads) {
-						const liquidGatherType = doodad.getLiquidGatherType()!;
-						if (returnOnUseAndDecayItemDescription.liquidGather?.[liquidGatherType] !== this.itemType) {
-							continue;
-						}
-
-						const well = doodad.isInGroup(DoodadTypeGroup.Well) ? doodad.tile.well : undefined;
-						if (well) {
-							if (this.options?.disallowWell || well.quantity === 0) {
-								continue;
-							}
-
-						} else if (!context.utilities.doodad.isWaterSourceDoodadGatherable(doodad)) {
-							if (this.options?.allowStartingWaterSourceDoodads) {
-								// start desalination and run back to the waterstill and wait
-								const objectives: IObjective[] = [
-									new StartWaterSourceDoodad(doodad),
-								];
-
-								// add difficulty to show that we don't want to idle
-								// difficulty is based on how long until the water is gatherable
-								objectives.push(new AddDifficulty(100 + (context.utilities.doodad.getTurnsUntilWaterSourceIsGatherable(doodad) * 2)));
-
-								if (this.options?.allowWaitingForWater) {
-									if (!this.options?.onlyIdleWhenWaitingForWaterStill) {
-										objectives.push(new MoveToTarget(doodad, true, { range: 5 }));
-									}
-
-									objectives.push(new Idle().setStatus(`Waiting for ${doodad.getName()}`));
-								}
-
-								objectivePipelines.push(objectives);
-							}
-
-							continue;
-						}
-
-						const itemContextDataKey = this.getUniqueContextDataKey(`WaterContainerFor${doodad.id}`);
-
-						const objectives: IObjective[] = [];
-
-						// notes for future reference:
-						// 1. the water container must be kept in the inventory in order to gather the water, so we must explicitly call keepInInventory instead of passShouldKeepInInventory
-						// todo: allow emptying unsafe water to pick up purified still water?
-						const waterContainer = context.utilities.item.getItemInInventory(context, returnOnUseAndDecayItemType, { allowUnsafeWaterContainers: true });
-						if (waterContainer) {
-							objectives.push(new ReserveItems(waterContainer).keepInInventory());
-							objectives.push(new SetContextData(itemContextDataKey, waterContainer));
-
-						} else {
-							objectives.push(new AcquireItem(returnOnUseAndDecayItemType).keepInInventory().setContextDataKey(itemContextDataKey));
-						}
-
-						objectives.push(
-							new MoveToTarget(doodad, true),
-							new ExecuteActionForItem(
-								ExecuteActionType.Generic,
-								[this.itemType],
-								{
-									genericAction: {
-										action: GatherLiquid,
-										args: context => {
-											const item = context.getData(itemContextDataKey);
-											if (!item?.isValid) {
-												this.log.warn("Invalid water container");
-												return ObjectiveResult.Restart;
-											}
-
-											return [item] as ActionArgumentsOf<typeof GatherLiquid>;
-										},
-									},
-								})
-								.passAcquireData(this));
-
-						objectivePipelines.push(objectives);
 					}
 				}
 			}
@@ -303,7 +291,7 @@ export default class AcquireItem extends AcquireBase {
 
 					const resource = TerrainResources[terrainType];
 					const terrainItems = context.island.getTerrainItems(resource);
-					if (resource && terrainItems && (resource.defaultItem === this.itemType || terrainItems.some(ri => ri.type === this.itemType))) {
+					if (resource && terrainItems && (resource.defaultItem === this.itemType || terrainItems.some(ri => ri.itemType === this.itemType))) {
 						const terrainSearch: ITerrainResourceSearch = {
 							type: terrainType,
 							itemType: this.itemType,
@@ -414,7 +402,7 @@ export default class AcquireItem extends AcquireBase {
 
 						if ((doodadDescription.isTall && growingStage >= GrowingStage.Budding) || growingStage >= GrowingStage.Ripening) {
 							for (const resourceItem of resourceItems) {
-								if (resourceItem.type !== this.itemType) {
+								if (resourceItem.itemType !== this.itemType) {
 									continue;
 								}
 
@@ -451,7 +439,7 @@ export default class AcquireItem extends AcquireBase {
 						}
 
 						for (const resourceItem of resourceItems) {
-							if (resourceItem.type !== this.itemType) {
+							if (resourceItem.itemType !== this.itemType) {
 								continue;
 							}
 

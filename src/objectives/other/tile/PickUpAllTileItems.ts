@@ -4,7 +4,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveItemsIntoInventory from "../item/MoveItemsIntoInventory";
 
 export default class PickUpAllTileItems extends Objective {
 
@@ -25,6 +24,8 @@ export default class PickUpAllTileItems extends Objective {
 		if (targetTile.containedItems === undefined || targetTile.containedItems.length === 0) {
 			return ObjectiveResult.Complete;
 		}
+
+		const { MoveItemsIntoInventory } = context.objectives;
 
 		return new MoveItemsIntoInventory(targetTile.containedItems);
 	}

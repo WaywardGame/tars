@@ -6,10 +6,7 @@ import type Context from "../../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
-import SetContextData from "../../../contextData/SetContextData";
-import ExecuteActionForItem, { ExecuteActionType } from "../../../core/ExecuteActionForItem";
-import ReserveItems from "../../../core/ReserveItems";
-import AcquireItem from "../AcquireItem";
+import { ExecuteActionType } from "../../../core/ExecuteActionForItem";
 
 export default class AcquireWaterContainer extends Objective {
 
@@ -25,6 +22,8 @@ export default class AcquireWaterContainer extends Objective {
 		const itemContextDataKey = this.getUniqueContextDataKey("MessageInABottle");
 
 		const messageInABottleObjectives: IObjective[] = [];
+
+		const { ReserveItems, ExecuteActionForItem, SetContextData, AcquireItem } = context.objectives;
 
 		const messageInABottleItem = context.utilities.item.getItemInInventory(context, ItemType.MessageInABottle);
 		if (messageInABottleItem) {

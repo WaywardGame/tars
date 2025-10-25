@@ -5,7 +5,6 @@ import Vector2 from "@wayward/game/utilities/math/Vector2";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
 
 /**
  * Moves to a target while maintaining a specific range from it
@@ -26,6 +25,8 @@ export default class MoveToTargetRange extends Objective {
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const objectivePipelines: IObjective[][] = [];
+
+		const { MoveToTarget } = context.objectives;
 
 		const navigation = context.utilities.navigation;
 		const rangeDelta = this.maxRange - this.minRange;

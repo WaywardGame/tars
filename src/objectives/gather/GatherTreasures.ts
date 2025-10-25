@@ -4,7 +4,6 @@ import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { IGatherTreasureOptions } from "./GatherTreasure";
-import GatherTreasure from "./GatherTreasure";
 
 /**
  * Gathers treasure from the easiest drawn map
@@ -24,6 +23,7 @@ export default class GatherTreasures extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { GatherTreasure } = context.objectives;
 		return this.drawnMaps.map(drawnMap => [new GatherTreasure(drawnMap, this.options)]);
 	}
 

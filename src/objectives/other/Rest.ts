@@ -7,12 +7,6 @@ import RestAction from "@wayward/game/game/entity/action/actions/Rest";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import ExecuteAction from "../core/ExecuteAction";
-import ReduceWeight from "../interrupt/ReduceWeight";
-import MoveToLand from "../utility/moveTo/MoveToLand";
-import Idle from "./Idle";
-import RunAwayFromTarget from "./RunAwayFromTarget";
-import Restart from "../core/Restart";
 
 export default class Rest extends Objective {
 
@@ -29,6 +23,8 @@ export default class Rest extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { ExecuteAction, ReduceWeight, MoveToLand, Idle, RunAwayFromTarget, Restart } = context.objectives;
+
 		if (context.utilities.tile.isSwimmingOrOverWater(context) && !context.utilities.player.isUsingVehicle(context)) {
 			return new MoveToLand();
 		}

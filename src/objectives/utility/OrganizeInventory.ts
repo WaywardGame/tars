@@ -3,18 +3,14 @@ import type { IContainer } from "@wayward/game/game/item/IItem";
 import type Item from "@wayward/game/game/item/Item";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import Drop from "@wayward/game/game/entity/action/actions/Drop";
+import { sleep } from "@wayward/utilities/promise/Async";
 
 import { ContextDataType } from "../../core/context/IContext";
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
+import { defaultMaxTilesChecked } from "../../core/ITars";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import ExecuteAction from "../core/ExecuteAction";
-import MoveToTarget from "../core/MoveToTarget";
-import Restart from "../core/Restart";
-import MoveItemsFromContainer from "../other/item/MoveItemsFromContainer";
-import { defaultMaxTilesChecked } from "../../core/ITars";
-import { sleep } from "@wayward/utilities/promise/Async";
 
 const maxChestDistance = 128;
 
@@ -171,8 +167,8 @@ export default class OrganizeInventory extends Objective {
 		const itemToDrop = unusedItems[0];
 
 		const target = context.human.tile.findMatchingTile(tile =>
-			context.utilities.tile.isOpenTile(context, tile) &&
-			Drop.canUseAt(context.human, { fromTile: tile, targetTile: tile }, itemToDrop).usable,
+			context.utilities.tile.isOpenTile(context, tile)
+			&& Drop.canUseAt(context.human, { fromTile: tile, targetTile: tile }, itemToDrop).usable,
 			{ maxTilesChecked: defaultMaxTilesChecked });
 		if (target === undefined) {
 			return ObjectiveResult.Impossible;
@@ -183,6 +179,8 @@ export default class OrganizeInventory extends Objective {
 		if (context.tars.saveData.options.slowMode) {
 			await sleep(500);
 		}
+
+		const { MoveToTarget, ExecuteAction } = context.objectives;
 
 		return [
 			new MoveToTarget(target, false),
@@ -218,6 +216,8 @@ export default class OrganizeInventory extends Objective {
 
 	private static moveIntoChestObjectives(context: Context, chest: Doodad, itemsToMove: Item[]): IObjective[] | undefined {
 		const objectives: IObjective[] = [];
+
+		const { MoveToTarget, Restart, MoveItemsFromContainer } = context.objectives;
 
 		const targetContainer = chest as IContainer;
 		let chestWeight = context.island.items.computeContainerWeight(targetContainer);

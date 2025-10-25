@@ -9,10 +9,6 @@ import type { ITarsMode } from "../core/mode/IMode";
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import Lambda from "../objectives/core/Lambda";
-import MoveToTarget from "../objectives/core/MoveToTarget";
-import MoveToBase from "../objectives/utility/moveTo/MoveToBase";
-import MoveToIsland from "../objectives/utility/moveTo/MoveToIsland";
 import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import { ContextDataType } from "../core/context/IContext";
 import SetContextData from "../objectives/contextData/SetContextData";
@@ -81,6 +77,7 @@ export class MoveToMode implements ITarsMode {
 	}
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
+		const { MoveToIsland, MoveToBase, Lambda, MoveToTarget } = context.objectives;
 		switch (this.target.type) {
 			case MoveToType.Island:
 				return [

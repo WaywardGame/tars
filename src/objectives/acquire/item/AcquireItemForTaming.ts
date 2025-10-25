@@ -5,7 +5,6 @@ import type Creature from "@wayward/game/game/entity/creature/Creature";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForTaming extends Objective {
 
@@ -32,6 +31,7 @@ export default class AcquireItemForTaming extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireItem } = context.objectives;
 		return AcquireItemForTaming.getItems(context, this.creature)
 			.map(item => [new AcquireItem(item, { requirePlayerCreatedIfCraftable: true }).passAcquireData(this)]);
 	}

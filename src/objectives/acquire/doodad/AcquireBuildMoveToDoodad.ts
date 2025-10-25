@@ -7,10 +7,7 @@ import Translation from "@wayward/game/language/Translation";
 import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
-import StartFire from "../../other/doodad/StartFire";
-import BuildItem from "../../other/item/BuildItem";
-import AcquireItemForDoodad from "../item/AcquireItemForDoodad";
+import Lambda from "../../core/Lambda";
 
 export interface IAcquireBuildMoveToDoodadOptions {
 	ignoreExistingDoodads: boolean;
@@ -45,9 +42,9 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
 		const doodadTypes = context.utilities.doodad.getDoodadTypes(this.doodadTypeOrGroup);
 
-		const doodads = !this.options.ignoreExistingDoodads ?
-			context.utilities.object.findDoodads(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && context.utilities.base.isBaseDoodad(context, d)) :
-			undefined;
+		const doodads = !this.options.ignoreExistingDoodads
+			? context.utilities.object.findDoodads(context, this.getIdentifier(), (d: Doodad) => doodadTypes.has(d.type) && context.utilities.base.isBaseDoodad(context, d))
+			: undefined;
 		if (doodads !== undefined && doodads.length > 0) {
 			return doodads.map(doodad => {
 				let requiresFire = false;
@@ -67,6 +64,7 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 
 				const objectives: IObjective[] = [];
 
+				const { StartFire, MoveToTarget } = context.objectives;
 				if (requiresFire) {
 					// StartFire handles fetching fire supplies and moving to the doodad to light it
 					objectives.push(new StartFire(doodad));
@@ -84,12 +82,16 @@ export default class AcquireBuildMoveToDoodad extends Objective {
 
 		const objectives: IObjective[] = [];
 
+		const { BuildItem, AcquireItemForDoodad, StartFire } = context.objectives;
+
 		const inventoryItem = context.utilities.item.getInventoryItemForDoodad(context, this.doodadTypeOrGroup);
 		if (inventoryItem === undefined) {
 			objectives.push(new AcquireItemForDoodad(this.doodadTypeOrGroup));
-		}
+			objectives.push(new Lambda(async () => new BuildItem(inventoryItem)));
 
-		objectives.push(new BuildItem(inventoryItem));
+		} else {
+			objectives.push(new BuildItem(inventoryItem));
+		}
 
 		if (requiresFire) {
 			// StartFire handles fetching fire supplies and moving to the doodad to light it

@@ -6,9 +6,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
-import Restart from "../../core/Restart";
-import Idle from "../Idle";
 
 export default class HuntCreature extends Objective {
 
@@ -33,6 +30,8 @@ export default class HuntCreature extends Objective {
 		if (!this.creature.isValid || this.creature.stat.get<IStat>(Stat.Health).value <= 0 || this.creature.isTamed) {
 			return ObjectiveResult.Complete;
 		}
+
+		const { MoveToTarget, Restart, Idle } = context.objectives;
 
 		const isPassable = this.creature.description?.passable ?? false;
 		if (isPassable && context.human.x === this.creature.x && context.human.y === this.creature.y && context.human.z === this.creature.z) {

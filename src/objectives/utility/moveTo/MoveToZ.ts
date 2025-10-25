@@ -5,7 +5,6 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
 
 export default class MoveToZ extends Objective {
 
@@ -27,6 +26,8 @@ export default class MoveToZ extends Objective {
 		}
 
 		const objectivePipelines: IObjective[][] = [];
+
+		const { MoveToTarget } = context.objectives;
 
 		const tileLocations = context.utilities.tile.getNearestTileLocation(context, TerrainType.CaveEntrance);
 

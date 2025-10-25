@@ -6,8 +6,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import ExecuteAction from "../../core/ExecuteAction";
-import ReserveItems from "../../core/ReserveItems";
 
 export default class EquipItem extends Objective {
 
@@ -35,6 +33,8 @@ export default class EquipItem extends Objective {
 		if (item.isEquipped(true)) {
 			return ObjectiveResult.Complete;
 		}
+
+		const { ReserveItems, ExecuteAction } = context.objectives;
 
 		return [
 			new ReserveItems(item).keepInInventory(),

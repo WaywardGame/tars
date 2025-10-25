@@ -1,5 +1,6 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
+import type Tile from "@wayward/types/definitions/game/game/tile/Tile";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
@@ -7,7 +8,6 @@ import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { BaseInfoKey } from "../../core/ITars";
 import { baseInfo } from "../../core/ITars";
-import type Tile from "@wayward/types/definitions/game/game/tile/Tile";
 
 const baseDoodadDistanceSq = Math.pow(50, 2);
 
@@ -68,9 +68,9 @@ export default class AnalyzeBase extends Objective {
 
 				} else {
 					// UUID for the key in order to ensure this always does a fresh scan
-					targets = info.findTargets ?
-						info.findTargets(context) :
-						context.utilities.object.findDoodads(context, `${this.getIdentifier()}:${this.getUniqueIdentifier()}`, doodad => doodad.builderIdentifier !== undefined && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad.tile));
+					targets = info.findTargets
+						? info.findTargets(context)
+						: context.utilities.object.findDoodads(context, `${this.getIdentifier()}:${this.getUniqueIdentifier()}`, doodad => doodad.builderIdentifier !== undefined && context.utilities.base.matchesBaseInfo(context, info, doodad.type, doodad.tile));
 				}
 
 				for (const target of targets) {
@@ -110,9 +110,9 @@ export default class AnalyzeBase extends Objective {
 
 			if (availableUnlimitedWellLocation !== undefined) {
 				if (context.base.availableUnlimitedWellLocation === undefined || (
-					context.base.availableUnlimitedWellLocation.x !== availableUnlimitedWellLocation.x ||
-					context.base.availableUnlimitedWellLocation.y !== availableUnlimitedWellLocation.y ||
-					context.base.availableUnlimitedWellLocation.z !== availableUnlimitedWellLocation.z)) {
+					context.base.availableUnlimitedWellLocation.x !== availableUnlimitedWellLocation.x
+					|| context.base.availableUnlimitedWellLocation.y !== availableUnlimitedWellLocation.y
+					|| context.base.availableUnlimitedWellLocation.z !== availableUnlimitedWellLocation.z)) {
 					context.base.availableUnlimitedWellLocation = availableUnlimitedWellLocation.point;
 					this.log.info(`Found unlimited well location (${context.base.availableUnlimitedWellLocation.x}, ${context.base.availableUnlimitedWellLocation.y}, ${context.base.availableUnlimitedWellLocation.z})`);
 				}

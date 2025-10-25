@@ -7,12 +7,6 @@ import { ContextDataType } from "../../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItemForTaming from "../../acquire/item/AcquireItemForTaming";
-import SetContextData from "../../contextData/SetContextData";
-import ExecuteAction from "../../core/ExecuteAction";
-import Lambda from "../../core/Lambda";
-import MoveToTarget from "../../core/MoveToTarget";
-import ReserveItems from "../../core/ReserveItems";
 
 export default class TameCreature extends Objective {
 
@@ -45,6 +39,8 @@ export default class TameCreature extends Objective {
 		const itemContextDataKey = this.getUniqueContextDataKey("OfferItem");
 
 		const objectives: IObjective[] = [];
+
+		const { AcquireItemForTaming, SetContextData, ExecuteAction, Lambda, MoveToTarget, ReserveItems } = context.objectives;
 
 		const items = context.utilities.item.getItemsInInventory(context);
 

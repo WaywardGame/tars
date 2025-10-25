@@ -4,22 +4,21 @@ import type Item from "@wayward/game/game/item/Item";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
+
 import type Context from "../../../core/context/Context";
 import type { IInventoryItems } from "../../../core/ITars";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import ExecuteAction from "../../core/ExecuteAction";
-import ReserveItems from "../../core/ReserveItems";
 
 export type UseItemActionDescriptions =
-	IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemInventory]]> |
-	IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory]> |
-	IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]> |
-	IActionDescription<[[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]]> |
-	IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemNearby, ActionArgument.DoodadNearby]]> |
-	IActionDescription<[[ActionArgument.ItemNearby, ActionArgument.DoodadNearby, ActionArgument.Undefined]]> |
-	IActionDescription<[ActionArgument.ItemInventory, [ActionArgument.Undefined, ActionArgument.ItemInventory], [ActionArgument.Undefined, ActionArgument.ItemNearby], [ActionArgument.Undefined, ActionArgument.ItemNearby], [ActionArgument.Undefined, ActionArgument.ItemNearby]]>;
+	IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemInventory]]>
+	| IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory]>
+	| IActionDescription<[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]>
+	| IActionDescription<[[ActionArgument.ItemNearby | ActionArgument.ItemInventory, any]]>
+	| IActionDescription<[[ActionArgument.Undefined, ActionArgument.ItemNearby, ActionArgument.DoodadNearby]]>
+	| IActionDescription<[[ActionArgument.ItemNearby, ActionArgument.DoodadNearby, ActionArgument.Undefined]]>
+	| IActionDescription<[ActionArgument.ItemInventory, [ActionArgument.Undefined, ActionArgument.ItemInventory], [ActionArgument.Undefined, ActionArgument.ItemNearby], [ActionArgument.Undefined, ActionArgument.ItemNearby], [ActionArgument.Undefined, ActionArgument.ItemNearby]]>;
 
 export default class UseItem<T extends UseItemActionDescriptions> extends Objective {
 
@@ -53,6 +52,8 @@ export default class UseItem<T extends UseItemActionDescriptions> extends Object
 			this.log.warn(`Invalid use item for action ${ActionType[actionType]}. Item ${item} is missing that action type`);
 			return ObjectiveResult.Restart;
 		}
+
+		const { ReserveItems, ExecuteAction } = context.objectives;
 
 		return [
 			new ReserveItems(item).keepInInventory(),

@@ -3,11 +3,6 @@ import type { IContainer } from "@wayward/game/game/item/IItem";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import type Context from "../core/context/Context";
 import type { IObjective } from "../core/objective/IObjective";
-import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
-import AcquireItem from "../objectives/acquire/item/AcquireItem";
-import AnalyzeInventory from "../objectives/analyze/AnalyzeInventory";
-import BuildItem from "../objectives/other/item/BuildItem";
-import EquipItem from "../objectives/other/item/EquipItem";
 
 /**
  * Common stuff that multiple modes would want to leverage
@@ -17,6 +12,7 @@ export abstract class BaseMode {
 	protected async getCommonInitialObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const objectives: Array<IObjective | IObjective[]> = [];
 
+		const { AcquireInventoryItem, AcquireItem, AnalyzeInventory, BuildItem, EquipItem } = context.objectives;
 		objectives.push(new AcquireInventoryItem("axe"));
 		objectives.push(new AcquireInventoryItem("pickAxe"));
 
@@ -80,6 +76,7 @@ export abstract class BaseMode {
 			// 	objectives.push([new AcquireItemForAction(ActionType.Chop)]);
 			// }
 
+			const { AcquireInventoryItem, BuildItem } = context.objectives;
 			objectives.push(new AcquireInventoryItem("shovel"));
 			objectives.push(new AcquireInventoryItem("knife"));
 			objectives.push(new AcquireInventoryItem("axe"));

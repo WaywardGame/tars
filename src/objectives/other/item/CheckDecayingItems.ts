@@ -5,7 +5,6 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItemWithRecipe from "../../acquire/item/AcquireItemWithRecipe";
 
 /**
  * Looks for items in chests that are going to decay soon and trys to do something with them
@@ -21,6 +20,8 @@ export default class CheckDecayingItems extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireItemWithRecipe } = context.objectives;
+
 		// it's very important to include items in inventory, so if this objective is restarted after grabing the item from the chest, it will continue to work
 		const baseItemsWithDecay = context.utilities.item.getBaseItems(context)
 			.filter(item => item.getDecayTime() !== undefined);

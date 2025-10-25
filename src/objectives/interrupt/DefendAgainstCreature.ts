@@ -6,8 +6,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import HuntCreature from "../other/creature/HuntCreature";
-import RunAwayFromTarget from "../other/RunAwayFromTarget";
 
 export default class DefendAgainstCreature extends Objective {
 
@@ -32,6 +30,8 @@ export default class DefendAgainstCreature extends Objective {
 		// use pipelines for the run away logic
 		// that way, if it's impossible to run away, it will fight
 		const objectivePipelines: IObjective[][] = [];
+
+		const { RunAwayFromTarget, HuntCreature } = context.objectives;
 
 		if (this.shouldRunAway) {
 			this.log.info("Running away from creature instead of defending");

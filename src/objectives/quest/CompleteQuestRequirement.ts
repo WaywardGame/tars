@@ -17,23 +17,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
-import AcquireItem from "../acquire/item/AcquireItem";
-import AcquireItemByGroup from "../acquire/item/AcquireItemByGroup";
-import AcquireItemFromDismantle from "../acquire/item/AcquireItemFromDismantle";
-import AcquireItemWithRecipe from "../acquire/item/AcquireItemWithRecipe";
-import AcquireWater from "../acquire/item/specific/AcquireWater";
-import Lambda from "../core/Lambda";
-import Restart from "../core/Restart";
-import HuntCreatures from "../other/creature/HuntCreatures";
-import TameCreatures from "../other/creature/TameCreatures";
-import StokeFire from "../other/doodad/StokeFire";
-import StartDripStone from "../other/doodad/waterSource/StartDripStone";
-import EquipItem from "../other/item/EquipItem";
-import UnequipItem from "../other/item/UnequipItem";
-import UseItem from "../other/item/UseItem";
-import SailToCivilization from "../utility/SailToCivilization";
 
 export default class CompleteQuestRequirement extends Objective {
 
@@ -59,6 +42,8 @@ export default class CompleteQuestRequirement extends Objective {
 	}
 
 	private getObjectivesForQuestRequirement(context: Context, requirementType: QuestRequirementType): ObjectiveExecutionResult {
+		const { AcquireBuildMoveToDoodad, AcquireItem, AcquireItemByGroup, AcquireItemFromDismantle, AcquireItemWithRecipe, Restart, HuntCreatures, TameCreatures, EquipItem, UnequipItem, SailToCivilization } = context.objectives;
+
 		switch (requirementType) {
 
 			case QuestRequirementType.SailToCivilization:
@@ -122,9 +107,9 @@ export default class CompleteQuestRequirement extends Objective {
 
 						const matchingItem = context.utilities.item.getItemInInventory(context, itemType);
 						if (matchingItem !== undefined) {
-							objectivePipelines.push(matchingItem.isEquipped(true) ?
-								[new UnequipItem(matchingItem), new EquipItem(equipType, matchingItem)] :
-								[new EquipItem(equipType, matchingItem)]);
+							objectivePipelines.push(matchingItem.isEquipped(true)
+								? [new UnequipItem(matchingItem), new EquipItem(equipType, matchingItem)]
+								: [new EquipItem(equipType, matchingItem)]);
 
 						} else {
 							objectivePipelines.push([new AcquireItem(itemType), new EquipItem(equipType)]);
@@ -243,6 +228,8 @@ export default class CompleteQuestRequirement extends Objective {
 	}
 
 	private getObjectivesForModdedQuestRequirement(context: Context, requirementTypeString: string, requirement: IQuestRequirement): ObjectiveExecutionResult {
+		const { Lambda, AcquireBuildMoveToDoodad, AcquireInventoryItem, UseItem, StokeFire, AcquireWater, StartDripStone } = context.objectives;
+
 		switch (requirementTypeString) {
 
 			case "ModStarterQuestActionSlots":

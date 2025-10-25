@@ -8,7 +8,6 @@ import Enums from "@wayward/game/utilities/enum/Enums";
 import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireItem from "./AcquireItem";
 
 export default class AcquireItemForAction extends Objective {
 
@@ -35,6 +34,7 @@ export default class AcquireItemForAction extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireItem } = context.objectives;
 		return AcquireItemForAction.getItems(context, this.actionType)
 			.map(item => [new AcquireItem(item).passAcquireData(this)]);
 	}

@@ -40,7 +40,7 @@ import type Translation from "@wayward/game/language/Translation";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import { Direction } from "@wayward/game/utilities/math/Direction";
 import type { IVector2 } from "@wayward/game/utilities/math/IVector";
-import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Vector2, { DistanceType } from "@wayward/game/utilities/math/Vector2";
 import { Bound } from "@wayward/utilities/Decorators";
 import EventEmitter, { Priority } from "@wayward/utilities/event/EventEmitter";
 import WorldZ from "@wayward/utilities/game/WorldZ";
@@ -97,6 +97,7 @@ import Objective from "./objective/Objective";
 import Plan from "./planning/Plan";
 import { Planner } from "./planning/Planner";
 import { sleep } from "@wayward/utilities/promise/Async";
+import Objectives from "../objectives/Objectives";
 
 export type TarsNPC = ControllableNPC<ISaveData> & { tarsInstance?: Tars };
 
@@ -553,7 +554,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 			const updateNeighbors = tileUpdateType === TileUpdateType.Creature || tileUpdateType === TileUpdateType.CreatureSpawn;
 			if (updateNeighbors) {
-				const tiles = tile.tilesInRange(tileUpdateRadius, true);
+				const tiles = tile.tilesInRange(DistanceType.Manhattan, tileUpdateRadius, true);
 				for (const otherTile of tiles) {
 					this.utilities.navigation.processTileUpdate(
 						otherTile,
@@ -724,7 +725,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	////////////////////////////////////////////////
 
 	public getContext(): Context {
-		return this.context ?? new Context(this, this.base, this.inventory, this.utilities);
+		return this.context ?? new Context(this, this.base, this.inventory, this.utilities, Objectives);
 	}
 
 	public get asNPC(): TarsNPC | undefined {
@@ -757,7 +758,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 
 		this.log.info(this.saveData.enabled ? "Enabled" : "Disabled");
 
-		this.context = new Context(this, this.base, this.inventory, this.utilities);
+		this.context = new Context(this, this.base, this.inventory, this.utilities, Objectives);
 
 		this.utilities.item.initialize(this.context);
 
@@ -912,8 +913,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			if (!statusMessage) {
 				statusMessage = planStatusMessage;
 
-			} else if (planStatusMessage && planStatusMessage !== statusMessage &&
-				statusMessage !== "Miscellaneous processing" && statusMessage !== "Calculating objective...") {
+			} else if (planStatusMessage && planStatusMessage !== statusMessage
+				&& statusMessage !== "Miscellaneous processing" && statusMessage !== "Calculating objective...") {
 				statusMessage = `${planStatusMessage} - ${statusMessage}`;
 			}
 
@@ -1101,7 +1102,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	}
 
 	private createContext(): void {
-		this.context = new Context(this, this.base, this.inventory, this.utilities);
+		this.context = new Context(this, this.base, this.inventory, this.utilities, Objectives);
 	}
 
 	private clearCaches(): void {
@@ -1211,9 +1212,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			return;
 		}
 
-		const interrupts = modeInstance.getInterrupts ?
-			await modeInstance.getInterrupts(this.context) :
-			this.getInterrupts(this.context);
+		const interrupts = modeInstance.getInterrupts
+			? await modeInstance.getInterrupts(this.context)
+			: this.getInterrupts(this.context);
 
 		const interruptIds = new Set<string>(interrupts
 			.filter(objective => Array.isArray(objective) ? objective.length > 0 : objective !== undefined)
@@ -1503,9 +1504,9 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 		const poisonHealthPercentThreshold = 0.85;
 
 		const health = context.human.stat.get<IStatMax>(Stat.Health);
-		const needsHealthRecovery = health.value <= this.utilities.player.getRecoverThreshold(context, Stat.Health) ||
-			context.human.status.Bleeding ||
-			(context.human.status.Poisoned && (health.value / health.max) <= poisonHealthPercentThreshold);
+		const needsHealthRecovery = health.value <= this.utilities.player.getRecoverThreshold(context, Stat.Health)
+			|| context.human.status.Bleeding
+			|| (context.human.status.Poisoned && (health.value / health.max) <= poisonHealthPercentThreshold);
 
 		const exceededThirstThreshold = context.human.stat.get<IStat>(Stat.Thirst).value <= this.utilities.player.getRecoverThreshold(context, Stat.Thirst);
 		// const isWaterEmergency = RecoverThirst.isEmergency(context);
@@ -1628,6 +1629,7 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 			this.repairInterrupt(context, queuedRepairs, this.inventory.equipSword),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.equipShield),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.tongs),
+			this.repairInterrupt(context, queuedRepairs, this.inventory.crucible),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.bed),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.backpack),
 			this.repairInterrupt(context, queuedRepairs, this.inventory.waterContainer),
@@ -1753,11 +1755,11 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	}
 
 	private returnToBaseInterrupt(context: Context): IObjective | undefined {
-		if (context.getData(ContextDataType.MovingToNewIsland) !== MovingToNewIslandState.Ready &&
-			this.weightStatus !== WeightStatus.None &&
-			this.previousWeightStatus === WeightStatus.Overburdened &&
-			!this.utilities.base.isNearBase(context) &&
-			context.utilities.item.getUnusedItems(context).length > 0) {
+		if (context.getData(ContextDataType.MovingToNewIsland) !== MovingToNewIslandState.Ready
+			&& this.weightStatus !== WeightStatus.None
+			&& this.previousWeightStatus === WeightStatus.Overburdened
+			&& !this.utilities.base.isNearBase(context)
+			&& context.utilities.item.getUnusedItems(context).length > 0) {
 			// return to base to put some extra items in a chest
 			return new MoveToBase();
 		}
@@ -1774,8 +1776,8 @@ export default class Tars extends EventEmitter.Host<ITarsEvents> {
 	 * Explicitly not using OrganizeInventory for this - the exact objectives should be specified to prevent issues
 	 */
 	private organizeInventoryInterrupts(context: Context, interruptContext?: Context, walkPath?: IVector2[]): IObjective[] | undefined {
-		if (context.getDataOrDefault(ContextDataType.DisableMoveAwayFromBaseItemOrganization, false) ||
-			context.getData(ContextDataType.MovingToNewIsland) === MovingToNewIslandState.Ready) {
+		if (context.getDataOrDefault(ContextDataType.DisableMoveAwayFromBaseItemOrganization, false)
+			|| context.getData(ContextDataType.MovingToNewIsland) === MovingToNewIslandState.Ready) {
 			return undefined;
 		}
 

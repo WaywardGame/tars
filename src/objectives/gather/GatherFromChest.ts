@@ -8,9 +8,6 @@ import { ContextDataType } from "../../core/context/IContext";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
 import type { IGatherItemOptions } from "../acquire/item/AcquireBase";
-import SetContextData from "../contextData/SetContextData";
-import ReserveItems from "../core/ReserveItems";
-import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
 
 export default class GatherFromChest extends Objective {
 
@@ -47,6 +44,8 @@ export default class GatherFromChest extends Objective {
 	// todo: add getWeightChange(): number and take that into account when grouping together?
 
 	public async execute(context: Context, objectiveHashCode: string): Promise<ObjectiveExecutionResult> {
+		const { SetContextData, ReserveItems, MoveItemsIntoInventory } = context.objectives;
+
 		const prioritizeBaseItems = context.getData(ContextDataType.PrioritizeBaseItems);
 
 		let chests: Doodad[] = context.base.chest;

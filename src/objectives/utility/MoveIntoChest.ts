@@ -8,10 +8,6 @@ import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import MoveToTarget from "../core/MoveToTarget";
-import BuildItem from "../other/item/BuildItem";
-import MoveItemsFromContainer from "../other/item/MoveItemsFromContainer";
-import AcquireInventoryItem from "../acquire/item/AcquireInventoryItem";
 
 export default class MoveIntoChest extends Objective {
 
@@ -43,6 +39,8 @@ export default class MoveIntoChest extends Objective {
 		}
 
 		const objectivePipelines: IObjective[][] = [];
+
+		const { MoveToTarget, BuildItem, MoveItemsFromContainer, AcquireInventoryItem } = context.objectives;
 
 		const chests = context.base.chest
 			.slice()

@@ -3,15 +3,8 @@ import AttachContainer from "@wayward/game/game/entity/action/actions/AttachCont
 
 import type Context from "../../../../core/context/Context";
 import { ObjectiveResult, type IObjective, type ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
-import Objective from "../../../../core/objective/Objective";
-import AcquireWaterContainer from "../../../acquire/item/specific/AcquireWaterContainer";
-import MoveToTarget from "../../../core/MoveToTarget";
-
-import UseItem from "../../item/UseItem";
-import PickUpAllTileItems from "../../tile/PickUpAllTileItems";
-import AnalyzeInventory from "../../../analyze/AnalyzeInventory";
-import EmptyWaterContainer from "../../EmptyWaterContainer";
 import { inventoryItemInfo } from "../../../../core/ITars";
+import Objective from "../../../../core/objective/Objective";
 
 /**
  * It will ensure the solar still has a container
@@ -35,6 +28,8 @@ export default class StartSolarStill extends Objective {
 		if (this.solarStill.tile.creature) {
 			return ObjectiveResult.Impossible;
 		}
+
+		const { AcquireWaterContainer, MoveToTarget, UseItem, PickUpAllTileItems, AnalyzeInventory, EmptyWaterContainer } = context.objectives;
 
 		const objectives: IObjective[] = [
 			// solar still tile must not have items on it

@@ -6,10 +6,7 @@ import type Context from "../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import AcquireInventoryItem from "../../acquire/item/AcquireInventoryItem";
-import ExecuteAction from "../../core/ExecuteAction";
-import MoveToTarget from "../../core/MoveToTarget";
-import MoveToWater, { MoveToWaterType } from "./MoveToWater";
+import { MoveToWaterType } from "./MoveToWater";
 
 export default class MoveToIsland extends Objective {
 
@@ -36,6 +33,8 @@ export default class MoveToIsland extends Objective {
 		}
 
 		const objectivePipelines: IObjective[][] = [];
+
+		const { AcquireInventoryItem, ExecuteAction, MoveToTarget, MoveToWater } = context.objectives;
 
 		for (const boat of context.base.boat) {
 			const result = boat.tile.canSailAwayFrom(context.human);

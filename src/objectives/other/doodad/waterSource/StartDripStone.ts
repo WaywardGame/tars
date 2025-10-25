@@ -1,18 +1,11 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
+import Pour from "@wayward/game/game/entity/action/actions/Pour";
 
 import type Context from "../../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
-import AcquireWaterContainer from "../../../acquire/item/specific/AcquireWaterContainer";
-import MoveToTarget from "../../../core/MoveToTarget";
-
-import UseItem from "../../item/UseItem";
-import AnalyzeInventory from "../../../analyze/AnalyzeInventory";
 import { inventoryItemInfo } from "../../../../core/ITars";
-import Pour from "@wayward/game/game/entity/action/actions/Pour";
-import AcquireWater from "../../../acquire/item/specific/AcquireWater";
-import RepairItem from "../../../interrupt/RepairItem";
 
 /**
  * It will ensure the dripstone has water in the top
@@ -44,6 +37,8 @@ export default class StartDripStone extends Objective {
 
 		const objectives: IObjective[] = [];
 
+		const { AcquireWaterContainer, MoveToTarget, AnalyzeInventory, AcquireWater, RepairItem, UseItem } = context.objectives;
+
 		this.log.info("No water at the top");
 
 		let isWaterInContainer = false;
@@ -56,9 +51,9 @@ export default class StartDripStone extends Objective {
 		if (availableWaterContainer) {
 			isWaterInContainer = context.utilities.item.isDrinkableItem(availableWaterContainer);
 
-			if (availableWaterContainer.durability !== undefined &&
-				availableWaterContainer.durabilityMax !== undefined &&
-				(availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
+			if (availableWaterContainer.durability !== undefined
+				&& availableWaterContainer.durabilityMax !== undefined
+				&& (availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
 				// repair our container
 				objectives.push(new RepairItem(availableWaterContainer));
 			}

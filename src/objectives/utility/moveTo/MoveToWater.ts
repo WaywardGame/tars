@@ -5,7 +5,7 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import MoveToTarget from "../../core/MoveToTarget";
+import { DistanceType } from "@wayward/game/utilities/math/Vector2";
 
 export enum MoveToWaterType {
 	AnyWater,
@@ -148,7 +148,7 @@ export default class MoveToWater extends Objective {
 					}
 
 					// verify there's no dangerous creatures nearby
-					const nearbyTiles = tile.tilesInRange(16, true);
+					const nearbyTiles = tile.tilesInRange(DistanceType.Manhattan, 16, true);
 					for (const tile of nearbyTiles) {
 						if (tile.creature && context.utilities.creature.isScaredOfCreature(context.human, tile.creature)) {
 							return false;
@@ -168,6 +168,8 @@ export default class MoveToWater extends Objective {
 		if (!target) {
 			return ObjectiveResult.Impossible;
 		}
+
+		const { MoveToTarget } = context.objectives;
 
 		return new MoveToTarget(
 			target,

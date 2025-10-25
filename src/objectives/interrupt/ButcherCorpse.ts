@@ -2,15 +2,12 @@ import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
 import Dictionary from "@wayward/game/language/Dictionary";
 import Translation from "@wayward/game/language/Translation";
 import Butcher from "@wayward/game/game/entity/action/actions/Butcher";
-// import Message from "@wayward/game/language/dictionary/Message";
+import Message from "@wayward/game/language/dictionary/Message";
 
 import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import ExecuteAction from "../core/ExecuteAction";
-import MoveToTarget from "../core/MoveToTarget";
-import Message from "@wayward/game/language/dictionary/Message";
 
 export default class ButcherCorpse extends Objective {
 
@@ -41,6 +38,8 @@ export default class ButcherCorpse extends Objective {
 		if (tile.events !== undefined || tile.creature !== undefined) {
 			return ObjectiveResult.Impossible;
 		}
+
+		const { ExecuteAction, MoveToTarget } = context.objectives;
 
 		// CannotAnythingHere is expected because we the amount of times a corpse can be carved is random
 		// TARS tries to carve the maximum amount of times

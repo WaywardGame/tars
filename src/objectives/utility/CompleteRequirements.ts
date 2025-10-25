@@ -2,18 +2,12 @@ import { DoodadTypeGroup } from "@wayward/game/game/doodad/IDoodad";
 import PickUp from "@wayward/game/game/entity/action/actions/PickUp";
 import type { IRequirementInfo } from "@wayward/game/game/item/IItemManager";
 import { RequirementStatus } from "@wayward/game/game/item/IItemManager";
-
 import type { ActionArgumentsOf } from "@wayward/game/game/entity/action/IAction";
+
 import type Context from "../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireBuildMoveToDoodad from "../acquire/doodad/AcquireBuildMoveToDoodad";
-import AcquireBuildMoveToFire from "../acquire/doodad/AcquireBuildMoveToFire";
-import AnalyzeBase from "../analyze/AnalyzeBase";
-import ExecuteAction from "../core/ExecuteAction";
-import MoveToTarget from "../core/MoveToTarget";
-import StartFire from "../other/doodad/StartFire";
 
 export default class CompleteRequirements extends Objective {
 
@@ -52,6 +46,8 @@ export default class CompleteRequirements extends Objective {
 		const requiresFire = this.requirementInfo.fireRequirement !== RequirementStatus.NotRequired;
 
 		const objectives: IObjective[] = [];
+
+		const { AcquireBuildMoveToDoodad, AcquireBuildMoveToFire, AnalyzeBase, ExecuteAction, MoveToTarget, StartFire } = context.objectives;
 
 		if (requiresDoodads && requiresFire) {
 			this.log.info("Requires doodad and fire", this.requirementInfo.doodadsRequired);

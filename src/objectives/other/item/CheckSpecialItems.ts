@@ -6,10 +6,7 @@ import type Context from "../../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../core/objective/IObjective";
 import Objective from "../../../core/objective/Objective";
-import ExecuteActionForItem, { ExecuteActionType } from "../../core/ExecuteActionForItem";
-import ReserveItems from "../../core/ReserveItems";
-import ExecuteAction from "../../core/ExecuteAction";
-import MoveItemsIntoInventory from "./MoveItemsIntoInventory";
+import { ExecuteActionType } from "../../core/ExecuteActionForItem";
 
 /**
  * Looks for items that are special and try to use them
@@ -25,6 +22,8 @@ export default class CheckSpecialItems extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { ExecuteActionForItem, ReserveItems, ExecuteAction, MoveItemsIntoInventory } = context.objectives;
+
 		const baseItems = context.utilities.item.getBaseItems(context);
 
 		const messageInABottles = baseItems

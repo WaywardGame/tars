@@ -14,9 +14,8 @@ import type Context from "../../core/context/Context";
 import type { ObjectiveExecutionResult } from "../../core/objective/IObjective";
 import { ObjectiveResult } from "../../core/objective/IObjective";
 import Objective from "../../core/objective/Objective";
-import AcquireFood from "../acquire/item/AcquireFood";
-import MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
-import UseItem from "../other/item/UseItem";
+import type MoveItemsIntoInventory from "../other/item/MoveItemsIntoInventory";
+import type UseItem from "../other/item/UseItem";
 
 const decayingSoonThreshold = 50;
 
@@ -35,6 +34,8 @@ export default class RecoverHunger extends Objective {
 	}
 
 	public async execute(context: Context): Promise<ObjectiveExecutionResult> {
+		const { AcquireFood, UseItem } = context.objectives;
+
 		const hunger = context.human.stat.get<IStatMax>(Stat.Hunger);
 
 		if (this.onlyUseAvailableItems) {
@@ -116,7 +117,9 @@ export default class RecoverHunger extends Objective {
 			.sort((a, b) => (a.getDecayTime() ?? 999999) - (b.getDecayTime() ?? 999999));
 	}
 
-	private eatItem(context: Context, item: Item): Array<MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], Human, void, IConsumeItemCanUse, [Item]>>> {
+	private eatItem(context: Context, item: Item): Array<MoveItemsIntoInventory | UseItem<Action<[ActionArgument.ItemNearby], ActionType, Human, void, IConsumeItemCanUse, [Item]>>> {
+		const { MoveItemsIntoInventory, UseItem } = context.objectives;
+
 		this.log.info(`Eating ${item.getName().getString()}`);
 		return [
 			new MoveItemsIntoInventory(item).keepInInventory(),

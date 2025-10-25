@@ -9,19 +9,7 @@ import type Context from "../../../../core/context/Context";
 import type { IObjective, ObjectiveExecutionResult } from "../../../../core/objective/IObjective";
 import { ObjectiveResult } from "../../../../core/objective/IObjective";
 import Objective from "../../../../core/objective/Objective";
-import AcquireWaterContainer from "../../../acquire/item/specific/AcquireWaterContainer";
-import ExecuteAction from "../../../core/ExecuteAction";
-import MoveToTarget from "../../../core/MoveToTarget";
-import Restart from "../../../core/Restart";
-import RepairItem from "../../../interrupt/RepairItem";
-
 import { inventoryItemInfo } from "../../../../core/ITars";
-import AcquireWater from "../../../acquire/item/specific/AcquireWater";
-import AnalyzeInventory from "../../../analyze/AnalyzeInventory";
-import EmptyWaterContainer from "../../EmptyWaterContainer";
-import UseItem from "../../item/UseItem";
-import PickUpAllTileItems from "../../tile/PickUpAllTileItems";
-import StokeFire from "../StokeFire";
 
 export interface IStartWaterStillDesalinationOptions {
 	disableAttaching: boolean;
@@ -62,6 +50,8 @@ export default class StartWaterStillDesalination extends Objective {
 
 		const objectives: IObjective[] = [];
 
+		const { AcquireWaterContainer, ExecuteAction, MoveToTarget, Restart, RepairItem, AcquireWater, AnalyzeInventory, EmptyWaterContainer, UseItem, PickUpAllTileItems, StokeFire } = context.objectives;
+
 		const availableWaterContainers = AnalyzeInventory.getItems(context, inventoryItemInfo["waterContainer"]);
 
 		const availableWaterContainer = Array.from(availableWaterContainers).find(waterContainer => !context.utilities.item.isSafeToDrinkItem(context, waterContainer));
@@ -77,9 +67,9 @@ export default class StartWaterStillDesalination extends Objective {
 			if (availableWaterContainer) {
 				isWaterInContainer = context.utilities.item.isDrinkableItem(availableWaterContainer);
 
-				if (availableWaterContainer.durability !== undefined &&
-					availableWaterContainer.durabilityMax !== undefined &&
-					(availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
+				if (availableWaterContainer.durability !== undefined
+					&& availableWaterContainer.durabilityMax !== undefined
+					&& (availableWaterContainer.durability / availableWaterContainer.durabilityMaxWithMagical) < 0.6) {
 					// repair our container
 					objectives.push(new RepairItem(availableWaterContainer));
 				}

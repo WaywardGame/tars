@@ -9,10 +9,6 @@ import type Context from "../core/context/Context";
 import type { ITarsMode } from "../core/mode/IMode";
 import type { IObjective } from "../core/objective/IObjective";
 import { ObjectiveResult } from "../core/objective/IObjective";
-import AcquireInventoryItem from "../objectives/acquire/item/AcquireInventoryItem";
-import Lambda from "../objectives/core/Lambda";
-import TameCreatures from "../objectives/other/creature/TameCreatures";
-import EquipItem from "../objectives/other/item/EquipItem";
 
 export class TameCreatureMode implements ITarsMode {
 
@@ -27,6 +23,8 @@ export class TameCreatureMode implements ITarsMode {
 
 	public async determineObjectives(context: Context): Promise<Array<IObjective | IObjective[]>> {
 		const objectives: Array<IObjective | IObjective[]> = [];
+
+		const { EquipItem, AcquireInventoryItem, TameCreatures, Lambda } = context.objectives;
 
 		objectives.push(new AcquireInventoryItem("knife"));
 
