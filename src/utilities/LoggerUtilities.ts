@@ -64,31 +64,29 @@ export class LoggerUtilities {
 	public createLog(...name: string[]): Log {
 		const log = new Log();
 
-		const sources: string[] = [...this.logSources, ...name];
-
 		log.info = (...args: any[]) => {
 			this.processQueuedMessages();
-			Log.info(...sources)(...args);
+			Log.info(...this.logSources)(...name, ...args);
 		};
 
 		log.warn = (...args: any[]) => {
 			this.processQueuedMessages();
-			Log.warn(...sources)(...args);
+			Log.warn(...this.logSources)(...name, ...args);
 		};
 
 		log.error = (...args: any[]) => {
 			this.processQueuedMessages();
-			Log.error(...sources)(...args);
+			Log.error(...this.logSources)(...name, ...args);
 		};
 
 		log.trace = (...args: any[]) => {
 			this.processQueuedMessages();
-			Log.trace(...sources)(...args);
+			Log.trace(...this.logSources)(...name, ...args);
 		};
 
 		log.debug = (...args: any[]) => {
 			this.processQueuedMessages();
-			Log.debug(...sources)(...args);
+			Log.debug(...this.logSources)(...name, ...args);
 		};
 
 		return log;
