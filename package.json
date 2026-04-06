@@ -10,7 +10,7 @@
 		"watch": "npx tsc --build --watch --pretty --preserveWatchOutput"
 	},
 	"devDependencies": {
-		"@wayward/types": "^2.15.4-beta.dev.20260403.1",
+		"@wayward/types": "^2.15.4-beta.dev.20260406.1",
 		"typescript": "^6.0.0-beta"
 	}
 }
